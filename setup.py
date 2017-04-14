@@ -1,3 +1,6 @@
+# Used:
+# https://github.com/pypa/sampleproject/blob/master/setup.py
+# https://github.com/biopython/biopython/blob/master/setup.py
 
 from setuptools import setup, find_packages
 # To use a consistent encoding
@@ -5,6 +8,7 @@ from codecs import open
 from os import path
 
 here = path.abspath(path.dirname(__file__))
+
 PACKAGES = [
     'lib',
     'lib.scripts',
@@ -16,6 +20,7 @@ PACKAGES = [
     'lib.scripts.multiprocessing',
     'lib.scripts.phylogenetic_analyses'
 ]
+
 # Get the long description from the README file
 with open(path.join(here, 'README.rst'), encoding='utf-8') as f:
     long_description = f.read()
@@ -36,5 +41,6 @@ setup(
         'Operating System :: Unix',
         'Natural Language :: English'
     ],
-    packages=
+    packages=PACKAGES,
+    install_requires=[],
 )
