@@ -16,15 +16,7 @@
       </profile-state>
     </entry>
   </component>
-  <component name="ProjectRootManager" version="2" project-jdk-name="Python 3.6.0 (C:\Users\rgilmore\Python36\python.exe)" project-jdk-type="Python SDK" />
-  <component name="PyConsoleOptionsProvider">
-    <option name="myPythonConsoleState">
-      <console-settings sdk-home="C:\Users\rgilmore\Python36\python.exe">
-        <option name="mySdkHome" value="C:\Users\rgilmore\Python36\python.exe" />
-        <option name="myAddSourceRoots" value="true" />
-      </console-settings>
-    </option>
-  </component>
+  <component name="ProjectRootManager" version="2" project-jdk-name="Python 3.6.0 (C:\Program Files\Python36\python.exe)" project-jdk-type="Python SDK" />
   <component name="masterDetails">
     <states>
       <state key="ScopeChooserConfigurable.UI">
