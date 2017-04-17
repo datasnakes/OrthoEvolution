@@ -11,8 +11,8 @@ from bs4 import BeautifulSoup as BS
 from urllib.request import urlopen
 
 # Use your google api key and project id
-my_api_key = "AIzaSyDCmwhWbKpEcSKl7eVCAQ-6X0uV-Q48qLE"
-my_cse_id = "011398459973079660664:noklcc-uegu"
+my_api_key = ""
+my_cse_id = ""
 
 def google_search(search_term, api_key, cse_id, **kwargs):
     service = build("customsearch", "v1", developerKey=api_key)
