@@ -132,7 +132,7 @@ orchid namespace.
 Now lets continue with this example by loading some data from NCBI using
 biopython's Entrez module.
 
-```
+```python
 ...
 from Bio import Entrez
 from Bio import SeqIO
