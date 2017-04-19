@@ -26,6 +26,7 @@ import time
 import json
 from pathlib import Path
 from pathlib import PurePath
+from project_mana import project_mana  # //TODO-ROB: Add a configure function to proj_mana to get the root directory using the project name
 ##############################################################################
 # Directory Initializations:
 
@@ -46,6 +47,7 @@ class dir_mana(object):
         """Initialize the directory tree for the project.
         Each project will have a home directory in addition to the following:
         ."""
+        config = tablib.Dataset().load(open('config.yaml').read())
         self.__file_home = Path(home)  # Home of the file calling this class
         self.__project_management = self.proj_mana(proj_mana)  # dict {[projects] : {[data-sets] : [research targets]}}
         if pdr is False:

@@ -22,7 +22,7 @@ import os
 #from dir_mana import dir_mana
 #from lister import Lister
 import json
-
+import tablib
 ##############################################################################
 # Custom Class Initializations
 # :
@@ -44,6 +44,7 @@ user = "rgilmore"
 class proj_mana(object):
 
     def __init__(self, projects='', datasets='', research_targets='', js_load=False):
+        data_config = tablib.Dataset().load(open('data_config.yaml').read())
 
         self.projects = projects
         self.datasets = datasets
