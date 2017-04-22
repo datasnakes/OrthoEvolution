@@ -24,9 +24,14 @@ import os
 import shutil
 import time
 import json
+from manager.dir_map.json_to_newick import _parse_json
+from manager.dir_map import treelib2
 from pathlib import Path
+import os
+from Bio.Phylo.PhyloXML import Phylogeny
+from Bio import Phylo
 from pathlib import PurePath
-from project_mana import project_mana  # //TODO-ROB: Add a configure function to proj_mana to get the root directory using the project name
+#from project_mana import project_mana  # //TODO-ROB: Add a configure function to proj_mana to get the root directory using the project name
 ##############################################################################
 # Directory Initializations:
 
@@ -43,51 +48,93 @@ class dir_mana(object):
 # //TODO-ROB Add JSON loading of the different directory variables
 # //TODO-Rob change project to projects and add another variable called project_type
 
-    def __init__(self, home=os.getcwd(), project='', dataset='', r_target='', proj_mana="proj_mana.json", pr=False, exists=True):
+    def __init__(self, home=os.getcwd(), proj_mana="proj_mana.json"):
         """Initialize the directory tree for the project.
         Each project will have a home directory in addition to the following:
         ."""
-        config = tablib.Dataset().load(open('config.yaml').read())
+        # config = tablib.Dataset().load(open('config.yaml').read())
         self.__file_home = Path(home)  # Home of the file calling this class
-        self.__project_management = self.proj_mana(proj_mana)  # dict {[projects] : {[data-sets] : [research targets]}}
-        if pdr is False:
-            self.__project = project  # Project Name
-            self.__project_home = Path()  # Initialize home to a PathLike object.
-            self.__dataset = self.__project_home / Path(dataset)
+        #self.__venv_home = os.environ['VIRTUAL_ENV']
+        #self.__python = self.__venv_home / Path('bin')
 
-            # The project name is also the name of the project's main directory.
-            # Make sure that the file's home is in the project's directory tree.
-            if self.__project not in list(self.__file_home.parts):
-                raise NotADirectoryError
-            # If the file isn't in the directory tree throw an Error.
+        #self.__project_management = self.proj_mana(proj_mana)  # dict {[projects] : {[data-sets] : [research targets]}}
+        # if pdr is False:
+        #     self.__project = project  # Project Name
+        #     self.__project_home = Path()  # Initialize home to a PathLike object.
+        #     self.__dataset = self.__project_home / Path(dataset)
+        #
+        #     # The project name is also the name of the project's main directory.
+        #     # Make sure that the file's home is in the project's directory tree.
+        #     if self.__project not in list(self.__file_home.parts):
+        #         raise NotADirectoryError
+        #     # If the file isn't in the directory tree throw an Error.
+        #
+        #     # Append the project_home variable with child directories until the
+        #     # project's main directory is reached.
+        #     for item in list(self.__file_home.parts):
+        #         self.__project_home = self.__project_home / Path(item)
+        #         if item == self.__project:
+        #             break
+        #     self.project()
+        # else:
+        #
+        #     self.top_level_struct()
+        #     self.project()
+        #
+        # if exists is False:
+        #     self.create_dirs()
 
-            # Append the project_home variable with child directories until the
-            # project's main directory is reached.
-            for item in list(self.__file_home.parts):
-                self.__project_home = self.__project_home / Path(item)
-                if item == self.__project:
-                    break
-            self.project()
+    # Map the main project directory.
+    def get_dir_map(self, top, ignore=None):
+        default_ignore = ['.git', '.idea']
+        if ignore is not None:
+            ignore += default_ignore
         else:
+            ignore = default_ignore
+        # Treelib will help to map everything and create a json at the same time
+        tree = treelib2.Tree()
+        tree.create_node('.', top)
+        # Walk through the directory of choice (top)
+        # Topdown is true so that directories can be modified in place
+        for root, dirs, files in os.walk(top, topdown=True):
+            # Only remove directories from the top
+            if root == top:
+                print(root)
+                try:
+                    dirs[:] = set(dirs) - set(ignore)  # Remove directories from os.walk()
+                    print(dirs)
+                except ValueError:
+                    pass
+            for d in dirs:
+                rd = str(Path(root) / Path(d))
+                tree.create_node(d, identifier=rd, parent=root)
+            for f in files:
+                tree.create_node(f, parent=root)
+        return tree
 
-            self.top_level_struct()
-            self.project()
+    def get_newick_dir_map(self, top, ignore=None):
+        """Takes a treelib tree created by get_dir_map and returns
+        a tree a dir_map in newick format.  This will be useful for Bio.Phylo
+        applications."""
 
-        if exists is False:
-            self.create_dirs()
+        tree = self.get_dir_map(top, ignore)
+        Ntree = _parse_json(tree.to_jsonnewick())
+        return Ntree
 
     def proj_mana(self, js_file):
         with open(js_file, 'r') as file:
             pdr = json.load(file)
         return pdr
+
     def top_level_struct(self):
         # Create variables for the default directories.
-        self.data = self.__project_home / Path('data')
         self.docs = self.__project_home / Path('docs')
         self.lib = self.__project_home / Path('lib')
         self.misc = self.__project_home / Path('misc')
-        self.raw_data = self.__project_home / Path('raw_data')
+        self.users = self.__project_home / Path('users')
+        self.__user_home = self.users / Path(os.environ['USER'])  # TODO-ROB:  Set 'USER' environment variable w/ flask
         self.web = self.__project_home / Path('web')
+
 
     def project(self, p_rt):
         """The projects function helps keep up with different projects.
