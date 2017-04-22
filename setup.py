@@ -9,18 +9,20 @@ from os import path
 import os
 import tablib
 home = path.abspath(path.dirname(__file__))
-name = 'Orthologs-Project'
+name = 'Datasnakes-Scripts'
 
 PACKAGES = [
-    'lib',
-    'lib.scripts',
-    'lib.scripts.biosql',
-    'lib.scripts.blast',
-    'lib.scripts.ftp',
-    'lib.scripts.genbank',
-    'lib.scripts.manager',
-    'lib.scripts.multiprocessing',
-    'lib.scripts.phylogenetic_analyses'
+    'biosql',
+    'blast',
+    'ftp',
+    'genbank',
+    'manager',
+    'manager.shiny',
+    'manager.flask',
+    'multiprocessing',
+    'phylogenetics',
+    'pybasher',
+    'pandoc',
 ]
 
 # Get the long description from the README file
@@ -29,11 +31,8 @@ with open(path.join(home, 'README.rst'), encoding='utf-8') as f:
 
 # Set up an initial configuration file
 # //TODO-ROB: Set up a reconfiguration script for manual movements;  Make the script append to 'init.yaml'
-config = tablib.Dataset()
-config.headers = ('package', 'location')
-config.append([name, home])
-with open('config.yaml', 'w') as c_yaml:
-    c_yaml.write('init.yaml')
+
+
 
 setup(
     name=name,
