@@ -24,7 +24,8 @@ file1 = csv.reader(g)
 print("\n" + "The current working directory is "+ os.getcwd() + (2 * "\n"))  # Print current working directory
 Gene_count = 0
 
-
+from manager.lister import Lister
+x = Lister.get_master_lists()
 for Gene in file1:
     Gene_count = Gene_count + 1
 
