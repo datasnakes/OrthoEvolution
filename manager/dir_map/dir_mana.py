@@ -135,7 +135,6 @@ class dir_mana(object):
         self.__user_home = self.users / Path(os.environ['USER'])  # TODO-ROB:  Set 'USER' environment variable w/ flask
         self.web = self.__project_home / Path('web')
 
-
     def project(self, p_rt):
         """The projects function helps keep up with different projects.
         Create a different function for every new project."""
