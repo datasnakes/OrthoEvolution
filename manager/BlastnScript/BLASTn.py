@@ -28,7 +28,7 @@ from manager.BLASTingTemplate import BLASTingTemplate as BT
 # TODO-ROB: Find packages for script timing and analysis
 
 
-class BLAST(BT):
+class BLASTn(BT):
     def __init__(self, template=None):
         """Inherit from the BLASTing Template."""
         super().__init__(template=template)
@@ -94,7 +94,58 @@ class BLAST(BT):
             self.blastn_log.info("A new BLAST started at %s" % self.get_time()())
             self.blasting(self.gene_list, self.org_list)
 
-    def blasting(self, genes, organisms):
+
+    def blast_config(self, query_align):
+        for query in query_align:
+            gene = self.acc_dict[query][0]
+            org = self.acc_dict[query][1]
+            self.blastn_log.info("Extracting query gi number to stdout and "
+                                 "query refseq sequence to a temp.fasta file from BLAST database.")
+            # https://www.ncbi.nlm.nih.gov/books/NBK279689/#_cookbook_Custom_data_extraction_and_form_
+            fasta_setup = "blastdbcmd -entry " + query + " -db refseq_rna -outfmt %f -out temp.fasta"
+            gi_setup = "blastdbcmd -entry " + query + " -db refseq_rna -outfmt %g"
+            gi_status = subprocess.call([gi_setup], shell=True)
+            fasta_status = subprocess.call([fasta_setup], shell=True)
+            if gi_status == 0 or fasta_status == 0:  # Command was successful.
+                if gi_status != 0:
+                    self.blastn_log.error("GI number for %s not found in the BLAST extraction" % query)  # Log it.
+                    # TODO-ROB:  Is this the correct move below???
+                    self.blastn_log.error("Removing %s from the BLAST list..." % gene)
+                    self.gene_list.remove(gene)
+                if fasta_status!= 0:
+                    self.blastn_log.error("FASTA sequence for %s not found in the BLAST extraction" % query)
+                    self.blastn_log.error("Removing %s from the BLAST list..." % gene)
+                    self.gene_list.remove(gene)
+                pass  # Continue through script.
+            else:
+                self.blastn_log.error("FASTA sequence and GI number for %s not found in the BLAST extraction" % query)
+                self.blastn_log.error("Removing %s from the BLAST list..." % gene)
+                self.gene_list.remove(gene)
+            if fasta_status == 0:
+                pass
+            else:
+
+            gi = subprocess.check_output([gi_setup], shell=True)
+
+            gi = gi.strip()
+            gi = gi.decode('utf-8')
+            gi = str(gi)
+            gi = gi.replace("'", "")
+            gene_list_G.append(gi)
+            GI_count = GI_count + 1
+
+            blastn_log.info("----%s seconds----" % (time.time() - start_time))
+            timer = str(time.time() - start_time)
+            gene_list_TREF.append('')
+            gene_list_TRBF.append(timer)
+            pass
+
+    def blasting(self, genes, query_align=None, organisms):
+        if query_align is None:
+            # TODO-ROB:  Correct this bottom call
+            query_align = self.df['Homo_sapiens'].tolist()
+        else:
+            query_align = self.df[query_align].tolist()
         os.chdir(self.__output)
         start_time = time.time()  # Variable used to check the processing time
         self.blastn_log.info("------------------------------------------------------------------")
@@ -104,7 +155,7 @@ class BLAST(BT):
 
         # Factor in the new gene list and parse the human querys
         index = (len(self.gene_list)- len(genes))
-        for query in self.blast_human[index:]:
+        for query in query_align[index:]:
             self.blastn_log.info('Human Accession: %s' % query)
             for gene in genes:
                 try:

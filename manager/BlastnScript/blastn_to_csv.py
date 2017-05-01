@@ -15,25 +15,21 @@ import os
 import time   # Used to delay when dealing with NCBI server errors
 import csv
 import subprocess
-from pandas import ExcelWriter
+import pandas as pd  # Used for dealing with CSV files
 from Bio import SearchIO  # Used for parsing and sorting XML files.
 from Bio.Blast.Applications import NcbiblastnCommandline  # Used for Local Blasting.
 # Modules as custom
 import logging as log
-import pandas as pd  # Used for dealing with CSV files
+
 from datetime import datetime as d
 # Proprietary Modules
 from manager.lister import Lister
-#------------------------------------------------------------------------------
-# Time this script
-start_of_script = time.time()
-
-#------------------------------------------------------------------------------
-# Set up the logger
-format1 = '%a %b %d at %I:%M:%S %p %Y'  # Used to add as a date
-format2 = '%m-%d-%Y@%I:%M:%S-%p'  # Used to append to archives
+from manager.BLASTingTemplate import BLASTingTemplate as BT
+# TODO-ROB: Find packages for script timing and analysis
 
 # Set up the blastn logger & log file
+format1 = '%a %b %d at %I:%M:%S %p %Y'  # Used to add as a date
+format2 = '%m-%d-%Y@%I:%M:%S-%p'  # Used to append to archives
 LOGFORMAT = '%(name)s - [%(levelname)-2s]: %(message)s'
 log.basicConfig(level=log.DEBUG,
                 format=LOGFORMAT,
@@ -46,60 +42,73 @@ blastn_log.info("The script name is %s" % os.path.basename(__file__))
 blastn_log.info("The script began on %s" % str(d.now().strftime(format1)))
 blastn_log.info("------------------------------------------------------------------")
 
-# Create a variable used to check the output
-check = 1
-# Create a variable used to check the processing time
-start_time = time.time()
+# Initializations
+check = 1  # Variable used to check the output
+start_time = time.time()  # Variable used to check the processing time
+get_time = time.time  # To get the time use 'get_time()'
+# Initialize from the template master accession file and taxon file
+template = 'MAFV3.1.csv'
+data = BT(template=template)
+"""The template accession file contains the following information...
+Headers: Tier, Gene, Org_1, ... , Org_n
+Rows:  tier_name, gene_name, Accession_1, ... , Accession_n"""
+header = data.header
+org_list = data.org_list
+gene_list = data.gene_list
+taxon_ids = data.taxon_ids
+"""The taxon ids file contains one id on each line"""
 
-#------------------------------------------------------------------------------
 # Manage directories
-# Home Directory
-home = os.getcwd()
-h = home
-
-# Directory for input .csv files
-input_files = 'data/blastn/blast-input-files/'
-os.makedirs(input_files, exist_ok=True)
-
-# Copy blast input files to input_files directory
-os.system("cp data/initial-data/{organisms.csv,taxids.csv,homo_sapiens_accessions.csv} "
-          + input_files)
-
-# Blastn Output Directory
-output = 'data/blastn/blast-xml-output/'
+h = os.getcwd()  # Home directory
+output = 'data/blastn/blast-xml-output/'  # Output directory
+processed = 'data/processed/'  # Processed data directory
 os.makedirs(output, exist_ok=True)  # only make blast-xml-output dir since blastn dir exists
-out = output
 
-# Processed Data Directory
-processed = 'data/processed/'
-
-# Processed Data Directory
-initial_data = 'data/initial-data/'
-
-#------------------------------------------------------------------------------
-# Open a .csv file that contains 1 column of organism names
-# Make a list of organisms and use it for column headers in the master file
-o = pd.read_csv('data/blastn/blast-input-files/organisms.csv', header=None)
-org_list = o.replace(to_replace=' ', value='_', regex=True)
-org_list = list(org_list[0])
+# ------------------------------------------------------------------------------
 blastn_log.info("These are the organisms: " + str(org_list))
-
-#------------------------------------------------------------------------------
-# Open a .csv file that contains 1 column of taxonomy id's
-# Make a list of the tax id's and use them for local NCBI BLAST
-# Use Taxonomy ID list to furher customize Blast search.
-tax_ids = pd.read_csv('data/blastn/blast-input-files/taxids.csv', header=None)
-ID_list = list(tax_ids[0])
-blastn_log.info("These are the taxonomy ids: " + str(ID_list))
-
-#------------------------------------------------------------------------------
-os.chdir(out) # Change or move to the output directory
+blastn_log.info("These are the genes: " + str(gene_list))
+blastn_log.info("These are the taxonomy ids: " + str(taxon_ids))
+# ------------------------------------------------------------------------------
+os.chdir(output)  # Change or move to the output directory
 output_dir_list = os.listdir()  # Make a list of files
 
-#------------------------------------------------------------------------------
+# ------------------------------------------------------------------------------
 # Check to see if the master ACCESSION file is in the home directory,
 # and then either add the header or count the number of rows that already
 # exist in order to skip to the most recently called gene.
+
+
+def blast_file_config(file):
+    """This function configures different files for new BLASTS.
+    It also helps recognize whether or not a BLAST was terminated
+    in the middle of the dataset.  This removes the last line of
+    the accession file if it is incomplete."""
+    if file in output_dir_list:
+        with open(file, 'r') as fi:
+            f = csv.reader(fi)
+            count = -1
+            for row in f:
+                count += 1
+                ending = row
+            gene = ending[1]
+            taxid = taxon_ids[count]
+            org = org_list[(len(ending) - 2)]
+
+            ncbi = str("""result_handle1 = NcbiblastnCommandline(query="temp.fasta", db="refseq_rna", strand="plus",
+            evalue=0.001, out="%s_%s.xml", outfmt=5, gilist=%s + "gi", max_target_seqs=10, task="blastn")"""
+                       % (gene, org, taxid))
+            blastn_log.warning("An incomplete accession file was produced from the previous BLAST,"
+                               "which was terminated midway through the procedure.")
+
+            blastn_log.info("The last row looks like: \n\t%s\n\t%s\n" % (header, ending))
+            blastn_log.info("The BLAST ended on the following query: \n%s" % ncbi)
+            if len(ending) < len(header):
+                blastn_log.info("Removing the last line...")
+                count = count -1
+            continued_org_list = list(x for i, x in enumerate(gene_list, 1) if i > count)
+            return continued_org_list
+    else:
+        blastn_log.info("A new BLAST started at %s" % get_time())
 
 if 'Master_Accession_File.csv' in output_dir_list:
     MAF = open('Master_Accession_File.csv')
@@ -115,26 +124,27 @@ else:
     row_count_A = 0
     blastn_log.info("2_A")
 
-#------------------------------------------------------------------------------
+#
+# DEPRECATED------------------------------------------------------------------------------
 # Check to see if the master GI file is in the home directory,
 # and then either add the header or count the number of rows that already
-# exist in order to skip to the most recently called gene
+# # exist in order to skip to the most recently called gene
+#
+# if 'Master_GI_File.csv' in output_dir_list:
+#     MGF = open('Master_GI_File.csv')
+#     MGF = csv.reader(MGF)
+#     row_count_G = sum(1 for row in MGF) - 1
+#     blastn_log.info("row_count_G: " + str(row_count_G))
+#     # input("Is this an ok row_count for the GI File?")
+# else:
+#     MGF = open('Master_GI_File.csv', 'w', newline = '')
+#     org_row = csv.writer(MGF, dialect='excel')
+#     org_row.writerow(['Tier'] + ['Gene'] + org_list)
+#     MGF.close()
+#     row_count_G = 0
+#     blastn_log.info("2_G")
 
-if 'Master_GI_File.csv' in output_dir_list:
-    MGF = open('Master_GI_File.csv')
-    MGF = csv.reader(MGF)
-    row_count_G = sum(1 for row in MGF) - 1
-    blastn_log.info("row_count_G: " + str(row_count_G))
-    # input("Is this an ok row_count for the GI File?")
-else:
-    MGF = open('Master_GI_File.csv', 'w', newline = '')
-    org_row = csv.writer(MGF, dialect='excel')
-    org_row.writerow(['Tier'] + ['Gene'] + org_list)
-    MGF.close()
-    row_count_G = 0
-    blastn_log.info("2_G")
-
-#------------------------------------------------------------------------------
+# DEPRECATED------------------------------------------------------------------------------
 # Check to see if the Time_Record_ExistingFiles file is in the home directory,
 # and then either add the header or count the number of rows that already exist
 # in order to skip to the most recently called gene
@@ -153,7 +163,7 @@ else:
     row_count_TREF = 0
     blastn_log.info("2_TREF")
 
-#------------------------------------------------------------------------------
+# DEPRECATED------------------------------------------------------------------------------
 # Check to see if the Time_Record_BLASTingFiles file is in the home directory,
 # and then either add the header or count the number of rows that already exist
 # in order to skip to the most recently called gene
@@ -171,7 +181,7 @@ else:
     row_count_TREF = 0
     blastn_log.info("2_TRBF")
 
-#------------------------------------------------------------------------------
+# DEPRECATED------------------------------------------------------------------------------
 # For writing Accessions/GIs to the file
 gene_list_A = []
 gene_list_B = []
@@ -179,7 +189,7 @@ file_count = 0
 BA_count = 0
 GI_count = 0
 
-#------------------------------------------------------------------------------
+# ------------------------------------------------------------------------------
 # Define the map function for hit id's.
 # This will be used later in the script.
 def map_func(hit):
@@ -188,16 +198,15 @@ def map_func(hit):
     hit.id = hit.id[:-2]
     return hit
 
-#------------------------------------------------------------------------------
+# ------------------------------------------------------------------------------
 # BLAST the Homo Sapiens Accession number & filter results via the Organism
 # The 1st 'for' loop parses through the individual genes in our data files
 os.chdir(h)  # Change to home directory
 
 # 1st column - tiers, 2nd column - genes, 3rd column - Human accession numbers
 # TODO-ROB: Lister here
-f = open('data/initial-data/homo_sapiens_accessions.csv')
-file1 = csv.reader(f)
-os.chdir(out)
+file1 = csv.reader(open('data/initial-data/homo_sapiens_accessions.csv'))
+os.chdir(output)
 
 Acc_count = 0  # The Accession count. Lists start at 0.
 
@@ -205,7 +214,7 @@ for Accession in file1:
     Acc_count = Acc_count + 1
 
 #  Begin listing I/O information
-#------------------------------------------------------------------------------
+# ------------------------------------------------------------------------------
     # TODO-ROB:  Lister here
     blastn_log.info('#' + (50 * '-'))
     blastn_log.info('The following contains information about the BLAST input and output:')
@@ -215,27 +224,28 @@ for Accession in file1:
 
     blastn_log.info("Current Directory: " + str(os.getcwd()))  # Check the Python Shell for proper directory
 
-    gene_list_A = []
-    gene_list_G = []
-    gene_list_TREF = []
-    gene_list_TRBF = []
-
     unfound_genes = []
     unfound_accs = []
     unfound_tier = []
 
-    # Append gene tiers to the row
-    gene_list_A.append(str(Accession[0]))
-    gene_list_G.append(str(Accession[0]))
-    gene_list_TREF.append(str(Accession[0]))
-    gene_list_TRBF.append(str(Accession[0]))
+# DEPRECATED                    DEPRECATED
+    #     gene_list_A = []
+    #     gene_list_G = []
+    #     gene_list_TREF = []
+    #     gene_list_TRBF = []
 
-    # Append gene names to the row
-    gene_list_A.append(str(Accession[1]))
-    gene_list_G.append(str(Accession[1]))
-    gene_list_TREF.append(str(Accession[1]))
-    gene_list_TRBF.append(str(Accession[1]))
-
+    # # Append gene tiers to the row
+    # gene_list_A.append(str(Accession[0]))
+    # gene_list_G.append(str(Accession[0]))
+    # gene_list_TREF.append(str(Accession[0]))
+    # gene_list_TRBF.append(str(Accession[0]))
+    #
+    # # Append gene names to the row
+    # gene_list_A.append(str(Accession[1]))
+    # gene_list_G.append(str(Accession[1]))
+    # gene_list_TREF.append(str(Accession[1]))
+    # gene_list_TRBF.append(str(Accession[1]))
+# DEPRECATED                        DEPRECATED
 # Create a folder (for target genes) unless it already exists.
 # If it does exist, then change to that folder to see
 # what XML files (for target gene/organisms) are present.
@@ -259,18 +269,19 @@ for Accession in file1:
 
 #  End listing I/O information
 
-#------------------------------------------------------------------------------
+# ------------------------------------------------------------------------------
 # The 2nd 'for' loop is for parsing through the individual organisms(which correspond
 # to taxonomy id's) in our data files, so that very specific BLAST data can be
 # retrieved and stored in the above directory.
-    for Organism, TID in zip(org_list, ID_list):
+    for Organism, TID in zip(org_list, taxon_ids):
         file_count = file_count + 1
         maximum = 0
 
         if Organism == 'Homo_sapiens':
             gene_list_A.append(str(Accession[2]))
             BA_count = BA_count + 1
-            getgi = "blastdbcmd -entry " + str(Accession[2]) +" -db refseq_rna -outfmt %g"
+            cmd = "blastdbcmd -entry " + str(Accession[2]) + " -db refseq_rna -outfmt %f -out temp.fasta"
+            getgi = "blastdbcmd -entry " + str(Accession[2]) + " -db refseq_rna -outfmt %g"
             cmdstatus = subprocess.call([getgi], shell=True)
 
             if cmdstatus == 0:  # Command was successful.
@@ -303,7 +314,7 @@ for Accession in file1:
             gene_list_TRBF.append(timer)
             pass
 
-#------------------------------------------------------------------------------
+# ------------------------------------------------------------------------------
 # Skip the first 3 items in the org_list and update the Best Accession Count and Best GI Count
         else:  # or Organism == 'Homo sapiens' or  Organism == 'Macaca mulatta':
             if Organism == '':
@@ -311,9 +322,9 @@ for Accession in file1:
                 GI_count = file_count
                 continue
             xmlfile_list = os.listdir()
-            s = "%s_%s.xml" % (Accession[1], Organism)
+            s = "%s_%s.xml" % (Accession[1], Organism) #TODO-ROB REMOVE????
 
-#------------------------------------------------------------------------------
+# ------------------------------------------------------------------------------
 # If a gene/organism XML file has already been established, parse through it.
             if s in xmlfile_list:
                 blastn_log.info(Organism)
@@ -362,7 +373,7 @@ for Accession in file1:
                 blastn_log.info(s + " already exists.  Next organism.")
                 continue
 
-#------------------------------------------------------------------------------
+# ------------------------------------------------------------------------------
 # If the gene/organism xml file hasn't already been established,
 # then BLAST the Homo sapiens accession number,
 # and store the blast report in an XML file.
@@ -380,7 +391,7 @@ for Accession in file1:
                 Org = str(Organism)
                 TAX = str(TID)
 
-#------------------------------------------------------------------------------
+# ------------------------------------------------------------------------------
                 # Standalone NCBI BLAST using local refseq_rna database on MCSR
 
                 # Before appending to the gene list, only append
@@ -389,6 +400,7 @@ for Accession in file1:
                 if TAX == '9606':
                     gene_list_A.append(str(Accession[2]))
                     BA_count = BA_count + 1
+                    cmd = "blastdbcmd -entry " + str(Accession[2]) + " -db refseq_rna -outfmt %f -out temp.fasta"
                     getgi = "blastdbcmd -entry " + str(Accession[2]) +" -db refseq_rna -outfmt %g"
 
                     cmdstatus = subprocess.call([getgi], shell=True)
@@ -464,7 +476,7 @@ for Accession in file1:
                     blastn_log.info("The temp.fasta file has been deleted." + "\n")
                     blastn_log.info("%s_%s.xml" % (Accession[1],Org) + " is being parsed." + "\n")
 
-#------------------------------------------------------------------------------
+# ------------------------------------------------------------------------------
                     # Open the saved XML files above in order to sort through the BLAST Data
                     with open("%s_%s.xml" % (Accession[1], Org)) as result_handle2:
                         blast_qresult = SearchIO.read(result_handle2, 'blast-xml')
@@ -476,12 +488,13 @@ for Accession in file1:
                                 blastn_log.info(hsp.bitscore_raw)
                                 blastn_log.info(hit.description + '\n')
 
-#------------------------------------------------------------------------------
+# ------------------------------------------------------------------------------
                                 # Find the highest scoring hit for each gene
                                 if hsp.bitscore_raw > maximum:
                                     # If the gene is a pseudogene then go the the next hit
                                     if "xr" in str(hit.id.lower()):
-                                        blastn_log.info("Encountered a pseudogene.  Moving to the next hit.")
+                                        blastn_log.info("Encountered a predicted(X*_00000) "
+                                                        "non-coding (XR_000000)(ncRNA) RefSeq.  Moving to the next hit.")
                                         break
 
                                     else:
@@ -495,7 +508,7 @@ for Accession in file1:
                                             Best_GI = hit.id2
                                         blastn_log.info(Best_Accession + ' ' + Best_GI + " has the higlhest bitscore!!!!")
 
-#------------------------------------------------------------------------------
+# ------------------------------------------------------------------------------
                                         gene_list_A.append(Best_Accession)
                                         gene_list_G.append(Best_GI)
                                         BA_count = BA_count + 1
@@ -503,7 +516,7 @@ for Accession in file1:
                                         Best_Accession = ''
                                         Best_GI = ''
 
-#------------------------------------------------------------------------------
+# ------------------------------------------------------------------------------
                         # blastn_log.info out the counts to ensure the user that everything is in order
                         blastn_log.info("BA_count = %s" % BA_count)
                         blastn_log.info("file_count = %s" % file_count)
@@ -521,12 +534,12 @@ for Accession in file1:
                         gene_list_TREF.append('')
                         gene_list_TRBF.append(timer)
 
-#------------------------------------------------------------------------------
+# ------------------------------------------------------------------------------
     # Add lists to csv files. If gene was not found in blastdb, add it to separate
     # file. If the gene was in the blast db, add the top hits/accessions list/
     if str(Accession[1]) in unfound_genes:  # If the gene is found in the list of unfound genes
         os.chdir(h)
-        os.chdir(out)
+        os.chdir(output)
 
         # Save the list of unfound genes, accessions, tiers to a csv file
         ug = pd.DataFrame(unfound_genes, dtype=str)  # create dataframe for unfound gene
@@ -544,7 +557,7 @@ for Accession in file1:
 
     else:  # If the gene is present in the database, save the lists to files.
         os.chdir(h)
-        os.chdir(out)
+        os.chdir(output)
 # TODO-ROB:  ERROR with extra line
         # Open the Master_Accession, Master_GI, and TREF File. Add the full gene list.
         with open('Master_Accession_File.csv', 'a', newline='') as csvfile:
@@ -567,7 +580,7 @@ for Accession in file1:
             gene_row.writerow(gene_list_TRBF)
             blastn_log.info(check)  # Check
 
-#------------------------------------------------------------------------------
+# ------------------------------------------------------------------------------
 # Close open files and announce the completion of the script.
 end_of_script = time.time()  # End time of script/blasting
 
@@ -578,15 +591,15 @@ csvfile.close()
 blastn_log.info("This script took {0} minutes to complete.".format((end_of_script - start_of_script)/60))
 blastn_log.info("This blastn portion of the script has completed. Check your output! ✓" + 2*("\n"))
 
-#------------------------------------------------------------------------------
-#------------------------------------------------------------------------------
-#------------------------------------------------------------------------------
+# ------------------------------------------------------------------------------
+# ------------------------------------------------------------------------------
+# ------------------------------------------------------------------------------
 # Post Blast Analysis
 # Analyze the accession file to check for missing genes
 
 # Set up the post blastn analysis logger and log file
 post_blast_log = log.getLogger('Post Blast Analysis')
-#------------------------------------------------------------------------------
+# ------------------------------------------------------------------------------
 # TODO-ROB:  Add post blast analysis to Lister
 # Read output accessions file and create dictionaries for data types.
 # Change to home directory
@@ -642,13 +655,10 @@ orgs = accession_data.org_list
 # Get number of missing organisms per gene
 # miss_per_gene = maf.sum(axis=1)
 
-#------------------------------------------------------------------------------
+# ------------------------------------------------------------------------------
 # Create and write dictionaries & dataframes to excel file
-
 if missing_gene['count'] <= 0 and missing_orgs['count'] <= 0:
-    # Write to a results file that there were no missing accessions/genes
-    # with open(processed + 'post_blast_analysis.txt', 'w') as pba:
-    #     pba.write('This is the post blast analysis results file.\n\nFor your latest blastn, there were no missing accession numbers.')
+    # Log that the blast had full coverage
     post_blast_log.info('There are no missing accession numbers for any gene or organism.')
     post_blast_log.info('Post blastn analysis is complete.')
 
@@ -656,7 +666,7 @@ else:
     post_blast_log.info('There are missing accessions. This data will be written an excel file.')
 
     # Set up the excel file
-    excel_file = ExcelWriter(processed + 'karg_missing_genes_data.xlsx')
+    excel_file = pd.ExcelWriter(processed + 'karg_missing_genes_data.xlsx')
 
     # This is the data frame for the names of missing genes by organism
     frame = pd.DataFrame.from_dict(no_acc, orient='index', dtype=str)
