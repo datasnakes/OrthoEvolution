@@ -31,8 +31,8 @@ Accession2 updated on 11/17/2016 at 1:09 PM
 
 import os
 import mygene
+from ete3 import NCBITaxa
 import pandas as pd
-
 from pathlib import Path
 from pandas import ExcelWriter
 #from dir_mana import dir_mana
@@ -53,7 +53,6 @@ project = "Orthologs-Project"
 
 ##############################################################################
 
-
 class Lister(object):
     __home = ''
     __acc_filename = ''
@@ -61,43 +60,39 @@ class Lister(object):
     __acc_path = ''
     __data = ''
     ##########################################################################
-
+    # TODO-ROB:  CREAT PRE-BLAST and POST-BLAST functions
     def __init__(self, acc_file=None, taxon_file=None, paml_file=None, go_list=None, post_blast=True, save_data=True, hgnc=False):
 
         # Private Variables
         self.__home = home
         self.__post_blast = post_blast
         self.__save_data = save_data
-        self.__pre_blast = True
-        if not acc_file:
-            self.__pre_blast = False
-
+        self.__taxon_filename = taxon_file
+        self.__paml_filename = paml_file
+        self.__acc_filename = acc_file
         # Handle the taxon_id file and blast query
         if taxon_file is not None:
             # File init
-            self.__taxon_filename = taxon_file
             self.__taxon_path = Path(home) / Path('index') / Path(self.__taxon_filename)
-            # Get taxon id list
-            self.taxon_ids = self.get_file_list(self.__taxon_path)
-
         # Handle the paml organism file
         if paml_file is not None:
             # File init
-            self.__paml_filename = paml_file
             self.__paml_path = Path(home) / Path('index') / Path(self.__paml_filename)
-            # Get PAML list
-            self.paml_org_list = self.get_file_list(self.__paml_path)
+            self.paml_org_list = []
 
         # Handle the master accession file (could be before or after blast)
         if acc_file is not None:
             # File init
-            self.__acc_filename = acc_file
             self.__acc_path = Path(home) / Path('index') / Path(self.__acc_filename)
             # TODO-ROB: Make a better way to generate a go list programmatically
             self.go_list = go_list
             # Handles for organism lists #
             self.org_list = []
+            self.ncbi_orgs = []
             self.org_count = 0
+            self.taxon_ids = []
+            self.ncbi_taxon_ids = []
+            self.taxon_dict = {}
             # Handles for gene lists #
             self.gene_list = []
             self.gene_count = 0
@@ -112,8 +107,8 @@ class Lister(object):
             self.blast_human = []
             self.blast_rhesus = []
             # Handles for dataframe init #
-            self.__raw_data = pd.read_csv(self.__acc_path, dtype=str)
-            self.header = self.__raw_data.axes[1].tolist()
+            self.raw_data = pd.read_csv(self.__acc_path, dtype=str)
+            self.header = self.raw_data.axes[1].tolist()
 
             # # Handles for accession file analysis # #
             if self.__post_blast:
@@ -132,7 +127,7 @@ class Lister(object):
                 self.duplicated_other = {}
 
             # #### Format the main data frame #### #
-            self.__data = self.__raw_data.set_index('Gene')
+            self.__data = self.raw_data.set_index('Gene')
             self.df = self.__data
             # #### Format the main pivot table #### #
             self.pt = pd.pivot_table(pd.read_csv(self.__acc_path), index=['Tier', 'Gene'], aggfunc='first')
@@ -163,7 +158,7 @@ class Lister(object):
         # TODO Add custom mygene options
         # Initialize variables and import my-gene search command
         urls = []
-        df = self.__raw_data
+        df = self.raw_data
         mg = mygene.MyGeneInfo()
         # Create a my-gene query handle to get the data
         human = list(x.upper() for x in self.blast_human)
@@ -212,6 +207,22 @@ class Lister(object):
 
         self.org_list = maf.axes[1].tolist()[1:]
         self.org_count = len(self.org_list)
+        self.ncbi_orgs = list(org.replace('_', ' ') for org in self.org_list)
+
+        if self.__taxon_filename is not None:
+            # Load taxon ids from a file
+            self.taxon_ids = self.get_file_list(self.__taxon_path)
+        else:
+            # Load taxon ids from a local NCBI taxon database via ete3
+            ncbi = NCBITaxa()
+            self.taxon_dict= ncbi.get_name_translator(self.ncbi_orgs)
+            self.ncbi_taxon_ids = list(tid for tid in self.taxon_dict.values())
+            self.taxon_ids = list(tid[0] for tid in self.taxon_dict.values())
+
+        if self.__paml_filename is not None:
+            self.paml_org_list = self.get_file_list(self.__paml_path)
+        else:
+            self.paml_org_list = self.paml_org_formatter()
 
         self.tier_list = maf['Tier'].tolist()
         self.tier_dict = maf['Tier'].to_dict()
@@ -221,12 +232,11 @@ class Lister(object):
         self.acc_list = list(self.acc_dict.keys())
 
         # Get blast query list
-        self.blast_human = list(self.df.Homo_sapiens.tolist())
-        self.blast_rhesus = list(self.df.Macaca_mulatta.tolist())
+        self.blast_human = self.df.Homo_sapiens.tolist()
+        self.blast_rhesus = self.df.Macaca_mulatta.tolist()
 
         # Gene analysis
-        if self.__pre_blast:
-            self.mygene_df = self.my_gene_info()
+        self.mygene_df = self.my_gene_info()
 
         # Accession file analysis
         if self.__post_blast:
@@ -289,6 +299,14 @@ class Lister(object):
             tier = str(tier)
             tier_frame_dict[tier] = maf.groupby('Tier').get_group(tier)
         return tier_frame_dict
+
+    def paml_org_formatter(self):
+        org_list = []
+        for organism in self.org_list:
+            genus, sep, species = organism.partition('_')
+            org = ''.join([genus[0], sep, species[0:28]])
+            org_list.append(org)
+        return org_list
 
     def make_excel_file(self):
         print('Under construction')
@@ -427,4 +445,28 @@ class Lister(object):
         print('under development')
 
 
+# class BLASTingTemplate(Lister):
+#     # TODO-ROB:  Look into subclasses and inheritance.  Which of the parameter below is necessary???
+#     def __init__(self, template=None, taxon_file=None, post_blast=False, save_data=True, hgnc=False):
+#         super().__init__(acc_file=template, taxon_file=taxon_file,
+#                          post_blast=post_blast, save_data=save_data, hgnc=hgnc)
+#
+#         # Initialize a data frame to add accession files to
+#         self.building = self.raw_data
+#         del self.building['Tier']
+#         del self.building['Homo_sapiens']
+#         self.building = self.building.set_index('Gene')
+#         # TODO-ROB:  Make function outside of init to do the stuff above with the template variable
+#         if template:
+#             # TODO-ROB: the following comments...
+#             # Open Template
+#             # Dynamically add stuff during the blast
+#             # Use with function maybe??
+#             # Close Template
+#
+#     def add_accession(self, gene, organism, accession):
+#         """Takes an accession and adds in to the building dataframe,
+#         and also adds to the csv file."""
+#
+#         self.building.set_value(gene, organism, accession)
 
