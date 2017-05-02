@@ -331,7 +331,6 @@ class Lister(object):
         which contains the corresponding genes/organisms."""
         gene_list = self.gene_list
         org_list = self.org_list
-        go1 = []
         go = {}
         for gene in gene_list:
             for org in org_list:
@@ -341,10 +340,10 @@ class Lister(object):
                 # TODO-ROB: Rework the missing functino using this.. maybe??
                 elif query_acc == 'missing':
                     continue
-                go1.append(gene)
-                go1.append(org)
+
                 # Append so that duplicates can be identified
-                go[query_acc].append(go1)
+                go[query_acc].append(gene)
+                go[query_acc].append(org)
                 go1 = []
         return go
 

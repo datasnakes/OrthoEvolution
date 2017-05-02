@@ -67,7 +67,7 @@ class BLASTn(BT):
     def blast_config(self, query_align, query_organism, auto_start=False):
         """This function configures everything for a BLAST.
         First the accession file, and gene list is configured."""
-        os.chdir(self.__output)
+        os.chdir(str(self.__output))
         self.blastn_log.info('\n\n\n***********************************BLAST CONFIG START***********************************')
         self.blastn_log.info('***********************************BLAST CONFIG START***********************************')
         self.blastn_log.info('***********************************BLAST CONFIG START***********************************\n\n\n')
@@ -86,7 +86,7 @@ class BLASTn(BT):
                              "query refseq sequence to a temp.fasta file from BLAST database.")
         # Iterate the query accessions numbers
         for query in query_align:
-            os.chdir(self.__output)
+            os.chdir(str(self.__output))
             gene = self.acc_dict[query][0]
             org = self.acc_dict[query][1]
             # Create the proper directories for each gene
@@ -165,7 +165,7 @@ class BLASTn(BT):
         in the middle of the dataset.  This removes the last line of
         the accession file if it is incomplete."""
 
-        os.chdir(self.__output)  # Change or move to the output directory
+        os.chdir(str(self.__output))  # Change or move to the output directory
         output_dir_list = os.listdir()  # Make a list of files
         if file in output_dir_list:
             with open(file, 'r') as fi:
@@ -250,7 +250,7 @@ class BLASTn(BT):
         elif pre_configured is True:
             genes = genes
 
-        os.chdir(self.__output)
+        os.chdir(str(self.__output))
         start_time = time.time()  # Variable used to check the processing time
         self.blastn_log.info("------------------------------------------------------------------")
         self.blastn_log.info("The script name is %s" % os.path.basename(__file__))
