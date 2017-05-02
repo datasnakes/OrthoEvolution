@@ -25,9 +25,10 @@ class BLASTAnalysis(OrthologAnalysis):
         # Initialize Logging
         df = LogIt()
         self.blastn_log = df.blastn()
+        self.postblast_log = df.post_blast()
+        self.config_log = df.config(self.__home / Path('BLAST.log'))
         self.__date_format = df.date_format
         self.get_time = time.time  # To get the time use 'get_time()'
-        self.postblast_log = df.post_blast()
         # Logging variables
         # self.__date_format = '%a %b %d at %I:%M:%S %p %Y'  # Used to add as a date
         # self.__archive_format = '%m-%d-%Y@%I:%M:%S-%p'  # Used to append to archives

@@ -60,7 +60,7 @@ class OrthologAnalysis(object):
     __paml_filename = ''
     __acc_path = ''
     __data = ''
-    ##########################################################################
+
     # TODO-ROB:  CREAT PRE-BLAST and POST-BLAST functions
     def __init__(self, acc_file=None, taxon_file=None, paml_file=None, go_list=None, post_blast=True, save_data=True, hgnc=False):
 
