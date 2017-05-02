@@ -24,9 +24,9 @@ from multiprocessing import Pool
 import logging as log
 from datetime import datetime as d
 # Proprietary Modules
-from manager.lister import Lister
+from manager.ortho_analysis import OrthologAnalysis
 from manager.logit.logit import LogIt
-from manager.BLASTingTemplate import BLASTingTemplate as BT
+from manager.blast_analysis import BLASTAnalysis as BT
 # TODO-ROB: Find packages for script timing and analysis
 
 

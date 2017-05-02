@@ -23,8 +23,8 @@ import logging as log
 
 from datetime import datetime as d
 # Proprietary Modules
-from manager.lister import Lister
-from manager.BLASTingTemplate import BLASTingTemplate as BT
+from manager.ortho_analysis import OrthologAnalysis
+from manager.blast_analysis import BLASTAnalysis as BT
 # TODO-ROB: Find packages for script timing and analysis
 
 # Set up the blastn logger & log file
@@ -204,7 +204,7 @@ def map_func(hit):
 os.chdir(h)  # Change to home directory
 
 # 1st column - tiers, 2nd column - genes, 3rd column - Human accession numbers
-# TODO-ROB: Lister here
+# TODO-ROB: OrthologAnalysis here
 file1 = csv.reader(open('data/initial-data/homo_sapiens_accessions.csv'))
 os.chdir(output)
 
@@ -215,7 +215,7 @@ for Accession in file1:
 
 #  Begin listing I/O information
 # ------------------------------------------------------------------------------
-    # TODO-ROB:  Lister here
+    # TODO-ROB:  OrthologAnalysis here
     blastn_log.info('#' + (50 * '-'))
     blastn_log.info('The following contains information about the BLAST input and output:')
     blastn_log.info('Human Accession: %s' % Accession[2])
@@ -601,14 +601,14 @@ blastn_log.info("This blastn portion of the script has completed. Check your out
 # Set up the post blastn analysis logger and log file
 post_blast_log = log.getLogger('Post Blast Analysis')
 # ------------------------------------------------------------------------------
-# TODO-ROB:  Add post blast analysis to Lister
+# TODO-ROB:  Add post blast analysis to OrthologAnalysis
 # Read output accessions file and create dictionaries for data types.
 # Change to home directory
 os.chdir(h)
 post_blast_log.info('------------------------------------------------------------------------------')
 post_blast_log.info('Post Blast Analysis has begun.' + '\n')
 
-accession_data = Lister(acc_file='Master_Accession_File.csv')
+accession_data = OrthologAnalysis(acc_file='Master_Accession_File.csv')
 missing_gene = accession_data.missing_dict['genes']
 missing_orgs = accession_data.missing_dict['organisms']
 orgs = accession_data.org_list
