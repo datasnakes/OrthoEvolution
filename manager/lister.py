@@ -216,7 +216,7 @@ class Lister(object):
             ncbi = NCBITaxa()
             taxon_dict = ncbi.get_name_translator(self.ncbi_orgs)
             self.taxon_ids = list(tid[0] for tid in taxon_dict.values())
-            self.taxon_dict = dict(zip(self.ncbi_orgs, self.taxon_ids))
+            self.taxon_dict = dict(zip(self.org_list, self.taxon_ids))
         if self.__paml_filename is not None:
             self.paml_org_list = self.get_file_list(self.__paml_path)
         else:
