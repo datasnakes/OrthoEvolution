@@ -309,16 +309,16 @@ class BLASTn(BT):
                     with open(xml, 'w') as blast_xml:
                         # TODO-ROB:  Ask about the gi files and how the yare created  TODO-SHAE:  Wuut??
                         # Create a copy of the gi list file per taxonomy id to be used in blast
-                        os.system("cp " + str(self.__home) + "/data/gi-lists/" + taxon_id + "gi " + taxon_id + "gi")
-                        gi_file = taxon_id + "gi"
+                        os.system("cp " + str(self.__home) + "/data/gi-lists/" + str(taxon_id) + "gi " + str(taxon_id) + "gi")
+                        gi_file = str(taxon_id) + "gi"
 
                         # Use Biopython's NCBIBlastnCommandline tool
                         result_handle1 = NcbiblastnCommandline(query="temp.fasta", db="refseq_rna",
                                                                strand="plus", evalue=0.001,  # DONT GO LOWER
-                                                               out=blast_xml.name,
                                                                outfmt=5, gilist=gi_file,
                                                                max_target_seqs=10, task="blastn")
                         stdout_str, stderr_str = result_handle1()
+                        blast_xml.write(stdout)
 
                         end_time = self.get_time()
                         elapsed_time = end_time - start_time
