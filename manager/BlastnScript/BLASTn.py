@@ -44,8 +44,8 @@ class BLASTn(BT):
         Path.mkdir(self.__gi_list, parents=True, exist_ok=True)
         # # Initialize Logging
         # self.__blastn_log = LogIt.blastn()
-        # df = LogIt()
-        # self.__date_format = df.date_format
+        df = LogIt()
+        self.date_format = df.date_format
         # self.get_time = time.time  # To get the time use 'get_time()'
         # TODO-ROB:  Add a query organism variable
         self.query_gi_dict = {}
@@ -106,20 +106,13 @@ class BLASTn(BT):
                 self.blastn_log.info("Directory already exists: %s" % gene)
                 os.chdir(gene)
 
-            # Determine if the Query sequence fasta file exists and set the status accordingly
-            if 'temp.fasta' in os.listdir():
-                self.blastn_log.info("Query FASTA already exists.")
-                fasta_status = 0
-            else:
-                fasta_status = 1
 
             # Save sequence data in FASTA file format and print the gi number to stdout with a custom BLAST extraction
             # https://www.ncbi.nlm.nih.gov/books/NBK279689/#_cookbook_Custom_data_extraction_and_form_
             # TODO-ROB:  TODO-SHAE:Combine these BLAST extractions???
 
-            if fasta_status != 0:
-                fasta_setup = "blastdbcmd -entry " + query + " -db refseq_rna -outfmt %f -out temp.fasta"
-                fasta_status = subprocess.call([fasta_setup], shell=True)
+            fasta_setup = "blastdbcmd -entry " + query + " -db refseq_rna -outfmt %f -out temp.fasta"
+            fasta_status = subprocess.call([fasta_setup], shell=True)
             gi_setup = "blastdbcmd -entry " + query + " -db refseq_rna -outfmt %g"
             gi_status = subprocess.call([gi_setup], shell=True)
             # TODO-ROB:  Add function to add the gi numbers to the dataframe/csv-file, and add a check function to see if thats already there
@@ -285,7 +278,7 @@ class BLASTn(BT):
         start_time = time.time()  # Variable used to check the processing time
         self.blastn_log.info("------------------------------------------------------------------")
         self.blastn_log.info("The script name is %s" % os.path.basename(__file__))
-        self.blastn_log.info("The script began on %s" % str(d.now().strftime(self.__date_format)))
+        self.blastn_log.info("The script began on %s" % str(d.now().strftime(self.date_format)))
         self.blastn_log.info("------------------------------------------------------------------")
 
         # Steps to a bulk blast

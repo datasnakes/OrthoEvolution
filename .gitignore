@@ -1,4 +1,5 @@
 *.gbff
+/manager/data
 *.log
 *.gbk
 *.pyc
