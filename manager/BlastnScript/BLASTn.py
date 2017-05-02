@@ -163,6 +163,7 @@ class BLASTn(BT):
         """This script is designed to create a gi list based on the refseq_rna database
         for each taxonomy id on the MCSR. It will also convert the gi list into a
         binary file which is more efficient to use with NCBI's Standalone Blast tools."""
+        os.chdir(self.__gi_list)
         taxids = self.taxon_ids
         with Pool(processes=20) as p:
             p.map(self.gi_split, taxids)
@@ -181,7 +182,6 @@ class BLASTn(BT):
         os.system("rm -r " + str(ID) + "gi.txt")
         # Move the gi file to a folder
         os.system("mv " + str(ID) + "gi data/gi-lists/")
-        print(ID)
 
     def blast_file_config(self, file):
         """This function configures different files for new BLASTS.
