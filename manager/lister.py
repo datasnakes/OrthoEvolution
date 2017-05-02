@@ -91,7 +91,6 @@ class Lister(object):
             self.ncbi_orgs = []
             self.org_count = 0
             self.taxon_ids = []
-            self.ncbi_taxon_ids = []
             self.taxon_dict = {}
             # Handles for gene lists #
             self.gene_list = []
@@ -215,10 +214,9 @@ class Lister(object):
         else:
             # Load taxon ids from a local NCBI taxon database via ete3
             ncbi = NCBITaxa()
-            self.taxon_dict= ncbi.get_name_translator(self.ncbi_orgs)
-            self.ncbi_taxon_ids = list(tid for tid in self.taxon_dict.values())
-            self.taxon_ids = list(tid[0] for tid in self.taxon_dict.values())
-
+            taxon_dict = ncbi.get_name_translator(self.ncbi_orgs)
+            self.taxon_ids = list(tid[0] for tid in taxon_dict.values())
+            self.taxon_dict = dict(zip(self.ncbi_orgs, self.taxon_ids))
         if self.__paml_filename is not None:
             self.paml_org_list = self.get_file_list(self.__paml_path)
         else:
@@ -312,6 +310,21 @@ class Lister(object):
         print('Under construction')
 # **********************************************POST BLAST ANALYSIS TOOLS********************************************* #
 # **********************************************POST BLAST ANALYSIS TOOLS********************************************* #
+
+    def get_taxon_dict(self):
+        ncbi = NCBITaxa()
+        taxa_dict = {}
+        for organism in self.ncbi_orgs:
+            taxa_dict[organism] = {}
+            taxid = self.taxon_dict[organism]
+            lineage = ncbi.get_lineage(taxid)
+            names = ncbi.get_taxid_translator(lineage)
+            ranks = ncbi.get_rank(lineage)
+            for id in lineage:
+                if ranks[id] == 'no rank':
+                    continue
+                taxa_dict[organism][ranks[id]] = names[id]
+        return taxa_dict
 
     def get_acc_dict(self):
         """This function takes a list of accession numbers and returns a dictionary
@@ -443,30 +456,3 @@ class Lister(object):
 
     def get_pseudogenes(self):
         print('under development')
-
-
-# class BLASTingTemplate(Lister):
-#     # TODO-ROB:  Look into subclasses and inheritance.  Which of the parameter below is necessary???
-#     def __init__(self, template=None, taxon_file=None, post_blast=False, save_data=True, hgnc=False):
-#         super().__init__(acc_file=template, taxon_file=taxon_file,
-#                          post_blast=post_blast, save_data=save_data, hgnc=hgnc)
-#
-#         # Initialize a data frame to add accession files to
-#         self.building = self.raw_data
-#         del self.building['Tier']
-#         del self.building['Homo_sapiens']
-#         self.building = self.building.set_index('Gene')
-#         # TODO-ROB:  Make function outside of init to do the stuff above with the template variable
-#         if template:
-#             # TODO-ROB: the following comments...
-#             # Open Template
-#             # Dynamically add stuff during the blast
-#             # Use with function maybe??
-#             # Close Template
-#
-#     def add_accession(self, gene, organism, accession):
-#         """Takes an accession and adds in to the building dataframe,
-#         and also adds to the csv file."""
-#
-#         self.building.set_value(gene, organism, accession)
-
