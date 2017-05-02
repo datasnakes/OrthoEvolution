@@ -394,49 +394,50 @@ for Accession in file1:
 # ------------------------------------------------------------------------------
                 # Standalone NCBI BLAST using local refseq_rna database on MCSR
 
+# DEPRECATED
                 # Before appending to the gene list, only append
                 # the human accession # that was the input for the
                 # homo sapiens list.
-                if TAX == '9606':
-                    gene_list_A.append(str(Accession[2]))
-                    BA_count = BA_count + 1
-                    cmd = "blastdbcmd -entry " + str(Accession[2]) + " -db refseq_rna -outfmt %f -out temp.fasta"
-                    getgi = "blastdbcmd -entry " + str(Accession[2]) +" -db refseq_rna -outfmt %g"
-
-                    cmdstatus = subprocess.call([getgi], shell=True)
-
-                    if cmdstatus == 0:  # Command was successful.
-                        pass  # Continue through script.
-
-                    else:  # Unsuccessful. Stdout will be '1'. Entry was not found.
-                        unfound_genes.append(str(Accession[1]))  # add unfound gene to list
-                        unfound_accs.append(str(Accession[2]))
-                        unfound_tier.append(str(Accession[0]))
-                        blastn_log.error("Entry not found: %s" % str(Accession[2]))  # Log it.
-                        os.system("rm -r temp.fasta")  # Remove that temp fasta file.
-
-                        # Remove the entry/gene/accession not found in the db from the lists.
-                        gene_list_A.remove(str(Accession[1]))
-                        gene_list_G.remove(str(Accession[1]))
-                        gene_list_TREF.remove(str(Accession[1]))
-                        gene_list_TRBF.remove(str(Accession[1]))
-                        break  # Continue to the next gene.
-
-                    gi = subprocess.check_output([getgi], shell=True)
-
-                    gi = gi.strip()
-                    gi = gi.decode('utf-8')
-                    gi = str(gi)
-                    gi = gi.replace("'", "")
-                    gene_list_G.append(gi)
-                    GI_count = GI_count + 1
-
-                    blastn_log.info("----%s seconds----" % (time.time() - start_time))
-                    timer = str(time.time() - start_time)
-                    gene_list_TREF.append('')
-                    gene_list_TRBF.append(timer)
-                    break
-
+                # if TAX == '9606':
+                #     gene_list_A.append(str(Accession[2]))
+                #     BA_count = BA_count + 1
+                #     cmd = "blastdbcmd -entry " + str(Accession[2]) + " -db refseq_rna -outfmt %f -out temp.fasta"
+                #     getgi = "blastdbcmd -entry " + str(Accession[2]) +" -db refseq_rna -outfmt %g"
+                #
+                #     cmdstatus = subprocess.call([getgi], shell=True)
+                #
+                #     if cmdstatus == 0:  # Command was successful.
+                #         pass  # Continue through script.
+                #
+                #     else:  # Unsuccessful. Stdout will be '1'. Entry was not found.
+                #         unfound_genes.append(str(Accession[1]))  # add unfound gene to list
+                #         unfound_accs.append(str(Accession[2]))
+                #         unfound_tier.append(str(Accession[0]))
+                #         blastn_log.error("Entry not found: %s" % str(Accession[2]))  # Log it.
+                #         os.system("rm -r temp.fasta")  # Remove that temp fasta file.
+                #
+                #         # Remove the entry/gene/accession not found in the db from the lists.
+                #         gene_list_A.remove(str(Accession[1]))
+                #         gene_list_G.remove(str(Accession[1]))
+                #         gene_list_TREF.remove(str(Accession[1]))
+                #         gene_list_TRBF.remove(str(Accession[1]))
+                #         break  # Continue to the next gene.
+                #
+                #     gi = subprocess.check_output([getgi], shell=True)
+                #
+                #     gi = gi.strip()
+                #     gi = gi.decode('utf-8')
+                #     gi = str(gi)
+                #     gi = gi.replace("'", "")
+                #     gene_list_G.append(gi)
+                #     GI_count = GI_count + 1
+                #
+                #     blastn_log.info("----%s seconds----" % (time.time() - start_time))
+                #     timer = str(time.time() - start_time)
+                #     gene_list_TREF.append('')
+                #     gene_list_TRBF.append(timer)
+                #     break
+# DEPRECATED
                 else:
                     # Create a temporary fasta file since the blastn command needs a sequence file as input.
                     cmd = "blastdbcmd -entry " + str(Accession[2]) +" -db refseq_rna -outfmt %f -out temp.fasta"
