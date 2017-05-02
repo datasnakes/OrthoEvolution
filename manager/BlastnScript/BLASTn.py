@@ -181,6 +181,7 @@ class BLASTn(BT):
         os.system("rm -r " + str(ID) + "gi.txt")
         # Move the gi file to a folder
         os.system("mv " + str(ID) + "gi data/gi-lists/")
+        print(ID)
 
     def blast_file_config(self, file):
         """This function configures different files for new BLASTS.
