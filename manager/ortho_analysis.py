@@ -53,7 +53,8 @@ project = "Orthologs-Project"
 
 ##############################################################################
 
-class Lister(object):
+
+class OrthologAnalysis(object):
     __home = ''
     __acc_filename = ''
     __paml_filename = ''
