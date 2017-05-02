@@ -168,7 +168,8 @@ class BLASTn(BT):
             p.map(self.gi_split, taxids)
             self.blastn_log.inf("The GI lists have been created.")
 
-    def gi_split(self, ID):
+    @staticmethod
+    def gi_split(ID):
         """ This function uses the blastdbcmd tool to get gi lists. It then uses the
         blastdb_aliastool to turn the list into a binary file."""
 
@@ -176,7 +177,6 @@ class BLASTn(BT):
         os.system("blastdbcmd -db refseq_rna -entry all -outfmt '%g %T' | awk ' { if ($2 == " + str(ID) + ") { print $1 } } ' > " + str(ID) + "gi.txt")
         # Convert the .txt file to a binary file using the blastdb_aliastool.
         os.system("blastdb_aliastool -gi_file_in " + str(ID) + "gi.txt -gi_file_out " + str(ID) + "gi")
-        self.blastn_log.info("The gi list binary file for %s has been created." % ID)
         # Remove the gi.text file
         os.system("rm -r " + str(ID) + "gi.txt")
         # Move the gi file to a folder
