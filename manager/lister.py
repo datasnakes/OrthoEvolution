@@ -30,7 +30,7 @@ Accession2 updated on 11/17/2016 at 1:09 PM
 # Libraries:
 
 import os
-import mygene
+#import mygene
 from ete3 import NCBITaxa
 import pandas as pd
 from pathlib import Path
@@ -152,44 +152,44 @@ class Lister(object):
 
 # ***********************************************PRE BLAST ANALYSIS TOOLS********************************************* #
 # ***********************************************PRE BLAST ANALYSIS TOOLS********************************************* #
-    def my_gene_info(self):
+#    def my_gene_info(self):
         # TODO-ROB TODO-SHAE
         # TODO Add custom mygene options
         # Initialize variables and import my-gene search command
-        urls = []
-        df = self.raw_data
-        mg = mygene.MyGeneInfo()
+#        urls = []
+#        df = self.raw_data
+#        mg = mygene.MyGeneInfo()
         # Create a my-gene query handle to get the data
-        human = list(x.upper() for x in self.blast_human)
-        mygene_query = mg.querymany(human, scopes='refseq',
-                                    fields='symbol,name,entrezgene,summary',
-                                    species='human', returnall=True, as_dataframe=True,
-                                    size=1, verbose=True)
+#        human = list(x.upper() for x in self.blast_human)
+#        mygene_query = mg.querymany(human, scopes='refseq',
+#                                    fields='symbol,name,entrezgene,summary',
+#                                    species='human', returnall=True, as_dataframe=True,
+#                                    size=1, verbose=True)
         # TODO-ROB:  Logging here
         # TODO-SHAE:  COME TO HE DARK SIDE SHAURITA!!!!!!!!!!!!
 
         # Turn my-gene queries into a data frame and then reset the index
-        mygene_query['out'].reset_index(level=0, inplace=True)
-        mg_df = pd.DataFrame(mygene_query['out'])
-        mg_df.drop(mg_df.columns[[1, 2, 6]], axis=1, inplace=True)
+#        mygene_query['out'].reset_index(level=0, inplace=True)
+#        mg_df = pd.DataFrame(mygene_query['out'])
+#        mg_df.drop(mg_df.columns[[1, 2, 6]], axis=1, inplace=True)
         # Rename the columns
-        mg_df.rename(columns={'entrezgene': 'Entrez ID', 'summary':
-                              'Gene Summary', 'query': 'RefSeqRNA Accession', 'name': 'Gene Name'},
-                     inplace=True)
+#        mg_df.rename(columns={'entrezgene': 'Entrez ID', 'summary':
+#                              'Gene Summary', 'query': 'RefSeqRNA Accession', 'name': 'Gene Name'},
+ #                    inplace=True)
 
         # Create NCBI links using a for loop and the Entrez IDs
-        for entrez_id in mg_df['Entrez ID']:
+#        for entrez_id in mg_df['Entrez ID']:
             # Format the url so that it becomes an html hyperlink
-            url = '<a href="{0}">{0}</a>'.format('https://www.ncbi.nlm.nih.gov/gene/' + str(entrez_id))
-            urls.append(url)
+#            url = '<a href="{0}">{0}</a>'.format('https://www.ncbi.nlm.nih.gov/gene/' + str(entrez_id))
+#            urls.append(url)
         # Turn the ncbi urls list into a data frame
-        ncbi = pd.DataFrame(urls, columns=['NCBI Link'], dtype=str)
+#        ncbi = pd.DataFrame(urls, columns=['NCBI Link'], dtype=str)
         # Merge, sort, and return the my-gene data frame
-        hot_data = pd.concat([df.Tier, df.Gene, mg_df, ncbi], axis=1)
-        hot_data.rename(columns={'Gene': 'Gene Symbol'}, inplace=True)
-        hot_data = hot_data.sort_values(['Tier'], ascending=True)
+#        hot_data = pd.concat([df.Tier, df.Gene, mg_df, ncbi], axis=1)
+#        hot_data.rename(columns={'Gene': 'Gene Symbol'}, inplace=True)
+#        hot_data = hot_data.sort_values(['Tier'], ascending=True)
 
-        return hot_data
+#        return hot_data
 # ***********************************************PRE BLAST ANALYSIS TOOLS********************************************* #
 # ***********************************************PRE BLAST ANALYSIS TOOLS********************************************* #
 
@@ -234,7 +234,7 @@ class Lister(object):
         self.blast_rhesus = self.df.Macaca_mulatta.tolist()
 
         # Gene analysis
-        self.mygene_df = self.my_gene_info()
+#        self.mygene_df = self.my_gene_info()
 
         # Accession file analysis
         if self.__post_blast:
