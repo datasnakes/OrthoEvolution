@@ -16,7 +16,7 @@ class BLASTingTemplate(Lister):
 
         # Private variables
         self.__home = os.getcwd()
-        self.__template_filename = template
+        self.template_filename = template
         self.__acc_filename = build_file
         self.__taxon_filename = taxon_file
         self.__post_blast = post_blast
@@ -27,7 +27,7 @@ class BLASTingTemplate(Lister):
         self.blastn_log = df.blastn()
         self.__date_format = df.date_format
         self.get_time = time.time  # To get the time use 'get_time()'
-
+        self.postblast_log = df.post_blast()
         # Logging variables
         # self.__date_format = '%a %b %d at %I:%M:%S %p %Y'  # Used to add as a date
         # self.__archive_format = '%m-%d-%Y@%I:%M:%S-%p'  # Used to append to archives
@@ -41,14 +41,15 @@ class BLASTingTemplate(Lister):
         self.building = self.raw_data
         del self.building['Tier']
         del self.building['Homo_sapiens']
-        self.building = self.building.set_index('Gene')
-        self.building_time = self.building
         if build_file is None:
             build_file = str(template[:-4] + 'building.csv')
-        time_file = build_file.replace('build.csv', 'building_time.csv') # TODO-ROB:  ADD time to the file name
+        time_file = build_file.replace('build.csv', 'building_time.csv')  # TODO-ROB:  ADD time to the file name
+        self.building = self.building.set_index('Gene')
         self.__building_filename = build_file
-        self.__building_time_filename = time_file
         self.__building_file_path = Path(home) / Path('index') / Path(self.__building_filename)
+        # Initialize some timing files
+        self.building_time = self.building
+        self.__building_time_filename = time_file
         self.__building_time_file_path = Path(home) / Path('index') / Path(self.__building_time_filename)
 
     def add_accession(self, gene, organism, accession):
@@ -94,7 +95,44 @@ class BLASTingTemplate(Lister):
         if self.__save_data is True:
             temp.to_csv(self.__building_time_file_path)
 
+    def post_blast_analysis(self, acc_file):
+        accession_data = Lister(acc_file=acc_file, post_blast=True)
+        self.postblast_log.info('*************************POST BLAST ANALYSIS START*************************\n\n\n')
 
+        missing_gene = accession_data.missing_dict['genes']
+        missing_orgs = accession_data.missing_dict['organisms']
+        orgs = accession_data.org_list
 
+        # Create and write dictionaries & dataframes to excel file
+        if missing_gene['count'] <= 0 and missing_orgs['count'] <= 0:
+            # Log that the blast had full coverage
+            self.postblast_log.info('There are no missing accession numbers for any gene or organism.')
+            self.postblast_log.info('Post blastn analysis is complete.')
+        else:
+            self.post_blast_log.info('There are missing accessions. This data will be written an excel file.')
+
+            # Set up the excel file
+            excel_file = pd.ExcelWriter(processed + 'karg_missing_genes_data.xlsx')
+
+            # This is the data frame for the names of missing genes by organism
+            frame = pd.DataFrame.from_dict(no_acc, orient='index', dtype=str)
+            frame = frame.transpose()
+            frame.to_excel(excel_file, sheet_name="Missing Genes by Org", index=False)
+
+            # This is the data frame for the number of missing genes by organism
+            frame2 = pd.DataFrame.from_dict(num_missing, orient='index')
+            frame2.to_excel(excel_file, sheet_name="# of Genes missing by Org", header=False)
+
+            # This is the data frame for the number of missing ORGANISMS by gene
+            frame3 = pd.DataFrame(miss_per_gene)
+            combine = [original.Tier, frame3]  # Combine the tier column and data column
+            frame3 = pd.concat(combine, axis=1) # Concatenate the dataframes
+            frame3.to_excel(excel_file, sheet_name="# of Orgs missing by Gene", header=False)
+
+            # Save the excel file
+            excel_file.save()
+            post_blast_log.info('Your file, karg_missing_genes_data.xlsx, has been created and saved.')
+
+            post_blast_log.info('Post blastn analysis is complete.')
 
 
