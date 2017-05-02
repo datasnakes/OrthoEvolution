@@ -1,0 +1,8 @@
+*.gbff
+*.gbk
+*.pyc
+*.db
+*.ffn.best
+shiny_dir_mana.txt
+/.Rproj*
+/.idea
