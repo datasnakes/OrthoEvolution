@@ -108,7 +108,7 @@ class BLASTn(BT):
 
             # Determine if the Query sequence fasta file exists and set the status accordingly
             if 'temp.fasta' in os.listdir():
-                self.blastn_log.inf("Query FASTA already exists.")
+                self.blastn_log.info("Query FASTA already exists.")
                 fasta_status = 0
             else:
                 fasta_status = 1
