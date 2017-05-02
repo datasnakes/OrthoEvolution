@@ -316,7 +316,7 @@ class BLASTn(BT):
                     with open(xml, 'w') as blast_xml:
                         # TODO-ROB:  Ask about the gi files and how the yare created  TODO-SHAE:  Wuut??
                         # Create a copy of the gi list file per taxonomy id to be used in blast
-                        os.system("cp " + self.__home + "/data/gi-lists/" + taxon_id + "gi " + taxon_id + "gi")
+                        os.system("cp " + str(self.__home) + "/data/gi-lists/" + taxon_id + "gi " + taxon_id + "gi")
                         gi_file = taxon_id + "gi"
 
                         # Use Biopython's NCBIBlastnCommandline tool
