@@ -108,7 +108,7 @@ class BLASTn(BT):
 
             # Determine if the Query sequence fasta file exists and set the status accordingly
             if 'temp.fasta' in os.listdir():
-                self.blast_log.inf("Query FASTA already exists.")
+                self.blastn_log.inf("Query FASTA already exists.")
                 fasta_status = 0
             else:
                 fasta_status = 1
@@ -179,7 +179,6 @@ class BLASTn(BT):
             os.system("blastdbcmd -db refseq_rna -entry all -outfmt '%g %T' | awk ' { if ($2 == " + ID + ") { print $1 } } ' > " + ID + "gi.txt")
             # Convert the .txt file to a binary file using the blastdb_aliastool.
             os.system("blastdb_aliastool -gi_file_in " + ID + "gi.txt -gi_file_out " + ID + "gi")
-            log.info(ID + "gi binary file has been created.")
             # Remove the gi.text file
             os.system("rm -r " + ID + "gi.txt")
             # Move the gi file to a folder
