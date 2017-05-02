@@ -85,8 +85,8 @@ class BLASTn(BT):
             new_gene_list = gene_list  # Reconfigure the gene_list to reflect the existing accession info
 
         # Create GI lists
-        self.blastn_log.info("Configuring GI list using the taxonomy id and the blastdbcmd tool.")
-        self.gi_list_config()
+#        self.blastn_log.info("Configuring GI list using the taxonomy id and the blastdbcmd tool.")
+#        self.gi_list_config()
         # Get GI (stdout) and query sequence (FASTA format)
         self.blastn_log.info("Generating directories.")
         self.blastn_log.info("Extracting query gi number to stdout and "

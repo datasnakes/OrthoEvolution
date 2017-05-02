@@ -1,4 +1,5 @@
 *.gbff
+*.log
 *.gbk
 *.pyc
 *.db
