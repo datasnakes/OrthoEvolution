@@ -1,14 +1,14 @@
-from manager.lister import *
+from manager.ortho_analysis import *
 from manager.logit.logit import LogIt
 import time
 import logging as log
 from _datetime import datetime as d
 
 
-class BLASTingTemplate(Lister):
+class BLASTAnalysis(OrthologAnalysis):
     # TODO-ROB:  Look into subclasses and inheritance.  Which of the parameter below is necessary???
     def __init__(self, template=None, build_file=None, taxon_file=None, post_blast=False):
-        """Inherit from the Lister class.  If the BLAST was cut short,
+        """Inherit from the OrthologAnalysis class.  If the BLAST was cut short,
         then a build_file is to be used."""
         super().__init__(acc_file=template, taxon_file=taxon_file,
                          post_blast=post_blast, save_data=True, hgnc=False)
@@ -96,7 +96,7 @@ class BLASTingTemplate(Lister):
             temp.to_csv(self.__building_time_file_path)
 
     def post_blast_analysis(self, acc_file):
-        accession_data = Lister(acc_file=acc_file, post_blast=True)
+        accession_data = OrthologAnalysis(acc_file=acc_file, post_blast=True)
         self.postblast_log.info('*************************POST BLAST ANALYSIS START*************************\n\n\n')
 
         missing_gene = accession_data.missing_dict['genes']
