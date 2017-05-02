@@ -1,6 +1,6 @@
-from manager.lister import Lister
-from manager.BLASTingTemplate import BLASTingTemplate
-from manager.BlastnScript.BLASTn import BLASTn
+from manager.ortho_analysis import OrthologAnalysis
+from manager.blast_analysis import BLASTAnalysis
+from manager.BlastnScript.blastn import BLASTn
 
 x = BLASTn('MAFV3.2.csv')  # This is a template for GPCR project
 
