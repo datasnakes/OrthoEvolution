@@ -42,9 +42,16 @@ class LogIt(object):
     def blastn(self):
         log.basicConfig(level=log.DEBUG,
                         format=self.log_format,
-                        filename="%s/accessions2blastxml_%s.log" % (os.getcwd(), str(d.now().strftime(self.archive_format))))
+                        filename="%s/BLAST_%s.log" % (os.getcwd(), str(d.now().strftime(self.archive_format))))
         self.blast_log = log.getLogger('Blastn')
         return self.blast_log
+
+    def post_blast(self):
+        log.basicConfig(level=log.INFO,
+                        format=self.log_format,
+                        filename="%s/Post_BLAST_Analysis_%s.log" % (os.getcwd(), str(d.now().strftime(self.archive_format))))
+        self.post_blast_log = log.getLogger('PostBlast')
+        return self.post_blast_log
 
     def scriptinfo(self):
         # Write basic information to the log
