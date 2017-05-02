@@ -18,6 +18,7 @@ import subprocess
 import pandas as pd  # Used for dealing with CSV files
 from Bio import SearchIO  # Used for parsing and sorting XML files.
 from Bio.Blast.Applications import NcbiblastnCommandline  # Used for Local Blasting.
+from pathlib import Path
 # Modules as custom
 import logging as log
 from datetime import datetime as d
@@ -34,17 +35,19 @@ class BLASTn(BT):
         super().__init__(template=template)
 
         # Manage Directories
-        self.__home = os.getcwd()
-        self.__output = 'data/blastn/blast-xml-output/'  # Output directory
-        self.processed = 'data/processed/'  # Processed data directory
-        os.makedirs(self.__output, exist_ok=True)  # only make blast-xml-output dir since blastn dir exists
+        self.__home = Path(os.getcwd())
+        self.__output = self.__home / Path('data/blastn/blast-xml-output/')  # Output directory
+        self.processed = self.__home / Path('data/processed/')  # Processed data directory
+        Path.mkdir(self.__output, parents=True, exist_ok=True)  # only make blast-xml-output dir since blastn dir exists
         # # Initialize Logging
         # self.__blastn_log = LogIt.blastn()
         # df = LogIt()
         # self.__date_format = df.date_format
         # self.get_time = time.time  # To get the time use 'get_time()'
+        # TODO-ROB:  Add a query organism variable
         self.query_gi_dict = {}
         self.removed_genes = []
+        # TODO-ROB:  Set up blast config logger, blasting logger, and post blast analysis logger
         # ------------------------------------------------------------------------------
         self.blastn_log.info("These are the organisms: " + str(self.org_list))
         self.blastn_log.info("These are the genes: " + str(self.gene_list))
@@ -55,47 +58,11 @@ class BLASTn(BT):
     def map_func(hit):
         """The map function for formatting hit id's.
         This will be used later in the script."""
+
         hit.id1 = hit.id.split('|')[3]
         hit.id2 = hit.id.split('|')[1]
         hit.id = hit.id[:-2]
         return hit
-
-    def blast_file_config(self, file):
-        """This function configures different files for new BLASTS.
-        It also helps recognize whether or not a BLAST was terminated
-        in the middle of the dataset.  This removes the last line of
-        the accession file if it is incomplete."""
-        os.chdir(self.__output)  # Change or move to the output directory
-        output_dir_list = os.listdir()  # Make a list of files
-        if file in output_dir_list:
-            with open(file, 'r') as fi:
-                f = csv.reader(fi)
-                count = - 1
-                for row in f:
-                    count += 1
-                    ending = row
-                gene = ending[1]
-                taxid = self.taxon_ids[count]
-                org = self.org_list[(len(ending) - 2)]
-
-                ncbi = str("""result_handle1 = NcbiblastnCommandline(query="temp.fasta", db="refseq_rna", strand="plus", 
-                evalue=0.001, out="%s_%s.xml", outfmt=5, gilist=%s + "gi", max_target_seqs=10, task="blastn")"""
-                           % (gene, org, taxid))
-                self.blastn_log.warning("An incomplete accession file was produced from the previous BLAST,"
-                                        "which was terminated midway through the procedure.")
-
-                self.blastn_log.info("The last row looks like: \n\t%s\n\t%s\n" % (self.header, ending))
-                self.blastn_log.info("The BLAST ended on the following query: \n%s" % ncbi)
-                if len(ending) < len(self.header):
-                    self.blastn_log.info("Restarting the BLAST for the previous gene...")
-                    count = count - 1
-                continued_gene_list = list(x for i, x in enumerate(self.gene_list, 1) if i > count)
-            return continued_gene_list
-               # self.blasting(continued_gene_list, self.org_list)
-        else:
-            self.blastn_log.info("A new BLAST started at %s" % self.get_time()())
-            return None
-           # self.blasting(self.gene_list, self.org_list)
 
     def blast_config(self, query_align, query_organism, auto_start=False):
         """This function configures everything for a BLAST.
@@ -131,12 +98,13 @@ class BLASTn(BT):
             except FileExistsError:
                 self.blastn_log.info("Directory already exists: %s" % gene)
                 os.chdir(gene)
-                # Determine if the Query sequence fasta file exists and set the status accordingly
-                if 'temp.fasta' in os.listdir():
-                    self.blast_log.inf("Query FASTA already exists.")
-                    fasta_status = 0
-                else:
-                    fasta_status = 1
+
+            # Determine if the Query sequence fasta file exists and set the status accordingly
+            if 'temp.fasta' in os.listdir():
+                self.blast_log.inf("Query FASTA already exists.")
+                fasta_status = 0
+            else:
+                fasta_status = 1
 
             # Save sequence data in FASTA file format and print the gi number to stdout with a custom BLAST extraction
             # https://www.ncbi.nlm.nih.gov/books/NBK279689/#_cookbook_Custom_data_extraction_and_form_
@@ -190,6 +158,44 @@ class BLASTn(BT):
         else:
             # Manually begin BLASTING and return the new gene and new query lists
             return new_gene_list
+
+    def blast_file_config(self, file):
+        """This function configures different files for new BLASTS.
+        It also helps recognize whether or not a BLAST was terminated
+        in the middle of the dataset.  This removes the last line of
+        the accession file if it is incomplete."""
+
+        os.chdir(self.__output)  # Change or move to the output directory
+        output_dir_list = os.listdir()  # Make a list of files
+        if file in output_dir_list:
+            with open(file, 'r') as fi:
+                f = csv.reader(fi)
+                count = - 1
+                for row in f:
+                    count += 1
+                    ending = row
+                gene = ending[1]
+                taxid = self.taxon_ids[count]
+                org = self.org_list[(len(ending) - 2)]
+
+                ncbi = str("""result_handle1 = NcbiblastnCommandline(query="temp.fasta", db="refseq_rna", strand="plus", 
+                evalue=0.001, out="%s_%s.xml", outfmt=5, gilist=%s + "gi", max_target_seqs=10, task="blastn")"""
+                           % (gene, org, taxid))
+                self.blastn_log.warning("An incomplete accession file was produced from the previous BLAST,"
+                                        "which was terminated midway through the procedure.")
+
+                self.blastn_log.info("The last row looks like: \n\t%s\n\t%s\n" % (self.header, ending))
+                self.blastn_log.info("The BLAST ended on the following query: \n%s" % ncbi)
+                if len(ending) < len(self.header):
+                    self.blastn_log.info("Restarting the BLAST for the previous gene...")
+                    count = count - 1
+                continued_gene_list = list(x for i, x in enumerate(self.gene_list, 1) if i > count)
+            return continued_gene_list
+               # self.blasting(continued_gene_list, self.org_list)
+        else:
+            self.blastn_log.info("A new BLAST started at %s" % self.get_time())
+            return None
+           # self.blasting(self.gene_list, self.org_list)
 
     def blast_xml_parse(self, xml_file, gene, organism):
         self.blastn_log.info("Parsing %s to find the best accession number." % xml_file)
