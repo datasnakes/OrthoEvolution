@@ -26,7 +26,7 @@ import shutil
 import time
 from pathlib import Path
 
-from manager.dir_map import treelib2
+from Orthologs.manager.dir_map import treelib2
 
 from Orthologs.manager.dir_map.json_to_newick import _parse_json
 
@@ -54,6 +54,36 @@ class dir_mana(object):
         ."""
         # config = tablib.Dataset().load(open('config.yaml').read())
         self.__file_home = Path(home)  # Home of the file calling this class
+
+        self.current_user = os.environ['ACTIVE_USER']  # TODO-ROB:  FLASK detail
+        self.user_dict = {}
+        self.user_path = self.users / Path(self.current_user)
+        self.user_dict['username'] = self.user_path
+        self.user_dict['index'] = self.user_path / Path('index')
+        self.user_dict['log'] = self.user_path / Path('log')
+        self.user_dict['manuscripts'] = self.user_path / Path('manuscripts')
+        self.user_dict['other'] = self.user_path / Path('other')
+        self.user_dict['projects'] = self.user_path / Path('projects')
+
+
+        self.project_status = ''
+        self.user_project_dict = {}
+        self.user_project_dict['public'] = self.user_dict['projects'] / Path('public')
+        self.user_project_dict['private'] = self.user_dict['projects'] / Path('private')
+        # TODO-ROB: Make a project category that allows users to make some research targets private and othes public
+        self.user_project_dict['other'] = self.user_dict['projects'] / Path('other')
+        self.current_dataset = ''
+        self.user_project_dict[self.current_dataset] = self.user_project_dict[self.project_status] / Path(self.current_dataset)
+        self.project_research_target_dict = {}
+        if self.project_status is 'other':
+            self.user_project_dict[self.current_dataset]
+
+
+        self.dataset_dict = {}
+        self.dataset_dict['data_set'] = self.user_project_dict[self.project_status] / Path(self.current_dataset)
+        self.dataset_dict[]
+
+        self.re
         #self.__venv_home = os.environ['VIRTUAL_ENV']
         #self.__python = self.__venv_home / Path('bin')
 
@@ -112,6 +142,30 @@ class dir_mana(object):
                 tree.create_node(f, parent=root)
         return tree
 
+    def user_dir_config(self, username):
+        # TODO-ROB USE SQL here to see if the user db contains the username
+        if username in os.listdir(self.users):
+            return UserWarning('This user already exists')
+        else:
+            # TODO-ROB CREATE THESE IN A VIRTUAL ENVIRONMENT FOR EACH USER
+            # TODO-ROB The virtual environment can be the name of the user
+            # TODO-ROB When the user logs in, they will activate the virtual environment
+            for path in self.user_dict.values():
+                Path.mkdir(path, parents=True, exist_ok=True)
+            for path in self.user_project_dict.values():
+                Path.mkdir(path, parents=True, exist_ok=True)
+
+    def user_project_config(self, project_name, private=False):
+        if private is False:
+            path = self.user_project_dict['public']
+        else:
+            path = self.user_project_dict['private']
+        Path.mkdir(path / Path(project_name))
+
+
+
+
+
     def get_newick_dir_map(self, top, ignore=None):
         """Takes a treelib tree created by get_dir_map and returns
         a tree a dir_map in newick format.  This will be useful for Bio.Phylo
@@ -133,6 +187,7 @@ class dir_mana(object):
         self.misc = self.__project_home / Path('misc')
         self.users = self.__project_home / Path('users')
         self.__user_home = self.users / Path(os.environ['USER'])  # TODO-ROB:  Set 'USER' environment variable w/ flask
+        # TODO-ROB:  configure during registration for all usernames to be lowercase
         self.web = self.__project_home / Path('web')
 
     def project(self, p_rt):
@@ -180,68 +235,68 @@ class dir_mana(object):
             if str(type(value)).__contains__('pathlib') is True:
                 Path.mkdir(value, parents=True, exist_ok=True)
 
-    # //TODO-ROB Find a different way to return a
-    def path_list_make(self, path, o_path=None):
-        # Takes a path and reduces it to a list of directories within the project
-        # An optional attribute (o_path) is give so that a deeper path within the project can be used
-        home = str(self.__project_home).split('/')
-        path_list = str(path).split('/')
-        for item in home:
-            if item in path_list:
-                path_list.remove(item)
-        # path_list = set(p) - set(home)
-        if o_path is not None:
-            o_path = str(o_path).split('/')
-            for item in o_path:
-                if item in path_list:
-                    path_list.remove(item)
-            # path_list = set(path_list) - set(o_path)
-        return path_list
+    # # //TODO-ROB Find a different way to return a
+    # def path_list_make(self, path, o_path=None):
+    #     # Takes a path and reduces it to a list of directories within the project
+    #     # An optional attribute (o_path) is give so that a deeper path within the project can be used
+    #     home = str(self.__project_home).split('/')
+    #     path_list = str(path).split('/')
+    #     for item in home:
+    #         if item in path_list:
+    #             path_list.remove(item)
+    #     # path_list = set(p) - set(home)
+    #     if o_path is not None:
+    #         o_path = str(o_path).split('/')
+    #         for item in o_path:
+    #             if item in path_list:
+    #                 path_list.remove(item)
+    #         # path_list = set(path_list) - set(o_path)
+    #     return path_list
 
     # //TODO-ROB utilize Path.mkdir(parents=TRUE) instead
-    def dir_make(self, path, path_list):
-        # Takes a path list which is a list of folder names
-        # path_list created by str(path).split('/')
-        # The path_list appends to path, which is already an established directory inside the project
-        t = None
-        for item in path_list:
-
-            if os.path.isdir(path + '/' + item): # If for some reason the directory already exists...
-                path += '/' + item  # Append a directory
-                continue
-            path += '/' + item  # Append a directory
-            os.mkdir(path)
-        if len(os.listdir(path)) > 0:
-            path, t = self.dir_archive(path, path_list='')
-        return path, t
-
-    # //TODO-ROB Change to using a compression module https://pymotw.com/2/compression.html
-    def dir_archive(self, path, path_list):
-        # Use the path that you want to update/add to
-        # Returns path and the time stamp (could be None)
-        unique_dir = False
-        archive_path = path
-        for item in path_list:
-
-            path += '/' + item  # Append a directory
-            if os.path.isdir(path):  # If the child directory exists
-                archive_path = path  # Then update the dir_archive path and continue
-                continue
-            else:                     # If the child directory doesnt exist
-                unique_dir = True     # Then raise the flag
-                os.mkdir(path)        # And make a directory
-
-        if unique_dir is False:  # Only dir_archive if the final child directory is not unique (via unique_dir = False)
-            t = time.strftime("%m%d%Y-%I%M%S")
-            new_archive = self.Archive + '/' + t  # Creates a time stamped directory
-
-            os.mkdir(new_archive)
-            for item in os.listdir(archive_path):
-                if os.path.isfile(archive_path + '/' + item):  # Only dir_archive the FILES
-                    shutil.move(archive_path + '/' + item, new_archive)
-            return path, t
-        else:
-            return path, None
+    # def dir_make(self, path, path_list):
+    #     # Takes a path list which is a list of folder names
+    #     # path_list created by str(path).split('/')
+    #     # The path_list appends to path, which is already an established directory inside the project
+    #     t = None
+    #     for item in path_list:
+    #
+    #         if os.path.isdir(path + '/' + item): # If for some reason the directory already exists...
+    #             path += '/' + item  # Append a directory
+    #             continue
+    #         path += '/' + item  # Append a directory
+    #         os.mkdir(path)
+    #     if len(os.listdir(path)) > 0:
+    #         path, t = self.dir_archive(path, path_list='')
+    #     return path, t
+    #
+    # # //TODO-ROB Change to using a compression module https://pymotw.com/2/compression.html
+    # def dir_archive(self, path, path_list):
+    #     # Use the path that you want to update/add to
+    #     # Returns path and the time stamp (could be None)
+    #     unique_dir = False
+    #     archive_path = path
+    #     for item in path_list:
+    #
+    #         path += '/' + item  # Append a directory
+    #         if os.path.isdir(path):  # If the child directory exists
+    #             archive_path = path  # Then update the dir_archive path and continue
+    #             continue
+    #         else:                     # If the child directory doesnt exist
+    #             unique_dir = True     # Then raise the flag
+    #             os.mkdir(path)        # And make a directory
+    #
+    #     if unique_dir is False:  # Only dir_archive if the final child directory is not unique (via unique_dir = False)
+    #         t = time.strftime("%m%d%Y-%I%M%S")
+    #         new_archive = self.Archive + '/' + t  # Creates a time stamped directory
+    #
+    #         os.mkdir(new_archive)
+    #         for item in os.listdir(archive_path):
+    #             if os.path.isfile(archive_path + '/' + item):  # Only dir_archive the FILES
+    #                 shutil.move(archive_path + '/' + item, new_archive)
+    #         return path, t
+    #     else:
+    #         return path, None
 
 
 
