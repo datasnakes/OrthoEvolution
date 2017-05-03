@@ -54,7 +54,7 @@ project = "Orthologs-Project"
 ##############################################################################
 
 
-class OrthologAnalysis(object):
+class CompGenAnalysis(object):
     __home = ''
     __acc_filename = ''
     __paml_filename = ''
