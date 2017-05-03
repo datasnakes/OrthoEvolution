@@ -28,7 +28,7 @@ from pathlib import Path
 
 from Orthologs.manager.dir_map import treelib2
 
-from Orthologs.manager.dir_map.json_to_newick import _parse_json
+from Manager.dir_map.json_to_newick import _parse_json
 
 
 #from project_mana import project_mana  # //TODO-ROB: Add a configure function to proj_mana to get the root directory using the project name

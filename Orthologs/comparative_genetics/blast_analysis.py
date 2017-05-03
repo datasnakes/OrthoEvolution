@@ -1,8 +1,7 @@
 import time
 
+from Orthologs.comparative_genetics.comparative_genetic_analysis import *
 from Orthologs.manager.logit.logit import LogIt
-
-from Orthologs.manager.comparative_genetic_analysis import *
 
 
 class BLASTAnalysis(CompGenAnalysis):
