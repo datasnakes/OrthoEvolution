@@ -25,8 +25,8 @@ file1 = csv.reader(g)
 print("\n" + "The current working directory is "+ os.getcwd() + (2 * "\n"))  # Print current working directory
 Gene_count = 0
 
-from Orthologs.manager.ortho_analysis import OrthologAnalysis
-x = OrthologAnalysis.get_master_lists()
+from Orthologs.manager.comparative_genetic_analysis import CompGenAnalysis
+x = CompGenAnalysis.get_master_lists()
 for Gene in file1:
     Gene_count = Gene_count + 1
 
