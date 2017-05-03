@@ -1,61 +1,50 @@
-##############################################################################
-# PyCharm Community Edition
 # -*- coding: utf-8 -*-
 """
-GPCR-Orthologs-Project
+Orthologs-Project
 Ftp2Db updated on 11/18/2016 at 3:16 PM
-##############################################################################
 
-    Input:  The class takes an email and an NCBI FTP site path
-    (ex..  refseq/release/multiprocessing) as optional attributes.
-    User input is also needed.
+Input:  The class takes an email and an NCBI FTP site path
+(ex..  refseq/release/vertebrate_mammalian) as optional attributes.
+User input is also needed.
 
-    Output:  The user gets to choose which files to download.  A cache is also
-    created in order update the same files at a later date.
+Output:  The user gets to choose which files to download.  A cache is also
+created in order update the same files at a later date.
 
-    Description:  This class is meant to act as an interface for downloading files
-    from NCBI.  Calling the class begins a series questions posed to the user
-    to navigate the NCBI FTP site and to begin downloading files from the site.
+Description:  This class is meant to act as an interface for downloading files
+from NCBI.  Calling the class begins a series questions posed to the user
+to navigate the NCBI FTP site and to begin downloading files from the site.
 
-##############################################################################
-@author: rgilmore
+@author: Rob Gilmore
 """
-##############################################################################
-# Libraries:
-
-import gzip
+# Modules Used
 import os
+import pandas as pd
+from ftplib import FTP
+from dir_mana import dir_mana
+from lister import lister
+import time
 import shutil
 import subprocess
-import tarfile
-import time
-from ftplib import FTP
+import configparser
+from cursesmenu import *  # for Linux Only
+from cursesmenu.items import *  # for Linux Only
 
-import pandas
-
-from dir_mana import dir_mana
-from lister import Lister
-
-##############################################################################
-# Custom Class Initializations
-# :
-# Use directory_management() class here so that we can stay organized
-# and more easily access the proper directories on command
+#------------------------------------------------------------------------------
+# Set up directories and project
 home = os.getcwd()
 project = "GPCR-Orthologs-Project"
 user = "rgilmore"
 where = dir_mana(home, project)
 # Use lister() class here so that we can easily access our Master RNA Accession File
-what = Lister('MAFV3.1.csv')  # Always make sure this file name is correct
+what = lister('Master_RNA_Accession_File.csv')  # Always make sure this file name is correct
 
-# Add a path that contains custom libraries for import
-# os.sys.path.append()
-
-
+#------------------------------------------------------------------------------
 class Ftp2Db(object):
     global user
-    # Private variable initialization
-    __NCBI_FTP = 'ftp.ncbi.nlm.nih.gov'
+    ncbi = configparser.ConfigParser()
+    ncbi.read('ncbiftp.cfg')
+    """Private variable initialization"""
+    __NCBI_FTP = ncbi['FTPSITE']['ncbi']
     __NCBI_RSYNC = 'rsync://ftp.ncbi.nlm.nih.gov'
     __class_name = ''
     __update_dict = {}
@@ -69,6 +58,7 @@ class Ftp2Db(object):
     __ftp_path_ui = True
     __table = None
 
+#------------------------------------------------------------------------------
     def __init__(self, email='', path='/', ftp_update=False, db_update=False):
 
         # Attributes based on Ftp2Db class parameters
@@ -93,7 +83,7 @@ class Ftp2Db(object):
             self.extensions = []  # A list of extensions in the chosen directory
             self.ext_choice = []  # The user chooses which extensions to use
             self.file_choice = []  # The user chooses which file types to use
-        ##############################################################################
+
             if self.path != '/':  # Begins Download inside the given path
                 print('\nYou must already know where you want to go on NCBI\'s FTP site...'
                       '\nTaking steps to prepare for file transfer...\n')
@@ -105,73 +95,64 @@ class Ftp2Db(object):
         # Initializes __update_dict with class variables if ftp_update_flag is true
         # If db_update_flag is true it updates the databases
 
-
-
-##############################################################################
-##############################################################################
-# Checks to see if the FTP connection still exists.
-# If it doesn't then it reconnects and returns an instance of the connection
+#------------------------------------------------------------------------------
     def ftp_check(self):
-            ftp = self.ftp_connect(self.__NCBI_FTP, self.email)
-            ftp.voidcmd('NOOP')
-            ftp.cwd(self.path)
-            return ftp
+        """ Checks to see if the FTP connection still exists.
+        If it doesn't then it reconnects and returns an instance of the connection.
+        """
+        ftp = self.ftp_connect(self.__NCBI_FTP, self.email)
+        ftp.voidcmd('NOOP')
+        ftp.cwd(self.path)
+        return ftp
 
-
-##############################################################################
-##############################################################################
-# Connects to the FTP server and returns and instance of the connection
+#------------------------------------------------------------------------------
     @staticmethod
     def ftp_connect(ftpsite, email):
-        ftp = FTP(ftpsite, timeout=900)
+        """Connects to the FTP server and returns and instance of the connection.
+        """
+        ftp = FTP(ftpsite, timeout=None)
         ftp.login(user='anonymous', passwd=email)
         return ftp
 
-# If the ftp or db files are intended to be updated then archive any old files
-# If this is a new download then make the appropriate directories
+#------------------------------------------------------------------------------
     @staticmethod
-    def ftp2db_mkdir(path, p_list, update):
+    def ftp_mkdir(path, p_list, update):
+        """If the ftp or db files are intended to be updated then archive
+        any old files. If this is a new download then make the appropriate
+        directories. """
         if update is True:
             os.system('rsync -av --delete ')
-        if update is True:
             path = where.dir_archive(path, p_list)
         else:
             path = where.dir_make(path, p_list)
         return path
 
-# Creates a new unzipped file
-# Deletes the old compressed file that was downloaded
+#------------------------------------------------------------------------------
     @staticmethod
     def ftp_unzip(local_dir, downloaded_list):
-        for f in downloaded_list:
-            f = str(f)
+        """Creates a new unzipped file.
+        Deletes the old compressed file that was downloaded."""
+        for f in os.listdir(local_dir):
             _p = local_dir + '/' + f
-            if _p.endswith("tar.gz"):
-                tar = tarfile.open(_p, "r:gz")
-                tar.extractall()
-                tar.close()
+            if f.endswith(".tar.gz"):
+                os.system("do tar xvf " + _p + "; done")  # Unzip the database files
+                os.system("rm -r " + _p)
                 print('Unzipped %s' % f)
-                os.remove(_p)
-            elif _p.endswith("tar"):
-                tar = tarfile.open(_p, "r:")
-                tar.extractall()
-                tar.close()
+            elif f.endswith(".tar"):
+                os.system("tar xvf " + _p)  # Unzip the database files
+                os.system("rm -r " + _p)
                 print('Unzipped %s' % f)
-                os.remove(_p)
-            elif _p.endswith(".gz"):
-                with gzip.open(_p, 'rb') as Zipped_file:
-                    with open(_p[:-3], 'wb') as New_file:
-                        for line in Zipped_file:
-                            New_file.write(line)
+            elif f.endswith(".gz"):
+                os.system("gunzip " + _p)  # Unzip the database files
                 print('Unzipped %s' % f)
-                os.remove(_p)
-# Handles user input for other instances
-# The ui_value determines the proper output
 
+#------------------------------------------------------------------------------
     def u_i(self, ui_value, table=None, prefix=None, suffix=None):
+        """Handles user input for other instances. The ui_value determines the'
+        proper output. """
         ext_choice = []
-
-    # $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
+    # ftp_path_ui
+    # download_ui
         if ui_value == 'ftp_path_ui':
             self.__ftp_path_ui = True
             while self.__ftp_path_ui is True:
@@ -180,7 +161,7 @@ class Ftp2Db(object):
                                 '\'ENTER\'.\nTo download files type \'DOWNLOAD\''))
                 # // TODO-ROB use curses module to use arrow keys for scrolling through a list of directory names
                 if answer.lower() == 'download':  # Preparing to download some files (exiting u_i)
-                    print('preparing for download')
+                    print('Preparing for download.')
                     self.__download_flag = True
                     self.__ftp_path_ui = False
                 elif answer.lower() == '':  # Moving backwards in a directory (exiting u_i)
@@ -196,12 +177,11 @@ class Ftp2Db(object):
                     self.__ftp_path_ui = False
                     self.__path_list.append(answer)
                 else:  # The user didn't properly type something or something is wrong (restating the u_i)
-                    print('\nBe careful with your input...\n\nTry Again...\n')
+                    print('\nBe careful with your input.\n\nTry Again.\n')
                     time.sleep(3)
                     print(table.to_string(index=False, header=False) + '\n\n')
             self.__ftp_path_ui = True
 
-    # $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
     # ext_ui
         if ui_value == 'ext_ui':
             ext_dict = {}
@@ -266,18 +246,13 @@ class Ftp2Db(object):
                 else:
                     print('Choice not available...\nType carefully next time...')
 
-##############################################################################
-##############################################################################
-# Continues navigation until the user decides to download files
+#------------------------------------------------------------------------------
     def ftp_navigate(self):
+        """Continues navigation until the user decides to download files."""
         self.__path_list = []
         if self.__download_flag is False:
-
             # Check the connection
-            # *************************
-            ftp = self.ftp_check()  # *
-            # *************************
-
+            ftp = self.ftp_check()
             print(ftp.getwelcome())
             input('Press Enter')
         while self.__download_flag is False:
@@ -289,36 +264,29 @@ class Ftp2Db(object):
         self.ftp_path()
         self.ftp_download(self.path)
 
-##############################################################################
-##############################################################################
-# Using user input, determine what directories to navigate on the NCBI FTP server
-
+#------------------------------------------------------------------------------
     def ftp_path(self):
+        """Using user input, determine what directories to navigate on the
+        NCBI FTP server."""
 
         # (re-initialize self.path)
-        # Check the connection and
-        # and change the directory
-        # *************************************
+        # Check the connection and change the directory
         if self.path == '/':                # *
             for item in self.__path_list:   # *
                 self.path += item + '/'     # *
         ftp = self.ftp_check()              # *
         if len(self.__path_list) != 0:      # *
             ftp.cwd(self.path)              # *
-        # *************************************
 
         ui_value = 'ftp_path_ui'
         self.__dir_list = []
         nest_list = []
         temp_list = []
 
-        ##############################################################################
         # Display of the current items in the directory
         count = 0
         if self.__ftp_path_ui is True:
             print('\nHere is a list of what\'s in the current directory:\n')
-            # //TODO-ROB Write code to distinguish between files and folders
-
             self.__dir_list = ftp.nlst()
             self.__dir_list.sort()
             dir_count = len(self.__dir_list)
@@ -332,24 +300,23 @@ class Ftp2Db(object):
 
             if (dir_count - count) != 0:
                 nest_list.append(temp_list)
-            table = pandas.DataFrame(nest_list)
+                # temp_list = []
+            table = pd.DataFrame(nest_list)
             print(table.to_string(index=False, header=False) + '\n\n')
 
             self.u_i(ui_value, table)  # User Input
 
-
-##############################################################################
-##############################################################################
-# Initiates the downloaded process which involves the user selecting the proper files
+#------------------------------------------------------------------------------
     def ftp_download(self, path):
+        """Initiates the downloading process which involves the user
+        selecting the proper files."""
 
         self.__file_list = []
         # Check the connection and make a file list
-        # ******************************************
         ftp = self.ftp_check()  # *
-        ftp.retrlines('NLST', self.__file_list.append)  # *
-        # ******************************************
+        ftp.retrlines('NLST', self.__file_list.append)
 
+        # ui_value = 'download_ui'
         download_list = []  # Keeps track of what the user wants to download
         downloaded_list = []  # Keeps track of download-ED files
         old_archive = []  # For Logging
@@ -362,12 +329,12 @@ class Ftp2Db(object):
         if self.ftp_update_flag is False:
             f_handle = 'w'  # Overwrites the log file when we are not updating
             self.file_choice, self.ext_choice = self.ftp_extension(path)  # Get the users extension choice
-            local_dir, t = self.ftp2db_mkdir(where.NCBI_DATA, self.__path_list, self.ftp_update_flag)  # Handles directories
+            local_dir, t = self.ftp_mkdir(where.NCBI_DATA, self.__path_list, self.ftp_update_flag)  # Handles directories
 
         else:
             f_handle = 'a'  # For FTP updates this makes the log file append the log file
             self.__path_list = where.path_list_make(self.path, where.NCBI_DATA)
-            local_dir, t = self.ftp2db_mkdir(where.NCBI_DATA, self.__path_list, self.ftp_update_flag)  # Directory Handling
+            local_dir, t = self.ftp_mkdir(where.NCBI_DATA, self.__path_list, self.ftp_update_flag)  # Directory Handling
             print('\n\nThis is an update, so the previous selections will be downloaded\n'
                   'and the old files will be archived.\n\n')
 
@@ -459,14 +426,10 @@ class Ftp2Db(object):
             if answer.lower() == 'download':
                 self.__init__(self.email, path='/')
 
-
-
-
-
-##############################################################################
-##############################################################################
-# Creates a list of extensions in the path and then presents them to the user for selection
+#------------------------------------------------------------------------------
     def ftp_extension(self, path):
+        """Creates a list of extensions in the path and then presents them to
+        the user for selection."""
         # Initialize globals and locals
         ui_value = 'ext_ui'
         suffix = []
@@ -476,9 +439,7 @@ class Ftp2Db(object):
         count1 = 0
 
         # Check the connection
-        # *************************
-        ftp = self.ftp_check()  # *
-        # *************************
+        ftp = self.ftp_check()
 
         ftp.cwd('/' + path)
         ftp.retrlines('NLST', self.__file_list.append)
@@ -516,6 +477,7 @@ class Ftp2Db(object):
             self.__server_dict[str(ext2)].append(str(item2)[:-3])
             prefix.sort()
             suffix.sort()
+        #print('server_dict: ', self.__server_dict)
         if self.db_update_flag is False:
             ext_choice = self.u_i(ui_value, table=None, prefix=prefix, suffix=suffix)  # User Input
             f_t, e_c = ext_choice
@@ -532,18 +494,20 @@ class Ftp2Db(object):
                 print('ext: ', ext)
                 for value in self.__server_dict[key]:
                     if str(ext) in str(value):
+                        #print(value)
                         temp_dict[str(key)].append(value)
         self.__server_dict = {}
+        #print('temp_dict: ', temp_dict)
         self.__server_dict = temp_dict  # __server_dict is a dictionary for our download files.
+        #print('server_dict: ', self.__server_dict)
         # The keys are the chosen file types and the values are the file names with the selected extensions.
         return f_t, e_c
 
-
-##############################################################################
-##############################################################################
+#------------------------------------------------------------------------------
 #  //TODO-ROB MODULE (DB):  Upload ftp files into a db file
     # //TODO-ROB give the user an option to do multiprocessing or not
     def db_upload(self, log_file):
+        """Upload ftp files into a db file."""
         import json
         if self.database_flag == 'genbank':
             db_name = str(log_file).split('_', 1)
@@ -556,9 +520,11 @@ class Ftp2Db(object):
             print(files_path)
             files_path = where.NCBI_DATA + '/' + files_path + '/'
             ser_loc = where.DB
+            t_count = 0
             home = os.getcwd()
             os.chdir(files_path)
             temp_list = []
+            process = {}
             json_dict = {}
             with open(where.LOG + '/' + log_file, 'a+') as log_w:
                 # //TODO-ROB Make better upload message for log file
@@ -599,14 +565,15 @@ class Ftp2Db(object):
                                      ser_loc + ('/%s%s.%s.db' % (db_name, (db_count-1), key)))
                     print('temp_list: ', temp_list)
                     nest_list.append(temp_list)
-
+            os.chdir(where.DB)
             with open('temp_file.txt', mode='w', encoding='utf-8') as temp_file:
                 json_dict["download_list"] = nest_list
                 json_dict["db_name"] = db_name
                 json_dict["key"] = key
                 json_dict["log_file"] = str(log_file)
                 json.dump(json_dict, temp_file)
-        os.system('qsub %sUPLOAD.sh' % (files_path))
+        # with open(where.LOG + '/UPLOAD.log', 'a+') as lg_file:
+        os.system('qsub UPLOAD.sh')
 
         print('Done submitting jobs')
         upload_flag = True
@@ -618,35 +585,24 @@ class Ftp2Db(object):
                 upload_flag = True
                 time.sleep(30)
                 print('Waiting for the upload to finish....')
-        print('Uploading is complete')
+        print('Uploading is complete.')
         os.remove('temp_file.txt')
         os.chdir(home)
         #//TODO-ROB Move the folder, and then move the db files into the directory
 
 
-##############################################################################
-##############################################################################
 #  //TODO-ROB MODULE (DB): Fetch target GBK files from local NCBI datase.  Create a seperate class for this
-
-
-
-##############################################################################
-##############################################################################
 #  //TODO-ROB MODULE (DB): Upload target GBK files into a new local database
-
-##############################################################################
-##############################################################################
-
 #  //TODO-ROB MODULE (DB):  Update custom databases from the most recent donwloads
-
-    def config(self, log_file):
-
+#------------------------------------------------------------------------------
+    def config(self, config_file):
+        """Update custom databases from the most recent downloads."""
         update_dict = {}
         self.__path_list = where.path_list_make(self.path, where.NCBI_DATA)
         os.sys.path.append(where.LOG)
         # Make a local dictionary from the log file called update_dict
         # and give it's values to the class variable __update_dict
-        with open(where.LOG + '//' + log_file, 'r') as log_file:
+        with open(where.LOG + '//' + config_file, 'r') as config_file:
             for line in log_file:
                 if line.startswith('> update_dict'):
                     line = line.replace('> ', '')
@@ -664,12 +620,10 @@ class Ftp2Db(object):
             print('ftp.' + str(key) + ' = ' + str(value))
             # Initializes all other class variables from the last archive
             exec(('self.%s = ' % key) + ('%s' % value))
-##############################################################################
-##############################################################################
-# Update ****ALL**** NCBI files by using the most recent log files and/or
 
+#------------------------------------------------------------------------------
+# Update ****ALL**** NCBI files by using the most recent log files
     def update(self):
-
         if self.ftp_update_flag is True:
             for item in os.listdir(where.LOG):
                 if str(self.__class_name).lower() in str(item).lower():
@@ -687,7 +641,3 @@ class Ftp2Db(object):
                 self.config(log_file)
                 self.ftp_extension(self.path)
                 self.db_upload(log_file)
-
-
-##############################################################################
-##############################################################################
