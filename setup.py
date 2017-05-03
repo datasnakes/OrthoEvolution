@@ -14,15 +14,24 @@ name = 'Datasnakes-Scripts'
 PACKAGES = [
     'biosql',
     'blast',
+    'ete3',
     'ftp',
-    'genbank',
-    'manager',
-    'manager.shiny',
-    'manager.flask',
-    'multiprocessing',
-    'phylogenetics',
     'pybasher',
     'pandoc',
+    'slacker'
+    'genbank',
+    'Orthologs'
+    'Orthologs.manager',
+    'Orthologs.manager.blast',
+    'Orthologs.manager.flask',
+    'Orthologs.manager.shiny',
+    'Orthologs.phylogenetics',
+    'Orthologs.genbank',
+    'Tools',
+    'Tools.ftp',
+    'Tools.multiprocessing',
+    'Tools.pybasher',
+    'Tools.pandoc',
 ]
 
 # Get the long description from the README file
