@@ -6,12 +6,13 @@
 # Align multiple sequences located in fasta files using alignment
 # via MCSR and create a .phylip output format.
 
+import csv
 # List of modules used
 import os
 import sys
-from Bio.Align.Applications import ClustalOmegaCommandline
-import csv
 import time
+
+from Bio.Align.Applications import ClustalOmegaCommandline
 
 # Mark start of script with printed text.
 print("\n" + (70 * "#") + "\n" + "#### Align fasta files using alignment via the MCSR.  ####" + "\n" + (70 * "#") + "\n")
@@ -24,7 +25,8 @@ file1 = csv.reader(g)
 print("\n" + "The current working directory is "+ os.getcwd() + (2 * "\n"))  # Print current working directory
 Gene_count = 0
 
-
+from Orthologs.manager.ortho_analysis import OrthologAnalysis
+x = OrthologAnalysis.get_master_lists()
 for Gene in file1:
     Gene_count = Gene_count + 1
 
