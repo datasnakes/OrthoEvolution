@@ -20,17 +20,17 @@ Directory_management updated on 11/15/2016 at 11:30 AM
 # Libraries:
 
 
+import json
 import os
 import shutil
 import time
-import json
-from manager.dir_map.json_to_newick import _parse_json
-from manager.dir_map import treelib2
 from pathlib import Path
-import os
-from Bio.Phylo.PhyloXML import Phylogeny
-from Bio import Phylo
-from pathlib import PurePath
+
+from manager.dir_map import treelib2
+
+from Orthologs.manager.dir_map.json_to_newick import _parse_json
+
+
 #from project_mana import project_mana  # //TODO-ROB: Add a configure function to proj_mana to get the root directory using the project name
 ##############################################################################
 # Directory Initializations:

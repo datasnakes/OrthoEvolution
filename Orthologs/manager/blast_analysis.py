@@ -1,8 +1,8 @@
-from manager.ortho_analysis import *
-from manager.logit.logit import LogIt
 import time
-import logging as log
-from _datetime import datetime as d
+
+from Orthologs.manager.logit.logit import LogIt
+
+from Orthologs.manager.ortho_analysis import *
 
 
 class BLASTAnalysis(OrthologAnalysis):
