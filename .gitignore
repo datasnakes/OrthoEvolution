@@ -8,3 +8,4 @@ shiny_dir_mana.txt
 /.Rproj*
 /.idea
 /.idea/**
+.spyproject/*
