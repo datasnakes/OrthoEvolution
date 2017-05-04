@@ -39,7 +39,7 @@ def clustal_align(gene):
     stdout, stderr = clustalo_cline()
     clustalo_cline()
     print(stdout, stderr)
-    return;
+    return
 
 #------------------------------------------------------------------------------
 # ETE3 Tools
