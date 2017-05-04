@@ -21,10 +21,10 @@ PACKAGES = [
     'slacker'
     'genbank',
     'Orthologs'
-    'Orthologs.manager',
-    'Orthologs.manager.blast',
-    'Orthologs.manager.flask',
-    'Orthologs.manager.shiny',
+    'Orthologs.Manager',
+    'Orthologs.Manager.blast',
+    'Orthologs.Manager.flask',
+    'Orthologs.Manager.shiny',
     'Orthologs.phylogenetics',
     'Orthologs.genbank',
     'Tools',

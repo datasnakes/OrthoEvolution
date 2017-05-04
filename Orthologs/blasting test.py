@@ -1,4 +1,4 @@
-from Orthologs.manager.blast.blastn import BLASTn
+from Orthologs.blast.blastn import BLASTn
 
 x = BLASTn('MAFV3.2.csv')  # This is a template for GPCR project
 

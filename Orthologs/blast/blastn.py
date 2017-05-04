@@ -11,21 +11,18 @@ Project Name: Orthologs Project
 Edited and updated for use with local/standalone NCBI BLAST 2.6.0
 """
 import csv
-# Modules used
 import os
 import subprocess
 import time  # Used to delay when dealing with NCBI server errors
-# Modules as custom
 from datetime import datetime as d
 from multiprocessing import Pool
 from pathlib import Path
 
 from Bio import SearchIO  # Used for parsing and sorting XML files.
 from Bio.Blast.Applications import NcbiblastnCommandline  # Used for Local Blasting.
-# Proprietary Modules
-from manager.logit.logit import LogIt
+from Manager.logit.logit import LogIt
 
-from Orthologs.manager.blast_analysis import BLASTAnalysis as BT
+from Orthologs.comparative_genetics.blast_analysis import BLASTAnalysis as BT
 
 
 # TODO-ROB: Find packages for script timing and analysis
