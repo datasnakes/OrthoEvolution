@@ -62,7 +62,7 @@ def SubmitPythonCode(code, pbstemp, author, jobname="job", cleanup=True, prefix=
         cmd = 'qsub  ' + base + '.pbs'
         cmd_status = subprocess.call([cmd], shell=True)
         if cmd_status == 0:  # Command was successful.
-            pass  # Continue through script.
+            pass  # Continue
         else:  # Unsuccessful. Stdout will be '1'.
             print("PBS job not submitted.")
     finally:

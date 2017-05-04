@@ -12,10 +12,10 @@ import os
 
 
 # Import the newick tree
-tree = EvolTree("ECP_EDN_15.nw")
+tree = EvolTree("HTR1D.nwk")
 
 # Import the alignment.
-tree.link_to_alignment ("ECP_EDN_15.fasta")
+tree.link_to_alignment ("HTR1D.fas")
 
 # Set a working directory
 tree.workdir = ""
@@ -23,7 +23,7 @@ tree.workdir = ""
 # Set the binpath of the codeml binary
 tree.execpath = r"C:\Users\shutchins2\Desktop\Software & Executables\paml4.9c\bin"
 
-tree.run_model ('M1.example')
+tree.run_model ('M1.' + 'HTR1D')
 #x = tree.get_evol_model("M2")
 
 ## Run the codeml models
