@@ -18,8 +18,8 @@ from string import Template
 from datetime import datetime as d
 import sys
 
-class CreateJob(object):
 #------------------------------------------------------------------------------
+class CreateJob(object):
     def __init__():
         """UNLESS A WINDOWS MACHINE HAS PBS (IT SHOULDNT)"""
         if sys.platform == 'win32' or 'win64':
