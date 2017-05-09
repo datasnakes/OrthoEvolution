@@ -65,7 +65,6 @@ class dir_mana(object):
         self.user_dict['other'] = self.user_path / Path('other')
         self.user_dict['projects'] = self.user_path / Path('projects')
 
-
         self.project_status = ''
         self.user_project_dict = {}
         self.user_project_dict['public'] = self.user_dict['projects'] / Path('public')

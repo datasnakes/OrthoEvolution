@@ -1,6 +1,6 @@
 import time
 
-from Orthologs.comparative_genetics.comparative_genetic_analysis import *
+from Orthologs.comparative_genetics.comp_gen import *
 from Orthologs.manager.logit.logit import LogIt
 
 
