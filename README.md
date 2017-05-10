@@ -27,5 +27,5 @@ In a live Python3.6 Console:
 from Orthologs import *
 ```
 ## Contributors
-* Rob Gilmore | Github: [@grabear](https://github.com/grabear) | Email: [::email::](mailto:robgilmore127@gmail.com)
-* S. Hutchins | Github: [@sdhutchins](https://github.com/sdhutchins) | Twitter: [@MavenNBA](https://twitter.com/MavenNBA/) | Email: [::email::](mailto:sdhutchins@outlook.com)
+* Rob Gilmore | Github: [@grabear](https://github.com/grabear) | Email: [:email:](mailto:robgilmore127@gmail.com)
+* S. Hutchins | Github: [@sdhutchins](https://github.com/sdhutchins) | Twitter: [@MavenNBA](https://twitter.com/MavenNBA/) | Email: [:email:](mailto:sdhutchins@outlook.com)
