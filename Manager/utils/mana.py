@@ -68,11 +68,11 @@ class Mana(object):
         # Below are the PyPi path strings
         #    The first group is to access the cookiecutter templates
         self.Cookies = Path(Cookies.__path__.path[0])
-        self.new_repo = self.Cookies / Path('new_repository')
-        self.new_user = self.Cookies / Path('new_user')
-        self.new_project = self.Cookies / Path('new_project')
-        self.new_research = self.Cookies / Path('new_research')
-        self.new_app = self.Cookies / Path('new_app')
+        self.repo_cookie = self.Cookies / Path('new_repository')
+        self.user_cookie = self.Cookies / Path('new_user')
+        self.project_cookie = self.Cookies / Path('new_project')
+        self.research_cookie = self.Cookies / Path('new_research')
+        self.app_cookie = self.Cookies / Path('new_app')
         #    The second group is for the Manager module
         self.Manager = Path(Manager.__path__.path[0])
         self.index = self.Manager / Path('index')
@@ -122,7 +122,7 @@ class Mana(object):
         else:
             e_c = None
             no_input = False
-        cookiecutter(self.new_repo, no_input=no_input, extra_context=e_c, output_dir=self.file_home)
+        cookiecutter(self.repo_cookie, no_input=no_input, extra_context=e_c, output_dir=self.file_home)
 
     # Map the main project directory.
     def get_dir_map(self, top, gitignore=None):

@@ -38,7 +38,7 @@ class RepoMana(DM):
         # TODO-ROB:  This is used ONLY when the user registers in flask
         # TODO-ROB:  Create the cookiecutter.json file
         # extra_context overrides user and default configs
-        cookiecutter(self.new_user, no_input=True, extra_context={"user_name": self.user}, output_dir=self.users)
+        cookiecutter(self.user_cookie, no_input=True, extra_context={"user_name": self.user}, output_dir=self.users)
         print('hold')
         pass
 
