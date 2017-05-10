@@ -18,7 +18,7 @@ import subprocess
 
 #------------------------------------------------------------------------------
 class S2S(object):
-    """S2S (Send 2 Server)"""
+    """S2S (Send 2 Server) is designed for use with a public ssh key."""
     def __init__(username, server_address):
         address = server_address
         user = username
