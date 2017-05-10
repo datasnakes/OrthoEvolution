@@ -37,7 +37,7 @@ from Manager.dir_map.json_to_newick import _parse_json
 
 class dir_mana(object):
     """This class organizes a directory tree for a project.
-    The dir_mana() class will help with organization and it will
+    The Mana() class will help with organization and it will
     help to instantly access the proper directories on command.
 
     It is advised to set up a function that is named after the project.
