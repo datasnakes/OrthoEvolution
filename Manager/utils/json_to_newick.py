@@ -10,7 +10,6 @@ def _parse_json(json_obj):
 
     if 'branch_length' in json_obj:
         newick = newick + ':' + str(json_obj['branch_length'])
-
     # If there are 'children'
     if 'children' in json_obj:
         # Initialise a list to contain the daughter info
@@ -19,14 +18,12 @@ def _parse_json(json_obj):
         for child in json_obj['children']:
             # parse the newick string straight into it the list
             info.append(_parse_json(child))
-
         # join all the daughter info together with a comma
         info = ','.join(info)
-
         # Concatenate all the children together at the start of the parent newick string
         newick = '(' + info + ')' + newick
-
-    return(newick)
+    newick = newick + ';'
+    return newick
 
 # if __name__ == '__main__':
 # 	n = '(A:0.1,B:0.2,(C:0.3,D:0.4)E:0.5)F'

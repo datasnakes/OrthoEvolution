@@ -5,7 +5,10 @@ from Manager.utils.repo_mana import RepoMana as RM
 
 
 class UserMana(RM):
-
+    #         # TODO-ROB CREATE THESE IN A VIRTUAL ENVIRONMENT FOR EACH USER
+    #         # TODO-ROB The virtual environment can be the name of the user
+    #         # TODO-ROB When the user logs in, they will activate the virtual environment
+    #     # TODO-ROB USE SQL here to see if the user db contains the username
     def __init__(self, repo, user, project=None, home=os.getcwd(), new_user=False, new_project=False):
         super().__init__(repo=repo, user=user, home=home, new_user=new_user)
         self.user = user

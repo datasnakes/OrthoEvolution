@@ -41,12 +41,6 @@ class RepoMana(DM):
         # extra_context overrides user and default configs
         cookiecutter(self.user_cookie, no_input=True, extra_context={"user_name": self.user}, output_dir=self.users)
 
-    def git_ignore(self):
-        """Get the ignored file patterns from the .gitignore file in the repo."""
-        with open(self.repo_path + '.gitignore', 'r', newline='') as ignore:
-            ignored = ignore.read().splitlines()
-        return ignored
-
 
 
 # TODO-ROB:  Edit the setup.py file for cookiecutter.

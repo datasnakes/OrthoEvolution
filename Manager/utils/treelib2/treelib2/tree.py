@@ -8,6 +8,8 @@ from __future__ import print_function
 from __future__ import unicode_literals
 import sys
 import json
+import os
+from pathlib import Path
 from copy import deepcopy
 try:
     from .node import Node
@@ -763,7 +765,7 @@ class Tree(object):
         bl['branch_length'] = int(length)
         self.create_node(tag, identifier, parent, data=bl)
 
-    def to_jsonnewick(self, nid=None, key=None, sort=True, reverse=False, with_data=False):
+    def to_newick_json(self, nid=None, key=None, sort=True, reverse=False, with_data=False):
         # For True newick files add a data parameter for branch length
         # ETE3 format #7 newick tree file format
         if nid is None:
@@ -782,13 +784,75 @@ class Tree(object):
                 queue.sort(key=key, reverse=reverse)
             for elem in queue:
                 tree_dict['children'].append(
-                    self.to_jsonnewick(elem.identifier, with_data=with_data, sort=sort, reverse=reverse))
+                    self.to_newick_json(elem.identifier, with_data=with_data, sort=sort, reverse=reverse))
             if len(tree_dict['children']) == 0:
                 if not with_data:
                     tree_dict = {"name": self[nid].tag}
                 else:
                     tree_dict = {"branch_length": self[nid].data}
             return tree_dict
+
+    def parse_newick_json(self):
+        """Edited from Source:  https://github.com/okeeffdp/json_to_newick"""
+        json_obj = self.to_newick_json()
+        try:
+            # Test is the key 'name' in the current level of the dictionary.
+            newick = json_obj['name']
+        except KeyError:
+            # Catch no 'name' trees and start the newick string with empty qoutes
+            newick = ''
+
+        if 'branch_length' in json_obj:
+            newick = newick + ':' + str(json_obj['branch_length'])
+        # If there are 'children'
+        if 'children' in json_obj:
+            # Initialise a list to contain the daughter info
+            info = []
+            # For each child, treat it as a new dictionary object
+            for child in json_obj['children']:
+                # parse the newick string straight into it the list
+                info.append(self.parse_newick_json())
+            # join all the daughter info together with a comma
+            info = ','.join(info)
+            # Concatenate all the children together at the start of the parent newick string
+            newick = '(' + info + ')' + newick
+        newick = newick + ';'
+        return newick
+
+    def git_ignore(self, pt):
+        """Get the ignored file patterns from the .gitignore file in the repo."""
+        with open(Path(pt) / Path('.gitignore'), 'r', newline='') as ignore:
+            ignored = ignore.read().splitlines()
+        return ignored
+
+        # Map the main project directory.
+    def get_dir_map(self, top, gitignore=None):
+        # TODO-ROB:  Change ignore to a .gitignore filename
+        x = Tree()
+        default_ignore = x.git_ignore(top)
+        if gitignore is not None:
+            gitignore += default_ignore
+        else:
+            gitignore = default_ignore
+        # Treelib will help to map everything and create a json at the same time
+        x.create_node('.', top)
+        # Walk through the directory of choice (top)
+        # Topdown is true so that directories can be modified in place
+        for root, dirs, files in os.walk(top, topdown=True):
+            # Only remove directories from the top
+            if root == top:
+                print(root)
+                try:
+                    dirs[:] = set(dirs) - set(gitignore)  # Remove directories from os.walk()
+                    print(dirs)
+                except ValueError:
+                    pass
+            for d in dirs:
+                rd = str(Path(root) / Path(d))
+                x.create_node(d, identifier=rd, parent=root)
+            for f in files:
+                x.create_node(f, parent=root)
+        return x
 
 if __name__ == '__main__':
     pass

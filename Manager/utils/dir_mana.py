@@ -171,7 +171,7 @@ class dir_mana(object):
         applications."""
 
         tree = self.get_dir_map(top, ignore)
-        Ntree = _parse_json(tree.to_jsonnewick())
+        Ntree = _parse_json(tree.to_newick_json())
         return Ntree
 
     def proj_mana(self, js_file):
