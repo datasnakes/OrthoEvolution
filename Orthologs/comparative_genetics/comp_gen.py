@@ -35,16 +35,16 @@ from ete3 import NCBITaxa
 import pandas as pd
 from pathlib import Path
 from pandas import ExcelWriter
-#from dir_mana import dir_mana
+#from Mana import Mana
 
 ##############################################################################
 # Directory Initializations:
-# Use dir_mana() class here so that we can stay organized
+# Use Mana() class here so that we can stay organized
 # and more easily access the proper directories on command
 os.chdir(os.path.dirname(__file__))
 home = os.getcwd()
 project = "Orthologs-Project"
-#where = dir_mana(home, project)
+#where = Mana(home, project)
 
 # Add a path that contains custom libraries for import
 # os.sys.path.append()
