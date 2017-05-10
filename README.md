@@ -1,27 +1,31 @@
-## Vallender-Labs-Scripts Directory
+## Datasnakes-Scripts
 
-This repository is a fork of the scripts directory in the Orthologs Project.  This will help to isolate some of the files and scripts for easier management during development.
+This package is a collection of the scripts related to an Orthologs Project. 
+
 ## Description
 
 The subdirectories here are used as modules in the Python3 package that we are developing.
-Here is a link to the project directory that this repository represents:  https://github.com/robear22890/Orthologs-Project/tree/Robs-Rework/lib/scripts
+
 
 ## Usage
 
 After installation via pip we will be able to easily import each module via:
 ```python
-from lib.scripts import manager, biosql, blast, ftp, genbank, multiprocessing
+from Orthologs import biosql, blast, ftp, genbank, phylogenetics
 ```
 ## Tests
 
 To test this first install the package.  It is currently in development so a pull request will be necessary.
 ```bash
-$ git clone https://github.com/robear22890/Orthologs-Project/tree/Robs-Rework
-$ cd Orthlogs-Project
+$ git clone https://github.com/datasnakes/Datasnakes-Scripts.git
+$ cd Datasnakes-Scripts
 $ pip install .
 ```
 In a live Python3.6 Console:
 
 ```python
-from lib.scripts import *
+from Orthologs import *
 ```
+## Contributors
+* Rob Gilmore | Github: [@grabear](https://github.com/grabear) | Email: [::email::](mailto:robgilmore127@gmail.com)
+* S. Hutchins | Github: [@sdhutchins](https://github.com/sdhutchins) | Twitter: [@MavenNBA](https://twitter.com/MavenNBA/) | Email: [::email::](mailto:sdhutchins@outlook.com)
