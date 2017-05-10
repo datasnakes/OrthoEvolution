@@ -28,64 +28,110 @@ from pathlib import Path
 from cookiecutter.main import cookiecutter
 from Manager.utils import treelib2
 from Manager.utils.json_to_newick import _parse_json
+# TODO-ROB once this is a pypi package all of these will be unnecessary
 import Cookies
 import Manager
 import Orthologs
 import Tools
+from Manager.logit.logit import LogIt
 
 #from project_mana import project_mana  # //TODO-ROB: Add a configure function to proj_mana to get the root directory using the project name
 ##############################################################################
 # Directory Initializations:
 
-class dir_mana(object):
-    """This class organizes a directory tree for a project.
-    The dir_mana() class will help with organization and it will
-    help to instantly access the proper directories on command.
 
-    It is advised to set up a function that is named after the project.
-    Each new project will be called from the project() function.
-
-    See GPCR-Orthologs-Project."""
+class Mana(object):
+    """
+    This is the directory management base class.  It 
+    maps the directories in the PyPi package using the pathlib module and 
+    turns the names of each important directory into a pathlike object.  The 
+    base class gives the option of creating a new repository with cookiecutter.
+    
+    This is also the home for many of the utility functions for manipulating
+    directories or paths.
+    """
 
 # //TODO-ROB Add JSON loading of the different directory variables
 # //TODO-Rob change project to projects and add another variable called project_type
 
-    def __init__(self, home=os.getcwd(), proj_mana="proj_mana.json"):
-        """Initialize the directory tree for the project.
-        Each project will have a home directory in addition to the following:
-        ."""
+    def __init__(self, home=os.getcwd(), repo=None, new_repo=False):
+        """
+        
+        :param home(path or path-like): The home of the file calling this name.  When creating a new 
+            repository it is best to explicitly name the home path.
+        :param repo(string): The name of the new repository to be created.
+        :param new_repo(bool): Triggers cookiecutter to create a new repository.
+        """
         # config = tablib.Dataset().load(open('config.yaml').read())
-        self.__file_home = Path(home)  # Home of the file calling this class
-        # TODO-ROB The user information will only be accessible via the flask user model.
-        # #TODO-ROB This is a helper class for FLASK
+        self.file_home = Path(home)  # Home of the file calling this class
+
         # Below are the PyPi path strings
         #    The first group is to access the cookiecutter templates
-        self._Cookies = Path(Cookies.__path__.path[0])
-        self._new_repo = self._Cookies / Path('new_repository')
-        self._new_user = self._Cookies / Path('new_user')
-        self._new_project = self._Cookies / Path('new_project')
-        self._new_research = self._Cookies / Path('new_research')
-        self._new_app = self._Cookies / Path('new_app')
+        self.Cookies = Path(Cookies.__path__.path[0])
+        self.new_repo = self.Cookies / Path('new_repository')
+        self.new_user = self.Cookies / Path('new_user')
+        self.new_project = self.Cookies / Path('new_project')
+        self.new_research = self.Cookies / Path('new_research')
+        self.new_app = self.Cookies / Path('new_app')
         #    The second group is for the Manager module
-        self._Manager = Path(Manager.__path__.path[0])
-        self._index = self._Manager / Path('index')
-        self._utils = self._Manager / Path('utils')
-        self._shiny = self._Manager / Path('shiny')
+        self.Manager = Path(Manager.__path__.path[0])
+        self.index = self.Manager / Path('index')
+        self.logit = self.Manager / Path('logit')
+        self.utils = self.Manager / Path('utils')
+        self.shiny = self.Manager / Path('shiny')
         #    The third group is for the Orthologs module
-        self._Orthologs = Path(Orthologs.__path__.path[0])
-        # TODO-ROB Add the other paths here
-        self._Tools = Path(Tools.__path__.path[0])
+        self.Orthologs = Path(Orthologs.__path__.path[0])
+        self.biosql = Path(self.Orthologs) / Path('biosql')
+        self.blast = Path(self.Orthologs) / Path('blast')
+        self.comp_gen = Path(self.Orthologs) / Path('comparative_genetics')
+        self.genbank = Path(self.Orthologs) / Path('genbank')
+        self.manager = Path(self.Orthologs) / Path('manager')
+        self.phylogenetics = Path(self.Orthologs) / Path('phylogenetics')
+        #    The fourth group is for the Tools module
+        self.Tools = Path(Tools.__path__.path[0])
+        self.ftp = Path(self.Tools) / Path('ftp')
+        self.multiprocessing = Path(self.Tools) / Path('multiprocessing')
+        self.pandoc = Path(self.Tools) / Path('pandoc')
+        self.pybasher = Path(self.Tools) / Path('pybasher')
+        self.qsub = Path(self.Tools) / Path('qsub')
 
-    def flask_user_config(self):
-        if
+        if repo:
+            self.repo = repo
+            self.repo_path = self.file_home / Path(self.repo)
+        if new_repo is True:
+            self.create_repo()
+
+        # Create a directory management logger
+        # TODO-ROB figure out where to put this based on user stuff
+        log = LogIt('user/path/userfile.log', 'Directory Management')
+        self.dm_log = log.basic
+
+    def create_repo(self):
+        """This function creates a new repository.  If a repository name 
+        is given to the class then it is given a name.  If not, cookiecutters
+        takes input from the user.
+        
+        The base class will be the only class that allows cookiecutters parameter
+        no_input to be False.
+        """
+        if self.repo:
+            no_input = True
+            e_c = {
+                "project_slug": self.repo
+            }
+        else:
+            e_c = None
+            no_input = False
+        cookiecutter(self.new_repo, no_input=no_input, extra_context=e_c, output_dir=self.file_home)
 
     # Map the main project directory.
-    def get_dir_map(self, top, ignore=None):
+    def get_dir_map(self, top, gitignore=None):
+        # TODO-ROB:  Change ignore to a .gitignore filename
         default_ignore = ['.git', '.idea']
-        if ignore is not None:
-            ignore += default_ignore
+        if gitignore is not None:
+            gitignore += default_ignore
         else:
-            ignore = default_ignore
+            gitignore = default_ignore
         # Treelib will help to map everything and create a json at the same time
         tree = treelib2.Tree()
         tree.create_node('.', top)
@@ -96,7 +142,7 @@ class dir_mana(object):
             if root == top:
                 print(root)
                 try:
-                    dirs[:] = set(dirs) - set(ignore)  # Remove directories from os.walk()
+                    dirs[:] = set(dirs) - set(gitignore)  # Remove directories from os.walk()
                     print(dirs)
                 except ValueError:
                     pass
