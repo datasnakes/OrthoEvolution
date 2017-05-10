@@ -7,8 +7,9 @@ from Manager.utils.mana import Mana as DM
 
 class RepoMana(DM):
 
-    def __init__(self, repo, home=os.getcwd(), user=None, new_user=False):
-        super().__init__(home=home, repo=repo)
+    def __init__(self, repo, user=None, home=os.getcwd(), new_user=False, new_repo=False):
+        super().__init__(repo=repo, home=home, new_repo=new_repo)
+        self.repo = repo
 
         self.docs = self.repo_path / Path('docs')
         self.misc = self.repo_path / Path('misc')
@@ -39,8 +40,6 @@ class RepoMana(DM):
         # TODO-ROB:  Create the cookiecutter.json file
         # extra_context overrides user and default configs
         cookiecutter(self.user_cookie, no_input=True, extra_context={"user_name": self.user}, output_dir=self.users)
-        print('hold')
-        pass
 
     def git_ignore(self):
         """Get the ignored file patterns from the .gitignore file in the repo."""

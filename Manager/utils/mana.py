@@ -54,9 +54,8 @@ class Mana(object):
 # //TODO-ROB Add JSON loading of the different directory variables
 # //TODO-Rob change project to projects and add another variable called project_type
 
-    def __init__(self, home=os.getcwd(), repo=None, new_repo=False):
+    def __init__(self, repo=None, home=os.getcwd(), new_repo=False):
         """
-        
         :param home(path or path-like): The home of the file calling this name.  When creating a new 
             repository it is best to explicitly name the home path.
         :param repo(string): The name of the new repository to be created.
@@ -64,7 +63,7 @@ class Mana(object):
         """
         # config = tablib.Dataset().load(open('config.yaml').read())
         self.file_home = Path(home)  # Home of the file calling this class
-
+        # TODO-ROB:  SOme of these directories don't need to be accessed directly
         # Below are the PyPi path strings
         #    The first group is to access the cookiecutter templates
         self.Cookies = Path(Cookies.__path__.path[0])
@@ -96,8 +95,8 @@ class Mana(object):
         self.qsub = Path(self.Tools) / Path('qsub')
 
         if repo:
-            self.repo = repo
             self.repo_path = self.file_home / Path(self.repo)
+            self.repo = repo
         if new_repo is True:
             self.create_repo()
 
@@ -120,8 +119,8 @@ class Mana(object):
                 "project_slug": self.repo
             }
         else:
-            e_c = None
             no_input = False
+            e_c = None
         cookiecutter(self.repo_cookie, no_input=no_input, extra_context=e_c, output_dir=self.file_home)
 
     # Map the main project directory.
