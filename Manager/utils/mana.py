@@ -73,6 +73,7 @@ class Mana(object):
         self.project_cookie = self.Cookies / Path('new_project')
         self.research_cookie = self.Cookies / Path('new_research')
         self.app_cookie = self.Cookies / Path('new_app')
+        self.website_cookie = self.Cookies / Path('new_website')
         #    The second group is for the Manager module
         self.Manager = Path(Manager.__path__._path[0])
         self.index = self.Manager / Path('index')
