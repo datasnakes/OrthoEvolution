@@ -117,7 +117,7 @@ class Mana(object):
         if self.repo:
             no_input = True
             e_c = {
-                "project_slug": self.repo
+                "repository_name": self.repo
             }
         else:
             no_input = False
