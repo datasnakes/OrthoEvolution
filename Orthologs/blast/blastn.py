@@ -22,7 +22,7 @@ from Bio import SearchIO  # Used for parsing and sorting XML files.
 from Bio.Blast.Applications import NcbiblastnCommandline  # Used for Local Blasting.
 from Manager.logit.logit import LogIt
 
-from Orthologs.comparative_genetics.blast_analysis import BLASTAnalysis as BT
+from Orthologs.comparative_genetics.ncbi_blast import BLASTAnalysis as BT
 
 
 # TODO-ROB: Find packages for script timing and analysis

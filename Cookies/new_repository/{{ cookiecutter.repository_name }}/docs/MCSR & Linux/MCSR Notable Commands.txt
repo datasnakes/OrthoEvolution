@@ -1,0 +1,20 @@
+MCSR NOTABLE COMMANDS & INFORMATION 
+This is a reference guide for MCSR that was written by Shaurita D. Hutchins on September 13, 2016. It was last updated on September 27, 2016. This guide will hopefully be useful as a quick tutorial for using the MCSR.
+
+What is the MCSR?
+The Mississippi Center for Supercomputing Research (MCSR) provides free accounts for the research and instructional use of students and faculty at all of Mississippi's public universities.
+The MCSR was established by the Mississippi legislature in 1987, and given the mission to provide high-performance computing support to all the campuses governed by the Board of Trustees of State Institutions of Higher Learning. Funded by the legislature each of the last 19 years, the center has attracted researchers into the state of Mississippi, enabled Mississippi researchers to conduct research on a much higher plane, and helped them to garner research money for graduate students and equipment. Today, MCSR continues to enhance both the instructional and research climates for all IHL institutions.
+MCSR enables researchers to conduct research on a much higher plane; makes it possible for Mississippi researchers to gain priority on computer time in order to meet grant deadlines; and empowers Mississippi universities to garner research money which funds graduate students and equipment. 
+MCSR Management maintains a list of active grant-funded research projects for performance reporting purposes. The list is updated semi-annually; researchers are encouraged to watch for an email requesting information on new grants each December and June. If you have new grants and would like to report these as soon as they become active, please send email to assist@mcsr.olemiss.edu. 
+
+How do I get an account?
+Go to http://www.mcsr.olemiss.edu/info.php and submit the form. Register with a university or school email address. After you submit the form, you will receive an email confirming your submission and soon after confirming the creation of your account with password information.
+Accounts that remain inactive for six months will be automatically restricted, which will prevent you from logging in. Restricted accounts will be preserved for a few months, and if unclaimed, may be then be deleted from the system. 
+It is your responsibility to backup all important files in your accounts and keep your disk usage to a reasonable minimum. 
+
+How do I contact MCSR?
+The best way to contact the MCSR is by sending an email to assist@mcsr.olemiss.edu.
+
+
+
+
