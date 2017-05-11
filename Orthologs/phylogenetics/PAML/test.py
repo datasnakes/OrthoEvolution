@@ -16,30 +16,21 @@ import pandas as pd
 ## Run the codeml model
 #tree.run_model('M1.HTR1D')
 #def prune_tree():
-t = Tree('Ete3Paml-Examples\species_tree.txt', format=1)
+t = Tree('Ete3Paml-Examples\species_tree.nw', format=1)
 
 # Create a list of
 #orgsfile = pd.read_csv('data/initial-data/organisms.csv', header=None)
-orgsfile = pd.read_csv('Ete3Paml-Examples\organisms.csv', header=None)
+orgsfile = pd.read_csv('Ete3Paml-Examples\common_org_names.csv', header=None)
 
 # Create a list name/variable and use list()
 orgs = list(orgsfile[0])
-def formatlist(input_list):
-    """Remove spaces from list items and turn those spaces into underscores."""
-    output_list = []
-    for item in input_list:
-        item = str(item)
-        item = item.replace(" ", "_")
-        output_list.append(item)
-        return output_list
-organismslist = formatlist(orgs)
 
 # Import alignment file as string
-alignment_file = open('Ete3Paml-Examples\HTR1D.fas', 'r')
+alignment_file = open(r'Ete3Paml-Examples\NFIA.fasta', 'r')
 alignment_str = alignment_file.read()
 
 branches2keep = []
-for organism in organismslist:
+for organism in orgs:
     if organism in alignment_str:
         print('Yup.')
         branches2keep.append(organism)
@@ -49,3 +40,6 @@ for organism in organismslist:
 
 # Input a list of branches to keep on the base tree
 t.prune(branches2keep, preserve_branch_length=True)
+
+# Write the tree to a file
+t.write(outfile='temptree.nw')
