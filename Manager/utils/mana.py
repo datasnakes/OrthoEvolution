@@ -56,6 +56,8 @@ class Mana(object):
 # //TODO-Rob change project to projects and add another variable called project_type
 
     def __init__(self, repo=None, home=os.getcwd(), new_repo=False):
+        # TODO-ROB ADD a REPOsitory destination path
+        self.repo = repo
         """
         :param home(path or path-like): The home of the file calling this name.  When creating a new 
             repository it is best to explicitly name the home path.
@@ -96,9 +98,8 @@ class Mana(object):
         self.pybasher = Path(self.Tools) / Path('pybasher')
         self.qsub = Path(self.Tools) / Path('qsub')
 
-        if repo:
+        if self.repo:
             self.repo_path = self.file_home / Path(self.repo)
-            self.repo = repo
         if new_repo is True:
             self.create_repo()
 
