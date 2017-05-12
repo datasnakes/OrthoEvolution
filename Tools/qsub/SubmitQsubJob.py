@@ -18,8 +18,8 @@ from string import Template
 from datetime import datetime as d
 import sys
 
-class CreateJob(object):
 #------------------------------------------------------------------------------
+class CreateJob(object):
     def __init__():
         """UNLESS A WINDOWS MACHINE HAS PBS (IT SHOULDNT)"""
         if sys.platform == 'win32' or 'win64':
@@ -57,7 +57,9 @@ class CreateJob(object):
         base = prefix + "submit_{0}".format(self.RandomId())
 
         # Create a python file and write the code to it
-        open(base + '.py', 'w').write(code)
+        with open('tempfiles/' + base + '.py', 'w') as pyfile:
+            pyfile.write(code)
+            pyfile.close()
 
         # This is the "command" for running the python script. If python is in
         # your environment as only 'python' update that here.
@@ -77,10 +79,13 @@ class CreateJob(object):
                 'job_name': jobname,
                 'script': script,
                 'log_name': base,
-                'cmd': ''
+                'cmd': script
                 }
+
         # Create the pbs script from the template/dict
-        open(base + '.pbs', 'w').write(pbstemp.substitute(pbs_dict))
+        with open(base + '.pbs', 'w') as pbsfile:
+            pbsfile.write(pbstemp.substitute(pbs_dict))
+            pbsfile.close()
 
         # Submit the qsub job using subprocess
         try:
@@ -96,4 +101,27 @@ class CreateJob(object):
                 os.remove(base + '.py')
 
 #------------------------------------------------------------------------------
-
+    def MultipleJobs(self):
+        """Create multiple jobs & scripts for each job to run based on splitting
+        a list into chunks."""
+#        # Modules used
+#        from QsubTools import SubmitPythonCode, ImportTemp
+#        from multiprocess_functions import genes2align
+#
+#        #------------------------------------------------------------------------------
+#        # Import the pbs and script templates
+#        pbs_temp = ImportTemp(filepath='templates/temp.pbs')
+#
+#        script_temp = """from multiprocess_functions import main, clustal
+#        main(geneslist={}, function=clustal)
+#            """
+#
+#        list_chunks = genes2align()
+#
+#        for k, v in list_chunks.items():
+#            # Format the script template with the list of genes to align or run PAML on
+#            # Submit the python code and create qsub jobs
+#            SubmitPythonCode(code=script_temp.format(v), pbstemp=pbs_temp, author="SDH", jobname="karg-clust")
+#
+#        # The next major part to add is creation of a bash script or waiting for
+#        # the genes to align in order to start paml
