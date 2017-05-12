@@ -27,7 +27,7 @@ class WebMana(RM):
                "website_path": os.path.join(str(self.website_path), ''),
                "website_host": self.web_host,
                "website_port": self.web_port}
-        cookiecutter(self.website_cookie, no_input=True, extra_context=e_c, output_dir=self.flask)
+        cookiecutter(str(self.website_cookie), no_input=True, extra_context=e_c, output_dir=self.flask)
         # Get the absolute path to the script that starts the flask server
         script_path = self.website_path / Path('hooks')
         scripts_file_path = find_hook('post_gen_project.sh', hooks_dir=script_path)
