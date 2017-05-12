@@ -21,10 +21,11 @@ class RepoMana(DM):
         self.repo_index = self.lib / Path('index')
 
         self.repo_web = self.repo_path / Path('web')
-        self.flask = self.repo_web / Path('flask')
         self.repo_shiny = self.repo_web / Path('shiny')
         self.ftp = self.repo_web / Path('ftp')
         self.wasabi = self.repo_web / Path('wasabi')
+
+        self.flask = self.repo_web / Path('flask')
 
         if user:
             self.user = user  # FROM Flask
