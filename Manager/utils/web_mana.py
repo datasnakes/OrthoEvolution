@@ -1,12 +1,17 @@
 from Manager.utils.repo_mana import RepoMana as RM
 import os
 from pathlib import Path
+from cookiecutter.main import cookiecutter
+from cookiecutter.hooks import run_script, find_hook, _HOOKS
+
 
 class WebMana(RM):
 
-    def __init__(self, repo, website, home=os.getcwd(), new_website=False):
+    def __init__(self, repo, website, host='0.0.0.0', port='5252', home=os.getcwd(), new_website=False, create_admin=False):
         super().__init__(repo=repo, home=home)
         self.website = website
+        self.web_host = host
+        self.web_port = port
         self.website_path = self.flask / Path(self.website)
 
         self.website_scripts = self.website_path / Path(self.website)
@@ -17,4 +22,13 @@ class WebMana(RM):
             self.create_website()
 
     def create_website(self):
-        print('web')
+        # TODO-ROB Add heavy logging here
+        e_c = {"website_name": self.website,
+               "website_path": os.path.join(str(self.website_path), ''),
+               "website_host": self.web_host,
+               "website_port": self.web_port}
+        cookiecutter(self.website_cookie, no_input=True, extra_context=e_c, output_dir=self.flask)
+        # Get the absolute path to the script that starts the flask server
+        script_path = self.website_path / Path('hooks')
+        scripts_file_path = find_hook('post_gen_project.sh', hooks_dir=script_path)
+        run_script(scripts_file_path, cwd=str(self.website_path))
