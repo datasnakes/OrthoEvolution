@@ -34,7 +34,7 @@ import Cookies
 import Manager
 import Orthologs
 import Tools
-from Manager.logit.logit import LogIt
+# from Manager.logit.logit import LogIt
 
 #from project_mana import project_mana  # //TODO-ROB: Add a configure function to proj_mana to get the root directory using the project name
 ##############################################################################
