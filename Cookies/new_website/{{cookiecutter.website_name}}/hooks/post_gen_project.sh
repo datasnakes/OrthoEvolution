@@ -4,7 +4,7 @@ export {{ cookiecutter.website_name | upper }}_SECRET='Genetics is cool for secr
 export FLASK_APP="{{ cookiecutter.website_path }}autoapp.py"
 export FLASK_DEBUG="1"
 
-cd {{ cookecutter.website_path }}
+cd {{ cookiecutter.website_path }}
 pip install -r requirements.txt
 pip install -r requirements/dev.txt
 bower install
