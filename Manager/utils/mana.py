@@ -124,7 +124,8 @@ class Mana(object):
         else:
             no_input = False
             e_c = None
-        cookiecutter(self.repo_cookie, no_input=no_input, extra_context=e_c, output_dir=self.file_home)
+            # TODO-ROB change cookiecutter so that it can take pathlike objects
+        cookiecutter(str(self.repo_cookie), no_input=no_input, extra_context=e_c, output_dir=self.file_home)
 
     # def git_ignore(self, path):
     #     """Get the ignored file patterns from the .gitignore file in the repo."""
