@@ -1,8 +1,14 @@
 #!/usr/bin/env bash
 
-export {{cookiecutter.app_name | upper}}_SECRET='Genetics is cool for secrets right?'
-export FLASK_APP="$1/autoapp.py"
+export {{ cookiecutter.website_name | upper }}_SECRET='Genetics is cool for secrets right?'
+export FLASK_APP="{{ cookiecutter.website_path }}autoapp.py"
 export FLASK_DEBUG="1"
+
+cd {{ cookecutter.website_path }}
+pip install -r requirements.txt
+pip install -r requirements/dev.txt
+bower install
+flask run -h {{ cookiecutter.website_host }} -p {{ cookiecutter.website_port }}
 
 """Quickstart
 ----------
@@ -37,7 +43,10 @@ database tables and perform the initial migration ::
     flask db migrate
     flask db upgrade
     flask run
+"""
 
+#TODO-ROB when actually deploying make sure to change the settings below
+"""
 
 Deployment
 ----------
