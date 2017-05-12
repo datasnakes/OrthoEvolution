@@ -31,4 +31,4 @@ class WebMana(RM):
         # Get the absolute path to the script that starts the flask server
         script_path = self.website_path / Path('hooks') / Path('post_gen_project.sh')
         #scripts_file_path = find_hook('post_gen_project.sh', hooks_dir=str(script_path))
-        run_script(script_path=script_path, cwd=str(self.website_path))
+        run_script(script_path=str(script_path), cwd=str(self.website_path))
