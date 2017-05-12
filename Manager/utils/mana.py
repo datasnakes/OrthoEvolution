@@ -34,6 +34,7 @@ import Cookies
 import Manager
 import Orthologs
 import Tools
+
 # from Manager.logit.logit import LogIt
 
 #from project_mana import project_mana  # //TODO-ROB: Add a configure function to proj_mana to get the root directory using the project name
@@ -58,6 +59,7 @@ class Mana(object):
     def __init__(self, repo=None, home=os.getcwd(), new_repo=False):
         # TODO-ROB ADD a REPOsitory destination path
         self.repo = repo
+
         """
         :param home(path or path-like): The home of the file calling this name.  When creating a new 
             repository it is best to explicitly name the home path.
@@ -75,7 +77,9 @@ class Mana(object):
         self.project_cookie = self.Cookies / Path('new_project')
         self.research_cookie = self.Cookies / Path('new_research')
         self.app_cookie = self.Cookies / Path('new_app')
+
         self.website_cookie = self.Cookies / Path('new_website')
+  
         #    The second group is for the Manager module
         self.Manager = Path(Manager.__path__._path[0])
         self.index = self.Manager / Path('index')
@@ -100,6 +104,7 @@ class Mana(object):
 
         if self.repo:
             self.repo_path = self.file_home / Path(self.repo)
+
         if new_repo is True:
             self.create_repo()
 
@@ -124,6 +129,7 @@ class Mana(object):
         else:
             no_input = False
             e_c = None
+
             # TODO-ROB change cookiecutter so that it can take pathlike objects
         cookiecutter(str(self.repo_cookie), no_input=no_input, extra_context=e_c, output_dir=self.file_home)
 
