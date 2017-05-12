@@ -18,14 +18,10 @@ Directory_management updated on 11/15/2016 at 11:30 AM
 """
 ##############################################################################
 # Libraries:
-
-
-import json
 import os
-import shutil
-import time
 from pathlib import Path
 from cookiecutter.main import cookiecutter
+from cookiecutter.hooks import run_script, find_hook
 from Manager.utils.treelib2.treelib2.tree import Tree
 import ete3
 from Manager.utils.json_to_newick import _parse_json
@@ -35,8 +31,6 @@ import Manager
 import Orthologs
 import Tools
 # from Manager.logit.logit import LogIt
-
-#from project_mana import project_mana  # //TODO-ROB: Add a configure function to proj_mana to get the root directory using the project name
 ##############################################################################
 # Directory Initializations:
 
@@ -52,11 +46,8 @@ class Mana(object):
     directories or paths.
     """
 
-# //TODO-ROB Add JSON loading of the different directory variables
-# //TODO-Rob change project to projects and add another variable called project_type
-
     def __init__(self, repo=None, home=os.getcwd(), new_repo=False):
-        # TODO-ROB ADD a REPOsitory destination path
+        # TODO-ROB ADD a REPOsitory destination path (an output directory for cookiecutter)
         self.repo = repo
         """
         :param home(path or path-like): The home of the file calling this name.  When creating a new 
@@ -104,7 +95,7 @@ class Mana(object):
             self.create_repo()
 
         # Create a directory management logger
-        # TODO-ROB figure out where to put this based on user stuff
+        # TODO-ROB add logging to manager class
         #log = LogIt('user/path/userfile.log', 'Directory Management')
         #self.dm_log = log.basic
 
@@ -166,6 +157,13 @@ class Mana(object):
         """Takes a treelib tree created by get_dir_map and returns
         a tree a dir_map in newick format.  This will be useful for Bio.Phylo
         applications."""
+        """
+        :param top (path):  The root at which the directory map is made. 
+        :param ignore (list):  The files to ignore.  The  get_dir_map function
+        adds this to the .gitignore list.
+        :return (tree):  A newick formatted string in style #8.  Can be used with
+        the ete3.Tree() class.
+        """
 
         tree = Tree()
         t = tree.get_dir_map(top, ignore)
@@ -244,12 +242,167 @@ class Mana(object):
     #         return path, None
 
 
+class RepoMana(Mana):
+
+    def __init__(self, repo, user=None, home=os.getcwd(), new_user=False, new_repo=False):
+        """
+        :param repo (string):  The name of the repository.  
+        :param user (string):  The name of the current user if any. 
+        :param home (string or pathlike):  The home path of the repository.
+        :param new_user (bool):  Flag for creating a new user. 
+        :param new_repo: 
+        """
+        # TODO-ROB change the home parameter to the output directory parameter
+        super().__init__(repo=repo, home=home, new_repo=new_repo)
+        self.repo = repo
+
+        self.docs = self.repo_path / Path('docs')
+        self.misc = self.repo_path / Path('misc')
+        self.users = self.repo_path / Path('users')
+
+        self.lib = self.repo_path / Path('lib')
+        self.archives = self.lib / Path('archives')
+        self.databases = self.lib / Path('databases')
+        self.repo_index = self.lib / Path('index')
+
+        self.repo_web = self.repo_path / Path('web')
+        self.repo_shiny = self.repo_web / Path('shiny')
+        self.ftp = self.repo_web / Path('ftp')
+        self.wasabi = self.repo_web / Path('wasabi')
+
+        self.flask = self.repo_web / Path('flask')
+
+        if user:
+            self.user = user  # FROM Flask
+            self.user_path = self.users / Path(self.user)
+        if new_user is True:
+            self.create_user()
+
+    def create_user(self):
+        """This function uses the username given by our FLASK framework
+        and creates a new directory system for the active user using
+        our  new_user cookiecutter template."""
+        # This is used ONLY when the user registers in flask
+        # TODO-ROB:  Create the cookiecutter.json file
+        # extra_context overrides user and default configs
+        cookiecutter(self.user_cookie, no_input=True, extra_context={"user_name": self.user}, output_dir=self.users)
+        # TODO-ROB do we need create user hooks?
 
 
+# TODO-ROB:  Edit the setup.py file for cookiecutter.
 
-'(.gitignore,GetBlastDB.py,README.md,ftp2db.py,ncbiftp.cfg,(blastftp.txt,ftpdownloadtest.py)tests);'
+class UserMana(RepoMana):
+    # TODO-ROB CREATE THESE IN A VIRTUAL ENVIRONMENT FOR EACH USER
+    # TODO-ROB The virtual environment can be the name of the user
+    # TODO-ROB When the user logs in, they will activate the virtual environment
+    # TODO-ROB USE SQL here to see if the user db contains the username
+    def __init__(self, repo, user, project=None, home=os.getcwd(), new_user=False, new_project=False):
+        super().__init__(repo=repo, user=user, home=home, new_user=new_user)
+        self.user = user
+
+        self.user_index = self.user_path / Path('index')
+        self.user_log = self.user_path / Path('log')
+        self.manuscripts = self.user_path / Path('manuscripts')
+        self.other = self.user_path / Path('other')
+        self.projects = self.user_path / Path('projects')
+
+        if project:
+            self.project = project
+            self.project_path = self.projects / Path(project)
+        if new_project is True:
+            self.create_project()
+
+    def create_project(self):
+        """
+        :return: A new project inside the user's
+        project directory.
+        """
+        if self.project:
+            no_input = True
+            e_c = {"project_name": self.project}
+        else:
+            no_input = False
+            e_c = None
+        cookiecutter(self.project_cookie, extra_context=e_c, no_input=no_input, output_dir=self.project_path)
+
+    def zip_data(self):
+        print('zip the users data and send it to their email')
 
 
+class WebMana(RepoMana):
 
+    def __init__(self, repo, website, host='0.0.0.0', port='5252', home=os.getcwd(), new_website=False, create_admin=False):
+        super().__init__(repo=repo, home=home)
+        self.website = website
+        self.web_host = host
+        self.web_port = port
+        self.website_path = self.flask / Path(self.website)
+
+        self.website_scripts = self.website_path / Path(self.website)
+        self.website_public = self.website_scripts / Path('public')
+        self.website_user = self.website_scripts / Path('user')
+
+        if new_website is True:
+            self.create_website()
+
+    def create_website(self):
+        # TODO-ROB Add heavy logging here
+        e_c = {"website_name": self.website,
+               "website_path": os.path.join(str(self.website_path), ''),
+               "website_host": self.web_host,
+               "website_port": self.web_port}
+        cookiecutter(str(self.website_cookie), no_input=True, extra_context=e_c, output_dir=self.flask)
+        # Get the absolute path to the script that starts the flask server
+        script_path = self.website_path / Path('hooks') / Path('post_gen_project.sh')
+        #scripts_file_path = find_hook('post_gen_project.sh', hooks_dir=str(script_path))
+        run_script(script_path=str(script_path), cwd=str(self.website_path))
+
+
+class ProjMana(UserMana):
+
+    def __init__(self, repo, user, project, research=None, research_type=None, app=None, home=os.getcwd(),
+                 new_project=False, new_research=False, new_app=False):
+        """
+        :param repo: 
+        :param user: 
+        :param project: 
+        :param research: 
+        :param app: 
+        :param home: 
+        :param new_project: 
+        :param project_type: 
+        :param new_research: 
+        :param new_app: 
+        """
+        super().__init__(repo=repo, user=user, project=project, home=home,
+                         new_project=new_project)
+        # TODO-ROB Go back to the drawing board for the public/private/other choices.  (FLASK forms)
+        # TODO-ROB determine how to get cookiecutter to skip over directories that already exist
+        self.project = project
+        self.research = research
+        self.research_type = research_type
+
+        # Project/Research Directories
+        self.research_path = self.project_path / Path(research_type) / Path(research)
+        self.data = self.research_path / Path('data')
+        self.raw_data = self.research_path / Path('raw_data')
+        self.project_web = self.research_path / Path('web')
+        # TODO-ROB:  THis is just a draft.  Rework to use public/private/other
+        if app:
+            self.app = app
+            self.app_path = self.project_web / Path(app)
+        if new_research is True:
+            self.create_research(new_app)
+
+    def create_research(self, new_app=False):
+        e_c = {"research_type": self.research_type,
+               "research_name": self.research}
+        cookiecutter(self.research_cookie, no_input=True, extra_context=e_c, output_dir=self.research_path)
+        if new_app is True:
+            self.create_app()
+
+    def create_app(self):
+        e_c = {"app_name": self.app}
+        cookiecutter(self.app_cookie, no_input=True, extra_context=e_c, output_dir=self.app_path)
 
 
