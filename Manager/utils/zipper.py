@@ -19,6 +19,7 @@ class ZipUtilities:
             print('skipped')
             self.add_folder_to_zip(zip_file, self.zip_path)
         zip_file.close()
+        return comp_path
 
     def add_folder_to_zip(self, zip_file, folder):
         for file in os.listdir(folder):
