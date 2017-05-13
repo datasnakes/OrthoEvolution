@@ -20,6 +20,7 @@ Directory_management updated on 11/15/2016 at 11:30 AM
 # Libraries:
 import os
 from pathlib import Path
+from Manager.utils.zipper import ZipUtilities
 from cookiecutter.main import cookiecutter
 from cookiecutter.hooks import run_script, find_hook
 from Manager.utils.treelib2.treelib2.tree import Tree
@@ -296,8 +297,11 @@ class UserMana(RepoMana):
             e_c = None
         cookiecutter(self.project_cookie, extra_context=e_c, no_input=no_input, output_dir=self.project_path)
 
-    def zip_data(self):
-        print('zip the users data and send it to their email')
+    def zip_data(self, data_path, filename, destination):
+        Zipper = ZipUtilities(filename, data_path)
+        Zipper_path = Zipper.to_zip()
+        # TODO-ROB add proper destination syntax.
+        print('%s is being sent to %s' % (Zipper_path, destination))
 
 # datasnakes~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # datasnakes~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
