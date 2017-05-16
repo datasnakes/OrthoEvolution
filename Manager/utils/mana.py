@@ -297,8 +297,8 @@ class UserMana(RepoMana):
             e_c = None
         cookiecutter(self.project_cookie, extra_context=e_c, no_input=no_input, output_dir=self.project_path)
 
-    def zip_data(self, data_path, filename, destination):
-        Zipper = ZipUtilities(filename, data_path)
+    def zip_mail(self, comp_filename, zip_path, ):
+        Zipper = ZipUtilities(comp_filename, zip_path)
         Zipper_path = Zipper.to_zip()
         # TODO-ROB add proper destination syntax.
         print('%s is being sent to %s' % (Zipper_path, destination))

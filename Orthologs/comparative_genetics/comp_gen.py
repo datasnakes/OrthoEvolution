@@ -249,11 +249,27 @@ class CompGenAnalysis(object):
 
             self.duplicated_dict = self.get_dup_acc()
             self.duplicated_accessions = self.duplicated_dict['accessions']
-            self.duplicated_genes = self.duplicated_dict['genes']
-            self.dup_gene_count = self.duplicated_genes.__len__()
             self.duplicated_organisms = self.duplicated_dict['organisms']
             self.duplicated_random = self.duplicated_dict['random']
             self.duplicated_other = self.duplicated_dict['other']
+            self.dup_org_count = {}
+            self.dup_gene_count = {}
+            dup_org = pd.DataFrame.from_dict(self.duplicated_organisms)
+            for org in self.org_list:
+                try:
+                    self.dup_org_count[org] = dup_org.T[org].count()
+                except KeyError:
+                    pass
+
+            dup_gene = pd.DataFrame.from_dict(self.duplicated_genes)
+            for gene in self.gene_list:
+                try:
+                    self.dup_gene_count[gene] = dup_gene.T[gene].count()
+                except KeyError:
+                    pass
+            self.dup_acc_count = {}
+            for accession, go in self.duplicated_accessions.items():
+                self.dup_acc_count[accession] = go.__len__()
 
     def get_accession(self, gene, organism):
         """Takes a single gene and organism and returns
@@ -307,8 +323,21 @@ class CompGenAnalysis(object):
             org_list.append(org)
         return org_list
 
-    def make_excel_file(self):
+    def make_excel_files(self):
         print('Under construction')
+        post_blast_file = pd.ExcelWriter('%s_post_blast_analysis.xlsx')
+        # Duplicated Accessions
+        acc_ws = pd.DataFrame.from_dict(self.dup_acc_count, orient='index')
+        acc_ws.columns = ['Count']
+
+            # Genetic Duplicates
+            # Species Duplicates
+            # Random Duplicates
+            # Other Duplicates
+        # Missing by Organism
+        # Missing by Gene
+
+
 # **********************************************POST BLAST ANALYSIS TOOLS********************************************* #
 # **********************************************POST BLAST ANALYSIS TOOLS********************************************* #
 
@@ -341,11 +370,9 @@ class CompGenAnalysis(object):
                 # TODO-ROB: Rework the missing functino using this.. maybe??
                 elif query_acc == 'missing':
                     continue
-
+                go_list = [gene, org]
                 # Append so that duplicates can be identified
-                go[query_acc].append(gene)
-                go[query_acc].append(org)
-                go1 = []
+                go[query_acc].append(go_list)
         return go
 
     def get_dup_acc(self):
@@ -375,35 +402,42 @@ class CompGenAnalysis(object):
                         duplicated_dict['genes'][g] = {}
                     if o not in duplicated_dict['organisms']:
                         duplicated_dict['organisms'][o] = {}
-                    # Categorize the different types of duplication
+                # Categorize the different types of duplication
+                    # Duplicates that persist across an organisms
+                    if orgs.count(o) == len(go_list):
+                        duplicated_dict['organisms'][o][accession] = genes
+                        del duplicated_dict['genes'][g]
+                        break
+                    # Duplication across an organisms, but also somewhere else
+                    elif orgs.count(o) != 1:
+                        alt_genes = list(gene for gene, org in go_list if org == o)
+                        duplicated_dict['organisms'][o][accession] = alt_genes
+
                     # Duplicates that persist across a gene
                     if genes.count(g) == len(go_list):
                         duplicated_dict['genes'][g][accession] = orgs
-                        break
-                    # Duplicates that persist across an organisms
-                    elif orgs.count(o) == len(go_list):
-                        duplicated_dict['organisms'][o][accession] = genes
+                        del duplicated_dict['organisms'][o]
                         break
                     # Duplication across a gene, but also somewhere else
                     elif genes.count(g) != 1:
                         alt_orgs = list(org for gene, org in go_list if gene == g)
                         duplicated_dict['genes'][g][accession] = alt_orgs
-                    # Duplication across an organisms, but also somewhere else
-                    elif orgs.count(o) != 1:
-                        alt_genes = list(gene for gene, org in go_list if org == o)
-                        duplicated_dict['organisms'][o][accession] = alt_genes
+
                     # This is the "somewhere else" if the duplication is random or not categorized
-                    else:
                         # The duplication is random
-                        if genes.count(g) == 1 and orgs.count(o) == 1:
-                            duplicated_dict['random'][accession] = go
-                            # There is another category of duplication that I'm missing
-                            # TODO-ROB:  If an other exists throw a warning in the logs
+                    if genes.count(g) == 1 and orgs.count(o) == 1:
+                        del duplicated_dict['organisms'][o]
+                        del duplicated_dict['genes'][g]
+                        duplicated_dict['random'][accession] = go
+                        # There is another category of duplication that I'm missing
+                        # TODO-ROB:  If an other exists throw a warning in the logs
+                    else:
+                        del duplicated_dict['organisms'][o]
+                        del duplicated_dict['genes'][g]
+                        if len(duplicated_dict['other'][accession]) > 0:
+                            duplicated_dict['other'][accession].append(go)
                         else:
-                            if len(duplicated_dict['other'][accession]) > 0:
-                                duplicated_dict['other'][accession].append(go)
-                            else:
-                                duplicated_dict['other'][accession] = go
+                            duplicated_dict['other'][accession] = go
         return duplicated_dict
 
     def get_miss_acc(self, acc_file=None):
