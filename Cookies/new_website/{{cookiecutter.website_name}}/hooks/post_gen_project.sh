@@ -8,6 +8,9 @@ cd {{ cookiecutter.website_path }}
 pip install -r requirements.txt
 pip install -r requirements/dev.txt
 bower install
+flask db init
+flask db migrate
+flask db upgrade
 flask run -h {{ cookiecutter.website_host }} -p {{ cookiecutter.website_port }}
 
 """Quickstart
