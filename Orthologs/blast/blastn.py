@@ -26,20 +26,21 @@ from Orthologs.comparative_genetics.ncbi_blast import BLASTAnalysis as BT
 
 
 # TODO-ROB: Find packages for script timing and analysis
-
+# TODO-ROB:  Add function for renaming and moving the builder files if the BLAST completed
 
 class BLASTn(BT):
-    def __init__(self, template=None):
+    def __init__(self, repo, user, project, research, research_type, template=None):
         """Inherit from the BLASTing Template."""
-        super().__init__(template=template)
+        super().__init__(template=template, repo=repo, user=user, project=project,
+                         research=research, research_type=research_type)
 
         # Manage Directories
         self.__home = Path(os.getcwd())
-        self.__output = self.__home / Path('data/blastn/blast-xml-output/')  # Output directory
-        self.__gi_list = self.__home / Path('data/gi-lists')
+        self.__output_path = self.raw_data / Path('blast')  # Output directory
+        self.__gi_list_path = self.project_index / Path('gi_lists')
         self.processed = self.__home / Path('data/processed/')  # Processed data directory
-        Path.mkdir(self.__output, parents=True, exist_ok=True)  # only make blast-xml-output dir since blastn dir exists
-        Path.mkdir(self.__gi_list, parents=True, exist_ok=True)
+        Path.mkdir(self.__output_path, parents=True, exist_ok=True)  # only make blast-xml-output dir since blastn dir exists
+        Path.mkdir(self.__gi_list_path, parents=True, exist_ok=True)
         # # Initialize Logging
         # self.__blastn_log = LogIt.blastn()
         df = LogIt()
@@ -68,7 +69,7 @@ class BLASTn(BT):
     def blast_config(self, query_align, query_organism, auto_start=False):
         """This function configures everything for a BLAST.
         First the accession file, and gene list is configured."""
-        os.chdir(str(self.__output))
+        os.chdir(str(self.__output_path))
         self.blastn_log.info('***********************************BLAST CONFIG START***********************************')
         self.blastn_log.info('***********************************BLAST CONFIG START***********************************')
         self.blastn_log.info('***********************************BLAST CONFIG START***********************************\n\n\n')
@@ -91,7 +92,7 @@ class BLASTn(BT):
                              "query refseq sequence to a temp.fasta file from BLAST database.")
         # Iterate the query accessions numbers
         for query in query_align:
-            os.chdir(str(self.__output))
+            os.chdir(str(self.__output_path))
             gene = self.acc_dict[query][0]
             org = self.acc_dict[query][1]
             # Create the proper directories for each gene
@@ -161,26 +162,30 @@ class BLASTn(BT):
         """This script is designed to create a gi list based on the refseq_rna database
         for each taxonomy id on the MCSR. It will also convert the gi list into a
         binary file which is more efficient to use with NCBI's Standalone Blast tools."""
-        os.chdir(str(self.__gi_list))
         print('gi_list_config')
         taxids = self.taxon_ids
         with Pool(processes=20) as p:
             p.map(self.gi_split, taxids)
             self.blastn_log.inf("The GI lists have been created.")
 
-    @staticmethod
-    def gi_split(ID):
+    def gi_split(self, ID):
         """ This function uses the blastdbcmd tool to get gi lists. It then uses the
         blastdb_aliastool to turn the list into a binary file."""
-
+        # Create dictionary for formatting
+        ID = str(ID)
+        gi_text_file = "%sgi.txt" % ID
+        gi_text_path = str(self.__gi_list_path / Path(gi_text_file))
+        gi_binary_file = "%sgi" % ID
+        gi_binary_path = str(self.__gi_list_path / Path(gi_binary_file))
+        fmt = {'gi_path': str(self.__gi_list_path), 'text file': gi_text_path, 'binary file': gi_binary_path}
+        # TODO untested
         # Use the accession #'s and the blastdbcmd tool to generate gi lists based on Organisms/Taxonomy ID's.
-        os.system("blastdbcmd -db refseq_rna -entry all -outfmt '%g %T' | awk ' { if ($2 == " + str(ID) + ") { print $1 } } ' > " + str(ID) + "gi.txt")
+        os.system("blastdbcmd -db refseq_rna -entry all -outfmt '%g %T' | awk ' {{ if ($2 == {id}) "
+                  "{{ print $1 }} }} ' > {text_file}".format(**fmt))
         # Convert the .txt file to a binary file using the blastdb_aliastool.
-        os.system("blastdb_aliastool -gi_file_in " + str(ID) + "gi.txt -gi_file_out " + str(ID) + "gi")
+        os.system("blastdb_aliastool -gi_file_in {text file} -gi_file_out {binary file}".format(**fmt))
         # Remove the gi.text file
-        os.system("rm -r " + str(ID) + "gi.txt")
-        # Move the gi file to a folder
-        os.system("mv " + str(ID) + "gi data/gi-lists/")
+        os.system("rm -r {text file}".format(**fmt))
 
     def blast_file_config(self, file):
         """This function configures different files for new BLASTS.
@@ -188,7 +193,7 @@ class BLASTn(BT):
         in the middle of the dataset.  This removes the last line of
         the accession file if it is incomplete."""
 
-        os.chdir(str(self.__output))  # Change or move to the output directory
+        os.chdir(str(self.__output_path))  # Change or move to the output directory
         output_dir_list = os.listdir()  # Make a list of files
         if file in output_dir_list:
             with open(file, 'r') as fi:
@@ -273,7 +278,7 @@ class BLASTn(BT):
         elif pre_configured is True:
             genes = genes
 
-        os.chdir(str(self.__output))
+        os.chdir(str(self.__output_path))
         start_time = time.time()  # Variable used to check the processing time
         self.blastn_log.info("------------------------------------------------------------------")
         self.blastn_log.info("The script name is %s" % os.path.basename(__file__))
