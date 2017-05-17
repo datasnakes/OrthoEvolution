@@ -1,22 +1,27 @@
 import time
+import os
+from pathlib import Path
+import pandas as pd
+from Orthologs.comparative_genetics.comp_gen import CompGenAnalysis as CGA
+# from Orthologs.manager.logit.logit import LogIt
 
-from Orthologs.comparative_genetics.comp_gen import *
-from Orthologs.manager.logit.logit import LogIt
 
-
-class BLASTAnalysis(CompGenAnalysis):
-    # TODO-ROB:  Look into subclasses and inheritance.  Which of the parameter below is necessary???
-    def __init__(self, template=None, build_file=None, taxon_file=None, post_blast=False):
+class BLASTAnalysis(CGA):
+    def __init__(self, repo, user, project, research, research_type,
+                 template=None, taxon_file=None, post_blast=False):
         """Inherit from the CompGenAnalysis class.  If the BLAST was cut short,
         then a build_file is to be used."""
-        super().__init__(acc_file=template, taxon_file=taxon_file,
-                         post_blast=post_blast, save_data=True, hgnc=False)
+        super().__init__(repo=repo, user=user, project=project, research=research, research_type=research_type,
+                         acc_file=template, taxon_file=taxon_file, post_blast=post_blast, save_data=True, hgnc=False)
         # TODO-ROB: Inherit or add variable for logger class
-
+        # TODO-ROB Add Mana directories
         # Private variables
         self.__home = os.getcwd()
-        self.template_filename = template
-        self.__acc_filename = build_file
+        # name, ext = os.path.splitext(template)
+        # new_name = "%s_template%s" % (self.project, ext)
+        # os.rename(template, new_name)
+        self.template_filename = self.acc_filename
+        self.template_path = self.data / Path(self.template_filename)
         self.__taxon_filename = taxon_file
         self.__post_blast = post_blast
         self.__save_data = True
@@ -25,7 +30,7 @@ class BLASTAnalysis(CompGenAnalysis):
         df = LogIt()
         self.blastn_log = df.blastn()
         self.postblast_log = df.post_blast()
-        self.config_log = df.config(self.__home / Path('BLAST.log'))
+        self.config_log = df.config(self.user_log / Path('BLAST.log'))
         self.__date_format = df.date_format
         self.get_time = time.time  # To get the time use 'get_time()'
         # Logging variables
@@ -38,19 +43,19 @@ class BLASTAnalysis(CompGenAnalysis):
         # self.blast_log = log.getLogger('Blastn')
 
         # Initialize a data frame to add accession files to
-        self.building = self.raw_data
+        self.building = self.raw_acc_data
         del self.building['Tier']
         del self.building['Homo_sapiens']
-        if build_file is None:
-            build_file = str(template[:-4] + 'building.csv')
-        time_file = build_file.replace('build.csv', 'building_time.csv')  # TODO-ROB:  ADD time to the file name
         self.building = self.building.set_index('Gene')
+        build_file = str(template[:-4] + 'building.csv')
         self.__building_filename = build_file
-        self.__building_file_path = Path(home) / Path('index') / Path(self.__building_filename)
-        # Initialize some timing files
+        self.__building_file_path = self.data / Path(self.__building_filename)
+
+        # Initialize some timing files to add times to
         self.building_time = self.building
+        time_file = build_file.replace('building.csv', 'building_time.csv')
         self.__building_time_filename = time_file
-        self.__building_time_file_path = Path(home) / Path('index') / Path(self.__building_time_filename)
+        self.__building_time_file_path = self.data / Path(self.__building_time_filename)
 
     def add_accession(self, gene, organism, accession):
         """Takes an accession and adds in to the building dataframe,
@@ -96,7 +101,8 @@ class BLASTAnalysis(CompGenAnalysis):
             temp.to_csv(self.__building_time_file_path)
 
     def post_blast_analysis(self, acc_file):
-        accession_data = CompGenAnalysis(acc_file=acc_file, post_blast=True)
+        # TODO-ROB Make this into the CGA.make_excel_files() method
+        accession_data = CGA(acc_file=acc_file, post_blast=True)
         self.postblast_log.info('*************************POST BLAST ANALYSIS START*************************\n\n\n')
 
         missing_gene = accession_data.missing_dict['genes']
