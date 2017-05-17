@@ -392,6 +392,7 @@ class ProjMana(UserMana):
 
         # Project/Research Directories
         self.research_path = self.project_path / Path(research_type) / Path(research)
+        self.project_index = self.research_path / Path('index')
         self.data = self.research_path / Path('data')
         self.raw_data = self.research_path / Path('raw_data')
         self.project_web = self.research_path / Path('web')
