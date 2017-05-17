@@ -30,13 +30,12 @@ Accession2 updated on 11/17/2016 at 1:09 PM
 # Libraries:
 
 import os
-#import mygene
+import mygene
 from ete3 import NCBITaxa
 import pandas as pd
 from pathlib import Path
 from pandas import ExcelWriter
-#from Mana import Mana
-
+from Manager.utils.mana import ProjMana as PM
 ##############################################################################
 # Directory Initializations:
 # Use Mana() class here so that we can stay organized
@@ -54,7 +53,7 @@ project = "Orthologs-Project"
 ##############################################################################
 
 
-class CompGenAnalysis(object):
+class CompGenAnalysis(PM):
     __home = ''
     __acc_filename = ''
     __paml_filename = ''
@@ -62,30 +61,31 @@ class CompGenAnalysis(object):
     __data = ''
 
     # TODO-ROB:  CREAT PRE-BLAST and POST-BLAST functions
-    def __init__(self, acc_file=None, taxon_file=None, paml_file=None, go_list=None, post_blast=True, save_data=True, hgnc=False):
+    def __init__(self, repo, user, project, research, research_type, acc_file=None, taxon_file=None, paml_file=None, go_list=None, post_blast=True, save_data=True, hgnc=False):
+        super().__init__(repo=repo, user=user, project=project, research=research, research_type=research_type)
 
+        self.project = project
         # Private Variables
         self.__home = home
         self.__post_blast = post_blast
         self.__save_data = save_data
         self.__taxon_filename = taxon_file
         self.__paml_filename = paml_file
-        self.__acc_filename = acc_file
+        self.acc_filename = acc_file
         # Handle the taxon_id file and blast query
         if taxon_file is not None:
             # File init
-            self.__taxon_path = Path(home) / Path('index') / Path(self.__taxon_filename)
+            self.taxon_path = self.user_index / Path(self.__taxon_filename)
         # Handle the paml organism file
+        # TODO-ROB Deprecate paml_file
         if paml_file is not None:
             # File init
-            self.__paml_path = Path(home) / Path('index') / Path(self.__paml_filename)
+            self.paml_path = self.user_index / Path(self.__paml_filename)
             self.paml_org_list = []
-
         # Handle the master accession file (could be before or after blast)
         if acc_file is not None:
             # File init
-            self.__acc_path = Path(home) / Path('index') / Path(self.__acc_filename)
-            # TODO-ROB: Make a better way to generate a go list programmatically
+            self.acc_path = self.user_index / Path(self.__acc_filename)
             self.go_list = go_list
             # Handles for organism lists #
             self.org_list = []
@@ -107,8 +107,11 @@ class CompGenAnalysis(object):
             self.blast_human = []
             self.blast_rhesus = []
             # Handles for dataframe init #
-            self.raw_data = pd.read_csv(self.__acc_path, dtype=str)
-            self.header = self.raw_data.axes[1].tolist()
+            self.raw_acc_data = pd.read_csv(self.__acc_path, dtype=str)
+            self.mygene_df = pd.DataFrame()
+            self.mygene_filename = "%s_mygene.csv" % self.project
+            self.mygene_path = self.data / Path(self.mygene_filename)
+            self.header = self.raw_acc_data.axes[1].tolist()
 
             # # Handles for accession file analysis # #
             if self.__post_blast:
@@ -121,13 +124,18 @@ class CompGenAnalysis(object):
                     # Duplicates
                 self.duplicated_dict = {}
                 self.duplicated_accessions = {}
+                self.dup_acc_count = {}
                 self.duplicated_genes = {}
+                self.dup_gene_count = {}
                 self.duplicated_organisms = {}
+                self.dup_org_count = {}
                 self.duplicated_random = {}
                 self.duplicated_other = {}
+                self.time_dict = {}
+
 
             # #### Format the main data frame #### #
-            self.__data = self.raw_data.set_index('Gene')
+            self.__data = self.raw_acc_data.set_index('Gene')
             self.df = self.__data
             # #### Format the main pivot table #### #
             self.pt = pd.pivot_table(pd.read_csv(self.__acc_path), index=['Tier', 'Gene'], aggfunc='first')
@@ -138,11 +146,9 @@ class CompGenAnalysis(object):
             self.org_dict = self.df.ix[0:, 'Homo_sapiens':].to_dict()
             self.gene_dict = self.df.T.to_dict()
             self.get_master_lists(self.__data)  # populates our lists
+            if save_data:
+                self.make_excel_files(project)
 
-
-            # TODO-ROB: Add script for parsing Accession files that are only part of the way complete
-            # TODO-ROB:  Add script for parsing GI files that are only part of the way complete
-            # TODO-ROB: Add script for parsing both time record files that are only part of the way complete
 
 # TODO-ROB Add HGNC python module
     @staticmethod
@@ -153,44 +159,46 @@ class CompGenAnalysis(object):
 
 # ***********************************************PRE BLAST ANALYSIS TOOLS********************************************* #
 # ***********************************************PRE BLAST ANALYSIS TOOLS********************************************* #
-#    def my_gene_info(self):
+    def my_gene_info(self):
         # TODO-ROB TODO-SHAE
         # TODO Add custom mygene options
         # Initialize variables and import my-gene search command
-#        urls = []
-#        df = self.raw_data
-#        mg = mygene.MyGeneInfo()
+        urls = []
+        df = self.raw_acc_data
+        mg = mygene.MyGeneInfo()
         # Create a my-gene query handle to get the data
-#        human = list(x.upper() for x in self.blast_human)
-#        mygene_query = mg.querymany(human, scopes='refseq',
-#                                    fields='symbol,name,entrezgene,summary',
-#                                    species='human', returnall=True, as_dataframe=True,
-#                                    size=1, verbose=True)
+        human = list(x.upper() for x in self.blast_human)
+        mygene_query = mg.querymany(human, scopes='refseq',
+                                    fields='symbol,name,entrezgene,summary',
+                                    species='human', returnall=True, as_dataframe=True,
+                                    size=1, verbose=True)
         # TODO-ROB:  Logging here
         # TODO-SHAE:  COME TO HE DARK SIDE SHAURITA!!!!!!!!!!!!
 
         # Turn my-gene queries into a data frame and then reset the index
-#        mygene_query['out'].reset_index(level=0, inplace=True)
-#        mg_df = pd.DataFrame(mygene_query['out'])
-#        mg_df.drop(mg_df.columns[[1, 2, 6]], axis=1, inplace=True)
+        mygene_query['out'].reset_index(level=0, inplace=True)
+        mg_df = pd.DataFrame(mygene_query['out'])
+        mg_df.drop(mg_df.columns[[1, 2, 6]], axis=1, inplace=True)
         # Rename the columns
-#        mg_df.rename(columns={'entrezgene': 'Entrez ID', 'summary':
-#                              'Gene Summary', 'query': 'RefSeqRNA Accession', 'name': 'Gene Name'},
- #                    inplace=True)
+        mg_df.rename(columns={'entrezgene': 'Entrez ID', 'summary':
+                             'Gene Summary', 'query': 'RefSeqRNA Accession', 'name': 'Gene Name'},
+                     inplace=True)
 
         # Create NCBI links using a for loop and the Entrez IDs
-#        for entrez_id in mg_df['Entrez ID']:
-            # Format the url so that it becomes an html hyperlink
-#            url = '<a href="{0}">{0}</a>'.format('https://www.ncbi.nlm.nih.gov/gene/' + str(entrez_id))
-#            urls.append(url)
+        urls = [urls.append('<a href="{0}">{0}</a>'.format('https://www.ncbi.nlm.nih.gov/gene/' + str(entrez_id)))
+                for entrez_id in mg_df['Entrez ID']]
+        # for entrez_id in mg_df['Entrez ID']:
+        #      # Format the url so that it becomes an html hyperlink
+        #     url = '<a href="{0}">{0}</a>'.format('https://www.ncbi.nlm.nih.gov/gene/' + str(entrez_id))
+        #     urls.append(url)
         # Turn the ncbi urls list into a data frame
-#        ncbi = pd.DataFrame(urls, columns=['NCBI Link'], dtype=str)
+        ncbi = pd.DataFrame(urls, columns=['NCBI Link'], dtype=str)
         # Merge, sort, and return the my-gene data frame
-#        hot_data = pd.concat([df.Tier, df.Gene, mg_df, ncbi], axis=1)
-#        hot_data.rename(columns={'Gene': 'Gene Symbol'}, inplace=True)
-#        hot_data = hot_data.sort_values(['Tier'], ascending=True)
+        hot_data = pd.concat([df.Tier, df.Gene, mg_df, ncbi], axis=1)
+        hot_data.rename(columns={'Gene': 'Gene Symbol'}, inplace=True)
+        hot_data = hot_data.sort_values(['Tier'], ascending=True)
 
-#        return hot_data
+        return hot_data
 # ***********************************************PRE BLAST ANALYSIS TOOLS********************************************* #
 # ***********************************************PRE BLAST ANALYSIS TOOLS********************************************* #
 
@@ -235,8 +243,9 @@ class CompGenAnalysis(object):
         self.blast_rhesus = self.df.Macaca_mulatta.tolist()
 
         # Gene analysis
-#        self.mygene_df = self.my_gene_info()
-
+        self.mygene_df = self.my_gene_info()
+        self.mygene_df.to_csv(self.mygene_df, self.mygene_path)
+        pd.DataFrame.to_excel()
         # Accession file analysis
         if self.__post_blast:
             self.missing_dict = self.get_miss_acc()
@@ -250,26 +259,9 @@ class CompGenAnalysis(object):
             self.duplicated_dict = self.get_dup_acc()
             self.duplicated_accessions = self.duplicated_dict['accessions']
             self.duplicated_organisms = self.duplicated_dict['organisms']
+            self.duplicated_genes = self.duplicated_dict['genes']
             self.duplicated_random = self.duplicated_dict['random']
             self.duplicated_other = self.duplicated_dict['other']
-            self.dup_org_count = {}
-            self.dup_gene_count = {}
-            dup_org = pd.DataFrame.from_dict(self.duplicated_organisms)
-            for org in self.org_list:
-                try:
-                    self.dup_org_count[org] = dup_org.T[org].count()
-                except KeyError:
-                    pass
-
-            dup_gene = pd.DataFrame.from_dict(self.duplicated_genes)
-            for gene in self.gene_list:
-                try:
-                    self.dup_gene_count[gene] = dup_gene.T[gene].count()
-                except KeyError:
-                    pass
-            self.dup_acc_count = {}
-            for accession, go in self.duplicated_accessions.items():
-                self.dup_acc_count[accession] = go.__len__()
 
     def get_accession(self, gene, organism):
         """Takes a single gene and organism and returns
@@ -323,20 +315,92 @@ class CompGenAnalysis(object):
             org_list.append(org)
         return org_list
 
-    def make_excel_files(self):
-        print('Under construction')
-        post_blast_file = pd.ExcelWriter('%s_post_blast_analysis.xlsx')
+    def make_excel_files(self, project_name):
+        # TODO-ROB  Fix the output format of the excel file.  View a sample output in /Orthologs/comp_gen
+        pba_file_path = str(self.data / Path(self.project + '_pba.xlsx'))
+        pb_file = pd.ExcelWriter(pba_file_path)
         # Duplicated Accessions
-        acc_ws = pd.DataFrame.from_dict(self.dup_acc_count, orient='index')
-        acc_ws.columns = ['Count']
+        try:
+            acc_ws = pd.DataFrame.from_dict(self.dup_acc_count, orient='index')
+            acc_ws.columns = ['Count']
+            acc_ws.to_excel(pb_file, sheet_name="Duplicate Count by Accession")
+        except ValueError:
+            pass
+        # Duplicate Genes
+        try:
+            dup_gene_ws = pd.DataFrame.from_dict(self.dup_gene_count, orient='index')
+            dup_gene_ws.columns = ['Count']
+            dup_gene_ws.to_excel(pb_file, sheet_name="Duplicate Count by Gene")
 
-            # Genetic Duplicates
-            # Species Duplicates
-            # Random Duplicates
-            # Other Duplicates
+            gene_org_dup = {}
+            for gene, dup_dict in self.duplicated_genes.items():
+                gene_org_dup[gene] = []
+                for acc, genes in self.duplicated_genes[gene].items():
+                    gene_org_dup[gene].append(genes)
+            dup_org_ws2 = pd.DataFrame.from_dict(gene_org_dup, orient='index')
+            dup_org_ws2.T.to_excel(pb_file, sheet_name="Duplicate Org Groups by Gene")
+        except ValueError:
+            pass
+        # Species Duplicates
+        try:
+            dup_org_ws1 = pd.DataFrame.from_dict(self.dup_org_count, orient='index')
+            dup_org_ws1.columns = ['Count']
+            dup_org_ws1.to_excel(pb_file, sheet_name="Duplicate Count by Org")
+
+            org_gene_dup = {}
+            for gene, dup_dict in self.duplicated_organisms.items():
+                org_gene_dup[gene] = []
+                for acc, genes in self.duplicated_organisms[gene].items():
+                    org_gene_dup[gene].append(genes)
+            dup_org_ws2 = pd.DataFrame.from_dict(org_gene_dup, orient='index')
+            dup_org_ws2.T.to_excel(pb_file, sheet_name="Duplicate Gene Groups by Org")
+        except ValueError:
+            pass
+        # Random Duplicates
+        try:
+            rand_ws = pd.DataFrame.from_dict(self.duplicated_random, orient='index')
+            rand_ws.to_excel(pb_file, sheet_name="Random Duplicates")
+        except ValueError:
+            pass
+        # Other Duplicates
+        try:
+            other_ws = pd.DataFrame.from_dict(self.duplicated_other, orient='index')
+            other_ws.to_excel(pb_file, sheet_name="Other Duplicates")
+        except ValueError:
+            pass
         # Missing by Organism
+        org_gene_ms = {}
+        org_gene_ms_count = {}
+        try:
+            for org, ms_dict in self.missing_organsims.items():
+                for key, value in ms_dict.items():
+                    if key == 'missing genes':
+                        org_gene_ms[org] = value
+                    else:
+                        org_gene_ms_count[org] = value
+            org_ms_count = pd.DataFrame.from_dict(org_gene_ms_count, orient='index')
+            org_ms_count.to_excel(pb_file, sheet_name="Missing Genes Count")
+            org_ms = pd.DataFrame.from_dict(org_gene_ms, orient='index')
+            org_ms.to_excel(pb_file, sheet_name="Missing Genes by Org")
+        except ValueError:
+            pass
         # Missing by Gene
-
+        gene_org_ms = {}
+        gene_org_ms_count = {}
+        try:
+            for gene, ms_dict in self.missing_genes.items():
+                for key, value in ms_dict.items():
+                    if key == 'missing genes':
+                        gene_org_ms[gene] = value
+                    else:
+                        gene_org_ms_count[gene] = value
+            gene_ms_count = pd.DataFrame.from_dict(gene_org_ms_count, orient='index')
+            gene_ms_count.to_excel(pb_file, sheet_name="Missing Organisms Count")
+            gene_ms = pd.DataFrame.from_dict(gene_org_ms, orient='index')
+            gene_ms.to_excel(pb_file, sheet_name="Missing Organisms by Genes")
+        except ValueError:
+            pass
+        pb_file.save()
 
 # **********************************************POST BLAST ANALYSIS TOOLS********************************************* #
 # **********************************************POST BLAST ANALYSIS TOOLS********************************************* #
@@ -428,16 +492,33 @@ class CompGenAnalysis(object):
                     if genes.count(g) == 1 and orgs.count(o) == 1:
                         del duplicated_dict['organisms'][o]
                         del duplicated_dict['genes'][g]
-                        duplicated_dict['random'][accession] = go
+                        if accession not in duplicated_dict['random']:
+                            duplicated_dict['random'][accession] = []
+                        duplicated_dict['random'][accession].append(go)
                         # There is another category of duplication that I'm missing
                         # TODO-ROB:  If an other exists throw a warning in the logs
                     else:
                         del duplicated_dict['organisms'][o]
                         del duplicated_dict['genes'][g]
-                        if len(duplicated_dict['other'][accession]) > 0:
-                            duplicated_dict['other'][accession].append(go)
-                        else:
-                            duplicated_dict['other'][accession] = go
+                        if accession not in duplicated_dict['other']:
+                            duplicated_dict['other'][accession] = []
+                        duplicated_dict['other'][accession].append(go)
+            # Get a count
+            dup_org = pd.DataFrame.from_dict(self.duplicated_organisms)
+            for org in self.org_list:
+                try:
+                    self.dup_org_count[org] = dup_org[org].count()
+                except KeyError:
+                    self.dup_org_count[org] = 0
+
+            dup_gene = pd.DataFrame.from_dict(self.duplicated_genes)
+            for gene in self.gene_list:
+                try:
+                    self.dup_gene_count[gene] = dup_gene[gene].count()
+                except KeyError:
+                    self.dup_gene_count[gene] = 0
+            for accession, go in self.duplicated_accessions.items():
+                self.dup_acc_count[accession] = go.__len__()
         return duplicated_dict
 
     def get_miss_acc(self, acc_file=None):
