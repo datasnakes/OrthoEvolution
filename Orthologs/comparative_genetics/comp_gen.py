@@ -61,8 +61,8 @@ class CompGenAnalysis(PM):
     __data = ''
 
     # TODO-ROB:  CREAT PRE-BLAST and POST-BLAST functions
-    def __init__(self, repo, user, project, research, research_type, acc_file=None, taxon_file=None, paml_file=None, go_list=None, post_blast=True, hgnc=False):
-        super().__init__(repo=repo, user=user, project=project, research=research, research_type=research_type)
+    def __init__(self, repo, user, project, research, research_type, acc_file=None, taxon_file=None, paml_file=None, go_list=None, post_blast=True, hgnc=False, **kwargs):
+        super().__init__(repo=repo, user=user, project=project, research=research, research_type=research_type, **kwargs)
 
         self.project = project
         # Private Variables
