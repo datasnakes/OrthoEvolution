@@ -117,7 +117,7 @@ class Mana(object):
             no_input = False
             e_c = None
             # TODO-ROB change cookiecutter so that it can take pathlike objects
-        cookiecutter(str(self.repo_cookie), no_input=no_input, extra_context=e_c, output_dir=self.file_home)
+        cookiecutter(str(self.repo_cookie), no_input=no_input, extra_context=e_c, output_dir=str(self.file_home))
 
     # def git_ignore(self, path):
     #     """Get the ignored file patterns from the .gitignore file in the repo."""
@@ -241,7 +241,7 @@ class RepoMana(Mana):
         # This is used ONLY when the user registers in flask
         # TODO-ROB:  Create the cookiecutter.json file
         # extra_context overrides user and default configs
-        cookiecutter(self.user_cookie, no_input=True, extra_context={"user_name": self.user}, output_dir=self.users)
+        cookiecutter(str(self.user_cookie), no_input=True, extra_context={"user_name": self.user}, output_dir=str(self.users))
         # TODO-ROB do we need create user hooks?
 
 # datasnakes~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -294,7 +294,7 @@ class UserMana(RepoMana):
         else:
             no_input = False
             e_c = None
-        cookiecutter(self.project_cookie, extra_context=e_c, no_input=no_input, output_dir=self.project_path)
+        cookiecutter(str(self.project_cookie), extra_context=e_c, no_input=no_input, output_dir=str(self.project_path))
 
     def zip_mail(self, comp_filename, zip_path, ):
         Zipper = ZipUtilities(comp_filename, zip_path)
@@ -354,7 +354,7 @@ class WebMana(RepoMana):
                "website_path": os.path.join(str(self.website_path), ''),
                "website_host": self.web_host,
                "website_port": self.web_port}
-        cookiecutter(str(self.website_cookie), no_input=True, extra_context=e_c, output_dir=self.flask)
+        cookiecutter(str(self.website_cookie), no_input=True, extra_context=e_c, output_dir=str(self.flask))
         # Get the absolute path to the script that starts the flask server
         script_path = self.website_path / Path('hooks') / Path('post_gen_project.sh')
         #scripts_file_path = find_hook('post_gen_project.sh', hooks_dir=str(script_path))
@@ -412,12 +412,12 @@ class ProjMana(UserMana):
         '''
         e_c = {"research_type": self.research_type,
                "research_name": self.research}
-        cookiecutter(self.research_cookie, no_input=True, extra_context=e_c, output_dir=self.research_path)
+        cookiecutter(str(self.research_cookie), no_input=True, extra_context=e_c, output_dir=str(self.research_path))
         if new_app is True:
             self.create_app()
 
     def create_app(self):
         e_c = {"app_name": self.app}
-        cookiecutter(self.app_cookie, no_input=True, extra_context=e_c, output_dir=self.app_path)
+        cookiecutter(str(self.app_cookie), no_input=True, extra_context=e_c, output_dir=str(self.app_path))
 
 
