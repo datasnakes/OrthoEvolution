@@ -1,4 +1,3 @@
 {
-  "project_type" : ["other", "public", "private"],
-  "project_name" : "os.environ['NEW_PROJECT']json"
+  "project_name" : "json"
 }
