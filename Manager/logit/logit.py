@@ -31,7 +31,7 @@ class LogIt(object):
 
         self.date_format = '%a %b %d at %I:%M:%S %p %Y'  # Used to add as a date
         self.log_format = '%(name)s - [%(levelname)-2s]: %(message)s'
-        self.slack = self.slack_config()
+        # self.slack = self.slack_config()
         self.basic = self.generic_logger(logfile, logname, log.DEBUG, self.log_format)
 
     def _get_file(self, filename):
@@ -55,25 +55,25 @@ class LogIt(object):
 # ******************************************SLACK****************************************** #
 # ******************************************SLACK****************************************** #
 
-    @staticmethod
-    def slack_config():
-        config = configparser.ConfigParser()
-        config.read('bin/orthologs.ini')
-        apikey = config['APIKEYS']['slack']
-        slack = Slacker(apikey)
-        return slack
-
-    # Definition for uploading images
-    def upload_img(self, channel, imgfile):
-        self.slack.files.upload(imgfile, channel=channel)
-
-    # Definition for uploading files
-    def upload_file(self, channel, file):
-        self.slack.files.upload(file, channel=channel)
-
-    # Definition for posting messages
-    def message_slack(self, channel, message, username):
-        self.slack.chat.post_message(channel, message, username, as_user=True)
+    # @staticmethod
+    # def slack_config():
+    #     config = configparser.ConfigParser()
+    #     config.read('bin/orthologs.ini')
+    #     apikey = config['APIKEYS']['slack']
+    #     slack = Slacker(apikey)
+    #     return slack
+    #
+    # # Definition for uploading images
+    # def upload_img(self, channel, imgfile):
+    #     self.slack.files.upload(imgfile, channel=channel)
+    #
+    # # Definition for uploading files
+    # def upload_file(self, channel, file):
+    #     self.slack.files.upload(file, channel=channel)
+    #
+    # # Definition for posting messages
+    # def message_slack(self, channel, message, username):
+    #     self.slack.chat.post_message(channel, message, username, as_user=True)
 
 # ******************************************SLACK****************************************** #
 # ******************************************SLACK****************************************** #
