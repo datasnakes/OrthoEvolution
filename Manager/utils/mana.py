@@ -36,7 +36,7 @@ import Tools
 # datasnakes~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # datasnakes~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-
+# TODO-ROB use **kwargs and **args to cut down on parameters
 class Mana(object):
     """
     This is the directory management base class.  It 
@@ -212,7 +212,6 @@ class RepoMana(Mana):
         # TODO-ROB change the home parameter to the output directory parameter
         super().__init__(repo=repo, home=home, new_repo=new_repo)
         self.repo = repo
-
         self.docs = self.repo_path / Path('docs')
         self.misc = self.repo_path / Path('misc')
         self.users = self.repo_path / Path('users')
@@ -255,7 +254,7 @@ class UserMana(RepoMana):
     # TODO-ROB The virtual environment can be the name of the user
     # TODO-ROB When the user logs in, they will activate the virtual environment
     # TODO-ROB USE SQL here to see if the user db contains the username
-    def __init__(self, repo, user, project=None, home=os.getcwd(), new_user=False, new_project=False):
+    def __init__(self, repo, user, project=None, home=os.getcwd(), new_user=False, new_project=False, **kwargs):
         '''
         The User Management class manages the current users directories.
         This class gives access to user paths, and provides functionality
@@ -269,7 +268,7 @@ class UserMana(RepoMana):
         :param new_user (bool):  Flag for creating a new user. 
         :param new_project (bool):  Flag for creating a new project. 
         '''
-        super().__init__(repo=repo, user=user, home=home, new_user=new_user)
+        super().__init__(repo=repo, user=user, home=home, new_user=new_user, **kwargs)
         self.user = user
 
         self.user_index = self.user_path / Path('index')
@@ -309,7 +308,7 @@ class UserMana(RepoMana):
 
 class WebMana(RepoMana):
 
-    def __init__(self, repo, website, host='0.0.0.0', port='5252', home=os.getcwd(), new_website=False, create_admin=False):
+    def __init__(self, repo, website, host='0.0.0.0', port='5252', home=os.getcwd(), new_website=False, create_admin=False, **kwargs):
         '''
         This installs a template for Flask using cookiecutter.  The 
         custom datasnakes cookie for this template has been edited for
@@ -326,7 +325,7 @@ class WebMana(RepoMana):
         :param create_admin:  Flag for creating a new admin for the website via FLASK USER.
         (Note:  This parameter is not used currently in development.)
         '''
-        super().__init__(repo=repo, home=home)
+        super().__init__(repo=repo, home=home, **kwargs)
         self.website = website
         self.web_host = host
         self.web_port = port
@@ -368,7 +367,7 @@ class WebMana(RepoMana):
 class ProjMana(UserMana):
 
     def __init__(self, repo, user, project, research=None, research_type=None, app=None, home=os.getcwd(),
-                 new_project=False, new_research=False, new_app=False):
+                 new_project=False, new_research=False, new_app=False, **kwargs):
         """
         :param repo (string):  The name of the repository.  
         :param user (string):  The name of the current user if any.
@@ -383,7 +382,7 @@ class ProjMana(UserMana):
 
         """
         super().__init__(repo=repo, user=user, project=project, home=home,
-                         new_project=new_project)
+                         new_project=new_project, **kwargs)
         # TODO-ROB Go back to the drawing board for the public/private/other choices.  (FLASK forms)
         # TODO-ROB determine how to get cookiecutter to skip over directories that already exist
         self.project = project
@@ -392,6 +391,7 @@ class ProjMana(UserMana):
 
         # Project/Research Directories
         self.research_path = self.project_path / Path(research_type) / Path(research)
+        self.project_archive = self.project_path / Path('archive')
         self.project_index = self.research_path / Path('index')
         self.data = self.research_path / Path('data')
         self.raw_data = self.research_path / Path('raw_data')
