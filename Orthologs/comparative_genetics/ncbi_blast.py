@@ -17,14 +17,30 @@ class BLASTAnalysis(CGA):
         # TODO-ROB Add Mana directories
         # Private variables
         self.__home = os.getcwd()
-        # name, ext = os.path.splitext(template)
-        # new_name = "%s_template%s" % (self.project, ext)
-        # os.rename(template, new_name)
-        self.template_filename = self.acc_filename
-        self.template_path = self.data / Path(self.template_filename)
-        self.__taxon_filename = taxon_file
+        if taxon_file is not None:
+            self.__taxon_filename = taxon_file
+            self.taxon_path = self.project_index / Path(taxon_file)
         self.__post_blast = post_blast
         self.__save_data = True
+
+        if template is not None:
+            self.template_filename = template
+            self.template_path = self.project_index / Path(self.template_filename)
+            self.building_filename = str(template[:-4] + 'building.csv')
+            self.building_time_filename = self.building_filename.replace('building.csv', 'building_time.csv')
+        else:
+            self.building_filename = str(project + 'building.csv')
+            self.building_time_filename = self.building_filename.replace('building.csv', 'building_time.csv')
+
+        # Initialize a data frame and file to add accession numbers to
+        # Initialize a data frame and file to add blast times to
+        self.building = self.raw_acc_data
+        del self.building['Tier']
+        del self.building['Homo_sapiens']
+        self.building = self.building.set_index('Gene')
+        self.building_time = self.building
+        self.building_file_path = self.raw_data / Path(self.building_filename)
+        self.building_time_file_path = self.raw_data / Path(self.building_time_filename)
 
         # Initialize Logging
         df = LogIt()
@@ -41,21 +57,6 @@ class BLASTAnalysis(CGA):
         #                 format=self.__log_format,
         #                 filename="logs/accessions2blastxml_%s.log" % str(d.now().strftime(self.__archive_format)))
         # self.blast_log = log.getLogger('Blastn')
-
-        # Initialize a data frame to add accession files to
-        self.building = self.raw_acc_data
-        del self.building['Tier']
-        del self.building['Homo_sapiens']
-        self.building = self.building.set_index('Gene')
-        build_file = str(template[:-4] + 'building.csv')
-        self.__building_filename = build_file
-        self.__building_file_path = self.data / Path(self.__building_filename)
-
-        # Initialize some timing files to add times to
-        self.building_time = self.building
-        time_file = build_file.replace('building.csv', 'building_time.csv')
-        self.__building_time_filename = time_file
-        self.__building_time_file_path = self.data / Path(self.__building_time_filename)
 
     def add_accession(self, gene, organism, accession):
         """Takes an accession and adds in to the building dataframe,
@@ -87,7 +88,7 @@ class BLASTAnalysis(CGA):
         temp = self.building.reset_index()
         temp.insert(0, 'Tier', self.df['Tier'])
         if self.__save_data is True:
-            temp.to_csv(self.__building_file_path)
+            temp.to_csv(self.building_file_path)
 
     def add_blast_time(self, gene, organism, start, end):
         """Takes the start/end times and adds in to the building_time 
@@ -98,7 +99,7 @@ class BLASTAnalysis(CGA):
         temp = self.building_time.reset_index()
         temp.insert(0, 'Tier', self.df['Tier'])
         if self.__save_data is True:
-            temp.to_csv(self.__building_time_file_path)
+            temp.to_csv(self.building_time_file_path)
 
     def post_blast_analysis(self, acc_file):
         # TODO-ROB Make this into the CGA.make_excel_files() method
