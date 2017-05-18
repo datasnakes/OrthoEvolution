@@ -101,10 +101,14 @@ class BLASTAnalysis(CGA):
         if self.save_data is True:
             temp.to_csv(self.building_time_file_path)
 
-    def post_blast_analysis(self, project_name):
+    def post_blast_analysis(self, project_name, removed_genes=None):
         # TODO-ROB  Fix the output format of the excel file.  View a sample output in /Orthologs/comp_gen
         pba_file_path = str(self.data / Path(self.project + '_pba.xlsx'))
         pb_file = pd.ExcelWriter(pba_file_path)
+        # Removed Genes
+        if removed_genes is not None:
+            rm_ws = pd.DataFrame(removed_genes)
+            rm_ws.to_excel(pb_file, sheet_name="Removed Genes")
         # Duplicated Accessions
         try:
             acc_ws = pd.DataFrame.from_dict(self.dup_acc_count, orient='index')
