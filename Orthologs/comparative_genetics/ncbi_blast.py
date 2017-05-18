@@ -3,7 +3,7 @@ import os
 from pathlib import Path
 import pandas as pd
 from Orthologs.comparative_genetics.comp_gen import CompGenAnalysis as CGA
-# from Orthologs.manager.logit.logit import LogIt
+from Manager.logit.logit import LogIt
 
 
 class BLASTAnalysis(CGA):
@@ -43,10 +43,10 @@ class BLASTAnalysis(CGA):
         self.building_time_file_path = self.raw_data / Path(self.building_time_filename)
 
         # Initialize Logging
-        df = LogIt()
-        self.blastn_log = df.blastn()
-        self.postblast_log = df.post_blast()
-        self.config_log = df.config(self.user_log / Path('BLAST.log'))
+        df = LogIt(str(self.user_log / Path('blast_test.log')), 'blastn')
+        self.blastn_log = df.basic
+        #self.postblast_log = df.basic
+        #self.config_log = df.basic(self.user_log / Path('BLAST.log'))
         self.__date_format = df.date_format
         self.get_time = time.time  # To get the time use 'get_time()'
         # Logging variables
