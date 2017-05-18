@@ -45,8 +45,8 @@ class BLASTn(BT):
         Path.mkdir(self.__xml_path, parents=True, exist_ok=True)
         # # Initialize Logging
         # self.__blastn_log = LogIt.blastn()
-        df = LogIt()
-        self.date_format = df.date_format
+        #df = LogIt()
+        #self.date_format = df.date_format
         # self.get_time = time.time  # To get the time use 'get_time()'
         # TODO-ROB:  Add a query organism variable
         self.query_gi_dict = {}
