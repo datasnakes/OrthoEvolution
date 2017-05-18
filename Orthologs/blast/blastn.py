@@ -30,10 +30,10 @@ from Orthologs.comparative_genetics.ncbi_blast import BLASTAnalysis as BT
 # TODO-ROB:  Add function for renaming and moving the builder files if the BLAST completed
 
 class BLASTn(BT):
-    def __init__(self, repo, user, project, research, research_type, template=None, save_data=True):
+    def __init__(self, repo, user, project, research, research_type, template=None, save_data=True, **kwargs):
         """Inherit from the BLASTing Template."""
         super().__init__(template=template, repo=repo, user=user, project=project,
-                         research=research, research_type=research_type, save_data=save_data)
+                         research=research, research_type=research_type, save_data=save_data, **kwargs)
         # # TODO-ROB Add taxon parameter
         # Manage Directories
         self.__home = Path(os.getcwd())
