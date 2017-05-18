@@ -30,10 +30,10 @@ from Orthologs.comparative_genetics.ncbi_blast import BLASTAnalysis as BT
 # TODO-ROB:  Add function for renaming and moving the builder files if the BLAST completed
 
 class BLASTn(BT):
-    def __init__(self, repo, user, project, research, research_type, template=None):
+    def __init__(self, repo, user, project, research, research_type, template=None, save_data=True):
         """Inherit from the BLASTing Template."""
         super().__init__(template=template, repo=repo, user=user, project=project,
-                         research=research, research_type=research_type)
+                         research=research, research_type=research_type, save_data=save_data)
         # # TODO-ROB Add taxon parameter
         # Manage Directories
         self.__home = Path(os.getcwd())
@@ -60,6 +60,8 @@ class BLASTn(BT):
         # For completed blast files
         self.complete_file = self.project + '_MAF.csv'
         self.complete_file_path = self.data / Path(self.complete_file)
+        self.complete_time_file = self.project + '_TIME.csv'
+        self.complete_time_file_path = self.data / Path(self.complete_time_file)
 
     @staticmethod
     def map_func(hit):
@@ -346,5 +348,7 @@ class BLASTn(BT):
                 # If the BLAST has gone through all orthologs then create a master accession file.
                 if gene == genes[-1] and organism == self.org_list[-1]:
                     shutil.copy(str(self.building_file_path), str(self.complete_file_path))
-                    # archive here
-
+                    shutil.copy(str(self.building_time_file_path), str(self.complete_time_file_path))
+                    if self.save_data is True:
+                        self.post_blast_analysis(self.project)
+                    # TODO-ROB Archive function here
