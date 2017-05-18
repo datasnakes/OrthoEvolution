@@ -1,10 +1,34 @@
-##############################################################################
-# PyCharm Community Edition
 # -*- coding: utf-8 -*-
 """
-GPCR-Orthologs-Project
-Accession2 updated on 11/17/2016 at 1:09 PM
-##############################################################################
+File Name: comp_gen.py
+Description: Parses an accession file with the designated format in order to
+             provide easy handles for different pieces of data.
+
+Author: Robert Gilmore
+Project Name: Orthologs Project
+"""
+# Modules Used
+import os
+#import mygene
+from ete3 import NCBITaxa
+import pandas as pd
+from pathlib import Path
+from pandas import ExcelWriter
+#from Mana import Mana
+
+# Directory Initializations:
+# Use Mana() class here so that we can stay organized
+# and more easily access the proper directories on command
+os.chdir(os.path.dirname(__file__))
+home = os.getcwd()
+project = "Orthologs-Project"
+#where = Mana(home, project)
+
+class CompGenAnalysis(object):
+    """ Comparative Genetics Analysis.
+
+    Parses an accession file with the designated format in order to
+    provide easy handling for data.
 
     Input:  An open .csv file object that contains a header of organisms.  The
     first column ranks the gene by tier, the second column is a HUGO Gene
@@ -18,43 +42,7 @@ Accession2 updated on 11/17/2016 at 1:09 PM
 
     Output:  A pandas Data-Frame, Pivot-Table, and associated lists and dictionaries.
 
-    Description:  Parses an accession file with the designated format in order to
-    provide easy handles for different pieces of data.
-
-    Notes:  It doesn't matter what tier.  Just parse the file.
-
-##############################################################################
-@author: rgilmore
-"""
-##############################################################################
-# Libraries:
-
-import os
-#import mygene
-from ete3 import NCBITaxa
-import pandas as pd
-from pathlib import Path
-from pandas import ExcelWriter
-#from Mana import Mana
-
-##############################################################################
-# Directory Initializations:
-# Use Mana() class here so that we can stay organized
-# and more easily access the proper directories on command
-os.chdir(os.path.dirname(__file__))
-home = os.getcwd()
-project = "Orthologs-Project"
-#where = Mana(home, project)
-
-# Add a path that contains custom libraries for import
-# os.sys.path.append()
-##############################################################################
-# Initializations:
-
-##############################################################################
-
-
-class CompGenAnalysis(object):
+    """
     __home = ''
     __acc_filename = ''
     __paml_filename = ''
@@ -71,10 +59,12 @@ class CompGenAnalysis(object):
         self.__taxon_filename = taxon_file
         self.__paml_filename = paml_file
         self.__acc_filename = acc_file
+
         # Handle the taxon_id file and blast query
         if taxon_file is not None:
             # File init
             self.__taxon_path = Path(home) / Path('index') / Path(self.__taxon_filename)
+
         # Handle the paml organism file
         if paml_file is not None:
             # File init
@@ -161,13 +151,13 @@ class CompGenAnalysis(object):
 #        df = self.raw_data
 #        mg = mygene.MyGeneInfo()
         # Create a my-gene query handle to get the data
-#        human = list(x.upper() for x in self.blast_human)
+#        human = list([accession.upper() for accession in self.blast_human])
 #        mygene_query = mg.querymany(human, scopes='refseq',
 #                                    fields='symbol,name,entrezgene,summary',
 #                                    species='human', returnall=True, as_dataframe=True,
 #                                    size=1, verbose=True)
         # TODO-ROB:  Logging here
-        # TODO-SHAE:  COME TO HE DARK SIDE SHAURITA!!!!!!!!!!!!
+        # TODO-SHAE:  COME TO THE DARK SIDE SHAURITA!!!!!!!!!!!!
 
         # Turn my-gene queries into a data frame and then reset the index
 #        mygene_query['out'].reset_index(level=0, inplace=True)
@@ -197,7 +187,8 @@ class CompGenAnalysis(object):
     def get_master_lists(self, df=None, csv_file=None):
         """This function populates the organism and gene lists with a data frame.
         This function also populates several dictionaries.
-        The dictionaries contain separate keys for Missing genes."""
+        The dictionaries contain separate keys for Missing genes.
+        """
         if csv_file is not None:
             self.__init__(csv_file)
             df = self.df
@@ -256,8 +247,14 @@ class CompGenAnalysis(object):
             self.duplicated_other = self.duplicated_dict['other']
 
     def get_accession(self, gene, organism):
-        """Takes a single gene and organism and returns
-        a single accession number."""
+        """Get the accession of a gene.
+
+        Args:
+            gene = input a gene
+            organism = input an organism
+        Returns:
+            accession = the accession will be returned.
+        """
         maf = self.df
         accession = maf.get_value(gene, organism)
         if isinstance(accession, float):
@@ -265,10 +262,16 @@ class CompGenAnalysis(object):
         return accession
 
     def get_accessions(self, go_list=None):
-        """Can take a gene/organism list as an argument:
-                go_list = [[gene.1, org.1], ... , [gene.n, org.n]]
-        Or it takes an empty gene/organisms list, which returns the 
-        entire list of accession numbers."""
+        """ Get a list of acessions.
+
+        Args:
+            Can take a gene/organism list as an argument:
+            go_list = [[gene.1, org.1], ... , [gene.n, org.n]]
+
+            It also takes an empty gene/organisms list.
+        Returns:
+            It returns an entire list of accession numbers.
+        """
         if go_list is None:
             accessions = self.acc_list
         else:
@@ -280,16 +283,21 @@ class CompGenAnalysis(object):
 
     def get_accession_alignment(self, gene):
         """Takes a single gene and returns a list of accession numbers
-        for the different orthologs."""
+        for the different orthologs.
+        """
         maf = self.df
         accession_alignment = maf.T[gene].tolist()[1:]
         return accession_alignment
 
     def get_tier_frame(self, tiers=None):
-        """Takes a list of tiers or nothing.
-        Returns a dictionary as:
+        """
+        Args:
+            Takes a list of tiers or nothing.
+        Returns:
+            It returns a dictionary.
             keys:  Tier list
-            values:  Data-Frame for each tier"""
+            values:  Data-Frame for each tier.
+        """
         maf = self.df
         tier_frame_dict = {}
         if tiers is None:
@@ -308,11 +316,17 @@ class CompGenAnalysis(object):
         return org_list
 
     def make_excel_file(self):
-        print('Under construction')
-# **********************************************POST BLAST ANALYSIS TOOLS********************************************* #
-# **********************************************POST BLAST ANALYSIS TOOLS********************************************* #
+        """ UNDER DEVELOPMENT!!!
+        This subclass will create an excel file of all of the data.
+        """
+        print(self.__doc__)
 
     def get_taxon_dict(self):
+        """ Get the taxonomny information about each organism using ETE3.
+
+        Returns:
+            taxa_dict = dict of organisms and their taxonomy ids.
+        """
         ncbi = NCBITaxa()
         taxa_dict = {}
         for organism in self.ncbi_orgs:
@@ -329,7 +343,8 @@ class CompGenAnalysis(object):
 
     def get_acc_dict(self):
         """This function takes a list of accession numbers and returns a dictionary
-        which contains the corresponding genes/organisms."""
+        which contains the corresponding genes/organisms.
+        """
         gene_list = self.gene_list
         org_list = self.org_list
         go = {}
@@ -349,9 +364,17 @@ class CompGenAnalysis(object):
         return go
 
     def get_dup_acc(self):
-        """This function is used to analyze an accession file post-BLAST.  It 
-        takes an accession dictionary (e.g. dict['XM_000000'] = [[g,o], [g,o]])
-        and finds the accession that contain duplicates."""
+        """Get duplicate accessions.
+
+        This function is used to analyze an accession file post-BLAST.
+
+        Args:
+            It takes an accession dictionary.
+            (e.g. dict['XM_000000'] = [[g,o], [g,o]])
+
+        Returns:
+            A dict of duplicates.
+        """
         duplicated_dict = dict()
         duplicated_dict['accessions'] = {}
         duplicated_dict['genes'] = {}
@@ -359,6 +382,7 @@ class CompGenAnalysis(object):
         duplicated_dict['random'] = {}
         duplicated_dict['other'] = {}
         acc_dict = self.acc_dict
+
         for accession, go_list in acc_dict.items():
             # Finding duplicates by using the length of the accession dictionary
             if len(go_list) > 1:
@@ -370,28 +394,34 @@ class CompGenAnalysis(object):
                 for go in go_list:
                     g = go[0]
                     o = go[1]
+
                     # Initialize the dictionaries if they haven't already been
                     if g not in duplicated_dict['genes']:
                         duplicated_dict['genes'][g] = {}
                     if o not in duplicated_dict['organisms']:
                         duplicated_dict['organisms'][o] = {}
+
                     # Categorize the different types of duplication
                     # Duplicates that persist across a gene
                     if genes.count(g) == len(go_list):
                         duplicated_dict['genes'][g][accession] = orgs
                         break
-                    # Duplicates that persist across an organisms
+
+                    # Duplicates that persist across an organism
                     elif orgs.count(o) == len(go_list):
                         duplicated_dict['organisms'][o][accession] = genes
                         break
+
                     # Duplication across a gene, but also somewhere else
                     elif genes.count(g) != 1:
                         alt_orgs = list(org for gene, org in go_list if gene == g)
                         duplicated_dict['genes'][g][accession] = alt_orgs
+
                     # Duplication across an organisms, but also somewhere else
                     elif orgs.count(o) != 1:
                         alt_genes = list(gene for gene, org in go_list if org == o)
                         duplicated_dict['organisms'][o][accession] = alt_genes
+
                     # This is the "somewhere else" if the duplication is random or not categorized
                     else:
                         # The duplication is random
@@ -407,14 +437,15 @@ class CompGenAnalysis(object):
         return duplicated_dict
 
     def get_miss_acc(self, acc_file=None):
-        """This function is used to analyze an accession file post BLAST.  
-        It generates several files and dictionaries regarding missing accession numbers."""
+        """This function is used to analyze an accession file post BLAST.
+        It generates several files and dictionaries regarding missing accession numbers.
+        """
         # TODO-ROB: Add Entrez ID validation;  Get info from xml files???
         missing_dict = dict()
         missing_dict['organisms'] = {}
         missing_dict['genes'] = {}
 
-        # Initialize the Data Frames
+        # Setup the Data Frames
         if acc_file is None:
             maf = self.df.isnull()
             mafT = self.df.T.isnull()
@@ -430,7 +461,8 @@ class CompGenAnalysis(object):
             if miss != 0:
                 missing_genes = maf.ix[:, organism].to_dict()  # Missing Gene dict {'HTR1A': True}
                 missing_dict['organisms'][organism] = {}
-                # Do a list comprehension to get a list of genes
+
+                # Use a list comprehension to get a list of genes
                 missing_dict['organisms'][organism]['missing genes'] = list(key for key, value in missing_genes.items()
                                                                             if value)  # Value is True for missing accessions
                 missing_dict['organisms'][organism]['count'] = miss  # Number of missing accessions per organism
@@ -444,7 +476,8 @@ class CompGenAnalysis(object):
             if miss != 0:
                 missing_orgs = maf.T.ix[:, gene].to_dict()
                 missing_dict['genes'][gene] = {}
-                # Do a list comprehension to get a list of organisms
+
+                # Create a list comprehension to get a list of organisms
                 missing_dict['genes'][gene]['missing organisms'] = list(key for key, value in missing_orgs.items()
                                                                              if value  # Value is True for missing accessions
                                                                              if key != 'Tier')  # Don't include 'Tier' in list
@@ -455,4 +488,7 @@ class CompGenAnalysis(object):
         return missing_dict
 
     def get_pseudogenes(self):
-        print('under development')
+        """ UNDER DEVELOPMENT!!!
+        This subclass will denote which genes are sudogenes.
+        """
+        print(self.__doc__)

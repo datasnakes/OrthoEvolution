@@ -1,19 +1,25 @@
 import time
-
 from Orthologs.comparative_genetics.comp_gen import *
 from Orthologs.manager.logit.logit import LogIt
 
-
+#------------------------------------------------------------------------------
 class BLASTAnalysis(CompGenAnalysis):
+    """Perform blast analysis.
+
+    Args:
+
+    Returns:
+    """
     # TODO-ROB:  Look into subclasses and inheritance.  Which of the parameter below is necessary???
     def __init__(self, template=None, build_file=None, taxon_file=None, post_blast=False):
-        """Inherit from the CompGenAnalysis class.  If the BLAST was cut short,
-        then a build_file is to be used."""
+        """Inherited from the CompGenAnalysis class.  If the BLAST was cut short,
+        then a build_file is to be used.
+        """
         super().__init__(acc_file=template, taxon_file=taxon_file,
                          post_blast=post_blast, save_data=True, hgnc=False)
         # TODO-ROB: Inherit or add variable for logger class
 
-        # Private variables
+        # Set private variables
         self.__home = os.getcwd()
         self.template_filename = template
         self.__acc_filename = build_file
@@ -21,7 +27,7 @@ class BLASTAnalysis(CompGenAnalysis):
         self.__post_blast = post_blast
         self.__save_data = True
 
-        # Initialize Logging
+        # Setup logging
         df = LogIt()
         self.blastn_log = df.blastn()
         self.postblast_log = df.post_blast()
@@ -47,6 +53,7 @@ class BLASTAnalysis(CompGenAnalysis):
         self.building = self.building.set_index('Gene')
         self.__building_filename = build_file
         self.__building_file_path = Path(home) / Path('index') / Path(self.__building_filename)
+
         # Initialize some timing files
         self.building_time = self.building
         self.__building_time_filename = time_file
@@ -54,7 +61,8 @@ class BLASTAnalysis(CompGenAnalysis):
 
     def add_accession(self, gene, organism, accession):
         """Takes an accession and adds in to the building dataframe,
-        and also adds to the csv file.  This returns a log."""
+        and also adds to the csv file.  This returns a log.
+        """
         # TODO-ROB:  Create this in the log file
         if pd.isnull(self.building.get_value(gene, organism)) is False:
             existing = self.building.get_value(gene, organism)
@@ -85,8 +93,9 @@ class BLASTAnalysis(CompGenAnalysis):
             temp.to_csv(self.__building_file_path)
 
     def add_blast_time(self, gene, organism, start, end):
-        """Takes the start/end times and adds in to the building_time 
-        dataframe, and also adds to the csv file."""
+        """Takes the start/end times and adds in to the building_time
+        dataframe, and also adds to the csv file.
+        """
         elapsed_time = end - start
         # Edit the data frame
         self.building_time.set_value(gene, organism, elapsed_time)
@@ -96,6 +105,10 @@ class BLASTAnalysis(CompGenAnalysis):
             temp.to_csv(self.__building_time_file_path)
 
     def post_blast_analysis(self, acc_file):
+        """Performs analysis on the output accession file to determine how many
+        genes are missing by organism and how many organisms are missing for
+        each gene.
+        """
         accession_data = CompGenAnalysis(acc_file=acc_file, post_blast=True)
         self.postblast_log.info('*************************POST BLAST ANALYSIS START*************************\n\n\n')
 
@@ -109,10 +122,10 @@ class BLASTAnalysis(CompGenAnalysis):
             self.postblast_log.info('There are no missing accession numbers for any gene or organism.')
             self.postblast_log.info('Post blastn analysis is complete.')
         else:
-            self.post_blast_log.info('There are missing accessions. This data will be written an excel file.')
+            self.post_blast_log.info('There are missing accessions. This data will be written to an excel file.')
 
             # Set up the excel file
-            excel_file = pd.ExcelWriter(processed + 'karg_missing_genes_data.xlsx')
+            excel_file = pd.ExcelWriter(processed + 'missing_genes_data.xlsx')
 
             # This is the data frame for the names of missing genes by organism
             frame = pd.DataFrame.from_dict(no_acc, orient='index', dtype=str)
@@ -131,7 +144,7 @@ class BLASTAnalysis(CompGenAnalysis):
 
             # Save the excel file
             excel_file.save()
-            post_blast_log.info('Your file, karg_missing_genes_data.xlsx, has been created and saved.')
+            post_blast_log.info('Your xls file has been created and saved.')
 
             post_blast_log.info('Post blastn analysis is complete.')
 
