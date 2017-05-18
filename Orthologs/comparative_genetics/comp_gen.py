@@ -32,6 +32,7 @@ Accession2 updated on 11/17/2016 at 1:09 PM
 import os
 #import mygene
 from ete3 import NCBITaxa
+NCBITaxa().update_taxonomy_database()
 import pandas as pd
 from pathlib import Path
 from pandas import ExcelWriter
