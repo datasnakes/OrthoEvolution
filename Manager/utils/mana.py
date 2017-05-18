@@ -101,6 +101,8 @@ class Mana(object):
         #self.dm_log = log.basic
 
     def create_repo(self):
+        print('creating dirs from repo cookie')
+        print(self.__class__.__name__)
         """This function creates a new repository.  If a repository name 
         is given to the class then it is given a name.  If not, cookiecutters
         takes input from the user.
@@ -235,6 +237,8 @@ class RepoMana(Mana):
             self.create_user()
 
     def create_user(self):
+        print('creating dirs from user cookie')
+        print(self.__class__.__name__)
         """This function uses the username given by our FLASK framework
         and creates a new directory system for the active user using
         our  new_user cookiecutter template."""
@@ -284,6 +288,8 @@ class UserMana(RepoMana):
             self.create_project()
 
     def create_project(self):
+        print('creating dirs from project cookie')
+        print(self.__class__.__name__)
         """
         :return: A new project inside the user's
         project directory.
@@ -388,7 +394,6 @@ class ProjMana(UserMana):
         self.project = project
         self.research = research
         self.research_type = research_type
-
         # Project/Research Directories
         self.research_path = self.project_path / Path(research_type) / Path(research)
         self.project_archive = self.project_path / Path('archive')
@@ -404,6 +409,8 @@ class ProjMana(UserMana):
             self.create_research(new_app)
 
     def create_research(self, new_app=False):
+        print('creating dirs from research cookie')
+        print(self.__class__.__name__)
         '''
         :param new_app (bool):  Flag for auto generating an app that
          goes with the research target.
