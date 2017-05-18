@@ -8,11 +8,11 @@ from Orthologs.comparative_genetics.comp_gen import CompGenAnalysis as CGA
 
 class BLASTAnalysis(CGA):
     def __init__(self, repo, user, project, research, research_type,
-                 template=None, taxon_file=None, post_blast=False):
+                 template=None, taxon_file=None, post_blast=False, save_data=True):
         """Inherit from the CompGenAnalysis class.  If the BLAST was cut short,
         then a build_file is to be used."""
         super().__init__(repo=repo, user=user, project=project, research=research, research_type=research_type,
-                         acc_file=template, taxon_file=taxon_file, post_blast=post_blast, save_data=True, hgnc=False)
+                         acc_file=template, taxon_file=taxon_file, post_blast=post_blast, hgnc=False)
         # TODO-ROB: Inherit or add variable for logger class
         # TODO-ROB Add Mana directories
         # Private variables
@@ -21,7 +21,7 @@ class BLASTAnalysis(CGA):
             self.__taxon_filename = taxon_file
             self.taxon_path = self.project_index / Path(taxon_file)
         self.__post_blast = post_blast
-        self.__save_data = True
+        self.save_data = save_data
 
         if template is not None:
             self.template_filename = template
@@ -87,7 +87,7 @@ class BLASTAnalysis(CGA):
         self.building.set_value(gene, organism, accession)
         temp = self.building.reset_index()
         temp.insert(0, 'Tier', self.df['Tier'])
-        if self.__save_data is True:
+        if self.save_data is True:
             temp.to_csv(self.building_file_path)
 
     def add_blast_time(self, gene, organism, start, end):
@@ -98,7 +98,7 @@ class BLASTAnalysis(CGA):
         self.building_time.set_value(gene, organism, elapsed_time)
         temp = self.building_time.reset_index()
         temp.insert(0, 'Tier', self.df['Tier'])
-        if self.__save_data is True:
+        if self.save_data is True:
             temp.to_csv(self.building_time_file_path)
 
     def post_blast_analysis(self, project_name):

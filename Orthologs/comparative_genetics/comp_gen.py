@@ -61,32 +61,30 @@ class CompGenAnalysis(PM):
     __data = ''
 
     # TODO-ROB:  CREAT PRE-BLAST and POST-BLAST functions
-    def __init__(self, repo, user, project, research, research_type, acc_file=None, taxon_file=None, paml_file=None, go_list=None, post_blast=True, save_data=True, hgnc=False):
+    def __init__(self, repo, user, project, research, research_type, acc_file=None, taxon_file=None, paml_file=None, go_list=None, post_blast=True, hgnc=False):
         super().__init__(repo=repo, user=user, project=project, research=research, research_type=research_type)
 
         self.project = project
         # Private Variables
         self.__home = home
         self.__post_blast = post_blast
-        self.__save_data = save_data
         self.__taxon_filename = taxon_file
-        self.taxon_path
         self.__paml_filename = paml_file
         self.acc_filename = acc_file
         # Handle the taxon_id file and blast query
         if taxon_file is not None:
             # File init
-            self.taxon_path = self.user_index / Path(self.__taxon_filename)
+            self.taxon_path = self.project_index / Path(self.__taxon_filename)
         # Handle the paml organism file
         # TODO-ROB Deprecate paml_file
         if paml_file is not None:
             # File init
-            self.paml_path = self.user_index / Path(self.__paml_filename)
+            self.paml_path = self.project_index / Path(self.__paml_filename)
             self.paml_org_list = []
         # Handle the master accession file (could be before or after blast)
         if acc_file is not None:
             # File init
-            self.acc_path = self.user_index / Path(self.__acc_filename)
+            self.acc_path = self.project_index / Path(self.__acc_filename)
             self.go_list = go_list
             # Handles for organism lists #
             self.org_list = []
@@ -108,7 +106,7 @@ class CompGenAnalysis(PM):
             self.blast_human = []
             self.blast_rhesus = []
             # Handles for dataframe init #
-            self.raw_acc_data = pd.read_csv(self.__acc_path, dtype=str)
+            self.raw_acc_data = pd.read_csv(self.acc_path, dtype=str)
             self.mygene_df = pd.DataFrame()
             self.mygene_filename = "%s_mygene.csv" % self.project
             self.mygene_path = self.data / Path(self.mygene_filename)
@@ -139,7 +137,7 @@ class CompGenAnalysis(PM):
             self.__data = self.raw_acc_data.set_index('Gene')
             self.df = self.__data
             # #### Format the main pivot table #### #
-            self.pt = pd.pivot_table(pd.read_csv(self.__acc_path), index=['Tier', 'Gene'], aggfunc='first')
+            self.pt = pd.pivot_table(pd.read_csv(self.acc_path), index=['Tier', 'Gene'], aggfunc='first')
             array = self.pt.axes[1].tolist() # Organism list
             self.pt.columns = pd.Index(array, name='Organism')
 
@@ -147,8 +145,6 @@ class CompGenAnalysis(PM):
             self.org_dict = self.df.ix[0:, 'Homo_sapiens':].to_dict()
             self.gene_dict = self.df.T.to_dict()
             self.get_master_lists(self.__data)  # populates our lists
-            if save_data:
-                self.make_excel_files(project)
 
 
 # TODO-ROB Add HGNC python module
