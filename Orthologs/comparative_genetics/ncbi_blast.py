@@ -43,7 +43,7 @@ class BLASTAnalysis(CGA):
         self.building_time_file_path = self.raw_data / Path(self.building_time_filename)
 
         # Initialize Logging
-        df = LogIt(str(self.user_log / Path('blast_test.log')), 'blastn')
+        df = LogIt('blast_test.log', 'blastn')
         self.blastn_log = df.basic
         #self.postblast_log = df.basic
         #self.config_log = df.basic(self.user_log / Path('BLAST.log'))
