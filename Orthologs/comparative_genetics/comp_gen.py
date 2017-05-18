@@ -70,6 +70,7 @@ class CompGenAnalysis(PM):
         self.__post_blast = post_blast
         self.__save_data = save_data
         self.__taxon_filename = taxon_file
+        self.taxon_path
         self.__paml_filename = paml_file
         self.acc_filename = acc_file
         # Handle the taxon_id file and blast query
@@ -245,7 +246,6 @@ class CompGenAnalysis(PM):
         # Gene analysis
         self.mygene_df = self.my_gene_info()
         self.mygene_df.to_csv(self.mygene_df, self.mygene_path)
-        pd.DataFrame.to_excel()
         # Accession file analysis
         if self.__post_blast:
             self.missing_dict = self.get_miss_acc()
@@ -315,92 +315,6 @@ class CompGenAnalysis(PM):
             org_list.append(org)
         return org_list
 
-    def make_excel_files(self, project_name):
-        # TODO-ROB  Fix the output format of the excel file.  View a sample output in /Orthologs/comp_gen
-        pba_file_path = str(self.data / Path(self.project + '_pba.xlsx'))
-        pb_file = pd.ExcelWriter(pba_file_path)
-        # Duplicated Accessions
-        try:
-            acc_ws = pd.DataFrame.from_dict(self.dup_acc_count, orient='index')
-            acc_ws.columns = ['Count']
-            acc_ws.to_excel(pb_file, sheet_name="Duplicate Count by Accession")
-        except ValueError:
-            pass
-        # Duplicate Genes
-        try:
-            dup_gene_ws = pd.DataFrame.from_dict(self.dup_gene_count, orient='index')
-            dup_gene_ws.columns = ['Count']
-            dup_gene_ws.to_excel(pb_file, sheet_name="Duplicate Count by Gene")
-
-            gene_org_dup = {}
-            for gene, dup_dict in self.duplicated_genes.items():
-                gene_org_dup[gene] = []
-                for acc, genes in self.duplicated_genes[gene].items():
-                    gene_org_dup[gene].append(genes)
-            dup_org_ws2 = pd.DataFrame.from_dict(gene_org_dup, orient='index')
-            dup_org_ws2.T.to_excel(pb_file, sheet_name="Duplicate Org Groups by Gene")
-        except ValueError:
-            pass
-        # Species Duplicates
-        try:
-            dup_org_ws1 = pd.DataFrame.from_dict(self.dup_org_count, orient='index')
-            dup_org_ws1.columns = ['Count']
-            dup_org_ws1.to_excel(pb_file, sheet_name="Duplicate Count by Org")
-
-            org_gene_dup = {}
-            for gene, dup_dict in self.duplicated_organisms.items():
-                org_gene_dup[gene] = []
-                for acc, genes in self.duplicated_organisms[gene].items():
-                    org_gene_dup[gene].append(genes)
-            dup_org_ws2 = pd.DataFrame.from_dict(org_gene_dup, orient='index')
-            dup_org_ws2.T.to_excel(pb_file, sheet_name="Duplicate Gene Groups by Org")
-        except ValueError:
-            pass
-        # Random Duplicates
-        try:
-            rand_ws = pd.DataFrame.from_dict(self.duplicated_random, orient='index')
-            rand_ws.to_excel(pb_file, sheet_name="Random Duplicates")
-        except ValueError:
-            pass
-        # Other Duplicates
-        try:
-            other_ws = pd.DataFrame.from_dict(self.duplicated_other, orient='index')
-            other_ws.to_excel(pb_file, sheet_name="Other Duplicates")
-        except ValueError:
-            pass
-        # Missing by Organism
-        org_gene_ms = {}
-        org_gene_ms_count = {}
-        try:
-            for org, ms_dict in self.missing_organsims.items():
-                for key, value in ms_dict.items():
-                    if key == 'missing genes':
-                        org_gene_ms[org] = value
-                    else:
-                        org_gene_ms_count[org] = value
-            org_ms_count = pd.DataFrame.from_dict(org_gene_ms_count, orient='index')
-            org_ms_count.to_excel(pb_file, sheet_name="Missing Genes Count")
-            org_ms = pd.DataFrame.from_dict(org_gene_ms, orient='index')
-            org_ms.to_excel(pb_file, sheet_name="Missing Genes by Org")
-        except ValueError:
-            pass
-        # Missing by Gene
-        gene_org_ms = {}
-        gene_org_ms_count = {}
-        try:
-            for gene, ms_dict in self.missing_genes.items():
-                for key, value in ms_dict.items():
-                    if key == 'missing genes':
-                        gene_org_ms[gene] = value
-                    else:
-                        gene_org_ms_count[gene] = value
-            gene_ms_count = pd.DataFrame.from_dict(gene_org_ms_count, orient='index')
-            gene_ms_count.to_excel(pb_file, sheet_name="Missing Organisms Count")
-            gene_ms = pd.DataFrame.from_dict(gene_org_ms, orient='index')
-            gene_ms.to_excel(pb_file, sheet_name="Missing Organisms by Genes")
-        except ValueError:
-            pass
-        pb_file.save()
 
 # **********************************************POST BLAST ANALYSIS TOOLS********************************************* #
 # **********************************************POST BLAST ANALYSIS TOOLS********************************************* #
