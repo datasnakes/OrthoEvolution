@@ -8,11 +8,11 @@ from Orthologs.comparative_genetics.comp_gen import CompGenAnalysis as CGA
 
 class BLASTAnalysis(CGA):
     def __init__(self, repo, user, project, research, research_type,
-                 template=None, taxon_file=None, post_blast=False, save_data=True):
+                 template=None, taxon_file=None, post_blast=False, save_data=True, **kwargs):
         """Inherit from the CompGenAnalysis class.  If the BLAST was cut short,
         then a build_file is to be used."""
         super().__init__(repo=repo, user=user, project=project, research=research, research_type=research_type,
-                         acc_file=template, taxon_file=taxon_file, post_blast=post_blast, hgnc=False)
+                         acc_file=template, taxon_file=taxon_file, post_blast=post_blast, hgnc=False, **kwargs)
         # TODO-ROB: Inherit or add variable for logger class
         # TODO-ROB Add Mana directories
         # Private variables
