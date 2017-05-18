@@ -1,4 +1,4 @@
-#  Naming Conventions and File Placements
+#  Naming Conventions and Paths _by class_
 
 ## CompGenAnalysis(ProjectMana) _comp_gen.py_
 ### User Generated Files
@@ -45,8 +45,20 @@
 ## BLASTn(BT) _blastn.py_
 ### User Generated Files
 * template file
+    * path = _project_index_ / Path(template file)
+    * name = "_users_file_name_.csv"
+
 ### Programmatically Generated Files
 * gi list binary files
     * path = _project_index_ / Path(binary_files)
     * names = "_TAXID_\_gi"
-*
+* blast xml files
+    * path = _project_raw_data_ / Path(gene) / Path(blast xml files)
+    * name = "_gene_\__organism_.xml
+* master accession file
+    * path = _project_data_ / Path(MAF)
+    * name = "_projectname_\_MAF.csv"
+    * ___Note___:  _Only exists if the BLAST finishes all the genes._
+
+# Naming Conventions and Paths _by location_
+
