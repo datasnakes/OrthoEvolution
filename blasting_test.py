@@ -2,6 +2,9 @@ from Orthologs.blast.blastn import BLASTn
 from Manager.utils import mana
 import shutil
 from pathlib import Path
+#from ete3 import NCBITaxa
+#NCBITaxa().update_taxonomy_database()
+
 # Initializations
 repo = "Test1"
 user = "rgilmore"
