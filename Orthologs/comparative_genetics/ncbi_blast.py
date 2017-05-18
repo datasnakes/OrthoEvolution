@@ -101,45 +101,92 @@ class BLASTAnalysis(CGA):
         if self.__save_data is True:
             temp.to_csv(self.building_time_file_path)
 
-    def post_blast_analysis(self, acc_file):
-        # TODO-ROB Make this into the CGA.make_excel_files() method
-        accession_data = CGA(acc_file=acc_file, post_blast=True)
-        self.postblast_log.info('*************************POST BLAST ANALYSIS START*************************\n\n\n')
+    def post_blast_analysis(self, project_name):
+        # TODO-ROB  Fix the output format of the excel file.  View a sample output in /Orthologs/comp_gen
+        pba_file_path = str(self.data / Path(self.project + '_pba.xlsx'))
+        pb_file = pd.ExcelWriter(pba_file_path)
+        # Duplicated Accessions
+        try:
+            acc_ws = pd.DataFrame.from_dict(self.dup_acc_count, orient='index')
+            acc_ws.columns = ['Count']
+            acc_ws.to_excel(pb_file, sheet_name="Duplicate Count by Accession")
+        except ValueError:
+            pass
+        # Duplicate Genes
+        try:
+            dup_gene_ws = pd.DataFrame.from_dict(self.dup_gene_count, orient='index')
+            dup_gene_ws.columns = ['Count']
+            dup_gene_ws.to_excel(pb_file, sheet_name="Duplicate Count by Gene")
 
-        missing_gene = accession_data.missing_dict['genes']
-        missing_orgs = accession_data.missing_dict['organisms']
-        orgs = accession_data.org_list
+            gene_org_dup = {}
+            for gene, dup_dict in self.duplicated_genes.items():
+                gene_org_dup[gene] = []
+                for acc, genes in self.duplicated_genes[gene].items():
+                    gene_org_dup[gene].append(genes)
+            dup_org_ws2 = pd.DataFrame.from_dict(gene_org_dup, orient='index')
+            dup_org_ws2.T.to_excel(pb_file, sheet_name="Duplicate Org Groups by Gene")
+        except ValueError:
+            pass
+        # Species Duplicates
+        try:
+            dup_org_ws1 = pd.DataFrame.from_dict(self.dup_org_count, orient='index')
+            dup_org_ws1.columns = ['Count']
+            dup_org_ws1.to_excel(pb_file, sheet_name="Duplicate Count by Org")
 
-        # Create and write dictionaries & dataframes to excel file
-        if missing_gene['count'] <= 0 and missing_orgs['count'] <= 0:
-            # Log that the blast had full coverage
-            self.postblast_log.info('There are no missing accession numbers for any gene or organism.')
-            self.postblast_log.info('Post blastn analysis is complete.')
-        else:
-            self.post_blast_log.info('There are missing accessions. This data will be written an excel file.')
+            org_gene_dup = {}
+            for gene, dup_dict in self.duplicated_organisms.items():
+                org_gene_dup[gene] = []
+                for acc, genes in self.duplicated_organisms[gene].items():
+                    org_gene_dup[gene].append(genes)
+            dup_org_ws2 = pd.DataFrame.from_dict(org_gene_dup, orient='index')
+            dup_org_ws2.T.to_excel(pb_file, sheet_name="Duplicate Gene Groups by Org")
+        except ValueError:
+            pass
+        # Random Duplicates
+        try:
+            rand_ws = pd.DataFrame.from_dict(self.duplicated_random, orient='index')
+            rand_ws.to_excel(pb_file, sheet_name="Random Duplicates")
+        except ValueError:
+            pass
+        # Other Duplicates
+        try:
+            other_ws = pd.DataFrame.from_dict(self.duplicated_other, orient='index')
+            other_ws.to_excel(pb_file, sheet_name="Other Duplicates")
+        except ValueError:
+            pass
+        # Missing by Organism
+        org_gene_ms = {}
+        org_gene_ms_count = {}
+        try:
+            for org, ms_dict in self.missing_organsims.items():
+                for key, value in ms_dict.items():
+                    if key == 'missing genes':
+                        org_gene_ms[org] = value
+                    else:
+                        org_gene_ms_count[org] = value
+            org_ms_count = pd.DataFrame.from_dict(org_gene_ms_count, orient='index')
+            org_ms_count.to_excel(pb_file, sheet_name="Missing Genes Count")
+            org_ms = pd.DataFrame.from_dict(org_gene_ms, orient='index')
+            org_ms.to_excel(pb_file, sheet_name="Missing Genes by Org")
+        except ValueError:
+            pass
+        # Missing by Gene
+        gene_org_ms = {}
+        gene_org_ms_count = {}
+        try:
+            for gene, ms_dict in self.missing_genes.items():
+                for key, value in ms_dict.items():
+                    if key == 'missing genes':
+                        gene_org_ms[gene] = value
+                    else:
+                        gene_org_ms_count[gene] = value
+            gene_ms_count = pd.DataFrame.from_dict(gene_org_ms_count, orient='index')
+            gene_ms_count.to_excel(pb_file, sheet_name="Missing Organisms Count")
+            gene_ms = pd.DataFrame.from_dict(gene_org_ms, orient='index')
+            gene_ms.to_excel(pb_file, sheet_name="Missing Organisms by Genes")
+        except ValueError:
+            pass
+        pb_file.save()
 
-            # Set up the excel file
-            excel_file = pd.ExcelWriter(processed + 'karg_missing_genes_data.xlsx')
-
-            # This is the data frame for the names of missing genes by organism
-            frame = pd.DataFrame.from_dict(no_acc, orient='index', dtype=str)
-            frame = frame.transpose()
-            frame.to_excel(excel_file, sheet_name="Missing Genes by Org", index=False)
-
-            # This is the data frame for the number of missing genes by organism
-            frame2 = pd.DataFrame.from_dict(num_missing, orient='index')
-            frame2.to_excel(excel_file, sheet_name="# of Genes missing by Org", header=False)
-
-            # This is the data frame for the number of missing ORGANISMS by gene
-            frame3 = pd.DataFrame(miss_per_gene)
-            combine = [original.Tier, frame3]  # Combine the tier column and data column
-            frame3 = pd.concat(combine, axis=1) # Concatenate the dataframes
-            frame3.to_excel(excel_file, sheet_name="# of Orgs missing by Gene", header=False)
-
-            # Save the excel file
-            excel_file.save()
-            post_blast_log.info('Your file, karg_missing_genes_data.xlsx, has been created and saved.')
-
-            post_blast_log.info('Post blastn analysis is complete.')
 
 
