@@ -33,7 +33,7 @@ tax_ids = list(tax_ids[0])
 #------------------------------------------------------------------------------
 # Create directory for Gi lists
 b = Path(os.getcwd()) / Path('data')  # Set a variable for the GiLists directory
-Path.mkdir(b)  # Create the directory
+Path.mkdir(b, parents=True, exist_ok=True)  # Create the directory
 os.chdir(str(b))
 
 #------------------------------------------------------------------------------
