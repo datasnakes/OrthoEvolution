@@ -18,11 +18,10 @@ import time  # Used to delay when dealing with NCBI server errors
 from datetime import datetime as d
 from multiprocessing import Pool
 from pathlib import Path
-
+import pandas as pd
 from Bio import SearchIO  # Used for parsing and sorting XML files.
 from Bio.Blast.Applications import NcbiblastnCommandline  # Used for Local Blasting.
 from Manager.logit.logit import LogIt
-
 from Orthologs.CompGenetics.ncbi_blast import BLASTAnalysis as BT
 
 
@@ -169,39 +168,44 @@ class BLASTn(BT):
             return new_gene_list
 
     def gi_list_config(self):
+        # TODO-ROB THis is for development / testing
         """This script is designed to create a gi list based on the refseq_rna database
         for each taxonomy id on the MCSR. It will also convert the gi list into a
         binary file which is more efficient to use with NCBI's Standalone Blast tools."""
         print('gi_list_config')
+        cd = os.getcwd()
+        os.chdir(str(self.__gi_list_path))
         taxids = self.taxon_ids
-        with Pool(processes=20) as p:
-            cd = os.getcwd()
-            os.chdir(self.__gi_list_path)
-            p.map(self.gi_split, taxids)
-            os.chdir(cd)
-            self.blastn_log.inf("The GI lists have been created.")
-
-    @staticmethod
-    def gi_split(ID):
-        """ This function uses the blastdbcmd tool to get gi lists. It then uses the
-        blastdb_aliastool to turn the list into a binary file."""
-        # Create dictionary for formatting
-        ID = str(ID)
-        gi_text_file = "%sgi.txt" % ID
-        gi_binary_file = "%sgi" % ID
-        fmt = {'id': ID, 'text file': gi_text_file, 'binary file': gi_binary_file}
-        # TODO untested
-        print("Current taxonomy ID: %s" % ID)
-        # Use the accession #'s and the blastdbcmd tool to generate gi lists based on Organisms/Taxonomy ID's.
-        os.system("blastdbcmd -db refseq_rna -entry all -outfmt '%g %T' | awk ' {{ if ($2 == {id}) "
-                  "{{ print $1 }} }} ' > {text file}".format(**fmt))
-        print("Text File generated")
-        # Convert the .txt file to a binary file using the blastdb_aliastool.
-        os.system("blastdb_aliastool -gi_file_in {text file} -gi_file_out {binary file}".format(**fmt))
-        # Remove the gi.text file
-        print("Binary file generated")
-        os.system("rm -r {text file}".format(**fmt))
-        print("Removing text file")
+        pd.Series(taxids).to_csv('taxids.csv')
+        subprocess.call(['qsub %s' % str(self.project_index / Path('get_gi_list.sh'))], shell=True)
+        print('Multiprocessing complete')
+    #     with Pool(processes=20) as p:
+    #         cd = os.getcwd()
+    #         os.chdir(self.__gi_list_path)
+    #         p.map(self.gi_split, taxids)
+    #         os.chdir(cd)
+    #         self.blastn_log.inf("The GI lists have been created.")
+    #
+    # @staticmethod
+    # def gi_split(ID):
+    #     """ This function uses the blastdbcmd tool to get gi lists. It then uses the
+    #     blastdb_aliastool to turn the list into a binary file."""
+    #     # Create dictionary for formatting
+    #     ID = str(ID)
+    #     gi_text_file = "%sgi.txt" % ID
+    #     gi_binary_file = "%sgi" % ID
+    #     fmt = {'id': ID, 'text file': gi_text_file, 'binary file': gi_binary_file}
+    #     # TODO untested
+    #     print("Current taxonomy ID: %s" % ID)
+    #     # Use the accession #'s and the blastdbcmd tool to generate gi lists based on Organisms/Taxonomy ID's.
+    #     os.system("blastdbcmd -db refseq_rna -entry all -outfmt '%g %T' | awk ' {{ if ($2 == {id}) {{ print $1 }} }} ' > {text file}".format(**fmt))
+    #     print("Text File generated")
+    #     # Convert the .txt file to a binary file using the blastdb_aliastool.
+    #     os.system("blastdb_aliastool -gi_file_in {text file} -gi_file_out {binary file}".format(**fmt))
+    #     # Remove the gi.text file
+    #     print("Binary file generated")
+    #     os.system("rm -r {text file}".format(**fmt))
+    #     print("Removing text file")
 
     def blast_file_config(self, file):
         """This function configures different files for new BLASTS.
