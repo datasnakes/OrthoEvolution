@@ -1,1 +1,0 @@
-The CleanCSV file is something you already have, but it's a working version using the most recent GPCR blast accessions output csv file.
