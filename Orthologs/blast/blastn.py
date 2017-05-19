@@ -189,7 +189,7 @@ class BLASTn(BT):
         ID = str(ID)
         gi_text_file = "%sgi.txt" % ID
         gi_binary_file = "%sgi" % ID
-        fmt = {'text file': gi_text_file, 'binary file': gi_binary_file}
+        fmt = {'id': ID, 'text file': gi_text_file, 'binary file': gi_binary_file}
         # TODO untested
         # Use the accession #'s and the blastdbcmd tool to generate gi lists based on Organisms/Taxonomy ID's.
         os.system("blastdbcmd -db refseq_rna -entry all -outfmt '%g %T' | awk ' {{ if ($2 == {id}) "
