@@ -178,6 +178,8 @@ class BLASTn(BT):
         taxids = self.taxon_ids
         pd.Series(taxids).to_csv('taxids.csv', index=False)
         subprocess.call(['qsub %s' % str(self.__gi_list_path / Path('get_gi_lists.pbs'))], shell=True)
+        p = subprocess.Popen(['qsub %s' % str(self.__gi_list_path / Path('get_gi_lists.pbs'))], shell=True)
+        p.wait()
         print('Multiprocessing complete')
         os.chdir(cd)
     #     with Pool(processes=20) as p:
