@@ -193,7 +193,7 @@ class BLASTn(BT):
         # TODO untested
         # Use the accession #'s and the blastdbcmd tool to generate gi lists based on Organisms/Taxonomy ID's.
         os.system("blastdbcmd -db refseq_rna -entry all -outfmt '%g %T' | awk ' {{ if ($2 == {id}) "
-                  "{{ print $1 }} }} ' > {text_file}".format(**fmt))
+                  "{{ print $1 }} }} ' > {text file}".format(**fmt))
         # Convert the .txt file to a binary file using the blastdb_aliastool.
         os.system("blastdb_aliastool -gi_file_in {text file} -gi_file_out {binary file}".format(**fmt))
         # Remove the gi.text file
