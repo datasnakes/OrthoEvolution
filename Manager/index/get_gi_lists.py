@@ -16,7 +16,7 @@ import pandas as pd
 from time import time
 from multiprocessing import Pool
 import logging as log
-
+from pathlib import Path
 
 log.basicConfig(filename="get_gi_lists.log", level=log.INFO)
 log.info("#------------------------------------------------------------------")
@@ -32,9 +32,9 @@ tax_ids = list(tax_ids[0])
 
 #------------------------------------------------------------------------------
 # Create directory for Gi lists
-b = 'data/gi-lists'  # Set a variable for the GiLists directory
-os.mkdir('%s' % b)  # Create the directory
-os.chdir(b)
+b = Path(os.getcwd()) / Path('data')  # Set a variable for the GiLists directory
+Path.mkdir(b)  # Create the directory
+os.chdir(str(b))
 
 #------------------------------------------------------------------------------
 # Define the functions we want to use.
