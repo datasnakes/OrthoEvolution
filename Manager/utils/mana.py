@@ -300,7 +300,7 @@ class UserMana(RepoMana):
         else:
             no_input = False
             e_c = None
-        cookiecutter(str(self.project_cookie), extra_context=e_c, no_input=no_input, output_dir=str(self.project_path))
+        cookiecutter(str(self.project_cookie), extra_context=e_c, no_input=no_input, output_dir=str(self.projects))
 
     def zip_mail(self, comp_filename, zip_path, ):
         Zipper = ZipUtilities(comp_filename, zip_path)
@@ -419,7 +419,7 @@ class ProjMana(UserMana):
         '''
         e_c = {"research_type": self.research_type,
                "research_name": self.research}
-        cookiecutter(str(self.research_cookie), no_input=True, extra_context=e_c, output_dir=str(self.research_path))
+        cookiecutter(str(self.research_cookie), no_input=True, extra_context=e_c, output_dir=str(self.project_path))
         if new_app is True:
             self.create_app()
 
