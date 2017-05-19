@@ -21,12 +21,9 @@ PACKAGES = [
     'slacker'
     'genbank',
     'Orthologs'
-    'Orthologs.Manager',
-    'Orthologs.Manager.blast',
-    'Orthologs.Manager.flask',
-    'Orthologs.Manager.shiny',
-    'Orthologs.phylogenetics',
-    'Orthologs.genbank',
+    'Manager',
+    'Cookie',
+    'Docs',
     'Tools',
     'Tools.ftp',
     'Tools.multiprocessing',

@@ -2,7 +2,7 @@ import time
 import os
 from pathlib import Path
 import pandas as pd
-from Orthologs.comparative_genetics.comp_gen import CompGenAnalysis as CGA
+from Orthologs.CompGenetics.comp_gen import CompGenAnalysis as CGA
 from Manager.logit.logit import LogIt
 
 
