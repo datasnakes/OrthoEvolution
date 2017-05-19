@@ -85,7 +85,7 @@ class CompGenAnalysis(PM):
         # Handle the master accession file (could be before or after blast)
         if acc_file is not None:
             # File init
-            self.acc_path = self.project_index / Path(self.__acc_filename)
+            self.acc_path = self.project_index / Path(self.acc_filename)
             self.go_list = go_list
             # Handles for organism lists #
             self.org_list = []
