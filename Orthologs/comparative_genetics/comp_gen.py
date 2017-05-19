@@ -107,7 +107,7 @@ class CompGenAnalysis(PM):
             self.blast_human = []
             self.blast_rhesus = []
             # Handles for dataframe init #
-            self.raw_acc_data = pd.read_csv(self.acc_path, dtype=str)
+            self.raw_acc_data = pd.read_csv(str(self.acc_path), dtype=str)
             # self.mygene_df = pd.DataFrame()
             # self.mygene_filename = "%s_mygene.csv" % self.project
             # self.mygene_path = self.data / Path(self.mygene_filename)
