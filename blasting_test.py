@@ -1,4 +1,4 @@
-from Orthologs.blast.blastn import BLASTn
+from Orthologs.Blast.blastn import BLASTn
 from Manager.utils import mana
 import shutil
 from pathlib import Path

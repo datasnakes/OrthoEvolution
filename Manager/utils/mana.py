@@ -18,7 +18,7 @@ Directory_management updated on 11/15/2016 at 11:30 AM
 """
 ##############################################################################
 # Libraries:
-import os
+import os, stat
 from pathlib import Path
 from Manager.utils.zipper import ZipUtilities
 from cookiecutter.main import cookiecutter
@@ -120,6 +120,7 @@ class Mana(object):
             e_c = None
             # TODO-ROB change cookiecutter so that it can take pathlike objects
         cookiecutter(str(self.repo_cookie), no_input=no_input, extra_context=e_c, output_dir=str(self.file_home))
+        os.chmod(str(self.file_home / Path(self.repo)),mode=stat.S_IRWXO)
 
     # def git_ignore(self, path):
     #     """Get the ignored file patterns from the .gitignore file in the repo."""
@@ -246,6 +247,7 @@ class RepoMana(Mana):
         # TODO-ROB:  Create the cookiecutter.json file
         # extra_context overrides user and default configs
         cookiecutter(str(self.user_cookie), no_input=True, extra_context={"user_name": self.user}, output_dir=str(self.users))
+        os.chmod(str(self.users / Path(self.user)), mode=stat.S_IRWXO)  # Change user permissions with flask later (this is for testing purposes
         # TODO-ROB do we need create user hooks?
 
 # datasnakes~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -301,6 +303,7 @@ class UserMana(RepoMana):
             no_input = False
             e_c = None
         cookiecutter(str(self.project_cookie), extra_context=e_c, no_input=no_input, output_dir=str(self.projects))
+        os.chmod(str(self.projects / Path(self.project)), mode=stat.S_IRWXO)
 
     def zip_mail(self, comp_filename, zip_path, ):
         Zipper = ZipUtilities(comp_filename, zip_path)
@@ -361,11 +364,13 @@ class WebMana(RepoMana):
                "website_host": self.web_host,
                "website_port": self.web_port}
         cookiecutter(str(self.website_cookie), no_input=True, extra_context=e_c, output_dir=str(self.flask))
+        os.chmod(str(self.flask / Path(self.website)), mode=stat.S_IRWXO)
         # Get the absolute path to the script that starts the flask server
         script_path = self.website_path / Path('hooks') / Path('post_gen_project.sh')
         #scripts_file_path = find_hook('post_gen_project.sh', hooks_dir=str(script_path))
         # TODO-ROB add screening to the bash script for flask run -h -p
         run_script(script_path=str(script_path), cwd=str(self.website_path))
+
 
 
 # datasnakes~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -420,11 +425,13 @@ class ProjMana(UserMana):
         e_c = {"research_type": self.research_type,
                "research_name": self.research}
         cookiecutter(str(self.research_cookie), no_input=True, extra_context=e_c, output_dir=str(self.project_path))
+        os.chmod(str(self.project_path / Path(self.research_type)), mode=stat.S_IRWXO)
         if new_app is True:
             self.create_app()
 
     def create_app(self):
         e_c = {"app_name": self.app}
         cookiecutter(str(self.app_cookie), no_input=True, extra_context=e_c, output_dir=str(self.app_path))
+        os.chmod(str(self.app_path / Path(self.app)), mode=stat.S_IRWXO)
 
 

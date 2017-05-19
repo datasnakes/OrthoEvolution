@@ -23,7 +23,7 @@ from Bio import SearchIO  # Used for parsing and sorting XML files.
 from Bio.Blast.Applications import NcbiblastnCommandline  # Used for Local Blasting.
 from Manager.logit.logit import LogIt
 
-from Orthologs.comparative_genetics.ncbi_blast import BLASTAnalysis as BT
+from Orthologs.CompGenetics.ncbi_blast import BLASTAnalysis as BT
 
 
 # TODO-ROB: Find packages for script timing and analysis
@@ -191,13 +191,17 @@ class BLASTn(BT):
         gi_binary_file = "%sgi" % ID
         fmt = {'id': ID, 'text file': gi_text_file, 'binary file': gi_binary_file}
         # TODO untested
+        print("Current taxonomy ID: %s" % ID)
         # Use the accession #'s and the blastdbcmd tool to generate gi lists based on Organisms/Taxonomy ID's.
         os.system("blastdbcmd -db refseq_rna -entry all -outfmt '%g %T' | awk ' {{ if ($2 == {id}) "
                   "{{ print $1 }} }} ' > {text file}".format(**fmt))
+        print("Text File generated")
         # Convert the .txt file to a binary file using the blastdb_aliastool.
         os.system("blastdb_aliastool -gi_file_in {text file} -gi_file_out {binary file}".format(**fmt))
         # Remove the gi.text file
+        print("Binary file generated")
         os.system("rm -r {text file}".format(**fmt))
+        print("Removing text file")
 
     def blast_file_config(self, file):
         """This function configures different files for new BLASTS.
