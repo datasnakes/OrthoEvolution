@@ -176,7 +176,7 @@ class BLASTn(BT):
         cd = os.getcwd()
         os.chdir(str(self.__gi_list_path))
         taxids = self.taxon_ids
-        pd.Series(taxids).to_csv('taxids.csv')
+        pd.Series(taxids).to_csv('taxids.csv', index=False)
         subprocess.call(['qsub %s' % str(self.__gi_list_path / Path('get_gi_lists.pbs'))], shell=True)
         print('Multiprocessing complete')
         os.chdir(cd)
