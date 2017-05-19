@@ -1,31 +1,52 @@
 import time
+import os
+from pathlib import Path
+import pandas as pd
+from Orthologs.comparative_genetics.comp_gen import CompGenAnalysis as CGA
+from Manager.logit.logit import LogIt
 
-from Orthologs.comparative_genetics.comp_gen import *
-from Orthologs.manager.logit.logit import LogIt
 
-
-class BLASTAnalysis(CompGenAnalysis):
-    # TODO-ROB:  Look into subclasses and inheritance.  Which of the parameter below is necessary???
-    def __init__(self, template=None, build_file=None, taxon_file=None, post_blast=False):
+class BLASTAnalysis(CGA):
+    def __init__(self, repo, user, project, research, research_type,
+                 template=None, taxon_file=None, post_blast=False, save_data=True, **kwargs):
         """Inherit from the CompGenAnalysis class.  If the BLAST was cut short,
         then a build_file is to be used."""
-        super().__init__(acc_file=template, taxon_file=taxon_file,
-                         post_blast=post_blast, save_data=True, hgnc=False)
+        super().__init__(repo=repo, user=user, project=project, research=research, research_type=research_type,
+                         acc_file=template, taxon_file=taxon_file, post_blast=post_blast, hgnc=False, **kwargs)
         # TODO-ROB: Inherit or add variable for logger class
-
+        # TODO-ROB Add Mana directories
         # Private variables
         self.__home = os.getcwd()
-        self.template_filename = template
-        self.__acc_filename = build_file
-        self.__taxon_filename = taxon_file
+        if taxon_file is not None:
+            self.__taxon_filename = taxon_file
+            self.taxon_path = self.project_index / Path(taxon_file)
         self.__post_blast = post_blast
-        self.__save_data = True
+        self.save_data = save_data
+
+        if template is not None:
+            self.template_filename = template
+            self.template_path = self.project_index / Path(self.template_filename)
+            self.building_filename = str(template[:-4] + 'building.csv')
+            self.building_time_filename = self.building_filename.replace('building.csv', 'building_time.csv')
+        else:
+            self.building_filename = str(project + 'building.csv')
+            self.building_time_filename = self.building_filename.replace('building.csv', 'building_time.csv')
+
+        # Initialize a data frame and file to add accession numbers to
+        # Initialize a data frame and file to add blast times to
+        self.building = self.raw_acc_data
+        del self.building['Tier']
+        del self.building['Homo_sapiens']
+        self.building = self.building.set_index('Gene')
+        self.building_time = self.building
+        self.building_file_path = self.raw_data / Path(self.building_filename)
+        self.building_time_file_path = self.raw_data / Path(self.building_time_filename)
 
         # Initialize Logging
-        df = LogIt()
-        self.blastn_log = df.blastn()
-        self.postblast_log = df.post_blast()
-        self.config_log = df.config(self.__home / Path('BLAST.log'))
+        df = LogIt('blast_test.log', 'blastn')
+        self.blastn_log = df.basic
+        #self.postblast_log = df.basic
+        #self.config_log = df.basic(self.user_log / Path('BLAST.log'))
         self.__date_format = df.date_format
         self.get_time = time.time  # To get the time use 'get_time()'
         # Logging variables
@@ -36,21 +57,6 @@ class BLASTAnalysis(CompGenAnalysis):
         #                 format=self.__log_format,
         #                 filename="logs/accessions2blastxml_%s.log" % str(d.now().strftime(self.__archive_format)))
         # self.blast_log = log.getLogger('Blastn')
-
-        # Initialize a data frame to add accession files to
-        self.building = self.raw_data
-        del self.building['Tier']
-        del self.building['Homo_sapiens']
-        if build_file is None:
-            build_file = str(template[:-4] + 'building.csv')
-        time_file = build_file.replace('build.csv', 'building_time.csv')  # TODO-ROB:  ADD time to the file name
-        self.building = self.building.set_index('Gene')
-        self.__building_filename = build_file
-        self.__building_file_path = Path(home) / Path('index') / Path(self.__building_filename)
-        # Initialize some timing files
-        self.building_time = self.building
-        self.__building_time_filename = time_file
-        self.__building_time_file_path = Path(home) / Path('index') / Path(self.__building_time_filename)
 
     def add_accession(self, gene, organism, accession):
         """Takes an accession and adds in to the building dataframe,
@@ -81,8 +87,8 @@ class BLASTAnalysis(CompGenAnalysis):
         self.building.set_value(gene, organism, accession)
         temp = self.building.reset_index()
         temp.insert(0, 'Tier', self.df['Tier'])
-        if self.__save_data is True:
-            temp.to_csv(self.__building_file_path)
+        if self.save_data is True:
+            temp.to_csv(self.building_file_path)
 
     def add_blast_time(self, gene, organism, start, end):
         """Takes the start/end times and adds in to the building_time 
@@ -92,47 +98,99 @@ class BLASTAnalysis(CompGenAnalysis):
         self.building_time.set_value(gene, organism, elapsed_time)
         temp = self.building_time.reset_index()
         temp.insert(0, 'Tier', self.df['Tier'])
-        if self.__save_data is True:
-            temp.to_csv(self.__building_time_file_path)
+        if self.save_data is True:
+            temp.to_csv(self.building_time_file_path)
 
-    def post_blast_analysis(self, acc_file):
-        accession_data = CompGenAnalysis(acc_file=acc_file, post_blast=True)
-        self.postblast_log.info('*************************POST BLAST ANALYSIS START*************************\n\n\n')
+    def post_blast_analysis(self, project_name, removed_genes=None):
+        # TODO-ROB  Fix the output format of the excel file.  View a sample output in /Orthologs/comp_gen
+        pba_file_path = str(self.data / Path(self.project + '_pba.xlsx'))
+        pb_file = pd.ExcelWriter(pba_file_path)
+        # Removed Genes
+        if removed_genes is not None:
+            rm_ws = pd.DataFrame(removed_genes)
+            rm_ws.to_excel(pb_file, sheet_name="Removed Genes")
+        # Duplicated Accessions
+        try:
+            acc_ws = pd.DataFrame.from_dict(self.dup_acc_count, orient='index')
+            acc_ws.columns = ['Count']
+            acc_ws.to_excel(pb_file, sheet_name="Duplicate Count by Accession")
+        except ValueError:
+            pass
+        # Duplicate Genes
+        try:
+            dup_gene_ws = pd.DataFrame.from_dict(self.dup_gene_count, orient='index')
+            dup_gene_ws.columns = ['Count']
+            dup_gene_ws.to_excel(pb_file, sheet_name="Duplicate Count by Gene")
 
-        missing_gene = accession_data.missing_dict['genes']
-        missing_orgs = accession_data.missing_dict['organisms']
-        orgs = accession_data.org_list
+            gene_org_dup = {}
+            for gene, dup_dict in self.duplicated_genes.items():
+                gene_org_dup[gene] = []
+                for acc, genes in self.duplicated_genes[gene].items():
+                    gene_org_dup[gene].append(genes)
+            dup_org_ws2 = pd.DataFrame.from_dict(gene_org_dup, orient='index')
+            dup_org_ws2.T.to_excel(pb_file, sheet_name="Duplicate Org Groups by Gene")
+        except ValueError:
+            pass
+        # Species Duplicates
+        try:
+            dup_org_ws1 = pd.DataFrame.from_dict(self.dup_org_count, orient='index')
+            dup_org_ws1.columns = ['Count']
+            dup_org_ws1.to_excel(pb_file, sheet_name="Duplicate Count by Org")
 
-        # Create and write dictionaries & dataframes to excel file
-        if missing_gene['count'] <= 0 and missing_orgs['count'] <= 0:
-            # Log that the blast had full coverage
-            self.postblast_log.info('There are no missing accession numbers for any gene or organism.')
-            self.postblast_log.info('Post blastn analysis is complete.')
-        else:
-            self.post_blast_log.info('There are missing accessions. This data will be written an excel file.')
+            org_gene_dup = {}
+            for gene, dup_dict in self.duplicated_organisms.items():
+                org_gene_dup[gene] = []
+                for acc, genes in self.duplicated_organisms[gene].items():
+                    org_gene_dup[gene].append(genes)
+            dup_org_ws2 = pd.DataFrame.from_dict(org_gene_dup, orient='index')
+            dup_org_ws2.T.to_excel(pb_file, sheet_name="Duplicate Gene Groups by Org")
+        except ValueError:
+            pass
+        # Random Duplicates
+        try:
+            rand_ws = pd.DataFrame.from_dict(self.duplicated_random, orient='index')
+            rand_ws.to_excel(pb_file, sheet_name="Random Duplicates")
+        except ValueError:
+            pass
+        # Other Duplicates
+        try:
+            other_ws = pd.DataFrame.from_dict(self.duplicated_other, orient='index')
+            other_ws.to_excel(pb_file, sheet_name="Other Duplicates")
+        except ValueError:
+            pass
+        # Missing by Organism
+        org_gene_ms = {}
+        org_gene_ms_count = {}
+        try:
+            for org, ms_dict in self.missing_organsims.items():
+                for key, value in ms_dict.items():
+                    if key == 'missing genes':
+                        org_gene_ms[org] = value
+                    else:
+                        org_gene_ms_count[org] = value
+            org_ms_count = pd.DataFrame.from_dict(org_gene_ms_count, orient='index')
+            org_ms_count.to_excel(pb_file, sheet_name="Missing Genes Count")
+            org_ms = pd.DataFrame.from_dict(org_gene_ms, orient='index')
+            org_ms.to_excel(pb_file, sheet_name="Missing Genes by Org")
+        except ValueError:
+            pass
+        # Missing by Gene
+        gene_org_ms = {}
+        gene_org_ms_count = {}
+        try:
+            for gene, ms_dict in self.missing_genes.items():
+                for key, value in ms_dict.items():
+                    if key == 'missing genes':
+                        gene_org_ms[gene] = value
+                    else:
+                        gene_org_ms_count[gene] = value
+            gene_ms_count = pd.DataFrame.from_dict(gene_org_ms_count, orient='index')
+            gene_ms_count.to_excel(pb_file, sheet_name="Missing Organisms Count")
+            gene_ms = pd.DataFrame.from_dict(gene_org_ms, orient='index')
+            gene_ms.to_excel(pb_file, sheet_name="Missing Organisms by Genes")
+        except ValueError:
+            pass
+        pb_file.save()
 
-            # Set up the excel file
-            excel_file = pd.ExcelWriter(processed + 'karg_missing_genes_data.xlsx')
-
-            # This is the data frame for the names of missing genes by organism
-            frame = pd.DataFrame.from_dict(no_acc, orient='index', dtype=str)
-            frame = frame.transpose()
-            frame.to_excel(excel_file, sheet_name="Missing Genes by Org", index=False)
-
-            # This is the data frame for the number of missing genes by organism
-            frame2 = pd.DataFrame.from_dict(num_missing, orient='index')
-            frame2.to_excel(excel_file, sheet_name="# of Genes missing by Org", header=False)
-
-            # This is the data frame for the number of missing ORGANISMS by gene
-            frame3 = pd.DataFrame(miss_per_gene)
-            combine = [original.Tier, frame3]  # Combine the tier column and data column
-            frame3 = pd.concat(combine, axis=1) # Concatenate the dataframes
-            frame3.to_excel(excel_file, sheet_name="# of Orgs missing by Gene", header=False)
-
-            # Save the excel file
-            excel_file.save()
-            post_blast_log.info('Your file, karg_missing_genes_data.xlsx, has been created and saved.')
-
-            post_blast_log.info('Post blastn analysis is complete.')
 
 

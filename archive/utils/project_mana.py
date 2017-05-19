@@ -1,7 +1,9 @@
 import os
 from pathlib import Path
+
 from cookiecutter.main import cookiecutter
-from Manager.utils.user_mana import UserMana as UM
+
+from archive.utils.user_mana import UserMana as UM
 
 
 class ProjMana(UM):

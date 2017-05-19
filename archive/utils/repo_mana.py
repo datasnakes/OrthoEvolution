@@ -2,7 +2,8 @@ import os
 from pathlib import Path
 from cookiecutter.main import cookiecutter
 
-from Manager.utils.mana import Mana as DM
+from Manager.utils import mana
+DM = mana.Mana
 
 
 class RepoMana(DM):
