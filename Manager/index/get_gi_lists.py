@@ -65,7 +65,7 @@ def main(idlist):
     The argument (idlist) should be a list of taxonomy ids or 1 id.
     """
     ts = time()
-    with Pool(processes=20) as p:
+    with Pool(processes=10) as p:
         p.map(get_gilists, idlist)
         log.info("Took {} minutes to get all gi lists.".format((time() - ts)/60))
 #------------------------------------------------------------------------------
