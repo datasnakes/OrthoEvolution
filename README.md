@@ -1,31 +1,45 @@
+## Datasnakes-Orthologs
 
-Orthologs Documentation
--------------------------
+This package is a collection of the scripts related to an Orthologs Project.
 
-This top level module includes submodules such as Align (for aligning multi fasta files), Phylogenetics (for analyzing multiple sequence alignments), BioSQL (for database creation), Blast (includes tools for using NCBI's blastn command line), and Genbank (for tools to extract features from genbank files).
+## Description
 
-Usage
------
+The subdirectories here are used as modules in the Python3 package that we are developing.
 
-These tools are optimized to be used together (very little work to do that), but can also be used singularly.
+## Installation
 
+Soon we'll be able to `pip install datasnakes-orthologs` via a command line.
 
-#### Simple Example
+In development but working.  To test you'll want to create a virtual environment so that cleanup is easy.
+Using _virtualenv_ with python3 insures that _python_ invokes py3.5 and _python3_ invokes py36.  Invoke python36.
 
-This is a simple example of using some of the modules.
+```bash
+$ mkdir dev
+$ cd dev
+$ virtualenv PackageTest --python=python3
+$ source activate PackageTest
+$ cd PackageTest
+$ pip install cookiecutter
+$ git clone -b RAG-Review http;//github.com/datasnakes/Datasnakes-Scripts
+$ cd Datasnakes-Scripts
+$ python3 tester.py
 
-``` python
-from Orthologs import Phylogenetics
+```
+## Usage
+
+After installation, you'll be able to easily import each module via:
+
+```python
+from Orthologs import Align, BioSQL, Blast, CompGenetics, Phylogenetics, Genbank
 
 ```
 
-Tests
------
+## Contributors
+* Rob Gilmore | Github: [@grabear](https://github.com/grabear) | [:email:](mailto:robgilmore127@gmail.com)
+* Shaurita Hutchins | Github: [@sdhutchins](https://github.com/sdhutchins) | Twitter: [@MavenNBA](https://twitter.com/MavenNBA/) | [:email:](mailto:sdhutchins@outlook.com)
 
-Tests will be added soon.
 
+### Citation
+We're so thankful to have a resource such as [Biopython](). They inspired this package.
 
-:exclamation: Notes
--------------------
-
-Explain or list any notable information about the contents of this folder.
+*Cock, P.J.A. et al. Biopython: freely available Python tools for computational molecular biology and bioinformatics. Bioinformatics 2009 Jun 1; 25(11) 1422-3 http://dx.doi.org/10.1093/bioinformatics/btp163 pmid:19304878*
