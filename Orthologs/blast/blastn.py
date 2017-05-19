@@ -175,19 +175,21 @@ class BLASTn(BT):
         print('gi_list_config')
         taxids = self.taxon_ids
         with Pool(processes=20) as p:
+            cd = os.getcwd()
+            os.chdir(self.__gi_list_path)
             p.map(self.gi_split, taxids)
+            os.chdir(cd)
             self.blastn_log.inf("The GI lists have been created.")
 
-    def gi_split(self, ID):
+    @staticmethod
+    def gi_split(ID):
         """ This function uses the blastdbcmd tool to get gi lists. It then uses the
         blastdb_aliastool to turn the list into a binary file."""
         # Create dictionary for formatting
         ID = str(ID)
         gi_text_file = "%sgi.txt" % ID
-        gi_text_path = str(self.__gi_list_path / Path(gi_text_file))
         gi_binary_file = "%sgi" % ID
-        gi_binary_path = str(self.__gi_list_path / Path(gi_binary_file))
-        fmt = {'gi_path': str(self.__gi_list_path), 'text file': gi_text_path, 'binary file': gi_binary_path}
+        fmt = {'text file': gi_text_file, 'binary file': gi_binary_file}
         # TODO untested
         # Use the accession #'s and the blastdbcmd tool to generate gi lists based on Organisms/Taxonomy ID's.
         os.system("blastdbcmd -db refseq_rna -entry all -outfmt '%g %T' | awk ' {{ if ($2 == {id}) "
