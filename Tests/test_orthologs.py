@@ -1,9 +1,10 @@
 from unittest import TestCase
+from Orthologs.Phylogenetics import PhyloTree
 from Orthologs import Align
 
+# Under Development
 class Test(TestCase):
-    def test_is_string(self):
-        s = Align.joke()
-        self.assertTrue(isinstance(s))
+    def test(self):
+        help(PhyloTree)
+        help(Align)
 
-help(Align)

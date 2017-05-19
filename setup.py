@@ -35,15 +35,14 @@ def readme():
 # Set up an initial configuration file
 # //TODO-ROB: Set up a reconfiguration script for manual movements;  Make the script append to 'init.yaml'
 
-
-
+# Setup the package
 setup(
     name=name,
     author = 'Datasnakes',
     description="A project that will help to analyze orthologous genes.",
     version='0.1.0',
     long_description=readme(),
-    url='https://github.com/robear22890/Orthologs-Project',
+    url='https://github.com/datasnakes/Datasnakes-Scripts',
     license='?',
     classifiers=[
         'Development Status :: 3 - Alpha',
