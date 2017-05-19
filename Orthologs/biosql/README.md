@@ -1,4 +1,4 @@
-## biosql directory
+## BioSQL
 
 This is the biosql package for our project.  It will automate upload of the
 sqlite3 biosql schema and the NCBI taxonomy data to a template database
@@ -8,7 +8,7 @@ and [biosql's](http://biosql.org) documentation site.
 
 ## Description
 
-#### BioSQL
+#### What is BioSQL?
 
 BioSQL is a generic unifying schema for storing sequences from different sources,
 for instance Genbank or Swissprot.

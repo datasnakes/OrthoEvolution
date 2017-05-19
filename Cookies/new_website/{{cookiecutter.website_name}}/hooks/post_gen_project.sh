@@ -8,6 +8,7 @@ cd {{ cookiecutter.website_path }}
 pip install -r requirements.txt
 pip install -r requirements/dev.txt
 bower install
+
 flask db init
 flask db migrate
 flask db upgrade
@@ -58,3 +59,4 @@ In your production environment, make sure the ``FLASK_DEBUG`` environment
 variable is unset or is set to ``0``, so that ``ProdConfig`` is used.
 
 """
+
