@@ -1,0 +1,1 @@
+This script is optimized strictly for Linux at the moment in terms of the ftp downloading.

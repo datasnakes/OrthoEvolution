@@ -1,0 +1,31 @@
+{'displayLink': 'www.ncbi.nlm.nih.gov',
+ 'formattedUrl': 'https://www.ncbi.nlm.nih.gov/gene/3350',
+ 'htmlFormattedUrl': 'https://www.ncbi.nlm.nih.gov/gene/3350',
+ 'htmlSnippet': 'Dec 6, 2016 <b>...</b> Also patients with a higher level of '
+                'alexithymia and the <b>HTR1A</b>-G gene variant <br>\n'
+                'are more vulnerable to experiencing IFN-induced '
+                'depressive&nbsp;...',
+ 'htmlTitle': '<b>HTR1A</b> 5-hydroxytryptamine receptor 1A [ (human)]',
+ 'kind': 'customsearch#result',
+ 'link': 'https://www.ncbi.nlm.nih.gov/gene/3350',
+ 'pagemap': {'metatags': [{'author': 'entrezgene',
+                           'gene_aliases': '5-HT-1A, 5-HT1A, 5HT1a, ADRB2RL1, '
+                                           'ADRBRL1, G-21, PFMCD',
+                           'gene_designations': '5-hydroxytryptamine receptor '
+                                                '1A|5-HT1a '
+                                                'receptor|5-hydroxytryptamine '
+                                                '(serotonin) receptor 1A, G '
+                                                'protein-coupled|guanine '
+                                                'nucleotide-binding regulatory '
+                                                'protein-coupled receptor',
+                           'gene_html_url': 'http://www.ncbi.nlm.nih.gov/gene/3350/',
+                           'gene_id': '3350',
+                           'gene_location': 'Chromosome: 5; Location: 5q12.3',
+                           'gene_name': '5-hydroxytryptamine receptor 1A',
+                           'gene_symbol': 'HTR1A',
+                           'gene_title': 'HTR1A 5-hydroxytryptamine receptor '
+                                         '1A [ (human)]'}]},
+ 'snippet': 'Dec 6, 2016 ... Also patients with a higher level of alexithymia '
+            'and the HTR1A-G gene variant \n'
+            'are more vulnerable to experiencing IFN-induced depressive\xa0...',
+ 'title': 'HTR1A 5-hydroxytryptamine receptor 1A [ (human)]'}
