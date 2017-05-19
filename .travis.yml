@@ -6,5 +6,5 @@ python:
   - "3.6"
 # command to install dependencies
 install: "pip install -r requirements.txt"
-# command to run tests
+# command to run nosetests
 script: nosetests Tests/test_orthologs.py
