@@ -1,10 +1,15 @@
-## Datasnakes-Orthologs
+[![Build Status](https://travis-ci.org/datasnakes/Datasnakes-Scripts.svg?branch=SDH-Review)](https://travis-ci.org/datasnakes/Datasnakes-Scripts)
+## Datasnakes-Orthologs 
 
 This package is a collection of the scripts related to an Orthologs Project.
 
 ## Description
 
 The subdirectories here are used as modules in the Python3 package that we are developing.
+
+## Dependencies
+
+Currently, this package works with python 3.4 and upward.
 
 ## Installation
 
@@ -20,7 +25,7 @@ $ virtualenv PackageTest --python=python3
 $ source activate PackageTest
 $ cd PackageTest
 $ pip install cookiecutter
-$ git clone -b RAG-Review http;//github.com/datasnakes/Datasnakes-Scripts
+$ git clone -b RAG-Review http://github.com/datasnakes/Datasnakes-Scripts
 $ cd Datasnakes-Scripts
 $ python3 tester.py
 
@@ -40,6 +45,6 @@ from Orthologs import Align, BioSQL, Blast, CompGenetics, Phylogenetics, Genbank
 
 
 ### Citation
-We're so thankful to have a resource such as [Biopython](). They inspired this package.
+We're so thankful to have a resource such as [Biopython](http://biopython.org/wiki/Biopython). They inspired this package.
 
 *Cock, P.J.A. et al. Biopython: freely available Python tools for computational molecular biology and bioinformatics. Bioinformatics 2009 Jun 1; 25(11) 1422-3 http://dx.doi.org/10.1093/bioinformatics/btp163 pmid:19304878*
