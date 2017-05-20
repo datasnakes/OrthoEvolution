@@ -53,11 +53,11 @@ After installation, you'll be able to easily import each module via:
 Contributors
 ------------
 
--  Rob Gilmore \| Github: [@grabear](https://github.com/grabear) \|
+-  Rob Gilmore \| Github: `@grabear <https://github.com/grabear>`__ \|
    `:email: <mailto:robgilmore127@gmail.com>`__
 -  Shaurita Hutchins \| Github:
-   [@sdhutchins](https://github.com/sdhutchins) \| Twitter:
-   [@MavenNBA](https://twitter.com/MavenNBA/) \|
+   `@sdhutchins <https://github.com/sdhutchins>`__ \| Twitter:
+   `@MavenNBA <https://twitter.com/MavenNBA/>`__ \|
    `:email: <mailto:sdhutchins@outlook.com>`__
 
 Citation
