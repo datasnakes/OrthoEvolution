@@ -2,53 +2,47 @@
 # https://github.com/pypa/sampleproject/blob/master/setup.py
 # https://github.com/biopython/biopython/blob/master/setup.py
 # TODO-ROB: 1.  Generate a Template BioSQL database using sqlite3
+
 from setuptools import setup, find_packages
 # To use a consistent encoding
 from codecs import open
 from os import path
-import os
-import tablib
+import sys
+
+sys.stderr = open('err.txt', 'w')
+
 home = path.abspath(path.dirname(__file__))
 name = 'Datasnakes-Scripts'
 
 PACKAGES = [
-    'biosql',
-    'blast',
-    'ete3',
-    'ftp',
-    'pybasher',
-    'pandoc',
-    'slacker'
-    'genbank',
-    'Orthologs'
-    'Orthologs.Manager',
-    'Orthologs.Manager.blast',
-    'Orthologs.Manager.flask',
-    'Orthologs.Manager.shiny',
-    'Orthologs.phylogenetics',
-    'Orthologs.genbank',
-    'Tools',
-    'Tools.ftp',
-    'Tools.multiprocessing',
-    'Tools.pybasher',
-    'Tools.pandoc',
+    'Align',
+    'Orthologs',
+    'CompGenetics',
+    'Blast',
+    'BioSQL',
+    'Manager',
+    'Cookies',
+    'Docs',
+    'Phylogenetics'
+    #'Tools',
 ]
 
 # Get the long description from the README file
-with open(path.join(home, 'README.rst'), encoding='utf-8') as f:
-    long_description = f.read()
+def readme():
+    with open(path.join(home, 'README.rst'), encoding='utf-8') as f:
+        return f.read()
 
 # Set up an initial configuration file
 # //TODO-ROB: Set up a reconfiguration script for manual movements;  Make the script append to 'init.yaml'
 
-
-
+# Setup the package
 setup(
     name=name,
+    author = 'Datasnakes',
     description="A project that will help to analyze orthologous genes.",
     version='0.1.0',
-    long_description=long_description,
-    url='https://github.com/robear22890/Orthologs-Project',
+    long_description=readme(),
+    url='https://github.com/datasnakes/Datasnakes-Scripts',
     license='?',
     classifiers=[
         'Development Status :: 3 - Alpha',
@@ -57,9 +51,16 @@ setup(
         'Topic :: Scientific/Engineering :: Visualization',
         'Programming Language :: Python :: 3',
         'Operating System :: Unix',
-        'Natural Language :: English'
+        'Natural Language :: English',
+        'Programming Language :: Python :: 3.3',
+        'Programming Language :: Python :: 3.4',
+        'Programming Language :: Python :: 3.5'
     ],
-    packages=PACKAGES,
+    packages=find_packages(exclude=['Docs', 'Tools', 'Archive', 'Examples']),
     install_requires=[],
+    include_package_data=True,
+    zip_safe=False,
+    test_suite='nose.collector',
+    tests_require=['nose']
 )
 
