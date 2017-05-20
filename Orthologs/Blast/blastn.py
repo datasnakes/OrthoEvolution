@@ -177,9 +177,19 @@ class BLASTn(BT):
         os.chdir(str(self.__gi_list_path))
         taxids = self.taxon_ids
         pd.Series(taxids).to_csv('taxids.csv', index=False)
-        subprocess.call(['qsub %s' % str(self.__gi_list_path / Path('get_gi_lists.pbs'))], shell=True)
+        #subprocess.call(['qsub %s' % str(self.__gi_list_path / Path('get_gi_lists.pbs'))], shell=True)
         p = subprocess.Popen(['qsub %s' % str(self.__gi_list_path / Path('get_gi_lists.pbs'))], shell=True)
         p.wait()
+        print('Done submitting jobs')
+        gi_flag = True
+        while gi_flag == True:
+            try:
+                subprocess.check_output(['pidof', 'getgilists'])
+                gi_flag = False
+            except subprocess.CalledProcessError:
+                gi_flag = True
+                time.sleep(30)
+                print('Waiting for the gi BLAST to finish....')
         print('Multiprocessing complete')
         os.chdir(cd)
     #     with Pool(processes=20) as p:
