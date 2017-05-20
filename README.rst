@@ -1,5 +1,6 @@
-[![Build Status](https://travis-ci.org/datasnakes/Datasnakes-Scripts.svg?branch=SDH-Review)](https://travis-ci.org/datasnakes/Datasnakes-Scripts)
-
+.. image:: https://travis-ci.org/datasnakes/Datasnakes-Scripts.svg?branch=SDH-Review
+    :target: https://travis-ci.org/datasnakes/Datasnakes-Scripts
+    
 ## Datasnakes-Orthologs 
 
 This package is a collection of the scripts related to an Orthologs Project.
