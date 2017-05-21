@@ -78,8 +78,8 @@ class BLASTAnalysis(CGA):
 
                 self.blastn_log.critical("Queried Accession Gene: %s" % gene)
                 self.blastn_log.critical("Queried Accession Organism: %s" % organism)
-                self.blastn_log.critical("Existing Accession Organism: %s" % self.acc_dict[existing][0])
-                self.blastn_log.critical("Existing Accession Organism: %s" % self.acc_dict[existing][1])
+                self.blastn_log.critical("Existing Accession Gene: %s" % self.acc_dict[existing][0][0])
+                self.blastn_log.critical("Existing Accession Organism: %s" % self.acc_dict[existing][0][1])
                 self.blastn_log.critical("***********************************************************************")
                 raise ValueError("The queried ACCESSION (%s) does not match the existing ACCESSION (%s).  Please see"
                                  "the log file." % (accession, existing))
