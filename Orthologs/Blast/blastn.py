@@ -92,7 +92,7 @@ class BLASTn(BT):
 
         # Create GI lists
         self.blastn_log.info("Configuring GI list using the taxonomy id and the blastdbcmd tool.")
-        self.gi_list_config()
+        #self.gi_list_config()
         # Get GI (stdout) and query sequence (FASTA format)
         self.blastn_log.info("Generating directories.")
         self.blastn_log.info("Extracting query gi number to stdout and "
@@ -188,8 +188,8 @@ class BLASTn(BT):
                 gi_flag = False
             except subprocess.CalledProcessError:
                 gi_flag = True
-                time.sleep(30)
                 print('Waiting for the gi BLAST to finish....')
+                time.sleep(30)
         print('Multiprocessing complete')
         os.chdir(cd)
     #     with Pool(processes=20) as p:
