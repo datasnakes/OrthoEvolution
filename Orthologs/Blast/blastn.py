@@ -100,7 +100,7 @@ class BLASTn(BT):
         # Iterate the query accessions numbers
         for query in query_align:
             # os.chdir(str(self.__output_path))
-            gene = self.acc_dict[query][0]
+            gene = self.acc_dict[query][0][0]
             gene_path = self.__xml_path / Path(gene)
             org = self.acc_dict[query][1]
             # Create the proper directories for each gene
