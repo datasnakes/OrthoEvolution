@@ -45,7 +45,7 @@ class BLASTn(BT):
         # # Initialize Logging
         # self.__blastn_log = LogIt.blastn()
         #df = LogIt()
-        #self.date_format = df.date_format
+        self.date_format = '%a %b %d at %I:%M:%S %p %Y'
         # self.get_time = time.time  # To get the time use 'get_time()'
         # TODO-ROB:  Add a query organism variable
         self.query_gi_dict = {}
