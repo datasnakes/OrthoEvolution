@@ -333,6 +333,7 @@ class CompGenAnalysis(PM):
         return taxa_dict
 
     def get_acc_dict(self):
+        # TODO-ROB set up function to accept a parameter for unique values or potential duplicates
         """This function takes a list of accession numbers and returns a dictionary
         which contains the corresponding genes/organisms.
         """

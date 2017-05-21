@@ -333,7 +333,7 @@ class BLASTn(BT):
 
                 # Initialize configuration variables
                 taxon_id = self.taxon_dict[organism]
-                taxon_gi_file = str(taxon_id + "gi")
+                taxon_gi_file = str(taxon_id) + "gi"
                 taxon_gi_path = self.__gi_list_path / Path(taxon_gi_file)
                 taxgi_dest_path = gene_path / Path(taxon_gi_file)
                 if xml in files:
