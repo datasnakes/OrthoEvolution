@@ -102,7 +102,7 @@ class BLASTn(BT):
             # os.chdir(str(self.__output_path))
             gene = self.acc_dict[query][0][0]
             gene_path = self.__xml_path / Path(gene)
-            org = self.acc_dict[query][1]
+            org = self.acc_dict[query][0][1]
             # Create the proper directories for each gene
             try:
                 Path.mkdir(gene_path)
