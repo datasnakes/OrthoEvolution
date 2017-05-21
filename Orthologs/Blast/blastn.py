@@ -263,7 +263,8 @@ class BLASTn(BT):
         # Parse the XML file created by the BLAST
         maximum = 0
         with open(xml_file, 'r') as blast_xml:
-            blast_qresult = SearchIO.read(blast_xml, 'blast-xml')
+            file_path = str(Path(self.__xml_path) / Path(gene) / Path(xml_file))
+            blast_qresult = SearchIO.read(file_path, 'blast-xml')
             mapped_qresult = blast_qresult.hit_map(self.map_func)
             for hit in mapped_qresult:
                 for hsp in hit.hsps:
