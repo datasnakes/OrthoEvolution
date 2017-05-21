@@ -88,7 +88,7 @@ class BLASTAnalysis(CGA):
         temp = self.building.reset_index()
         temp.insert(0, 'Tier', self.df['Tier'])
         if self.save_data is True:
-            temp.to_csv(self.building_file_path)
+            temp.to_csv(str(self.building_file_path))
 
     def add_blast_time(self, gene, organism, start, end):
         """Takes the start/end times and adds in to the building_time 
@@ -99,7 +99,7 @@ class BLASTAnalysis(CGA):
         temp = self.building_time.reset_index()
         temp.insert(0, 'Tier', self.df['Tier'])
         if self.save_data is True:
-            temp.to_csv(self.building_time_file_path)
+            temp.to_csv(str(self.building_time_file_path))
 
     def post_blast_analysis(self, project_name, removed_genes=None):
         # TODO-ROB  Fix the output format of the excel file.  View a sample output in /Orthologs/comp_gen
