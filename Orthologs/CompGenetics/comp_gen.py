@@ -95,11 +95,26 @@ class CompGenAnalysis(PM):
             self.blast_human = []
             self.blast_rhesus = []
             # Handles for dataframe init #
-            self.raw_acc_data = pd.read_csv(str(self.acc_path), dtype=str, engine='python')
+            self.raw_acc_data = pd.read_csv(str(self.acc_path), dtype=str)
+
+            self.building_filename = str(acc_file[:-4] + 'building.csv')
+            self.building_time_filename = self.building_filename.replace('building.csv', 'building_time.csv')
+            self.building = pd.read_csv(str(self.acc_path), dtype=str)
+            del self.building['Tier']
+            del self.building['Homo_sapiens']
+            self.building = self.building.set_index('Gene')
+            self.building_file_path = self.raw_data / Path(self.building_filename)
+
+            self.building_time = pd.read_csv(str(self.acc_path), dtype=str)
+            del self.building_time['Tier']
+            del self.building_time['Homo_sapiens']
+            self.building_time = self.building_time.set_index('Gene')
+            self.building_time_file_path = self.raw_data / Path(self.building_time_filename)
             # self.mygene_df = pd.DataFrame()
             # self.mygene_filename = "%s_mygene.csv" % self.project
             # self.mygene_path = self.data / Path(self.mygene_filename)
             self.header = self.raw_acc_data.axes[1].tolist()
+
 
             # # Handles for accession file analysis # #
             if self.__post_blast:
@@ -121,7 +136,6 @@ class CompGenAnalysis(PM):
                 self.duplicated_other = {}
                 self.time_dict = {}
 
-
             # #### Format the main data frame #### #
             self.__data = self.raw_acc_data.set_index('Gene')
             self.df = self.__data
@@ -134,6 +148,9 @@ class CompGenAnalysis(PM):
             self.org_dict = self.df.ix[0:, 'Homo_sapiens':].to_dict()
             self.gene_dict = self.df.T.to_dict()
             self.get_master_lists(self.__data)  # populates our lists
+        else:
+            self.building_filename = str(project + 'building.csv')
+            self.building_time_filename = self.building_filename.replace('building.csv', 'building_time.csv')
 
 
 # TODO-ROB Add HGNC python module
