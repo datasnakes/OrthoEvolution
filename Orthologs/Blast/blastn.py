@@ -332,9 +332,10 @@ class BLASTn(BT):
                 xml_path = gene_path / Path(xml)
 
                 # Initialize configuration variables
+                # TODO-ROB change the __gi_list_path to current path + 'data'
                 taxon_id = self.taxon_dict[organism]
                 taxon_gi_file = str(taxon_id) + "gi"
-                taxon_gi_path = self.__gi_list_path / Path(taxon_gi_file)
+                taxon_gi_path = self.__gi_list_path / Path('data') / Path(taxon_gi_file)
                 taxgi_dest_path = gene_path / Path(taxon_gi_file)
                 if xml in files:
                     self.blast_xml_parse(xml_path, gene, organism)
