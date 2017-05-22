@@ -5,7 +5,7 @@ provide easy handles for different pieces of data.
 """
 # Modules Used
 import os
-#import mygene
+import mygene
 from ete3 import NCBITaxa
 #NCBITaxa().update_taxonomy_database()
 import pandas as pd
@@ -101,9 +101,9 @@ class CompGenAnalysis(PM):
             del self.building_time['Homo_sapiens']
             self.building_time = self.building_time.set_index('Gene')
             self.building_time_file_path = self.raw_data / Path(self.building_time_filename)
-            # self.mygene_df = pd.DataFrame()
-            # self.mygene_filename = "%s_mygene.csv" % self.project
-            # self.mygene_path = self.data / Path(self.mygene_filename)
+            self.mygene_df = pd.DataFrame()
+            self.mygene_filename = "%s_mygene.csv" % self.project
+            self.mygene_path = self.data / Path(self.mygene_filename)
             self.header = self.raw_acc_data.axes[1].tolist()
 
 
@@ -153,46 +153,46 @@ class CompGenAnalysis(PM):
 
 # ***********************************************PRE BLAST ANALYSIS TOOLS********************************************* #
 # ***********************************************PRE BLAST ANALYSIS TOOLS********************************************* #
-#     def my_gene_info(self):
-#         # TODO-ROB TODO-SHAE
-#         # TODO Add custom mygene options
-#         # Initialize variables and import my-gene search command
-#         urls = []
-#         df = self.raw_acc_data
-#         mg = mygene.MyGeneInfo()
-#         # Create a my-gene query handle to get the data
-#         human = list(x.upper() for x in self.blast_human)
-#         mygene_query = mg.querymany(human, scopes='refseq',
-#                                     fields='symbol,name,entrezgene,summary',
-#                                     species='human', returnall=True, as_dataframe=True,
-#                                     size=1, verbose=True)
-#         # TODO-ROB:  Logging here
-#         # TODO-SHAE:  COME TO HE DARK SIDE SHAURITA!!!!!!!!!!!!
-#
-#         # Turn my-gene queries into a data frame and then reset the index
-#         mygene_query['out'].reset_index(level=0, inplace=True)
-#         mg_df = pd.DataFrame(mygene_query['out'])
-#         mg_df.drop(mg_df.columns[[1, 2, 6]], axis=1, inplace=True)
-#         # Rename the columns
-#         mg_df.rename(columns={'entrezgene': 'Entrez ID', 'summary':
-#                              'Gene Summary', 'query': 'RefSeqRNA Accession', 'name': 'Gene Name'},
-#                      inplace=True)
-#
-#         # Create NCBI links using a for loop and the Entrez IDs
-#         urls = [urls.append('<a href="{0}">{0}</a>'.format('https://www.ncbi.nlm.nih.gov/gene/' + str(entrez_id)))
-#                 for entrez_id in mg_df['Entrez ID']]
-#         # for entrez_id in mg_df['Entrez ID']:
-#         #      # Format the url so that it becomes an html hyperlink
-#         #     url = '<a href="{0}">{0}</a>'.format('https://www.ncbi.nlm.nih.gov/gene/' + str(entrez_id))
-#         #     urls.append(url)
-#         # Turn the ncbi urls list into a data frame
-#         ncbi = pd.DataFrame(urls, columns=['NCBI Link'], dtype=str)
-#         # Merge, sort, and return the my-gene data frame
-#         hot_data = pd.concat([df.Tier, df.Gene, mg_df, ncbi], axis=1)
-#         hot_data.rename(columns={'Gene': 'Gene Symbol'}, inplace=True)
-#         hot_data = hot_data.sort_values(['Tier'], ascending=True)
-#
-#         return hot_data
+    def my_gene_info(self):
+        # TODO-ROB TODO-SHAE
+        # TODO Add custom mygene options
+        # Initialize variables and import my-gene search command
+        urls = []
+        df = self.raw_acc_data
+        mg = mygene.MyGeneInfo()
+        # Create a my-gene query handle to get the data
+        human = list(x.upper() for x in self.blast_human)
+        mygene_query = mg.querymany(human, scopes='refseq',
+                                    fields='symbol,name,entrezgene,summary',
+                                    species='human', returnall=True, as_dataframe=True,
+                                    size=1, verbose=True)
+        # TODO-ROB:  Logging here
+        # TODO-SHAE:  COME TO HE DARK SIDE SHAURITA!!!!!!!!!!!!
+
+        # Turn my-gene queries into a data frame and then reset the index
+        mygene_query['out'].reset_index(level=0, inplace=True)
+        mg_df = pd.DataFrame(mygene_query['out'])
+        mg_df.drop(mg_df.columns[[1, 2, 6]], axis=1, inplace=True)
+        # Rename the columns
+        mg_df.rename(columns={'entrezgene': 'Entrez ID', 'summary':
+                             'Gene Summary', 'query': 'RefSeqRNA Accession', 'name': 'Gene Name'},
+                     inplace=True)
+
+        # Create NCBI links using a for loop and the Entrez IDs
+        urls = [urls.append('<a href="{0}">{0}</a>'.format('https://www.ncbi.nlm.nih.gov/gene/' + str(entrez_id)))
+                for entrez_id in mg_df['Entrez ID']]
+        # for entrez_id in mg_df['Entrez ID']:
+        #      # Format the url so that it becomes an html hyperlink
+        #     url = '<a href="{0}">{0}</a>'.format('https://www.ncbi.nlm.nih.gov/gene/' + str(entrez_id))
+        #     urls.append(url)
+        # Turn the ncbi urls list into a data frame
+        ncbi = pd.DataFrame(urls, columns=['NCBI Link'], dtype=str)
+        # Merge, sort, and return the my-gene data frame
+        hot_data = pd.concat([df.Tier, df.Gene, mg_df, ncbi], axis=1)
+        hot_data.rename(columns={'Gene': 'Gene Symbol'}, inplace=True)
+        hot_data = hot_data.sort_values(['Tier'], ascending=True)
+
+        return hot_data
 
     def get_master_lists(self, df=None, csv_file=None):
         """This function populates the organism and gene lists with a data frame.
@@ -238,8 +238,8 @@ class CompGenAnalysis(PM):
         self.blast_rhesus = self.df.Macaca_mulatta.tolist()
 
         # Gene analysis
-        # self.mygene_df = self.my_gene_info()
-        # self.mygene_df.to_csv(self.mygene_df, self.mygene_path)
+        self.mygene_df = self.my_gene_info()
+        self.mygene_df.to_csv(self.mygene_df, self.mygene_path)
         # Accession file analysis
         if self.__post_blast:
             self.missing_dict = self.get_miss_acc()
