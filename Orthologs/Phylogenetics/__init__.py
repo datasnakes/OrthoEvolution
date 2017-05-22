@@ -7,7 +7,7 @@ from Orthologs import OrthologsWarning
 warnings.simplefilter('ignore', OrthologsWarning)
 
 from Orthologs.Phylogenetics.PAML import ETE3PAML, PamlTest
-from Orthologs.Phylogenetics.PhyML import PhyML, PhymlTest
+from Orthologs.Phylogenetics.PhyML import PhyML
 from Orthologs.Phylogenetics.Phylip import Phylip
 from Orthologs.Phylogenetics.PhyloTree import TreeViz
 
@@ -15,7 +15,6 @@ from Orthologs.Phylogenetics.PhyloTree import TreeViz
 __all__ = ("ETE3PAML",
            "PamlTest",
            "PhyML",
-           "PhymlTest",
            "TreeViz",
            "Phylip",
 )
