@@ -114,7 +114,7 @@ class BLASTAnalysis(CGA):
             acc_ws = pd.DataFrame.from_dict(self.dup_acc_count, orient='index')
             acc_ws.columns = ['Count']
             acc_ws.to_excel(pb_file, sheet_name="Duplicate Count by Accession")
-        except ValueError or AttributeError:
+        except (ValueError, AttributeError):
             pass
         # Duplicate Genes
         try:
@@ -129,7 +129,7 @@ class BLASTAnalysis(CGA):
                     gene_org_dup[gene].append(genes)
             dup_org_ws2 = pd.DataFrame.from_dict(gene_org_dup, orient='index')
             dup_org_ws2.T.to_excel(pb_file, sheet_name="Duplicate Org Groups by Gene")
-        except ValueError or AttributeError:
+        except (ValueError, AttributeError):
             pass
         # Species Duplicates
         try:
@@ -144,19 +144,19 @@ class BLASTAnalysis(CGA):
                     org_gene_dup[gene].append(genes)
             dup_org_ws2 = pd.DataFrame.from_dict(org_gene_dup, orient='index')
             dup_org_ws2.T.to_excel(pb_file, sheet_name="Duplicate Gene Groups by Org")
-        except ValueError or AttributeError:
+        except (ValueError, AttributeError):
             pass
         # Random Duplicates
         try:
             rand_ws = pd.DataFrame.from_dict(self.duplicated_random, orient='index')
             rand_ws.to_excel(pb_file, sheet_name="Random Duplicates")
-        except ValueError or AttributeError:
+        except (ValueError, AttributeError):
             pass
         # Other Duplicates
         try:
             other_ws = pd.DataFrame.from_dict(self.duplicated_other, orient='index')
             other_ws.to_excel(pb_file, sheet_name="Other Duplicates")
-        except ValueError or AttributeError:
+        except (ValueError, AttributeError):
             pass
         # Missing by Organism
         org_gene_ms = {}
@@ -172,7 +172,7 @@ class BLASTAnalysis(CGA):
             org_ms_count.to_excel(pb_file, sheet_name="Missing Genes Count")
             org_ms = pd.DataFrame.from_dict(org_gene_ms, orient='index')
             org_ms.to_excel(pb_file, sheet_name="Missing Genes by Org")
-        except ValueError or AttributeError:
+        except (ValueError, AttributeError):
             pass
         # Missing by Gene
         gene_org_ms = {}
@@ -188,7 +188,7 @@ class BLASTAnalysis(CGA):
             gene_ms_count.to_excel(pb_file, sheet_name="Missing Organisms Count")
             gene_ms = pd.DataFrame.from_dict(gene_org_ms, orient='index')
             gene_ms.to_excel(pb_file, sheet_name="Missing Organisms by Genes")
-        except ValueError or AttributeError:
+        except (ValueError, AttributeError):
             pass
         pb_file.save()
 
