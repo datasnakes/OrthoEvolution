@@ -1,8 +1,3 @@
-# Author: Shaurita D. Hutchins
-# Date Created: Tue Mar 28 18:29:14 2017
-# Project Name: Addictions Project
-# This is a simple bash script that gets GI lists for the local blast.
-
 #PBS -S /bin/bash
 #PBS -m bea
 #PBS -M rgilmore@umc.edu

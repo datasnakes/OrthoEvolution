@@ -178,7 +178,7 @@ class BLASTn(BT):
         taxids = self.taxon_ids
         pd.Series(taxids).to_csv('taxids.csv', index=False)
         Path.mkdir(self.__gi_list_path / Path('data'), parents=True, exist_ok=True)
-        os.system('qsub %s' % str(self.__gi_list_path / Path('get_gi_lists.pbs')))
+        os.system('qsub %s' % str(self.__gi_list_path / Path('get_gi_lists.sh')))
         print('Done submitting jobs')
         gi_flag = True
         while gi_flag == True:
