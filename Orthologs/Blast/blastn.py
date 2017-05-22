@@ -337,7 +337,7 @@ class BLASTn(BT):
                 taxon_id = self.taxon_dict[organism]
                 taxon_gi_file = str(taxon_id) + "gi"
                 taxon_gi_path = self.__gi_list_path / Path('data') / Path(taxon_gi_file)
-                taxgi_dest_path = gene_path / Path(taxon_gi_file)
+                # taxgi_dest_path = gene_path / Path(taxon_gi_file)
                 if xml in files:
                     self.blast_xml_parse(xml_path, gene, organism)
                 else:
@@ -348,16 +348,17 @@ class BLASTn(BT):
                     self.blastn_log.info("The current organisms is %s (%s)." % (organism, taxon_id))
 
                     with open(xml_path, 'w') as blast_xml:
+                        # TODO-ROB: For multiporcessing copy gi lists, but for regular processing just use the one.
                         # Create a copy of the gi list file per taxonomy id to be used in blast
-                        fmt = {'src': str(taxon_gi_path), 'dst': str(taxgi_dest_path)}
-                        os.system("cp {src} {dst}".format(**fmt))
+                        # fmt = {'src': str(taxon_gi_path), 'dst': str(taxgi_dest_path)}
+                        # os.system("cp {src} {dst}".format(**fmt))
                         # Set up blast parameters
-                        taxgi_dest_path = str(taxgi_dest_path)
+                        taxon_gi_path = str(taxon_gi_path)
                         query_seq_path = str(gene_path / Path('temp.fasta'))
                         # Use Biopython's NCBIBlastnCommandline tool
                         result_handle1 = NcbiblastnCommandline(query=query_seq_path, db="refseq_rna",
                                                                strand="plus", evalue=0.001,  # DONT GO LOWER
-                                                               outfmt=5, gilist=taxgi_dest_path,
+                                                               outfmt=5, gilist=taxon_gi_path,
                                                                max_target_seqs=10, task="blastn")
                         # Capture blast data
                         stdout_str, stderr_str = result_handle1()
