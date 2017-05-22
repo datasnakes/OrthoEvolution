@@ -36,15 +36,17 @@ def get_gilists(id):
     blastdb_aliastool to turn the list into a binary file.
     The input (id) for the function is a taxonomy id.
     """
-    # Use the accession #'s and the blastdbcmd tool to generate gi lists based on Organisms/Taxonomy id's.
-    os.system("blastdbcmd -db refseq_rna -entry all -outfmt '%g %T' | awk ' { if ($2 == " + id + ") { print $1 } } ' > " + id + "gi.txt")
-    log.info(id + "gi.txt has been created.")
-    # Convert the .txt file to a binary file using the blastdb_aliastool.
-    os.system("blastdb_aliastool -gi_file_in " + id + "gi.txt -gi_file_out " + id + "gi")
-    log.info(id + "gi binary file has been created.")
-    # Remove the gi.text file
-    os.system("rm " + id + "gi.txt")
-    log.info(id + "gi.text file has been deleted.")
+    binary = str(id) + 'gi'
+    if binary not in os.listdir():
+        # Use the accession #'s and the blastdbcmd tool to generate gi lists based on Organisms/Taxonomy id's.
+        os.system("blastdbcmd -db refseq_rna -entry all -outfmt '%g %T' | awk ' { if ($2 == " + id + ") { print $1 } } ' > " + id + "gi.txt")
+        log.info(id + "gi.txt has been created.")
+        # Convert the .txt file to a binary file using the blastdb_aliastool.
+        os.system("blastdb_aliastool -gi_file_in " + id + "gi.txt -gi_file_out " + id + "gi")
+        log.info(id + "gi binary file has been created.")
+        # Remove the gi.text file
+        os.system("rm " + id + "gi.txt")
+        log.info(id + "gi.text file has been deleted.")
 
 
 def main(idlist):
