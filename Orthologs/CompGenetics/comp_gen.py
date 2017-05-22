@@ -13,17 +13,9 @@ from pathlib import Path
 from pandas import ExcelWriter
 from Manager.utils.mana import ProjMana as PM
 
-# Directory Initializations:
-# Use Mana() class here so that we can stay organized
-# and more easily access the proper directories on command
-os.chdir(os.path.dirname(__file__))
-home = os.getcwd()
-project = "Orthologs-Project"
-#where = Mana(home, project)
 
-# Add a path that contains custom libraries for import
-# os.sys.path.append()
 # TODO-ROB Create function for archiving and multiple runs (this can go into the Mana class)
+
 
 class CompGenAnalysis(PM):
     """ Comparative Genetics Analysis.
@@ -43,7 +35,6 @@ class CompGenAnalysis(PM):
     
     Output:  A pandas Data-Frame, Pivot-Table, and associated lists and dictionaries.
     """
-    __home = ''
     __acc_filename = ''
     __paml_filename = ''
     __acc_path = ''
@@ -55,7 +46,6 @@ class CompGenAnalysis(PM):
 
         self.project = project
         # Private Variables
-        self.__home = home
         self.__post_blast = post_blast
         self.__taxon_filename = taxon_file
         self.__paml_filename = paml_file
