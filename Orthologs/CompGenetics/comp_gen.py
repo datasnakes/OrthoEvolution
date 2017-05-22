@@ -80,6 +80,7 @@ class CompGenAnalysis(PM):
             self.ncbi_orgs = []
             self.org_count = 0
             self.taxon_ids = []
+            self.taxon_orgs = []
             self.taxon_dict = {}
             # Handles for gene lists #
             self.gene_list = []
@@ -227,7 +228,8 @@ class CompGenAnalysis(PM):
             ncbi = NCBITaxa()
             taxon_dict = ncbi.get_name_translator(self.ncbi_orgs)
             self.taxon_ids = list(tid[0] for tid in taxon_dict.values())
-            self.taxon_dict = dict(zip(self.org_list, self.taxon_ids))
+            self.taxon_orgs = list(torg for torg in taxon_dict.keys())
+            self.taxon_dict = dict(zip(self.taxon_orgs, self.taxon_ids))
         if self.__paml_filename is not None:
             self.paml_org_list = self.get_file_list(self.__paml_path)
         else:
