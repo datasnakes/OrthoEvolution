@@ -1,14 +1,12 @@
-# -*- coding: utf-8 -*-
 class ETE3PAML(object):
     """Integration of ETE3 for using PAML's codeml. For this project,
     we start my using the M1 model so it is the default.
     """
 
-    def __init__(self):
-        pass
-
-    def ete3paml(gene, paml_path, workdir='data/paml-output/', model='M1'):
-        """ Use ETE3's integration with PAML"""
+    def __init__(self, gene, paml_path, workdir='data/paml-output/', model='M1'):
+        """
+        Improve docstrings here.
+        """
         # Modules used
         from ete3 import EvolTree, Tree
         from OrthoTools import formatlist
@@ -41,7 +39,7 @@ class ETE3PAML(object):
 
         # Input a list of branches to keep on the base tree
         speciestree = t.prune(branches2keep, preserve_branch_length=True)
-#------------------------------------------------------------------------------
+
         # Run PAML
         # Import the newick tree
         tree = EvolTree(speciestree)
