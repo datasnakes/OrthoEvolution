@@ -190,7 +190,7 @@ class CompGenAnalysis(PM):
         ncbi = pd.DataFrame(urls, columns=['NCBI Link'], dtype=str)
         # Merge, sort, and return the my-gene data frame
 
-        hot_data = pd.concat([pd.Series(df.Tier), df.Gene, mg_df, ncbi], axis=1)
+        hot_data = pd.concat([pd.Series(df.Tier, dtype=str), df.Gene, mg_df, ncbi], axis=1)
         hot_data.rename(columns={'Gene': 'Gene Symbol'}, inplace=True)
         hot_data = hot_data.sort_values(['Tier'], ascending=True)
 
