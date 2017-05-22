@@ -1,3 +1,7 @@
+"""
+This is a test for the blastn function.
+"""
+# Modules used
 from Orthologs.Blast.blastn import BLASTn
 from Manager.utils import mana
 import shutil

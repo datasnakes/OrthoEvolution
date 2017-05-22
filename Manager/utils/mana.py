@@ -1,23 +1,5 @@
-##############################################################################
-# PyCharm Community Edition
 # -*- coding: utf-8 -*-
-"""
-Orthologs-Project
-Directory_management updated on 11/15/2016 at 11:30 AM
-##############################################################################
-
-    Input:  A string that represents a path for the main file systems
-
-    Output:  Custom class variables for import in the project file template.
-
-    Description:  This file manges the directories for projects created in PyCharm.
-    Each new project gets it's own function.
-
-##############################################################################
-@author: rgilmore
-"""
-##############################################################################
-# Libraries:
+# Modules Used
 import os, stat
 from pathlib import Path
 from Manager.utils.zipper import ZipUtilities
@@ -33,17 +15,15 @@ import Orthologs
 import Tools
 # from Manager.logit.logit import LogIt
 
-# datasnakes~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-# datasnakes~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
+#------------------------------------------------------------------------------
 # TODO-ROB use **kwargs and **args to cut down on parameters
 class Mana(object):
     """
-    This is the directory management base class.  It 
-    maps the directories in the PyPi package using the pathlib module and 
-    turns the names of each important directory into a pathlike object.  The 
+    This is the directory management base class.  It
+    maps the directories in the PyPi package using the pathlib module and
+    turns the names of each important directory into a pathlike object.  The
     base class gives the option of creating a new repository with cookiecutter.
-    
+
     This is also the home for many of the utility functions for manipulating
     directories or paths.
     """
@@ -51,7 +31,7 @@ class Mana(object):
     def __init__(self, repo=None, home=os.getcwd(), new_repo=False):
         # TODO-ROB ADD a REPOsitory destination path (an output directory for cookiecutter)
         """
-        :param home(path or path-like): The home of the file calling this name.  When creating a new 
+        :param home(path or path-like): The home of the file calling this name.  When creating a new
             repository it is best to explicitly name the home path.
         :param repo(string): The name of the new repository to be created.
         :param new_repo(bool): Triggers cookiecutter to create a new repository.
@@ -100,13 +80,14 @@ class Mana(object):
         #log = LogIt('user/path/userfile.log', 'Directory Management')
         #self.dm_log = log.basic
 
+#------------------------------------------------------------------------------
     def create_repo(self):
         print('creating dirs from repo cookie')
         print(self.__class__.__name__)
-        """This function creates a new repository.  If a repository name 
+        """This function creates a new repository.  If a repository name
         is given to the class then it is given a name.  If not, cookiecutters
         takes input from the user.
-        
+
         The base class will be the only class that allows cookiecutters parameter
         no_input to be False.
         """
@@ -122,6 +103,7 @@ class Mana(object):
         cookiecutter(str(self.repo_cookie), no_input=no_input, extra_context=e_c, output_dir=str(self.file_home))
         os.chmod(str(self.file_home / Path(self.repo)), mode=0o777)
 
+#------------------------------------------------------------------------------
     # def git_ignore(self, path):
     #     """Get the ignored file patterns from the .gitignore file in the repo."""
     #     with open(Path(path) / Path('.gitignore'), 'r', newline='') as ignore:
@@ -157,12 +139,13 @@ class Mana(object):
     #             tree.create_node(f, parent=root)
     #     return tree
 
+#------------------------------------------------------------------------------
     def get_newick_dir_map(self, top, ignore=None):
         """Takes a treelib tree created by get_dir_map and returns
         a tree a dir_map in newick format.  This will be useful for Bio.Phylo
         applications."""
         """
-        :param top (path):  The root at which the directory map is made. 
+        :param top (path):  The root at which the directory map is made.
         :param ignore (list):  The files to ignore.  The  get_dir_map function
         adds this to the .gitignore list.
         :return (tree):  A newick formatted string in style #8.  Can be used with
@@ -198,18 +181,15 @@ class Mana(object):
     #     # Use the path that you want to update/add to
     #     # Returns path and the time stamp (could be None)
 
-# datasnakes~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-# datasnakes~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-
+#------------------------------------------------------------------------------
 class RepoMana(Mana):
 
     def __init__(self, repo, user=None, home=os.getcwd(), new_user=False, new_repo=False):
         """
-        :param repo (string):  The name of the repository.  
-        :param user (string):  The name of the current user if any. 
+        :param repo (string):  The name of the repository.
+        :param user (string):  The name of the current user if any.
         :param home (string or pathlike):  The home path of the repository.
-        :param new_user (bool):  Flag for creating a new user. 
+        :param new_user (bool):  Flag for creating a new user.
         :param new_repo: Flag for creating a new repository.
         """
         # TODO-ROB change the home parameter to the output directory parameter
@@ -237,25 +217,31 @@ class RepoMana(Mana):
         if new_user is True:
             self.create_user()
 
+#------------------------------------------------------------------------------
     def create_user(self):
-        print('creating dirs from user cookie')
-        print(self.__class__.__name__)
         """This function uses the username given by our FLASK framework
         and creates a new directory system for the active user using
-        our  new_user cookiecutter template."""
+        our  new_user cookiecutter template.
+        """
+        print('creating dirs from user cookie')
+        print(self.__class__.__name__)
+
         # This is used ONLY when the user registers in flask
         # TODO-ROB:  Create the cookiecutter.json file
+
         # extra_context overrides user and default configs
         cookiecutter(str(self.user_cookie), no_input=True, extra_context={"user_name": self.user}, output_dir=str(self.users))
-        os.chmod(str(self.users / Path(self.user)), mode=0o777)  # Change user permissions with flask later (this is for testing purposes
+
+        # Change user permissions with flask later (this is for testing purposes
+        os.chmod(str(self.users / Path(self.user)), mode=0o777)
         # TODO-ROB do we need create user hooks?
 
-# datasnakes~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-# datasnakes~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # TODO-ROB:  Edit the setup.py file for cookiecutter.
-
+#------------------------------------------------------------------------------
 
 class UserMana(RepoMana):
+    """User Management Class.
+    """
     # TODO-ROB CREATE THESE IN A VIRTUAL ENVIRONMENT FOR EACH USER
     # TODO-ROB The virtual environment can be the name of the user
     # TODO-ROB When the user logs in, they will activate the virtual environment
@@ -266,13 +252,13 @@ class UserMana(RepoMana):
         This class gives access to user paths, and provides functionality
         for creating new projects for the current user within the users
         home.
-        
-        :param repo (string):  The name of the repository.  
+
+        :param repo (string):  The name of the repository.
         :param user (string):  The name of the current user if any.
-        :param project(string):  The name of the current project if any. 
+        :param project(string):  The name of the current project if any.
         :param home (string or pathlike):  The home path of the repository.
-        :param new_user (bool):  Flag for creating a new user. 
-        :param new_project (bool):  Flag for creating a new project. 
+        :param new_user (bool):  Flag for creating a new user.
+        :param new_project (bool):  Flag for creating a new project.
         '''
         super().__init__(repo=repo, user=user, home=home, new_user=new_user, **kwargs)
         self.user = user
@@ -305,32 +291,33 @@ class UserMana(RepoMana):
         cookiecutter(str(self.project_cookie), extra_context=e_c, no_input=no_input, output_dir=str(self.projects))
         os.chmod(str(self.projects / Path(self.project)), mode=0o777)
 
-    def zip_mail(self, comp_filename, zip_path, ):
+    def zip_mail(self, comp_filename, zip_path, destination=''):
         Zipper = ZipUtilities(comp_filename, zip_path)
         Zipper_path = Zipper.to_zip()
         # TODO-ROB add proper destination syntax.
         print('%s is being sent to %s' % (Zipper_path, destination))
 
-# datasnakes~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-# datasnakes~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
+#------------------------------------------------------------------------------
 
 class WebMana(RepoMana):
+    """Web Management Class.
+    """
 
-    def __init__(self, repo, website, host='0.0.0.0', port='5252', home=os.getcwd(), new_website=False, create_admin=False, **kwargs):
+    def __init__(self, repo, website, host='0.0.0.0', port='5252', home=os.getcwd(),
+                 new_website=False, create_admin=False, **kwargs):
         '''
-        This installs a template for Flask using cookiecutter.  The 
+        This installs a template for Flask using cookiecutter.  The
         custom datasnakes cookie for this template has been edited for
         our own purposes.
-        
-        :param repo (string):  The name of the repository.  
+
+        :param repo (string):  The name of the repository.
         :param website (string):  The name of the website.  Not a url, so
-        it doesn't containt http://www.*.com.  
+        it doesn't containt http://www.*.com.
         (e.g. for www.vallenger-genetics.ml this parameter would be 'vallender-genetics')
         :param host (string):  The address to launch the flask app.  Defaults to 0.0.0.0
-        :param port (string):  The port to launch the flask app.  Defaults to 5252  
+        :param port (string):  The port to launch the flask app.  Defaults to 5252
         :param home (string or pathlike):  The home path of the repository.
-        :param new_website (bool):  Flag for creating a new website 
+        :param new_website (bool):  Flag for creating a new website
         :param create_admin:  Flag for creating a new admin for the website via FLASK USER.
         (Note:  This parameter is not used currently in development.)
         '''
@@ -350,12 +337,12 @@ class WebMana(RepoMana):
     def create_website(self):
         '''
         To create a website, the new_website cookie is used.
-        After creating the directory structure, the run_script function 
+        After creating the directory structure, the run_script function
         from cookiecutter finds the hooks folder which contains a
         post-cookiecutter-template-generation bash script.  The bash script
         sets up the proper dependencies and environment variables for the website,
         and runs the website on the specified host and port
-        
+
         :return: Runs the website.
         '''
         # TODO-ROB Add heavy logging here
@@ -371,25 +358,25 @@ class WebMana(RepoMana):
         # TODO-ROB add screening to the bash script for flask run -h -p
         run_script(script_path=str(script_path), cwd=str(self.website_path))
 
-
-
-# datasnakes~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-# datasnakes~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+#------------------------------------------------------------------------------
 class ProjMana(UserMana):
+    """Project Management Class.
+    """
 
-    def __init__(self, repo, user, project, research=None, research_type=None, app=None, home=os.getcwd(),
+    def __init__(self, repo, user, project, research=None, research_type=None,
+                 app=None, home=os.getcwd(),
                  new_project=False, new_research=False, new_app=False, **kwargs):
         """
-        :param repo (string):  The name of the repository.  
+        :param repo (string):  The name of the repository.
         :param user (string):  The name of the current user if any.
         :param project(string):  The name of the current project if any.
-        :param research (string):  The name of the current type of research if any 
+        :param research (string):  The name of the current type of research if any
         :param research_type (string):  The type of research (public or private)
-        :param app (string):  The name of the application that the research. 
+        :param app (string):  The name of the application that the research.
         :param home (string or pathlike):  The home path of the repository.
-        :param new_project (bool):  Flag for creating a new project. 
+        :param new_project (bool):  Flag for creating a new project.
         :param new_research (bool):  Flag for creating new research under a project.
-        :param new_app (bool):  Flag for creating a new web app under a research target. 
+        :param new_app (bool):  Flag for creating a new web app under a research target.
 
         """
         super().__init__(repo=repo, user=user, project=project, home=home,
@@ -414,14 +401,15 @@ class ProjMana(UserMana):
             self.create_research(new_app)
 
     def create_research(self, new_app=False):
-        print('creating dirs from research cookie')
-        print(self.__class__.__name__)
-        '''
+        """
         :param new_app (bool):  Flag for auto generating an app that
          goes with the research target.
         :return:  Adds new directories in the current project labeled
         with the proper names.
-        '''
+        """
+        print('Creating directories from research cookie...')
+        print(self.__class__.__name__)
+
         e_c = {"research_type": self.research_type,
                "research_name": self.research}
         cookiecutter(str(self.research_cookie), no_input=True, extra_context=e_c, output_dir=str(self.project_path))
