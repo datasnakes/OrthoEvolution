@@ -177,9 +177,8 @@ class BLASTn(BT):
         os.chdir(str(self.__gi_list_path))
         taxids = self.taxon_ids
         pd.Series(taxids).to_csv('taxids.csv', index=False)
-        #subprocess.call(['qsub %s' % str(self.__gi_list_path / Path('get_gi_lists.pbs'))], shell=True)
-        p = subprocess.Popen(['qsub %s' % str(self.__gi_list_path / Path('get_gi_lists.pbs'))], shell=True)
-        p.wait()
+        Path.mkdir(self.__gi_list_path / Path('data'), parents=True, exist_ok=True)
+        os.system('qsub %s' % str(self.__gi_list_path / Path('get_gi_lists.pbs')))
         print('Done submitting jobs')
         gi_flag = True
         while gi_flag == True:
