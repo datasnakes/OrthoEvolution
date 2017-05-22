@@ -303,8 +303,7 @@ class WebMana(RepoMana):
     """Web Management Class.
     """
 
-    def __init__(self, repo, website, host='0.0.0.0', port='5252', home=os.getcwd(),
-                 new_website=False, create_admin=False, **kwargs):
+    def __init__(self, repo, website, host='0.0.0.0', port='5252', home=os.getcwd(), new_website=False, create_admin=False, **kwargs):
         '''
         This installs a template for Flask using cookiecutter.  The
         custom datasnakes cookie for this template has been edited for
@@ -364,8 +363,8 @@ class ProjMana(UserMana):
     """
 
     def __init__(self, repo, user, project, research=None, research_type=None,
-                 app=None, home=os.getcwd(),
-                 new_project=False, new_research=False, new_app=False, **kwargs):
+                 app=None, home=os.getcwd(), new_project=False, new_research=False,
+                 new_app=False, **kwargs):
         """
         :param repo (string):  The name of the repository.
         :param user (string):  The name of the current user if any.
