@@ -18,16 +18,15 @@ import time  # Used to delay when dealing with NCBI server errors
 from datetime import datetime as d
 from multiprocessing import Pool
 from pathlib import Path
-
+import pandas as pd
 from Bio import SearchIO  # Used for parsing and sorting XML files.
 from Bio.Blast.Applications import NcbiblastnCommandline  # Used for Local Blasting.
 from Manager.logit.logit import LogIt
-
 from Orthologs.CompGenetics.ncbi_blast import BLASTAnalysis as BT
 
 
 # TODO-ROB: Find packages for script timing and analysis
-# TODO-ROB:  Add function for renaming and moving the builder files if the BLAST completed
+# DONE-ROB:  Add function for renaming and moving the builder files if the BLAST completed
 
 class BLASTn(BT):
     def __init__(self, repo, user, project, research, research_type, template=None, save_data=True, **kwargs):
@@ -46,7 +45,7 @@ class BLASTn(BT):
         # # Initialize Logging
         # self.__blastn_log = LogIt.blastn()
         #df = LogIt()
-        #self.date_format = df.date_format
+        self.date_format = '%a %b %d at %I:%M:%S %p %Y'
         # self.get_time = time.time  # To get the time use 'get_time()'
         # TODO-ROB:  Add a query organism variable
         self.query_gi_dict = {}
@@ -93,7 +92,7 @@ class BLASTn(BT):
 
         # Create GI lists
         self.blastn_log.info("Configuring GI list using the taxonomy id and the blastdbcmd tool.")
-        self.gi_list_config()
+        #self.gi_list_config()
         # Get GI (stdout) and query sequence (FASTA format)
         self.blastn_log.info("Generating directories.")
         self.blastn_log.info("Extracting query gi number to stdout and "
@@ -101,9 +100,9 @@ class BLASTn(BT):
         # Iterate the query accessions numbers
         for query in query_align:
             # os.chdir(str(self.__output_path))
-            gene = self.acc_dict[query][0]
+            gene = self.acc_dict[query][0][0]
             gene_path = self.__xml_path / Path(gene)
-            org = self.acc_dict[query][1]
+            org = self.acc_dict[query][0][1]
             # Create the proper directories for each gene
             try:
                 Path.mkdir(gene_path)
@@ -169,39 +168,57 @@ class BLASTn(BT):
             return new_gene_list
 
     def gi_list_config(self):
+        # TODO-ROB THis is for development / testing
         """This script is designed to create a gi list based on the refseq_rna database
         for each taxonomy id on the MCSR. It will also convert the gi list into a
         binary file which is more efficient to use with NCBI's Standalone Blast tools."""
         print('gi_list_config')
+        cd = os.getcwd()
+        os.chdir(str(self.__gi_list_path))
         taxids = self.taxon_ids
-        with Pool(processes=20) as p:
-            cd = os.getcwd()
-            os.chdir(self.__gi_list_path)
-            p.map(self.gi_split, taxids)
-            os.chdir(cd)
-            self.blastn_log.inf("The GI lists have been created.")
-
-    @staticmethod
-    def gi_split(ID):
-        """ This function uses the blastdbcmd tool to get gi lists. It then uses the
-        blastdb_aliastool to turn the list into a binary file."""
-        # Create dictionary for formatting
-        ID = str(ID)
-        gi_text_file = "%sgi.txt" % ID
-        gi_binary_file = "%sgi" % ID
-        fmt = {'id': ID, 'text file': gi_text_file, 'binary file': gi_binary_file}
-        # TODO untested
-        print("Current taxonomy ID: %s" % ID)
-        # Use the accession #'s and the blastdbcmd tool to generate gi lists based on Organisms/Taxonomy ID's.
-        os.system("blastdbcmd -db refseq_rna -entry all -outfmt '%g %T' | awk ' {{ if ($2 == {id}) "
-                  "{{ print $1 }} }} ' > {text file}".format(**fmt))
-        print("Text File generated")
-        # Convert the .txt file to a binary file using the blastdb_aliastool.
-        os.system("blastdb_aliastool -gi_file_in {text file} -gi_file_out {binary file}".format(**fmt))
-        # Remove the gi.text file
-        print("Binary file generated")
-        os.system("rm -r {text file}".format(**fmt))
-        print("Removing text file")
+        pd.Series(taxids).to_csv('taxids.csv', index=False)
+        #subprocess.call(['qsub %s' % str(self.__gi_list_path / Path('get_gi_lists.pbs'))], shell=True)
+        p = subprocess.Popen(['qsub %s' % str(self.__gi_list_path / Path('get_gi_lists.pbs'))], shell=True)
+        p.wait()
+        print('Done submitting jobs')
+        gi_flag = True
+        while gi_flag == True:
+            try:
+                subprocess.check_output(['pidof', 'getgilists'])
+                gi_flag = False
+            except subprocess.CalledProcessError:
+                gi_flag = True
+                print('Waiting for the gi BLAST to finish....')
+                time.sleep(30)
+        print('Multiprocessing complete')
+        os.chdir(cd)
+    #     with Pool(processes=20) as p:
+    #         cd = os.getcwd()
+    #         os.chdir(self.__gi_list_path)
+    #         p.map(self.gi_split, taxids)
+    #         os.chdir(cd)
+    #         self.blastn_log.inf("The GI lists have been created.")
+    #
+    # @staticmethod
+    # def gi_split(ID):
+    #     """ This function uses the blastdbcmd tool to get gi lists. It then uses the
+    #     blastdb_aliastool to turn the list into a binary file."""
+    #     # Create dictionary for formatting
+    #     ID = str(ID)
+    #     gi_text_file = "%sgi.txt" % ID
+    #     gi_binary_file = "%sgi" % ID
+    #     fmt = {'id': ID, 'text file': gi_text_file, 'binary file': gi_binary_file}
+    #     # TODO untested
+    #     print("Current taxonomy ID: %s" % ID)
+    #     # Use the accession #'s and the blastdbcmd tool to generate gi lists based on Organisms/Taxonomy ID's.
+    #     os.system("blastdbcmd -db refseq_rna -entry all -outfmt '%g %T' | awk ' {{ if ($2 == {id}) {{ print $1 }} }} ' > {text file}".format(**fmt))
+    #     print("Text File generated")
+    #     # Convert the .txt file to a binary file using the blastdb_aliastool.
+    #     os.system("blastdb_aliastool -gi_file_in {text file} -gi_file_out {binary file}".format(**fmt))
+    #     # Remove the gi.text file
+    #     print("Binary file generated")
+    #     os.system("rm -r {text file}".format(**fmt))
+    #     print("Removing text file")
 
     def blast_file_config(self, file):
         """This function configures different files for new BLASTS.
@@ -245,7 +262,8 @@ class BLASTn(BT):
         self.blastn_log.info("Parsing %s to find the best accession number." % xml_file)
         # Parse the XML file created by the BLAST
         maximum = 0
-        with open(xml_file, 'r') as blast_xml:
+        file_path = str(Path(self.__xml_path) / Path(gene) / Path(xml_file))
+        with open(file_path, 'r') as blast_xml:
             blast_qresult = SearchIO.read(blast_xml, 'blast-xml')
             mapped_qresult = blast_qresult.hit_map(self.map_func)
             for hit in mapped_qresult:
@@ -315,10 +333,11 @@ class BLASTn(BT):
                 xml_path = gene_path / Path(xml)
 
                 # Initialize configuration variables
+                # TODO-ROB change the __gi_list_path to current path + 'data'
                 taxon_id = self.taxon_dict[organism]
-                taxon_gi_file = str(taxon_id + "gi")
-                taxon_gi_path = self.__gi_list_path / Path(taxon_gi_file)
-                taxgi_dest_path = gene_path / Path(taxon_gi_file)
+                taxon_gi_file = str(taxon_id) + "gi"
+                taxon_gi_path = self.__gi_list_path / Path('data') / Path(taxon_gi_file)
+                # taxgi_dest_path = gene_path / Path(taxon_gi_file)
                 if xml in files:
                     self.blast_xml_parse(xml_path, gene, organism)
                 else:
@@ -329,16 +348,17 @@ class BLASTn(BT):
                     self.blastn_log.info("The current organisms is %s (%s)." % (organism, taxon_id))
 
                     with open(xml_path, 'w') as blast_xml:
+                        # TODO-ROB: For multiporcessing copy gi lists, but for regular processing just use the one.
                         # Create a copy of the gi list file per taxonomy id to be used in blast
-                        fmt = {'src': str(taxon_gi_path), 'dst': str(taxgi_dest_path)}
-                        os.system("cp {src} {dst}".format(**fmt))
+                        # fmt = {'src': str(taxon_gi_path), 'dst': str(taxgi_dest_path)}
+                        # os.system("cp {src} {dst}".format(**fmt))
                         # Set up blast parameters
-                        taxgi_dest_path = str(taxgi_dest_path)
+                        taxon_gi_path = str(taxon_gi_path)
                         query_seq_path = str(gene_path / Path('temp.fasta'))
                         # Use Biopython's NCBIBlastnCommandline tool
                         result_handle1 = NcbiblastnCommandline(query=query_seq_path, db="refseq_rna",
                                                                strand="plus", evalue=0.001,  # DONT GO LOWER
-                                                               outfmt=5, gilist=taxgi_dest_path,
+                                                               outfmt=5, gilist=taxon_gi_path,
                                                                max_target_seqs=10, task="blastn")
                         # Capture blast data
                         stdout_str, stderr_str = result_handle1()

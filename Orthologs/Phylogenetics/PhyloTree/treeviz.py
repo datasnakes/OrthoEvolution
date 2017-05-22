@@ -9,7 +9,8 @@ Project Name: Orthologs Project
 """
 from Bio import Phylo
 
-def drawtree(path2tree, treeformat='newick'):
-    """Import a newick formatted tree and visualize it."""
-    tree = Phylo.read(path2tree, treeformat)
-    Phylo.draw(tree)
+class TreeViz(object):
+    def drawtree(path2tree, treeformat='newick'):
+        """Import a newick formatted tree and visualize it."""
+        tree = Phylo.read(path2tree, treeformat)
+        Phylo.draw(tree)
