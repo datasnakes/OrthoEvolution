@@ -26,7 +26,7 @@ from Orthologs.CompGenetics.ncbi_blast import BLASTAnalysis as BT
 
 
 # TODO-ROB: Find packages for script timing and analysis
-# TODO-ROB:  Add function for renaming and moving the builder files if the BLAST completed
+# DONE-ROB:  Add function for renaming and moving the builder files if the BLAST completed
 
 class BLASTn(BT):
     def __init__(self, repo, user, project, research, research_type, template=None, save_data=True, **kwargs):
@@ -45,7 +45,7 @@ class BLASTn(BT):
         # # Initialize Logging
         # self.__blastn_log = LogIt.blastn()
         #df = LogIt()
-        #self.date_format = df.date_format
+        self.date_format = '%a %b %d at %I:%M:%S %p %Y'
         # self.get_time = time.time  # To get the time use 'get_time()'
         # TODO-ROB:  Add a query organism variable
         self.query_gi_dict = {}
@@ -92,7 +92,7 @@ class BLASTn(BT):
 
         # Create GI lists
         self.blastn_log.info("Configuring GI list using the taxonomy id and the blastdbcmd tool.")
-        self.gi_list_config()
+        #self.gi_list_config()
         # Get GI (stdout) and query sequence (FASTA format)
         self.blastn_log.info("Generating directories.")
         self.blastn_log.info("Extracting query gi number to stdout and "
@@ -100,9 +100,9 @@ class BLASTn(BT):
         # Iterate the query accessions numbers
         for query in query_align:
             # os.chdir(str(self.__output_path))
-            gene = self.acc_dict[query][0]
+            gene = self.acc_dict[query][0][0]
             gene_path = self.__xml_path / Path(gene)
-            org = self.acc_dict[query][1]
+            org = self.acc_dict[query][0][1]
             # Create the proper directories for each gene
             try:
                 Path.mkdir(gene_path)
@@ -188,8 +188,8 @@ class BLASTn(BT):
                 gi_flag = False
             except subprocess.CalledProcessError:
                 gi_flag = True
-                time.sleep(30)
                 print('Waiting for the gi BLAST to finish....')
+                time.sleep(30)
         print('Multiprocessing complete')
         os.chdir(cd)
     #     with Pool(processes=20) as p:
@@ -262,7 +262,8 @@ class BLASTn(BT):
         self.blastn_log.info("Parsing %s to find the best accession number." % xml_file)
         # Parse the XML file created by the BLAST
         maximum = 0
-        with open(xml_file, 'r') as blast_xml:
+        file_path = str(Path(self.__xml_path) / Path(gene) / Path(xml_file))
+        with open(file_path, 'r') as blast_xml:
             blast_qresult = SearchIO.read(blast_xml, 'blast-xml')
             mapped_qresult = blast_qresult.hit_map(self.map_func)
             for hit in mapped_qresult:
@@ -332,9 +333,10 @@ class BLASTn(BT):
                 xml_path = gene_path / Path(xml)
 
                 # Initialize configuration variables
+                # TODO-ROB change the __gi_list_path to current path + 'data'
                 taxon_id = self.taxon_dict[organism]
-                taxon_gi_file = str(taxon_id + "gi")
-                taxon_gi_path = self.__gi_list_path / Path(taxon_gi_file)
+                taxon_gi_file = str(taxon_id) + "gi"
+                taxon_gi_path = self.__gi_list_path / Path('data') / Path(taxon_gi_file)
                 taxgi_dest_path = gene_path / Path(taxon_gi_file)
                 if xml in files:
                     self.blast_xml_parse(xml_path, gene, organism)

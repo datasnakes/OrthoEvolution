@@ -34,13 +34,13 @@ class BLASTAnalysis(CGA):
 
         # Initialize a data frame and file to add accession numbers to
         # Initialize a data frame and file to add blast times to
-        self.building = self.raw_acc_data
-        del self.building['Tier']
-        del self.building['Homo_sapiens']
-        self.building = self.building.set_index('Gene')
-        self.building_time = self.building
-        self.building_file_path = self.raw_data / Path(self.building_filename)
-        self.building_time_file_path = self.raw_data / Path(self.building_time_filename)
+        # self.building = self.raw_acc_data
+        # del self.building['Tier']
+        # del self.building['Homo_sapiens']
+        # self.building = self.building.set_index('Gene')
+        # self.building_time = self.building
+        # self.building_file_path = self.raw_data / Path(self.building_filename)
+        # self.building_time_file_path = self.raw_data / Path(self.building_time_filename)
 
         # Initialize Logging
         df = LogIt('blast_test.log', 'blastn')
@@ -78,8 +78,8 @@ class BLASTAnalysis(CGA):
 
                 self.blastn_log.critical("Queried Accession Gene: %s" % gene)
                 self.blastn_log.critical("Queried Accession Organism: %s" % organism)
-                self.blastn_log.critical("Existing Accession Organism: %s" % self.acc_dict[existing][0])
-                self.blastn_log.critical("Existing Accession Organism: %s" % self.acc_dict[existing][1])
+                self.blastn_log.critical("Existing Accession Gene: %s" % self.acc_dict[existing][0][0])
+                self.blastn_log.critical("Existing Accession Organism: %s" % self.acc_dict[existing][0][1])
                 self.blastn_log.critical("***********************************************************************")
                 raise ValueError("The queried ACCESSION (%s) does not match the existing ACCESSION (%s).  Please see"
                                  "the log file." % (accession, existing))
@@ -88,7 +88,7 @@ class BLASTAnalysis(CGA):
         temp = self.building.reset_index()
         temp.insert(0, 'Tier', self.df['Tier'])
         if self.save_data is True:
-            temp.to_csv(self.building_file_path)
+            temp.to_csv(str(self.building_file_path))
 
     def add_blast_time(self, gene, organism, start, end):
         """Takes the start/end times and adds in to the building_time 
@@ -99,7 +99,7 @@ class BLASTAnalysis(CGA):
         temp = self.building_time.reset_index()
         temp.insert(0, 'Tier', self.df['Tier'])
         if self.save_data is True:
-            temp.to_csv(self.building_time_file_path)
+            temp.to_csv(str(self.building_time_file_path))
 
     def post_blast_analysis(self, project_name, removed_genes=None):
         # TODO-ROB  Fix the output format of the excel file.  View a sample output in /Orthologs/comp_gen
@@ -114,7 +114,7 @@ class BLASTAnalysis(CGA):
             acc_ws = pd.DataFrame.from_dict(self.dup_acc_count, orient='index')
             acc_ws.columns = ['Count']
             acc_ws.to_excel(pb_file, sheet_name="Duplicate Count by Accession")
-        except ValueError:
+        except ValueError or AttributeError:
             pass
         # Duplicate Genes
         try:
@@ -129,7 +129,7 @@ class BLASTAnalysis(CGA):
                     gene_org_dup[gene].append(genes)
             dup_org_ws2 = pd.DataFrame.from_dict(gene_org_dup, orient='index')
             dup_org_ws2.T.to_excel(pb_file, sheet_name="Duplicate Org Groups by Gene")
-        except ValueError:
+        except ValueError or AttributeError:
             pass
         # Species Duplicates
         try:
@@ -144,19 +144,19 @@ class BLASTAnalysis(CGA):
                     org_gene_dup[gene].append(genes)
             dup_org_ws2 = pd.DataFrame.from_dict(org_gene_dup, orient='index')
             dup_org_ws2.T.to_excel(pb_file, sheet_name="Duplicate Gene Groups by Org")
-        except ValueError:
+        except ValueError or AttributeError:
             pass
         # Random Duplicates
         try:
             rand_ws = pd.DataFrame.from_dict(self.duplicated_random, orient='index')
             rand_ws.to_excel(pb_file, sheet_name="Random Duplicates")
-        except ValueError:
+        except ValueError or AttributeError:
             pass
         # Other Duplicates
         try:
             other_ws = pd.DataFrame.from_dict(self.duplicated_other, orient='index')
             other_ws.to_excel(pb_file, sheet_name="Other Duplicates")
-        except ValueError:
+        except ValueError or AttributeError:
             pass
         # Missing by Organism
         org_gene_ms = {}
@@ -172,7 +172,7 @@ class BLASTAnalysis(CGA):
             org_ms_count.to_excel(pb_file, sheet_name="Missing Genes Count")
             org_ms = pd.DataFrame.from_dict(org_gene_ms, orient='index')
             org_ms.to_excel(pb_file, sheet_name="Missing Genes by Org")
-        except ValueError:
+        except ValueError or AttributeError:
             pass
         # Missing by Gene
         gene_org_ms = {}
@@ -188,7 +188,7 @@ class BLASTAnalysis(CGA):
             gene_ms_count.to_excel(pb_file, sheet_name="Missing Organisms Count")
             gene_ms = pd.DataFrame.from_dict(gene_org_ms, orient='index')
             gene_ms.to_excel(pb_file, sheet_name="Missing Organisms by Genes")
-        except ValueError:
+        except ValueError or AttributeError:
             pass
         pb_file.save()
 
