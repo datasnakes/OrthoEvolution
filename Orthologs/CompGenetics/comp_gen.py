@@ -159,6 +159,7 @@ class CompGenAnalysis(PM):
         # Initialize variables and import my-gene search command
         urls = []
         df = self.raw_acc_data
+
         mg = mygene.MyGeneInfo()
         # Create a my-gene query handle to get the data
         human = list(x.upper() for x in self.blast_human)
@@ -188,7 +189,8 @@ class CompGenAnalysis(PM):
         # Turn the ncbi urls list into a data frame
         ncbi = pd.DataFrame(urls, columns=['NCBI Link'], dtype=str)
         # Merge, sort, and return the my-gene data frame
-        hot_data = pd.concat([df.Tier.reset_index(), mg_df, ncbi], axis=1)
+        tier_gene = self.df.Tier
+        hot_data = pd.concat([tier_gene, mg_df, ncbi], axis=1)
         hot_data.rename(columns={'Gene': 'Gene Symbol'}, inplace=True)
         hot_data = hot_data.sort_values(['Tier'], ascending=True)
 
