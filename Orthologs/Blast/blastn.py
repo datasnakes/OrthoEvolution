@@ -26,7 +26,7 @@ from Orthologs.CompGenetics.ncbi_blast import BLASTAnalysis as BT
 
 
 # TODO-ROB: Find packages for script timing and analysis
-# TODO-ROB:  Add function for renaming and moving the builder files if the BLAST completed
+# DONE-ROB:  Add function for renaming and moving the builder files if the BLAST completed
 
 class BLASTn(BT):
     def __init__(self, repo, user, project, research, research_type, template=None, save_data=True, **kwargs):
