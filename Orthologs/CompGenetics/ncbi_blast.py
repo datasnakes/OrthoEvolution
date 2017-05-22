@@ -32,15 +32,6 @@ class BLASTAnalysis(CGA):
             self.building_filename = str(project + 'building.csv')
             self.building_time_filename = self.building_filename.replace('building.csv', 'building_time.csv')
 
-        # Initialize a data frame and file to add accession numbers to
-        # Initialize a data frame and file to add blast times to
-        # self.building = self.raw_acc_data
-        # del self.building['Tier']
-        # del self.building['Homo_sapiens']
-        # self.building = self.building.set_index('Gene')
-        # self.building_time = self.building
-        # self.building_file_path = self.raw_data / Path(self.building_filename)
-        # self.building_time_file_path = self.raw_data / Path(self.building_time_filename)
 
         # Initialize Logging
         df = LogIt('blast_test.log', 'blastn')
