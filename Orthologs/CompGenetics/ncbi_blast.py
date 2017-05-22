@@ -104,7 +104,7 @@ class BLASTAnalysis(CGA):
     def post_blast_analysis(self, project_name, removed_genes=None):
         # TODO-ROB  Fix the output format of the excel file.  View a sample output in /Orthologs/comp_gen
         pba_file_path = str(self.data / Path(self.project + '_pba.xlsx'))
-        pb_file = pd.ExcelWriter(pba_file_path,engine='xlsxwriter')
+        pb_file = pd.ExcelWriter(pba_file_path)
         # Removed Genes
         if removed_genes is not None:
             rm_ws = pd.DataFrame(removed_genes)
@@ -190,7 +190,11 @@ class BLASTAnalysis(CGA):
             gene_ms.to_excel(pb_file, sheet_name="Missing Organisms by Genes")
         except (ValueError, AttributeError):
             pass
-        pb_file.save()
+        try:
+            pb_file.save()
+        except IndexError:
+            print("There are no duplicates or missing genes.")
+            pass
 
 
 
