@@ -87,6 +87,8 @@ class BLASTAnalysis(CGA):
         self.building.set_value(gene, organism, accession)
         temp = self.building.reset_index()
         temp.insert(0, 'Tier', self.df['Tier'])
+        # TODO-ROB make the query organism insert implicit
+        temp.insert(2, 'Homo_sapiens', self.df['Homo_sapiens'])
         if self.save_data is True:
             temp.to_csv(str(self.building_file_path))
 
@@ -98,6 +100,7 @@ class BLASTAnalysis(CGA):
         self.building_time.set_value(gene, organism, elapsed_time)
         temp = self.building_time.reset_index()
         temp.insert(0, 'Tier', self.df['Tier'])
+        temp.insert(2, 'Homo_sapiens', self.df['Homo_sapiens'])
         if self.save_data is True:
             temp.to_csv(str(self.building_time_file_path))
 
