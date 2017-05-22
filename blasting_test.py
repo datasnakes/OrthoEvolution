@@ -19,5 +19,6 @@ research_type = "public"
 #shutil.copy(str(a.index / Path('get_gi_lists.py')), str(a.raw_data / Path('blast') / Path('gi_lists')))
 #x = BLASTn(repo, user, project, research, research_type, template="MAFV3.2.csv", new_project=True, new_research=True, new_repo=True, new_user=True)
 x = BLASTn(repo=repo, user=user, project=project, research=research, research_type=research_type, template="MAFV3.2.csv")
-BLASTER = x.blast_config
-BLASTER(x.blast_human, 'Homo_sapiens', auto_start=True)
+# BLASTER = x.blast_config
+# BLASTER(x.blast_human, 'Homo_sapiens', auto_start=True)
+x.post_blast_analysis("Vall")
