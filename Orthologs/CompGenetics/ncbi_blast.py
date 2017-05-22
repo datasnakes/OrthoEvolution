@@ -104,7 +104,7 @@ class BLASTAnalysis(CGA):
     def post_blast_analysis(self, project_name, removed_genes=None):
         # TODO-ROB  Fix the output format of the excel file.  View a sample output in /Orthologs/comp_gen
         pba_file_path = str(self.data / Path(self.project + '_pba.xlsx'))
-        pb_file = pd.ExcelWriter(pba_file_path)
+        pb_file = pd.ExcelWriter(pba_file_path,engine='xlsxwriter')
         # Removed Genes
         if removed_genes is not None:
             rm_ws = pd.DataFrame(removed_genes)
