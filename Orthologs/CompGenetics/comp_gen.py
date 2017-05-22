@@ -179,7 +179,7 @@ class CompGenAnalysis(PM):
                      inplace=True)
 
         # Create NCBI links using a for loop and the Entrez IDs
-        urls = [urls.append('<a href="{0}">{0}</a>'.format('https://www.ncbi.nlm.nih.gov/gene/' + str(entrez_id)))
+        urls = [('<a href="{0}">{0}</a>'.format('https://www.ncbi.nlm.nih.gov/gene/' + str(entrez_id)))
                 for entrez_id in mg_df['Entrez ID']]
         # for entrez_id in mg_df['Entrez ID']:
         #      # Format the url so that it becomes an html hyperlink
