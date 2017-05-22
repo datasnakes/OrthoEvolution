@@ -2,15 +2,16 @@ import time
 import os
 from pathlib import Path
 import pandas as pd
-from Orthologs.CompGenetics.comp_gen import CompGenAnalysis as CGA
+from Orthologs.CompGenetics.comp_gen import CompGenAnalysis
 from Manager.logit.logit import LogIt
 
-
-class BLASTAnalysis(CGA):
+class BLASTAnalysis(CompGenAnalysis):
     def __init__(self, repo, user, project, research, research_type,
                  template=None, taxon_file=None, post_blast=False, save_data=True, **kwargs):
-        """Inherit from the CompGenAnalysis class.  If the BLAST was cut short,
-        then a build_file is to be used."""
+        """Inherited from the CompGenAnalysis class.
+
+        If the BLAST was cut short, then a build_file is to be used.
+        """
         super().__init__(repo=repo, user=user, project=project, research=research, research_type=research_type,
                          acc_file=template, taxon_file=taxon_file, post_blast=post_blast, hgnc=False, **kwargs)
         # TODO-ROB: Inherit or add variable for logger class
@@ -51,7 +52,9 @@ class BLASTAnalysis(CGA):
 
     def add_accession(self, gene, organism, accession):
         """Takes an accession and adds in to the building dataframe,
-        and also adds to the csv file.  This returns a log."""
+        and also adds to the csv file.
+        This returns a log.
+        """
         # TODO-ROB:  Create this in the log file
         if pd.isnull(self.building.get_value(gene, organism)) is False:
             existing = self.building.get_value(gene, organism)
@@ -85,8 +88,10 @@ class BLASTAnalysis(CGA):
             temp.to_csv(str(self.building_file_path))
 
     def add_blast_time(self, gene, organism, start, end):
-        """Takes the start/end times and adds in to the building_time 
-        dataframe, and also adds to the csv file."""
+        """
+        Takes the start/end times and adds in to the building_time
+        dataframe, and also adds to the csv file.
+        """
         elapsed_time = end - start
         # Edit the data frame
         self.building_time.set_value(gene, organism, elapsed_time)
@@ -101,10 +106,12 @@ class BLASTAnalysis(CGA):
         # TODO-ROB  Fix the output format of the excel file.  View a sample output in /Orthologs/comp_gen
         pba_file_path = str(self.data / Path(self.project + '_pba.xlsx'))
         pb_file = pd.ExcelWriter(pba_file_path)
+
         # Removed Genes
         if removed_genes is not None:
             rm_ws = pd.DataFrame(removed_genes)
             rm_ws.to_excel(pb_file, sheet_name="Removed Genes")
+
         # Duplicated Accessions
         try:
             acc_ws = pd.DataFrame.from_dict(self.dup_acc_count, orient='index')
@@ -112,6 +119,7 @@ class BLASTAnalysis(CGA):
             acc_ws.to_excel(pb_file, sheet_name="Duplicate Count by Accession")
         except (ValueError, AttributeError):
             pass
+
         # Duplicate Genes
         try:
             dup_gene_ws = pd.DataFrame.from_dict(self.dup_gene_count, orient='index')
@@ -127,6 +135,7 @@ class BLASTAnalysis(CGA):
             dup_org_ws2.T.to_excel(pb_file, sheet_name="Duplicate Org Groups by Gene")
         except (ValueError, AttributeError):
             pass
+
         # Species Duplicates
         try:
             dup_org_ws1 = pd.DataFrame.from_dict(self.dup_org_count, orient='index')
@@ -142,18 +151,21 @@ class BLASTAnalysis(CGA):
             dup_org_ws2.T.to_excel(pb_file, sheet_name="Duplicate Gene Groups by Org")
         except (ValueError, AttributeError):
             pass
+
         # Random Duplicates
         try:
             rand_ws = pd.DataFrame.from_dict(self.duplicated_random, orient='index')
             rand_ws.to_excel(pb_file, sheet_name="Random Duplicates")
         except (ValueError, AttributeError):
             pass
+
         # Other Duplicates
         try:
             other_ws = pd.DataFrame.from_dict(self.duplicated_other, orient='index')
             other_ws.to_excel(pb_file, sheet_name="Other Duplicates")
         except (ValueError, AttributeError):
             pass
+
         # Missing by Organism
         org_gene_ms = {}
         org_gene_ms_count = {}
@@ -170,6 +182,7 @@ class BLASTAnalysis(CGA):
             org_ms.to_excel(pb_file, sheet_name="Missing Genes by Org")
         except (ValueError, AttributeError):
             pass
+
         # Missing by Gene
         gene_org_ms = {}
         gene_org_ms_count = {}

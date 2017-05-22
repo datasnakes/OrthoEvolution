@@ -1,5 +1,4 @@
-# -*- coding: utf-8 -*-
-"""PAML tools."""
+"""PAML/ETE3 tools."""
 
 from .ete3paml import ETE3PAML
 from .test import PamlTest

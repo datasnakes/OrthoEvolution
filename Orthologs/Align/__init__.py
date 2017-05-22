@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """Alignment command line tool wrapper."""
 
 from .orthoclustal import ClustalO
