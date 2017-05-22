@@ -86,7 +86,10 @@ class BLASTAnalysis(CGA):
 
         self.building.set_value(gene, organism, accession)
         temp = self.building.reset_index()
-        temp.insert(0, 'Tier', self.df['Tier'])
+        temp.insert(0, 'Tier', pd.Series(self.df['Tier'].tolist()))
+        # TODO-ROB make the query organism insert implicit
+        temp.insert(2, 'Homo_sapiens', self.df['Homo_sapiens'])
+        temp.set_index('Tier')
         if self.save_data is True:
             temp.to_csv(str(self.building_file_path))
 
@@ -97,7 +100,9 @@ class BLASTAnalysis(CGA):
         # Edit the data frame
         self.building_time.set_value(gene, organism, elapsed_time)
         temp = self.building_time.reset_index()
-        temp.insert(0, 'Tier', self.df['Tier'])
+        temp.insert(0, 'Tier', pd.Series(self.df['Tier'].tolist()))
+        temp.insert(2, 'Homo_sapiens', self.df['Homo_sapiens'])
+        temp.set_index('Tier')
         if self.save_data is True:
             temp.to_csv(str(self.building_time_file_path))
 
@@ -190,7 +195,11 @@ class BLASTAnalysis(CGA):
             gene_ms.to_excel(pb_file, sheet_name="Missing Organisms by Genes")
         except (ValueError, AttributeError):
             pass
-        pb_file.save()
+        try:
+            pb_file.save()
+        except IndexError:
+            print("There are no duplicates or missing genes.")
+            pass
 
 
 
