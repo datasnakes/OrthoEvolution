@@ -229,6 +229,7 @@ class CompGenAnalysis(PM):
             taxon_dict = ncbi.get_name_translator(self.ncbi_orgs)
             self.taxon_ids = list(tid[0] for tid in taxon_dict.values())
             self.taxon_orgs = list(torg for torg in taxon_dict.keys())
+            self.taxon_orgs = list(org.replace(' ', '_') for org in self.taxon_orgs)
             self.taxon_dict = dict(zip(self.taxon_orgs, self.taxon_ids))
         if self.__paml_filename is not None:
             self.paml_org_list = self.get_file_list(self.__paml_path)
