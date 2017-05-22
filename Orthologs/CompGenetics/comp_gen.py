@@ -239,7 +239,7 @@ class CompGenAnalysis(PM):
 
         # Gene analysis
         self.mygene_df = self.my_gene_info()
-        self.mygene_df.to_csv(self.mygene_df, self.mygene_path)
+        self.mygene_df.to_csv(self.mygene_path, self.mygene_df)
         # Accession file analysis
         if self.__post_blast:
             self.missing_dict = self.get_miss_acc()
