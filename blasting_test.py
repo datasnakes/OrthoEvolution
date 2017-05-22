@@ -21,4 +21,4 @@ x = BLASTn(repo, user, project, research, research_type, template="MAFV3.2.csv",
 x = BLASTn(repo=repo, user=user, project=project, research=research, research_type=research_type, template="MAFV3.2.csv")
 BLASTER = x.blast_config
 BLASTER(x.blast_human, 'Homo_sapiens', auto_start=True)
-#x.post_blast_analysis("Vall")
+# x.post_blast_analysis("Vall")
