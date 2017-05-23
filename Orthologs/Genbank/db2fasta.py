@@ -1,50 +1,21 @@
-##############################################################################
-# PyCharm Community Edition
-# -*- coding: utf-8 -*-
-"""
-GPCR_Orthologs
-db2fasta.py updated on 1/4/2017 at 11:04 AM
-##############################################################################
-
-    Input:
-
-    Output:
-
-    Description:
-
-##############################################################################
-@author: rgilmore
-"""
-##############################################################################
-# Libraries:
-
 import os
-
 from BioSQL import BioSeqDatabase
-
 from dir_mana import dir_mana
 from lister import Lister
 
-##############################################################################
-# Custom Class Initializations
-# :
-# Use directory_management() class here so that we can stay organized
-# and more easily access the proper directories on command
+# Set the home directory
 home = os.getcwd()
+
+# Set the project name, username, and directory location
 project = "GPCR-Orthologs-Project"
 user = "rgilmore"
 where = dir_mana(home, project)
-# Use lister() class here so that we can easily access our Master RNA Accession File
 
-## Add a path that contains custom libraries for import
-#os.sys.path.append()
-##############################################################################
-# Global Initializations:
-
-##############################################################################
-
-class Db2FASTA(object):
-
+class Database2Fasta(object):
+    """
+    Download specific genbank features from a user prefilled BioSQL database
+    as fasta files.
+    """
     def __init__(self, path='/', fasta_update=False):
         self.FASTA_update = fasta_update
         self.what = Lister('MAFV3.1.csv')  # Always make sure this file name is correct
@@ -63,6 +34,9 @@ class Db2FASTA(object):
             print('self.path: ', self.path)
 
     def fasta_gather(self):
+        """
+        Extract the desired fasta feature.
+        """
         os.chdir(self.path)
         os.mkdir('MASTER_FASTA')
         os.mkdir('FASTA')

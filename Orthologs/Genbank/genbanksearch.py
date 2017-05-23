@@ -1,55 +1,31 @@
-##############################################################################
-# PyCharm Community Edition
-# -*- coding: utf-8 -*-
 """
-GPCR_Orthologs
-db2gbk.py updated on 1/3/2017 at 1:03 PM
-##############################################################################
-
-    Input:  Master_Accession_File in a specified format (described in a seperate
-    text file) and the proper database files.
-
-    Output:  Extract target GenBank files from the database files that were
-    created with ftp2db
-
-    Description:
-
-##############################################################################
-@author: rgilmore
+This class is designed to aid in extracting genbank files from a prefilled
+database.
 """
-##############################################################################
-# Libraries:
-
 import os
 import shutil
-
 from Bio import SeqIO
 from BioSQL import BioSeqDatabase
+from Manager.utils.mana import UserMana as UserManagement
+from Orthologs.CompGenetics.comp_gen import CompGenAnalysis
 
-from Manager.utils.mana import UserMana
-from Orthologs.comparative_genetics.comp_gen import CompGenAnalysis as CGA
-
-# //TODO-ROB Add a progress bar to the pipeline
-##############################################################################
-# Custom Class Initializations
-
-##############################################################################
-# Global Initializations:
-
-##############################################################################
-
-
-# #//TODO-ROB make code more versatile for multiple projects or even single queries
-class Db2Gbk(CGA, UserMana):
+# TODO-ROB Add a progress bar to the pipeline
+# TODO-ROB make code more versatile for multiple projects or even single queries
+class Database2Genbank(CompGenAnalysis, UserManagement):
+    """
+    Extract target GenBank files from the database files that were created using
+    ftp2db.
+    """
 
     def __init__(self, repo, user, project, m_file, genbank_update=False):
-
         # TODO-ROB Update the CGA.  I have yet to write functions for saving the data post blast
-        CGA.__init__(acc_file=m_file, save_data=False)
-        UserMana.__init__(repo=repo, user=user, porject=project)
+        CompGenAnalysis.__init__(acc_file=m_file, save_data=False)
+        UserManagement.__init__(repo=repo, user=user, porject=project)
         self.GenBank_update = genbank_update
 
     def gbk_gather(self):
+        """Extract/download the genbank files from the database.
+        """
         os.chdir(self.databases)
         db_name = []
 
@@ -93,6 +69,9 @@ class Db2Gbk(CGA, UserMana):
 
 
     def gbk_upload(self):
+        """
+        Upload the BioSQL database with genbank data.
+        """
         t_count = 0
         os.chdir(self.path)
         print(os.getcwd())
@@ -144,6 +123,9 @@ class Db2Gbk(CGA, UserMana):
 
 
     def db2gbk_mkdir(self, path, p_list, update):
+        """
+        This simple function aids in the handling of directory creation.
+        """
         if update is True:
             path = where.dir_archive(path, p_list)
         else:

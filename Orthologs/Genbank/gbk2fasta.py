@@ -1,41 +1,11 @@
-##############################################################################
-# PyCharm Community Edition
-# -*- coding: utf-8 -*-
-"""
-GPCR-Orthologs-Project
-gbk2fasta updated on 1/24/2017 at 2:48 PM
-##############################################################################
-
-    Input:  .gbk files or .db files
-
-    Output:  FASTA files
-
-    Description:  This script accepts .gbk files or .db files (loaded with
-    target .gbk files with BioPython schema).  The output is a group of FASTA
-    files  The different types of regions that are specified by the GenBank files
-    get their own directories.
-
-##############################################################################
-@author: rgilmore
-"""
-##############################################################################
-# Libraries:
-
 import os
 from pathlib import Path
 from pathlib import PurePath
-
 from Bio import SeqIO
 from BioSQL import BioSeqDatabase
-
 from dir_mana import dir_mana
 from lister import Lister
 
-##############################################################################
-# Custom Class Initializations
-# :
-# Use directory_management() class here so that we can stay organized
-# and more easily access the proper directories on command
 home = os.getcwd()
 project = "GPCR-Orthologs-Project"
 user = "rgilmore"
@@ -43,15 +13,13 @@ where = dir_mana(home, project)
 # Use lister() class here so that we can easily access our Master RNA Accession File
 what = Lister('MAFV3.1.csv')  # Always make sure this file name is correct
 
-## Add a path that contains custom libraries for import
-#os.sys.path.append()
-##############################################################################
-# Global Initializations:
-
-##############################################################################
-
-
 class Gbk2Fasta(object):
+    """
+    This class accepts .gbk files or .db files (loaded with target .gbk files
+    with BioPython schema).  The output is a group of FASTA files. The
+    different types of regions that are specified by the GenBank files get
+    their own directories.
+    """
 
     def __init__(self, path=Path(os.getcwd()), db_flag=False, gbk_flag=False):
         # Where are the files?
@@ -67,8 +35,10 @@ class Gbk2Fasta(object):
                 self.gbk(f_db)
 
     def db(self, database):
+        """
+        Create FASTA files for every GenBank record in the database.
+        """
         server = BioSeqDatabase.open_database(driver="sqlite3", db=database)
-        # Create FASTA files for every GenBank record in the database
         try:
             for db_name in server.keys():
                 db = server[db_name]
@@ -80,9 +50,11 @@ class Gbk2Fasta(object):
             raise()
 
     def gbk(self, file):
+        """
+        Write a group of fasta files from a group of .gbk files in the directory.
+        The specified self.path must be an empty directory with .gbk files
+        """
         record = SeqIO.read(file, 'genbank')
-        # Write a group of fasta files from a group of .gbk files in the directory.
-        # The specified self.path must be an empty directory with .gbk files
         self.write_fasta_file(record)
 
     def write_fasta_file(self, record):

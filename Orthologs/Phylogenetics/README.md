@@ -17,8 +17,42 @@ Biopython's Bio.Phylo class.
 This is a quick example to use this class.
 
 ``` python
-import Orthologs
-from Phylogenetics.PAML import ete3paml
+from Orthologs import Phylogenetics
+
+# Find out what subclasses are available for use
+dir(Phylogenetics)
+
+Out[1]:
+['ETE3PAML',
+ 'OrthologsWarning',
+ 'PAML',
+ 'PamlTest',
+ 'PhyML',
+ 'Phylip',
+ 'PhyloTree',
+ 'PhymlTest',
+ 'TreeViz',
+ '__all__',
+ '__builtins__',
+ '__cached__',
+ '__doc__',
+ '__file__',
+ '__loader__',
+ '__name__',
+ '__package__',
+ '__path__',
+ '__spec__',
+ 'warnings']
+
+# Now you can import a class you want to utilize
+from Orthologs.Phylogenetics import PhyML, TreeViz
+
+PhyML = PhyML()
+
+PhyML.relaxphylip("HTR1A_aligned.fasta", "HTR1A_aligned.phy")
+
+PhyML.runphyml("HTR1A_aligned.phy")
+
 
 ```
 
@@ -26,6 +60,6 @@ from Phylogenetics.PAML import ete3paml
 :exclamation: Notes
 -------------------
 
-It's important to not that the default parameters are as follows:
+It's important to note the default parameters for `ETE3PAML` are as follows:
  `workdir='data/paml-output/'`, `model='M1'`
 

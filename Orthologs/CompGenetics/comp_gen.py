@@ -1,9 +1,3 @@
-# -*- coding: utf-8 -*-
-"""
-Parses an accession file with the designated format in order to
-provide easy handles for different pieces of data.
-"""
-# Modules Used
 import os
 import mygene
 from ete3 import NCBITaxa
@@ -11,28 +5,25 @@ from ete3 import NCBITaxa
 import pandas as pd
 from pathlib import Path
 from pandas import ExcelWriter
-from Manager.utils.mana import ProjMana as PM
-
+from Manager.utils.mana import ProjMana as ProjectManagement
 
 # TODO-ROB Create function for archiving and multiple runs (this can go into the Mana class)
-
-
-class CompGenAnalysis(PM):
+class CompGenAnalysis(ProjectManagement):
     """ Comparative Genetics Analysis.
-    
+
     Parses an accession file with the designated format in order to
     provide easy handling for data.
-    
+
     Input:  An open .csv file object that contains a header of organisms.  The
     first column ranks the gene by tier, the second column is a HUGO Gene
     Nomenclature Committee(HGNC) symbol for the genes of interest.  The .csv
     has to be located in the same directory as this module unless a full path is
     specified.
-    
+
     The organisms are taken from
     ftp://ftp.ncbi.nlm.nih.gov/genomes/refseq/multiprocessing/
     and the genes are taken from http://www.guidetopharmacology.org/targets.jsp.
-    
+
     Output:  A pandas Data-Frame, Pivot-Table, and associated lists and dictionaries.
     """
     __acc_filename = ''
@@ -373,8 +364,8 @@ class CompGenAnalysis(PM):
         Get duplicate accessions.
         This function is used to analyze an accession file post-BLAST.
         It uses the accession dictionary as a base.
-        
-        :return: A master duplication dictionary used to initialize the 
+
+        :return: A master duplication dictionary used to initialize the
         duplicate class variables.
         """
         duplicated_dict = dict()
@@ -458,9 +449,9 @@ class CompGenAnalysis(PM):
 
     def get_miss_acc(self, acc_file=None):
         """
-        This function is used to analyze an accession file post BLAST.  
+        This function is used to analyze an accession file post BLAST.
         It generates several files and dictionaries regarding missing accession numbers.
-        
+
         :param acc_file: An accession file (post BLAST).
         :return: A dictionary with data about the missing accession numbers by Gene and
         by Organism.

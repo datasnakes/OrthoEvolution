@@ -14,11 +14,12 @@ class ClustalO(object):
     parameters. These parameters include 2 additional iterations for the hmm.
     """
 
-    def __init__(infile, outfile, logpath, seqtype="DNA", infmt="fasta",
-                  outfmt="fasta"):
+    def __init__(self, infile, outfile, logpath, seqtype="DNA", infmt="fasta",
+                  outfmt="fasta", clustalpath='clustalo'):
 
         # Run clustal omega using the multifasta file
         clustalo_cline = ClustalOmegaCommandline(infile=infile,
+                                                 cmd=clustalpath,
                                                  outfile=outfile,
                                                  seqtype=seqtype, # "RNA"
                                                  max_hmm_iterations=2, # Notable
