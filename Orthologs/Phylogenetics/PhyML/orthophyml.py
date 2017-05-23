@@ -28,7 +28,8 @@ class PhyML(object):
         # Create the command & run phyml
         # Input a phylip formatted alignment file and describe the datatype
         # ('nt' or 'aa')
-        run_phyml = PhymlCommandline(
-            phyml_exe, input=phyml_input, datatype=datatype)
+        run_phyml = PhymlCommandline(phyml_exe,
+                                     input=phyml_input,
+                                     datatype=datatype)
         print(run_phyml)
         out_log, err_log = run_phyml()
