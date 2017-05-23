@@ -21,15 +21,17 @@ import subprocess
 # ------------------------------------------------------------------------------
 class S2S(object):
     """S2S (Send 2 Server) is designed for use with a public ssh key."""
-    def __init__(self, username=None, server_address=None, dest_path=None, remote=True, comp_filename='', zip_path=None, compressed=True, auto=False):
+
+    def __init__(self, username=None, server_address=None, dest_path=None,
+                 remote=True, comp_filename='', zip_path=None, compressed=True, auto=False):
         """
         :param username (string):  Remote server username.
-        :param server_address (string):  Remote server address. 
-        :param dest_path (string):  Remote server destination. 
-        :param comp_filename (string):  This is the name of the compressed file that will be generated (eg 'test.zip') 
+        :param server_address (string):  Remote server address.
+        :param dest_path (string):  Remote server destination.
+        :param comp_filename (string):  This is the name of the compressed file that will be generated (eg 'test.zip')
         :param zip_path: This is the absolute path of the directory (or file) to be zipped.
-        :param auto (bool):  Flag for automatically carrying out compression and SCP file sending. 
-        :param remote (bool):  Flag for determining if the copied file is on a remote or local server.  Default to True. 
+        :param auto (bool):  Flag for automatically carrying out compression and SCP file sending.
+        :param remote (bool):  Flag for determining if the copied file is on a remote or local server.  Default to True.
         """
 
         self.user = username
@@ -37,9 +39,11 @@ class S2S(object):
         self.dest_path = dest_path
         self.comp_filename = comp_filename
         self.zip_path = zip_path
-        self.send_cmd = "scp %s %s@%s:%s" % (self.comp_filename, self.user, self.address, self.dest_path)
+        self.send_cmd = "scp %s %s@%s:%s" % (
+            self.comp_filename, self.user, self.address, self.dest_path)
         # TODO-ROB Fix this for recursive directory or just a file
-        self.copy_cmd = 'cp -R %s/%s %s' % (self.zip_path, self.comp_filename, self.dest_path)
+        self.copy_cmd = 'cp -R %s/%s %s' % (self.zip_path,
+                                            self.comp_filename, self.dest_path)
         if compressed:
             self.to_zip()
             if auto:
@@ -60,7 +64,7 @@ class S2S(object):
     def cpto(self, file):
         cmd = self.copy_cmd
         status = subprocess.call([cmd], shell=True)
-        if status ==0:
+        if status == 0:
             print("%s file sent." % file)
             pass
         else:

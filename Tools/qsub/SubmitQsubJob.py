@@ -12,19 +12,22 @@ Project Name: Orthologs Project
 import os
 import random
 import string
-#import tempfile  # This MAY be added later.
+# import tempfile  # This MAY be added later.
 import subprocess
 from string import Template
 from datetime import datetime as d
 import sys
 
 #------------------------------------------------------------------------------
+
+
 class CreateJob(object):
     def __init__():
         """UNLESS A WINDOWS MACHINE HAS PBS (IT SHOULDNT)"""
         if sys.platform == 'win32' or 'win64':
             sys.exit("This module is strictly for use on Linux at the moment.")
 #------------------------------------------------------------------------------
+
     def ImportTemp(filepath):
         """Import the script or file that you need a template of and that has temp
         strings."""
@@ -45,10 +48,12 @@ class CreateJob(object):
 #------------------------------------------------------------------------------
     def RandomId(self, length=5):
         """Generate a random ID of 5 characters to append to qsub job name."""
-        return ''.join(random.sample(string.ascii_letters + string.digits, length))
+        return ''.join(random.sample(
+            string.ascii_letters + string.digits, length))
 
 #------------------------------------------------------------------------------
-    def SubmitPythonCode(self, code, pbstemp, author, jobname="job", cleanup=True, prefix="", slots=1):
+    def SubmitPythonCode(self, code, pbstemp, author,
+                         jobname="job", cleanup=True, prefix="", slots=1):
         """ This function creates and submits qsub jobs."""
 
         format1 = '%a %b %d %I:%M:%S %p %Y'  # Used to add as a date
@@ -66,21 +71,21 @@ class CreateJob(object):
         script = "python3 " + base + ".py"
 
         pbs_dict = {
-                'author': author,
-                'description': 'do things',
-                'date': d.now().strftime(format1),
-                'PBS_JOBID': '${PBS_JOBID}',
-                'PBS_O_WORKDIR': '${PBS_O_WORKDIR}',
-                'proj_name': 'Orthologs Project',
-                'select': '4',
-                'memgb': '8gb',
-                'cput': '30:00:00',
-                'wt': '30:00:00',
-                'job_name': jobname,
-                'script': script,
-                'log_name': base,
-                'cmd': script
-                }
+            'author': author,
+            'description': 'do things',
+            'date': d.now().strftime(format1),
+            'PBS_JOBID': '${PBS_JOBID}',
+            'PBS_O_WORKDIR': '${PBS_O_WORKDIR}',
+            'proj_name': 'Orthologs Project',
+            'select': '4',
+            'memgb': '8gb',
+            'cput': '30:00:00',
+            'wt': '30:00:00',
+            'job_name': jobname,
+            'script': script,
+            'log_name': base,
+            'cmd': script
+        }
 
         # Create the pbs script from the template/dict
         with open(base + '.pbs', 'w') as pbsfile:
@@ -90,7 +95,8 @@ class CreateJob(object):
         # Submit the qsub job using subprocess
         try:
             cmd = 'qsub  ' + base + '.pbs'  # this is the command
-            cmd_status = subprocess.call([cmd], shell=True)  #  Shell must be TRUE
+            cmd_status = subprocess.call(
+                [cmd], shell=True)  # Shell must be TRUE
             if cmd_status == 0:  # Command was successful.
                 pass  # Continue
             else:  # Unsuccessful. Stdout will be '1'.
