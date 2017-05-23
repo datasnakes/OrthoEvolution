@@ -14,6 +14,8 @@ from Orthologs.Phylogenetics.Phylip import Phylip
 from Orthologs.Phylogenetics.PhyloTree import TreeViz
 
 # Add a new module
+
+
 class RelaxPhylip(object):
     """Convert the a multiple sequence alignment file to
     relaxed-phylip format.
@@ -23,6 +25,7 @@ class RelaxPhylip(object):
         AlignIO.convert(inputfile, "fasta",
                         outputfile, "phylip-relaxed")
 
+
 # Make this explicit, then they show up in the API docs
 __all__ = ("ETE3PAML",
            "PamlTest",
@@ -30,4 +33,4 @@ __all__ = ("ETE3PAML",
            "TreeViz",
            "Phylip",
            "RelaxPhylip",
-)
+           )

@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 # Modules Used
-import os, stat
+import os
+import stat
 from pathlib import Path
 from Manager.utils.zipper import ZipUtilities
 from cookiecutter.main import cookiecutter
@@ -17,6 +18,8 @@ import Tools
 
 #------------------------------------------------------------------------------
 # TODO-ROB use **kwargs and **args to cut down on parameters
+
+
 class Mana(object):
     """
     This is the directory management base class.  It
@@ -29,7 +32,8 @@ class Mana(object):
     """
 
     def __init__(self, repo=None, home=os.getcwd(), new_repo=False):
-        # TODO-ROB ADD a REPOsitory destination path (an output directory for cookiecutter)
+        # TODO-ROB ADD a REPOsitory destination path (an output directory for
+        # cookiecutter)
         """
         :param home(path or path-like): The home of the file calling this name.  When creating a new
             repository it is best to explicitly name the home path.
@@ -100,7 +104,8 @@ class Mana(object):
             no_input = False
             e_c = None
             # TODO-ROB change cookiecutter so that it can take pathlike objects
-        cookiecutter(str(self.repo_cookie), no_input=no_input, extra_context=e_c, output_dir=str(self.file_home))
+        cookiecutter(str(self.repo_cookie), no_input=no_input,
+                     extra_context=e_c, output_dir=str(self.file_home))
         os.chmod(str(self.file_home / Path(self.repo)), mode=0o777)
 
 #------------------------------------------------------------------------------
@@ -166,14 +171,16 @@ class Mana(object):
     # DEPRECATED Change this IN OTHER CLASSES
    # def path_list_make(self, path, o_path=None):
         # Takes a path and reduces it to a list of directories within the project
-        # An optional attribute (o_path) is give so that a deeper path within the project can be used
+        # An optional attribute (o_path) is give so that a deeper path within
+        # the project can be used
 
     # //TODO-ROB utilize Path.mkdir(parents=TRUE) instead
         # DEPRECATED Change this IN OTHER CLASSES
   #  def dir_make(self, path, path_list):
         # Takes a path list which is a list of folder names
         # path_list created by str(path).split('/')
-        # The path_list appends to path, which is already an established directory inside the project
+        # The path_list appends to path, which is already an established
+        # directory inside the project
 
     # # //TODO-ROB Change to using a compression module https://pymotw.com/2/compression.html
         # DEPRECATED Change this IN OTHER CLASSES
@@ -182,9 +189,12 @@ class Mana(object):
     #     # Returns path and the time stamp (could be None)
 
 #------------------------------------------------------------------------------
+
+
 class RepoMana(Mana):
 
-    def __init__(self, repo, user=None, home=os.getcwd(), new_user=False, new_repo=False):
+    def __init__(self, repo, user=None, home=os.getcwd(),
+                 new_user=False, new_repo=False):
         """
         :param repo (string):  The name of the repository.
         :param user (string):  The name of the current user if any.
@@ -230,14 +240,17 @@ class RepoMana(Mana):
         # TODO-ROB:  Create the cookiecutter.json file
 
         # extra_context overrides user and default configs
-        cookiecutter(str(self.user_cookie), no_input=True, extra_context={"user_name": self.user}, output_dir=str(self.users))
+        cookiecutter(str(self.user_cookie), no_input=True, extra_context={
+                     "user_name": self.user}, output_dir=str(self.users))
 
-        # Change user permissions with flask later (this is for testing purposes
+        # Change user permissions with flask later (this is for testing
+        # purposes
         os.chmod(str(self.users / Path(self.user)), mode=0o777)
         # TODO-ROB do we need create user hooks?
 
 # TODO-ROB:  Edit the setup.py file for cookiecutter.
 #------------------------------------------------------------------------------
+
 
 class UserMana(RepoMana):
     """User Management Class.
@@ -246,7 +259,9 @@ class UserMana(RepoMana):
     # TODO-ROB The virtual environment can be the name of the user
     # TODO-ROB When the user logs in, they will activate the virtual environment
     # TODO-ROB USE SQL here to see if the user db contains the username
-    def __init__(self, repo, user, project=None, home=os.getcwd(), new_user=False, new_project=False, **kwargs):
+
+    def __init__(self, repo, user, project=None, home=os.getcwd(),
+                 new_user=False, new_project=False, **kwargs):
         '''
         The User Management class manages the current users directories.
         This class gives access to user paths, and provides functionality
@@ -288,7 +303,8 @@ class UserMana(RepoMana):
         else:
             no_input = False
             e_c = None
-        cookiecutter(str(self.project_cookie), extra_context=e_c, no_input=no_input, output_dir=str(self.projects))
+        cookiecutter(str(self.project_cookie), extra_context=e_c,
+                     no_input=no_input, output_dir=str(self.projects))
         os.chmod(str(self.projects / Path(self.project)), mode=0o777)
 
     def zip_mail(self, comp_filename, zip_path, destination=''):
@@ -299,11 +315,13 @@ class UserMana(RepoMana):
 
 #------------------------------------------------------------------------------
 
+
 class WebMana(RepoMana):
     """Web Management Class.
     """
 
-    def __init__(self, repo, website, host='0.0.0.0', port='5252', home=os.getcwd(), new_website=False, create_admin=False, **kwargs):
+    def __init__(self, repo, website, host='0.0.0.0', port='5252',
+                 home=os.getcwd(), new_website=False, create_admin=False, **kwargs):
         '''
         This installs a template for Flask using cookiecutter.  The
         custom datasnakes cookie for this template has been edited for
@@ -349,15 +367,19 @@ class WebMana(RepoMana):
                "website_path": os.path.join(str(self.website_path), ''),
                "website_host": self.web_host,
                "website_port": self.web_port}
-        cookiecutter(str(self.website_cookie), no_input=True, extra_context=e_c, output_dir=str(self.flask))
+        cookiecutter(str(self.website_cookie), no_input=True,
+                     extra_context=e_c, output_dir=str(self.flask))
         os.chmod(str(self.flask / Path(self.website)), mode=0o777)
         # Get the absolute path to the script that starts the flask server
-        script_path = self.website_path / Path('hooks') / Path('post_gen_project.sh')
+        script_path = self.website_path / \
+            Path('hooks') / Path('post_gen_project.sh')
         #scripts_file_path = find_hook('post_gen_project.sh', hooks_dir=str(script_path))
         # TODO-ROB add screening to the bash script for flask run -h -p
         run_script(script_path=str(script_path), cwd=str(self.website_path))
 
 #------------------------------------------------------------------------------
+
+
 class ProjMana(UserMana):
     """Project Management Class.
     """
@@ -381,12 +403,14 @@ class ProjMana(UserMana):
         super().__init__(repo=repo, user=user, project=project, home=home,
                          new_project=new_project, **kwargs)
         # TODO-ROB Go back to the drawing board for the public/private/other choices.  (FLASK forms)
-        # TODO-ROB determine how to get cookiecutter to skip over directories that already exist
+        # TODO-ROB determine how to get cookiecutter to skip over directories
+        # that already exist
         self.project = project
         self.research = research
         self.research_type = research_type
         # Project/Research Directories
-        self.research_path = self.project_path / Path(research_type) / Path(research)
+        self.research_path = self.project_path / \
+            Path(research_type) / Path(research)
         self.project_archive = self.project_path / Path('archive')
         self.project_index = self.research_path / Path('index')
         self.data = self.research_path / Path('data')
@@ -411,14 +435,14 @@ class ProjMana(UserMana):
 
         e_c = {"research_type": self.research_type,
                "research_name": self.research}
-        cookiecutter(str(self.research_cookie), no_input=True, extra_context=e_c, output_dir=str(self.project_path))
+        cookiecutter(str(self.research_cookie), no_input=True,
+                     extra_context=e_c, output_dir=str(self.project_path))
         os.chmod(str(self.project_path / Path(self.research_type)), mode=0o777)
         if new_app is True:
             self.create_app()
 
     def create_app(self):
         e_c = {"app_name": self.app}
-        cookiecutter(str(self.app_cookie), no_input=True, extra_context=e_c, output_dir=str(self.app_path))
+        cookiecutter(str(self.app_cookie), no_input=True,
+                     extra_context=e_c, output_dir=str(self.app_path))
         os.chmod(str(self.app_path / Path(self.app)), mode=0o777)
-
-

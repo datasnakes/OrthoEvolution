@@ -11,11 +11,31 @@ class TkFileDialogExample(Frame):
         button_opt = {'fill': BOTH, 'padx': 5, 'pady': 5}
 
         # define buttons
-        Button(self, text='askopenfile', command=self.askopenfile).pack(**button_opt)
-        Button(self, text='askopenfilename', command=self.askopenfilename).pack(**button_opt)
-        Button(self, text='asksaveasfile', command=self.asksaveasfile).pack(**button_opt)
-        Button(self, text='asksaveasfilename', command=self.asksaveasfilename).pack(**button_opt)
-        Button(self, text='askdirectory', command=self.askdirectory).pack(**button_opt)
+        Button(
+            self,
+            text='askopenfile',
+            command=self.askopenfile).pack(
+            **button_opt)
+        Button(
+            self,
+            text='askopenfilename',
+            command=self.askopenfilename).pack(
+            **button_opt)
+        Button(
+            self,
+            text='asksaveasfile',
+            command=self.asksaveasfile).pack(
+            **button_opt)
+        Button(
+            self,
+            text='asksaveasfilename',
+            command=self.asksaveasfilename).pack(
+            **button_opt)
+        Button(
+            self,
+            text='askdirectory',
+            command=self.askdirectory).pack(
+            **button_opt)
 
         # define options for opening or saving a file
         self.file_opt = options = {}
@@ -40,13 +60,11 @@ class TkFileDialogExample(Frame):
         options['title'] = 'This is a title'
 
     def askopenfile(self):
-
         """Returns an opened file in read mode."""
 
         return askopenfile(mode='r', **self.file_opt)
 
     def askopenfilename(self):
-
         """Returns an opened file in read mode.
         This time the dialog just returns a filename and the file is opened by your own code.
         """
@@ -59,13 +77,11 @@ class TkFileDialogExample(Frame):
             return open(filename, 'r')
 
     def asksaveasfile(self):
-
         """Returns an opened file in write mode."""
 
         return asksaveasfile(mode='w', **self.file_opt)
 
     def asksaveasfilename(self):
-
         """Returns an opened file in write mode.
         This time the dialog just returns a filename and the file is opened by your own code.
         """
@@ -78,12 +94,12 @@ class TkFileDialogExample(Frame):
             return open(filename, 'w')
 
     def askdirectory(self):
-
         """Returns a selected directoryname."""
 
         return askdirectory(**self.dir_opt)
 
-if __name__=='__main__':
+
+if __name__ == '__main__':
     root = Tk()
     TkFileDialogExample(root).pack()
     root.mainloop()

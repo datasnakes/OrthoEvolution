@@ -29,7 +29,11 @@ format1 = '%a %b %d %I:%M:%S %p %Y'  # Used to add as a date
 format2 = '%m-%d-%Y@%I:%M:%S-%p'  # Used to append to archives
 format3 = '%m-%d-%Y'  # Use for Windows
 
-log.basicConfig(filename="blast_setup_" + d.now().strftime(format3) + ".log", level=log.INFO)
+log.basicConfig(
+    filename="blast_setup_" +
+    d.now().strftime(format3) +
+    ".log",
+    level=log.INFO)
 log.info("#------------------------------------------------------------------")
 log.info("The script name is %s" % os.path.basename(__file__))
 log.info("The date and time is currently %s" % str(d.now().strftime(format1)))
@@ -48,7 +52,11 @@ try:
         log.info("The %s directory exists & will be archived." % str(dbpath))
         # Move any files that are in the directory to a dated archive folder.
         # Moving a directory in linux/unix essentially renames it.
-        os.system('mv ' + dbpath + ' /databases/refseqrnadb_archive_' + d.now().strftime(format2))
+        os.system(
+            'mv ' +
+            dbpath +
+            ' /databases/refseqrnadb_archive_' +
+            d.now().strftime(format2))
         os.mkdir(dbpath)   # Recreate the database directory
         log.info("The %s directory was created." % str(dbpath))
         pass
@@ -102,10 +110,12 @@ try:
     if status == 0:
         log.info("The refseqrna blast db files have downloaded.")
         # Unzip all of the files and remove unneccessary files
-        os.system("for file in *.tar.gz; do tar xvf $file; done")  # Unzip the database files
+        # Unzip the database files
+        os.system("for file in *.tar.gz; do tar xvf $file; done")
         os.system("rm -r *.tar.gz")
         log.info("The files have been unzipped, and Part 1 has finished.")
-        log.info("#------------------------------------------------------------------")
+        log.info(
+            "#------------------------------------------------------------------")
     else:
         log.info("Something went wrong.")
         ftp.quit()
@@ -131,7 +141,8 @@ os.chdir(home)
 #------------------------------------------------------------------------------
 # Open Orgnanisms.csv which is a comma delimited list of all species names to be used.
 # Read .csv into pandas. If no columns for the data, set header as None or 0 (int)
-# If the data has columns, simply just read in the csv without the header option
+# If the data has columns, simply just read in the csv without the header
+# option
 orgsfile = pd.read_csv('data/initial-data/organisms.csv', header=None)
 # Create a list name/variable and use list()
 orgs = list(orgsfile[0])
@@ -195,7 +206,8 @@ log.info("Create a csv file with only human accessions and genes for downstream 
 #------------------------------------------------------------------------------
 # Open the file with the list of all the genes, accessions, and tiers
 mal = pd.read_csv('data/initial-data/master_accessions_list.csv')
-human_acc = list(mal.Homo_sapiens)  # Create a list of human accessions from column
+# Create a list of human accessions from column
+human_acc = list(mal.Homo_sapiens)
 genes_list = list(mal.Gene)  # Create a list of genes from the column
 tiers_list = list(mal.Tier)
 
@@ -211,7 +223,10 @@ frames = [tiers, genes, accs]
 human_acc_info = pd.concat(frames, axis=1)
 
 # Save the dataframe as a csv file which will be used in AccCollect.py
-human_acc_info.to_csv('data/initial-data/homo_sapiens_accessions.csv', index=False, header=None)
+human_acc_info.to_csv(
+    'data/initial-data/homo_sapiens_accessions.csv',
+    index=False,
+    header=None)
 
 log.info("homo_sapiens_accessions.csv file was created.")
 log.info("The script has finished.")

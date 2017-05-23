@@ -1,13 +1,16 @@
 import os
 import mygene
 from ete3 import NCBITaxa
-#NCBITaxa().update_taxonomy_database()
+# NCBITaxa().update_taxonomy_database()
 import pandas as pd
 from pathlib import Path
 from pandas import ExcelWriter
 from Manager.utils.mana import ProjMana as ProjectManagement
 
-# TODO-ROB Create function for archiving and multiple runs (this can go into the Mana class)
+# TODO-ROB Create function for archiving and multiple runs (this can go
+# into the Mana class)
+
+
 class CompGenAnalysis(ProjectManagement):
     """ Comparative Genetics Analysis.
 
@@ -32,8 +35,15 @@ class CompGenAnalysis(ProjectManagement):
     __data = ''
 
     # TODO-ROB:  CREAT PRE-BLAST and POST-BLAST functions
-    def __init__(self, repo, user, project, research, research_type, acc_file=None, taxon_file=None, paml_file=None, go_list=None, post_blast=True, hgnc=False, **kwargs):
-        super().__init__(repo=repo, user=user, project=project, research=research, research_type=research_type, **kwargs)
+    def __init__(self, repo, user, project, research, research_type, acc_file=None,
+                 taxon_file=None, paml_file=None, go_list=None, post_blast=True, hgnc=False, **kwargs):
+        super().__init__(
+            repo=repo,
+            user=user,
+            project=project,
+            research=research,
+            research_type=research_type,
+            **kwargs)
 
         self.project = project
         # Private Variables
@@ -80,23 +90,25 @@ class CompGenAnalysis(ProjectManagement):
             self.raw_acc_data = pd.read_csv(str(self.acc_path), dtype=str)
 
             self.building_filename = str(acc_file[:-4] + 'building.csv')
-            self.building_time_filename = self.building_filename.replace('building.csv', 'building_time.csv')
+            self.building_time_filename = self.building_filename.replace(
+                'building.csv', 'building_time.csv')
             self.building = pd.read_csv(str(self.acc_path), dtype=str)
             del self.building['Tier']
             del self.building['Homo_sapiens']
             self.building = self.building.set_index('Gene')
-            self.building_file_path = self.raw_data / Path(self.building_filename)
+            self.building_file_path = self.raw_data / \
+                Path(self.building_filename)
 
             self.building_time = pd.read_csv(str(self.acc_path), dtype=str)
             del self.building_time['Tier']
             del self.building_time['Homo_sapiens']
             self.building_time = self.building_time.set_index('Gene')
-            self.building_time_file_path = self.raw_data / Path(self.building_time_filename)
+            self.building_time_file_path = self.raw_data / \
+                Path(self.building_time_filename)
             # self.mygene_df = pd.DataFrame()
             # self.mygene_filename = "%s_mygene.csv" % self.project
             # self.mygene_path = self.data / Path(self.mygene_filename)
             self.header = self.raw_acc_data.axes[1].tolist()
-
 
             # # Handles for accession file analysis # #
             if self.__post_blast:
@@ -106,7 +118,7 @@ class CompGenAnalysis(ProjectManagement):
                 self.missing_organsims = {}
                 self.missing_gene_count = 0
                 self.missing_organsims_count = 0
-                    # Duplicates
+                # Duplicates
                 self.duplicated_dict = {}
                 self.duplicated_accessions = {}
                 self.dup_acc_count = {}
@@ -122,8 +134,14 @@ class CompGenAnalysis(ProjectManagement):
             self.__data = self.raw_acc_data.set_index('Gene')
             self.df = self.__data
             # #### Format the main pivot table #### #
-            self.pt = pd.pivot_table(pd.read_csv(self.acc_path), index=['Tier', 'Gene'], aggfunc='first')
-            array = self.pt.axes[1].tolist() # Organism list
+            self.pt = pd.pivot_table(
+                pd.read_csv(
+                    self.acc_path),
+                index=[
+                    'Tier',
+                    'Gene'],
+                aggfunc='first')
+            array = self.pt.axes[1].tolist()  # Organism list
             self.pt.columns = pd.Index(array, name='Organism')
 
             # #### Handles for full dictionaries #### #
@@ -132,7 +150,8 @@ class CompGenAnalysis(ProjectManagement):
             self.get_master_lists(self.__data)  # populates our lists
         else:
             self.building_filename = str(project + 'building.csv')
-            self.building_time_filename = self.building_filename.replace('building.csv', 'building_time.csv')
+            self.building_time_filename = self.building_filename.replace(
+                'building.csv', 'building_time.csv')
 
 
 # TODO-ROB Add HGNC python module
@@ -206,7 +225,8 @@ class CompGenAnalysis(ProjectManagement):
             taxon_dict = ncbi.get_name_translator(self.ncbi_orgs)
             self.taxon_ids = list(tid[0] for tid in taxon_dict.values())
             self.taxon_orgs = list(torg for torg in taxon_dict.keys())
-            self.taxon_orgs = list(org.replace(' ', '_') for org in self.taxon_orgs)
+            self.taxon_orgs = list(org.replace(' ', '_')
+                                   for org in self.taxon_orgs)
             self.taxon_dict = dict(zip(self.taxon_orgs, self.taxon_ids))
             self.taxon_lineage = self.get_taxon_dict()
         if self.__paml_filename is not None:
@@ -329,13 +349,15 @@ class CompGenAnalysis(ProjectManagement):
             for id in lineage:
                 if ranks[id] == 'no rank':
                     continue
-                if ranks[id] not in ['superkingdom', 'kingdom', 'phylum', 'class', 'order', 'family', 'genus', 'species']:
+                if ranks[id] not in ['superkingdom', 'kingdom', 'phylum',
+                                     'class', 'order', 'family', 'genus', 'species']:
                     continue
                 taxa_dict[organism][ranks[id]] = names[id]
         return taxa_dict
 
     def get_acc_dict(self):
-        # TODO-ROB set up function to accept a parameter for unique values or potential duplicates
+        # TODO-ROB set up function to accept a parameter for unique values or
+        # potential duplicates
         """
         This function takes a list of accession numbers and returns a dictionary
         which contains the corresponding genes/organisms.
@@ -376,13 +398,16 @@ class CompGenAnalysis(ProjectManagement):
         duplicated_dict['other'] = {}
         acc_dict = self.acc_dict
         for accession, go_list in acc_dict.items():
-            # Finding duplicates by using the length of the accession dictionary
+            # Finding duplicates by using the length of the accession
+            # dictionary
             if len(go_list) > 1:
-                duplicated_dict['accessions'][accession] = go_list  # dict['accessions']['XM_000000'] = [[g, o], [g, o]]
+                # dict['accessions']['XM_000000'] = [[g, o], [g, o]]
+                duplicated_dict['accessions'][accession] = go_list
                 genes, orgs = zip(*go_list)
                 genes = list(genes)
                 orgs = list(orgs)
-                # Process the duplicates by categorizing and storing in a dictionary
+                # Process the duplicates by categorizing and storing in a
+                # dictionary
                 for go in go_list:
                     g = go[0]
                     o = go[1]
@@ -399,7 +424,8 @@ class CompGenAnalysis(ProjectManagement):
                         break
                     # Duplication across an organisms, but also somewhere else
                     elif orgs.count(o) != 1:
-                        alt_genes = list(gene for gene, org in go_list if org == o)
+                        alt_genes = list(
+                            gene for gene, org in go_list if org == o)
                         duplicated_dict['organisms'][o][accession] = alt_genes
 
                     # Duplicates that persist across a gene
@@ -409,7 +435,8 @@ class CompGenAnalysis(ProjectManagement):
                         break
                     # Duplication across a gene, but also somewhere else
                     elif genes.count(g) != 1:
-                        alt_orgs = list(org for gene, org in go_list if gene == g)
+                        alt_orgs = list(
+                            org for gene, org in go_list if gene == g)
                         duplicated_dict['genes'][g][accession] = alt_orgs
 
                     # This is the "somewhere else" if the duplication is random or not categorized
@@ -421,7 +448,8 @@ class CompGenAnalysis(ProjectManagement):
                             duplicated_dict['random'][accession] = []
                         duplicated_dict['random'][accession].append(go)
                         # There is another category of duplication that I'm missing
-                        # TODO-ROB:  If an other exists throw a warning in the logs
+                        # TODO-ROB:  If an other exists throw a warning in the
+                        # logs
                     else:
                         del duplicated_dict['organisms'][o]
                         del duplicated_dict['genes'][g]
@@ -476,12 +504,14 @@ class CompGenAnalysis(ProjectManagement):
         for organism, miss in organism_dict.items():
             if miss != 0:
                 missing_dict['organisms'][organism] = {}
-                missing_genes = miss_gene_df.ix[:, organism].to_dict()  # Missing Gene dict {'HTR1A': True}
+                # Missing Gene dict {'HTR1A': True}
+                missing_genes = miss_gene_df.ix[:, organism].to_dict()
                 # Do a list comprehension to get a list of genes
                 missing_dict['organisms'][organism]['missing genes'] = list(key for key, value in missing_genes.items()
                                                                             if value)  # Value is True for miss accns
 
-                missing_dict['organisms'][organism]['count'] = miss  # Number of missing accessions per organism
+                # Number of missing accessions per organism
+                missing_dict['organisms'][organism]['count'] = miss
                 total_miss += miss
         missing_dict['organisms']['count'] = total_miss
 
@@ -497,7 +527,8 @@ class CompGenAnalysis(ProjectManagement):
                                                                         if value  # Value is True for missing accessions
                                                                         if key != 'Tier')  # Don't include 'Tier'
 
-                missing_dict['genes'][gene]['count'] = miss  # Number of missing accessions per gene
+                # Number of missing accessions per gene
+                missing_dict['genes'][gene]['count'] = miss
                 total_miss += miss
         missing_dict['genes']['count'] = total_miss
 

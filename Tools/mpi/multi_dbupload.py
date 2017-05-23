@@ -25,8 +25,10 @@ what = Lister('MAFV3.1.csv')
 
 # Initialize the files and variables used to upload the proper database files
 log_file = ''
-# THe download list contains 8 lists with file names  e.g. [[list1], [list2]....[list8]]
-temp_file = 'temp_file.txt'   # A JSON file (keys: 'logfile'; 'downloadlist', 'db_name', 'key)
+# THe download list contains 8 lists with file names  e.g. [[list1],
+# [list2]....[list8]]
+# A JSON file (keys: 'logfile'; 'downloadlist', 'db_name', 'key)
+temp_file = 'temp_file.txt'
 # (values: 'file'; list of lists;, 'refseq-release-vertebrate-mammalian', 'vertebrate-mammalian)
 temp_file_flag = True
 process_number = rank
@@ -40,15 +42,20 @@ while temp_file_flag is True:
             temp_var = json.load(temp_file)
             temp_file_flag = False
             print('JSON file loaded from process %s' % process_number)
-    except:
+    except BaseException:
         temp_file_flag = True
-        print('Trying to open %s again from process %s' % ((home+'/'+temp_file), process_number))
+        print('Trying to open %s again from process %s' %
+              ((home + '/' + temp_file), process_number))
         time.sleep(2)
 
-# Initialize the dictionary for the download list.  'temp_var' already has the JSON data with mentioned key/value pairs
-temp_var['db_name'] = str(temp_var['db_name'] + str(process_number))  # Each process get's it's own unique database
-temp_var['small_list'] = temp_var['download_list'][rank-1]   # Each process gets it's own unique list of files
-temp_var['log_file_rank'] = str(temp_var['log_file']) + str(rank)  # Each process gets it's own unique log file
+# Initialize the dictionary for the download list.  'temp_var' already has
+# the JSON data with mentioned key/value pairs
+# Each process get's it's own unique database
+temp_var['db_name'] = str(temp_var['db_name'] + str(process_number))
+# Each process gets it's own unique list of files
+temp_var['small_list'] = temp_var['download_list'][rank - 1]
+# Each process gets it's own unique log file
+temp_var['log_file_rank'] = str(temp_var['log_file']) + str(rank)
 ser_loc = where.DB
 loaded_list = []
 t_count = 0
@@ -59,18 +66,28 @@ with open(where.LOG + '/Temp/' + temp_var['log_file_rank'], 'w') as log_w:
         print('file: ', file)
         log = []
         log.append('file: %s' % file)
-        # Create's or opens an existing server.  If the database cannot be created or opened it deletes and try again
+        # Create's or opens an existing server.  If the database cannot be
+        # created or opened it deletes and try again
         try:
-            server = BioSeqDatabase.open_database(driver='sqlite3', db=ser_loc + '/' + temp_var['db_name'] + '.' + temp_var['key'] + '.db')
+            server = BioSeqDatabase.open_database(
+                driver='sqlite3',
+                db=ser_loc +
+                '/' +
+                temp_var['db_name'] +
+                '.' +
+                temp_var['key'] +
+                '.db')
             print('server created')
             log.append('server created')
-        except:
+        except BaseException:
             print('server not created')
             log.append('server not created')
-            os.remove(ser_loc + ('/%s.%s.db' % (temp_var['db_name'], temp_var['key'])))
+            os.remove(ser_loc + ('/%s.%s.db' %
+                                 (temp_var['db_name'], temp_var['key'])))
             raise
 
-        # Deprecated (all files are RNA, but I originally wanted to get the other types as well)
+        # Deprecated (all files are RNA, but I originally wanted to get the
+        # other types as well)
         s = str(file).lower()
         if s.find("rna") != -1:
             sub_db = 'RNA'
@@ -108,9 +125,14 @@ with open(where.LOG + '/Temp/' + temp_var['log_file_rank'], 'w') as log_w:
             log_w.write(str(log) + '\n')
             print('The total number of files loaded so far is %i.' % t_count)
             t = time.strftime("%I:%M:%S")
-            loaded_list.append(("#%s#" % t) + ("<%s>  " % process_number) + str(file) + (' #GBK files: %s#' % count) + '\n')
-        except:
-            print('The database was unable to load from process %s' % process_number)
+            loaded_list.append(("#%s#" %
+                                t) + ("<%s>  " %
+                                      process_number) + str(file) + (' #GBK files: %s#' %
+                                                                     count) + '\n')
+        except BaseException:
+            print(
+                'The database was unable to load from process %s' %
+                process_number)
             log_w.write('The database was unable to load')
             log.append('The database was unable to load')
             log_w.write(str(log) + '\n')
@@ -118,7 +140,7 @@ with open(where.LOG + '/Temp/' + temp_var['log_file_rank'], 'w') as log_w:
             try:
                 del server[sub_db]
                 server.commit()
-            except:
+            except BaseException:
                 raise
             raise
 print("end of multi_dbupload.py from process %s" % process_number)
@@ -127,11 +149,13 @@ log_flag = True
 while log_flag is True:
     try:
         with open(where.LOG + '/Ftp2Db_refseq-release-multiprocessing.log', 'a') as log_w:
-            log_w.write('\n#%s# PROCESS %s uploaded %s GenBank files to %s.' % (t, process_number, t_count, (temp_var['db_name'] + '.' + temp_var['key'] + '.db')))
+            log_w.write(
+                '\n#%s# PROCESS %s uploaded %s GenBank files to %s.' %
+                (t, process_number, t_count, (temp_var['db_name'] + '.' + temp_var['key'] + '.db')))
             for item in loaded_list:
                 log_w.write(item)
         log_flag = False
-    except:
+    except BaseException:
         print('Could not open log_file from process %s' % process_number)
         time.sleep(30)
         log_flag = True

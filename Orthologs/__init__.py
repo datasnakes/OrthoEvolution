@@ -3,6 +3,7 @@ Python. It has been built upon BioPython and ETE3 and provides a great blueprint
 for utilizing BioPython and ETE3 to achieve analysis of biological data.
 """
 
+
 class OrthologsWarning(Warning):
     """This is the Orthologs main warning class.
 
