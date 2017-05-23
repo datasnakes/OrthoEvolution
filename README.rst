@@ -16,7 +16,7 @@ we are developing.
 Dependencies
 ------------
 
-Currently, this package works with python 3.4 and upward.
+Currently, this package is optimized for ``python 3.4`` and upward.
 
 Installation
 ------------
