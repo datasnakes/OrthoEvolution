@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 from OrthoTools import message_slack
 import argparse
 import textwrap
