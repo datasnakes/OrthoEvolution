@@ -183,7 +183,7 @@ class BLASTn(BT):
         gi_flag = True
         while gi_flag == True:
             try:
-                subprocess.check_output(['pgrep', 'getgilists'])
+                subprocess.check_output(['pidof', 'getgilists'])
                 gi_flag = False
             except subprocess.CalledProcessError:
                 gi_flag = True

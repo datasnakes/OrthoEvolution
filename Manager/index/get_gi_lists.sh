@@ -10,8 +10,4 @@
 #PBS -j oe
 
 cd ${PBS_O_WORKDIR}
-
-python3 get_gi_lists.py
-
-mail -s "get_gi_lists.py script completed" rgilmore@umc.edu < get_gi_lists.log
-
+mpiexec python get_gi_lists.py
