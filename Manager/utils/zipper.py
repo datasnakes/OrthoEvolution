@@ -1,23 +1,28 @@
 import zipfile
 import os
 from pathlib import Path
-# Inspired by http://stackoverflow.com/a/670635/7351746
 
 
-class ZipUtilities:
+class ZipUtils:
+    """The ZipUtil class allows easy compression/zipping of file folders.
 
-    def __init__(self, comp_filename, zip_path):
-        """
-        :param comp_filename (string):  This is the name of the compressed file that will be generated (eg 'test.zip') 
+    Inspired by http://stackoverflow.com/a/670635/7351746
+    """
+
+    def __init__(self, zip_filename, zip_path):
+        """Initialize the input files and path.
+
+        :param comp_filename (string):  This is the name of the compressed file that will be generated (eg 'test.zip')
         :param zip_path: This is the absolute path of the directory (or file) to be zipped.
         :returns:  A zip file that is created inside of the zip_path.  The path string is returned.
         """
-        self.comp_filename = comp_filename
+        self.zip_filename = zip_filename
         self.zip_path = zip_path
         self.ignore_parts = Path(zip_path).parent.parts
 
     def to_zip(self):
-        comp_path = os.path.join(self.zip_path, self.comp_filename)
+        """Zip a folder."""
+        comp_path = os.path.join(self.zip_path, self.zip_filename)
         zip_handle = zipfile.ZipFile(comp_path, 'w', zipfile.ZIP_DEFLATED)
         if os.path.isfile(self.zip_path):
             zip_handle.write(self.zip_path)
@@ -28,8 +33,8 @@ class ZipUtilities:
         return comp_path
 
     def add_folder_to_zip(self, zip_handle, folder):
-        """
-        Not meant to be used explicitly.  Use to_zip.
+        """Not meant to be used explicitly.  Use to_zip.
+
         :param zip_handle: An initialized zipfile.ZipFile handle.
         :param folder: A path that represents an entire folder to be zipped.
         :return: Recursively zips nested directories.

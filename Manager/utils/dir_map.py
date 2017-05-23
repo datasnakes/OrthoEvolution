@@ -1,3 +1,5 @@
+"""These functions allow the user to create a directory map."""
+
 import treelib
 from pathlib import Path
 import os
@@ -10,7 +12,9 @@ def git_ignore(path):
     return ignored
 
 
-def create_newick_node(dir_map, length, tag=None, identifier=None, parent=None, data=None):
+def create_newick_node(dir_map, length, tag=None,
+                       identifier=None, parent=None, data=None):
+    """Create a newick node."""
     bl = {}
     bl['name'] = tag
     # length must be an int
@@ -18,16 +22,19 @@ def create_newick_node(dir_map, length, tag=None, identifier=None, parent=None, 
     dir_map.create_node(tag, identifier, parent, data=bl)
 
 
+def to_jsonnewick(dir_map, nid=None, key=None, sort=True,
+                  reverse=False, with_data=False):
+    """For True newick files add a data parameter for branch length.
 
-def to_jsonnewick(dir_map, nid=None, key=None, sort=True, reverse=False, with_data=False):
-    # For True newick files add a data parameter for branch length
-    # ETE3 format #7 newick tree file format
+    ETE3 format #7 newick tree file format.
+    """
     if nid is None:
-        nid = dir_map.root # identifier (path)
-    ntag = dir_map[nid].tag # folder name
+        nid = dir_map.root  # identifier (path)
+    ntag = dir_map[nid].tag  # folder name
     tree_dict = {
         'name': ntag,
-        'children': []}
+        'children': []
+    }
     if with_data is True:
         tree_dict['children'].append(dir_map[nid].data)
     if dir_map[nid].expanded:
@@ -48,7 +55,7 @@ def to_jsonnewick(dir_map, nid=None, key=None, sort=True, reverse=False, with_da
 
 
 def _parse_json(json_obj):
-    """Edited from Source:  https://github.com/okeeffdp/json_to_newick"""
+    """Edited from Source:  https://github.com/okeeffdp/json_to_newick."""
     try:
         # Test is the key 'name' in the current level of the dictionary.
         newick = json_obj['name']
@@ -68,22 +75,25 @@ def _parse_json(json_obj):
             info.append(_parse_json(child))
         # join all the daughter info together with a comma
         info = ','.join(info)
-        # Concatenate all the children together at the start of the parent newick string
+        # Concatenate all the children together at the start of the parent
+        # newick string
         newick = '(' + info + ')' + newick
     return newick
 
 
-# Map the main project directory.
 def get_dir_map(top, gitignore=None):
+    """Map the main project directory."""
     # TODO-ROB:  Change ignore to a .gitignore filename
     default_ignore = git_ignore(os.getcwd())
     if gitignore is not None:
         gitignore += default_ignore
     else:
         gitignore = default_ignore
+
     # Treelib will help to map everything and create a json at the same time
     tree = treelib.Tree()
     tree.create_node('.', top)
+
     # Walk through the directory of choice (top)
     # Topdown is true so that directories can be modified in place
     for root, dirs, files in os.walk(top, topdown=True):
@@ -91,7 +101,8 @@ def get_dir_map(top, gitignore=None):
         if root == top:
             print(root)
             try:
-                dirs[:] = set(dirs) - set(gitignore)  # Remove directories from os.walk()
+                # Remove directories from os.walk()
+                dirs[:] = set(dirs) - set(gitignore)
                 print(dirs)
             except ValueError:
                 pass
@@ -104,10 +115,10 @@ def get_dir_map(top, gitignore=None):
 
 
 def get_newick_dir_map(top, ignore=None):
-    """Takes a treelib tree created by get_dir_map and returns
-    a tree a dir_map in newick format.  This will be useful for Bio.Phylo
-    applications."""
+    """Take a treelib tree created by get_dir_map and returns a dir_map in newick format.
 
+    This will be useful for Bio.Phylo applications.
+    """
     tree = get_dir_map(top, ignore)
     Ntree = _parse_json(to_jsonnewick(tree))
     return Ntree

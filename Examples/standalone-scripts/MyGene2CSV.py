@@ -1,8 +1,4 @@
-# -*- coding: utf-8 -*-
 """
-Created on Wed Feb  1 14:45:12 2017
-
-@author: S. Hutchins
 """
 # Modules Used
 import mygene
