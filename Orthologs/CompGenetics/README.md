@@ -1,22 +1,33 @@
-Folder Name & Description
+CompGenetics (Comparative Genetics) Documentation
 -------------------------
+Perform comparative genetics bioinformatics studies on [genes](http://www.guidetopharmacology.org/targets.jsp)
+of interest across a group of [species](ftp://ftp.ncbi.nlm.nih.gov/genomes/refseq/multiprocessing/).
 
-At the top of the file there should be a short introduction and/ or overview that explains **what** the folder contains and how it relates to the project. This description should match descriptions added for package managers (Gemspec, package.json, etc.)
 
 Usage
 -----
 
-Provide code examples and explanations of how to get the project.
-
-1.  A
-2.  B
-3.  C
+The main classes under CompGenetics are `BLASTAnalysis` and `CompGenAnalysis`.
 
 #### Code Examples
 
+##### Performing Blast Analysis
+
 ``` python
-gene_list = ['HTR1A', 'CCR5', 'DRD4']
-print(gene_list)
+from Orthologs.CompGenetics import BLASTAnalysis
+
+# Take a look at the required and default parameters
+# The default arguments are template, taxon_file, post_blast, save_data
+BLASTAnalysis(self, repo, user, project, research, research_type,
+              template=None, taxon_file=None, post_blast=False, save_data=True)
+
+
+```
+##### Performing Comparative Genetics Analysis
+
+``` python
+from Orthologs.CompGenetics import CompGenAnalysis
+
 ```
 
 Tests
