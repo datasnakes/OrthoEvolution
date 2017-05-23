@@ -11,7 +11,7 @@
 
 cd ${PBS_O_WORKDIR}
 
-python3 get_gi_lists.py
+mpiexec python3 get_gi_lists.py
 
 mail -s "get_gi_lists.py script completed" rgilmore@umc.edu < get_gi_lists.log
 
