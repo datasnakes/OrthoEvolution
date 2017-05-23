@@ -12,12 +12,11 @@ warnings.warn('Orthologs.Phylogenetics.PhyloTree is still under development and 
 class TreeViz(object):
     """Vizualize a newick tree."""
 
-    def __init__(self):
+    def __init__(self, path2tree):
         """Import the path to the tree."""
-        self.path2tree
+        self.path2tree = path2tree
 
-    def drawtree(self, treepath, treeformat='newick'):
+    def drawtree(self, treeformat='newick'):
         """Import a newick formatted tree and visualize it."""
-        self.path2tree = treepath
-        tree = Phylo.read(treepath, treeformat)
+        tree = Phylo.read(self.path2tree, treeformat)
         Phylo.draw(tree)
