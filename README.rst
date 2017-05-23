@@ -71,3 +71,8 @@ package.
 computational molecular biology and bioinformatics. Bioinformatics 2009
 Jun 1; 25(11) 1422-3 http://dx.doi.org/10.1093/bioinformatics/btp163
 pmid:19304878*
+
+
+.. image:: https://api.codacy.com/project/badge/Grade/9a4ce39423ed4458a0c7fa3610c81ba2
+   :alt: Codacy Badge
+   :target: https://www.codacy.com/app/sdhutchins/Datasnakes-Scripts?utm_source=github.com&utm_medium=referral&utm_content=datasnakes/Datasnakes-Scripts&utm_campaign=badger
