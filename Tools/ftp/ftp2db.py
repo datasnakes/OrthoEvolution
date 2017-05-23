@@ -35,10 +35,14 @@ home = os.getcwd()
 project = "GPCR-Orthologs-Project"
 user = "rgilmore"
 where = dir_mana(home, project)
-# Use lister() class here so that we can easily access our Master RNA Accession File
-what = lister('Master_RNA_Accession_File.csv')  # Always make sure this file name is correct
+# Use lister() class here so that we can easily access our Master RNA
+# Accession File
+# Always make sure this file name is correct
+what = lister('Master_RNA_Accession_File.csv')
 
 #------------------------------------------------------------------------------
+
+
 class Ftp2Db(object):
     global user
     ncbi = configparser.ConfigParser()
@@ -65,8 +69,10 @@ class Ftp2Db(object):
         self.__class_name = str(self.__class__.__name__)
         self.email = email
         self.path = path
-        self.ftp_update_flag = ftp_update  # Only use if there is a proper log file to be handled
-        self.db_update_flag = db_update  # Only use if there is a proper log file to be handled
+        # Only use if there is a proper log file to be handled
+        self.ftp_update_flag = ftp_update
+        # Only use if there is a proper log file to be handled
+        self.db_update_flag = db_update
         self.__table = [
             'blast',
             'genbank',
@@ -135,7 +141,8 @@ class Ftp2Db(object):
         for f in os.listdir(local_dir):
             _p = local_dir + '/' + f
             if f.endswith(".tar.gz"):
-                os.system("do tar xvf " + _p + "; done")  # Unzip the database files
+                # Unzip the database files
+                os.system("do tar xvf " + _p + "; done")
                 os.system("rm -r " + _p)
                 print('Unzipped %s' % f)
             elif f.endswith(".tar"):
@@ -176,7 +183,9 @@ class Ftp2Db(object):
                     print('moving forward')
                     self.__ftp_path_ui = False
                     self.__path_list.append(answer)
-                else:  # The user didn't properly type something or something is wrong (restating the u_i)
+                # The user didn't properly type something or something is wrong
+                # (restating the u_i)
+                else:
                     print('\nBe careful with your input.\n\nTry Again.\n')
                     time.sleep(3)
                     print(table.to_string(index=False, header=False) + '\n\n')
@@ -321,20 +330,25 @@ class Ftp2Db(object):
         downloaded_list = []  # Keeps track of download-ED files
         old_archive = []  # For Logging
 
-        # Creates a helpful naming convention for the log file based on the NCBI-FTP path
+        # Creates a helpful naming convention for the log file based on the
+        # NCBI-FTP path
         log_name = str(self.path)
         log_name = log_name[1:-1].replace('/', '-')
         self.__update_dict['log_name'] = log_name
-        log_file_name = where.LOG + ('/%s_' % self.__class_name) + log_name + '.log'
+        log_file_name = where.LOG + ('/%s_' %
+                                     self.__class_name) + log_name + '.log'
         if self.ftp_update_flag is False:
             f_handle = 'w'  # Overwrites the log file when we are not updating
-            self.file_choice, self.ext_choice = self.ftp_extension(path)  # Get the users extension choice
-            local_dir, t = self.ftp_mkdir(where.NCBI_DATA, self.__path_list, self.ftp_update_flag)  # Handles directories
+            self.file_choice, self.ext_choice = self.ftp_extension(
+                path)  # Get the users extension choice
+            local_dir, t = self.ftp_mkdir(
+                where.NCBI_DATA, self.__path_list, self.ftp_update_flag)  # Handles directories
 
         else:
             f_handle = 'a'  # For FTP updates this makes the log file append the log file
             self.__path_list = where.path_list_make(self.path, where.NCBI_DATA)
-            local_dir, t = self.ftp_mkdir(where.NCBI_DATA, self.__path_list, self.ftp_update_flag)  # Directory Handling
+            local_dir, t = self.ftp_mkdir(
+                where.NCBI_DATA, self.__path_list, self.ftp_update_flag)  # Directory Handling
             print('\n\nThis is an update, so the previous selections will be downloaded\n'
                   'and the old files will be archived.\n\n')
 
@@ -349,7 +363,9 @@ class Ftp2Db(object):
                 for item in old_archive:
                     log_file.write(item)
                 if t is not None:  # Logs the files that were archived during the current FTP session
-                    log_file.write('\n<< Archived ,%s, stamped as ,%s.\n' % (local_dir, t))
+                    log_file.write(
+                        '\n<< Archived ,%s, stamped as ,%s.\n' %
+                        (local_dir, t))
                     log_file.write(time.strftime("<< %m/%d/%Y %I:%M:%S\n"))
 
         # Make a list of files to download
@@ -378,15 +394,21 @@ class Ftp2Db(object):
             """
 
             for key, value in self.__dict__.items():
-                if type(value) is bool:  # Skips the update flags so the configuration doesn't break
+                if isinstance(
+                        value, bool):  # Skips the update flags so the configuration doesn't break
                     continue
-                # Log script to be used ass class variables later (a.k.a. "self.key = value")
+                # Log script to be used ass class variables later (a.k.a.
+                # "self.key = value")
                 if '__' in str(key):
                     continue
-                if type(value) is str:
-                    log_file.write('> update_dict[\'{0}\'] = \'{1}\'\n'.format(key, value))
+                if isinstance(value, str):
+                    log_file.write(
+                        '> update_dict[\'{0}\'] = \'{1}\'\n'.format(
+                            key, value))
                     continue
-                log_file.write('> update_dict[\'{0}\'] = {1}\n'.format(key, value))  # Logs the objects in
+                log_file.write(
+                    '> update_dict[\'{0}\'] = {1}\n'.format(
+                        key, value))  # Logs the objects in
                 # order to make the updates work
             t = time.strftime("%m/%d/%Y")
             log_file.write(
@@ -404,11 +426,13 @@ class Ftp2Db(object):
                         ftp.retrbinary('RETR %s' % file, local_file.write)
                 except KeyboardInterrupt:
                     os.remove(local_dir + '/' + file)
-                    self.ftp_unzip(local_dir, downloaded_list)  # unzip the files that were downloaded
+                    # unzip the files that were downloaded
+                    self.ftp_unzip(local_dir, downloaded_list)
                     raise KeyboardInterrupt
                 t = time.strftime("%I:%M:%S")
                 log_file.write(('#%s# ' % t) + file[:-3] + '\n')
-                downloaded_list.append(file)  # Keeping track of the downloaded files
+                # Keeping track of the downloaded files
+                downloaded_list.append(file)
                 print(file + ' Created')
 
         self.ftp_unzip(local_dir, downloaded_list)
@@ -479,7 +503,11 @@ class Ftp2Db(object):
             suffix.sort()
         #print('server_dict: ', self.__server_dict)
         if self.db_update_flag is False:
-            ext_choice = self.u_i(ui_value, table=None, prefix=prefix, suffix=suffix)  # User Input
+            ext_choice = self.u_i(
+                ui_value,
+                table=None,
+                prefix=prefix,
+                suffix=suffix)  # User Input
             f_t, e_c = ext_choice
         else:
             e_c = self.ext_choice
@@ -494,13 +522,15 @@ class Ftp2Db(object):
                 print('ext: ', ext)
                 for value in self.__server_dict[key]:
                     if str(ext) in str(value):
-                        #print(value)
+                        # print(value)
                         temp_dict[str(key)].append(value)
         self.__server_dict = {}
         #print('temp_dict: ', temp_dict)
-        self.__server_dict = temp_dict  # __server_dict is a dictionary for our download files.
+        # __server_dict is a dictionary for our download files.
+        self.__server_dict = temp_dict
         #print('server_dict: ', self.__server_dict)
-        # The keys are the chosen file types and the values are the file names with the selected extensions.
+        # The keys are the chosen file types and the values are the file names
+        # with the selected extensions.
         return f_t, e_c
 
 #------------------------------------------------------------------------------
@@ -529,7 +559,9 @@ class Ftp2Db(object):
             with open(where.LOG + '/' + log_file, 'a+') as log_w:
                 # //TODO-ROB Make better upload message for log file
                 t = time.strftime("%m/%d/%Y")
-                log_w.write('\n\n<%s>Below is a log of the databases created using a multiprocessing script:\n' % t)
+                log_w.write(
+                    '\n\n<%s>Below is a log of the databases created using a multiprocessing script:\n' %
+                    t)
             print('Upload has started')
             for key, value in self.__server_dict.items():
                 # //TODO-ROB Split __server_dict into multiple lists and send those list to multiple jobs
@@ -538,31 +570,34 @@ class Ftp2Db(object):
                 print('value', value)
 
                 process_count = 8
-                div = len(self.__server_dict[key])//(process_count-1)
+                div = len(self.__server_dict[key]) // (process_count - 1)
                 nest_list = []
                 count = 0
                 db_count = 0
                 for files in self.__server_dict[key]:
                     temp_list.append(files)
-                    if len(temp_list) % div == 0:  # 15 items per process for 16 processes
+                    if len(
+                            temp_list) % div == 0:  # 15 items per process for 16 processes
                         count += div
                         db_count += 1
                         nest_list.append(temp_list)
                         temp_list = []
-                        if os.path.isfile(ser_loc + ('/%s%s.%s.db' % (db_name, (db_count-1), key))) is True:
+                        if os.path.isfile(
+                                ser_loc + ('/%s%s.%s.db' % (db_name, (db_count - 1), key))) is True:
                             print('DB file exists...  Continuing...')
                             continue
                         print('Copying Template BioSQL Database...  '
                               'This may take a few minutes...')
                         shutil.copy2(where.Templates + '/Template_BioSQL_DB.db',
-                                     ser_loc + ('/%s%s.%s.db' % (db_name, (db_count-1), key)))
+                                     ser_loc + ('/%s%s.%s.db' % (db_name, (db_count - 1), key)))
                 if (len(self.__server_dict[key]) - count) != 0:
                     db_count += 1
-                    if os.path.isfile(ser_loc + ('/%s%s.%s.db' % (db_name, (db_count-1), key))) is True:
+                    if os.path.isfile(ser_loc + ('/%s%s.%s.db' %
+                                                 (db_name, (db_count - 1), key))) is True:
                         print('DB file exists...  Continuing...')
                     else:
                         shutil.copy2(where.Templates + '/Template_BioSQL_DB.db',
-                                     ser_loc + ('/%s%s.%s.db' % (db_name, (db_count-1), key)))
+                                     ser_loc + ('/%s%s.%s.db' % (db_name, (db_count - 1), key)))
                     print('temp_list: ', temp_list)
                     nest_list.append(temp_list)
             os.chdir(where.DB)
@@ -612,7 +647,7 @@ class Ftp2Db(object):
 
         # Configure all of the class variables with the dictionary
         for key, value in self.__update_dict.items():
-            if type(value) is str:
+            if isinstance(value, str):
                 print(('ftp.' + str(key) + ' = ' + str(value)))
                 # Initializes class string variables from the last archive
                 exec(('self.%s = ' % key) + ('\'%s\'' % value))
@@ -628,12 +663,17 @@ class Ftp2Db(object):
             for item in os.listdir(where.LOG):
                 if str(self.__class_name).lower() in str(item).lower():
                     #//TODO-ROB Add JSON
-                    self.config(item)  # Class variables are configured from a log file
+                    # Class variables are configured from a log file
+                    self.config(item)
                 else:
                     continue
                 self.ftp_update_flag = True
-                os.system('rsync -vah --include \'*%s\' --exclude \'*\' ' % ((self.__NCBI_RSYNC + '/' + self.path)))
-                self.ftp_download(self.path)  # Files are archived and the previous download is repeated from log file
+                os.system(
+                    'rsync -vah --include \'*%s\' --exclude \'*\' ' %
+                    ((self.__NCBI_RSYNC + '/' + self.path)))
+                # Files are archived and the previous download is repeated from
+                # log file
+                self.ftp_download(self.path)
                 input('ok')
         if self.db_update_flag is True:
             for log_file in self.__log_files:

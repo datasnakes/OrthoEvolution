@@ -11,10 +11,13 @@ from subprocess import call, check_output
 import os
 
 #------------------------------------------------------------------------------
+
+
 class CleanUp(object):
     def __init__(self, cmd):
         c = call([cmd], shell=True)
         return c
+
     def rmdir(self, cmd="rm -r " + pathname, pathname):
         self.c
         return print("%s was removed." % pathname)

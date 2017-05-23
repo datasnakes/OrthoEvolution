@@ -10,6 +10,7 @@ from Bio import Phylo
 from Bio.Phylo.Applications import PhymlCommandline
 from Bio import MissingExternalDependencyError
 
+
 class PhymlTest(unittest.TestCase):
     """Tests for application wrappers."""
 
@@ -29,22 +30,24 @@ class PhymlTest(unittest.TestCase):
             # Python 2.6 or 2.7 on Windows XP:
             # WindowsError: [Error 2] The system cannot find the file specified
             # Python 3.3 or 3.4 on Windows XP:
-            # FileNotFoundError: [WinError 2] The system cannot find the file specified
+            # FileNotFoundError: [WinError 2] The system cannot find the file
+            # specified
             pass
 
         if not phyml_exe:
             raise MissingExternalDependencyError(
                 "Install PhyML 3.0 if you want to use the Bio.Phylo.Applications wrapper.")
 
-
         # Example Phylip file with 13 aligned protein sequences
         EX_PHYLIP = 'HTR1E_aligned.phy'
         return EX_PHYLIP
 
-
     def test_phyml(self):
         """Run PhyML using the wrapper."""
-        cmd = PhymlCommandline(self.phyml_exe, input=self.EX_PHYLIP, datatype='nt')
+        cmd = PhymlCommandline(
+            self.phyml_exe,
+            input=self.EX_PHYLIP,
+            datatype='nt')
         # Smoke test
         try:
             out, err = cmd()

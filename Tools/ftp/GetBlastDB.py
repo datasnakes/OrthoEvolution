@@ -26,7 +26,11 @@ format1 = '%a %b %d %I:%M:%S %p %Y'  # Used to add as a date
 format2 = '%m-%d-%Y@%I:%M:%S-%p'  # Used to append to archives
 format3 = '%m-%d-%Y'
 
-log.basicConfig(filename="logs/blast_setup_" + d.now().strftime(format3) + ".log", level=log.INFO)
+log.basicConfig(
+    filename="logs/blast_setup_" +
+    d.now().strftime(format3) +
+    ".log",
+    level=log.INFO)
 log.info("#------------------------------------------------------------------")
 log.info("The script name is %s" % os.path.basename(__file__))
 log.info("The date and time is currently %s" % str(d.now().strftime(format1)))
@@ -44,7 +48,11 @@ try:
         log.info("The %s directory exists & will be archived." % str(dbpath))
         # Move any files that are in the directory to a dated archive folder.
         # Moving a directory in linux/unix essentially renames it.
-        os.system('mv ' + dbpath + ' /work5/r2295/bin/databases/refseqrnadb_archive_' + d.now().strftime(format2))
+        os.system(
+            'mv ' +
+            dbpath +
+            ' /work5/r2295/bin/databases/refseqrnadb_archive_' +
+            d.now().strftime(format2))
         os.mkdir(dbpath)   # Recreate the database directory
         log.info("The %s directory was created." % str(dbpath))
         pass
@@ -109,7 +117,8 @@ ftp.close()
 
 #------------------------------------------------------------------------------
 # Unzip all of the files and remove unneccessary files
-os.system("for file in *.tar.gz; do tar xvf $file; done")  # Unzip the database files
+# Unzip the database files
+os.system("for file in *.tar.gz; do tar xvf $file; done")
 os.system("rm -r *.tar.gz")
 log.info("The files have been unzipped, and Part 1 has finished.")
 log.info("#------------------------------------------------------------------")

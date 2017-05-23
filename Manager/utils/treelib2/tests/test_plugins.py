@@ -6,6 +6,7 @@ from treelib.plugins import *
 import os
 import unittest
 
+
 class DotExportCase(unittest.TestCase):
     """Test class for the export to dot format function"""
 
@@ -41,10 +42,15 @@ digraph tree {
 \t"jane" -> "diane"
 }"""
 
-        self.assertTrue(os.path.isfile('tree.dot'), "The file tree.dot could not be found.")
+        self.assertTrue(
+            os.path.isfile('tree.dot'),
+            "The file tree.dot could not be found.")
         generated = self.read_generated_output('tree.dot')
 
-        self.assertEqual(generated, expected, "Generated dot tree is not the expected one")
+        self.assertEqual(
+            generated,
+            expected,
+            "Generated dot tree is not the expected one")
         os.remove('tree.dot')
 
     def test_export_to_dot_empty_tree(self):
@@ -55,10 +61,15 @@ digraph tree {
 digraph tree {
 
 }"""
-        self.assertTrue(os.path.isfile('tree.dot'), "The file tree.dot could not be found.")
+        self.assertTrue(
+            os.path.isfile('tree.dot'),
+            "The file tree.dot could not be found.")
         generated = self.read_generated_output('tree.dot')
 
-        self.assertEqual(expected, generated, 'The generated output for an empty tree is not empty')
+        self.assertEqual(
+            expected,
+            generated,
+            'The generated output for an empty tree is not empty')
         os.remove('tree.dot')
 
     def test_unicode_filename(self):
@@ -71,9 +82,14 @@ digraph tree {
 \t"node_1" [label="Node 1", shape=circle]
 
 }"""
-        self.assertTrue(os.path.isfile('ŕʩϢ.dot'), "The file ŕʩϢ.dot could not be found.")
+        self.assertTrue(
+            os.path.isfile('ŕʩϢ.dot'),
+            "The file ŕʩϢ.dot could not be found.")
         generated = self.read_generated_output('ŕʩϢ.dot')
-        self.assertEqual(expected, generated, "The generated file content is not the expected one")
+        self.assertEqual(
+            expected,
+            generated,
+            "The generated file content is not the expected one")
         os.remove('ŕʩϢ.dot')
 
     def test_export_with_minus_in_filename(self):
@@ -86,13 +102,19 @@ digraph tree {
 }"""
 
         export_to_dot(tree, 'id_with_minus.dot')
-        self.assertTrue(os.path.isfile('id_with_minus.dot'), "The file id_with_minus.dot could not be found.")
+        self.assertTrue(
+            os.path.isfile('id_with_minus.dot'),
+            "The file id_with_minus.dot could not be found.")
         generated = self.read_generated_output('id_with_minus.dot')
-        self.assertEqual(expected, generated, "The generated file content is not the expected one")
+        self.assertEqual(
+            expected,
+            generated,
+            "The generated file content is not the expected one")
         os.remove('id_with_minus.dot')
 
     def tearDown(self):
         self.tree = None
+
 
 if __name__ == "__main__":
     unittest.main()

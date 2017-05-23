@@ -20,14 +20,18 @@ home = path.abspath(path.dirname(__file__))
 name = 'Datasnakes-Scripts'
 
 # Get the long description from the README file
+
+
 def readme():
     with open(path.join(home, 'README.rst'), encoding='utf-8') as f:
         return f.read()
+
+
 #------------------------------------------------------------------------------
 # Setup the package by adding information to these parameters
 setup(
     name=name,
-    author = 'Rob Gilmore & Shaurita Hutchins',
+    author='Rob Gilmore & Shaurita Hutchins',
     description="This package helps in the analysis of orthologous genes.",
     version='0.1.0',
     long_description=readme(),

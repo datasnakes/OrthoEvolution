@@ -10,7 +10,10 @@ from Manager.utils.mana import UserMana as UserManagement
 from Orthologs.CompGenetics.comp_gen import CompGenAnalysis
 
 # TODO-ROB Add a progress bar to the pipeline
-# TODO-ROB make code more versatile for multiple projects or even single queries
+# TODO-ROB make code more versatile for multiple projects or even single
+# queries
+
+
 class Database2Genbank(CompGenAnalysis, UserManagement):
     """
     Extract target GenBank files from the database files that were created using
@@ -18,7 +21,8 @@ class Database2Genbank(CompGenAnalysis, UserManagement):
     """
 
     def __init__(self, repo, user, project, m_file, genbank_update=False):
-        # TODO-ROB Update the CGA.  I have yet to write functions for saving the data post blast
+        # TODO-ROB Update the CGA.  I have yet to write functions for saving
+        # the data post blast
         CompGenAnalysis.__init__(acc_file=m_file, save_data=False)
         UserManagement.__init__(repo=repo, user=user, porject=project)
         self.GenBank_update = genbank_update
@@ -52,7 +56,8 @@ class Database2Genbank(CompGenAnalysis, UserManagement):
                         if server_flag is True:
                             break
                         name = str(name)
-                        server = BioSeqDatabase.open_database(driver='sqlite3', db = where.VERT_MAM + ('/Databases/%s' % name))
+                        server = BioSeqDatabase.open_database(
+                            driver='sqlite3', db=where.VERT_MAM + ('/Databases/%s' % name))
                         for sub_db_name in server.keys():
                             db = server[sub_db_name]
 
@@ -66,7 +71,6 @@ class Database2Genbank(CompGenAnalysis, UserManagement):
                             except IndexError:
                                 print('Index Error')
                                 continue
-
 
     def gbk_upload(self):
         """
@@ -83,7 +87,7 @@ class Database2Genbank(CompGenAnalysis, UserManagement):
             db_name = str(tier) + '.db'
             if os.path.isfile(self.path + '/Databases/' + db_name) is False:
                 print('Copying Template BioSQL Database...  '
-                  'This may take a few minutes...')
+                      'This may take a few minutes...')
                 shutil.copy2(where.Templates + '/Template_BioSQL_DB.db',
                              self.path + '/Databases/%s' % db_name)
             else:
@@ -93,7 +97,9 @@ class Database2Genbank(CompGenAnalysis, UserManagement):
                 shutil.copy2(where.Templates + '/Template_BioSQL_DB.db',
                              self.path + '/Databases/%s' % db_name)
 
-            server = BioSeqDatabase.open_database(driver='sqlite3', db=(self.path + '/Databases/' + db_name))
+            server = BioSeqDatabase.open_database(
+                driver='sqlite3', db=(
+                    self.path + '/Databases/' + db_name))
             os.chdir(tier)
             for gene in os.listdir(os.getcwd()):
                 os.chdir(gene)
@@ -107,20 +113,23 @@ class Database2Genbank(CompGenAnalysis, UserManagement):
                         server.commit()
                         print('Server Commited %s' % sub_db_name)
                         print('%s database loaded with %s.' % (db.dbid, file))
-                        print("That file contains %s genbank records." % str(count))
+                        print(
+                            "That file contains %s genbank records." %
+                            str(count))
                         t_count = t_count + count
-                        print('The total number of files loaded so far is %i.' % t_count)
-                    except:
+                        print(
+                            'The total number of files loaded so far is %i.' %
+                            t_count)
+                    except BaseException:
                         server.rollback()
                         try:
                             del server[sub_db_name]
                             server.commit()
-                        except:
+                        except BaseException:
                             raise
                         raise
                 os.chdir('..')
             os.chdir('..')
-
 
     def db2gbk_mkdir(self, path, p_list, update):
         """
@@ -131,7 +140,3 @@ class Database2Genbank(CompGenAnalysis, UserManagement):
         else:
             path = where.dir_make(path, p_list)
         return path
-
-
-
-

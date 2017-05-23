@@ -66,17 +66,23 @@ for gene in geneslist:
 #------------------------------------------------------------------------------
 # Save the list of files that will be zipped
 df = pd.DataFrame(fileslist)
-df.to_csv(processed + 'files-to-zip/alignment_files_to_zip.txt', sep='\t', index=False, header=None)
+df.to_csv(
+    processed +
+    'files-to-zip/alignment_files_to_zip.txt',
+    sep='\t',
+    index=False,
+    header=None)
 
 #------------------------------------------------------------------------------
 # Send all alignment files to the server.
 os.chdir(processed + 'files-to-zip')
-sendfile = pexpect.spawnu("scp *.fasta shutchins2@162.243.56.106:/srv/shiny-server/public-ftp/data/karg/alignments")
+sendfile = pexpect.spawnu(
+    "scp *.fasta shutchins2@162.243.56.106:/srv/shiny-server/public-ftp/data/karg/alignments")
 sendfile.sendline("shutchins2\r")
 sendfile.waitnoecho()
 
 #------------------------------------------------------------------------------
-#Create and save the zip file
+# Create and save the zip file
 with zipfile.ZipFile(h + processed + 'karg_alignments.zip', 'w') as clustzip:
     for f in fileslist:
         clustzip.write(f)
@@ -85,4 +91,3 @@ with zipfile.ZipFile(h + processed + 'karg_alignments.zip', 'w') as clustzip:
 log.info("The zip file (%s) has been created and saved." % clustzip)
 
 #------------------------------------------------------------------------------
-

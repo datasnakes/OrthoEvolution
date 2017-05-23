@@ -23,12 +23,12 @@ ftp = FTP("ftp.ncbi.nlm.nih.gov", timeout=None)
 ftp.login(user='anonymous', passwd='shutchins2@umc.edu')
 
 # Change to the desired directory
-#ftp.cwd(refseqrna)
+# ftp.cwd(refseqrna)
 ftp.cwd(blast)
 # Use ftp.pwd() to find out the current directory
 
 # Get a list of all the files in the directory
-#ftp.retrlines('LIST')
+# ftp.retrlines('LIST')
 
 # This is a list of the file names
 filenames = ftp.nlst()

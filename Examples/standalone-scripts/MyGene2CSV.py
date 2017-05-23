@@ -20,8 +20,8 @@ mg = mygene.MyGeneInfo()
 # Create a mygene query handle to get the data
 basic_info = mg.querymany(refseq_list, scopes='refseq',
                           fields='symbol,name,entrezgene,summary',
-                           species='human', returnall=True, as_dataframe=True,
-                           size=1, verbose=True)
+                          species='human', returnall=True, as_dataframe=True,
+                          size=1, verbose=True)
 
 #------------------------------------------------------------------------------
 # Use pandas to turn results of the mygene queries into dataframes
@@ -29,12 +29,12 @@ basic_info = mg.querymany(refseq_list, scopes='refseq',
 basic_info['out'].reset_index(level=0, inplace=True)
 data = basic_info['out']
 gene_info = pd.DataFrame(data)
-gene_info.drop(gene_info.columns[[1,2,6]], axis=1, inplace=True)
+gene_info.drop(gene_info.columns[[1, 2, 6]], axis=1, inplace=True)
 
 # Rename the columns
-gene_info.rename(columns={'entrezgene': 'Entrez ID','summary':
-    'Gene Summary','query': 'RefSeqRNA Accession','name': 'Gene Name'},
-    inplace=True)
+gene_info.rename(columns={'entrezgene': 'Entrez ID', 'summary':
+                          'Gene Summary', 'query': 'RefSeqRNA Accession', 'name': 'Gene Name'},
+                 inplace=True)
 
 #------------------------------------------------------------------------------
 # Create the NCBI links using a for loop
@@ -71,4 +71,3 @@ alldata = alldata.sort_values(['Tier'], ascending=True)
 
 # Save the merged dataframes to one file that contains all of the information
 alldata.to_csv('datasets/gpcr_gene_info.csv', index=False)
-

@@ -35,7 +35,10 @@ log.info("#------------------------------------------------------------------")
 log.info("Create a GI list for each organism using the taxonomy id and the blastdbcmd tool on the MCSR.")
 
 # Get a taxid list from the file and change to the output directory
-tax_ids = pd.read_csv('taxids.csv', header=None, dtype=str)  # 1st column = tax id's
+tax_ids = pd.read_csv(
+    'taxids.csv',
+    header=None,
+    dtype=str)  # 1st column = tax id's
 tax_ids = list(tax_ids[0])
 os.chdir('data')
 
@@ -47,11 +50,18 @@ def get_gilists(id):
     """
     binary = str(id) + 'gi'
     if binary not in os.listdir():
-        # Use the accession #'s and the blastdbcmd tool to generate gi lists based on Organisms/Taxonomy id's.
-        os.system("blastdbcmd -db refseq_rna -entry all -outfmt '%g %T' | awk ' { if ($2 == " + id + ") { print $1 } } ' > " + id + "gi.txt")
+        # Use the accession #'s and the blastdbcmd tool to generate gi lists
+        # based on Organisms/Taxonomy id's.
+        os.system(
+            "blastdbcmd -db refseq_rna -entry all -outfmt '%g %T' | awk ' { if ($2 == " +
+            id +
+            ") { print $1 } } ' > " +
+            id +
+            "gi.txt")
         log.info(id + "gi.txt has been created.")
         # Convert the .txt file to a binary file using the blastdb_aliastool.
-        os.system("blastdb_aliastool -gi_file_in " + id + "gi.txt -gi_file_out " + id + "gi")
+        os.system("blastdb_aliastool -gi_file_in " +
+                  id + "gi.txt -gi_file_out " + id + "gi")
         log.info(id + "gi binary file has been created.")
         # Remove the gi.text file
         os.system("rm " + id + "gi.txt")
@@ -65,7 +75,11 @@ def main(idlist):
     ts = time()
     with Pool(processes=10) as p:
         p.map(get_gilists, idlist)
-        log.info("Took {} minutes to get all gi lists.".format((time() - ts)/60))
+        log.info(
+            "Took {} minutes to get all gi lists.".format(
+                (time() - ts) / 60))
+
+
 # ------------------------------------------------------------------------------
 # Run the main function that creates the lists in parallel.
 main(idlist=tax_ids)

@@ -5,6 +5,7 @@ import unittest
 from Orthologs import Phylogenetics as Phylo
 #from Orthologs import OrthologsDevelopmentWarning
 
+
 class TestOrthologs(unittest.TestCase):
     """Test the Orthologs Package."""
     def test_phylo():
@@ -22,5 +23,5 @@ class TestOrthologs(unittest.TestCase):
 #        """Test the BioSQL module."""
 #
 #
-#class TestManager(unittest.TestCase):
+# class TestManager(unittest.TestCase):
 #    """Test the Manager Package."""

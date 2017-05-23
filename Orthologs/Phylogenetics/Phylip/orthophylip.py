@@ -9,6 +9,8 @@ os.system("set -x")
 rn = os.rename
 
 #------------------------------------------------------------------------------
+
+
 class Phylip(object):
     def __init__(inputfile):
         """ The input file should be a phylip formatted multiple sequence

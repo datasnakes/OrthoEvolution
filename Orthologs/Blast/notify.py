@@ -20,20 +20,29 @@ slack_log = log.getLogger('Slack Message')
 __author__ = 'SDH'
 
 parser = argparse.ArgumentParser(
-        formatter_class=argparse.RawDescriptionHelpFormatter,
-        description=textwrap.dedent('''\
+    formatter_class=argparse.RawDescriptionHelpFormatter,
+    description=textwrap.dedent('''\
                                     This is a command line wrapper for the Vallender Lab's Slack channel.
 
                                     Channels = #hall-project, #drd4-project, #karg-project,
                                                #l' '''))
-parser.add_argument("-c", "--channel", help="Input a channel name", required=True)
-parser.add_argument("-m", "--message", help="Write a message here", required=True)
+parser.add_argument(
+    "-c",
+    "--channel",
+    help="Input a channel name",
+    required=True)
+parser.add_argument(
+    "-m",
+    "--message",
+    help="Write a message here",
+    required=True)
 parser.add_argument("-u", "--username", help="Input a username", required=True)
 args = parser.parse_args()
 
 
-
 message_slack(args.channel, args.message, args.username)
 print('Your message was posted to Slack.')
-slack_log.info('You posted to the %s channel with the user, %s.' % (args.channel, args.username))
+slack_log.info(
+    'You posted to the %s channel with the user, %s.' %
+    (args.channel, args.username))
 log.shutdown()

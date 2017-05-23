@@ -21,7 +21,6 @@ except ImportError:
     from io import BytesIO
 
 
-
 __author__ = 'chenxm'
 
 
@@ -85,6 +84,7 @@ def python_2_unicode_compatible(klass):
         klass.__str__ = lambda self: self.__unicode__().encode('utf-8')
     return klass
 
+
 @python_2_unicode_compatible
 class Tree(object):
     """Tree objects are made of Node(s) stored in _nodes dictionary."""
@@ -144,8 +144,8 @@ class Tree(object):
         return self.reader
 
     def __print_backend(self, nid=None, level=ROOT, idhidden=True, filter=None,
-                       key=None, reverse=False, line_type='ascii-ex',
-                       data_property=None, func=print):
+                        key=None, reverse=False, line_type='ascii-ex',
+                        data_property=None, func=print):
         """
         Another implementation of printing tree using Stack
         Print tree structure in hierarchy style.
@@ -174,7 +174,8 @@ class Tree(object):
                     return getattr(node.data, data_property)
             else:
                 def get_label(node):
-                    return "%s[%s]" % (getattr(node.data, data_property), node.identifier)
+                    return "%s[%s]" % (
+                        getattr(node.data, data_property), node.identifier)
         else:
             if idhidden:
                 def get_label(node):
@@ -233,7 +234,7 @@ class Tree(object):
 
         if filter_(node) and node.expanded:
             children = [self[i] for i in node.fpointer if filter_(self[i])]
-            idxlast = len(children)-1
+            idxlast = len(children) - 1
             if key:
                 children.sort(key=key, reverse=reverse)
             elif reverse:
@@ -446,7 +447,7 @@ class Tree(object):
         Update: @filter params is added to calculate level passing
         exclusive nodes.
         """
-        return len([n for n in self.rsearch(nid, filter)])-1
+        return len([n for n in self.rsearch(nid, filter)]) - 1
 
     def link_past_node(self, nid):
         """
@@ -660,10 +661,10 @@ class Tree(object):
         def _write_line(line, f):
             f.write(line + b'\n')
 
-        handler = lambda x: _write_line(x, open(filename, 'ab'))
+        def handler(x): return _write_line(x, open(filename, 'ab'))
 
         self.__print_backend(nid, level, idhidden, filter,
-            key, reverse, line_type, data_property, func=handler)
+                             key, reverse, line_type, data_property, func=handler)
 
     def show(self, nid=None, level=ROOT, idhidden=True, filter=None,
              key=None, reverse=False, line_type='ascii-ex', data_property=None):
@@ -674,7 +675,7 @@ class Tree(object):
 
         try:
             self.__print_backend(nid, level, idhidden, filter,
-                key, reverse, line_type, data_property, func=write)
+                                 key, reverse, line_type, data_property, func=write)
         except NodeIDAbsentError:
             print('Tree is empty')
 
@@ -731,7 +732,8 @@ class Tree(object):
             st._nodes.update({self[node_n].identifier: self[node_n]})
         return st
 
-    def to_dict(self, nid=None, key=None, sort=True, reverse=False, with_data=False):
+    def to_dict(self, nid=None, key=None, sort=True,
+                reverse=False, with_data=False):
         """transform self into a dict"""
 
         nid = self.root if (nid is None) else nid
@@ -751,26 +753,29 @@ class Tree(object):
                     self.to_dict(elem.identifier, with_data=with_data, sort=sort, reverse=reverse))
             if len(tree_dict[ntag]["children"]) == 0:
                 tree_dict = self[nid].tag if not with_data else \
-                            {ntag: {"data":self[nid].data}}
+                    {ntag: {"data": self[nid].data}}
             return tree_dict
 
     def to_json(self, with_data=False, sort=True, reverse=False):
         """Return the json string corresponding to self"""
-        return json.dumps(self.to_dict(with_data=with_data, sort=sort, reverse=reverse))
+        return json.dumps(self.to_dict(
+            with_data=with_data, sort=sort, reverse=reverse))
 
-    def create_newick_node(self, length, tag=None, identifier=None, parent=None, data=None):
+    def create_newick_node(self, length, tag=None,
+                           identifier=None, parent=None, data=None):
         bl = {}
         bl['name'] = tag
         # length must be an int
         bl['branch_length'] = int(length)
         self.create_node(tag, identifier, parent, data=bl)
 
-    def to_newick_json(self, nid=None, key=None, sort=True, reverse=False, with_data=False):
+    def to_newick_json(self, nid=None, key=None, sort=True,
+                       reverse=False, with_data=False):
         # For True newick files add a data parameter for branch length
         # ETE3 format #7 newick tree file format
         if nid is None:
-            nid = self.root # identifier (path)
-        ntag = self[nid].tag # folder name
+            nid = self.root  # identifier (path)
+        ntag = self[nid].tag  # folder name
         tree_dict = {
             'name': ntag,
             'children': []}
@@ -799,7 +804,8 @@ class Tree(object):
             # Test is the key 'name' in the current level of the dictionary.
             newick = json_obj['name']
         except KeyError:
-            # Catch no 'name' trees and start the newick string with empty qoutes
+            # Catch no 'name' trees and start the newick string with empty
+            # qoutes
             newick = ''
 
         if 'branch_length' in json_obj:
@@ -814,7 +820,8 @@ class Tree(object):
                 info.append(self.parse_newick_json())
             # join all the daughter info together with a comma
             info = ','.join(info)
-            # Concatenate all the children together at the start of the parent newick string
+            # Concatenate all the children together at the start of the parent
+            # newick string
             newick = '(' + info + ')' + newick
         newick = newick + ';'
         return newick
@@ -834,7 +841,8 @@ class Tree(object):
             gitignore += default_ignore
         else:
             gitignore = default_ignore
-        # Treelib will help to map everything and create a json at the same time
+        # Treelib will help to map everything and create a json at the same
+        # time
         x.create_node('.', top)
         # Walk through the directory of choice (top)
         # Topdown is true so that directories can be modified in place
@@ -843,7 +851,8 @@ class Tree(object):
             if root == top:
                 print(root)
                 try:
-                    dirs[:] = set(dirs) - set(gitignore)  # Remove directories from os.walk()
+                    # Remove directories from os.walk()
+                    dirs[:] = set(dirs) - set(gitignore)
                     print(dirs)
                 except ValueError:
                     pass
@@ -853,6 +862,7 @@ class Tree(object):
             for f in files:
                 x.create_node(f, parent=root)
         return x
+
 
 if __name__ == '__main__':
     pass

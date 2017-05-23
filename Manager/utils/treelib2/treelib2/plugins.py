@@ -9,13 +9,14 @@ import codecs
 
 def export_to_dot(tree, filename, shape='circle', graph='digraph'):
     """Exports the tree in the dot format of the graphviz software"""
-        
+
     nodes, connections = [], []
-    if tree.nodes:        
-        
+    if tree.nodes:
+
         for n in tree.expand_tree(mode=tree.WIDTH):
             nid = tree[n].identifier
-            state = '"' + nid + '"' + ' [label="' + tree[n].tag + '", shape=' + shape + ']'
+            state = '"' + nid + '"' + \
+                ' [label="' + tree[n].tag + '", shape=' + shape + ']'
             nodes.append(state)
 
             for c in tree.children(nid):
@@ -28,12 +29,13 @@ def export_to_dot(tree, filename, shape='circle', graph='digraph'):
         f.write(graph + ' tree {\n')
         for n in nodes:
             f.write('\t' + n + '\n')
-        
+
         f.write('\n')
         for c in connections:
             f.write('\t' + c + '\n')
 
         f.write('}')
+
 
 if __name__ == '__main__':
     pass

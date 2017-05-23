@@ -11,24 +11,32 @@ project = "GPCR-Orthologs-Project"
 user = "rgilmore"
 where = dir_mana(home, project)
 
+
 class Database2Fasta(object):
     """
     Download specific genbank features from a user prefilled BioSQL database
     as fasta files.
     """
+
     def __init__(self, path='/', fasta_update=False):
         self.FASTA_update = fasta_update
-        self.what = Lister('MAFV3.1.csv')  # Always make sure this file name is correct
+        # Always make sure this file name is correct
+        self.what = Lister('MAFV3.1.csv')
         self.org_list = self.what.org_list
         self.gene_list = self.what.gene_list
 
         if os.path.isdir(where.GB_FASTA + '/Vallender_Data') is False:
             os.mkdir(where.GB_FASTA + '/Vallender_Data')
-        self.feature_list = ['CDS', 'Protein', 'Misc_Features', 'Other']  # Feature list for directory tree
+        self.feature_list = [
+            'CDS',
+            'Protein',
+            'Misc_Features',
+            'Other']  # Feature list for directory tree
         path_list = where.path_list_make(where.VERT_MAM, where.NCBI_DATA)
         print('path_list: ', path_list)
         if path == '/':
-            self.path, t = self.db2fasta_mkdir(where.GB_FASTA + '/Vallender_Data', path_list, self.FASTA_update)
+            self.path, t = self.db2fasta_mkdir(
+                where.GB_FASTA + '/Vallender_Data', path_list, self.FASTA_update)
         else:
             self.path = path
             print('self.path: ', self.path)
@@ -40,7 +48,9 @@ class Database2Fasta(object):
         os.chdir(self.path)
         os.mkdir('MASTER_FASTA')
         os.mkdir('FASTA')
-        os.chdir(where.VALLENDER_DATA + '/refseq/release/multiprocessing/Databases')
+        os.chdir(
+            where.VALLENDER_DATA +
+            '/refseq/release/multiprocessing/Databases')
         db_name = []
         for file in os.listdir(os.getcwd()):
             if file.endswith('.db'):
@@ -110,10 +120,10 @@ class Database2Fasta(object):
                                         c += 1
                                         if 'GI' in x:
                                             AN, sup, GI = x.partition(':')
-                                ##############################################################################
+                                ###############################################
                                 """ Change the way the files are saved.  Could just use the copy function.
                                 The current way writes a seperate file with the same info"""
-                                ##############################################################################
+                                ###############################################
                                 # Create CDS fasta files
                                 if feature.type == "CDS":
 
@@ -210,7 +220,7 @@ class Database2Fasta(object):
                                 #     name2, gene_list[line_count - 2], gene_list[line_count - 2], n), 'a') as f:
                                 #         f.write(
                                 #             ">" + "gi|" + GI + "|" + "ref" + "|" + ref + '|' + ' ' + record.description + "\n" + str(
-                                #                 feature.extract(record.seq)) + "\n\n")
+                                # feature.extract(record.seq)) + "\n\n")
 
                         except IndexError:
                             continue
@@ -221,8 +231,3 @@ class Database2Fasta(object):
         else:
             path = where.dir_make(path, p_list)
         return path
-
-
-
-
-

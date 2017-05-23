@@ -3,7 +3,8 @@ class ETE3PAML(object):
     we start my using the M1 model so it is the default.
     """
 
-    def __init__(self, gene, paml_path, workdir='data/paml-output/', model='M1'):
+    def __init__(self, gene, paml_path,
+                 workdir='data/paml-output/', model='M1'):
         """
         Improve docstrings here.
         """
@@ -21,7 +22,13 @@ class ETE3PAML(object):
         organismslist = formatlist(orgs)
 
         # Import alignment file as string
-        alignment_file = open('data/clustal-output/' + gene + '_Aligned/' + gene + '_aligned_cds_nucl.fasta', 'r')
+        alignment_file = open(
+            'data/clustal-output/' +
+            gene +
+            '_Aligned/' +
+            gene +
+            '_aligned_cds_nucl.fasta',
+            'r')
         alignment_str = alignment_file.read()
         alignment_file.close()
 
@@ -30,12 +37,11 @@ class ETE3PAML(object):
         branches2keep = []
         for organism in organismslist:
             if organism in alignment_str:
-                #print('Yup.')
+                # print('Yup.')
                 branches2keep.append(organism)
             else:
                 pass
-                #print('Nope.') Make an error code in the log
-
+                # print('Nope.') Make an error code in the log
 
         # Input a list of branches to keep on the base tree
         speciestree = t.prune(branches2keep, preserve_branch_length=True)
@@ -45,7 +51,12 @@ class ETE3PAML(object):
         tree = EvolTree(speciestree)
 
         # Import the alignment
-        tree.link_to_alignment('data/clustal-output/' + gene + '_Aligned/' + gene + '_aligned_cds_nucl.fasta')
+        tree.link_to_alignment(
+            'data/clustal-output/' +
+            gene +
+            '_Aligned/' +
+            gene +
+            '_aligned_cds_nucl.fasta')
 
         tree.workdir = workdir
 

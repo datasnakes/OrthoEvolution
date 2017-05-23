@@ -32,7 +32,8 @@ class LogIt(object):
         self.date_format = '%a %b %d at %I:%M:%S %p %Y'  # Used to add as a date
         self.log_format = '%(name)s - [%(levelname)-2s]: %(message)s'
         # self.slack = self.slack_config()
-        self.basic = self.generic_logger(logfile, logname, log.DEBUG, self.log_format)
+        self.basic = self.generic_logger(
+            logfile, logname, log.DEBUG, self.log_format)
 
     def _get_file(self, filename):
         base, extension = filename.split('.')
@@ -78,8 +79,3 @@ class LogIt(object):
 # ******************************************SLACK****************************************** #
 # ******************************************SLACK****************************************** #
 # ******************************************SLACK****************************************** #
-
-
-
-
-

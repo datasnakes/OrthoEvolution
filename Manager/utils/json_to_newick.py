@@ -20,7 +20,8 @@ def _parse_json(json_obj):
             info.append(_parse_json(child))
         # join all the daughter info together with a comma
         info = ','.join(info)
-        # Concatenate all the children together at the start of the parent newick string
+        # Concatenate all the children together at the start of the parent
+        # newick string
         newick = '(' + info + ')' + newick
     newick = newick + ';'
     return newick
@@ -98,4 +99,3 @@ def _parse_json(json_obj):
 #
 # 	print(observed)
 # 	print(observed == expected)
-

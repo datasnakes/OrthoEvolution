@@ -27,7 +27,10 @@ log.info("Create a GI list for each organism using the taxonomy id and the blast
 
 #------------------------------------------------------------------------------
 # Open taxids.csv which is a comma delimited list of all tax id's to be used.
-tax_ids = pd.read_csv('data/initial-data/taxids.csv', header=None, dtype=str)  # 1st column = tax id's
+tax_ids = pd.read_csv(
+    'data/initial-data/taxids.csv',
+    header=None,
+    dtype=str)  # 1st column = tax id's
 tax_ids = list(tax_ids[0])
 
 #------------------------------------------------------------------------------
@@ -38,18 +41,27 @@ os.chdir(b)
 
 #------------------------------------------------------------------------------
 # Define the functions we want to use.
+
+
 def get_gilists(ID):
     """ This function uses the blastdbcmd tool to get gi lists. It then uses the
     blastdb_aliastool to turn the list into a binary file.
 
     The input (ID) for the function is a taxonomy ID.
     """
-    # Use the accession #'s and the blastdbcmd tool to generate gi lists based on Organisms/Taxonomy ID's.
-    os.system("blastdbcmd -db refseq_rna -entry all -outfmt '%g %T' | awk ' { if ($2 == " + ID + ") { print $1 } } ' > " + ID + "gi.txt")
+    # Use the accession #'s and the blastdbcmd tool to generate gi lists based
+    # on Organisms/Taxonomy ID's.
+    os.system(
+        "blastdbcmd -db refseq_rna -entry all -outfmt '%g %T' | awk ' { if ($2 == " +
+        ID +
+        ") { print $1 } } ' > " +
+        ID +
+        "gi.txt")
     log.info(ID + "gi.txt has been created.")
 
     # Convert the .txt file to a binary file using the blastdb_aliastool.
-    os.system("blastdb_aliastool -gi_file_in " + ID + "gi.txt -gi_file_out " + ID + "gi")
+    os.system("blastdb_aliastool -gi_file_in " +
+              ID + "gi.txt -gi_file_out " + ID + "gi")
     log.info(ID + "gi binary file has been created.")
 
     # Remove the gi.text file
@@ -60,6 +72,7 @@ def get_gilists(ID):
     os.system("mv " + ID + "gi data/gi-lists/")
     log.info(ID + "gi binary file has been moved.")
 
+
 def main(idlist):
     """This function uses a pool to start multiple processes to get gi lists.
     The argument (idlist) should be a list of taxonomy ids or 1 id.
@@ -67,7 +80,11 @@ def main(idlist):
     ts = time()
     with Pool(processes=20) as p:
         p.map(get_gilists, idlist)
-        log.info("Took {} minutes to get all gi lists.".format((time() - ts)/60))
+        log.info(
+            "Took {} minutes to get all gi lists.".format(
+                (time() - ts) / 60))
+
+
 #------------------------------------------------------------------------------
 # Run the main function that creates the lists in parallel.
 main(idlist=tax_ids)

@@ -37,17 +37,18 @@ home = os.getcwd()
 project = "GPCR-Orthologs-Project"
 user = "Work"
 where = dir_mana(home, project)
-# Use lister() class here so that we can easily access our Master RNA Accession File
+# Use lister() class here so that we can easily access our Master RNA
+# Accession File
 what = Lister('MAFV3.1.csv')  # Always make sure this file name is correct
 
-## Add a path that contains custom libraries for import
-#os.sys.path.append()
+# Add a path that contains custom libraries for import
+# os.sys.path.append()
 ##############################################################################
 # Global Initializations:
 
 ##############################################################################
 
-#Gene and Organism choices from the R script are used here for database lookup
+# Gene and Organism choices from the R script are used here for database lookup
 Choices = sys.argv
 
 Accession = what.gene_dict[Choices[1]][Choices[2]]
@@ -66,7 +67,9 @@ for file in os.listdir(where.APP_DATA):
     if '.db' in str(file):
         db_list.append(file)
 for db_name in db_list:
-    server = BioSeqDatabase.open_database(driver='sqlite3', db=str(where.APP_DATA / Path(db_name)))
+    server = BioSeqDatabase.open_database(
+        driver='sqlite3', db=str(
+            where.APP_DATA / Path(db_name)))
     for sub_db_name in server.keys():
         db = server[sub_db_name]
         try:
@@ -99,7 +102,12 @@ for record in SeqIO.parse(str(where.APP_DATA / Path(GenBank)), 'genbank'):
             if item.type in item_list:
                 type_count += 1
             item_list.append(item.type)
-            file.write('%s#%s\n' % (item.type + str(type_count), item.extract(record.seq)))
+            file.write(
+                '%s#%s\n' %
+                (item.type +
+                 str(type_count),
+                    item.extract(
+                     record.seq)))
     with open(where.APP_DATA / Path(Annotations), 'w', newline='\n') as file:
         for k, v in record.annotations.items():
             if k == 'comment' or k == 'references':

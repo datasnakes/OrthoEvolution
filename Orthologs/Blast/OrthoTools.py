@@ -25,6 +25,8 @@ rn = os.rename
 
 #------------------------------------------------------------------------------
 # Tool that uses the CLustalOmega Command line
+
+
 def clustal_align(gene):
     """ This function aligns genes using parameters similar to the default
     parameters. These parameters include 2 additional iterations for the hmm."""
@@ -43,6 +45,8 @@ def clustal_align(gene):
 
 #------------------------------------------------------------------------------
 # ETE3 Tools
+
+
 def ete3paml(gene, paml_path, workdir='data/paml-output/', model='M1'):
     """ Use ETE3's integration with PAML"""
 
@@ -66,12 +70,11 @@ def ete3paml(gene, paml_path, workdir='data/paml-output/', model='M1'):
     branches2keep = []
     for organism in organismslist:
         if organism in alignment_str:
-            #print('Yup.')
+            # print('Yup.')
             branches2keep.append(organism)
         else:
             pass
-            #print('Nope.') Make an error code in the log
-
+            # print('Nope.') Make an error code in the log
 
     # Input a list of branches to keep on the base tree
     speciestree = t.prune(branches2keep, preserve_branch_length=True)
@@ -80,7 +83,12 @@ def ete3paml(gene, paml_path, workdir='data/paml-output/', model='M1'):
     tree = EvolTree(speciestree)
 
     # Import the alignment
-    tree.link_to_alignment('data/clustal-output/' + gene + '_Aligned/' + gene + '_aligned_cds_nucl.fasta')
+    tree.link_to_alignment(
+        'data/clustal-output/' +
+        gene +
+        '_Aligned/' +
+        gene +
+        '_aligned_cds_nucl.fasta')
 
     tree.workdir = workdir
 
@@ -93,6 +101,7 @@ def ete3paml(gene, paml_path, workdir='data/paml-output/', model='M1'):
 #------------------------------------------------------------------------------
 # Phylip tools
 
+
 def dnapars(gene):
     # Maximum Parsimony using Phylip executable, dnapars, within unix shell
     dnapars = pexpect.spawnu("dnapars infile")
@@ -100,6 +109,7 @@ def dnapars(gene):
     dnapars.waitnoecho()
     rn("outfile", gene + "_maxpars")
     rn("outtree", gene + "_maxparstree")
+
 
 def dnaml(gene):
     """Maximum Likelihood using Phylip executable, dnaml, within a unix shell. """
@@ -109,6 +119,7 @@ def dnaml(gene):
     rn("outfile", gene + "_maxlike")
     rn("outtree", gene + "_maxliketree")
 
+
 def dnadist(gene):
     dnadist = pexpect.spawnu("dnadist infile")
     dnadist.sendline("Y\r")
@@ -116,10 +127,13 @@ def dnadist(gene):
     rn("outfile", gene + "_dnadist")
 #------------------------------------------------------------------------------
 # PhyMl tools
+
+
 def relaxphylip(gene):
     """Convert the file to relaxed-phylip format."""
     AlignIO.convert(gene + "_aligned_cds_nucl.fasta", "fasta",
                     gene + "_aligned.phy", "phylip-relaxed")
+
 
 def runphyml(gene):
     # Run phyml to generate tree results
@@ -131,14 +145,21 @@ def runphyml(gene):
     phyml_exe = exe_name
 
     # Create the command & run phyml
-    # Input a phylip formatted alignment file and describe the datatype ('nt' or 'aa')
-    run_phyml = PhymlCommandline(phyml_exe, input=gene + '_aligned.phy', datatype='nt')
+    # Input a phylip formatted alignment file and describe the datatype ('nt'
+    # or 'aa')
+    run_phyml = PhymlCommandline(
+        phyml_exe,
+        input=gene +
+        '_aligned.phy',
+        datatype='nt')
     print(run_phyml)
     out_log, err_log = run_phyml()
 #------------------------------------------------------------------------------
+
+
 def SplitLists(listname, basefilename, n):
     # Split the list into chunks
-    chunks = [listname[x:x+n] for x in range(0, len(listname), n)]
+    chunks = [listname[x:x + n] for x in range(0, len(listname), n)]
     list_group = []
     num_lists = len(chunks)
 
@@ -151,6 +172,8 @@ def SplitLists(listname, basefilename, n):
     return list_group
 
 #------------------------------------------------------------------------------
+
+
 def formatlist(input_list):
     """Remove spaces from list items and turn those spaces into underscores."""
     output_list = []
@@ -160,6 +183,7 @@ def formatlist(input_list):
         output_list.append(item)
         return output_list
 
+
 #------------------------------------------------------------------------------
 # Slack Tools
 config = configparser.ConfigParser()
@@ -168,13 +192,19 @@ apikey = config['APIKEYS']['slack']
 slack = Slacker(apikey)
 
 # Definition for uploading images
+
+
 def upload_img(channel, imgfile):
     slack.files.upload(imgfile, channel=channel)
 
 # Definition for uploading files
+
+
 def upload_file(channel, file):
     slack.files.upload(file, channel=channel)
 
 # Definition for posting messages
+
+
 def message_slack(channel, message, username):
-    slack.chat.post_message(channel, message, username, as_user = True)
+    slack.chat.post_message(channel, message, username, as_user=True)

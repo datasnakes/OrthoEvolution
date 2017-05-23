@@ -39,31 +39,33 @@ home = os.getcwd()
 project = "GPCR-Orthologs-Project"
 user = "rgilmore"
 where = dir_mana(home, project)
-# Use lister() class here so that we can easily access our Master RNA Accession File
+# Use lister() class here so that we can easily access our Master RNA
+# Accession File
 
 
-## Add a path that contains custom libraries for import
-#os.sys.path.append()
+# Add a path that contains custom libraries for import
+# os.sys.path.append()
 ##############################################################################
 # Global Initializations:
 
 ##############################################################################
-##//TODO-ROB make code more versatile for multiple projects or even single queries
+# //TODO-ROB make code more versatile for multiple projects or even single queries
 class Db2Gbk(object):
 
     def __init__(self, m_file='', path='/', genbank_update=False):
         self.M_file = m_file
-        self.what = Lister('MAFV3.1.csv')  # Always make sure this file name is correct
+        # Always make sure this file name is correct
+        self.what = Lister('MAFV3.1.csv')
         self.GenBank_update = genbank_update
 
         path_list = where.path_list_make(where.VERT_MAM, where.NCBI_DATA)
         print('path_list: ', path_list)
         if path == '/':
-            self.path, t = self.db2gbk_mkdir(where.VALLENDER_DATA, path_list, self.GenBank_update)
+            self.path, t = self.db2gbk_mkdir(
+                where.VALLENDER_DATA, path_list, self.GenBank_update)
         else:
             self.path = path
             print('self.path: ', self.path)
-
 
     def gbk_gather(self):
         os.chdir(where.VERT_MAM + '/Databases')
@@ -91,7 +93,8 @@ class Db2Gbk(object):
                         if server_flag is True:
                             break
                         name = str(name)
-                        server = BioSeqDatabase.open_database(driver='sqlite3', db = where.VERT_MAM + ('/Databases/%s' % name))
+                        server = BioSeqDatabase.open_database(
+                            driver='sqlite3', db=where.VERT_MAM + ('/Databases/%s' % name))
                         for sub_db_name in server.keys():
                             db = server[sub_db_name]
 
@@ -106,7 +109,6 @@ class Db2Gbk(object):
                                 print('Index Error')
                                 continue
 
-
     def gbk_upload(self):
         t_count = 0
         os.chdir(self.path)
@@ -119,7 +121,7 @@ class Db2Gbk(object):
             db_name = str(tier) + '.db'
             if os.path.isfile(self.path + '/Databases/' + db_name) is False:
                 print('Copying Template BioSQL Database...  '
-                  'This may take a few minutes...')
+                      'This may take a few minutes...')
                 shutil.copy2(where.Templates + '/Template_BioSQL_DB.db',
                              self.path + '/Databases/%s' % db_name)
             else:
@@ -129,7 +131,9 @@ class Db2Gbk(object):
                 shutil.copy2(where.Templates + '/Template_BioSQL_DB.db',
                              self.path + '/Databases/%s' % db_name)
 
-            server = BioSeqDatabase.open_database(driver='sqlite3', db=(self.path + '/Databases/' + db_name))
+            server = BioSeqDatabase.open_database(
+                driver='sqlite3', db=(
+                    self.path + '/Databases/' + db_name))
             os.chdir(tier)
             for gene in os.listdir(os.getcwd()):
                 os.chdir(gene)
@@ -143,20 +147,23 @@ class Db2Gbk(object):
                         server.commit()
                         print('Server Commited %s' % sub_db_name)
                         print('%s database loaded with %s.' % (db.dbid, file))
-                        print("That file contains %s genbank records." % str(count))
+                        print(
+                            "That file contains %s genbank records." %
+                            str(count))
                         t_count = t_count + count
-                        print('The total number of files loaded so far is %i.' % t_count)
-                    except:
+                        print(
+                            'The total number of files loaded so far is %i.' %
+                            t_count)
+                    except BaseException:
                         server.rollback()
                         try:
                             del server[sub_db_name]
                             server.commit()
-                        except:
+                        except BaseException:
                             raise
                         raise
                 os.chdir('..')
             os.chdir('..')
-
 
     def db2gbk_mkdir(self, path, p_list, update):
         if update is True:
@@ -164,7 +171,3 @@ class Db2Gbk(object):
         else:
             path = where.dir_make(path, p_list)
         return path
-
-
-
-
