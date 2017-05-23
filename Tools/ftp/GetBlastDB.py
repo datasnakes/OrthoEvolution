@@ -26,17 +26,6 @@ format1 = '%a %b %d %I:%M:%S %p %Y'  # Used to add as a date
 format2 = '%m-%d-%Y@%I:%M:%S-%p'  # Used to append to archives
 format3 = '%m-%d-%Y'
 
-log.basicConfig(
-    filename="logs/blast_setup_" +
-    d.now().strftime(format3) +
-    ".log",
-    level=log.INFO)
-log.info("#------------------------------------------------------------------")
-log.info("The script name is %s" % os.path.basename(__file__))
-log.info("The date and time is currently %s" % str(d.now().strftime(format1)))
-log.info("#------------------------------------------------------------------")
-log.info("Download and update the refseq_rna blast database.")
-
 #------------------------------------------------------------------------------
 home = os.getcwd()  # My home directory for this script/project
 dbpath = '/work5/r2295/bin/databases/refseq_rna_db'  # My current dbpath

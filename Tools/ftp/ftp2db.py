@@ -26,10 +26,9 @@ import time
 import shutil
 import subprocess
 import configparser
-from cursesmenu import *  # for Linux Only
-from cursesmenu.items import *  # for Linux Only
+#from cursesmenu import *  # for Linux Only
+#from cursesmenu.items import *  # for Linux Only
 
-#------------------------------------------------------------------------------
 # Set up directories and project
 home = os.getcwd()
 project = "GPCR-Orthologs-Project"
@@ -39,9 +38,6 @@ where = dir_mana(home, project)
 # Accession File
 # Always make sure this file name is correct
 what = lister('Master_RNA_Accession_File.csv')
-
-#------------------------------------------------------------------------------
-
 
 class Ftp2Db(object):
     global user
@@ -62,7 +58,6 @@ class Ftp2Db(object):
     __ftp_path_ui = True
     __table = None
 
-#------------------------------------------------------------------------------
     def __init__(self, email='', path='/', ftp_update=False, db_update=False):
 
         # Attributes based on Ftp2Db class parameters
@@ -101,7 +96,6 @@ class Ftp2Db(object):
         # Initializes __update_dict with class variables if ftp_update_flag is true
         # If db_update_flag is true it updates the databases
 
-#------------------------------------------------------------------------------
     def ftp_check(self):
         """ Checks to see if the FTP connection still exists.
         If it doesn't then it reconnects and returns an instance of the connection.
@@ -111,7 +105,6 @@ class Ftp2Db(object):
         ftp.cwd(self.path)
         return ftp
 
-#------------------------------------------------------------------------------
     @staticmethod
     def ftp_connect(ftpsite, email):
         """Connects to the FTP server and returns and instance of the connection.
@@ -120,7 +113,6 @@ class Ftp2Db(object):
         ftp.login(user='anonymous', passwd=email)
         return ftp
 
-#------------------------------------------------------------------------------
     @staticmethod
     def ftp_mkdir(path, p_list, update):
         """If the ftp or db files are intended to be updated then archive
@@ -133,7 +125,6 @@ class Ftp2Db(object):
             path = where.dir_make(path, p_list)
         return path
 
-#------------------------------------------------------------------------------
     @staticmethod
     def ftp_unzip(local_dir, downloaded_list):
         """Creates a new unzipped file.
@@ -153,7 +144,6 @@ class Ftp2Db(object):
                 os.system("gunzip " + _p)  # Unzip the database files
                 print('Unzipped %s' % f)
 
-#------------------------------------------------------------------------------
     def u_i(self, ui_value, table=None, prefix=None, suffix=None):
         """Handles user input for other instances. The ui_value determines the'
         proper output. """
@@ -255,7 +245,6 @@ class Ftp2Db(object):
                 else:
                     print('Choice not available...\nType carefully next time...')
 
-#------------------------------------------------------------------------------
     def ftp_navigate(self):
         """Continues navigation until the user decides to download files."""
         self.__path_list = []
@@ -273,7 +262,6 @@ class Ftp2Db(object):
         self.ftp_path()
         self.ftp_download(self.path)
 
-#------------------------------------------------------------------------------
     def ftp_path(self):
         """Using user input, determine what directories to navigate on the
         NCBI FTP server."""
@@ -315,7 +303,6 @@ class Ftp2Db(object):
 
             self.u_i(ui_value, table)  # User Input
 
-#------------------------------------------------------------------------------
     def ftp_download(self, path):
         """Initiates the downloading process which involves the user
         selecting the proper files."""
@@ -450,7 +437,6 @@ class Ftp2Db(object):
             if answer.lower() == 'download':
                 self.__init__(self.email, path='/')
 
-#------------------------------------------------------------------------------
     def ftp_extension(self, path):
         """Creates a list of extensions in the path and then presents them to
         the user for selection."""
@@ -533,7 +519,6 @@ class Ftp2Db(object):
         # with the selected extensions.
         return f_t, e_c
 
-#------------------------------------------------------------------------------
 #  //TODO-ROB MODULE (DB):  Upload ftp files into a db file
     # //TODO-ROB give the user an option to do multiprocessing or not
     def db_upload(self, log_file):
