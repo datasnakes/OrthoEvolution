@@ -1,17 +1,13 @@
-
-Folder Name & Description
+Blast
 -------------------------
+Use NCBI's standalone blast
 
-At the top of the file there should be a short introduction and/ or overview that explains **what** the folder contains and how it relates to the project. This description should match descriptions added for package managers (Gemspec, package.json, etc.)
 
 Usage
 -----
 
 Provide code examples and explanations of how to get the project.
 
-1.  A
-2.  B
-3.  C
 
 #### Code Examples
 

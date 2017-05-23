@@ -1,27 +1,34 @@
-## Vallender-Labs-Scripts Directory
+FTP (File Transfer Protocol) Documentation
+-------------------------
+The `ftp` module is geared towards making it easier to interface with [NCBI's
+FTP repository](ftp://ftp.ncbi.nlm.nih.gov).
 
-This repository is a fork of the scripts directory in the Orthologs Project.  This will help to isolate some of the files and scripts for easier management during development.
-## Description
+More specifically, we provide a way to easily find and list directories and their
+respective contents as well as to download blast databases and other databases
+for use with the Orthologs package.
 
-The subdirectories here are used as modules in the Python3 package that we are developing.
-Here is a link to the project directory that this repository represents:  https://github.com/robear22890/Orthologs-Project/tree/Robs-Rework/lib/scripts
+Usage
+-----
 
-## Usage
+These tools are optimized to be used together (very little work to do that), but can also be used singularly.
 
-After installation via pip we will be able to easily import each module via:
-```python
-from lib.scripts import manager, biosql, blast, ftp, genbank, multiprocessing
+
+#### Simple Example
+
+This is a simple example of using some of the modules.
+
+``` python
+from Tools import ftp
+
 ```
-## Tests
 
-To test this first install the package.  It is currently in development so a pull request will be necessary.
-```bash
-$ git clone https://github.com/robear22890/Orthologs-Project/tree/Robs-Rework
-$ cd Orthlogs-Project
-$ pip install .
-```
-In a live Python3.6 Console:
+Tests
+-----
 
-```python
-from lib.scripts import *
-```
+Tests will be added soon.
+
+
+:exclamation: Notes
+-------------------
+
+Explain or list any notable information about the contents of this folder.

@@ -1,4 +1,5 @@
-# Phylogenetics Documentation
+Phylogenetics Documentation
+------------------------------
 
 This document will provide information and guidelines about how we use the Phylogenetics modules related to this package.
 
@@ -45,19 +46,17 @@ Out[1]:
  'warnings']
 
 # Now you can import a class you want to utilize
-from Orthologs.Phylogenetics import PhyML, TreeViz
+from Orthologs.Phylogenetics import PhyML, RelaxPhylip
 
-PhyML = PhyML()
+RelaxPhylip("HTR1A_aligned.fasta", "HTR1A_aligned.phy")
 
-PhyML.relaxphylip("HTR1A_aligned.fasta", "HTR1A_aligned.phy")
-
-PhyML.runphyml("HTR1A_aligned.phy")
+PhyML("HTR1A_aligned.phy")
 
 
 ```
 
 
-:exclamation: Notes
+Default Parameters
 -------------------
 
 It's important to note the default parameters for `ETE3PAML` are as follows:
