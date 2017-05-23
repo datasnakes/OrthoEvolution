@@ -10,4 +10,4 @@
 #PBS -j oe
 
 cd ${PBS_O_WORKDIR}
-mpiexec python3 get_gi_lists.py
+mpiexec python get_gi_lists.py
