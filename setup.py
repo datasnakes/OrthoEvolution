@@ -33,7 +33,7 @@ setup(
     name=name,
     author='Rob Gilmore & Shaurita Hutchins',
     description="This package helps in the analysis of orthologous genes.",
-    version='0.1.0-dev',
+    version='0.1.0a1',
     long_description=readme(),
     url='https://github.com/datasnakes/Datasnakes-Scripts',
     license='MIT',
@@ -67,7 +67,7 @@ setup(
     test_suite='nose.collector',
     tests_require=['nose']
 )
-
+# TODO-ROB add package_data to setup
 #------------------------------------------------------------------------------
 # TODO
 """
