@@ -1,8 +1,12 @@
 # Include the README file
 include README.rst
+include *.md
 
 # Include the requirements file
 include requirements.txt
 
 # Include the setup file
 include setup.py
+
+# Include Modules
+include Cookies/*

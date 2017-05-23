@@ -33,26 +33,36 @@ setup(
     name=name,
     author='Rob Gilmore & Shaurita Hutchins',
     description="This package helps in the analysis of orthologous genes.",
-    version='0.1.0',
+    version='0.1.0-dev',
     long_description=readme(),
     url='https://github.com/datasnakes/Datasnakes-Scripts',
     license='MIT',
+    keywords='bioinformatics science evolution orthology psychiatry genetics',
     classifiers=[
         'Development Status :: 3 - Alpha',
         'Intended Audience :: Science/Research',
         'Topic :: Scientific/Engineering :: Bio-Informatics',
         'Topic :: Scientific/Engineering :: Visualization',
+        'Topic :: Scientific/Engineering :: Medical Science Apps.',
         'Programming Language :: Python :: 3',
+        'Operating System :: POSIX :: Linux',
         'Operating System :: Unix',
         'Natural Language :: English',
+        'Programming Language :: Python :: 3 :: Only',
         'Programming Language :: Python :: 3.3',
         'Programming Language :: Python :: 3.4',
-        'Programming Language :: Python :: 3.5'
+        'Programming Language :: Python :: 3.5',
+        'Framework :: Flask',
+        'Framework :: R-Shiny',
+        'Framework :: Cookiecutter'
     ],
     # Packages will be automatically found if not in this list.
     packages=find_packages(exclude=['Docs', 'Tools', 'Archive', 'Examples']),
     install_requires=[],
     include_package_data=True,
+    entyr_point={
+        'console_scripts': ['d~s=Orthologs.command_line:main']
+    },
     zip_safe=False,
     test_suite='nose.collector',
     tests_require=['nose']
