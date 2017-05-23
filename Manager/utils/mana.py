@@ -3,7 +3,7 @@
 import os
 import stat
 from pathlib import Path
-from Manager.utils.zipper import ZipUtilities
+from Manager.utils.zipper import ZipUtils
 from cookiecutter.main import cookiecutter
 from cookiecutter.hooks import run_script, find_hook
 from Manager.utils.treelib2.treelib2.tree import Tree
@@ -308,7 +308,7 @@ class UserMana(RepoMana):
         os.chmod(str(self.projects / Path(self.project)), mode=0o777)
 
     def zip_mail(self, comp_filename, zip_path, destination=''):
-        Zipper = ZipUtilities(comp_filename, zip_path)
+        Zipper = ZipUtils(comp_filename, zip_path)
         Zipper_path = Zipper.to_zip()
         # TODO-ROB add proper destination syntax.
         print('%s is being sent to %s' % (Zipper_path, destination))
