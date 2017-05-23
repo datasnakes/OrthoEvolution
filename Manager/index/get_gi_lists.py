@@ -11,11 +11,20 @@ Project Name: Addictions Project
 """
 # Modules used
 import os
+import platform
+import logging as log
 from datetime import datetime as d
-import pandas as pd
 from time import time
 from multiprocessing import Pool
-import logging as log
+import pandas as pd
+from mpi4py import MPI
+
+# Get child process information
+comm = MPI.COMM_WORLD
+rank = comm.Get_rank()
+size = comm.Get_size()
+machine = platform.node()
+
 
 # Set up logging
 log.basicConfig(filename="get_gi_lists.log", level=log.INFO)
