@@ -1,14 +1,5 @@
-#!/usr/local/apps/anaconda3/bin/python3
-# -*- coding: utf-8 -*-
 """
-File Name: blastntest.py
-Description: This script inputs a list of organisms & genes. It tests a script.
-
-@authors: Robert A. Gilmore & Shaurita D. Hutchins
-Date Created: March 29, 2017
-Project Name: Orthologs Project
-
-Edited and updated for use with local/standalone NCBI BLAST 2.6.0
+Optimized use with local/standalone NCBI BLAST 2.6.0
 """
 import csv
 import os
@@ -24,10 +15,7 @@ from Bio.Blast.Applications import NcbiblastnCommandline  # Used for Local Blast
 from Manager.logit.logit import LogIt
 from Orthologs.CompGenetics.ncbi_blast import BLASTAnalysis as BT
 
-
 # TODO-ROB: Find packages for script timing and analysis
-# DONE-ROB:  Add function for renaming and moving the builder files if the BLAST completed
-
 class BLASTn(BT):
     def __init__(self, repo, user, project, research, research_type, template=None, save_data=True, **kwargs):
         """Inherit from the BLASTing Template."""
@@ -65,8 +53,8 @@ class BLASTn(BT):
     @staticmethod
     def map_func(hit):
         """The map function for formatting hit id's.
-        This will be used later in the script."""
-
+        This will be used later in the script.
+        """
         hit.id1 = hit.id.split('|')[3]
         hit.id2 = hit.id.split('|')[1]
         hit.id = hit.id[:-2]
@@ -74,13 +62,12 @@ class BLASTn(BT):
 
     def blast_config(self, query_align, query_organism, auto_start=False):
         """This function configures everything for a BLAST.
-        First the accession file, and gene list is configured."""
+        First the accession file, and gene list is configured.
+        """
         # os.chdir(str(self.__output_path))
-        self.blastn_log.info('***********************************BLAST CONFIG START***********************************')
-        self.blastn_log.info('***********************************BLAST CONFIG START***********************************')
         self.blastn_log.info('***********************************BLAST CONFIG START***********************************\n\n\n')
-
         self.blastn_log.info('Configuring the accession file...')
+
         # Update the gene_list based on the existence of a incomplete blast file
         gene_list = self.blast_file_config(self.building_file_path)
         if gene_list is not None:
@@ -103,7 +90,7 @@ class BLASTn(BT):
             gene = self.acc_dict[query][0][0]
             gene_path = self.__xml_path / Path(gene)
             org = self.acc_dict[query][0][1]
-            # Create the proper directories for each gene
+            # Create the directories for each gene
             try:
                 Path.mkdir(gene_path)
                 self.blastn_log.info("Directory Created: %s" % gene)
@@ -112,7 +99,6 @@ class BLASTn(BT):
             except FileExistsError:
                 self.blastn_log.info("Directory already exists: %s" % gene)
                 #os.chdir(gene)
-
 
             # Save sequence data in FASTA file format and print the gi number to stdout with a custom BLAST extraction
             # https://www.ncbi.nlm.nih.gov/books/NBK279689/#_cookbook_Custom_data_extraction_and_form_
@@ -157,8 +143,6 @@ class BLASTn(BT):
         new_query_align = query_align
         self.blastn_log.info('Configured query accession list: %s' % new_query_align)
         self.blastn_log.info('Configured gene list: %s\n\n\n' % new_gene_list)
-        self.blastn_log.info('************************************BLAST CONFIG END************************************')
-        self.blastn_log.info('************************************BLAST CONFIG END************************************')
         self.blastn_log.info('************************************BLAST CONFIG END************************************\n\n\n')
         if auto_start is True:
             # Automatically begin BLASTING after the configuration
@@ -220,11 +204,13 @@ class BLASTn(BT):
     #     print("Removing text file")
 
     def blast_file_config(self, file):
-        """This function configures different files for new BLASTS.
+        """Create or use a blast configuration file.
+
+        This function configures different files for new BLASTS.
         It also helps recognize whether or not a BLAST was terminated
         in the middle of the dataset.  This removes the last line of
-        the accession file if it is incomplete."""
-
+        the accession file if it is incomplete.
+        """
         output_dir_list = os.listdir(self.__output_path)  # Make a list of files
         # If the file exists then make a gene list that picks up from the last BLAST
         if file in output_dir_list:
@@ -238,7 +224,7 @@ class BLASTn(BT):
                 taxid = self.taxon_ids[count]
                 org = self.org_list[(len(ending) - 2)]
 
-                ncbi = str("""result_handle1 = NcbiblastnCommandline(query="temp.fasta", db="refseq_rna", strand="plus", 
+                ncbi = str("""result_handle1 = NcbiblastnCommandline(query="temp.fasta", db="refseq_rna", strand="plus",
                 evalue=0.001, out="%s_%s.xml", outfmt=5, gilist=%s + "gi", max_target_seqs=10, task="blastn")"""
                            % (gene, org, taxid))
                 self.blastn_log.warning("An incomplete accession file was produced from the previous BLAST,"
@@ -258,8 +244,9 @@ class BLASTn(BT):
             return None
 
     def blast_xml_parse(self, xml_file, gene, organism):
+        """Parse the XML file created by the BLAST.
+        """
         self.blastn_log.info("Parsing %s to find the best accession number." % xml_file)
-        # Parse the XML file created by the BLAST
         maximum = 0
         file_path = str(Path(self.__xml_path) / Path(gene) / Path(xml_file))
         with open(file_path, 'r') as blast_xml:
@@ -299,12 +286,9 @@ class BLASTn(BT):
             self.blastn_log.info("Description: %s" % description)
             self.add_accession(gene, organism, accession)
 
-# *********************************************************************************************************************
-# *********************************************************************************************************************
-# *********************************************************************************************************************
-
     def blasting(self, genes=None, query_organism=None, pre_configured=False):
-        # Configure the BLAST
+        """ Configure the BLAST.
+        """
         if pre_configured is False:
             query = self.df[query_organism].tolist()
             genes = self.blast_config(query_align=query, query_organism=query_organism, auto_start=True)
@@ -351,9 +335,11 @@ class BLASTn(BT):
                         # Create a copy of the gi list file per taxonomy id to be used in blast
                         # fmt = {'src': str(taxon_gi_path), 'dst': str(taxgi_dest_path)}
                         # os.system("cp {src} {dst}".format(**fmt))
+
                         # Set up blast parameters
                         taxon_gi_path = str(taxon_gi_path)
                         query_seq_path = str(gene_path / Path('temp.fasta'))
+
                         # Use Biopython's NCBIBlastnCommandline tool
                         result_handle1 = NcbiblastnCommandline(query=query_seq_path, db="refseq_rna",
                                                                strand="plus", evalue=0.001,  # DONT GO LOWER
@@ -370,6 +356,7 @@ class BLASTn(BT):
                     self.blastn_log.warning("********************BLAST END********************\n\n\n")
                     self.add_blast_time(gene, organism, start_time, end_time)
                     self.blast_xml_parse(xml, gene, organism)
+
                 # If the BLAST has gone through all orthologs then create a master accession file.
                 if gene == genes[-1] and organism == self.org_list[-1]:
                     shutil.copy(str(self.building_file_path), str(self.complete_file_path))
