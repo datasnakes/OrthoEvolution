@@ -213,12 +213,13 @@ class BLASTn(BT):
         print('The GI list configuration\'s JobID is %s' % gi_config)
         job_id = gi_config.replace('.sequoia', '')
         time.sleep(20)  # Wait for the job to be queued properly
-        x = subprocess.Popen('qsig -s SIGNULL %s' % job_id, shell=True)
-        while int(x.returncode) == 0:
-            x = subprocess.Popen(['qsig', '-s', 'SIGNULL', job_id])
-            time.sleep(30)
-            print("Waiting...")
-            continue
+        while True:
+            try:
+                subprocess.check_output('qsig -s SIGNULL %s' % job_id, shell=True, stderr=subprocess.PIPE)
+                print("Waiting...")
+                time.sleep(30)
+            except subprocess.CalledProcessError:
+                break
         os.chdir(cd)
 
     def blast_file_config(self, file):
