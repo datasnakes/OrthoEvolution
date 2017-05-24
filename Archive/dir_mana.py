@@ -1,39 +1,10 @@
-##############################################################################
-# PyCharm Community Edition
-# -*- coding: utf-8 -*-
-"""
-Orthologs-Project
-Directory_management updated on 11/15/2016 at 11:30 AM
-##############################################################################
-
-    Input:  A string that represents a path for the main file systems
-
-    Output:  Custom class variables for import in the project file template.
-
-    Description:  This file manges the directories for projects created in PyCharm.
-    Each new project gets it's own function.
-
-##############################################################################
-@author: rgilmore
-"""
-##############################################################################
-# Libraries:
-
-
 import json
 import os
 import shutil
 import time
 from pathlib import Path
-
 from datasnakes.Orthologs import treelib2
-
 from Manager.dir_map.json_to_newick import _parse_json
-
-
-#from project_mana import project_mana  # //TODO-ROB: Add a configure function to proj_mana to get the root directory using the project name
-##############################################################################
-# Directory Initializations:
 
 class dir_mana(object):
     """This class organizes a directory tree for a project.
@@ -45,9 +16,6 @@ class dir_mana(object):
 
     See GPCR-Orthologs-Project."""
 
-# //TODO-ROB Add JSON loading of the different directory variables
-# //TODO-Rob change project to projects and add another variable called project_type
-
     def __init__(self, home=os.getcwd(), proj_mana="proj_mana.json"):
         """Initialize the directory tree for the project.
         Each project will have a home directory in addition to the following:
@@ -55,7 +23,7 @@ class dir_mana(object):
         # config = tablib.Dataset().load(open('config.yaml').read())
         self.__file_home = Path(home)  # Home of the file calling this class
 
-        self.current_user = os.environ['ACTIVE_USER']  # TODO-ROB:  FLASK detail
+        self.current_user = os.environ['ACTIVE_USER']
         self.user_dict = {}
         self.user_path = self.users / Path(self.current_user)
         self.user_dict['username'] = self.user_path
@@ -69,7 +37,6 @@ class dir_mana(object):
         self.user_project_dict = {}
         self.user_project_dict['public'] = self.user_dict['projects'] / Path('public')
         self.user_project_dict['private'] = self.user_dict['projects'] / Path('private')
-        # TODO-ROB: Make a project category that allows users to make some research targets private and othes public
         self.user_project_dict['other'] = self.user_dict['projects'] / Path('other')
         self.current_dataset = ''
         self.user_project_dict[self.current_dataset] = self.user_project_dict[self.project_status] / Path(self.current_dataset)
@@ -80,7 +47,6 @@ class dir_mana(object):
 
         self.dataset_dict = {}
         self.dataset_dict['data_set'] = self.user_project_dict[self.project_status] / Path(self.current_dataset)
-        self.dataset_dict[]
 
         self.re
         #self.__venv_home = os.environ['VIRTUAL_ENV']
@@ -142,13 +108,9 @@ class dir_mana(object):
         return tree
 
     def user_dir_config(self, username):
-        # TODO-ROB USE SQL here to see if the user db contains the username
         if username in os.listdir(self.users):
             return UserWarning('This user already exists')
         else:
-            # TODO-ROB CREATE THESE IN A VIRTUAL ENVIRONMENT FOR EACH USER
-            # TODO-ROB The virtual environment can be the name of the user
-            # TODO-ROB When the user logs in, they will activate the virtual environment
             for path in self.user_dict.values():
                 Path.mkdir(path, parents=True, exist_ok=True)
             for path in self.user_project_dict.values():
@@ -185,8 +147,7 @@ class dir_mana(object):
         self.lib = self.__project_home / Path('lib')
         self.misc = self.__project_home / Path('misc')
         self.users = self.__project_home / Path('users')
-        self.__user_home = self.users / Path(os.environ['USER'])  # TODO-ROB:  Set 'USER' environment variable w/ flask
-        # TODO-ROB:  configure during registration for all usernames to be lowercase
+        self.__user_home = self.users / Path(os.environ['USER'])
         self.web = self.__project_home / Path('web')
 
     def project(self, p_rt):
@@ -234,7 +195,6 @@ class dir_mana(object):
             if str(type(value)).__contains__('pathlib') is True:
                 Path.mkdir(value, parents=True, exist_ok=True)
 
-    # # //TODO-ROB Find a different way to return a
     # def path_list_make(self, path, o_path=None):
     #     # Takes a path and reduces it to a list of directories within the project
     #     # An optional attribute (o_path) is give so that a deeper path within the project can be used
@@ -252,7 +212,6 @@ class dir_mana(object):
     #         # path_list = set(path_list) - set(o_path)
     #     return path_list
 
-    # //TODO-ROB utilize Path.mkdir(parents=TRUE) instead
     # def dir_make(self, path, path_list):
     #     # Takes a path list which is a list of folder names
     #     # path_list created by str(path).split('/')
@@ -269,7 +228,6 @@ class dir_mana(object):
     #         path, t = self.dir_archive(path, path_list='')
     #     return path, t
     #
-    # # //TODO-ROB Change to using a compression module https://pymotw.com/2/compression.html
     # def dir_archive(self, path, path_list):
     #     # Use the path that you want to update/add to
     #     # Returns path and the time stamp (could be None)
@@ -296,20 +254,3 @@ class dir_mana(object):
     #         return path, t
     #     else:
     #         return path, None
-
-
-
-
-
-# TODO-ROB Add a instance that stores new paths inside of a text file and has an updating/overwriting ability
-
-# TODO-ROB CALL ON THIS INSTNACE IN __INIT__ SO THAT VARIABLES CAN BE CREATED BASED ON THE PATHS
-
-
-
-
-
-
-
-
-

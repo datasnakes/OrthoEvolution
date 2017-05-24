@@ -17,15 +17,11 @@ sys.stderr = open('err.txt', 'w')
 
 # Set the home path of the setup script/package
 home = path.abspath(path.dirname(__file__))
-name = 'Datasnakes-Scripts'
+name = 'Datasnakes-Orthologs'
 
 # Get the long description from the README file
-
-
-def readme():
-    with open(path.join(home, 'README.rst'), encoding='utf-8') as f:
-        return f.read()
-
+with open(path.join(home, 'README.rst'), encoding='utf-8') as f:
+    long_description = f.read()
 
 # Setup the package by adding information to these parameters
 setup(
@@ -33,7 +29,7 @@ setup(
     author='Rob Gilmore & Shaurita Hutchins',
     description="This package helps in the analysis of orthologous genes.",
     version='0.1.0a1',
-    long_description=readme(),
+    long_description=long_description,
     url='https://github.com/datasnakes/Datasnakes-Scripts',
     license='MIT',
     keywords='bioinformatics science evolution orthology psychiatry genetics',
