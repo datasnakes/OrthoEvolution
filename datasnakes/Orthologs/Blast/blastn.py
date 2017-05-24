@@ -207,8 +207,8 @@ class BLASTn(BT):
         Path.mkdir(self.__gi_list_path / Path('data'), parents=True, exist_ok=True)
         pd.Series(taxids).to_csv('taxids.csv', index=False)
         # PBS job submission
-        cmd = 'qsub %s' % str(self.__gi_list_path / Path('get_gi_lists.sh'))
-        gi_config = psutil.Popen([cmd], stdout=subprocess.PIPE)
+        pbs_script = str(self.__gi_list_path / Path('get_gi_lists.sh'))
+        gi_config = psutil.Popen(['qsub', pbs_script], stdout=subprocess.PIPE)
         print('The GI list configuration\'s PID is %s' % gi_config.pid)
         gi_config.wait()
         print('The GI configuration process has completed.')
