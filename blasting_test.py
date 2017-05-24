@@ -6,7 +6,7 @@ This is a test for the blastn function.
 import shutil
 from pathlib import Path
 
-from Manager.utils import mana
+from datasnakes.Manager.utils import mana
 
 # Modules used
 from datasnakes.Orthologs.Blast.blastn import BLASTn
