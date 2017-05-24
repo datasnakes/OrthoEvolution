@@ -9,6 +9,7 @@ import time  # Used to delay when dealing with NCBI server errors
 from datetime import datetime as d
 from pathlib import Path
 
+import psutil
 import pandas as pd
 from Bio import SearchIO  # Used for parsing and sorting XML files.
 # Used for Local Blasting.
@@ -194,61 +195,24 @@ class BLASTn(BT):
 
     def gi_list_config(self):
         # TODO-ROB THis is for development / testing
+        # TODO-ROB Add the ability to do two seperate gi configs
         """This script is designed to create a gi list based on the refseq_rna database
         for each taxonomy id on the MCSR. It will also convert the gi list into a
         binary file which is more efficient to use with NCBI's Standalone Blast tools."""
         print('gi_list_config')
+        # Directory and file handling
         cd = os.getcwd()
         os.chdir(str(self.__gi_list_path))
         taxids = self.taxon_ids
+        Path.mkdir(self.__gi_list_path / Path('data'), parents=True, exist_ok=True)
         pd.Series(taxids).to_csv('taxids.csv', index=False)
-        Path.mkdir(
-            self.__gi_list_path /
-            Path('data'),
-            parents=True,
-            exist_ok=True)
-        os.system('qsub %s' %
-                  str(self.__gi_list_path /
-                      Path('get_gi_lists.sh')))
-        print('Done submitting jobs')
-        gi_flag = True
-        while gi_flag == True:
-            try:
-                subprocess.check_output(['pidof', 'getgilists'])
-                gi_flag = False
-            except subprocess.CalledProcessError:
-                gi_flag = True
-                print('Waiting for the gi BLAST to finish....')
-                time.sleep(30)
-        print('Multiprocessing complete')
+        # PBS job submission
+        cmd = 'qsub %s' % str(self.__gi_list_path / Path('get_gi_lists.sh'))
+        gi_config = psutil.Popen([cmd], stdout=subprocess.PIPE)
+        print('The GI list configuration\'s PID is %s' % gi_config.pid)
+        gi_config.wait()
+        print('The GI configuration process has completed.')
         os.chdir(cd)
-    #     with Pool(processes=20) as p:
-    #         cd = os.getcwd()
-    #         os.chdir(self.__gi_list_path)
-    #         p.map(self.gi_split, taxids)
-    #         os.chdir(cd)
-    #         self.blastn_log.inf("The GI lists have been created.")
-    #
-    # @staticmethod
-    # def gi_split(ID):
-    #     """ This function uses the blastdbcmd tool to get gi lists. It then uses the
-    #     blastdb_aliastool to turn the list into a binary file."""
-    #     # Create dictionary for formatting
-    #     ID = str(ID)
-    #     gi_text_file = "%sgi.txt" % ID
-    #     gi_binary_file = "%sgi" % ID
-    #     fmt = {'id': ID, 'text file': gi_text_file, 'binary file': gi_binary_file}
-    #     # TODO untested
-    #     print("Current taxonomy ID: %s" % ID)
-    #     # Use the accession #'s and the blastdbcmd tool to generate gi lists based on Organisms/Taxonomy ID's.
-    #     os.system("blastdbcmd -db refseq_rna -entry all -outfmt '%g %T' | awk ' {{ if ($2 == {id}) {{ print $1 }} }} ' > {text file}".format(**fmt))
-    #     print("Text File generated")
-    #     # Convert the .txt file to a binary file using the blastdb_aliastool.
-    #     os.system("blastdb_aliastool -gi_file_in {text file} -gi_file_out {binary file}".format(**fmt))
-    #     # Remove the gi.text file
-    #     print("Binary file generated")
-    #     os.system("rm -r {text file}".format(**fmt))
-    #     print("Removing text file")
 
     def blast_file_config(self, file):
         """Create or use a blast configuration file.
