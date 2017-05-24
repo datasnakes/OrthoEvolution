@@ -5,7 +5,7 @@ from ete3 import NCBITaxa
 import pandas as pd
 from pathlib import Path
 #from pandas import ExcelWriter
-from Manager.utils.mana import ProjMana as ProjectManagement
+from datasnakes.Manager.utils.mana import ProjMana as ProjectManagement
 
 # TODO-ROB Create function for archiving and multiple runs (this can go
 # into the Mana class)
