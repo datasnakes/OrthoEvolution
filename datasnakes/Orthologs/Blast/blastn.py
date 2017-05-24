@@ -208,10 +208,16 @@ class BLASTn(BT):
         pd.Series(taxids).to_csv('taxids.csv', index=False)
         # PBS job submission
         pbs_script = str(self.__gi_list_path / Path('get_gi_lists.sh'))
-        gi_config = psutil.Popen(['qsub', pbs_script], stdout=subprocess.PIPE)
-        print('The GI list configuration\'s PID is %s' % gi_config.pid)
-        gi_config.wait()
-        prnt = psutil.Popen(['echo', 'The GI configuration process has completed.'], stdout=subprocess.PIPE)
+        gi_config = subprocess.check_output(['qsub', pbs_script], shell=True)
+        print('The GI list configuration\'s JobID is %s' % gi_config)
+        job_id = str(gi_config).replace('.sequoia', '')
+        time.sleep(20)  # Wait for the job to be queued properly
+        x = subprocess.Popen(['qsig', '-s', 'SIGNULL', job_id])
+        while x.returncode == 0:
+            x = subprocess.Popen(['qsig', '-s', 'SIGNULL', job_id])
+            time.sleep(30)
+            print("Waiting...")
+            continue
         os.chdir(cd)
 
     def blast_file_config(self, file):
