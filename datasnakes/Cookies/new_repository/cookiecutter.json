@@ -6,7 +6,8 @@
     "*{{cookiecutter.project_type}}",
     "*{{cookiecutter.research_name}}",
     "*{{cookiecutter.user_name}}",
-    "cookiecutter.json"
+    "cookiecutter.json",
+    "Biopython Tutorial and Cookbook.pdf"
   ]
 }
 
