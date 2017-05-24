@@ -56,7 +56,7 @@ setup(
         'Framework :: Cookiecutter'
     ],
     # Packages will be automatically found if not in this list.
-    packages=find_packages(exclude=['Docs', 'Tools', 'Archive', 'Examples']),
+    packages=find_packages(exclude=['Docs', 'Archive', 'Examples']),
     include_package_data=True,
     entry_points={
         'console_scripts': ['d~s=Orthologs.command_line:main']

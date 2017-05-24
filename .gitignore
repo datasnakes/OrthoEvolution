@@ -10,7 +10,7 @@ shiny_dir_mana.txt
 /.idea/**
 .spyproject/*
 datasnakes/Manager/TODO.py
-
+TODO.py
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
