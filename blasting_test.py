@@ -15,7 +15,7 @@ from datasnakes.Orthologs.Blast.blastn import BLASTn
 # NCBITaxa().update_taxonomy_database()
 
 # Initializations
-repo = "Test1"
+repo = "Test2"
 user = "rgilmore"
 project = "BLASTest"
 research = "comparative_genetics"
