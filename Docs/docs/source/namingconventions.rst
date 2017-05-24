@@ -1,11 +1,11 @@
-Naming Conventions and Paths *by class*
-=======================================
-
-CompGenAnalysis(ProjectMana) *comp\_gen.py*
+Class Naming Conventions
 -------------------------------------------
 
+CompGenAnalysis(ProjectMana) *comp\_gen.py*
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
 User Generated Files
-~~~~~~~~~~~~~~~~~~~~
+^^^^^^^^^^^^^^^^^^^^^
 
 -  taxon\_file
 
@@ -24,7 +24,7 @@ User Generated Files
    -  name = "*projectname*\ \_acc.csv"
 
 Programmatically Generated Files
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 -  log\_files
 
@@ -42,10 +42,10 @@ Programmatically Generated Files
    -  name = "*projectname*\ \_pba.xlsx"
 
 BLASTAnalysis(CompGenAnalysis) *ncbi\_blast.py*
------------------------------------------------
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 User Generated Files
-~~~~~~~~~~~~~~~~~~~~
+^^^^^^^^^^^^^^^^^^^^^
 
 -  template\_file
 
@@ -53,7 +53,7 @@ User Generated Files
    -  name = "*projectname*\ \_temp.csv"
 
 Programmatically Generated Files
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 -  log\_files
 
@@ -72,10 +72,10 @@ Programmatically Generated Files
    -  name = "*projectname*\ \_building\_time.csv"
 
 BLASTn(BT) *blastn.py*
-----------------------
+~~~~~~~~~~~~~~~~~~~~~~~~
 
 User Generated Files
-~~~~~~~~~~~~~~~~~~~~
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 -  template file
 
@@ -83,7 +83,7 @@ User Generated Files
    -  name = "*users\_file\_name*.csv"
 
 Programmatically Generated Files
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 -  gi list binary files
 
@@ -102,4 +102,4 @@ Programmatically Generated Files
    -  ***Note***: *Only exists if the BLAST finishes all the genes.*
 
 Naming Conventions and Paths *by location*
-==========================================
+-------------------------------------------

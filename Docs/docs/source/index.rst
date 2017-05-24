@@ -8,7 +8,7 @@ Welcome to Datasnakes-Orthologs's documentation!
 
 .. module:: Datasnakes
 
-.. image:: https://travis-ci.org/datasnakes/Datasnakes-Scripts.svg?branch=dev2
+.. image:: https://travis-ci.org/datasnakes/Datasnakes-Scripts.svg?branch=release
    :target: https://travis-ci.org/datasnakes/Datasnakes-Scripts
 .. image:: https://api.codacy.com/project/badge/Grade/9a4ce39423ed4458a0c7fa3610c81ba2
    :target: https://www.codacy.com/app/sdhutchins/Datasnakes-Scripts?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=datasnakes/Datasnakes-Scripts&amp;utm_campaign=Badge_Grade
@@ -16,7 +16,8 @@ Welcome to Datasnakes-Orthologs's documentation!
    :target: https://gitter.im/datasnakes/Lobby
 .. image:: https://badge.fury.io/py/Datasnakes-Scripts.svg
    :target: https://badge.fury.io/py/Datasnakes-Scripts
-
+.. image:: https://readthedocs.org/projects/datasnakes-scripts/badge/?version=release
+   :target: http://datasnakes-scripts.readthedocs.io/en/release/?badge=release
 
 The Datasnakes-Orthologs package is a collection of the modules which aids in
 the analysis and visualization of orthologs-related bioinformatics projects.
@@ -96,6 +97,7 @@ Contents
 .. toctree::
     :maxdepth: 2
 
+    compgenetics
     clustalomega
     phylogenetics
     namingconventions

@@ -1,14 +1,14 @@
 Phylogenetics Documentation
-===========================
+-------------------------------------------
 
 This document will provide information and guidelines about using PAML
 (with ete3) in order to generate dN/dS data about orthologous genes.
 
 ETE3 & PAML
------------
+~~~~~~~~~~~~
 
 Format Examples
-~~~~~~~~~~~~~~~
+^^^^^^^^^^^^^^^^^^^^^
 
 **Directory name:** ``M1.HTR1A``
 
@@ -20,10 +20,10 @@ Format Examples
 standard output.*
 
 Phylip
-------
+~~~~~~~~~~~~
 
 PhyML
------
+~~~~~~~~~~~~
 
-Bio.Phylo
----------
+TreeViz
+~~~~~~~~~~~~

@@ -1,4 +1,4 @@
-.. image:: https://travis-ci.org/datasnakes/Datasnakes-Scripts.svg?branch=dev2
+.. image:: https://travis-ci.org/datasnakes/Datasnakes-Scripts.svg?branch=release
    :target: https://travis-ci.org/datasnakes/Datasnakes-Scripts
 .. image:: https://api.codacy.com/project/badge/Grade/9a4ce39423ed4458a0c7fa3610c81ba2
    :target: https://www.codacy.com/app/sdhutchins/Datasnakes-Scripts?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=datasnakes/Datasnakes-Scripts&amp;utm_campaign=Badge_Grade
@@ -6,6 +6,8 @@
    :target: https://gitter.im/datasnakes/Lobby
 .. image:: https://badge.fury.io/py/Datasnakes-Scripts.svg
    :target: https://badge.fury.io/py/Datasnakes-Scripts
+.. image:: https://readthedocs.org/projects/datasnakes-scripts/badge/?version=release
+   :target: http://datasnakes-scripts.readthedocs.io/en/release/?badge=release
 
 Datasnakes-Orthologs
 --------------------
