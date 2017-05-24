@@ -209,8 +209,9 @@ class BLASTn(BT):
         # PBS job submission
         pbs_script = str(self.__gi_list_path / Path('get_gi_lists.sh'))
         gi_config = subprocess.check_output('qsub %s' % pbs_script, shell=True)
+        gi_config = gi_config.decode('utf-8')
         print('The GI list configuration\'s JobID is %s' % gi_config)
-        job_id = str(gi_config).replace('.sequoia', '')
+        job_id = gi_config.replace('.sequoia', '')
         time.sleep(20)  # Wait for the job to be queued properly
         x = subprocess.Popen(['qsig', '-s', 'SIGNULL', job_id])
         while x.returncode == 0:
