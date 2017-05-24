@@ -211,7 +211,7 @@ class BLASTn(BT):
         gi_config = psutil.Popen(['qsub', pbs_script], stdout=subprocess.PIPE)
         print('The GI list configuration\'s PID is %s' % gi_config.pid)
         gi_config.wait()
-        print('The GI configuration process has completed.')
+        prnt = psutil.Popen(['echo', 'The GI configuration process has completed.'], stdout=subprocess.PIPE)
         os.chdir(cd)
 
     def blast_file_config(self, file):
