@@ -214,11 +214,15 @@ class BLASTn(BT):
         job_id = gi_config.replace('.sequoia', '')
         time.sleep(20)  # Wait for the job to be queued properly
         while True:
-            try:
-                subprocess.check_output('qsig -s SIGNULL %s' % job_id, shell=True, stderr=subprocess.PIPE)
-                print("Waiting...")
-                time.sleep(30)
-            except subprocess.CalledProcessError:
+            out, err = subprocess.Popen('qsig -s SIGNULL %s' % job_id, shell=True, stderr=subprocess.PIPE, stdout=subprocess.PIPE)
+            print("Waiting...")
+            time.sleep(30)
+            if err.decode('utf-8') == 'qsig: Request invalid for state of job %s.sequoia\n' % job_id:
+                print('The blast config is in MCSR\'s queue.  Waiting...')
+                continue
+            else:
+                print('out:', out)
+                print('err:', err)
                 break
         os.chdir(cd)
 
