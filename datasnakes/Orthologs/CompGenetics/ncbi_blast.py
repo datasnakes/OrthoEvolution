@@ -3,7 +3,7 @@ import time
 from pathlib import Path
 
 import pandas as pd
-from Orthologs.CompGenetics.comp_gen import CompGenAnalysis
+from datasnakes.Orthologs.CompGenetics.comp_gen import CompGenAnalysis
 
 from datasnakes.Manager.logit.logit import LogIt
 
