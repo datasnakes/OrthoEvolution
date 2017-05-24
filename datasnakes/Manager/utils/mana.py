@@ -3,16 +3,14 @@
 import os
 from pathlib import Path
 
-import Manager
-import Tools
 import ete3
-from Manager.utils.treelib2.treelib2.tree import Tree
-from Manager.utils.zipper import ZipUtils
+from datasnakes.Manager.utils.treelib2.treelib2.tree import Tree
+from datasnakes.Manager.utils.zipper import ZipUtils
 from cookiecutter.hooks import run_script
 from cookiecutter.main import cookiecutter
 
 # TODO-ROB once this is a pypi package all of these will be unnecessary
-from datasnakes import Cookies, Orthologs
+from datasnakes import Cookies, Orthologs, Manager, Tools
 
 
 # from Manager.logit.logit import LogIt
