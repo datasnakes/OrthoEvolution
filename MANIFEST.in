@@ -1,6 +1,8 @@
+# Exclude
+exclude Manager/TODO.py
+
 # Include the README file
 include README.rst
-include *.md
 
 # Include the requirements file
 include requirements.txt
@@ -9,4 +11,6 @@ include requirements.txt
 include setup.py
 
 # Include Modules
-include Cookies/*
+recursive-include Cookies *
+recursive-include Manager/index *
+

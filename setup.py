@@ -11,7 +11,7 @@ from codecs import open  # To use a consistent encoding
 from os import path
 import sys
 
-#------------------------------------------------------------------------------
+
 # Save the standard error of the setup file. This can be removed soon.
 sys.stderr = open('err.txt', 'w')
 
@@ -27,7 +27,6 @@ def readme():
         return f.read()
 
 
-#------------------------------------------------------------------------------
 # Setup the package by adding information to these parameters
 setup(
     name=name,
@@ -58,19 +57,12 @@ setup(
     ],
     # Packages will be automatically found if not in this list.
     packages=find_packages(exclude=['Docs', 'Tools', 'Archive', 'Examples']),
-    install_requires=[],
     include_package_data=True,
-    entyr_point={
+    entry_points={
         'console_scripts': ['d~s=Orthologs.command_line:main']
     },
     zip_safe=False,
     test_suite='nose.collector',
     tests_require=['nose']
 )
-# TODO-ROB add package_data to setup
-#------------------------------------------------------------------------------
-# TODO
-"""
-TODO-ROB: 1.  Generate a Template BioSQL database using sqlite3
-TODO-ROB: Set up a reconfiguration script for manual movements;  Make the script append to 'init.yaml'
-"""
+
