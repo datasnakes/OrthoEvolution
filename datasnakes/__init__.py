@@ -1,1 +1,1 @@
-import Cookies, Tests, Tools, Orthologs, Manager
+import Tools, Orthologs, Manager
