@@ -16,24 +16,26 @@ Welcome to Datasnakes-Orthologs's documentation!
    :target: https://gitter.im/datasnakes/Lobby
 .. image:: https://badge.fury.io/py/Datasnakes-Scripts.svg
    :target: https://badge.fury.io/py/Datasnakes-Scripts
-.. image:: https://readthedocs.org/projects/datasnakes-scripts/badge/?version=release
-   :target: http://datasnakes-scripts.readthedocs.io/en/release/?badge=release
+.. image:: https://readthedocs.org/projects/datasnakes-scripts/badge/?version=master
+   :target: http://datasnakes-scripts.readthedocs.io/en/release/?badge=master
+.. image:: https://img.shields.io/badge/under-development-orange.svg
+   :target: https://github.com/datasnakes/Datasnakes-Scripts
 
 The Datasnakes-Orthologs package is a collection of the modules which aids in
 the analysis and visualization of orthologs-related bioinformatics projects.
 
 Check out our `wiki docs <https://github.com/datasnakes/Datasnakes-Scripts/wiki>`__!
 
-Dependencies
-------------
-
-Currently, this package is optimized for ``python v3.4`` and upward. It's also
-dependent upon ``biopython v1.68``.
-
 Installation
 ------------
 
 For easy installation, ``pip install Datasnakes-Orthologs``
+
+Dependencies
+~~~~~~~~~~~~~
+
+Currently, this package is optimized for ``python v3.4`` and upward. It's also
+dependent upon ``biopython v1.68``.
 
 Manual Installation
 ~~~~~~~~~~~~~~~~~~~~~

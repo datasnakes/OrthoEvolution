@@ -1,4 +1,4 @@
-.. image:: https://travis-ci.org/datasnakes/Datasnakes-Scripts.svg?branch=release
+.. image:: https://travis-ci.org/datasnakes/Datasnakes-Scripts.svg?branch=master
    :target: https://travis-ci.org/datasnakes/Datasnakes-Scripts
 .. image:: https://api.codacy.com/project/badge/Grade/9a4ce39423ed4458a0c7fa3610c81ba2
    :target: https://www.codacy.com/app/sdhutchins/Datasnakes-Scripts?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=datasnakes/Datasnakes-Scripts&amp;utm_campaign=Badge_Grade
@@ -6,8 +6,10 @@
    :target: https://gitter.im/datasnakes/Lobby
 .. image:: https://badge.fury.io/py/Datasnakes-Scripts.svg
    :target: https://badge.fury.io/py/Datasnakes-Scripts
-.. image:: https://readthedocs.org/projects/datasnakes-scripts/badge/?version=release
-   :target: http://datasnakes-scripts.readthedocs.io/en/release/?badge=release
+.. image:: https://readthedocs.org/projects/datasnakes-scripts/badge/?version=master
+   :target: http://datasnakes-scripts.readthedocs.io/en/release/?badge=master
+.. image:: https://img.shields.io/badge/under-development-orange.svg
+   :target: https://github.com/datasnakes/Datasnakes-Scripts
 
 Datasnakes-Orthologs
 --------------------
@@ -15,7 +17,7 @@ Datasnakes-Orthologs
 The Datasnakes-Orthologs package is a collection of the modules which aids in
 the analysis and visualization of orthologs-related bioinformatics projects.
 
-Check out our `wiki docs <https://github.com/datasnakes/Datasnakes-Scripts/wiki>`__!
+Check out our `wiki docs <https://github.com/datasnakes/Datasnakes-Scripts/wiki>`__ and our `read the docs <http://datasnakes-scripts.readthedocs.io/en/master/>`__!
 
 Dependencies
 ------------
@@ -26,7 +28,13 @@ dependent upon ``biopython v1.68``.
 Installation
 ------------
 
-For easy installation, ``pip install Datasnakes-Orthologs``
+``pip install Datasnakes-Orthologs``
+
+Dependencies
+~~~~~~~~~~~~~
+
+Currently, this package is optimized for ``python v3.4`` and upward. It's also
+dependent upon ``biopython v1.68``.
 
 Manual Installation
 ~~~~~~~~~~~~~~~~~~~~~
@@ -39,7 +47,7 @@ Alternatively, you can set install the package manually.
 
 Project Setup
 ~~~~~~~~~~~~~~~~
-This package is in development but still working. To test you'll want to create a virtual
+This package is under development but still working. To test you'll want to create a virtual
 environment so that cleanup is easy. Using *virtualenv* with python3
 insures that ``python`` invokes py3.5 and ``python3`` invokes py36. Invoke
 python36.
