@@ -26,16 +26,16 @@ the analysis and visualization of orthologs-related bioinformatics projects.
 
 Check out our `wiki docs <https://github.com/datasnakes/Datasnakes-Scripts/wiki>`__!
 
-Dependencies
-------------
-
-Currently, this package is optimized for ``python v3.4`` and upward. It's also
-dependent upon ``biopython v1.68``.
-
 Installation
 ------------
 
 For easy installation, ``pip install Datasnakes-Orthologs``
+
+Dependencies
+~~~~~~~~~~~~~
+
+Currently, this package is optimized for ``python v3.4`` and upward. It's also
+dependent upon ``biopython v1.68``.
 
 Manual Installation
 ~~~~~~~~~~~~~~~~~~~~~

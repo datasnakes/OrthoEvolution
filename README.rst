@@ -28,7 +28,13 @@ dependent upon ``biopython v1.68``.
 Installation
 ------------
 
-For easy installation, ``pip install Datasnakes-Orthologs``
+``pip install Datasnakes-Orthologs``
+
+Dependencies
+~~~~~~~~~~~~~
+
+Currently, this package is optimized for ``python v3.4`` and upward. It's also
+dependent upon ``biopython v1.68``.
 
 Manual Installation
 ~~~~~~~~~~~~~~~~~~~~~
@@ -41,7 +47,7 @@ Alternatively, you can set install the package manually.
 
 Project Setup
 ~~~~~~~~~~~~~~~~
-This package is in development but still working. To test you'll want to create a virtual
+This package is under development but still working. To test you'll want to create a virtual
 environment so that cleanup is easy. Using *virtualenv* with python3
 insures that ``python`` invokes py3.5 and ``python3`` invokes py36. Invoke
 python36.
