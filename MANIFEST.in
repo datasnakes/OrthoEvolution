@@ -14,3 +14,10 @@ include setup.py
 recursive-include Cookies *
 recursive-include Manager/index *
 
+# Include docs
+include Docs/*.rst
+include Docs/Makefile
+include Docs/conf.py
+include Docs/convertdocs.py
+include Docs/archive/*
+include Docs/README.md
