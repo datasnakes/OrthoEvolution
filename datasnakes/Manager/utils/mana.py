@@ -294,8 +294,10 @@ class UserMana(RepoMana):
         if len(database) > 0:
             self.db_list = database
             self.db_path_dict = {}
+            self.db_archive_dict = {}
             for item in database:
                 self.db_path_dict[item] = self.user_db / Path(item)
+                self.db_archive_dict[item] = self.db_path_dict[item] / Path('archive')
         if new_db is True:
             self.create_db_repo()
 
