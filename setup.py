@@ -11,7 +11,6 @@ from codecs import open  # To use a consistent encoding
 from os import path
 import sys
 
-
 # Save the standard error of the setup file. This can be removed soon.
 sys.stderr = open('err.txt', 'w')
 
@@ -20,12 +19,9 @@ home = path.abspath(path.dirname(__file__))
 name = 'Datasnakes-Scripts'
 
 # Get the long description from the README file
-
-
 def readme():
     with open(path.join(home, 'README.rst'), encoding='utf-8') as f:
         return f.read()
-
 
 # Setup the package by adding information to these parameters
 setup(
