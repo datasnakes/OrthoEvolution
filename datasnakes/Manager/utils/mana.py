@@ -50,6 +50,7 @@ class Mana(object):
         self.project_cookie = self.Cookies / Path('new_project')
         self.research_cookie = self.Cookies / Path('new_research')
         self.app_cookie = self.Cookies / Path('new_app')
+        self.db_cookie = self.Cookies / Path('new_database')
         self.website_cookie = self.Cookies / Path('new_website')
         #    The second group is for the Manager module
         self.Manager = Path(Manager.__path__[0])
@@ -259,8 +260,8 @@ class UserMana(RepoMana):
     # TODO-ROB When the user logs in, they will activate the virtual environment
     # TODO-ROB USE SQL here to see if the user db contains the username
 
-    def __init__(self, repo, user, project=None, home=os.getcwd(),
-                 new_user=False, new_project=False, **kwargs):
+    def __init__(self, repo, user, project=None, database=[], home=os.getcwd(),
+                 new_user=False, new_project=False, new_db=False, **kwargs):
         '''
         The User Management class manages the current users directories.
         This class gives access to user paths, and provides functionality
@@ -277,6 +278,7 @@ class UserMana(RepoMana):
         super().__init__(repo=repo, user=user, home=home, new_user=new_user, **kwargs)
         self.user = user
 
+        # TODO-ROB Add database files to the repository as well
         self.user_db = self.user_path / Path('databases')
         self.user_index = self.user_path / Path('index')
         self.user_log = self.user_path / Path('log')
@@ -289,6 +291,13 @@ class UserMana(RepoMana):
             self.project_path = self.projects / Path(project)
         if new_project is True:
             self.create_project()
+        if len(database) > 0:
+            self.db_list = database
+            self.db_path_dict = {}
+            for item in database:
+                self.db_path_dict[item] = self.user_db / Path(item)
+        if new_db is True:
+            self.create_db_repo()
 
     def create_project(self):
         print('creating dirs from project cookie')
@@ -306,6 +315,25 @@ class UserMana(RepoMana):
         cookiecutter(str(self.project_cookie), extra_context=e_c,
                      no_input=no_input, output_dir=str(self.projects))
         os.chmod(str(self.projects / Path(self.project)), mode=0o777)
+
+    def create_db_repo(self):
+        print('creating dirs from database cookie')
+        """
+        :return: A new database inside the users database directory
+        """
+        if self.databases:
+            for db, path in self.db_path_dict.items():
+                no_input = True
+                e_c = {"db_name": db}
+                cookiecutter(str(self.db_cookie), extra_context=e_c, no_input=no_input, output_dir=str(self.user_db))
+                os.chmod(str(self.user_db / Path(db)), mode=0o777)
+
+        else:
+            db_num = int(input("How many databases do you need to create?"))
+            for db in range(1, db_num + 1):
+                cookiecutter(str(self.db_cookie), output_dir=str(self.user_db))
+                os.chmod(str(self.user_db / Path(db)), mode=0o777)
+
 
     def zip_mail(self, comp_filename, zip_path, destination=''):
         Zipper = ZipUtils(comp_filename, zip_path)
