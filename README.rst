@@ -6,8 +6,8 @@
    :target: https://gitter.im/datasnakes/Lobby
 .. image:: https://badge.fury.io/py/Datasnakes-Scripts.svg
    :target: https://badge.fury.io/py/Datasnakes-Scripts
-.. image:: https://readthedocs.org/projects/datasnakes-scripts/badge/?version=master
-   :target: http://datasnakes-scripts.readthedocs.io/en/release/?badge=master
+.. image:: https://readthedocs.org/projects/datasnakes-scripts/badge/?version=release
+   :target: http://datasnakes-scripts.readthedocs.io/en/release/?badge=release
 
 Datasnakes-Orthologs
 --------------------
