@@ -277,6 +277,7 @@ class UserMana(RepoMana):
         super().__init__(repo=repo, user=user, home=home, new_user=new_user, **kwargs)
         self.user = user
 
+        self.user_db = self.user_path / Path('databases')
         self.user_index = self.user_path / Path('index')
         self.user_log = self.user_path / Path('log')
         self.manuscripts = self.user_path / Path('manuscripts')
