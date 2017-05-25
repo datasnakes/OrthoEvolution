@@ -6,15 +6,15 @@ import os
 import shutil
 from Bio import SeqIO
 from BioSQL import BioSeqDatabase
-from Manager.utils.mana import UserMana as UserManagement
-from datasnakes.Orthologs import CompGenAnalysis
+from datasnakes.Manager.utils.mana import UserMana as UM
+from datasnakes.Orthologs.CompGenetics import CompGenAnalysis as CGA
 
 # TODO-ROB Add a progress bar to the pipeline
 # TODO-ROB make code more versatile for multiple projects or even single
 # queries
 
 
-class Database2Genbank(CompGenAnalysis, UserManagement):
+class Database2Genbank(CGA, UM):
     """
     Extract target GenBank files from the database files that were created using
     ftp2db.
@@ -23,8 +23,8 @@ class Database2Genbank(CompGenAnalysis, UserManagement):
     def __init__(self, repo, user, project, m_file, genbank_update=False):
         # TODO-ROB Update the CGA.  I have yet to write functions for saving
         # the data post blast
-        CompGenAnalysis.__init__(acc_file=m_file, save_data=False)
-        UserManagement.__init__(repo=repo, user=user, porject=project)
+        CGA.__init__(acc_file=m_file, save_data=False)
+        UM.__init__(repo=repo, user=user, porject=project)
         self.GenBank_update = genbank_update
 
     def gbk_gather(self):
