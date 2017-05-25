@@ -3,7 +3,7 @@
 import warnings
 
 from Bio import AlignIO
-from Orthologs import OrthologsWarning
+from datasnakes.Orthologs import OrthologsWarning
 
 # Ignore the warning in this init script.
 warnings.simplefilter('ignore', OrthologsWarning)
