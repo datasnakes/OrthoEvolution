@@ -9,12 +9,9 @@ from Orthologs import OrthologsWarning
 warnings.simplefilter('ignore', OrthologsWarning)
 
 # Initialize the modules
-from datasnakes.Orthologs import PhyML
-from datasnakes.Orthologs.Phylogenetics.PhyloTree import TreeViz
+from Orthologs.Phylogenetics import PhyML, Phylip, TreeViz, ETE3PAML, PamlTest
 
 # Add a new module
-
-
 class RelaxPhylip(object):
     """Convert the a multiple sequence alignment file to
     relaxed-phylip format.
