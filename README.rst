@@ -12,29 +12,37 @@
 Datasnakes-Orthologs
 --------------------
 
-This package is a collection of the scripts related to an Orthologs
-Project.
+The Datasnakes-Orthologs package is a collection of the modules which aids in
+the analysis and visualization of orthologs-related bioinformatics projects.
 
-Description
------------
-
-The subdirectories here are used as modules in the Python3 package that
-we are developing.
+Check out our `wiki docs <https://github.com/datasnakes/Datasnakes-Scripts/wiki>`__!
 
 Dependencies
 ------------
 
-Currently, this package is optimized for ``python 3.4`` and upward.
+Currently, this package is optimized for ``python v3.4`` and upward. It's also
+dependent upon ``biopython v1.68``.
 
 Installation
 ------------
 
-Soon we'll be able to ``pip install datasnakes-orthologs`` via a command
-line.
+For easy installation, ``pip install Datasnakes-Orthologs``
 
-In development but working. To test you'll want to create a virtual
+Manual Installation
+~~~~~~~~~~~~~~~~~~~~~
+
+Alternatively, you can set install the package manually.
+
+1. Download the zip file and unzip it or ``git clone https://github.com/datasnakes/Datasnakes-Scripts.git``
+2. ``cd Datasnakes-Scripts``
+3. ``python setup.py install``
+
+
+Project Setup
+~~~~~~~~~~~~~~~~
+This package is in development but still working. To test you'll want to create a virtual
 environment so that cleanup is easy. Using *virtualenv* with python3
-insures that *python* invokes py3.5 and *python3* invokes py36. Invoke
+insures that ``python`` invokes py3.5 and ``python3`` invokes py36. Invoke
 python36.
 
 .. code:: bash
@@ -43,11 +51,9 @@ python36.
     $ cd dev
     $ virtualenv PackageTest --python=python3
     $ source activate PackageTest
-    $ cd PackageTest
-    $ pip install cookiecutter
-    $ git clone -b RAG-Review http://github.com/datasnakes/Datasnakes-Scripts
+    $ git clone http://github.com/datasnakes/Datasnakes-Scripts
     $ cd Datasnakes-Scripts
-    $ python3 tester.py
+    $ python3 setup.py install or pip install .
 
 Usage
 -----
@@ -56,7 +62,7 @@ After installation, you'll be able to easily import each module via:
 
 .. code:: python
 
-    from Orthologs import Align, BioSQL, Blast, CompGenetics, Phylogenetics, Genbank
+    from Datasnakes.Orthologs import Align, BioSQL, Blast, CompGenetics, Phylogenetics, Genbank
 
 Contributors
 ------------
