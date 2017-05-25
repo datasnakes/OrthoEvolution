@@ -20,12 +20,13 @@ class Database2Genbank(CGA, UM):
     ftp2db.
     """
 
-    def __init__(self, repo, user, project, m_file, genbank_update=False):
+    def __init__(self, repo, user, project, m_file, new_db=True):
+        # if new db is False then update the genbank files
+        self.GenBank_update = new_db
         # TODO-ROB Update the CGA.  I have yet to write functions for saving
         # the data post blast
-        CGA.__init__(acc_file=m_file, save_data=False)
-        UM.__init__(repo=repo, user=user, porject=project)
-        self.GenBank_update = genbank_update
+        CGA.__init__(repo=repo, user=user, project=project, acc_file=m_file, save_data=False)
+        UM.__init__(repo=repo, user=user, porject=project, database=['genbank'], new_db=new_db)
 
     def gbk_gather(self):
         """Extract/download the genbank files from the database.
