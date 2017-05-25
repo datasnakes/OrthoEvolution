@@ -28,7 +28,7 @@ dependent upon ``biopython v1.68``.
 Installation
 ------------
 
-``pip install Datasnakes-Orthologs``
+``pip install Datasnakes-Scripts``
 
 Dependencies
 ~~~~~~~~~~~~~

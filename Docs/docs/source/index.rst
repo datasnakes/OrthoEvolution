@@ -29,7 +29,7 @@ Check out our `wiki docs <https://github.com/datasnakes/Datasnakes-Scripts/wiki>
 Installation
 ------------
 
-For easy installation, ``pip install Datasnakes-Orthologs``
+For easy installation, ``pip install Datasnakes-Scripts``
 
 Dependencies
 ~~~~~~~~~~~~~
