@@ -9,7 +9,7 @@ from Orthologs import OrthologsWarning
 warnings.simplefilter('ignore', OrthologsWarning)
 
 # Initialize the modules
-from datasnakes.Orthologs import PhyML
+from datasnakes.Orthologs.Phylogenetics import PhyML, ETE3PAML, Phylip, PamlTest
 from datasnakes.Orthologs.Phylogenetics.PhyloTree import TreeViz
 
 # Add a new module
