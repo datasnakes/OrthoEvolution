@@ -20,6 +20,8 @@ home = path.abspath(path.dirname(__file__))
 name = 'Datasnakes-Scripts'
 
 # Get the long description from the README file
+
+
 def readme():
     with open(path.join(home, 'README.rst'), encoding='utf-8') as f:
         return f.read()
@@ -54,7 +56,7 @@ setup(
         'Framework :: Cookiecutter'
     ],
     # Packages will be automatically found if not in this list.
-    packages=find_packages(exclude=['Docs', 'Tools', 'Archive', 'Examples']),
+    packages=find_packages(exclude=['Docs', 'Archive', 'Examples']),
     include_package_data=True,
     entry_points={
         'console_scripts': ['d~s=Orthologs.command_line:main']

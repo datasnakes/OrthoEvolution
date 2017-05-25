@@ -5,8 +5,7 @@ This is the test suite.
 from datasnakes.Orthologs import Phylogenetics as Phylo
 #from Orthologs import OrthologsDevelopmentWarning
 
-class Test1(object):
-    help(Phylo)
+help(Phylo)
 #class TestOrthologs(unittest.TestCase):
 #    """Test the Orthologs Package."""
 #    def test_phylo(self):
