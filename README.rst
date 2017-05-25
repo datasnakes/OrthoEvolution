@@ -8,6 +8,8 @@
    :target: https://badge.fury.io/py/Datasnakes-Scripts
 .. image:: https://readthedocs.org/projects/datasnakes-scripts/badge/?version=release
    :target: http://datasnakes-scripts.readthedocs.io/en/release/?badge=release
+.. image:: https://img.shields.io/badge/under-development-orange.svg
+   :target: https://github.com/datasnakes/Datasnakes-Scripts
 
 Datasnakes-Orthologs
 --------------------
