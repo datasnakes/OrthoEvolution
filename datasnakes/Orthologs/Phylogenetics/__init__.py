@@ -9,9 +9,9 @@ from datasnakes.Orthologs import OrthologsWarning
 warnings.simplefilter('ignore', OrthologsWarning)
 
 # Initialize the modules
-from datasnakes.Orthologs.Phylogenetics import PhyML, ETE3PAML, Phylip, PamlTest
+from datasnakes.Orthologs.Phylogenetics.PAML import ETE3PAML, PamlTest
 from datasnakes.Orthologs.Phylogenetics.PhyloTree import TreeViz
-
+from datasnakes.Orthologs.Phylogenetics import PhyML
 # Add a new module
 
 
@@ -30,6 +30,6 @@ __all__ = ("ETE3PAML",
            "PamlTest",
            "PhyML",
            "TreeViz",
-           "Phylip",
+           #"Phylip",
            "RelaxPhylip",
            )
