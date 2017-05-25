@@ -2,10 +2,11 @@
 This is the test suite.
 """
 #import unittest
-from Orthologs import Phylogenetics as Phylo
+from datasnakes.Orthologs import Phylogenetics as Phylo
 #from Orthologs import OrthologsDevelopmentWarning
 
-help(Phylo)
+class Test1(object):
+    help(Phylo)
 #class TestOrthologs(unittest.TestCase):
 #    """Test the Orthologs Package."""
 #    def test_phylo(self):
