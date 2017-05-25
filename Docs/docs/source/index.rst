@@ -18,6 +18,8 @@ Welcome to Datasnakes-Orthologs's documentation!
    :target: https://badge.fury.io/py/Datasnakes-Scripts
 .. image:: https://readthedocs.org/projects/datasnakes-scripts/badge/?version=release
    :target: http://datasnakes-scripts.readthedocs.io/en/release/?badge=release
+.. image:: https://img.shields.io/badge/under-development-orange.svg
+   :target: https://github.com/datasnakes/Datasnakes-Scripts
 
 The Datasnakes-Orthologs package is a collection of the modules which aids in
 the analysis and visualization of orthologs-related bioinformatics projects.
