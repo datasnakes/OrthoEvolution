@@ -8,6 +8,8 @@ from datasnakes.Manager.utils.treelib2.treelib2.tree import Tree
 from datasnakes.Manager.utils.zipper import ZipUtils
 from cookiecutter.hooks import run_script
 from cookiecutter.main import cookiecutter
+from cookiecutter.prompt import prompt_for_config
+from cookiecutter.generate import generate_context
 
 # TODO-ROB once this is a pypi package all of these will be unnecessary
 from datasnakes import Cookies, Orthologs, Manager, Tools
@@ -325,17 +327,20 @@ class UserMana(RepoMana):
         """
         if self.databases:
             for db, path in self.db_path_dict.items():
-                no_input = True
                 e_c = {"db_name": db}
-                cookiecutter(str(self.db_cookie), extra_context=e_c, no_input=no_input, output_dir=str(self.user_db))
+                cookiecutter(str(self.db_cookie), extra_context=e_c, no_input=True, output_dir=str(self.user_db))
                 os.chmod(str(self.user_db / Path(db)), mode=0o777)
 
         else:
             db_num = int(input("How many databases do you need to create?"))
             for db in range(1, db_num + 1):
-                cookiecutter(str(self.db_cookie), output_dir=str(self.user_db))
-                os.chmod(str(self.user_db / Path(db)), mode=0o777)
-
+                # Manually set up cookiecutter prompting
+                context_file = str(self.db_cookie / Path('cookiecutter.json'))
+                e_c = prompt_for_config(context=generate_context(context_file=context_file))
+                # Create the cookiecutter repo with no input, and add extra content from manual prompts
+                cookiecutter(str(self.db_cookie), output_dir=str(self.user_db), extra_context=e_c, no_input=True)
+                # Use cookiecutter_dict from manual prompts to change the user permissions.
+                os.chmod(str(self.user_db / Path(e_c['db_name'])), mode=0o777)
 
     def zip_mail(self, comp_filename, zip_path, destination=''):
         Zipper = ZipUtils(comp_filename, zip_path)
