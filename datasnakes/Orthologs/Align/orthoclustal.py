@@ -1,9 +1,6 @@
-# -*- coding: utf-8 -*-
-"""
-Clustal Omega is a multiple sequence alignment program that uses seeded
+"""Clustal Omega is a multiple sequence alignment program that uses seeded
 guide trees and HMM profile-profile techniques to generate alignments between
 three or more sequences.
-
 """
 # Import the Clustal Omega wrapper from Biopython
 from Bio.Align.Applications import ClustalOmegaCommandline
@@ -23,7 +20,7 @@ class ClustalO(object):
                                                  cmd=clustalpath,
                                                  outfile=outfile,
                                                  seqtype=seqtype,  # "RNA"
-                                                 max_hmm_iterations=2,  # Notable
+                                                 max_hmm_iterations=2,
                                                  infmt=infmt,
                                                  outfmt=outfmt,  # "aln", "phy"
                                                  iterations=3,  # Notable
