@@ -1,4 +1,4 @@
-qsub Documentation
+Qsub Documentation
 -------------------------
 Collection of tools for using PBS, a job scheduler for high-performance
 computing environments. The command is usually `qsub <options>` on most systems.
