@@ -5,7 +5,8 @@ from datasnakes.Tools.ftp.ftp2db import FTP
 
 
 class GenBankMana(FTP, GB):
-
+    """
+    """
     def __init__(self):
         FTP.__init__(self)
         GB.__init__(self)

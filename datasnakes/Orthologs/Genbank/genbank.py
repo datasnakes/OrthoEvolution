@@ -1,3 +1,4 @@
+"""Class for managing, downloading and extracting features from genbank files."""
 import os
 import shutil
 from pathlib import Path
@@ -6,21 +7,21 @@ from Bio import SeqIO
 
 
 class GenBank(object):
+    """Class for managing, downloading and extracting features from genbank files."""
 
     def __init__(self, ncbi_db_path, gbk_path, solo=False, multi=True, archive=False, min_fasta=True):
-        """
-        Base GenBank class that handles GenBank files in various ways
-        for the Orthologs Project.
+        """Handle genbank files in various ways for the Orthologs Project.
+
         :param ncbi_db_path: A path to the .db files of interest.  These
         .db files were created by downloading NCBI's refseq-GenBank
         flat files, and then uploading these files to a .db file
         that uses biopython's BioSQL database schema.
         :param gbk_path: The path used for the custom .db files and
-        the single entry GenBank files.  
-        use:  
-            Path(gbk_path) / Path(target_gbk_files_path); 
+        the single entry GenBank files.
+        use:
+            Path(gbk_path) / Path(target_gbk_files_path);
             Path(gbk_path) / Path(db_files)
-            
+
         :param solo: Boolean for adding single fasta files.
         :param multi:  Boolean for adding multi-fasta files.
         """
@@ -34,8 +35,7 @@ class GenBank(object):
         self.min_fasta = min_fasta
 
     def get_gbk_files(self, tier_frame_dict, org_list, gene_dict):
-        """Extract/download the genbank files from the database.
-        """
+        """Extract/download the genbank files from the database."""
         # Make a list of BioSQL database(.db) files that contain GenBank info
         db_files_list = []
         for FILE in os.listdir(str(self.ncbi_db_path)):
@@ -75,9 +75,7 @@ class GenBank(object):
                                 continue
 
     def gbk_upload(self):
-        """
-        Upload the BioSQL database with genbank data.
-        """
+        """Upload the BioSQL database with genbank data."""
         t_count = 0
         Path.mkdir(self.target_gbk_db_path)
         for TIER in os.listdir(str(self.target_gbk_files_path)):
@@ -120,9 +118,7 @@ class GenBank(object):
                         raise
 
     def get_fasta_files(self, acc_dict):
-        """
-        Create FASTA files for every GenBank record in the databases.
-        """
+        """Create FASTA files for every GenBank record in the databases."""
         for database in os.listdir(str(self.target_gbk_db_path)):
             server = BioSeqDatabase.open_database(driver="sqlite3", db=database)
             try:
@@ -136,6 +132,7 @@ class GenBank(object):
                 raise()
 
     def write_fasta_files(self, record, acc_dict):
+        """Initialize writing a fasta sequence or feature to a file."""
         min = self.min_fasta
         if self.solo is True:
             self.sol_fasta(record, acc_dict, min)
@@ -164,9 +161,9 @@ class GenBank(object):
             feat_type_rank = feat_type + str(x)  # Adding the number to the name of the feature.type
             if x == 1:
                 feat_type_rank = feat_type
-            ###########################
 
     def solo_fasta(self, record, acc_dict, min):
+        """Write a feature to a file."""
         print('')
 
         feat_type_list = []
@@ -231,6 +228,7 @@ class GenBank(object):
                 self.file.close()
 
     def multi_fasta(self, record, acc_dict, min):
+        """Write multiple fasta files."""
         print('')
 
         feat_type_list = []
@@ -296,6 +294,7 @@ class GenBank(object):
                 self.file.close()
 
     def name_fasta_file(self, accession, feat_type, feat_type_rank, extension, acc_dict):
+        """Provide a unique name for the fasta file."""
         gene = acc_dict[accession][0]
         organism = acc_dict[accession][1]
         # Create Handles for directories and file paths
@@ -314,6 +313,7 @@ class GenBank(object):
         return self.file
 
     def protein_gi_fetch(self, feature):
+        """Retrieve the gi number."""
         for x in feature.qualifiers:
             if 'GI' in x:
                 head, sup, gi_p = x.partition(':')
