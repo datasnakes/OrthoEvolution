@@ -4,7 +4,6 @@ openpyxl==2.4.7
 pexpect==4.2.1
 slacker==0.9.42
 biopython==1.68
-numpy==1.12.0
 tablib==0.11.4
 mygene==3.0.0
 cookiecutter==1.5.1
