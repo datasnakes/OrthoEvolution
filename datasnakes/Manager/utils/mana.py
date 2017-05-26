@@ -282,12 +282,13 @@ class UserMana(RepoMana):
 
         # TODO-ROB Add database files to the repository as well
         self.user_db = self.user_path / Path('databases')
+        self.ncbi_db_repo = self.user_db / Path('NCBI')
         self.user_index = self.user_path / Path('index')
         self.user_log = self.user_path / Path('log')
         self.manuscripts = self.user_path / Path('manuscripts')
         self.other = self.user_path / Path('other')
         self.projects = self.user_path / Path('projects')
-
+        # TODO-ROB Create a DB_mana class in a seperate file that interactsd with the ftp class
         if project:
             self.project = project
             self.project_path = self.projects / Path(project)

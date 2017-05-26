@@ -14,25 +14,25 @@ from datasnakes.Orthologs.CompGenetics import CompGenAnalysis as CGA
 # queries
 
 
-class Database2Genbank(CGA, UM):
+class GenBankMana(CGA, UM):
     """
     Extract target GenBank files from the database files that were created using
     ftp2db.
     """
 
-    def __init__(self, repo, user, project, m_file, genbank_update=False):
+    def __init__(self, repo, user, project, m_file, ncbi_db='', new_local_db=True):
+        # if new db is False then update the genbank files
+        self.GenBank_update = new_local_db
         # TODO-ROB Update the CGA.  I have yet to write functions for saving
         # the data post blast
-        CGA.__init__(acc_file=m_file, save_data=False)
-        UM.__init__(repo=repo, user=user, porject=project)
-        self.GenBank_update = genbank_update
+        CGA.__init__(repo=repo, user=user, project=project, acc_file=m_file, save_data=False)
+        UM.__init__(repo=repo, user=user, porject=project, database=['genbank'], new_db=new_local_db)
 
-    def gbk_gather(self):
+    def get_gbk_files(self):
         """Extract/download the genbank files from the database.
         """
-        os.chdir(self.databases)
-        db_name = []
 
+        db_name = []
         for file in os.listdir(os.getcwd()):
             if file.endswith('.db'):
                 db_name.append(str(file))
