@@ -4,6 +4,7 @@ necessary requirements.
 References:
 https://github.com/pypa/sampleproject/blob/master/setup.py
 https://github.com/biopython/biopython/blob/master/setup.py
+http://python-packaging.readthedocs.io/en/latest/index.html
 """
 # Modules Used
 from setuptools import setup, find_packages
