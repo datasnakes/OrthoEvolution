@@ -325,6 +325,7 @@ class CompGenAnalysis(ProjectManagement):
             tier_frame_dict[tier] = maf.groupby('Tier').get_group(tier)
         return tier_frame_dict
 
+    # TODO-ROB turn into a utility
     def paml_org_formatter(self):
         org_list = []
         for organism in self.org_list:
