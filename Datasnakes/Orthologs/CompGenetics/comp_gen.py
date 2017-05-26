@@ -164,8 +164,8 @@ class CompGenAnalysis(ProjectManagement):
 # ***********************************************PRE BLAST ANALYSIS TOOLS********************************************* #
 # ***********************************************PRE BLAST ANALYSIS TOOLS********************************************* #
 #     def my_gene_info(self):
-#         # TODO-ROB TODO-SHAE
-#         # TODO Add custom mygene options
+#         # TODO-ROB
+#         # TODO-SDH Add custom mygene options
 #         # Initialize variables and import my-gene search command
 #         urls = []
 #         df = self.raw_acc_data
@@ -202,6 +202,7 @@ class CompGenAnalysis(ProjectManagement):
 
     def get_master_lists(self, df=None, csv_file=None):
         """This function populates the organism and gene lists with a data frame.
+
         This function also populates several dictionaries.
         The dictionaries contain separate keys for Missing genes.
         """
@@ -326,6 +327,7 @@ class CompGenAnalysis(ProjectManagement):
         return tier_frame_dict
 
     # TODO-ROB turn into a utility
+    # XXX PAML no longer needs a format different than `Homo_sapiens`
     def paml_org_formatter(self):
         org_list = []
         for organism in self.org_list:
@@ -362,6 +364,7 @@ class CompGenAnalysis(ProjectManagement):
         """
         This function takes a list of accession numbers and returns a dictionary
         which contains the corresponding genes/organisms.
+
         :return: A dictionary with values that are nested lists.  Unique accessions
         will have a nested list with a length of 1.  Accessions that are duplicated
         will have a nested list with a length > 1.
@@ -383,8 +386,7 @@ class CompGenAnalysis(ProjectManagement):
         return go
 
     def get_dup_acc(self):
-        """
-        Get duplicate accessions.
+        """Get duplicate accessions.
         This function is used to analyze an accession file post-BLAST.
         It uses the accession dictionary as a base.
 
