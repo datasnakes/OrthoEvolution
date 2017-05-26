@@ -29,10 +29,47 @@ class GenBank(object):
         self.gbk_path = Path(gbk_path) / Path('genbank')
         self.target_gbk_files_path = self.gbk_path / Path('gbk')
         self.target_gbk_db_path = self.gbk_path / Path('db')
-        self.target_fasta_files = self.gbk_path / Path('solo')
+        self.target_fasta_files = self.gbk_path / Path('fasta')
         self.solo = solo
         self.multi = multi
         self.min_fasta = min_fasta
+
+    @staticmethod
+    def name_fasta_file(path, gene, org, feat_type, feat_type_rank, extension, mode):
+        """Provide a unique name for the fasta file."""
+
+        # Create path variables.
+        feat_path = path / Path(feat_type) / Path(gene)
+        if mode == 'w':
+            file_path = feat_path / Path('%s_%s_%s%s' % (gene, org, feat_type_rank, extension))
+        elif mode == 'a':
+            file_path = feat_path / Path('%s_%s%s' % (gene, feat_type_rank, extension))
+
+        # Make the base directory and return an open file.
+        feat_path.mkdir(parents=True, exist_ok=True)
+        file = open(file_path, mode)
+        return file
+
+    @staticmethod
+    def protein_gi_fetch(feature):
+        """Retrieve the protein gi number."""
+
+        # Find the protein gi number under the features qualifiers.
+        for x in feature.qualifiers:
+            if 'GI' in x:
+                head, sup, p_gi = x.partition(':')
+                return p_gi
+
+    @staticmethod
+    def gbk_dir_config(path, tier_frame_dict):
+        # TODO-ROB Create a generator function
+        for G_KEY, G_value in tier_frame_dict.items():
+            tier = G_KEY
+            tier_path = path / Path(tier)
+            Path.mkdir(tier_path, parents=True, exist_ok=True)
+            for GENE in tier_frame_dict[tier].T:
+                gene_path = tier_path / Path(GENE)
+                Path.mkdir(gene_path)
 
     def get_gbk_files(self, tier_frame_dict, org_list, gene_dict):
         """Extract/download the genbank files from the database."""
@@ -73,6 +110,29 @@ class GenBank(object):
                             except IndexError:
                                 print('Index Error in %s.  Moving to the next database...' % SUB_DB_NAME)
                                 continue
+
+    def get_fasta_files(self, acc_dict, db=True):
+        """Create FASTA files for every GenBank record."""
+
+        # Get FASTA files from the BioSQL GenBank databases.
+        if db is True:
+            for database in os.listdir(str(self.target_gbk_db_path)):
+                server = BioSeqDatabase.open_database(driver="sqlite3", db=database)
+                try:
+                    for db_name in server.keys():
+                        db = server[db_name]
+                        for item in db.keys():
+                            record = db.lookup(item)
+                            self.write_fasta_files(record, acc_dict)
+                except:
+                    raise()
+        # Get FASTA files from the GenBank files.
+        elif db is False:
+            for root, dirs, gbk_files in os.walk(str(self.target_gbk_files_path)):
+                for gbk_file in gbk_files:
+                    if Path(gbk_file).suffix is '.gbk':
+                        record = SeqIO.read(gbk_file, 'genbank')
+                        self.write_fasta_files(record, acc_dict)
 
     def gbk_upload(self):
         """Upload the BioSQL database with genbank data."""
@@ -117,204 +177,129 @@ class GenBank(object):
                             raise
                         raise
 
-    def get_fasta_files(self, acc_dict):
-        """Create FASTA files for every GenBank record in the databases."""
-        for database in os.listdir(str(self.target_gbk_db_path)):
-            server = BioSeqDatabase.open_database(driver="sqlite3", db=database)
-            try:
-                for db_name in server.keys():
-                    db = server[db_name]
-                    for item in db.keys():
-                        record = db.lookup(item)
-
-                        self.write_fasta_files(record, acc_dict)
-            except:
-                raise()
-
     def write_fasta_files(self, record, acc_dict):
         """Initialize writing a fasta sequence or feature to a file."""
-        min = self.min_fasta
-        if self.solo is True:
-            self.sol_fasta(record, acc_dict, min)
-        if self.multi is True:
-            self.multi_fasta(record, acc_dict, min)
-
         feat_type_list = []
         for feature in record.features:
-            # TODO-ROB logic for self.multi
-            m = 'multi'
+            # ############ Set up variables to use for dictionary values ############# #
+            # Basic variables.
             accession = record.id
-            try:
-                organism = acc_dict[accession][1]
-            except KeyError:
-                accession = str(record.id).lower()
-                organism = acc_dict[accession][1]
-            gi = record.annotations['gi']
+            gene = acc_dict[accession][0]
+            organism = acc_dict[accession][1]
+            # Variable for minimalistic FASTA files.
+            genus, sep, species = organism.partition('_')
+            min_org = str(''.join([genus[0], sep, species[0:28]]))
 
+            # Keep a list of feature types to identify duplicates (for naming the FASTA files).
+            # The first iteration of the feature type contains no number.
+            # The following iterations are concatenated with a number.
             feat_type = str(feature.type)
             feat_type_list.append(feat_type)
-
-            # Add this in the name_fasta_file definition
-            # If there are duplicates of feature.type
-            # then add a number to the end of the name
-            x = feat_type_list.count(feat_type)  # Number of duplicates
-            feat_type_rank = feat_type + str(x)  # Adding the number to the name of the feature.type
-            if x == 1:
+            duplicate_num = feat_type_list.count(feat_type)
+            if duplicate_num == 1:
                 feat_type_rank = feat_type
+            else:
+                feat_type_rank = feat_type + str(duplicate_num)
+            # ############ End ############# #
 
-    def solo_fasta(self, record, acc_dict, min):
+            # ######### Create a dictionary and format FASTA file entries. ######### #
+            fmt = {
+                'na_gi': str(record.annotations['gi']),
+                'aa_gi': str(self.protein_gi_fetch(feature)),
+                'na_acc_n': str(accession),
+                'aa_acc_n': str(feature.qualifiers['protein_id'][0]),
+                'na_description': str(record.description),
+                'aa_description': str(feature.qualifiers['product'][0]),
+                'na_seq': str(feature.extract(record.seq)),
+                'aa_seq': str(feature.qualifiers['translation'][0]),
+                'na_misc_feat': str(feature.qualifiers['note'][0]),
+                'org': str(organism),
+                'gene': str(gene),
+                'min_org': str(min_org),
+                'feat_type': str(feat_type),
+                'feat_type_rank': str(feat_type_rank),
+                'path': self.target_fasta_files
+            }
+            # Set up minimalistic FASTA headers and sequence entries for Nucleic Acid and Amino Acid sequences.
+            na_entry = ">{min_org}\n{na_seq}\n".format(**fmt)
+            aa_entry = ">{min_org}\n{aa_seq}\n".format(**fmt)
+            # For full FASTA headers/sequences set min_fasta to False
+            if self.min_fasta is False:
+                na_entry = ">gi|{na_gi}|ref|{na_acc_n}| {na_description}\n{na_seq}\n".format(**fmt)
+                aa_entry = ">gi|{aa_gi}|reg|{aa_acc_n}| {aa_description} {org}\n{aa_seq}\n".format(**fmt)
+            # ######### End ######### #
+
+            # ############ Write desired FASTA files ############ #
+            if self.solo is True:
+                self.solo_fasta(na_entry, aa_entry, fmt)
+            if self.multi is True:
+                self.multi_fasta(na_entry, aa_entry, fmt)
+
+    def solo_fasta(self, na_entry, aa_entry, fmt):
         """Write a feature to a file."""
-        print('')
+        mode = 'w'
 
-        feat_type_list = []
-        for feature in record.features:
-            # TODO-ROB logic for self.multi
-            m = 'multi'
-            accession = record.id
-            try:
-                organism = acc_dict[accession][1]
-            except KeyError:
-                accession = str(record.id).lower()
-                organism = acc_dict[accession][1]
-            gi = record.annotations['gi']
+        # Create the desired variables from the formatter dictionary.
+        feat_type = fmt['feat_type']
+        feat_type_rank = fmt['feat_type_rank']
+        path = fmt['path']
+        gene = fmt['gene']
+        org = fmt['org']
 
-            feat_type = str(feature.type)
-            feat_type_list.append(feat_type)
+        if feat_type == "CDS":
+            # Create a .ffn file (FASTA for Coding Nucleic Acids)
+            extension = '.ffn'
+            file = self.name_fasta_file(path, gene, org, feat_type, feat_type_rank, extension, mode)
+            file.write(na_entry)
+            file.close()
+            # Create a .faa file (FASTA for Amino Acids)
+            extension = '.faa'
+            file = self.name_fasta_file(path, gene, org, 'Protein', feat_type_rank, extension, mode)
+            file.write(aa_entry)
+            file.close()
 
-            # Add this in the name_fasta_file definition
-            # If there are duplicates of feature.type
-            # then add a number to the end of the name
-            x = feat_type_list.count(feat_type)  # Number of duplicates
-            feat_type_rank = feat_type + str(x)  # Adding the number to the name of the feature.type
-            if x == 1:
-                feat_type_rank = feat_type
-            if feat_type == "CDS":
+        elif feat_type == "misc_feature":
+            # Create a custom entry for miscellaneous features.
+            na_entry = ">gi|{na_gi}|ref|{na_acc_n}| {na_description} Feature: {na_misc_feat}\n{na_seq}\n".format(**fmt)
+            # Creates .fna files (generic FASTA file for Nucleic Acids)
+            extension = '.fna'
+            file = self.name_fasta_file(path, gene, org, feat_type, feat_type_rank, extension, mode)
+            file.write(na_entry)
+            file.close()
 
-                # Create a .ffn file (FASTA for Coding Nucleic Acids)
-                self.file = self.name_fasta_file(accession, feat_type, feat_type_rank, extension='.ffn')
-                self.file.write(">gi|" + gi + "|ref|" + accession + '| ' + record.description + "\n"
-                                + str(feature.extract(record.seq)))
-                self.file.close()
+        elif feat_type != "variation":
+            # Creates .fasta files (generic FASTA file)
+            extension = '.fasta'
+            file = self.name_fasta_file(path, gene, org, 'Other', feat_type_rank, extension, mode)
+            file.write(na_entry)
+            file.close()
 
-                # Create a .faa file (FASTA for Amino Acids)
-                self.file = self.name_fasta_file(accession, 'Protein', feat_type_rank, extension='.faa')
-                gi_p = self.protein_gi_fetch(feature)
-                self.file.write(">gi|" + str(gi_p) + "|ref|"
-                                + str(feature.qualifiers['protein_id'][0]) + '| '
-                                + str(feature.qualifiers['product'][0]) + ' ' + str(organism) + '\n'
-                                + str(feature.qualifiers['translation'][0]))
-                self.file.close()
-
-            elif feat_type == "misc_feature":
-
-                # Creates .fna files (generic FASTA file for Nucleic Acids)
-                self.file = self.name_fasta_file(accession, feat_type, feat_type_rank, extension='.fna')
-                self.file.write(">gi|" + gi + "|ref|" + accession + '| ' + record.description
-                                + ' Feature: ' + str(feature.qualifiers['note'][0]) + '\n'
-                                + str(feature.extract(record.seq)))
-                self.file.close()
-
-            elif feat_type != "variation":
-                print(feat_type)
-                # Creates .fasta files (generic FASTA file)
-                self.file = self.name_fasta_file(accession, 'Other', feat_type_rank, extension='.fasta')
-                self.file.write(">gi|" + gi + "|ref|" + accession + '| ' + record.description + "\n"
-                                + str(feature.extract(record.seq)) + "\n")
-                self.file.close()
-
-                self.file = self.name_fasta_file(accession, 'Other', feat_type_rank, extension='.fasta')
-                self.file.write(">gi|" + gi + "|ref|" + accession + '| ' + record.description + "\n"
-                                + str(feature.extract(record.seq)) + "\n")
-                self.file.close()
-
-    def multi_fasta(self, record, acc_dict, min):
+    def multi_fasta(self, na_entry, aa_entry, fmt):
         """Write multiple fasta files."""
-        print('')
+        mode = 'a'
 
-        feat_type_list = []
-        for feature in record.features:
-            # TODO-ROB logic for self.multi
-            m = 'multi'
-            accession = record.id
-            try:
-                organism = acc_dict[accession][1]
-            except KeyError:
-                accession = str(record.id).lower()
-                organism = acc_dict[accession][1]
-            gi = record.annotations['gi']
+        # Create the desired variables from the formatter dictionary.
+        feat_type = fmt['feat_type']
+        feat_type_rank = fmt['feat_type_rank']
+        path = fmt['path']
+        gene = fmt['gene']
+        org = fmt['org']
 
-            feat_type = str(feature.type)
-            feat_type_list.append(feat_type)
-
-            # Add this in the name_fasta_file definition
-            # If there are duplicates of feature.type
-            # then add a number to the end of the name
-            x = feat_type_list.count(feat_type)  # Number of duplicates
-            feat_type_rank = feat_type + str(x)  # Adding the number to the name of the feature.type
-            if x == 1:
-                feat_type_rank = feat_type
-            if feat_type == "CDS":
-
-                # Create a MASTER .ffn file (multi-FASTA file for Coding Nucleic Acids)
-                self.file = self.name_fasta_file(accession, m, feat_type_rank, extension='.ffn')
-                self.file.write(">gi|" + gi + "|ref|" + accession + '| ' + record.description + "\n"
-                                + str(feature.extract(record.seq)) + "\n")
-                self.file.close()
-
-                # Create a MASTER .faa file (multi-FASTA file for Amino Acids)
-                self.file = self.name_fasta_file(accession, m, feat_type_rank, extension='.faa')
-                gi_p = self.protein_gi_fetch(feature)
-                self.file.write(">gi|" + str(gi_p) + "|ref|"
-                                + str(feature.qualifiers['protein_id'][0]) + '| '
-                                + str(feature.qualifiers['product'][0]) + ' ' + organism + '\n'
-                                + str(feature.qualifiers['translation'][0]) + '\n')
-                self.file.close()
-
-            elif feat_type == "misc_feature":
-
-                # Creates .fna files (generic FASTA file for Nucleic Acids)
-                self.file = self.name_fasta_file(accession, m, feat_type_rank, extension='.fna')
-                self.file.write(">gi|" + gi + "|ref|" + accession + '| ' + record.description
-                                + ' Feature: ' + str(feature.qualifiers['note'][0]) + '\n'
-                                + str(feature.extract(record.seq)) + "\n")
-                self.file.close()
-
-            elif feat_type != "variation":
-                # TODO-ROB: fix for multifasta
-                print(feat_type)
-                # Creates .fasta files (generic FASTA file)
-                self.file = self.name_fasta_file(accession, 'Other', feat_type_rank, extension='.fasta')
-                self.file.write(">gi|" + gi + "|ref|" + accession + '| ' + record.description + "\n"
-                                + str(feature.extract(record.seq)) + "\n")
-                self.file.close()
-
-                self.file = self.name_fasta_file(accession, 'Other', feat_type_rank, extension='.fasta')
-                self.file.write(">gi|" + gi + "|ref|" + accession + '| ' + record.description + "\n"
-                                + str(feature.extract(record.seq)) + "\n")
-                self.file.close()
-
-    def name_fasta_file(self, accession, feat_type, feat_type_rank, extension, acc_dict):
-        """Provide a unique name for the fasta file."""
-        gene = acc_dict[accession][0]
-        organism = acc_dict[accession][1]
-        # Create Handles for directories and file paths
-        gene_feat_type_path = self.target_fasta_files / Path(feat_type) / Path(gene)
-        file_path = gene_feat_type_path / Path('%s_%s_%s%s' % (gene, organism, feat_type_rank, extension))
-        multi_file_path = gene_feat_type_path / Path('%s_%s%s' % (gene, feat_type_rank, extension))
-        # Make the base directory
-        gene_feat_type_path.mkdir(parents=True, exist_ok=True)
-
-        if feat_type == 'MASTER':
-            mode = 'a'
-            self.file = open(multi_file_path, mode)
-        else:
-            mode = 'w'
-            self.file = open(file_path, mode)
-        return self.file
-
-    def protein_gi_fetch(self, feature):
-        """Retrieve the gi number."""
-        for x in feature.qualifiers:
-            if 'GI' in x:
-                head, sup, gi_p = x.partition(':')
-                return gi_p
+        if feat_type == "CDS":
+            # Create a MASTER .ffn file (multi-FASTA file for Coding Nucleic Acids)
+            extension = '.ffn'
+            file = self.name_fasta_file(path, gene, org, feat_type, feat_type_rank, extension, mode)
+            file.write(na_entry)
+            file.close()
+            # Create a MASTER .faa file (multi-FASTA file for Amino Acids)
+            extension = '.faa'
+            file = self.name_fasta_file(path, gene, org, feat_type, feat_type_rank, extension, mode)
+            file.write(aa_entry)
+            file.close()
+        elif feat_type == "misc_feature":
+            na_entry = ">gi|{na_gi}|ref|{na_acc_n}| {na_description} Feature: {na_misc_feat}\n{na_seq}\n".format(**fmt)
+            # Creates .fna files (generic FASTA file for Nucleic Acids)
+            extension = '.fna'
+            file = self.name_fasta_file(path, gene, org, feat_type, feat_type_rank, extension, mode)
+            file.write(na_entry)
+            file.close()
