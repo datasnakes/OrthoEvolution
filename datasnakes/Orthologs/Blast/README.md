@@ -1,6 +1,6 @@
-Blast
+Blast Documentation
 -------------------------
-Use NCBI's standalone blast
+Use NCBI's standalone blast to generate 
 
 
 Usage

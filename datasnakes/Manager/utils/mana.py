@@ -1,8 +1,6 @@
-# -*- coding: utf-8 -*-
-# Modules Used
+"""Management tools for the package."""
 import os
 from pathlib import Path
-
 import ete3
 from datasnakes.Manager.utils.treelib2.treelib2.tree import Tree
 from datasnakes.Manager.utils.zipper import ZipUtils
@@ -10,21 +8,15 @@ from cookiecutter.hooks import run_script
 from cookiecutter.main import cookiecutter
 from cookiecutter.prompt import prompt_for_config
 from cookiecutter.generate import generate_context
-
 # TODO-ROB once this is a pypi package all of these will be unnecessary
 from datasnakes import Cookies, Orthologs, Manager, Tools
-
-
 # from Manager.logit.logit import LogIt
-
-#------------------------------------------------------------------------------
 # TODO-ROB use **kwargs and **args to cut down on parameters
 
-
 class Mana(object):
-    """
-    This is the directory management base class.  It
-    maps the directories in the PyPi package using the pathlib module and
+    """This is the directory management base class.
+
+    It maps the directories in the PyPi package using the pathlib module and
     turns the names of each important directory into a pathlike object.  The
     base class gives the option of creating a new repository with cookiecutter.
 
@@ -86,7 +78,6 @@ class Mana(object):
         #log = LogIt('user/path/userfile.log', 'Directory Management')
         #self.dm_log = log.basic
 
-#------------------------------------------------------------------------------
     def create_repo(self):
         print('creating dirs from repo cookie')
         print(self.__class__.__name__)
@@ -110,7 +101,6 @@ class Mana(object):
                      extra_context=e_c, output_dir=str(self.file_home))
         os.chmod(str(self.file_home / Path(self.repo)), mode=0o777)
 
-#------------------------------------------------------------------------------
     # def git_ignore(self, path):
     #     """Get the ignored file patterns from the .gitignore file in the repo."""
     #     with open(Path(path) / Path('.gitignore'), 'r', newline='') as ignore:
@@ -146,7 +136,6 @@ class Mana(object):
     #             tree.create_node(f, parent=root)
     #     return tree
 
-#------------------------------------------------------------------------------
     def get_newick_dir_map(self, top, ignore=None):
         """Takes a treelib tree created by get_dir_map and returns
         a tree a dir_map in newick format.  This will be useful for Bio.Phylo
@@ -160,7 +149,7 @@ class Mana(object):
         """
 
         tree = Tree()
-        t = tree.get_dir_map(top, ignore)
+        #t = tree.get_dir_map(top, ignore)
         Ntree = tree.parse_newick_json()
         return Ntree
 
@@ -190,11 +179,8 @@ class Mana(object):
     #     # Use the path that you want to update/add to
     #     # Returns path and the time stamp (could be None)
 
-#------------------------------------------------------------------------------
-
-
 class RepoMana(Mana):
-
+    """Repository Management."""
     def __init__(self, repo, user=None, home=os.getcwd(),
                  new_user=False, new_repo=False):
         """
@@ -349,18 +335,14 @@ class UserMana(RepoMana):
         # TODO-ROB add proper destination syntax.
         print('%s is being sent to %s' % (Zipper_path, destination))
 
-#------------------------------------------------------------------------------
-
-
 class WebMana(RepoMana):
-    """Web Management Class.
-    """
+    """Web Management Class."""
 
     def __init__(self, repo, website, host='0.0.0.0', port='5252',
                  home=os.getcwd(), new_website=False, create_admin=False, **kwargs):
-        '''
-        This installs a template for Flask using cookiecutter.  The
-        custom datasnakes cookie for this template has been edited for
+        """Install a template for Flask using cookiecutter.
+
+        The custom datasnakes cookie for this template has been edited for
         our own purposes.
 
         :param repo (string):  The name of the repository.
@@ -373,7 +355,7 @@ class WebMana(RepoMana):
         :param new_website (bool):  Flag for creating a new website
         :param create_admin:  Flag for creating a new admin for the website via FLASK USER.
         (Note:  This parameter is not used currently in development.)
-        '''
+        """
         super().__init__(repo=repo, home=home, **kwargs)
         self.website = website
         self.web_host = host
@@ -388,8 +370,8 @@ class WebMana(RepoMana):
             self.create_website()
 
     def create_website(self):
-        '''
-        To create a website, the new_website cookie is used.
+        """Create a website using the new_website cookie.
+
         After creating the directory structure, the run_script function
         from cookiecutter finds the hooks folder which contains a
         post-cookiecutter-template-generation bash script.  The bash script
@@ -397,7 +379,7 @@ class WebMana(RepoMana):
         and runs the website on the specified host and port
 
         :return: Runs the website.
-        '''
+        """
         # TODO-ROB Add heavy logging here
         e_c = {"website_name": self.website,
                "website_path": os.path.join(str(self.website_path), ''),
@@ -413,12 +395,12 @@ class WebMana(RepoMana):
         # TODO-ROB add screening to the bash script for flask run -h -p
         run_script(script_path=str(script_path), cwd=str(self.website_path))
 
-#------------------------------------------------------------------------------
-
+    def stop_server(self):
+        """Stop the server running the website."""
+        # TODO-SDH Add way to stop the server from running.
 
 class ProjMana(UserMana):
-    """Project Management Class.
-    """
+    """Project Management Class."""
 
     def __init__(self, repo, user, project, research=None, research_type=None,
                  app=None, home=os.getcwd(), new_project=False, new_research=False,
@@ -478,6 +460,7 @@ class ProjMana(UserMana):
             self.create_app()
 
     def create_app(self):
+        """Create an app."""
         e_c = {"app_name": self.app}
         cookiecutter(str(self.app_cookie), no_input=True,
                      extra_context=e_c, output_dir=str(self.app_path))

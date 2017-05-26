@@ -1,11 +1,9 @@
-"""
-Test the PhyML executable.
-source = https://github.com/biopython/biopython/blob/master/Tests/test_phyml_tool.py
+"""Test the PhyML executable.
+https://github.com/biopython/biopython/blob/master/Tests/test_phyml_tool.py
 """
 import sys
 import os
 import unittest
-
 from Bio import Phylo
 from Bio.Phylo.Applications import PhymlCommandline
 from Bio import MissingExternalDependencyError
@@ -26,7 +24,6 @@ class PhymlTest(unittest.TestCase):
             if "not found" not in output and "20" in output:
                 phyml_exe = exe_name
         except OSError:
-            # TODO: Use FileNotFoundError once we drop Python 2
             # Python 2.6 or 2.7 on Windows XP:
             # WindowsError: [Error 2] The system cannot find the file specified
             # Python 3.3 or 3.4 on Windows XP:
@@ -36,7 +33,8 @@ class PhymlTest(unittest.TestCase):
 
         if not phyml_exe:
             raise MissingExternalDependencyError(
-                "Install PhyML 3.0 if you want to use the Bio.Phylo.Applications wrapper.")
+                "Install PhyML 3.0 if you want to use the \
+                Bio.Phylo.Applications wrapper.")
 
         # Example Phylip file with 13 aligned protein sequences
         EX_PHYLIP = 'HTR1E_aligned.phy'

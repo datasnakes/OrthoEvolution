@@ -1,20 +1,15 @@
-# -*- coding: utf-8 -*-
-"""
-File Name:
-Description:
-
-Author: S. Hutchins
-Date Created: Mon May  8 11:09:04 2017
-Project Name: Orthologs Project
-"""
+"""A user-friendly Bash module for Python."""
+# TODO-SDH It may be helpful to use psutil for pybasher.
+# TODO-SDH Finish pybasher ASAP
+# TODO-SDH Look at some examples for pybasher.
+# TODO-SDH Update the README for pybasher
 from subprocess import call, check_output
 import os
 
-#------------------------------------------------------------------------------
 
-
-class CleanUp(object):
+class PyBasher(object):
     def __init__(self, cmd):
+        # TODO-SDH Test if this is working.
         c = call([cmd], shell=True)
         return c
 

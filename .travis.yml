@@ -3,7 +3,12 @@ python:
   - "3.4"
   - "3.5"
   - "3.6"
+notifications:
+  email: false
 # command to install dependencies
-install: "pip install -r requirements.txt"
+install:
+  - "pip install --upgrade pip setuptools wheel"
+  - "pip install --only-binary=numpy,scipy numpy==1.12.0 scipy==0.18.1"
+  - "pip install -r requirements.txt"
 # command to run nosetests
-script: nosetests datasnakes/Tests/* --verbosity=3
+script: nosetests datasnakes/Tests/test_orthologs.py --verbosity=3

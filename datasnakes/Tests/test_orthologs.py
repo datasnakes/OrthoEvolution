@@ -6,7 +6,7 @@ from datasnakes.Orthologs import Phylogenetics as Phylo
 #from Orthologs import OrthologsDevelopmentWarning
 
 help(Phylo)
-#class TestOrthologs(unittest.TestCase):
+#class Orthologs_Tests(unittest.TestCase):
 #    """Test the Orthologs Package."""
 #    def test_phylo(self):
 #        """Test the Phylogenetics modules."""
@@ -23,5 +23,5 @@ help(Phylo)
 ##        """Test the BioSQL module."""
 ##
 ##
-## class TestManager(unittest.TestCase):
-##    """Test the Manager Package."""
+
+# TODO-SDH Write tests for Orthologs module.

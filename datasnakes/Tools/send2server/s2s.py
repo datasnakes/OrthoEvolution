@@ -1,13 +1,4 @@
-# -*- coding: utf-8 -*-
-"""
-File Name:
-Description: s2s sets up sending files to servers via public SSH keys.
-
-Author: S. Hutchins
-Date Created: Tue Apr 11 12:31:17 2017
-Project Name: Orthologs Project
-"""
-
+"""s2s sets up sending files to servers via public SSH keys."""
 import os
 from pathlib import Path
 #import logging as log
@@ -18,9 +9,10 @@ import zipfile
 import subprocess
 
 
-# ------------------------------------------------------------------------------
 class S2S(object):
     """S2S (Send 2 Server) is designed for use with a public ssh key."""
+    # TIP Create a public key to use this class. It's easy!
+    # TIP Go here if Linux >>> http://tinyurl.com/pccz3pj
 
     def __init__(self, username=None, server_address=None, dest_path=None,
                  remote=True, comp_filename='', zip_path=None, compressed=True, auto=False):
@@ -39,8 +31,8 @@ class S2S(object):
         self.dest_path = dest_path
         self.comp_filename = comp_filename
         self.zip_path = zip_path
-        self.send_cmd = "scp %s %s@%s:%s" % (
-            self.comp_filename, self.user, self.address, self.dest_path)
+        self.send_cmd = "scp %s %s@%s:%s" % (self.comp_filename, self.user,
+                                             self.address, self.dest_path)
         # TODO-ROB Fix this for recursive directory or just a file
         self.copy_cmd = 'cp -R %s/%s %s' % (self.zip_path,
                                             self.comp_filename, self.dest_path)
@@ -53,6 +45,7 @@ class S2S(object):
                     self.cpto(self.comp_filename)
 
     def scpto(self, file):
+        """Send the file."""
         cmd = self.send_cmd
         status = subprocess.call([cmd], shell=True)
         if status == 0:  # Command was successful.
@@ -71,7 +64,7 @@ class S2S(object):
             print("%s file not sent." % file)
 
     def to_zip(self):
-        # Inspired by http://stackoverflow.com/a/670635/7351746
+        # XXX Inspired by http://tinyurl.com/y7uxn2dk
         comp_path = os.path.join(self.zip_path, self.comp_filename)
         zip_handle = zipfile.ZipFile(comp_path, 'w', zipfile.ZIP_DEFLATED)
         if os.path.isfile(self.zip_path):
@@ -83,9 +76,8 @@ class S2S(object):
         return comp_path
 
     def add_folder_to_zip(self, zip_handle, folder):
-        """
-        Not meant to be used explicitly.  Use to_zip.
-        """
+        """Not meant to be used explicitly.  Use to_zip."""
+        # XXX Use to_zip !!!
         for file in os.listdir(folder):
             full_path = os.path.join(folder, file)
             rel_path = Path(full_path)
