@@ -1,5 +1,6 @@
 """Collection of tools for using PBS, a job scheduler for high-performance
-computing environments. The command is usually `qsub <options>` on most systems.
+computing environments. The command is usually `qsub <options>` on most
+systems.
 """
 import os
 import random
@@ -9,15 +10,23 @@ from string import Template
 from datetime import datetime as d
 import sys
 
+
 class CreateJob(object):
+    """Create a pbs job and submit it using qsub.
+
+    This class also provides functionality for creating multiple pbs jobs that
+    by creating chunks of lists for each python script and job.
+    """
     def __init__():
         """UNLESS A WINDOWS MACHINE HAS PBS (IT LIKELY WONT)"""
+        # XXX This class is optimized for Linux!
         if sys.platform == 'win32' or 'win64':
             sys.exit("This module is strictly for use on Linux at the moment.")
 
     def import_temp(filepath):
-        """Import the script or file that you need a template of and that has temp
-        strings."""
+        """Import the script or file that you need a template of and that has
+        temp strings.
+        """
         file_temp = open(filepath, 'r')
         file_str = file_temp.read()
         file_temp.close()
@@ -36,8 +45,9 @@ class CreateJob(object):
         return ''.join(random.sample(
             string.ascii_letters + string.digits, length))
 
-    def submitpythoncode(self, code, author, pbstemp='temp.pbs',
-                         jobname="job", cleanup=True, prefix="", slots=1):
+    def submitpythoncode(self, code, author, python="python3",
+                         pbstemp='temp.pbs', jobname="job", cleanup=True,
+                         prefix="", slots=1):
         """Creates and submit a qsub jobs. Also use python code."""
 
         format1 = '%a %b %d %I:%M:%S %p %Y'  # Used to add as a date
@@ -50,9 +60,9 @@ class CreateJob(object):
             pyfile.write(code)
             pyfile.close()
 
-        # This is the "command" for running the python script. If python is in
-        # your environment as only 'python' update that here.
-        script = "python3 " + base + ".py"
+        # This is the "command" for running the python script.
+        # TIP If python is in your environment as only 'python' update that.
+        script = python + " " + base + ".py"
 
         pbs_dict = {
             'author': author,
@@ -79,18 +89,20 @@ class CreateJob(object):
         # Submit the qsub job using subprocess
         try:
             cmd = 'qsub  ' + base + '.pbs'  # this is the command
-            cmd_status = subprocess.call([cmd], shell=True)  # Shell must be TRUE
+            cmd_status = subprocess.call([cmd], shell=True)  # must = TRUE
             if cmd_status == 0:  # Command was successful.
                 pass  # Continue
             else:  # Unsuccessful. Stdout will be '1'.
                 print("PBS job not submitted.")
         finally:
-            if cleanup:  # When finished, remove the qsub files and python files.
+            if cleanup:  # When finished, remove the qsub files & python files.
                 os.remove(base + '.qsub')
                 os.remove(base + '.py')
 
     def MultipleJobs(self):
-        """Create multiple jobs & scripts for each job to run based on splitting a list into chunks."""
+        """Create multiple jobs & scripts for each job to run based on
+        splitting a list into chunks.
+        """
 #        # Modules used
 #        from QsubTools import SubmitPythonCode, ImportTemp
 #        from multiprocess_functions import genes2align
