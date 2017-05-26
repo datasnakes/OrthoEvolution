@@ -6,12 +6,15 @@ import subprocess
 import time  # Used to delay when dealing with NCBI server errors
 from datetime import datetime as d
 from pathlib import Path
-#import psutil
+
+import psutil
 import pandas as pd
 from Bio import SearchIO  # Used for parsing and sorting XML files.
 # Used for Local Blasting.
 from Bio.Blast.Applications import NcbiblastnCommandline
-from datasnakes.Orthologs.CompGenetics.ncbi_blast import BLASTAnalysis as BT
+from Datasnakes.Orthologs.CompGenetics import BLASTAnalysis as BT
+
+
 # TODO-ROB: Find packages for script timing and analysis
 
 
@@ -71,8 +74,7 @@ class BLASTn(BT):
         """
         # os.chdir(str(self.__output_path))
         self.blastn_log.info(
-            '***********************************BLAST CONFIG START************ \
-            ***********************\n\n\n')
+            '***********************************BLAST CONFIG START***********************************\n\n\n')
         self.blastn_log.info('Configuring the accession file...')
 
         # Update the gene_list based on the existence of a incomplete blast
@@ -114,7 +116,7 @@ class BLASTn(BT):
 
             # Save sequence data in FASTA file format and print the gi number to stdout with a custom BLAST extraction
             # https://www.ncbi.nlm.nih.gov/books/NBK279689/#_cookbook_Custom_data_extraction_and_form_
-            # TODO-SDH Combine these BLAST extractions???
+            # TODO-ROB:  TODO-SHAE:Combine these BLAST extractions???
             fmt = {
                 'query': query,
                 'temp fasta': str(
@@ -134,7 +136,7 @@ class BLASTn(BT):
                     self.blastn_log.error(
                         "GI number for %s not found in the BLAST extraction" %
                         query)
-                    # TODO-SDH Is this the correct move below???
+                    # TODO-ROB: TODO-SHAE: Is this the correct move below???
                     self.blastn_log.error(
                         "Removing %s from the BLAST list..." % gene)
                     self.gene_list.remove(gene)

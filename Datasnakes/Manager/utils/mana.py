@@ -1,16 +1,16 @@
 """Management tools for the package."""
+from Datasnakes import Cookies, Orthologs, Manager, Tools
 import os
 from pathlib import Path
 import ete3
-from datasnakes.Manager.utils.treelib2.treelib2.tree import Tree
-from datasnakes.Manager.utils.zipper import ZipUtils
+from treelib2.treelib2.tree import Tree
+from Datasnakes.Manager.utils.zipper import ZipUtils
 from cookiecutter.hooks import run_script
 from cookiecutter.main import cookiecutter
 from cookiecutter.prompt import prompt_for_config
 from cookiecutter.generate import generate_context
-# TODO-ROB once this is a pypi package all of these will be unnecessary
-from datasnakes import Cookies, Orthologs, Manager, Tools
 # from Manager.logit.logit import LogIt
+
 # TODO-ROB use **kwargs and **args to cut down on parameters
 
 class Mana(object):
@@ -149,7 +149,7 @@ class Mana(object):
         """
 
         tree = Tree()
-        #t = tree.get_dir_map(top, ignore)
+        t = tree.get_dir_map(top, ignore)
         Ntree = tree.parse_newick_json()
         return Ntree
 
@@ -215,7 +215,6 @@ class RepoMana(Mana):
         if new_user is True:
             self.create_user()
 
-#------------------------------------------------------------------------------
     def create_user(self):
         """This function uses the username given by our FLASK framework
         and creates a new directory system for the active user using

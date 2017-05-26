@@ -3,15 +3,15 @@
 import warnings
 
 from Bio import AlignIO
-from datasnakes.Orthologs import OrthologsWarning
+from Datasnakes.Orthologs import OrthologsWarning
 
 # Ignore the warning in this init script.
 warnings.simplefilter('ignore', OrthologsWarning)
 
 # Initialize the modules
-from datasnakes.Orthologs.Phylogenetics.PAML import ETE3PAML, PamlTest
-from datasnakes.Orthologs.Phylogenetics.PhyloTree import TreeViz
-from datasnakes.Orthologs.Phylogenetics import PhyML
+from Datasnakes.Orthologs.Phylogenetics import PhyML
+from Datasnakes.Orthologs.Phylogenetics.PhyloTree import TreeViz
+
 # Add a new module
 
 
@@ -30,6 +30,6 @@ __all__ = ("ETE3PAML",
            "PamlTest",
            "PhyML",
            "TreeViz",
-           #"Phylip",
+           "Phylip",
            "RelaxPhylip",
            )
