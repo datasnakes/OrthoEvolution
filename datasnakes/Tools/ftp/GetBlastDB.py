@@ -1,17 +1,10 @@
-# -*- coding: utf-8 -*-
 """
-File Name: blast_setup.py
-Description: This script 1) updates/downloads the refseq_rna blast db files,
+This script 1) updates/downloads the refseq_rna blast db files,
 2) creates a list of taxonomy ids based on the list of organisms, and 3) create
 a csv file with only human accessions and genes for downstream usage. Check the
 ReadMe file for a first time setup of a blast database. Both steps occur on the
 head node of the MCSR because they need internet access.
-
-@author: Shaurita Hutchins
-Date Created: Tue Feb 28 19:05:41 2017
-Project Name: Orthologs Project
 """
-# Modules used
 from ftplib import FTP, error_perm
 import os
 import fnmatch
@@ -34,7 +27,6 @@ dbpath = '/work5/r2295/bin/databases/refseq_rna_db'  # My current dbpath
 try:
     # If the directory exists,
     if os.path.exists(dbpath) == True:
-        log.info("The %s directory exists & will be archived." % str(dbpath))
         # Move any files that are in the directory to a dated archive folder.
         # Moving a directory in linux/unix essentially renames it.
         os.system(
@@ -43,7 +35,6 @@ try:
             ' /work5/r2295/bin/databases/refseqrnadb_archive_' +
             d.now().strftime(format2))
         os.mkdir(dbpath)   # Recreate the database directory
-        log.info("The %s directory was created." % str(dbpath))
         pass
     else:  # If the directory does not exist
         os.mkdir(dbpath)

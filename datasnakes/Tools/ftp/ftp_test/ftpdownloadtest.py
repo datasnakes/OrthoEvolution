@@ -1,10 +1,5 @@
-# -*- coding: utf-8 -*-
 """
-Date created: Tue Feb 28 17:32:04 2017
-Author: S. Hutchins
-
-Script description:
-
+Test the ftp module.
 """
 
 # Modules used
