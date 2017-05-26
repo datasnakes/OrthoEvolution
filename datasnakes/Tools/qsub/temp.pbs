@@ -10,12 +10,12 @@
 #PBS -l cput=$cput
 #PBS -l walltime=$wt
 #PBS -N $job_name
-#PBS -o logs/$job_name.o$PBS_JOBID
-#PBS -e logs/$job_name.e$PBS_JOBID
+#PBS -o $job_name.o$PBS_JOBID
+#PBS -e $job_name.e$PBS_JOBID
 #PBS -j oe
 
 cd $PBS_O_WORKDIR
 
 $cmd
 
-mail -s "$script_name.py script completed" $email < logs/$script_name.log
+mail -s "$script.py script completed" $email <<< 'Check your output'

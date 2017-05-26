@@ -18,7 +18,7 @@ class CreateJob(object):
     by creating chunks of lists for each python script and job.
     """
     def __init__():
-        """UNLESS A WINDOWS MACHINE HAS PBS (IT LIKELY WONT)"""
+        """UNLESS A WINDOWS MACHINE HAS PBS IT LIKELY WONT"""
         # XXX This class is optimized for Linux!
         if sys.platform == 'win32' or 'win64':
             sys.exit("This module is strictly for use on Linux at the moment.")
@@ -45,12 +45,35 @@ class CreateJob(object):
         return ''.join(random.sample(
             string.ascii_letters + string.digits, length))
 
-    def submitpythoncode(self, code, author, python="python3",
-                         pbstemp='temp.pbs', jobname="job", cleanup=True,
-                         prefix="", slots=1):
-        """Creates and submit a qsub jobs. Also use python code."""
-
+    def pbs_dict(self, author, email, description, project, select, jobname,
+                 script_name, logname, python='python3', gb='6gb',
+                 cput='75:00:00', walltime='75:00:00'):
+        """Add PBS script attributes."""
+        # Date format
         format1 = '%a %b %d %I:%M:%S %p %Y'  # Used to add as a date
+        # Fillin the pbs script attributes
+        job_attributes = {
+            'author': author,
+            'description': description,
+            'date': d.now().strftime(format1),
+            'PBS_JOBID': '${PBS_JOBID}',
+            'PBS_O_WORKDIR': '${PBS_O_WORKDIR}',
+            'proj_name': project,
+            'select': int(select),
+            'memgb': gb,
+            'cput': cput,
+            'wt': walltime,
+            'job_name': jobname,
+            'script': script_name,
+            'log_name': logname,
+            'cmd': python + " " + script_name + ".py",
+            'email': email
+            }
+
+        return job_attributes
+
+    def submitpythoncode(self, code, cleanup=True, prefix="", slots=1):
+        """Creates and submit a qsub job. Also use python code."""
 
         # Create a base name for the jobs and python scripts
         base = prefix + "submit_{0}".format(self.randomid())
@@ -62,47 +85,36 @@ class CreateJob(object):
 
         # This is the "command" for running the python script.
         # TIP If python is in your environment as only 'python' update that.
+        # TODO-SDH add a default parameter or custom parameter
+        # Custom will allow user to use whatever python script they want
+        # If default, python file will be created from code that is used.
         script = python + " " + base + ".py"
-
-        pbs_dict = {
-            'author': author,
-            'description': 'do things',
-            'date': d.now().strftime(format1),
-            'PBS_JOBID': '${PBS_JOBID}',
-            'PBS_O_WORKDIR': '${PBS_O_WORKDIR}',
-            'proj_name': 'Orthologs Project',
-            'select': '4',
-            'memgb': '8gb',
-            'cput': '30:00:00',
-            'wt': '30:00:00',
-            'job_name': jobname,
-            'script': script,
-            'log_name': base,
-            'cmd': script
-        }
 
         # Create the pbs script from the template or dict
         with open(base + '.pbs', 'w') as pbsfile:
-            pbsfile.write(pbstemp.substitute(pbs_dict))
+            pbsfile.write(pbstemp.substitute(self.pbs_dict))
             pbsfile.close()
 
         # Submit the qsub job using subprocess
         try:
             cmd = 'qsub  ' + base + '.pbs'  # this is the command
-            cmd_status = subprocess.call([cmd], shell=True)  # must = TRUE
-            if cmd_status == 0:  # Command was successful.
-                pass  # Continue
-            else:  # Unsuccessful. Stdout will be '1'.
-                print("PBS job not submitted.")
+            print(cmd)
+#            cmd_status = subprocess.call([cmd], shell=True)  # must = TRUE
+#            if cmd_status == 0:  # Command was successful.
+#                pass  # Continue
+#            else:  # Unsuccessful. Stdout will be '1'.
+#                print("PBS job not submitted.")
         finally:
-            if cleanup:  # When finished, remove the qsub files & python files.
-                os.remove(base + '.qsub')
-                os.remove(base + '.py')
+            print('finally')
+#            if cleanup:  # When finished, remove the qsub files & python files.
+#                os.remove(base + '.qsub')
+#                os.remove(base + '.py')
 
-    def MultipleJobs(self):
+    def multiplejobs(self):
         """Create multiple jobs & scripts for each job to run based on
         splitting a list into chunks.
         """
+        print(self.__doc__)
 #        # Modules used
 #        from QsubTools import SubmitPythonCode, ImportTemp
 #        from multiprocess_functions import genes2align
