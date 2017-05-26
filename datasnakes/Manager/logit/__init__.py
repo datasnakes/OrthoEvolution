@@ -1,2 +1,2 @@
-# -*- coding: utf-8 -*-
-
+"""Initialize LogIt class"""
+from .logit import LogIt

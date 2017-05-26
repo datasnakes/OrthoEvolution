@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # Modules Used
 import os
 from pathlib import Path
