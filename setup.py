@@ -6,7 +6,6 @@ https://github.com/pypa/sampleproject/blob/master/setup.py
 https://github.com/biopython/biopython/blob/master/setup.py
 http://python-packaging.readthedocs.io/en/latest/index.html
 """
-# Modules Used
 from setuptools import setup, find_packages
 from codecs import open  # To use a consistent encoding
 from os import path
@@ -63,4 +62,3 @@ setup(
     test_suite='nose.collector',
     tests_require=['nose']
 )
-
