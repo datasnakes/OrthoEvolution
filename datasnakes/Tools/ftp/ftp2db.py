@@ -365,9 +365,9 @@ class Ftp2Db(object):
                         if ext_choice not in file:
                             continue
                         download_list.append(file)
-        # //TODO-ROB Make a logging function and look up the built in logging method
-        # //TODO-ROB Add Code that sends Rob and Shaurita a login message about the current update
-        # //TODO-SHAE Add Code that sends Rob and Shaurita a login message about the current update
+        # TODO-ROB Make a logging function and look up the built in logging method
+        # TODO-ROB Add Code that sends Rob and Shaurita a login message about the current update
+        # TODO-SDH Add Code that sends Rob and Shaurita a login message about the current update
 
         with open(log_file_name, f_handle) as log_file:
 
