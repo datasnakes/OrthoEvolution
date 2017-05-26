@@ -1,0 +1,21 @@
+# Author: $author
+# Date Created: $date
+# Project Name: $proj_name
+# Description: $description
+
+#PBS -S /bin/bash
+#PBS -m bea
+#PBS -M $email
+#PBS -l select=$select:ncpus=1:mem=$memgb -l place=free
+#PBS -l cput=$cput
+#PBS -l walltime=$wt
+#PBS -N $job_name
+#PBS -o logs/$job_name.o$PBS_JOBID
+#PBS -e logs/$job_name.e$PBS_JOBID
+#PBS -j oe
+
+cd $PBS_O_WORKDIR
+
+$cmd
+
+mail -s "$script_name.py script completed" $email < logs/$script_name.log
