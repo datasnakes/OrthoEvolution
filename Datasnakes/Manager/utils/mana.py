@@ -4,7 +4,7 @@ import os
 from pathlib import Path
 import ete3
 from Datasnakes.Manager.utils.treelib2.treelib2.tree import Tree
-from Manager.utils.zipper import ZipUtils
+from Datasnakes.Manager.utils.zipper import ZipUtils
 from cookiecutter.hooks import run_script
 from cookiecutter.main import cookiecutter
 from cookiecutter.prompt import prompt_for_config
