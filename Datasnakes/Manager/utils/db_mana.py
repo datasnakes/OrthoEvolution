@@ -1,5 +1,5 @@
-from datasnakes.Tools.ftp.ftp2db import FTP
-from datasnakes.Manager.utils.mana import UserMana as UM
+from Datasnakes.Tools.ftp.ftp2db import FTP
+from Datasnakes.Manager.utils.mana import UserMana as UM
 
 
 class DbMana(FTP, UM):

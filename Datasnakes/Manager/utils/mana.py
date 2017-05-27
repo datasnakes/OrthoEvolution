@@ -1,10 +1,10 @@
 """Management tools for the package."""
-import Datasnakes as DS
+from Datasnakes import Manager, Cookies, Tools, Orthologs
 import os
 from pathlib import Path
 import ete3
-from Datasnakes.Manager.utils.treelib2.treelib2.tree import Tree
-from Datasnakes.Manager.utils.zipper import ZipUtils
+from treelib2.treelib2.tree import Tree
+from Manager.utils.zipper import ZipUtils
 from cookiecutter.hooks import run_script
 from cookiecutter.main import cookiecutter
 from cookiecutter.prompt import prompt_for_config
@@ -38,7 +38,7 @@ class Mana(object):
         # TODO-ROB:  SOme of these directories don't need to be accessed directly
         # Below are the PyPi path strings
         #    The first group is to access the cookiecutter templates
-        self.Cookies = Path(DS.Cookies.__path__[0])
+        self.Cookies = Path(Cookies.__path__[0])
         self.repo_cookie = self.Cookies / Path('new_repository')
         self.user_cookie = self.Cookies / Path('new_user')
         self.project_cookie = self.Cookies / Path('new_project')
@@ -47,13 +47,13 @@ class Mana(object):
         self.db_cookie = self.Cookies / Path('new_database')
         self.website_cookie = self.Cookies / Path('new_website')
         #    The second group is for the Manager module
-        self.Manager = Path(DS.Manager.__path__[0])
+        self.Manager = Path(Manager.__path__[0])
         self.index = self.Manager / Path('index')
         self.logit = self.Manager / Path('logit')
         self.utils = self.Manager / Path('utils')
         self.shiny = self.Manager / Path('shiny')
         #    The third group is for the Orthologs module
-        self.Orthologs = Path(DS.Orthologs.__path__[0])
+        self.Orthologs = Path(Orthologs.__path__[0])
         self.biosql = Path(self.Orthologs) / Path('biosql')
         self.blast = Path(self.Orthologs) / Path('blast')
         self.comp_gen = Path(self.Orthologs) / Path('comparative_genetics')
@@ -61,7 +61,7 @@ class Mana(object):
         self.manager = Path(self.Orthologs) / Path('manager')
         self.phylogenetics = Path(self.Orthologs) / Path('phylogenetics')
         #    The fourth group is for the Tools module
-        self.Tools = Path(DS.Tools.__path__[0])
+        self.Tools = Path(Tools.__path__[0])
         self.ftp = Path(self.Tools) / Path('ftp')
         self.multiprocessing = Path(self.Tools) / Path('multiprocessing')
         self.pandoc = Path(self.Tools) / Path('pandoc')
