@@ -1,5 +1,4 @@
 """Management tools for the package."""
-#import Datasnakes
 from Datasnakes import Cookies, Tools, Orthologs, Manager
 import os
 from pathlib import Path
