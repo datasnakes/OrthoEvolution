@@ -1,5 +1,5 @@
 """Management tools for the package."""
-from Datasnakes import Cookies, Orthologs, Manager, Tools
+#from Datasnakes import Cookies, Orthologs, Manager, Tools
 import os
 from pathlib import Path
 import ete3
