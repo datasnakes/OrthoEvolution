@@ -1,6 +1,6 @@
 """Management tools for the package."""
-import Datasnakes
-from Datasnakes import Cookies, Tools, Orthologs
+#import Datasnakes
+from Datasnakes import Cookies, Tools, Orthologs, Manager
 import os
 from pathlib import Path
 import ete3
@@ -48,7 +48,7 @@ class Mana(object):
         self.db_cookie = self.Cookies / Path('new_database')
         self.website_cookie = self.Cookies / Path('new_website')
         #    The second group is for the Manager module
-        self.Manager = Path(Datasnakes.Manager.__path__[0])
+        self.Manager = Path(Manager.__path__[0])
         self.index = self.Manager / Path('index')
         self.logit = self.Manager / Path('logit')
         self.utils = self.Manager / Path('utils')
