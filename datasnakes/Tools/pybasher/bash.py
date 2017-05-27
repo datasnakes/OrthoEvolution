@@ -3,16 +3,31 @@
 # TODO-SDH Finish pybasher ASAP
 # TODO-SDH Look at some examples for pybasher.
 # TODO-SDH Update the README for pybasher
-from subprocess import call, check_output
-import os
+from subprocess import PIPE, Popen
+import sys
+#import os
+#import configparser
+# TODO-SDH use a config file to load/use a list or group of common commands.
 
 
 class PyBasher(object):
+    # !!! Only for linux
     def __init__(self, cmd):
+        """Initialize the call as well as standard error and output."""
         # TODO-SDH Test if this is working.
-        c = call([cmd], shell=True)
-        return c
-
-    def rmdir(self, cmd="rm -r " + pathname, pathname):
-        self.c
-        return print("%s was removed." % pathname)
+        c = Popen([cmd], shell=True, stdout=PIPE, stderr=PIPE)
+        stdout, stderr = c.communicate()
+        if stderr:
+            sys.stderr
+        else:
+            sys.stdout          
+#        return c
+#
+#        __COMMANDS__ = [
+#                ]
+#        commands = __COMMANDS__
+#        return commands
+#    
+#    def listcommands(configfile='bash.cfg'):
+#        """Use a bash configuration file of common commands."""
+#        # IDEA not sure if this is the best option
