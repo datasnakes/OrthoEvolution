@@ -69,7 +69,7 @@ After installation, you'll be able to easily import each module via:
 
 .. code:: python
 
-    from datasnakes.Orthologs import Align, BioSQL, Blast, CompGenetics, Phylogenetics, Genbank
+    from Datasnakes.Orthologs import Align, BioSQL, Blast, CompGenetics, Phylogenetics, Genbank
 
 Contributors
 ------------
