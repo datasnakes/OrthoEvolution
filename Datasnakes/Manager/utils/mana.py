@@ -3,7 +3,7 @@ from Datasnakes import Manager, Cookies, Tools, Orthologs
 import os
 from pathlib import Path
 import ete3
-from treelib2.treelib2.tree import Tree
+from Datasnakes.Manager.utils.treelib2.treelib2.tree import Tree
 from Manager.utils.zipper import ZipUtils
 from cookiecutter.hooks import run_script
 from cookiecutter.main import cookiecutter
