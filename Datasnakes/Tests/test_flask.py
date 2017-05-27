@@ -1,7 +1,7 @@
 """Test for flask integration."""
 import shutil
 import os
-from datasnakes.Manager import Mana, WebMana
+from Datasnakes.Manager import Mana, WebMana
 
 
 def flask_test(directoryname='Test-Directory', website='TestSite'):

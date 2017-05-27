@@ -1,7 +1,7 @@
-import os
-from pathlib import Path
-from datasnakes.Orthologs.Genbank.genbank import GenBank as GB
-from datasnakes.Tools.ftp.ftp2db import FTP
+#import os
+#from pathlib import Path
+from Datasnakes.Orthologs.Genbank.genbank import GenBank as GB
+from Datasnakes.Tools.ftp.ftp2db import FTP
 
 
 class GenBankMana(FTP, GB):

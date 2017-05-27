@@ -2,7 +2,7 @@
 This is the test suite.
 """
 #import unittest
-from datasnakes.Orthologs import Phylogenetics as Phylo
+from Datasnakes.Orthologs import Phylogenetics as Phylo
 #from Orthologs import OrthologsDevelopmentWarning
 
 help(Phylo)

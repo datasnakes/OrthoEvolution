@@ -1,4 +1,5 @@
 """Class for managing, downloading and extracting features from genbank files."""
+
 import os
 import shutil
 from pathlib import Path

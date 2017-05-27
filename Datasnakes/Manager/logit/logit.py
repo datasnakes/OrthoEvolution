@@ -9,6 +9,7 @@ import sys
 #import argparse
 #import textwrap
 
+
 class LogIt(object):
     """LogIt makes logging easier by creating easy loggers."""
     def __init__(self, logfile=None, logname=None):

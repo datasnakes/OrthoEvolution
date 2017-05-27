@@ -1,8 +1,8 @@
 """BLASTn test"""
 #import shutil
 #from pathlib import Path
-from datasnakes.Manager import ProjMana
-from datasnakes.Orthologs.Blast import BLASTn
+from Datasnakes.Manager import ProjMana
+from Datasnakes.Orthologs.Blast import BLASTn
 
 #from ete3 import NCBITaxa
 # NCBITaxa().update_taxonomy_database()

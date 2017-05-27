@@ -1,11 +1,10 @@
+"""Perform Blast Analysis after completing BLASTn"""
 import os
 import time
 from pathlib import Path
-
 import pandas as pd
-from datasnakes.Orthologs.CompGenetics.comp_gen import CompGenAnalysis
-
-from datasnakes.Manager.logit.logit import LogIt
+from Datasnakes.Orthologs.CompGenetics.comp_gen import CompGenAnalysis
+from Datasnakes.Manager.logit.logit import LogIt
 
 
 class BLASTAnalysis(CompGenAnalysis):

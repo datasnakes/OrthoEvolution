@@ -11,7 +11,7 @@ import pandas as pd
 from Bio import SearchIO  # Used for parsing and sorting XML files.
 # Used for Local Blasting.
 from Bio.Blast.Applications import NcbiblastnCommandline
-from datasnakes.Orthologs.CompGenetics.ncbi_blast import BLASTAnalysis as BT
+from Datasnakes.Orthologs.CompGenetics.ncbi_blast import BLASTAnalysis as BT
 # TODO-ROB: Find packages for script timing and analysis
 
 

@@ -1,3 +1,8 @@
+from ete3 import EvolTree, Tree
+from OrthoTools import formatlist
+import pandas as pd
+
+
 class ETE3PAML(object):
     """Integration of ETE3 for using PAML's codeml. For this project,
     we start my using the M1 model so it is the default.
@@ -5,14 +10,7 @@ class ETE3PAML(object):
 
     def __init__(self, gene, paml_path,
                  workdir='data/paml-output/', model='M1'):
-        """
-        Improve docstrings here.
-        """
-        # Modules used
-        from ete3 import EvolTree, Tree
-        from OrthoTools import formatlist
-        import pandas as pd
-
+        """Improve docstrings here."""
         # First make sure that
         t = Tree('data/initial-data/species_tree.nw', format=1)
         orgsfile = pd.read_csv('data/initial-data/organisms.csv', header=None)

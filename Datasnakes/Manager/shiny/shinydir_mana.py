@@ -1,23 +1,4 @@
-##############################################################################
-# PyCharm Community Edition
-# -*- coding: utf-8 -*-
-"""
-GPCR-Orthologs-Project
-shinylookup updated on 1/31/2017 at 11:52 AM
-##############################################################################
-
-    Input:
-
-    Output:
-
-    Description:
-
-##############################################################################
-@author: rgilmore
-"""
-##############################################################################
-# Libraries:
-
+"""Directory management for shiny app."""
 import os
 import platform
 
