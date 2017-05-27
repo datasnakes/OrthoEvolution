@@ -17,7 +17,7 @@ Welcome to Datasnakes-Orthologs's documentation!
 .. image:: https://badge.fury.io/py/Datasnakes-Scripts.svg
    :target: https://badge.fury.io/py/Datasnakes-Scripts
 .. image:: https://readthedocs.org/projects/datasnakes-scripts/badge/?version=master
-   :target: http://datasnakes-scripts.readthedocs.io/en/release/?badge=master
+   :target: http://datasnakes-scripts.readthedocs.io/en/master/
 .. image:: https://img.shields.io/badge/under-development-orange.svg
    :target: https://github.com/datasnakes/Datasnakes-Scripts
 
