@@ -1,4 +1,7 @@
-"""A user-friendly Bash module for Python."""
+"""A user-friendly Bash module for Python.
+
+Built open Alex Couper's `bash` package. (https://github.com/alexcouper/bash)
+"""
 # TODO-SDH It may be helpful to use psutil for pybasher.
 # TODO-SDH Finish pybasher ASAP
 # TODO-SDH Look at some examples for pybasher.
@@ -6,20 +9,21 @@
 import platform
 import sys
 
-
 SUBPROCESS_HAS_TIMEOUT = True
-if "windows" in platform.system().lower():
-    raise ImportError(
-            "sh %s is currently only supported on linux and osx.")
-elif sys.version_info < (3, 0):
-    try:
-        from subprocess32 import PIPE, Popen
-    except ImportError:
-        # You haven't got subprocess32 installed. If you're running 2.X this
-        # will mean you don't have access to things like timeout
-        SUBPROCESS_HAS_TIMEOUT = False
 
-from subprocess import PIPE, Popen, call
+if "windows" in platform.system().lower():
+    raise ImportError("PyBasher is currently only supported on linux and osx.")
+else:
+    from subprocess import PIPE, Popen
+    
+    if sys.version_info < (3, 0):
+        try:
+            from subprocess32 import PIPE, Popen
+        except ImportError:
+            # You haven't got subprocess32 installed. If you're running 2.X this
+            # will mean you don't have access to things like timeout
+            SUBPROCESS_HAS_TIMEOUT = False
+
 #import os
 #import configparser
 # TODO-SDH use a config file to load/use a list or group of common commands.
@@ -27,15 +31,49 @@ from subprocess import PIPE, Popen, call
 
 class PyBasher(object):
     # !!! Only for linux
-    def __init__(self, *args, **kwargs):
+    def __init__(self, cmd):
         """Initialize the call as well as standard error and output."""
         # TODO-SDH Test if this is working.
         self.process = None
         self.stdout = None
-        self.pybasher(*args, **kwargs)
+        self._bash(cmd)
         
-    def runcmd(self, cmd, env=None, stdout=PIPE, stderr=PIPE, timeout=None, sync=True):
-        self.process = Popen(cmd, shell=True, stdout=stdout, stdin=PIPE, stderr=stderr, env=env)
-        if sync:
-            self.sync(timeout)
+    def _bash(self, cmd, env=None, stdout=PIPE, stderr=PIPE, timeout=None, _sync=True):
+        self.process = Popen(cmd, shell=True, stdout=stdout, stdin=PIPE,
+                             stderr=stderr, env=env)
+        if _sync:
+            self._sync(timeout)
         return self
+
+    def _sync(self, timeout=None):
+        kwargs = {'input': self.stdout}
+        if timeout:
+            kwargs['timeout'] = timeout
+            if not SUBPROCESS_HAS_TIMEOUT:
+                raise ValueError(
+                    "Timeout given but subprocess doesn't support it. "
+                    "Install subprocess32 and try again."
+                )
+        self.stdout, self.stderr = self.process.communicate(**kwargs)
+        self.code = self.process.returncode
+        return self
+        
+    def __repr__(self):
+        return self._value()
+
+    def __unicode__(self):
+        return self._value()
+
+    def __str__(self):
+        return self._value()
+
+    def __nonzero__(self):
+        return self.__bool__()
+
+    def __bool__(self):
+        return bool(self.value())
+
+    def _value(self):
+        if self.stdout:
+            return self.stdout.strip().decode(encoding='UTF-8')
+        return ''
