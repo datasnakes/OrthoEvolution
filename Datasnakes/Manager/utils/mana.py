@@ -247,7 +247,7 @@ class UserMana(RepoMana):
     # TODO-ROB When the user logs in, they will activate the virtual environment
     # TODO-ROB USE SQL here to see if the user db contains the username
 
-    def __init__(self, repo, user, project=None, database=[], home=os.getcwd(),
+    def __init__(self, repo, user, project=None, database=None, home=os.getcwd(),
                  new_user=False, new_project=False, new_db=False, **kwargs):
         '''
         The User Management class manages the current users directories.
@@ -262,6 +262,8 @@ class UserMana(RepoMana):
         :param new_user (bool):  Flag for creating a new user.
         :param new_project (bool):  Flag for creating a new project.
         '''
+        if database is None:
+            database = []
         super().__init__(repo=repo, user=user, home=home, new_user=new_user, **kwargs)
         self.user = user
 
