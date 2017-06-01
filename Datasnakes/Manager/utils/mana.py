@@ -13,6 +13,7 @@ from cookiecutter.generate import generate_context
 
 # TODO-ROB use **kwargs and **args to cut down on parameters
 
+
 class Mana(object):
     """This is the directory management base class.
 
@@ -179,6 +180,7 @@ class Mana(object):
     #     # Use the path that you want to update/add to
     #     # Returns path and the time stamp (could be None)
 
+
 class RepoMana(Mana):
     """Repository Management."""
     def __init__(self, repo, user=None, home=os.getcwd(),
@@ -206,7 +208,6 @@ class RepoMana(Mana):
         self.repo_shiny = self.repo_web / Path('shiny')
         self.ftp = self.repo_web / Path('ftp')
         self.wasabi = self.repo_web / Path('wasabi')
-
         self.flask = self.repo_web / Path('flask')
 
         if user:
@@ -236,7 +237,6 @@ class RepoMana(Mana):
         # TODO-ROB do we need create user hooks?
 
 # TODO-ROB:  Edit the setup.py file for cookiecutter.
-#------------------------------------------------------------------------------
 
 
 class UserMana(RepoMana):
@@ -318,21 +318,22 @@ class UserMana(RepoMana):
                 os.chmod(str(self.user_db / Path(db)), mode=0o777)
 
         else:
-            db_num = int(input("How many databases do you need to create?"))
+            db_num = int(input("How many NCBI databases do you need to create?"))
             for db in range(1, db_num + 1):
                 # Manually set up cookiecutter prompting
                 context_file = str(self.db_cookie / Path('cookiecutter.json'))
                 e_c = prompt_for_config(context=generate_context(context_file=context_file))
                 # Create the cookiecutter repo with no input, and add extra content from manual prompts
-                cookiecutter(str(self.db_cookie), output_dir=str(self.user_db), extra_context=e_c, no_input=True)
+                cookiecutter(str(self.db_cookie), output_dir=str(self.ncbi_db_repo), extra_context=e_c, no_input=True)
                 # Use cookiecutter_dict from manual prompts to change the user permissions.
-                os.chmod(str(self.user_db / Path(e_c['db_name'])), mode=0o777)
+                os.chmod(str(self.ncbi_db_repo / Path(e_c['db_name'])), mode=0o777)
 
     def zip_mail(self, comp_filename, zip_path, destination=''):
         Zipper = ZipUtils(comp_filename, zip_path)
         Zipper_path = Zipper.to_zip()
         # TODO-ROB add proper destination syntax.
         print('%s is being sent to %s' % (Zipper_path, destination))
+
 
 class WebMana(RepoMana):
     """Web Management Class."""
