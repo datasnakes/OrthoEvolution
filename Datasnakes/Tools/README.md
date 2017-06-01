@@ -1,6 +1,7 @@
 Tools
--------------------------
-These tools were created by or modified our team to aid in this package
+========
+These tools were created by or modified our team to aid with the Orthologs package.
+
 
 Usage
 -----

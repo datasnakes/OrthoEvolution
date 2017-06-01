@@ -1,21 +1,11 @@
 # -*- coding: utf-8 -*-
-"""
-Last updated on February 15, 2017
-
-@author: Shaurita D. Hutchins
-
-
-This script is designed to remove duplicates from a .csv file and
+"""This script is designed to remove duplicates from a .csv file and
 not which duplicates were removed in a .txt file.
 """
-
 # List of modules used.
 import pandas as pd
-import mygene as mg
 
-#------------------------------------------------------------------------------
 # Use pandas to read in the dataframe and create lists.
-
 # Read in main file
 maf = pd.read_csv('GPCR_Master_Accession_File.csv', index_col=False, dtype=str)
 
@@ -23,7 +13,6 @@ maf = pd.read_csv('GPCR_Master_Accession_File.csv', index_col=False, dtype=str)
 orgs = pd.read_csv('Organisms.csv', index_col=False, dtype=str, header=None)
 orglist = list(orgs[0])
 
-#------------------------------------------------------------------------------
 # Create dictionary for duplicate values and blank cells/values
 dupdict = {}  # Dictionary of duplicates based on organisms/columns
 nadict = {}  # Dictionary of black or n/a cells in the main file
@@ -35,9 +24,10 @@ for org in orglist:
     nas = maf[org].isnull()
     nadict[org] = nas
 
-#------------------------------------------------------------------------------
+
 # Short definition that turns a dictionary into a csv file
 def frametocsv(csvname, data):
+    """Short definition that turns a dictionary into a csv file."""
     frame = pd.DataFrame.from_dict(data, orient='columns')
     frames = [maf.Tier, maf.Gene, frame]
     file = pd.concat(frames, axis=1)

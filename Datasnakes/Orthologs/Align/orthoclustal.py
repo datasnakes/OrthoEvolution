@@ -6,10 +6,10 @@ three or more sequences.
 from Bio.Align.Applications import ClustalOmegaCommandline
 
 
-class ClustalO(object):
-    """
-    This class aligns genes using parameters similar to the default
-    parameters. These parameters include 2 additional iterations for the hmm.
+class ClustalO:
+    """This class aligns genes using parameters similar to the default parameters.
+
+    These parameters include 2 additional iterations for the hmm.
     """
 
     def __init__(self, infile, outfile, logpath, seqtype="DNA", infmt="fasta",
