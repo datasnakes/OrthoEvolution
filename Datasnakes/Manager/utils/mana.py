@@ -3,7 +3,7 @@ from Datasnakes import Cookies, Orthologs, Manager, Tools
 import os
 from pathlib import Path
 import ete3
-from treelib2.treelib2.tree import Tree
+#from treelib2.treelib2.tree import Tree
 from Datasnakes.Manager.utils.zipper import ZipUtils
 from cookiecutter.hooks import run_script
 from cookiecutter.main import cookiecutter
@@ -400,6 +400,7 @@ class WebMana(RepoMana):
     def stop_server(self):
         """Stop the server running the website."""
         # TODO-SDH Add way to stop the server from running.
+
 
 class ProjMana(UserMana):
     """Project Management Class."""
