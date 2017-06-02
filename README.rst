@@ -27,8 +27,12 @@ dependent upon ``biopython v1.68``.
 
 Installation
 ------------
-
 ``pip install Datasnakes-Scripts``
+
+For development mode installation:
+1. ``git clone http://github.com/datasnakes/Datasnakes-Scripts``
+2. ``cd Datasnakes-Scripts``
+3. ``pip install -e .``
 
 Dependencies
 ~~~~~~~~~~~~~
@@ -43,7 +47,7 @@ Alternatively, you can set install the package manually.
 
 1. Download the zip file and unzip it or ``git clone https://github.com/datasnakes/Datasnakes-Scripts.git``
 2. ``cd Datasnakes-Scripts``
-3. ``python setup.py install``
+3. ``pip install .``
 
 Project Setup
 ~~~~~~~~~~~~~~~~
@@ -95,4 +99,4 @@ pmid:19304878*
 
 License
 ~~~~~~~~
-`MIT LICENSE <https://github.com/datasnakes/Datasnakes-Scripts/blob/master/LICENSE>`_
+`MIT <https://github.com/datasnakes/Datasnakes-Scripts/blob/master/LICENSE>`_

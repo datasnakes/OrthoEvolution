@@ -6,7 +6,7 @@ computing environments. The command is usually `qsub <options>` on most systems.
 
 Usage
 -----
-The main class under Genbank is `CreateJob`. Some functions are `import_temp`,
+The base class under qsub is `QsubUtils`. Some functions are `import_temp`,
 which allows the user to import a preformatted template pbs script or python
 script and use it in the pipeline if needed.
 

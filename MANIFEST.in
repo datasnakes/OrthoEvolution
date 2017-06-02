@@ -1,5 +1,5 @@
 # Exclude
-exclude Manager/TODO.py
+#exclude Datasnakes/Manager/TODO.py
 
 # Include the README file
 include README.rst
@@ -10,14 +10,17 @@ include requirements.txt
 # Include the setup file
 include setup.py
 
+# Include license
+include LICENSE
+
 # Include Modules
-recursive-include Cookies *
-recursive-include Manager/index *
+recursive-include Datasnakes/Cookies/*
+recursive-include Datasnakes/Manager/index/*
 
 # Include docs
-include Docs/*.rst
-include Docs/Makefile
-include Docs/conf.py
-include Docs/convertdocs.py
+include Docs/docs/source/*.rst
+include Docs/docs/source/Makefile
+include Docs/docs/source/conf.py
+include Docs/docs/ource/convertdocs.py
 include Docs/archive/*
 include Docs/README.md
