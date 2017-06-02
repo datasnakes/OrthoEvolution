@@ -1,11 +1,11 @@
-# Author: Shaurita D. Hutchins
+# Author: Datasnakes
 # Date Created: Tue Mar 28 18:29:14 2017
-# Project Name: Addictions Project
+# Project Name: Orthologs Project
 # This is a simple bash script that gets GI lists for the local blast.
 
 #PBS -S /bin/bash
 #PBS -m bea
-#PBS -M rgilmore@umc.edu
+#PBS -M emailaddress
 #PBS -l select=20:ncpus=1:mem=2gb -l place=free
 #PBS -l cput=24:00:00
 #PBS -l walltime=32:00:00
@@ -18,5 +18,5 @@ cd ${PBS_O_WORKDIR}
 
 python3 get_gi_lists.py
 
-mail -s "get_gi_lists.py script completed" rgilmore@umc.edu < get_gi_lists.log
+mail -s "get_gi_lists.py script completed" emailaddress < get_gi_lists.log
 

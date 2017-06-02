@@ -1,6 +1,4 @@
-"""
-This is the test suite.
-"""
+"""This is the test suite for Orthologs."""
 #import unittest
 from Datasnakes.Orthologs import Phylogenetics as Phylo
 #from Orthologs import OrthologsDevelopmentWarning

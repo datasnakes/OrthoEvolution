@@ -4,7 +4,7 @@ import os
 from Datasnakes.Manager.utils import Mana, WebMana
 
 
-def flask_test(directoryname='Datasnakes\Tests\Test-Directory', website='Vall'):
+def flask_test(directoryname='Datasnakes\Tests\Test-Directory', website='Test'):
     """"Test flask by creating a website/directory."""
     Mana(repo=directoryname, new_repo=True)
     WebMana(repo=directoryname, website=website, new_website=True)
@@ -16,3 +16,4 @@ def flask_test(directoryname='Datasnakes\Tests\Test-Directory', website='Vall'):
         shutil.rmtree(directoryname)
     else:
         print('%s directory DOES NOT exists. Test failed.' % directoryname)
+# TODO-SDH Turn this test into a class.
