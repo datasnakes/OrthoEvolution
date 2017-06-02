@@ -29,7 +29,15 @@ Check out our `wiki docs <https://github.com/datasnakes/Datasnakes-Scripts/wiki>
 Installation
 ------------
 
-For easy installation, ``pip install Datasnakes-Scripts``
+For easy installation:
+
+   ``pip install Datasnakes-Scripts``
+
+For development mode installation:
+
+   ``git clone http://github.com/datasnakes/Datasnakes-Scripts``
+
+   ``pip install -e path\to\Datasnakes-Scripts``
 
 Dependencies
 ~~~~~~~~~~~~~
