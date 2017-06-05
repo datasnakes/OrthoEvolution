@@ -1,6 +1,6 @@
 """A user-friendly Bash module for Python.
 
-Built open Alex Couper's `bash` package. (https://github.com/alexcouper/bash)
+Built upon Alex Couper's `bash` package. (https://github.com/alexcouper/bash)
 """
 # TODO-SDH It may be helpful to use psutil for pybasher.
 # TODO-SDH Finish pybasher ASAP
@@ -15,7 +15,7 @@ if "windows" in platform.system().lower():
     raise ImportError("PyBasher is currently only supported on linux and osx.")
 else:
     from subprocess import PIPE, Popen
-    
+
     if sys.version_info < (3, 0):
         try:
             from subprocess32 import PIPE, Popen
@@ -37,7 +37,7 @@ class PyBasher(object):
         self.process = None
         self.stdout = None
         self._bash(cmd)
-        
+
     def _bash(self, cmd, env=None, stdout=PIPE, stderr=PIPE, timeout=None, _sync=True):
         self.process = Popen(cmd, shell=True, stdout=stdout, stdin=PIPE,
                              stderr=stderr, env=env)
@@ -57,7 +57,7 @@ class PyBasher(object):
         self.stdout, self.stderr = self.process.communicate(**kwargs)
         self.code = self.process.returncode
         return self
-        
+
     def __repr__(self):
         return self._value()
 

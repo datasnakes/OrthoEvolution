@@ -1,11 +1,7 @@
 """s2s sets up sending files to servers via public SSH keys."""
 import os
 from pathlib import Path
-#import logging as log
-#import pandas as pd
-#from datetime import datetime as d
 import zipfile
-#import pexpect
 import subprocess
 
 
@@ -71,11 +67,11 @@ class S2S(object):
             zip_handle.write(self.zip_path)
         else:
             print('skipped')
-            self.add_folder_to_zip(zip_handle, self.zip_path)
+            self.__addfolder2zip(zip_handle, self.zip_path)
         zip_handle.close()
         return comp_path
 
-    def add_folder_to_zip(self, zip_handle, folder):
+    def __addfolder2zip(self, zip_handle, folder):
         """Not meant to be used explicitly.  Use to_zip."""
         # XXX Use to_zip !!!
         for file in os.listdir(folder):
@@ -91,4 +87,4 @@ class S2S(object):
                 if str(file) in self.ignore_parts:
                     continue
                 print('Entering folder: ' + str(full_path))
-                self.add_folder_to_zip(zip_handle, full_path)
+                self.__addfolder2zip(zip_handle, full_path)
