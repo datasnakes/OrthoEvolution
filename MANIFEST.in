@@ -14,13 +14,13 @@ include setup.py
 include LICENSE
 
 # Include Modules
-recursive-include Datasnakes/Cookies/*
-recursive-include Datasnakes/Manager/index/*
+recursive-include Datasnakes/Cookies/ *
+recursive-include Datasnakes/Manager/index/ *
 
 # Include docs
 include Docs/docs/source/*.rst
 include Docs/docs/source/Makefile
 include Docs/docs/source/conf.py
-include Docs/docs/ource/convertdocs.py
+include Docs/docs/source/convertdocs.py
 include Docs/archive/*
 include Docs/README.md
