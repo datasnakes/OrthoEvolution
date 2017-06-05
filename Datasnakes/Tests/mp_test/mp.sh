@@ -2,7 +2,6 @@
 
 #PBS -S /bin/bash
 #PBS -m bea
-#PBS -M rgilmore@umc.edu
 #PBS -l select=10:ncpus=1:mem=1gb -l place=free
 #PBS -l cput=24:00:00
 #PBS -l walltime=32:00:00

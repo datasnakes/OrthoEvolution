@@ -1,8 +1,3 @@
-# -*- coding: utf-8 -*-
-"""
-"""
-# Modules used
-
 import platform
 import time
 from mpi4py import MPI
