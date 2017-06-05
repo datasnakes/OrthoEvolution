@@ -19,30 +19,18 @@ the analysis and visualization of orthologs-related bioinformatics projects.
 
 Check out our `wiki docs <https://github.com/datasnakes/Datasnakes-Scripts/wiki>`__ and our `read the docs <http://datasnakes-scripts.readthedocs.io/en/master/>`__!
 
-Dependencies
-------------
-
-Currently, this package is optimized for ``python v3.4`` and upward. It's also
-dependent upon ``biopython v1.68``.
-
 Installation
 ------------
 ``pip install Datasnakes-Scripts``
 
-For development mode installation:
+Development Mode Installation
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 1. ``git clone http://github.com/datasnakes/Datasnakes-Scripts``
 2. ``cd Datasnakes-Scripts``
 3. ``pip install -e .``
 
-Dependencies
-~~~~~~~~~~~~~
-
-Currently, this package is optimized for ``python v3.4`` and upward. It's also
-dependent upon ``biopython v1.68``.
-
 Manual Installation
 ~~~~~~~~~~~~~~~~~~~~~
-
 Alternatively, you can set install the package manually.
 
 1. Download the zip file and unzip it or ``git clone https://github.com/datasnakes/Datasnakes-Scripts.git``
@@ -74,6 +62,10 @@ After installation, you'll be able to easily import each module via:
 .. code:: python
 
     from Datasnakes.Orthologs import Align, BioSQL, Blast, CompGenetics, Phylogenetics, Genbank
+    
+Tests
+------
+To run tests, type ``nosetests Tests/`` in the Datasnakes-Orthologs directory.
 
 Contributors
 ------------
