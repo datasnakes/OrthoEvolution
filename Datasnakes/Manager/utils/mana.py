@@ -82,8 +82,7 @@ class Mana(object):
         #self.dm_log = log.basic
 
     def create_repo(self):
-        print('creating dirs from repo cookie')
-        print(self.__class__.__name__)
+        print('Creating directories from repository cookie.')
         """This function creates a new repository.  If a repository name
         is given to the class then it is given a name.  If not, cookiecutters
         takes input from the user.
@@ -224,7 +223,6 @@ class RepoMana(Mana):
         our  new_user cookiecutter template.
         """
         print('creating dirs from user cookie')
-        print(self.__class__.__name__)
 
         # This is used ONLY when the user registers in flask
         # TODO-ROB:  Create the cookiecutter.json file
@@ -289,8 +287,7 @@ class UserMana(RepoMana):
             self.create_db_repo()
 
     def create_project(self):
-        print('creating dirs from project cookie')
-        print(self.__class__.__name__)
+        print('Creating directories from project cookie.')
         """
         :return: A new project inside the user's
         project directory.
@@ -306,7 +303,7 @@ class UserMana(RepoMana):
         os.chmod(str(self.projects / Path(self.project)), mode=0o777)
 
     def create_db_repo(self):
-        print('creating dirs from database cookie')
+        print('Creating directories from database cookie.')
         """
         :return: A new database inside the users database directory
         """
@@ -363,6 +360,7 @@ class WebMana(RepoMana):
         self.website_scripts = self.website_path / Path(self.website)
         self.website_public = self.website_scripts / Path('public')
         self.website_user = self.website_scripts / Path('user')
+        print('Website directory structure created. Server not running.')
 
         if new_website is True:
             self.create_website()
@@ -392,10 +390,7 @@ class WebMana(RepoMana):
         #scripts_file_path = find_hook('post_gen_project.sh', hooks_dir=str(script_path))
         # TODO-ROB add screening to the bash script for flask run -h -p
         run_script(script_path=str(script_path), cwd=str(self.website_path))
-
-    def stop_server(self):
-        """Stop the server running the website."""
-        # TODO-SDH Add a way to stop the server from running.
+        print('Site running at port: 5252')
 
 class ProjMana(UserMana):
     """Project Management Class."""
@@ -446,8 +441,7 @@ class ProjMana(UserMana):
         :return:  Adds new directories in the current project labeled
         with the proper names.
         """
-        print('Creating directories from research cookie...')
-        print(self.__class__.__name__)
+        print('Creating directories from research cookie.')
 
         e_c = {"research_type": self.research_type,
                "research_name": self.research}
