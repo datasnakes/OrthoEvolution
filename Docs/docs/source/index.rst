@@ -17,7 +17,7 @@ Welcome to Datasnakes-Orthologs's documentation!
 .. image:: https://badge.fury.io/py/Datasnakes-Scripts.svg
    :target: https://badge.fury.io/py/Datasnakes-Scripts
 .. image:: https://readthedocs.org/projects/datasnakes-scripts/badge/?version=master
-   :target: http://datasnakes-scripts.readthedocs.io/en/release/?badge=master
+   :target: http://datasnakes-scripts.readthedocs.io/en/master/
 .. image:: https://img.shields.io/badge/under-development-orange.svg
    :target: https://github.com/datasnakes/Datasnakes-Scripts
 
@@ -29,7 +29,15 @@ Check out our `wiki docs <https://github.com/datasnakes/Datasnakes-Scripts/wiki>
 Installation
 ------------
 
-For easy installation, ``pip install Datasnakes-Scripts``
+For easy installation:
+
+   ``pip install Datasnakes-Scripts``
+
+For development mode installation:
+
+   ``git clone http://github.com/datasnakes/Datasnakes-Scripts``
+
+   ``pip install -e path\to\Datasnakes-Scripts``
 
 Dependencies
 ~~~~~~~~~~~~~
