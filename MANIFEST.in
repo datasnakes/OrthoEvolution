@@ -24,3 +24,6 @@ include Docs/docs/source/conf.py
 include Docs/docs/source/convertdocs.py
 include Docs/archive/*
 include Docs/README.md
+
+# Include tests
+include Tests/*
