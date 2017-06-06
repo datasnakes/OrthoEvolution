@@ -1,50 +1,21 @@
-##############################################################################
-# PyCharm Community Edition
-# -*- coding: utf-8 -*-
-"""
-Orthologs-Project
-Directory_management updated on 11/15/2016 at 11:30 AM
-##############################################################################
-
-    Input:  A string that represents a path for the main file systems
-
-    Output:  Custom class variables for import in the project file template.
-
-    Description:  This file manges the directories for projects created in PyCharm.
-    Each new project gets it's own function.
-
-##############################################################################
-@author: rgilmore
-"""
-##############################################################################
-# Libraries:
 import os
 from pathlib import Path
-
 import Manager
 import Tools
 import ete3
 from Manager.utils.treelib2.treelib2.tree import Tree
 from cookiecutter.hooks import run_script
 from cookiecutter.main import cookiecutter
-
 # TODO-ROB once this is a pypi package all of these will be unnecessary
 from datasnakes import Cookies, Orthologs
 
-
-# from Manager.logit.logit import LogIt
-
-# datasnakes~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-# datasnakes~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-
 class Mana(object):
     """
-    This is the directory management base class.  It 
-    maps the directories in the PyPi package using the pathlib module and 
-    turns the names of each important directory into a pathlike object.  The 
+    This is the directory management base class.  It
+    maps the directories in the PyPi package using the pathlib module and
+    turns the names of each important directory into a pathlike object.  The
     base class gives the option of creating a new repository with cookiecutter.
-    
+
     This is also the home for many of the utility functions for manipulating
     directories or paths.
     """
@@ -52,7 +23,7 @@ class Mana(object):
     def __init__(self, repo=None, home=os.getcwd(), new_repo=False):
         # TODO-ROB ADD a REPOsitory destination path (an output directory for cookiecutter)
         """
-        :param home(path or path-like): The home of the file calling this name.  When creating a new 
+        :param home(path or path-like): The home of the file calling this name.  When creating a new
             repository it is best to explicitly name the home path.
         :param repo(string): The name of the new repository to be created.
         :param new_repo(bool): Triggers cookiecutter to create a new repository.
@@ -102,10 +73,10 @@ class Mana(object):
         #self.dm_log = log.basic
 
     def create_repo(self):
-        """This function creates a new repository.  If a repository name 
+        """This function creates a new repository.  If a repository name
         is given to the class then it is given a name.  If not, cookiecutters
         takes input from the user.
-        
+
         The base class will be the only class that allows cookiecutters parameter
         no_input to be False.
         """
@@ -160,7 +131,7 @@ class Mana(object):
         a tree a dir_map in newick format.  This will be useful for Bio.Phylo
         applications."""
         """
-        :param top (path):  The root at which the directory map is made. 
+        :param top (path):  The root at which the directory map is made.
         :param ignore (list):  The files to ignore.  The  get_dir_map function
         adds this to the .gitignore list.
         :return (tree):  A newick formatted string in style #8.  Can be used with
@@ -251,10 +222,10 @@ class RepoMana(Mana):
 
     def __init__(self, repo, user=None, home=os.getcwd(), new_user=False, new_repo=False):
         """
-        :param repo (string):  The name of the repository.  
-        :param user (string):  The name of the current user if any. 
+        :param repo (string):  The name of the repository.
+        :param user (string):  The name of the current user if any.
         :param home (string or pathlike):  The home path of the repository.
-        :param new_user (bool):  Flag for creating a new user. 
+        :param new_user (bool):  Flag for creating a new user.
         :param new_repo: Flag for creating a new repository.
         """
         # TODO-ROB change the home parameter to the output directory parameter
@@ -309,13 +280,13 @@ class UserMana(RepoMana):
         This class gives access to user paths, and provides functionality
         for creating new projects for the current user within the users
         home.
-        
-        :param repo (string):  The name of the repository.  
+
+        :param repo (string):  The name of the repository.
         :param user (string):  The name of the current user if any.
-        :param project(string):  The name of the current project if any. 
+        :param project(string):  The name of the current project if any.
         :param home (string or pathlike):  The home path of the repository.
-        :param new_user (bool):  Flag for creating a new user. 
-        :param new_project (bool):  Flag for creating a new project. 
+        :param new_user (bool):  Flag for creating a new user.
+        :param new_project (bool):  Flag for creating a new project.
         '''
         super().__init__(repo=repo, user=user, home=home, new_user=new_user)
         self.user = user
@@ -356,18 +327,18 @@ class WebMana(RepoMana):
 
     def __init__(self, repo, website, host='0.0.0.0', port='5252', home=os.getcwd(), new_website=False, create_admin=False):
         '''
-        This installs a template for Flask using cookiecutter.  The 
+        This installs a template for Flask using cookiecutter.  The
         custom datasnakes cookie for this template has been edited for
         our own purposes.
-        
-        :param repo (string):  The name of the repository.  
+
+        :param repo (string):  The name of the repository.
         :param website (string):  The name of the website.  Not a url, so
-        it doesn't containt http://www.*.com.  
+        it doesn't containt http://www.*.com.
         (e.g. for www.vallenger-genetics.ml this parameter would be 'vallender-genetics')
         :param host (string):  The address to launch the flask app.  Defaults to 0.0.0.0
-        :param port (string):  The port to launch the flask app.  Defaults to 5252  
+        :param port (string):  The port to launch the flask app.  Defaults to 5252
         :param home (string or pathlike):  The home path of the repository.
-        :param new_website (bool):  Flag for creating a new website 
+        :param new_website (bool):  Flag for creating a new website
         :param create_admin:  Flag for creating a new admin for the website via FLASK USER.
         (Note:  This parameter is not used currently in development.)
         '''
@@ -387,12 +358,12 @@ class WebMana(RepoMana):
     def create_website(self):
         '''
         To create a website, the new_website cookie is used.
-        After creating the directory structure, the run_script function 
+        After creating the directory structure, the run_script function
         from cookiecutter finds the hooks folder which contains a
         post-cookiecutter-template-generation bash script.  The bash script
         sets up the proper dependencies and environment variables for the website,
         and runs the website on the specified host and port
-        
+
         :return: Runs the website.
         '''
         # TODO-ROB Add heavy logging here
@@ -415,17 +386,17 @@ class ProjMana(UserMana):
     def __init__(self, repo, user, project, research=None, research_type=None, app=None, home=os.getcwd(),
                  new_project=False, new_research=False, new_app=False):
         """
-        :param repo (string):  The name of the repository.  
+        :param repo (string):  The name of the repository.
         :param user (string):  The name of the current user if any.
         :param project(string):  The name of the current project if any.
-        :param research (string):  The name of the current type of research if any 
+        :param research (string):  The name of the current type of research if any
         :param research_type (string):  The type of research (public or private)
-        :param app (string):  The name of the application that the research. 
+        :param app (string):  The name of the application that the research.
         :param home (string or pathlike):  The home path of the repository.
-        :param new_user (bool):  Flag for creating a new user. 
-        :param new_project (bool):  Flag for creating a new project. 
-        :param new_research: 
-        :param new_app: 
+        :param new_user (bool):  Flag for creating a new user.
+        :param new_project (bool):  Flag for creating a new project.
+        :param new_research:
+        :param new_app:
 
         """
         super().__init__(repo=repo, user=user, project=project, home=home,

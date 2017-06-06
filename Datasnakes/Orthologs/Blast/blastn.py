@@ -6,10 +6,8 @@ import subprocess
 import time  # Used to delay when dealing with NCBI server errors
 from datetime import datetime as d
 from pathlib import Path
-#import psutil
 import pandas as pd
 from Bio import SearchIO  # Used for parsing and sorting XML files.
-# Used for Local Blasting.
 from Bio.Blast.Applications import NcbiblastnCommandline
 from Datasnakes.Orthologs.CompGenetics.ncbi_blast import BLASTAnalysis as BT
 # TODO-ROB: Find packages for script timing and analysis
@@ -199,8 +197,8 @@ class BLASTn(BT):
         # TODO-ROB THis is for development / testing
         # TODO-ROB Add the ability to do two seperate gi configs
         """Create a gi list based on the refseq_rna database for each taxonomy id on the MCSR.
-        
-        It will also convert the gi list into a binary file which is more 
+
+        It will also convert the gi list into a binary file which is more
         efficient to use with NCBI's Standalone Blast tools.
         """
         print('gi_list_config')

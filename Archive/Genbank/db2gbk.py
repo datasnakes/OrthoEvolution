@@ -1,55 +1,15 @@
-##############################################################################
-# PyCharm Community Edition
-# -*- coding: utf-8 -*-
-"""
-GPCR_Orthologs
-db2gbk.py updated on 1/3/2017 at 1:03 PM
-##############################################################################
-
-    Input:  Master_Accession_File in a specified format (described in a seperate
-    text file) and the proper database files.
-
-    Output:  Extract target GenBank files from the database files that were
-    created with ftp2db
-
-    Description:
-
-##############################################################################
-@author: rgilmore
-"""
-##############################################################################
-# Libraries:
-
 import os
 import shutil
-
 from Bio import SeqIO
 from BioSQL import BioSeqDatabase
-
 from dir_mana import dir_mana
 from lister import Lister
 
-# //TODO-ROB Add a progress bar to the pipeline
-##############################################################################
-# Custom Class Initializations
-# :
-# Use directory_management() class here so that we can stay organized
-# and more easily access the proper directories on command
 home = os.getcwd()
 project = "GPCR-Orthologs-Project"
 user = "rgilmore"
 where = dir_mana(home, project)
-# Use lister() class here so that we can easily access our Master RNA
-# Accession File
 
-
-# Add a path that contains custom libraries for import
-# os.sys.path.append()
-##############################################################################
-# Global Initializations:
-
-##############################################################################
-# //TODO-ROB make code more versatile for multiple projects or even single queries
 class Db2Gbk(object):
 
     def __init__(self, m_file='', path='/', genbank_update=False):

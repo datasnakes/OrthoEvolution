@@ -6,8 +6,8 @@ write the features to text files.
 
 Usage
 -----
-
-The main class under Genbank is `Genbank`.
+The main classes are `GenBank` and `GenBankMana`. GenBankMana helps to incorporate
+the ftp class.
 
 #### Code Examples
 
@@ -20,13 +20,5 @@ The main class under Genbank is `Genbank`.
 
 Tests
 -----
-
 Describe and show how to run the tests with code examples.
 
-:exclamation: Notes
--------------------
-
-Explain or list any notable information about the contents of this folder.
-
-Other
------

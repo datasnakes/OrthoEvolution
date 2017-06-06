@@ -1,23 +1,12 @@
-
-"""
-
-"""
-# Libraries:
-
+"""Use a biosql database to extract genbank features or files."""
 import os
 import sys
 from pathlib import Path
-
 from Bio import SeqIO
 from BioSQL import BioSeqDatabase
-
 from dir_mana import dir_mana
 from lister import Lister
 
-# Custom Class Initializations
-# :
-# Use directory_management() class here so that we can stay organized
-# and more easily access the proper directories on command
 home = os.getcwd()
 project = "GPCR-Orthologs-Project"
 user = "Work"

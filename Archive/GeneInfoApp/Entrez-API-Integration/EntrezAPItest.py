@@ -1,17 +1,12 @@
-# -*- coding: utf-8 -*-
-"""
-Use Entrez to get genbank files and features from a list of GI numbers.
+"""Use Entrez to retrieve genbank files & features from GI numbers."""
 
-@author: S.D. Hutchins
-"""
-# Modules used
 from Bio import Entrez
 import time as t
 import pandas as pd
 from Bio import SeqIO
 
 # Always tell NCBI who you are
-Entrez.email = "shutchins2@umc.edu"
+Entrez.email = ""
 
 # Create a short variable for esearch, Entrez.read, and efetch
 esearch = Entrez.esearch

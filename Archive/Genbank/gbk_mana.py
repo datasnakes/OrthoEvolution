@@ -1,5 +1,4 @@
-"""
-This class is designed to aid in extracting genbank files from a prefilled
+"""This class is designed to aid in extracting genbank files from a prefilled
 database.
 """
 import os

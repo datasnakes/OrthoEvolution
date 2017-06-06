@@ -1,13 +1,6 @@
-# -*- coding: utf-8 -*-
-"""
-File Name: get_gi_lists.py
-Description: This script is designed to create a gi list based on the refseq_rna database
+"""This script is designed to create a gi list based on the refseq_rna database
 for each taxonomy id on the MCSR. It will also convert the gi list into a
 binary file which is more efficient to use with NCBI's Standalone Blast tools.
-
-@author: Shaurita D. Hutchins
-Date Created: Wed Mar 29 16:40:01 2017
-Project Name: Addictions Project
 """
 # Modules used
 import os

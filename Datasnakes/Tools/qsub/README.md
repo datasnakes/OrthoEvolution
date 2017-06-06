@@ -27,16 +27,6 @@ with the class using the `pbs_dict` function.
 
 ```
 
-
-Tests
------
-
-Describe and show how to run the tests with code examples.
-
 :exclamation: Notes
 -------------------
-
 Explain or list any notable information about the contents of this folder.
-
-Other
------
