@@ -1,3 +1,10 @@
+"""
+This script 1) updates/downloads the refseq_rna blast db files,
+2) creates a list of taxonomy ids based on the list of organisms, and 3) create
+a csv file with only human accessions and genes for downstream usage. Check the
+ReadMe file for a first time setup of a blast database. Both steps occur on the
+head node of the MCSR because they need internet access.
+"""
 from ftplib import FTP, error_perm
 import os
 import fnmatch
@@ -6,18 +13,20 @@ import logging as log
 from datetime import datetime as d
 import subprocess
 
+#------------------------------------------------------------------------------
 # Set up the logger for logging
 format1 = '%a %b %d %I:%M:%S %p %Y'  # Used to add as a date
 format2 = '%m-%d-%Y@%I:%M:%S-%p'  # Used to append to archives
 format3 = '%m-%d-%Y'
 
+#------------------------------------------------------------------------------
 home = os.getcwd()  # My home directory for this script/project
 dbpath = '/work5/r2295/bin/databases/refseq_rna_db'  # My current dbpath
 
 # Create a directory for the database if one doesn't exist
 try:
     # If the directory exists,
-    if os.path.exists(dbpath):
+    if os.path.exists(dbpath) == True:
         # Move any files that are in the directory to a dated archive folder.
         # Moving a directory in linux/unix essentially renames it.
         os.system(
@@ -36,6 +45,7 @@ except os.error:
 
 os.chdir(dbpath)  # Change to the database directory
 
+#------------------------------------------------------------------------------
 # Connect to the NCBI ftp site
 try:
     ncbi = 'ftp.ncbi.nlm.nih.gov/'
@@ -56,6 +66,7 @@ ftp.cwd(blastdb)
 # This is a list of the file names in the current directory
 filenames = ftp.nlst()
 
+#------------------------------------------------------------------------------
 # Create a for loop that writes the list/text file of files wanted
 with open('downloadlist.txt', 'w') as downloads:
     for filename in filenames:
@@ -84,6 +95,7 @@ except os.error:
 
 ftp.close()
 
+#------------------------------------------------------------------------------
 # Unzip all of the files and remove unneccessary files
 # Unzip the database files
 os.system("for file in *.tar.gz; do tar xvf $file; done")

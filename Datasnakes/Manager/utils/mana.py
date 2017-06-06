@@ -86,8 +86,8 @@ class Mana(object):
         is given to the class then it is given a name.  If not, cookiecutters
         takes input from the user.
 
-        The base class will be the only class that allows cookiecutters parameter
-        no_input to be False.
+        The base class will be the only class that allows cookiecutters
+        parameter no_input to be False.
         """
         if self.repo:
             no_input = True
@@ -145,8 +145,8 @@ class Mana(object):
         :param top (path):  The root at which the directory map is made.
         :param ignore (list):  The files to ignore.  The  get_dir_map function
         adds this to the .gitignore list.
-        :return (tree):  A newick formatted string in style #8.  Can be used with
-        the ete3.Tree() class.
+        :return (tree):  A newick formatted string in style #8.  Can be used
+        with the ete3.Tree() class.
         """
 
         tree = Tree()
@@ -155,6 +155,7 @@ class Mana(object):
         return Ntree
 
     def get_ete3_tree(self, top, tree=None):
+        """Create the ete3 tree."""
         if not tree:
             tree = self.get_newick_dir_map(top)
         t = ete3.Tree(tree, format=8)
@@ -179,6 +180,7 @@ class Mana(object):
     # def dir_archive(self, path, path_list):
     #     # Use the path that you want to update/add to
     #     # Returns path and the time stamp (could be None)
+
 
 class RepoMana(Mana):
     """Repository Management."""
@@ -235,6 +237,7 @@ class RepoMana(Mana):
         os.chmod(str(self.users / Path(self.user)), mode=0o777)
         # TODO-ROB do we need create user hooks?
 # TODO-ROB:  Edit the setup.py file for cookiecutter.
+
 
 class UserMana(RepoMana):
     """User Management Class."""

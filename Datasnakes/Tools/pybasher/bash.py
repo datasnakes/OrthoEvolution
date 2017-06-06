@@ -30,6 +30,7 @@ else:
 
 
 class PyBasher(object):
+    """Utilize bash commands within python."""
     # !!! Only for linux
     def __init__(self, cmd):
         """Initialize the call as well as standard error and output."""

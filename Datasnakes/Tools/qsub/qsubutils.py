@@ -57,7 +57,9 @@ class QsubUtils:
                  jobname='', script_name='', logname='', python='python3',
                  gb='6gb', cput='75:00:00', walltime='75:00:00'):
         """Add PBS script attributes."""
-        format1 = '%a %b %d %I:%M:%S %p %Y'  # Date format. Used to add as a date
+
+        # Date format. Used to add as a date
+        format1 = '%a %b %d %I:%M:%S %p %Y'
 
         if self.default == default:
             author = getpass.getuser().upper()

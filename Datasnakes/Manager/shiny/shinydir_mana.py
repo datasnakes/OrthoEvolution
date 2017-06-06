@@ -3,7 +3,8 @@ import os
 import platform
 from dir_mana import dir_mana
 
-where = dir_mana(os.path.dirname(os.path.abspath(__file__)), 'GPCR-Orthologs-Project')
+where = dir_mana(os.path.dirname(os.path.abspath(__file__)),
+                 'GPCR-Orthologs-Project')
 os.chdir(where.APP_DATA)
 computer = str(platform.uname()[1])
 
