@@ -30,6 +30,20 @@ Installation
 ------------
 ``pip install Datasnakes-Scripts``
 
+Development Mode Installation
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+1. ``git clone http://github.com/datasnakes/Datasnakes-Scripts``
+2. ``cd Datasnakes-Scripts``
+3. ``pip install -e .``
+
+Manual Installation
+~~~~~~~~~~~~~~~~~~~~~
+Alternatively, you can set install the package manually.
+
+1. Download the zip file and unzip it or ``git clone https://github.com/datasnakes/Datasnakes-Scripts.git``
+2. ``cd Datasnakes-Scripts``
+3. ``pip install .``
+
 Dependencies
 ~~~~~~~~~~~~~
 
