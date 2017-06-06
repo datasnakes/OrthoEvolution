@@ -1,10 +1,3 @@
-# -*- coding: utf-8 -*-
-"""
-Created on Wed Dec 28 15:03:16 2016
-
-@author: shutchins2
-"""
-# Modules Used
 from googleapiclient.discovery import build
 from pprint import pprint
 from bs4 import BeautifulSoup as BS
@@ -28,9 +21,6 @@ results = google_search(
 with open('results.txt', 'w') as file1:
         for result in results:
             pprint(result, stream=file1)
-#            pprint(result)
-
-# Extract 'formattedUrl' from the results
 
 # Use urllib2 to get the link and create an html file
 ncbigene = 'https://www.ncbi.nlm.nih.gov/gene/3350'
@@ -41,9 +31,4 @@ soup = BS(html.read(), 'lxml')
 with open('html.txt', 'w', encoding='utf-8-sig') as file2:
     file2.write(soup.prettify())
 
-# Extract the specified summary info or other information
-#a = soup.find_all('dd')  # Find specific tags in the html file
-#print(a)
-#print(soup.get_text())  # Extract all text from the html page
-#print(soup.find_all(attrs={"class": "section"})) # Gene Summary text
 

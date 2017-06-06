@@ -6,7 +6,6 @@ of interest across a group of [species](ftp://ftp.ncbi.nlm.nih.gov/genomes/refse
 
 Usage
 -----
-
 The main classes under CompGenetics are `BLASTAnalysis` and `CompGenAnalysis`.
 
 #### Code Examples
@@ -30,15 +29,3 @@ from Orthologs.CompGenetics import CompGenAnalysis
 
 ```
 
-Tests
------
-
-Describe and show how to run the tests with code examples.
-
-:exclamation: Notes
--------------------
-
-Explain or list any notable information about the contents of this folder.
-
-Other
------

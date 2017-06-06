@@ -2,10 +2,7 @@
 # https://github.com/pypa/sampleproject/blob/master/setup.py
 # https://github.com/biopython/biopython/blob/master/setup.py
 # TODO-ROB: 1.  Generate a Template BioSQL database using sqlite3
-from Datasnakes
 from setuptools import setup
-
--Scripts
 # To use a consistent encoding
 from codecs import open
 from os import path
@@ -40,7 +37,7 @@ setup(
         'Operating System :: Unix',
         'Natural Language :: English'
     ],
-    packages=PACKAGES,
+    #packages=PACKAGES,
     install_requires=[],
 )
 

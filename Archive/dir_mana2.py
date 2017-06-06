@@ -1,39 +1,10 @@
-##############################################################################
-# PyCharm Community Edition
-# -*- coding: utf-8 -*-
-"""
-Orthologs-Project
-Directory_management updated on 11/15/2016 at 11:30 AM
-##############################################################################
-
-    Input:  A string that represents a path for the main file systems
-
-    Output:  Custom class variables for import in the project file template.
-
-    Description:  This file manges the directories for projects created in PyCharm.
-    Each new project gets it's own function.
-
-##############################################################################
-@author: rgilmore
-"""
-##############################################################################
-# Libraries:
-
-
 import json
 import os
 import shutil
 import time
 from pathlib import Path
-
 from datasnakes.Orthologs import treelib2
-
 from Manager.dir_map.json_to_newick import _parse_json
-
-
-#from project_mana import project_mana  # //TODO-ROB: Add a configure function to proj_mana to get the root directory using the project name
-##############################################################################
-# Directory Initializations:
 
 class dir_mana(object):
     """This class organizes a directory tree for a project.

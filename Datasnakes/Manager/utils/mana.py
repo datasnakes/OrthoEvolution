@@ -10,7 +10,6 @@ from cookiecutter.main import cookiecutter
 from cookiecutter.prompt import prompt_for_config
 from cookiecutter.generate import generate_context
 # TODO-ROB once this is a pypi package all of these will be unnecessary
-# from Manager.logit.logit import LogIt
 # TODO-ROB use **kwargs and **args to cut down on parameters
 
 class Mana(object):

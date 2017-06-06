@@ -1,13 +1,3 @@
-# -*- coding: utf-8 -*-
-"""
-Created on Tue Jan 17 15:47:16 2017
-
-@author: shutchins2
-"""
-
-# Classes and/or definitions to be used for GBK Feature Extraction,
-# alignment, PhyML, PAML
-
 import csv
 
 
@@ -29,5 +19,3 @@ class CreateLists:
             olist.append(org)
         print("This is the list of organisms: " + "\n")
         print(olist)  # Print the list of organisms
-
-        # To do - [] Complete these definitions

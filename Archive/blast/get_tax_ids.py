@@ -1,11 +1,5 @@
 # -*- coding: utf-8 -*-
-"""
-Date created: Thu Mar  2 12:58:59 2017
-Author: S. Hutchins
-
-Script description: Get taxonomy ids from a list of organisms using Entrez.
-
-"""
+"""Get taxonomy ids from a list of organisms using Entrez."""
 #------------------------------------------------------------------------------
 # List of modules used.
 #------------------------------------------------------------------------------

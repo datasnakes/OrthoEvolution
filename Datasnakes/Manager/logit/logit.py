@@ -1,5 +1,4 @@
 """Main logging class to make logging easier."""
-
 import logging as log
 import os
 from datetime import datetime as d
