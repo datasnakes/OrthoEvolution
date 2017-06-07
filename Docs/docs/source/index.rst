@@ -28,16 +28,21 @@ Check out our `wiki docs <https://github.com/datasnakes/Datasnakes-Scripts/wiki>
 
 Installation
 ------------
+``pip install Datasnakes-Scripts``
 
-For easy installation:
+Development Mode Installation
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+1. ``git clone http://github.com/datasnakes/Datasnakes-Scripts``
+2. ``cd Datasnakes-Scripts``
+3. ``pip install -e .``
 
-   ``pip install Datasnakes-Scripts``
+Manual Installation
+~~~~~~~~~~~~~~~~~~~~~
+Alternatively, you can set install the package manually.
 
-For development mode installation:
-
-   ``git clone http://github.com/datasnakes/Datasnakes-Scripts``
-
-   ``pip install -e path\to\Datasnakes-Scripts``
+1. Download the zip file and unzip it or ``git clone https://github.com/datasnakes/Datasnakes-Scripts.git``
+2. ``cd Datasnakes-Scripts``
+3. ``pip install .``
 
 Dependencies
 ~~~~~~~~~~~~~
@@ -45,14 +50,22 @@ Dependencies
 Currently, this package is optimized for ``python v3.4`` and upward. It's also
 dependent upon ``biopython v1.68``.
 
+If you don't use pip to install the package, ``pip install -r requirements.txt``
+will install dependencies.
+
+Development Mode Installation
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+1. ``git clone http://github.com/datasnakes/Datasnakes-Scripts``
+2. ``cd Datasnakes-Scripts``
+3. ``pip install -e .``
+
 Manual Installation
 ~~~~~~~~~~~~~~~~~~~~~
-
 Alternatively, you can set install the package manually.
 
 1. Download the zip file and unzip it or ``git clone https://github.com/datasnakes/Datasnakes-Scripts.git``
 2. ``cd Datasnakes-Scripts``
-3. ``python setup.py install``
+3. ``pip install .``
 
 Project Setup
 ~~~~~~~~~~~~~~~~

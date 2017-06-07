@@ -1,13 +1,7 @@
-# -*- coding: utf-8 -*-
-"""
-
-@author: S. Hutchins
-"""
 # Align multiple sequences located in fasta files using alignment
 # via MCSR and create a .phylip output format.
 
 import csv
-# List of modules used
 import os
 import sys
 import time
