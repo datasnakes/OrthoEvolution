@@ -4,6 +4,8 @@ three or more sequences.
 """
 # Import the Clustal Omega wrapper from Biopython
 from Bio.Align.Applications import ClustalOmegaCommandline
+from Bio import SeqIO
+stop_codons = ['TAG', 'TAA', 'TGA']
 
 
 class ClustalO:
@@ -32,3 +34,22 @@ class ClustalO:
             print(stderr)
         if stdout:
             print(stdout)
+
+
+class AlignmentEditor:
+    """Edit alignments and ensure divisibility by 3."""
+    def __init__(self, seqfile, seqtype):
+        """Initialize the record handle."""
+        self.seqfile = seqfile
+        self.seqtype = seqtype
+        records = list(SeqIO.parse(self.seqfile, self.seqtype))
+        self.records = records
+
+    def divby3(self):
+        for record in self.records:
+            if len(record.seq) % 3 != 0:
+                print('Sequences in %s are not divisible by 3.' % self.seqfile)
+                break
+            else:
+                print('Sequences in %s are divisible by 3.' % self.seqfile)
+                break
