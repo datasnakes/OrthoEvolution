@@ -14,11 +14,6 @@ module/package will seek to simplify a number of useful bash commands & make
 them easier to incorporate into python scripts.
 
 
-Install/Setup
----------------
-This package depends upon a knowledge of [Python]() and [Linux]().
-
-
 Usage
 -----
 Place code examples here and other ways to use this project/pipeline.

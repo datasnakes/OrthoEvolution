@@ -19,9 +19,8 @@ from Orthologs.CompGenetics import BLASTAnalysis
 # The default arguments are template, taxon_file, post_blast, save_data
 BLASTAnalysis(self, repo, user, project, research, research_type,
               template=None, taxon_file=None, post_blast=False, save_data=True)
-
-
 ```
+
 ##### Performing Comparative Genetics Analysis
 
 ``` python

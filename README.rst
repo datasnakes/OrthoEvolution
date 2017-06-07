@@ -1,5 +1,5 @@
 .. image:: https://travis-ci.org/datasnakes/Datasnakes-Scripts.svg?branch=master
-   :target: https://travis-ci.org/datasnakes/Datasnakes-Scripts
+    :target: https://travis-ci.org/datasnakes/Datasnakes-Scripts
 .. image:: https://api.codacy.com/project/badge/Grade/9a4ce39423ed4458a0c7fa3610c81ba2
    :target: https://www.codacy.com/app/sdhutchins/Datasnakes-Scripts?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=datasnakes/Datasnakes-Scripts&amp;utm_campaign=Badge_Grade
 .. image:: https://badges.gitter.im/gitterHQ/gitter.png
@@ -11,10 +11,10 @@
 .. image:: https://img.shields.io/badge/under-development-orange.svg
    :target: https://github.com/datasnakes/Datasnakes-Scripts
 
-Datasnakes-Orthologs
+Datasnakes-Scripts
 --------------------
 
-The Datasnakes-Orthologs package is a collection of the modules which aids in
+The Datasnakes-Scripts package is a collection of the modules which aids in
 the analysis and visualization of orthologs-related bioinformatics projects.
 
 Check out our `wiki docs <https://github.com/datasnakes/Datasnakes-Scripts/wiki>`__ and our `read the docs <http://datasnakes-scripts.readthedocs.io/en/master/>`__!
@@ -62,7 +62,7 @@ After installation, you'll be able to easily import each module via:
 .. code:: python
 
     from Datasnakes.Orthologs import Align, BioSQL, Blast, CompGenetics, Phylogenetics, Genbank
-    
+
 Tests
 ------
 To run tests, type ``nosetests Tests/`` in the Datasnakes-Orthologs directory.

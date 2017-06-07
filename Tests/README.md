@@ -5,9 +5,9 @@ This is the test suite.
 
 Usage
 --------
+Ensure that nose is installed.
 
-`pip install nosetests`
+`pip install nose`
 
 Run our tests from the top directory, `Datasnakes-Orthologs`, by typing:
-
 `nosetests Tests/`
