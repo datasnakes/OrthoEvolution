@@ -36,28 +36,28 @@ class ETE3PAML(object):
                 else:
                     print('No sequence for %s.' % organism)
                     pass
-                
+
             # Input a list of branches to keep on the base tree
             t.prune(branches2keep, preserve_branch_length=True)
-        
+
             # Write the tree to a file
             t.write(outfile='/work2/vallender/Projects/KARG-Project/data/paml-output/' + gene + '_PAML/temptree.nw')
-        
+
             # Import the newick tree
             tree = EvolTree('/work2/vallender/Projects/KARG-Project/data/paml-output/' + gene + '_PAML/temptree.nw')
-    
+
             # Import the alignment
             tree.link_to_alignment('data/clustal-output/' + gene + '_Aligned/' +
                                    gene + '_aligned_cds_nucl.fasta')
-    
+
             tree.workdir = workdir
-    
+
             # Set the binpath of the codeml binary
             tree.execpath = paml_path
-    
+
             # Run the codeml model
             tree.run_model(model + '.' + gene)
-            
+
         except:
             print('Error with %s.' % gene)
             pass
