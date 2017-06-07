@@ -9,13 +9,8 @@ Dependencies
 
 Setup
 -------
-
-Linux
-~~~~~~
+**On Linux/Debian**
 
 Make the script executable. Then run it.
 1. `chmod +x docx2md.sh`
 2. `./docx2md.sh`
-
-Windows
-~~~~~~~~
