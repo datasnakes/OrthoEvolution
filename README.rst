@@ -78,7 +78,7 @@ Contributors
    `:email: <mailto:sdhutchins@outlook.com>`__
 
 Citation
-~~~~~~~~
+----------
 
 We're so thankful to have a resource such as
 `Biopython <http://biopython.org/wiki/Biopython>`__. They inspired this
@@ -90,5 +90,5 @@ Jun 1; 25(11) 1422-3 http://dx.doi.org/10.1093/bioinformatics/btp163
 pmid:19304878*
 
 License
-~~~~~~~~
+---------
 `MIT <https://github.com/datasnakes/Datasnakes-Scripts/blob/master/LICENSE>`_
