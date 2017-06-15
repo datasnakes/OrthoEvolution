@@ -1,0 +1,1 @@
+from .blastn import BLASTn

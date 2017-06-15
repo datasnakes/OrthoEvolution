@@ -1,0 +1,75 @@
+Revision history for BioSQL
+===========================
+
+Note: this revision history only starts at the BioHackathon 2008,
+Tokyo, prior to the v1.0 release.
+
+BioSQL core schema
+------------------
+
+version 1.0.1:
+
+  o Enlarged column width for dbxref.accession and bioentry.accession
+    to 128 characters to deal with some very long accession numbers of
+    pathway database entries.
+
+  o Added migrate/ directory and migration scripts from 1.0.0 for Pg,
+    MySQL, and Oracle (the latter is in the sql/biosql-ora/1.0/migrate
+    directory).
+
+  o Fixed INSTALL documentation to consistently use biosql as the
+    schema (database) name.
+
+  o Added note to INSTALL file about incompatibility with PostgreSQL v8.3+.
+
+  o Added script to add back explicit typecasts to v8.3. This is
+    experimental and untested, use at your own risk. If it does make
+    v8.3+ work for you with bioperl-db, please let us know at
+    biosql-l{at}lists{dot}open-bio{dot}org.
+
+  o Fixed bug #2470: load_ncbi_taxonomy.pl will no longer require to
+    use the NCBI taxon ID as the primary key value. Hence, the primary
+    key will now be different from the NCBI taxon ID.
+
+version 1.0.0:
+
+  o Brought sql/biosql-accelerators-pg.sql to the 1.0 schema, but
+    still retired it since no-one can have been using it.
+
+  o Updated and fixed views and functions in sql/biosqldb-views-pg.sql
+    to work with 1.0 schema. Apparently this hadn't been used for a while ...
+
+  o Retired scripts/create_mysql_db.pl. Not sure what this was ever
+    useful for, and the DDL path was wrong anyway.
+
+  o Oracle version is now under sql/biosqldb-ora for consistency.
+
+  o Added version for Apache Derby (Java embedded RDBMS).
+
+  o Changed license to LGPL v3.
+
+PhyloDB module
+--------------
+
+alpha - no release yet
+
+  o Added SQL script to drop phyloDB tables and sequences.
+ 
+  o Changed license to LGPL v3.
+
+  o Added tables tree_dbxref and node_dbxref tables to allow storing
+    identifiers and cross-references for trees and nodes.
+
+  o Renamed edge_attribute_value and node_attribute_value to use
+    'qualifier' instead of 'attribute', for the sake of consistency
+    with the core schema (though attribute sounds like the better
+    name).
+
+  o Added tree_qualifier_value table to capture metadata for trees.
+
+  o Replaced 1-n relationships (foreign keys) between bioentry and
+    node and taxon and node, respectively, with n-n relationships
+    (association tables).
+
+  o Added tree_root table to allow storing of multiple roots (e.g., as
+    resulting from Bayesian analysis) (11/13/2007)
