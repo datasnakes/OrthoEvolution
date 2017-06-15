@@ -46,19 +46,9 @@ class SequenceEditor:
         records = list(SeqIO.parse(self.seqfile, self.seqtype))
         self.records = records
 
-    def divby3(self):
-        """Ensure divisibility by 3."""
-        for record in self.records:
-            if len(record.seq) % 3 != 0:
-                print('Sequences in %s are not divisible by 3.' % self.seqfile)
-                break
-            else:
-                print('Sequences in %s are divisible by 3.' % self.seqfile)
-                break
-
 
 class AlignmentEditor:
-    """Edit alignments and ensure divisibility by 3."""
+    """Edit alignments to ensure length is a multiple of 3 for PAML."""
     def __init__(self, seqfile, seqtype):
         """Initialize the multiple sequence alignment file record."""
         self.seqfile = seqfile
