@@ -6,6 +6,7 @@ from BioSQL import BioSeqDatabase
 from Bio import SeqIO
 
 
+# TODO-Change inheritance to PM
 class GenBank(object):
     """Class for managing, downloading and extracting features from genbank files."""
 

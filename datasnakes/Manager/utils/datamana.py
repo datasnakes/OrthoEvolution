@@ -12,24 +12,33 @@ from Datasnakes.Manager.utils.mana import ProjMana as PM
 # TODO-ROB: Use this class to move data back and forth between local and remote servers
 # TODO-ROB:  Mirror the directory creation on MCSR's servers
 # TODO-ROB:  ^^ This will allow the transfer of data
+
+# TODO-ROB:  Add FTP and s2s inheritance
 class DataMana(PM):
-    def __init__(self, home=os.getcwd(), data=None, new_data=False, database=None, new_db=False, **kwargs):
+
+    def __init__(self, home=os.getcwd(), web_address=None, hpc_address=None, hpc_user=None,
+                 research=None, new_data=False, database=None, new_db=False, **kwargs):
         super().__init__(database=database, new_db=new_db, **kwargs)
 
-        for item in data:
-            if item.lower() == 'blast':
+        for item in research:
+            if item.lower() == 'comparative genetics':
                 self.blast_data = self.ncbi_db_repo / Path()
                 self.blast()
-            elif item.lower() == 'genbank':
+            elif item.lower() == 'comparative polymorphism':
                 self.genbank()
-            elif item.lower() == 'fasta':
+            elif item.lower() == 'natural selection':
                 self.fasta()
 
     def blast(self):
-        print('blast folders')
+        print('create blast folders')
+        # TODO-Create directories for the blast data
+        # Setup inside of a project:  ~/raw_data/blast
+                                    # ~/raw_data/blast/gi_lists
+                                    # ~/raw_data/blast/xml
 
     def genbank(self):
         print('genbank folders')
+
 
     def fasta(self):
         print('fasta foldrs')

@@ -8,7 +8,7 @@ import zipfile
 #import pexpect
 import subprocess
 
-
+# TODO-ROB:  Create Command 2 Server class or find something on GitHub similar
 class S2S(object):
     """S2S (Send 2 Server) is designed for use with a public ssh key."""
     # TIP Create a public key to use this class. It's easy!

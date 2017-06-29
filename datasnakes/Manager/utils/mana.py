@@ -404,7 +404,7 @@ class WebMana(RepoMana):
 
 class ProjMana(UserMana):
     """Project Management Class."""
-
+    # TODO-ROB:  Change "research type" to "private" and make it boolean
     def __init__(self, repo, user, project, research=None, research_type=None,
                  app=None, home=os.getcwd(), new_project=False, new_research=False,
                  new_app=False, **kwargs):
