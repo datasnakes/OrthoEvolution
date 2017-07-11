@@ -12,4 +12,4 @@ __all__ = ("WebMana",
            "UserMana",
            "FormatList",
            "SplitList",
-)
+           )

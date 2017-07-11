@@ -132,7 +132,6 @@ class QsubUtils:
             else:  # Unsuccessful. Stdout will be '1'.
                 print("PBS job not submitted.")
         finally:
-            print('hi')
             if cleanup:  # When finished, remove the qsub files & python files.
                 os.remove(base + '.qsub')
                 os.remove(base + '.py')

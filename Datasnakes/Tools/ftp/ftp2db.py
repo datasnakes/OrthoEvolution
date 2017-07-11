@@ -71,7 +71,8 @@ class FTP2DB(object):
     def ftp_check(self):
         """Check to see if the FTP connection still exists.
 
-        If it doesn't then it reconnects and returns an instance of the connection.
+        If it doesn't then it reconnects and returns an instance of the
+        connection.
         """
         ftp = self.ftp_connect(self.__NCBI_FTP, self.email)
         ftp.voidcmd('NOOP')
