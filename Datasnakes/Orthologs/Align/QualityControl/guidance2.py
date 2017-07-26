@@ -13,7 +13,7 @@ It weights, filters or masks unreliably aligned positions in multiple sequence a
 
 from __future__ import print_function
 from pathlib import Path
-from Bio.Application import _Option, _Switch, AbstractCommandline
+from Bio.Application import _Option, AbstractCommandline
 
 
 class Guidance2Commandline(AbstractCommandline):
