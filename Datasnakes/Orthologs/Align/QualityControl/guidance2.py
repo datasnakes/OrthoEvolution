@@ -8,8 +8,8 @@
 # This code is part of the Biopython distribution and governed by its
 # license.  Please see the LICENSE file that should have been included
 # as part of this package.
-"""Command line wrapper for the weighting, filtering or masking
-of unreliably aligned positions in multiple sequence alignments using GUIDANCE2."""
+"""Command line wrapper for GUIDANCE2
+It weights, filters or masks unreliably aligned positions in multiple sequence alignments."""
 
 from __future__ import print_function
 from pathlib import Path
