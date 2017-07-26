@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# Copyright 2017 by Rob Gilmore. All rights reserved.
+# Copyright 2017 by Rob Gilmore and Shaurita Hutchins. All rights reserved.
 # Based on ClustalOmega wrapper copyright 2011 by Andreas Wilm.
 #
 # Wrapper for Guidance2 by Rob Gilmore (2017).  http://guidance.tau.ac.il/ver2/
