@@ -40,11 +40,11 @@ class Pal2NalCommandline(AbstractCommandline):
         self.parameters = \
             [
                 # Required Parameters
-                _Argument(['pep.aln'],
+                _Argument(['pepaln'],
                           'protein alignment either in CLUSTAL or FASTA format',
                           filename=True, is_required=True,
                           checker_function=lambda x: Path(x).is_file()),
-                _Argument(['nuc.fasta'],
+                _Argument(['nucfasta'],
                           'DNA sequences (single multi-fasta or separated files)',
                           filename=True, is_required=True,
                           checker_function=lambda x: Path(x).is_file()),
@@ -79,4 +79,4 @@ class Pal2NalCommandline(AbstractCommandline):
                         equate=False,
                         checker_function=lambda x: isinstance(x, int))
             ]
-        AbstractCommandline.__init(self, cmd, **kwargs)
+        AbstractCommandline.__init__(self, cmd, **kwargs)
