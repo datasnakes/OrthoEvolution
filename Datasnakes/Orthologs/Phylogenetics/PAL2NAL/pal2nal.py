@@ -1,8 +1,9 @@
 """Command line wrapper for PAL2NAL"""
+# TODO Use Biopython style command line wrapper for PAL2NAL wrapper.
 from __future__ import print_function
 from Bio.Application import _Option, _Switch, AbstractCommandline
 
-#TODO Use Biopython style command line wrapper for PAL2NAL wrapper.
+
 class Pal2nalCommandline(AbstractCommandline):
     """Command line wrapper for PAL2NAL.
     http://www.clustal.org/omega
