@@ -136,4 +136,4 @@ class Guidance2Commandline(AbstractCommandline):
                         equate=False,
                         checker_function=lambda x: isinstance(x, int))
             ]
-        AbstractCommandline.__init(self, cmd, **kwargs)
+        AbstractCommandline.__init__(self, cmd, **kwargs)
