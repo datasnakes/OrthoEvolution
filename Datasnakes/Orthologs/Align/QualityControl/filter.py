@@ -40,7 +40,7 @@ class QCAlignmentCommandline(Guidance2Commandline, Pal2NalCommandline):
         na_fasta = self.home / Path(self.gene + '_G2.ffn')
         na_alignment = self.home / Path(self.gene + '_P2N_na.aln')
         # PAL2NAL nucleic acid alignment
-        self.pal2nal_conversion(aa_alignment, na_fasta, na_alignment, )
+        self.pal2nal_conversion(aa_alignment, na_fasta, na_alignment)
 
     def nucleic_acid_guidance(self, iteration, seqFile, outDir, bootstraps, seqCutoff, colCutoff):
         seqType = 'nuc'
@@ -89,9 +89,7 @@ class QCAlignmentCommandline(Guidance2Commandline, Pal2NalCommandline):
         return Path(moved_alignment)
 
     def pal2nal_conversion(self, aa_alignment, na_fasta, output_file):
-
         P2Ncmd = Pal2NalCommandline(pepaln=aa_alignment, nucfasta=na_fasta, output_file=output_file, nogap=True,
                                     nomismatch=True)
         P2Ncmd()
-
         print('Align the nucleic acids using the amino acid alignment.')
