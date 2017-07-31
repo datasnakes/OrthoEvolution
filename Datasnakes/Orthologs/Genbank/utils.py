@@ -30,7 +30,8 @@ def multi_fasta_manipulator(full_file, id_file, manipulation='remove', added_nam
         new_records.update(set(record for record in SeqIO.parse(id_file, 'fasta')))
         print('Sequences have been added.')
 
-    new_file = Path(full_file).stem + added_name + Path(full_file).suffix
+    new_file = Path(full_file).parent / Path(full_file).stem + added_name + Path(full_file).suffix
     SeqIO.write(new_records, new_file, 'fasta')
     print('A new fasta file has been created.')
+    return new_file
 
