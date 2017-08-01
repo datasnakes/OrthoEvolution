@@ -45,7 +45,7 @@ class Guidance2Commandline(AbstractCommandline):
                 _Option(['--seqFile', 'seqFile'],
                         "Input sequence file in FASTA format",
                         filename=True, equate=False, is_required=True,
-                        checker_function=lambda x: Path(x).suffix in ['.fasta', 'fna', '.ffn', '.faa', '.fra']
+                        checker_function=lambda x: str(Path(x).suffix) in ['.fasta', 'fna', '.ffn', '.faa', '.fra']
                         and Path(x).is_file()),
                 _Option(['--msaProgram', 'msaProgram'],
                         "Which MSA program to use",
@@ -97,11 +97,11 @@ class Guidance2Commandline(AbstractCommandline):
                 _Option(['--seqCutoff', 'seqCutoff'],
                         "Confidence cutoff between 0 to 1. Default=0.6",
                         equate=False,
-                        checker_function=lambda x: isinstance(x, int)),
+                        checker_function=lambda x: isinstance(x, (int, float))),
                 _Option(['--colCutoff', 'colCutoff'],
                         "Confidence cutoff between 0 to 1. Default=0.93",
-                        equate=False),
-
+                        equate=False,
+                        checker_function=lambda x: isinstance(x, (int, float))),
                 # Alignment Programs
                 _Option(['--mafft', 'mafft'],
                         "path to mafft executable. Default=mafft",
