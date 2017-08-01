@@ -16,7 +16,8 @@ def multi_fasta_manipulator(full_file, id_file, manipulation='remove', added_nam
     :return:  A multi-FASTA file with filter sequences.
     """
     new_records = set()
-
+    full_file = Path(full_file).open()
+    id_file = Path(full_file).open()
     # Turn the id_file into set of ids
     with open(id_file) as id_handle:
         ids = set(record.id for record in SeqIO.parse(id_handle, 'fasta'))
