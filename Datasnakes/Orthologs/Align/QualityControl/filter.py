@@ -7,12 +7,17 @@ from Bio import SeqIO
 from Datasnakes.Orthologs.Genbank.utils import multi_fasta_manipulator
 import subprocess
 
-# For one gene at a time
-class QCAlignmentCommandline(object):
 
-    def __init__(self, na_fasta, aa_fasta, home=os.getcwd(), msaProgram='CLUSTALW', na_bootstraps=10, aa_bootstraps=25,
-                 na_seqCutoff=0.6, aa_seqCutoff=0.6, na_colCutoff=0, aa_colCutoff=0.88):
-        self.G2C_args = dict(outOrder='as_input', dataset=Path(na_fasta).stem.__str__(), msaProgram=msaProgram)
+# For one gene at a time
+class FilteredAlignment(object):
+
+    def __init__(self, na_fasta, aa_fasta, gene_name=None, home=os.getcwd(), msaProgram='CLUSTALW', na_bootstraps=5,
+                 aa_bootstraps=5, na_seqCutoff=0.6, aa_seqCutoff=0.6, na_colCutoff=0, aa_colCutoff=0.88):
+        if gene_name is None:
+            gene_name = Path(na_fasta).stem
+
+        # Initialize the default command line arguments
+        self.G2C_args = dict(outOrder='as_input', dataset=gene_name, msaProgram=msaProgram)
         self.P2N_args = dict(nogap=True, nomismatch=True, output_file=Path(na_fasta).stem + '_P2N.aln')
 
         # Initialize
@@ -21,24 +26,27 @@ class QCAlignmentCommandline(object):
         self.aa_guidance_path = self.home / Path('AA_Guidance2')
         self.gene = Path(na_fasta).stem
 
+        na_seqFile = str(self.home / Path(na_fasta))  # Guidance NA sequence file
+        aa_seqFile = str(self.home / Path(aa_fasta))  # Guidance AA sequence file
+
+        na_fasta = str(self.home / Path(self.gene + '_G2.ffn'))  # Pal2Nal NA sequence file
+        na_alignment = str(self.home / Path(self.gene + '_P2N_na.aln'))  # Pal2Nal output file
         # Guidance2 iterations over the nucleic acid sequences
         iteration_flag = True
         iteration = 1
-        seqFile = Path(self.home) / Path(na_fasta)
         while iteration_flag is True:
             if iteration > 1:
                 na_seqCutoff = 0.7
-                na_bootstraps = 15
-            iteration_flag, seqFile = self.nucleic_acid_guidance(iteration, seqFile=str(seqFile),
+                na_bootstraps = 5
+            iteration_flag, na_seqFile = self.nucleic_acid_guidance(iteration, seqFile=na_seqFile,
                                                                  outDir=str(self.na_guidance_path), bootstraps=na_bootstraps,
                                                                  seqCutoff=na_seqCutoff, colCutoff=na_colCutoff)
             iteration += 1
-        # Guidance 2 amino acid alignment filter
-        aa_alignment = self.amino_acid_guidance(seqFile=Path(self.home) / Path(aa_fasta), remFile=seqFile,
-                                 outDir=self.aa_guidance_path, bootstraps=aa_bootstraps,
-                                 seqCutoff=aa_seqCutoff, colCutoff=aa_colCutoff)
-        na_fasta = self.home / Path(self.gene + '_G2.ffn')
-        na_alignment = self.home / Path(self.gene + '_P2N_na.aln')
+
+        # Guidance 2 amino acid alignment filter.  Returns the path as a string
+        aa_alignment = self.amino_acid_guidance(seqFile=aa_seqFile, remFile=na_seqFile, outDir=str(self.aa_guidance_path),
+                                                bootstraps=aa_bootstraps, seqCutoff=aa_seqCutoff, colCutoff=aa_colCutoff)
+
         # PAL2NAL nucleic acid alignment
         self.pal2nal_conversion(aa_alignment, na_fasta, na_alignment)
 
@@ -55,10 +63,10 @@ class QCAlignmentCommandline(object):
         print(G2Cmd)
         subprocess.check_call([str(G2Cmd)], stderr=subprocess.STDOUT, shell=True)
         removed_file = str(Path(outDir) / Path('Seqs.Orig.fas.FIXED.Removed_Seq'))
-        renamed_file1 = str(copy(removed_file, Path(self.gene + '_G2_removed.ffn').__str__()))
+        renamed_file1 = str(copy(removed_file, str(Path(self.gene + '_G2_removed.ffn'))))
 
         seq_file = str(Path(outDir) / Path('Seqs.Orig.fas.FIXED.Without_low_SP_Seq.With_Names'))
-        renamed_file2 = str(copy(seq_file, Path(self.gene + '_G2.ffn').__str__()))
+        renamed_file2 = str(copy(seq_file, str(Path(self.gene + '_G2.ffn'))))
 
         # Copy and rename files
         rem_count = SeqIO.write(SeqIO.parse(removed_file, 'fasta'), renamed_file1, 'fasta')
@@ -83,7 +91,7 @@ class QCAlignmentCommandline(object):
         G2Cmd()
 
         filtered_alignment = Path(outDir) / Path('MSA.CLUSTALW.Without_low_SP_Col.With_Names')
-        renamed_alignment = copy(filtered_alignment.__str__(), Path(self.gene + '_G2_aa.aln').__str__())
+        renamed_alignment = copy(str(filtered_alignment), str(Path(self.gene + '_G2_aa.aln')))
         print('Align the filtered amino acid sequences using guidance 2')
         return Path(renamed_alignment)
 
