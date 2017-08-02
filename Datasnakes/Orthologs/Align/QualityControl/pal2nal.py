@@ -48,10 +48,6 @@ class Pal2NalCommandline(AbstractCommandline):
                           'DNA sequences (single multi-fasta or separated files)',
                           filename=True, is_required=True,
                           checker_function=lambda x: Path(x).is_file()),
-                _Option(['>', 'output_file'],
-                        "This issues the bash command that redirects the PAL2NAL"
-                        "alignment to a particular file",
-                        filename=True, equate=False, is_required=True),
                 _Switch(['-h', 'help'],
                         'Show help'),
                 _Option(['-output', 'output'],
@@ -81,6 +77,10 @@ class Pal2NalCommandline(AbstractCommandline):
                             15  Blepharisma nuclear code\
                             16  Chlorophycean mitochondrial code",
                         equate=False,
-                        checker_function=lambda x: isinstance(x, int))
+                        checker_function=lambda x: isinstance(x, int)),
+                _Option(['>', 'output_file'],
+                        "This issues the bash command that redirects the PAL2NAL"
+                        "alignment to a particular file",
+                        filename=True, equate=False, is_required=True)
             ]
         AbstractCommandline.__init__(self, cmd, **kwargs)
