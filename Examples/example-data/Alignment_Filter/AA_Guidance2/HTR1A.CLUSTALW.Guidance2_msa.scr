@@ -1,0 +1,6 @@
+#REF_FILE /work5/r2294/bin/Datasnakes/Orthologs/Align/QualityControl/AA_Guidance2//HTR1A.CLUSTALW.aln.Sorted
+#ROWS   66  #COLUMNS    454
+#ALT_FILES -d /work5/r2294/bin/Datasnakes/Orthologs/Align/QualityControl/AA_Guidance2/BP/GUIDANCE2_MSA/ 
+#N_ALT      4
+#MEAN_RES_PAIR_SCORE 0.996675  #MEAN_COL_SCORE 0.890969
+#END
