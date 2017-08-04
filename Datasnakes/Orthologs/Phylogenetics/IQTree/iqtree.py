@@ -104,6 +104,11 @@ class IQTreeCommandline(AbstractCommandline):
                 _Option(['-st', 'dataType'],
                         "BIN, DNA, AA, NT2AA, CODON, MORPH (default: auto-detect)",
                         equate=False,
-                        checker_function=lambda x: x in ['BIN', 'DNA', 'AA', 'NT2AA', 'CODON', 'MORPH', 'auto-detect'])
+                        checker_function=lambda x: x in ['BIN', 'DNA', 'AA', 'NT2AA', 'CODON', 'MORPH', 'auto-detect']),
+                _Option(['', 'opts'],
+                        "A placeholder to set additional parameters."
+                        "e.g.  -m <model-name> -o <outgroup_taxon> -quiet -safe -mem RAM",
+                        equate=False)
             ]
+
         AbstractCommandline.__init__(self, cmd, **kwargs)
