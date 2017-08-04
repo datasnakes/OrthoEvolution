@@ -11,14 +11,14 @@ import subprocess
 # For one gene at a time
 class FilteredAlignment(object):
 
-    def __init__(self, na_fasta, aa_fasta, gene_name=None, home=os.getcwd(), msaProgram='CLUSTALW', na_bootstraps=5,
-                 aa_bootstraps=5, na_seqCutoff=0.6, aa_seqCutoff=0.6, na_colCutoff=0, aa_colCutoff=0.88):
+    def __init__(self, na_fasta, aa_fasta, gene_name=None, home=os.getcwd(), msaProgram='CLUSTALW', na_bootstraps=1,
+                 aa_bootstraps=1, na_seqCutoff=0.6, aa_seqCutoff=0.6, na_colCutoff=0, aa_colCutoff=0.88):
         if gene_name is None:
             gene_name = Path(na_fasta).stem
 
         # Initialize the default command line arguments
         self.G2C_args = dict(outOrder='as_input', dataset=gene_name, msaProgram=msaProgram)
-        self.P2N_args = dict(nogap=True, nomismatch=True, output_file=Path(na_fasta).stem + '_P2N.aln')
+        self.P2N_args = dict(nogap=True, nomismatch=True)
 
         # Initialize
         self.home = Path(home)
@@ -37,7 +37,7 @@ class FilteredAlignment(object):
         while iteration_flag is True:
             if iteration > 1:
                 na_seqCutoff = 0.7
-                na_bootstraps = 5
+                na_bootstraps = 1
             iteration_flag, na_seqFile = self.nucleic_acid_guidance(iteration, seqFile=na_seqFile,
                                                                  outDir=str(self.na_guidance_path), bootstraps=na_bootstraps,
                                                                  seqCutoff=na_seqCutoff, colCutoff=na_colCutoff)
@@ -48,7 +48,7 @@ class FilteredAlignment(object):
                                                 bootstraps=aa_bootstraps, seqCutoff=aa_seqCutoff, colCutoff=aa_colCutoff)
 
         # PAL2NAL nucleic acid alignment
-        self.pal2nal_conversion(aa_alignment, na_fasta, na_alignment)
+        self.pal2nal_conversion(str(aa_alignment), na_fasta, na_alignment)
 
     def nucleic_acid_guidance(self, iteration, seqFile, outDir, bootstraps, seqCutoff, colCutoff):
         seqType = 'nuc'
@@ -86,17 +86,18 @@ class FilteredAlignment(object):
     def amino_acid_guidance(self, seqFile, remFile, outDir, bootstraps, seqCutoff, colCutoff):
         seqType = 'aa'
         filtered_fasta = multi_fasta_manipulator(seqFile, remFile)
-        G2Cmd = Guidance2Commandline(**self.G2C_args, seqFile=filtered_fasta, seqType=seqType, outDir=outDir, bootstraps=bootstraps,
+        G2Cmd = Guidance2Commandline(**self.G2C_args, seqFile=str(filtered_fasta), seqType=seqType, outDir=outDir, bootstraps=bootstraps,
                                      seqCutoff=seqCutoff, colCutoff=colCutoff)
+        print(G2Cmd)
         G2Cmd()
-
-        filtered_alignment = Path(outDir) / Path('MSA.CLUSTALW.Without_low_SP_Col.With_Names')
+        # DO not remove any columns.
+        filtered_alignment = Path(outDir) / Path('%s.CLUSTALW.aln.Sorted.With_Names' % self.G2C_args['dataset'])
         renamed_alignment = copy(str(filtered_alignment), str(Path(self.gene + '_G2_aa.aln')))
         print('Align the filtered amino acid sequences using guidance 2')
         return Path(renamed_alignment)
 
     def pal2nal_conversion(self, aa_alignment, na_fasta, output_file):
-        P2Ncmd = Pal2NalCommandline(**self.P2N_args, pepaln=aa_alignment, nucfasta=na_fasta, output_file=output_file, nogap=True,
-                                    nomismatch=True)
+        P2Ncmd = Pal2NalCommandline(**self.P2N_args, pepaln=aa_alignment, nucfasta=na_fasta, output_file=output_file)
+        print(P2Ncmd)
         P2Ncmd()
         print('Align the nucleic acids using the amino acid alignment.')
