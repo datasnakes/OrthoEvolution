@@ -30,10 +30,9 @@ class Pal2NalCommandline(AbstractCommandline):
         the Python subprocess module, as described in the Biopython tutorial.
     Citation:
     ---------
-
-    Mikita Suyama, David Torrents, and Peer Bork (2006)
-    PAL2NAL: robust conversion of protein sequence alignments into the corresponding codon alignments.
-    Nucleic Acids Res. 34, W609-W612.
+        Mikita Suyama, David Torrents, and Peer Bork (2006)
+        PAL2NAL: robust conversion of protein sequence alignments into the corresponding codon alignments.
+        Nucleic Acids Res. 34, W609-W612.
     """
     def __init__(self, cmd='pal2nal', **kwargs):
         # order parameters in the same order as invoking guidance on the cmd line (e.g. 'perl guidance.pl')
