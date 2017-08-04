@@ -1,8 +1,8 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
-from treelib import Tree
-from treelib.plugins import *
+from treelib2.treelib2 import Tree
+from treelib2.treelib2.plugins import *
 import os
 import unittest
 

@@ -20,8 +20,6 @@ to navigate the NCBI FTP site and to begin downloading files from the site.
 import os
 import pandas as pd
 from ftplib import FTP
-from dir_mana import dir_mana
-from lister import lister
 import time
 import shutil
 import subprocess
@@ -29,6 +27,7 @@ import configparser
 #from cursesmenu import *  # for Linux Only
 #from cursesmenu.items import *  # for Linux Only
 
+class FTP2DB(object):
 # Set up directories and project
 home = os.getcwd()
 project = "GPCR-Orthologs-Project"
@@ -98,7 +97,8 @@ class Ftp2Db(object):
         # If db_update_flag is true it updates the databases
 
     def ftp_check(self):
-        """ Checks to see if the FTP connection still exists.
+        """Check to see if the FTP connection still exists.
+
         If it doesn't then it reconnects and returns an instance of the connection.
         """
         ftp = self.ftp_connect(self.__NCBI_FTP, self.email)
@@ -108,8 +108,7 @@ class Ftp2Db(object):
 
     @staticmethod
     def ftp_connect(ftpsite, email):
-        """Connects to the FTP server and returns and instance of the connection.
-        """
+        """Connect to the FTP server."""
         ftp = FTP(ftpsite, timeout=None)
         ftp.login(user='anonymous', passwd=email)
         return ftp
@@ -128,7 +127,7 @@ class Ftp2Db(object):
 
     @staticmethod
     def ftp_unzip(local_dir, downloaded_list):
-        """Creates a new unzipped file.
+        """Create a new unzipped file.
         Deletes the old compressed file that was downloaded."""
         for f in os.listdir(local_dir):
             _p = local_dir + '/' + f

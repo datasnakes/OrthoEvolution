@@ -13,20 +13,18 @@ import logging as log
 from datetime import datetime as d
 import subprocess
 
-#------------------------------------------------------------------------------
 # Set up the logger for logging
 format1 = '%a %b %d %I:%M:%S %p %Y'  # Used to add as a date
 format2 = '%m-%d-%Y@%I:%M:%S-%p'  # Used to append to archives
 format3 = '%m-%d-%Y'
 
-#------------------------------------------------------------------------------
 home = os.getcwd()  # My home directory for this script/project
 dbpath = '/work5/r2295/bin/databases/refseq_rna_db'  # My current dbpath
 
 # Create a directory for the database if one doesn't exist
 try:
     # If the directory exists,
-    if os.path.exists(dbpath) == True:
+    if os.path.exists(dbpath):
         # Move any files that are in the directory to a dated archive folder.
         # Moving a directory in linux/unix essentially renames it.
         os.system(
@@ -45,7 +43,6 @@ except os.error:
 
 os.chdir(dbpath)  # Change to the database directory
 
-#------------------------------------------------------------------------------
 # Connect to the NCBI ftp site
 try:
     ncbi = 'ftp.ncbi.nlm.nih.gov/'
@@ -66,7 +63,6 @@ ftp.cwd(blastdb)
 # This is a list of the file names in the current directory
 filenames = ftp.nlst()
 
-#------------------------------------------------------------------------------
 # Create a for loop that writes the list/text file of files wanted
 with open('downloadlist.txt', 'w') as downloads:
     for filename in filenames:
@@ -95,7 +91,6 @@ except os.error:
 
 ftp.close()
 
-#------------------------------------------------------------------------------
 # Unzip all of the files and remove unneccessary files
 # Unzip the database files
 os.system("for file in *.tar.gz; do tar xvf $file; done")

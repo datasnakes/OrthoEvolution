@@ -1,4 +1,4 @@
-"""Comparative Genetics Analysis tools for"""
+"""Comparative Genetics Analysis classes."""
 
 from .comp_gen import CompGenAnalysis
 from .ncbi_blast import BLASTAnalysis

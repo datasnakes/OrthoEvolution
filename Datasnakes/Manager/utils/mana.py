@@ -1,18 +1,17 @@
 """Management tools for the package."""
-from Datasnakes import Cookies, Orthologs, Manager, Tools
 import os
 from pathlib import Path
 import ete3
-#from treelib2.treelib2.tree import Tree
-from Datasnakes.Manager.utils.zipper import ZipUtils
+from datasnakes.Manager.utils.treelib2.treelib2.tree import Tree
+from datasnakes.Manager.utils.zipper import ZipUtils
 from cookiecutter.hooks import run_script
 from cookiecutter.main import cookiecutter
 from cookiecutter.prompt import prompt_for_config
 from cookiecutter.generate import generate_context
+# TODO-ROB once this is a pypi package all of these will be unnecessary
+from datasnakes import Cookies, Orthologs, Manager, Tools
 # from Manager.logit.logit import LogIt
-
 # TODO-ROB use **kwargs and **args to cut down on parameters
-
 
 class Mana(object):
     """This is the directory management base class.
@@ -145,16 +144,17 @@ class Mana(object):
         :param top (path):  The root at which the directory map is made.
         :param ignore (list):  The files to ignore.  The  get_dir_map function
         adds this to the .gitignore list.
-        :return (tree):  A newick formatted string in style #8.  Can be used with
-        the ete3.Tree() class.
+        :return (tree):  A newick formatted string in style #8.  Can be used
+        with the ete3.Tree() class.
         """
 
         tree = Tree()
-        t = tree.get_dir_map(top, ignore)
+        #t = tree.get_dir_map(top, ignore)
         Ntree = tree.parse_newick_json()
         return Ntree
 
     def get_ete3_tree(self, top, tree=None):
+        """Create the ete3 tree."""
         if not tree:
             tree = self.get_newick_dir_map(top)
         t = ete3.Tree(tree, format=8)
@@ -208,6 +208,7 @@ class RepoMana(Mana):
         self.repo_shiny = self.repo_web / Path('shiny')
         self.ftp = self.repo_web / Path('ftp')
         self.wasabi = self.repo_web / Path('wasabi')
+
         self.flask = self.repo_web / Path('flask')
 
         if user:
@@ -235,13 +236,11 @@ class RepoMana(Mana):
         # purposes
         os.chmod(str(self.users / Path(self.user)), mode=0o777)
         # TODO-ROB do we need create user hooks?
-
 # TODO-ROB:  Edit the setup.py file for cookiecutter.
 
 
 class UserMana(RepoMana):
-    """User Management Class.
-    """
+    """User Management Class."""
     # TODO-ROB CREATE THESE IN A VIRTUAL ENVIRONMENT FOR EACH USER
     # TODO-ROB The virtual environment can be the name of the user
     # TODO-ROB When the user logs in, they will activate the virtual environment
@@ -309,7 +308,7 @@ class UserMana(RepoMana):
         os.chmod(str(self.projects / Path(self.project)), mode=0o777)
 
     def create_db_repo(self):
-        print('creating dirs from database cookie')
+        print('Creating directories from database cookie.')
         """
         :return: A new database inside the users database directory
         """
@@ -367,6 +366,7 @@ class WebMana(RepoMana):
         self.website_scripts = self.website_path / Path(self.website)
         self.website_public = self.website_scripts / Path('public')
         self.website_user = self.website_scripts / Path('user')
+        print('Website directory structure created. Server not running.')
 
         if new_website is True:
             self.create_website()
@@ -404,7 +404,7 @@ class WebMana(RepoMana):
 
 class ProjMana(UserMana):
     """Project Management Class."""
-    # TODO-ROB:  Change "research type" to "private" and make it boolean
+
     def __init__(self, repo, user, project, research=None, research_type=None,
                  app=None, home=os.getcwd(), new_project=False, new_research=False,
                  new_app=False, **kwargs):

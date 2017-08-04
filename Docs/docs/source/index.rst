@@ -17,7 +17,7 @@ Welcome to Datasnakes-Orthologs's documentation!
 .. image:: https://badge.fury.io/py/Datasnakes-Scripts.svg
    :target: https://badge.fury.io/py/Datasnakes-Scripts
 .. image:: https://readthedocs.org/projects/datasnakes-scripts/badge/?version=master
-   :target: http://datasnakes-scripts.readthedocs.io/en/release/?badge=master
+   :target: http://datasnakes-scripts.readthedocs.io/en/master/
 .. image:: https://img.shields.io/badge/under-development-orange.svg
    :target: https://github.com/datasnakes/Datasnakes-Scripts
 
@@ -28,8 +28,21 @@ Check out our `wiki docs <https://github.com/datasnakes/Datasnakes-Scripts/wiki>
 
 Installation
 ------------
+``pip install Datasnakes-Scripts``
 
-For easy installation, ``pip install Datasnakes-Scripts``
+Development Mode Installation
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+1. ``git clone http://github.com/datasnakes/Datasnakes-Scripts``
+2. ``cd Datasnakes-Scripts``
+3. ``pip install -e .``
+
+Manual Installation
+~~~~~~~~~~~~~~~~~~~~~
+Alternatively, you can set install the package manually.
+
+1. Download the zip file and unzip it or ``git clone https://github.com/datasnakes/Datasnakes-Scripts.git``
+2. ``cd Datasnakes-Scripts``
+3. ``pip install .``
 
 Dependencies
 ~~~~~~~~~~~~~
@@ -37,14 +50,22 @@ Dependencies
 Currently, this package is optimized for ``python v3.4`` and upward. It's also
 dependent upon ``biopython v1.68``.
 
+If you don't use pip to install the package, ``pip install -r requirements.txt``
+will install dependencies.
+
+Development Mode Installation
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+1. ``git clone http://github.com/datasnakes/Datasnakes-Scripts``
+2. ``cd Datasnakes-Scripts``
+3. ``pip install -e .``
+
 Manual Installation
 ~~~~~~~~~~~~~~~~~~~~~
-
 Alternatively, you can set install the package manually.
 
 1. Download the zip file and unzip it or ``git clone https://github.com/datasnakes/Datasnakes-Scripts.git``
 2. ``cd Datasnakes-Scripts``
-3. ``python setup.py install``
+3. ``pip install .``
 
 Project Setup
 ~~~~~~~~~~~~~~~~

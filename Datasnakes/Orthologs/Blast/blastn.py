@@ -1,4 +1,4 @@
-"""Optimized use with local/standalone NCBI BLAST 2.6.0"""
+"""Optimized for use with local/standalone NCBI BLAST 2.6.0."""
 import csv
 import os
 import shutil
@@ -6,19 +6,19 @@ import subprocess
 import time  # Used to delay when dealing with NCBI server errors
 from datetime import datetime as d
 from pathlib import Path
-
-import psutil
 import pandas as pd
 from Bio import SearchIO  # Used for parsing and sorting XML files.
-# Used for Local Blasting.
 from Bio.Blast.Applications import NcbiblastnCommandline
-from Datasnakes.Orthologs.CompGenetics import BLASTAnalysis as BT
-
-
+from Datasnakes.Orthologs.CompGenetics.ncbi_blast import BLASTAnalysis as BT
 # TODO-ROB: Find packages for script timing and analysis
 
 
 class BLASTn(BT):
+    """Use BLASTn to search nucleotide databases using a nucleotide query.
+
+    This class currently only works with the standalone blast.
+    """
+
     def __init__(self, repo, user, project, research, research_type,
                  template=None, save_data=True, **kwargs):
         """Inherit from the BLASTing Template."""
@@ -60,7 +60,8 @@ class BLASTn(BT):
 
     @staticmethod
     def map_func(hit):
-        """The map function for formatting hit id's.
+        """Use the map function for formatting hit id's.
+
         This will be used later in the script.
         """
         hit.id1 = hit.id.split('|')[3]
@@ -69,12 +70,14 @@ class BLASTn(BT):
         return hit
 
     def blast_config(self, query_align, query_organism, auto_start=False):
-        """This function configures everything for a BLAST.
+        """Configure everything for a BLAST.
+
         First the accession file, and gene list is configured.
         """
         # os.chdir(str(self.__output_path))
         self.blastn_log.info(
-            '***********************************BLAST CONFIG START***********************************\n\n\n')
+            '***********************************BLAST CONFIG START************ \
+            ***********************\n\n\n')
         self.blastn_log.info('Configuring the accession file...')
 
         # Update the gene_list based on the existence of a incomplete blast
@@ -116,7 +119,7 @@ class BLASTn(BT):
 
             # Save sequence data in FASTA file format and print the gi number to stdout with a custom BLAST extraction
             # https://www.ncbi.nlm.nih.gov/books/NBK279689/#_cookbook_Custom_data_extraction_and_form_
-            # TODO-ROB:  TODO-SHAE:Combine these BLAST extractions???
+            # TODO-SDH Combine these BLAST extractions???
             fmt = {
                 'query': query,
                 'temp fasta': str(
@@ -136,7 +139,7 @@ class BLASTn(BT):
                     self.blastn_log.error(
                         "GI number for %s not found in the BLAST extraction" %
                         query)
-                    # TODO-ROB: TODO-SHAE: Is this the correct move below???
+                    # TODO-SDH Is this the correct move below???
                     self.blastn_log.error(
                         "Removing %s from the BLAST list..." % gene)
                     self.gene_list.remove(gene)
@@ -193,9 +196,11 @@ class BLASTn(BT):
     def gi_list_config(self):
         # TODO-ROB THis is for development / testing
         # TODO-ROB Add the ability to do two seperate gi configs
-        """This script is designed to create a gi list based on the refseq_rna database
-        for each taxonomy id on the MCSR. It will also convert the gi list into a
-        binary file which is more efficient to use with NCBI's Standalone Blast tools."""
+        """Create a gi list based on the refseq_rna database for each taxonomy id on the MCSR.
+
+        It will also convert the gi list into a binary file which is more
+        efficient to use with NCBI's Standalone Blast tools.
+        """
         print('gi_list_config')
         # Directory and file handling
         cd = os.getcwd()
@@ -273,8 +278,7 @@ class BLASTn(BT):
             return None
 
     def blast_xml_parse(self, xml_file, gene, organism):
-        """Parse the XML file created by the BLAST.
-        """
+        """Parse the XML file created by the BLAST."""
         self.blastn_log.info(
             "Parsing %s to find the best accession number." %
             xml_file)
@@ -319,8 +323,7 @@ class BLASTn(BT):
             self.add_accession(gene, organism, accession)
 
     def blasting(self, genes=None, query_organism=None, pre_configured=False):
-        """ Configure the BLAST.
-        """
+        """Configure the BLAST."""
         if pre_configured is False:
             query = self.df[query_organism].tolist()
             genes = self.blast_config(

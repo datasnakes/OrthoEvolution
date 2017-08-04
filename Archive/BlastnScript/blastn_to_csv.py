@@ -1,33 +1,14 @@
-#!/usr/local/apps/anaconda3/bin/python3
-# -*- coding: utf-8 -*-
-"""
-File Name: blastntest.py
-Description: This script inputs a list of organisms & genes. It tests a script.
-
-@authors: Robert A. Gilmore & Shaurita D. Hutchins
-Date Created: March 29, 2017
-Project Name: Orthologs Project
-
-Edited and updated for use with local/standalone NCBI BLAST 2.6.0
-"""
 import csv
-# Modules as custom
 import logging as log
-# Modules used
 import os
 import subprocess
 import time  # Used to delay when dealing with NCBI server errors
 from datetime import datetime as d
-
 import pandas as pd  # Used for dealing with CSV files
 from Bio import SearchIO  # Used for parsing and sorting XML files.
 from Bio.Blast.Applications import NcbiblastnCommandline  # Used for Local Blasting.
-# Proprietary Modules
 from manager.ortho_analysis import OrthologAnalysis
-
 from datasnakes.Orthologs import BLASTAnalysis as BT
-
-# TODO-ROB: Find packages for script timing and analysis
 
 # Set up the blastn logger & log file
 format1 = '%a %b %d at %I:%M:%S %p %Y'  # Used to add as a date

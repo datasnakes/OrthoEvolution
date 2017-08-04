@@ -1,10 +1,11 @@
+"""File/folder zipping utility."""
 import zipfile
 import os
 from pathlib import Path
 
 
 class ZipUtils:
-    """The ZipUtil class allows easy compression/zipping of file folders.
+    """The ZipUtils class allows easy compression/zipping of file folders.
 
     Inspired by http://stackoverflow.com/a/670635/7351746
     """
@@ -28,11 +29,11 @@ class ZipUtils:
             zip_handle.write(self.zip_path)
         else:
             print('skipped')
-            self.add_folder_to_zip(zip_handle, self.zip_path)
+            self.__addfolder2zip(zip_handle, self.zip_path)
         zip_handle.close()
         return comp_path
 
-    def add_folder_to_zip(self, zip_handle, folder):
+    def __addfolder2zip(self, zip_handle, folder):
         """Not meant to be used explicitly.  Use to_zip.
 
         :param zip_handle: An initialized zipfile.ZipFile handle.
@@ -52,4 +53,4 @@ class ZipUtils:
                 if str(file) in self.ignore_parts:
                     continue
                 print('Entering folder: ' + str(full_path))
-                self.add_folder_to_zip(zip_handle, full_path)
+                self.__addfolder2zip(zip_handle, full_path)

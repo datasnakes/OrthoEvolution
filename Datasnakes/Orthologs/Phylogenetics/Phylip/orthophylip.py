@@ -2,13 +2,8 @@ import os
 import pexpect  # I used this to feed input into shell executable
 import sys
 
-# Echos all commands in the current shell.
-os.system("set -x")
-
 # Create a variable for os.rename
 rn = os.rename
-
-#------------------------------------------------------------------------------
 
 
 class Phylip(object):

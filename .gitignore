@@ -9,7 +9,7 @@ shiny_dir_mana.txt
 /.idea
 /.idea/**
 .spyproject/*
-datasnakes/Manager/TODO.py
+Datasnakes/Manager/TODO.py
 TODO.py
 # Byte-compiled / optimized / DLL files
 __pycache__/
@@ -48,9 +48,4 @@ coverage.xml
 # Translations
 *.mo
 
-# Don't include doc builds
-_build
-_static
-_templates
-Docs/make.bat
-Docs/Makefile
+err.txt

@@ -1,7 +1,16 @@
 Phylogenetics Documentation
-------------------------------
+=============================
+This document will provide information and guidelines about how we use the
+Phylogenetics modules related to this package.
 
-This document will provide information and guidelines about how we use the Phylogenetics modules related to this package.
+Phylogenetics is best defined as the study of evolutionary relationships among
+biological entities. In our case, those entities are species. We are seeking to
+learn how mammals (more specifically primates) compare to each other given a group
+of genes (GPCRs and addiction related).
+
+PAML in particular is the best software for helping us to understand the potentially
+significant differences in genes across different mammalian species. From there, we can
+decide which genes we will further study in cell culture projects or assays.
 
 Usage
 -----

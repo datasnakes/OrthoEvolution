@@ -1,4 +1,5 @@
 """Class for managing, downloading and extracting features from genbank files."""
+
 import os
 import shutil
 from pathlib import Path
@@ -63,6 +64,7 @@ class GenBank(object):
 
     @staticmethod
     def gbk_dir_config(path, tier_frame_dict):
+        """Configure the genbank directories."""
         # TODO-ROB Create a generator function
         for G_KEY, G_value in tier_frame_dict.items():
             tier = G_KEY

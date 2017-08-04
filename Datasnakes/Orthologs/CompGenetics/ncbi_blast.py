@@ -1,14 +1,13 @@
 import os
 import time
 from pathlib import Path
-
 import pandas as pd
-from Datasnakes.Orthologs.CompGenetics.comp_gen import CompGenAnalysis
-
-from Datasnakes.Manager.logit.logit import LogIt
+from Datasnakes.Orthologs.CompGenetics import CompGenAnalysis
+from Datasnakes.Manager.logit import LogIt
 
 
 class BLASTAnalysis(CompGenAnalysis):
+    """Perform Blast Analysis after completing BLASTn."""
     def __init__(self, repo, user, project, research, research_type,
                  template=None, taxon_file=None, post_blast=False, save_data=True, **kwargs):
         """Inherited from the CompGenAnalysis class.
@@ -56,8 +55,8 @@ class BLASTAnalysis(CompGenAnalysis):
         # self.blast_log = log.getLogger('Blastn')
 
     def add_accession(self, gene, organism, accession):
-        """Takes an accession and adds in to the building dataframe,
-        and also adds to the csv file.
+        """Take an accession and add in to the building dataframe & csv file.
+
         This returns a log.
         """
         # TODO-ROB:  Create this in the log file
@@ -105,10 +104,7 @@ class BLASTAnalysis(CompGenAnalysis):
             temp.to_csv(str(self.building_file_path))
 
     def add_blast_time(self, gene, organism, start, end):
-        """
-        Takes the start/end times and adds in to the building_time
-        dataframe, and also adds to the csv file.
-        """
+        """Retrieve the start/end times and add in to the building_time dataframe & csv file."""
         elapsed_time = end - start
         # Edit the data frame
         self.building_time.set_value(gene, organism, elapsed_time)
@@ -120,6 +116,11 @@ class BLASTAnalysis(CompGenAnalysis):
             temp.to_csv(str(self.building_time_file_path))
 
     def post_blast_analysis(self, project_name, removed_genes=None):
+        """Analyze the blast results.
+
+        Generate information about any duplicated or missing accessions by gene
+        and by organism.
+        """
         # TODO-ROB  Fix the output format of the excel file.  View a sample
         # output in /Orthologs/comp_gen
         pba_file_path = str(self.data / Path(self.project + '_pba.xlsx'))

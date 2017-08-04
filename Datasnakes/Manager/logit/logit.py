@@ -1,5 +1,4 @@
 """Main logging class to make logging easier."""
-
 import logging as log
 import os
 from datetime import datetime as d
@@ -8,6 +7,7 @@ import sys
 #from slacker import Slacker
 #import argparse
 #import textwrap
+
 
 class LogIt(object):
     """LogIt makes logging easier by creating easy loggers."""

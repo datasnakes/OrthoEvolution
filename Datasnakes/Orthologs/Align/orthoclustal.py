@@ -6,22 +6,21 @@ three or more sequences.
 from Bio.Align.Applications import ClustalOmegaCommandline
 
 
-class ClustalO(object):
-    """
-    This class aligns genes using parameters similar to the default
-    parameters. These parameters include 2 additional iterations for the hmm.
+class ClustalO:
+    """This class aligns genes using parameters similar to the default parameters.
+
+    These parameters include 2 additional iterations for the hmm.
     """
 
-    def __init__(self, infile, outfile, logpath, seqtype="DNA", infmt="fasta",
-                 outfmt="fasta", clustalpath='clustalo'):
+    def __init__(self, infile, outfile, logpath, outfmt="fasta"):
 
         # Run clustal omega using the multifasta file
         clustalo_cline = ClustalOmegaCommandline(infile=infile,
-                                                 cmd=clustalpath,
+                                                 cmd="clustalo",
                                                  outfile=outfile,
-                                                 seqtype=seqtype,  # "RNA"
+                                                 seqtype="DNA",  # "RNA"
                                                  max_hmm_iterations=2,
-                                                 infmt=infmt,
+                                                 infmt="fasta",
                                                  outfmt=outfmt,  # "aln", "phy"
                                                  iterations=3,  # Notable
                                                  verbose=True,
@@ -29,3 +28,7 @@ class ClustalO(object):
                                                  log=logpath)
         stdout, stderr = clustalo_cline()
         clustalo_cline()
+        if stderr:
+            print(stderr)
+        if stdout:
+            print(stdout)
