@@ -39,6 +39,7 @@ where = dir_mana(home, project)
 # Always make sure this file name is correct
 what = lister('Master_RNA_Accession_File.csv')
 
+
 class Ftp2Db(object):
     global user
     ncbi = configparser.ConfigParser()

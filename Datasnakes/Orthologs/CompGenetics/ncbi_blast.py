@@ -1,4 +1,3 @@
-"""BLASTAnalysis aims to aid in the analysis of the blast results."""
 import os
 import time
 from pathlib import Path

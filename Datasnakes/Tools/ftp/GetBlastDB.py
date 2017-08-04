@@ -1,3 +1,10 @@
+"""
+This script 1) updates/downloads the refseq_rna blast db files,
+2) creates a list of taxonomy ids based on the list of organisms, and 3) create
+a csv file with only human accessions and genes for downstream usage. Check the
+ReadMe file for a first time setup of a blast database. Both steps occur on the
+head node of the MCSR because they need internet access.
+"""
 from ftplib import FTP, error_perm
 import os
 import fnmatch

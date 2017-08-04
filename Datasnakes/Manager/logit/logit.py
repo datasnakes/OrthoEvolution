@@ -11,9 +11,11 @@ import sys
 
 class LogIt(object):
     """LogIt makes logging easier by creating easy loggers."""
+    """Class for improving the ease of use of the logging module."""
     def __init__(self, logfile=None, logname=None):
         """Initialize the logger format based on system platform."""
         # Set the different formats
+        """Set the different formats based on user's platform."""
         if sys.platform == 'win32':
             self.archive_format = '%m-%d-%Y_%I-%M-%p'
             pass
@@ -46,6 +48,10 @@ class LogIt(object):
 #        else:
 #            slack_logger = log.getLogger('SLACK')
 
+# ******************************************SLACK****************************************** #
+# ******************************************SLACK****************************************** #
+# ******************************************SLACK****************************************** #
+
     # @staticmethod
     # def slack_config():
     #     config = configparser.ConfigParser()
@@ -65,3 +71,7 @@ class LogIt(object):
     # # Definition for posting messages
     # def message_slack(self, channel, message, username):
     #     self.slack.chat.post_message(channel, message, username, as_user=True)
+
+# ******************************************SLACK****************************************** #
+# ******************************************SLACK****************************************** #
+# ******************************************SLACK****************************************** #

@@ -1,15 +1,16 @@
 """Management tools for the package."""
-from Datasnakes import Cookies, Tools, Orthologs, Manager
 import os
 from pathlib import Path
 import ete3
-from Datasnakes.Manager.utils.treelib2.treelib2.tree import Tree
-from Datasnakes.Manager.utils.zipper import ZipUtils
+from datasnakes.Manager.utils.treelib2.treelib2.tree import Tree
+from datasnakes.Manager.utils.zipper import ZipUtils
 from cookiecutter.hooks import run_script
 from cookiecutter.main import cookiecutter
 from cookiecutter.prompt import prompt_for_config
 from cookiecutter.generate import generate_context
 # TODO-ROB once this is a pypi package all of these will be unnecessary
+from datasnakes import Cookies, Orthologs, Manager, Tools
+# from Manager.logit.logit import LogIt
 # TODO-ROB use **kwargs and **args to cut down on parameters
 
 class Mana(object):
@@ -34,7 +35,7 @@ class Mana(object):
         """
         self.repo = repo
         self.file_home = Path(home)  # Home of the file calling this class
-        # TODO-ROB: Some of these directories don't need to be accessed directly
+        # TODO-ROB:  SOme of these directories don't need to be accessed directly
         # Below are the PyPi path strings
         #    The first group is to access the cookiecutter templates
         self.Cookies = Path(Cookies.__path__[0])
@@ -45,15 +46,13 @@ class Mana(object):
         self.app_cookie = self.Cookies / Path('new_app')
         self.db_cookie = self.Cookies / Path('new_database')
         self.website_cookie = self.Cookies / Path('new_website')
-
-        # The second group is for the Manager module
+        #    The second group is for the Manager module
         self.Manager = Path(Manager.__path__[0])
         self.index = self.Manager / Path('index')
         self.logit = self.Manager / Path('logit')
         self.utils = self.Manager / Path('utils')
         self.shiny = self.Manager / Path('shiny')
-
-        # The third group is for the Orthologs module
+        #    The third group is for the Orthologs module
         self.Orthologs = Path(Orthologs.__path__[0])
         self.biosql = Path(self.Orthologs) / Path('biosql')
         self.blast = Path(self.Orthologs) / Path('blast')
@@ -61,8 +60,7 @@ class Mana(object):
         self.genbank = Path(self.Orthologs) / Path('genbank')
         self.manager = Path(self.Orthologs) / Path('manager')
         self.phylogenetics = Path(self.Orthologs) / Path('phylogenetics')
-
-        # The fourth group is for the Tools module
+        #    The fourth group is for the Tools module
         self.Tools = Path(Tools.__path__[0])
         self.ftp = Path(self.Tools) / Path('ftp')
         self.multiprocessing = Path(self.Tools) / Path('multiprocessing')
@@ -81,13 +79,14 @@ class Mana(object):
         #self.dm_log = log.basic
 
     def create_repo(self):
-        print('Creating directories from repository cookie.')
+        print('creating dirs from repo cookie')
+        print(self.__class__.__name__)
         """This function creates a new repository.  If a repository name
         is given to the class then it is given a name.  If not, cookiecutters
         takes input from the user.
 
-        The base class will be the only class that allows cookiecutters
-        parameter no_input to be False.
+        The base class will be the only class that allows cookiecutters parameter
+        no_input to be False.
         """
         if self.repo:
             no_input = True
@@ -224,6 +223,7 @@ class RepoMana(Mana):
         our  new_user cookiecutter template.
         """
         print('creating dirs from user cookie')
+        print(self.__class__.__name__)
 
         # This is used ONLY when the user registers in flask
         # TODO-ROB:  Create the cookiecutter.json file
@@ -246,7 +246,7 @@ class UserMana(RepoMana):
     # TODO-ROB When the user logs in, they will activate the virtual environment
     # TODO-ROB USE SQL here to see if the user db contains the username
 
-    def __init__(self, repo, user, project=None, database=[], home=os.getcwd(),
+    def __init__(self, repo, user, project=None, database=None, home=os.getcwd(),
                  new_user=False, new_project=False, new_db=False, **kwargs):
         '''
         The User Management class manages the current users directories.
@@ -261,6 +261,8 @@ class UserMana(RepoMana):
         :param new_user (bool):  Flag for creating a new user.
         :param new_project (bool):  Flag for creating a new project.
         '''
+        if database is None:
+            database = []
         super().__init__(repo=repo, user=user, home=home, new_user=new_user, **kwargs)
         self.user = user
 
@@ -289,7 +291,8 @@ class UserMana(RepoMana):
             self.create_db_repo()
 
     def create_project(self):
-        print('Creating directories from project cookie.')
+        print('creating dirs from project cookie')
+        print(self.__class__.__name__)
         """
         :return: A new project inside the user's
         project directory.
@@ -316,21 +319,22 @@ class UserMana(RepoMana):
                 os.chmod(str(self.user_db / Path(db)), mode=0o777)
 
         else:
-            db_num = int(input("How many databases do you need to create?"))
+            db_num = int(input("How many NCBI databases do you need to create?"))
             for db in range(1, db_num + 1):
                 # Manually set up cookiecutter prompting
                 context_file = str(self.db_cookie / Path('cookiecutter.json'))
                 e_c = prompt_for_config(context=generate_context(context_file=context_file))
                 # Create the cookiecutter repo with no input, and add extra content from manual prompts
-                cookiecutter(str(self.db_cookie), output_dir=str(self.user_db), extra_context=e_c, no_input=True)
+                cookiecutter(str(self.db_cookie), output_dir=str(self.ncbi_db_repo), extra_context=e_c, no_input=True)
                 # Use cookiecutter_dict from manual prompts to change the user permissions.
-                os.chmod(str(self.user_db / Path(e_c['db_name'])), mode=0o777)
+                os.chmod(str(self.ncbi_db_repo / Path(e_c['db_name'])), mode=0o777)
 
     def zip_mail(self, comp_filename, zip_path, destination=''):
         Zipper = ZipUtils(comp_filename, zip_path)
         Zipper_path = Zipper.to_zip()
         # TODO-ROB add proper destination syntax.
         print('%s is being sent to %s' % (Zipper_path, destination))
+
 
 class WebMana(RepoMana):
     """Web Management Class."""
@@ -392,7 +396,11 @@ class WebMana(RepoMana):
         #scripts_file_path = find_hook('post_gen_project.sh', hooks_dir=str(script_path))
         # TODO-ROB add screening to the bash script for flask run -h -p
         run_script(script_path=str(script_path), cwd=str(self.website_path))
-        print('Site running at port: 5252')
+
+    def stop_server(self):
+        """Stop the server running the website."""
+        # TODO-SDH Add way to stop the server from running.
+
 
 class ProjMana(UserMana):
     """Project Management Class."""
@@ -443,7 +451,8 @@ class ProjMana(UserMana):
         :return:  Adds new directories in the current project labeled
         with the proper names.
         """
-        print('Creating directories from research cookie.')
+        print('Creating directories from research cookie...')
+        print(self.__class__.__name__)
 
         e_c = {"research_type": self.research_type,
                "research_name": self.research}
