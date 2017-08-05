@@ -4,7 +4,7 @@ import zipfile
 import logging as log
 from pathlib import Path
 from datetime import datetime as d
-from Datasnakes.Manager.utils.mana import ProjMana as PM
+from Datasnakes.Manager.utils import ProjMana as PM
 #import configparser
 #from slacker import Slacker
 #import argparse
