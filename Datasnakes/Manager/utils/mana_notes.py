@@ -1,5 +1,5 @@
 import os
-from Datasnakes.Manager.utils.mana import Mana, RepoMana, UserMana, WebMana, ProjMana
+from Datasnakes.Manager.utils import ProjMana, WebMana, UserMana, RepoMana, Mana, DataMana
 repo = "Test"
 user = "rgilmore"
 project = "Orthlogs_Test"

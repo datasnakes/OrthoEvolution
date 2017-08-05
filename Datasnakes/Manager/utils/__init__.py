@@ -1,8 +1,9 @@
 """Utilities & Management classes"""
 
 from .mana import Mana, ProjMana, RepoMana, UserMana, WebMana
-from .zipper import ZipUtils
+#from .zipper import ZipUtils
 from .otherutils import FormatList, SplitList
+from .datamana import DataMana, ZipUtils
 
 __all__ = ("WebMana",
            "Mana",
@@ -12,4 +13,5 @@ __all__ = ("WebMana",
            "UserMana",
            "FormatList",
            "SplitList",
+           "DataMana",
 )
