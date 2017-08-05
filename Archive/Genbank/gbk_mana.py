@@ -5,8 +5,8 @@ import os
 import shutil
 from Bio import SeqIO
 from BioSQL import BioSeqDatabase
-from datasnakes.Manager.utils.mana import UserMana as UM
-from datasnakes.Orthologs.CompGenetics import CompGenAnalysis as CGA
+from Datasnakes.Manager.utils.mana import UserMana as UM
+from Datasnakes.Orthologs.CompGenetics import CompGenAnalysis as CGA
 
 # TODO-ROB Add a progress bar to the pipeline
 # TODO-ROB make code more versatile for multiple projects or even single

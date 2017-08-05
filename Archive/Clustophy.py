@@ -19,7 +19,7 @@ file1 = csv.reader(g)
 print("\n" + "The current working directory is "+ os.getcwd() + (2 * "\n"))  # Print current working directory
 Gene_count = 0
 
-from datasnakes.Orthologs import CompGenAnalysis
+from Datasnakes.Orthologs import CompGenAnalysis
 x = CompGenAnalysis.get_master_lists()
 for Gene in file1:
     Gene_count = Gene_count + 1
