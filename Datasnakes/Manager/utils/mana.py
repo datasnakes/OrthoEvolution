@@ -2,14 +2,13 @@
 import os
 from pathlib import Path
 import ete3
+from Datasnakes import Cookies, Orthologs, Manager, Tools
 from Datasnakes.Manager.utils.treelib2.treelib2.tree import Tree
-from Datasnakes.Manager.utils.datamana import ZipUtils
+from Datasnakes.Manager.utils.zipper import ZipUtils
 from cookiecutter.hooks import run_script
 from cookiecutter.main import cookiecutter
 from cookiecutter.prompt import prompt_for_config
 from cookiecutter.generate import generate_context
-# TODO-ROB once this is a pypi package all of these will be unnecessary
-from Datasnakes import Cookies, Orthologs, Manager, Tools
 # from Manager.logit.logit import LogIt
 # TODO-ROB use **kwargs and **args to cut down on parameters
 

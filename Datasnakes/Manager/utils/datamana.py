@@ -4,8 +4,7 @@ import zipfile
 import logging as log
 from pathlib import Path
 from datetime import datetime as d
-from Datasnakes.Manager.utils.zipper import ZipUtils
-from Datasnakes.Manager.utils.mana import ProjMana as PM
+from Datasnakes.Manager.utils import ProjMana as PM
 #import configparser
 #from slacker import Slacker
 #import argparse
@@ -13,8 +12,8 @@ from Datasnakes.Manager.utils.mana import ProjMana as PM
 # TODO-ROB: Use this class to move data back and forth between local and remote servers
 # TODO-ROB:  Mirror the directory creation on MCSR's servers
 # TODO-ROB:  ^^ This will allow the transfer of data
-
 # TODO-ROB:  Add FTP and s2s inheritance
+
 class DataMana(PM):
 
     def __init__(self, home=os.getcwd(), web_address=None, hpc_address=None, hpc_user=None,
