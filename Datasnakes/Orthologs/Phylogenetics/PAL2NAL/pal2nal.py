@@ -6,25 +6,7 @@ from Bio.Application import _Option, _Switch, AbstractCommandline
 
 class Pal2nalCommandline(AbstractCommandline):
     """Command line wrapper for PAL2NAL.
-    http://www.clustal.org/omega
-    Example:
-    --------
-    >>> from Bio.Align.Applications import ClustalOmegaCommandline
-    >>> in_file = "unaligned.fasta"
-    >>> out_file = "aligned.fasta"
-    >>> clustalomega_cline = ClustalOmegaCommandline(infile=in_file, outfile=out_file, verbose=True, auto=True)
-    >>> print(clustalomega_cline)
-    clustalo -i unaligned.fasta -o aligned.fasta --auto -v
-    You would typically run the command line with clustalomega_cline() or via
-    the Python subprocess module, as described in the Biopython tutorial.
-    Citation:
-    ---------
-    Sievers F, Wilm A, Dineen DG, Gibson TJ, Karplus K, Li W, Lopez R,
-    McWilliam H, Remmert M, Söding J, Thompson JD, Higgins DG (2011).
-    Fast, scalable generation of high-quality protein multiple
-    sequence alignments using Clustal Omega.
-    Molecular Systems Biology 7:539 doi:10.1038/msb.2011.75
-    Last checked against versions: 1.2.0
+    Last checked against versions:
     """
 
     def __init__(self, cmd="clustalo", **kwargs):
