@@ -2,6 +2,7 @@ import os
 from pathlib import Path
 from Datasnakes.Orthologs.Phylogenetics.IQTree.iqtree import IQTreeCommandline
 from shutil import copy
+import subprocess
 #TODO-ROB Make this inherit FilteredAlignment
 
 class FilteredTree(object):
@@ -21,4 +22,4 @@ class FilteredTree(object):
     def iqtree_best_tree(self, alignment, dataType):
         IQTCmd = IQTreeCommandline(alignment=alignment, dataType=dataType)
         print(IQTCmd)
-        IQTCmd()
+        subprocess.check_call([str(IQTCmd)], stderr=subprocess.STDOUT, shell=True)
