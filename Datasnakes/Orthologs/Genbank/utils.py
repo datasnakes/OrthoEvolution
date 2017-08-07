@@ -1,8 +1,9 @@
 from Bio import SeqIO
 from pathlib import Path
+from tempfile import TemporaryFile
 import itertools
 
-def multi_fasta_manipulator(full_file, id_file, manipulation='remove', added_name='_G2'):
+def multi_fasta_manipulator(full_file, id_file, output, manipulation='remove'):
     # Inspired by the BioPython Tutorial and Cookbook ("20.1.1 Filtering a sequence file")
     """
     This method manipulated selected sequences in a multi-FASTA files.  The original
@@ -16,7 +17,7 @@ def multi_fasta_manipulator(full_file, id_file, manipulation='remove', added_nam
     :return:  A multi-FASTA file with filter sequences.
     """
     # Create path variables
-    file_name = Path(full_file).stem + added_name + Path(full_file).suffix
+    file_name = output
     new_file = Path(full_file).parent / Path(file_name)
     # Turn the id_file into set of ids
     ids = set(record.id for record in SeqIO.parse(id_file, 'fasta'))
@@ -28,9 +29,14 @@ def multi_fasta_manipulator(full_file, id_file, manipulation='remove', added_nam
     # Combine all the FASTA sequence in one record object
     elif manipulation == 'add':
         # Concatenate the multifasta files together by chaining the SeqIO.parse generators
+        # Allows one to overwrite a file by using temporary files for storage
         # adding generators - https://stackoverflow.com/questions/3211041/how-to-join-two-generators-in-python
-        new_records = itertools.chain(SeqIO.parse(full_file, 'fasta',), SeqIO.parse(id_file, 'fasta'))
-        SeqIO.write(new_records, str(new_file), 'fasta')
+        with TemporaryFile('r+', dir=Path(full_file).parent) as tmp_file:
+            new_records = itertools.chain(SeqIO.parse(full_file, 'fasta',), SeqIO.parse(id_file, 'fasta'))
+            count = SeqIO.write(new_records, tmp_file, 'fasta')
+            tmp_file.seek(0)
+            print('temp file count: ' + str(count))
+            SeqIO.write(SeqIO.parse(tmp_file, 'fasta'), str(new_file), 'fasta')
         print('Sequences have been added.')
     print('A new fasta file has been created.')
     return new_file
