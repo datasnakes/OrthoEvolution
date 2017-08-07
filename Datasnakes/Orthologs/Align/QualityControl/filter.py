@@ -6,6 +6,8 @@ from Datasnakes.Orthologs.Align.QualityControl.pal2nal import Pal2NalCommandline
 from Bio import SeqIO
 from Datasnakes.Orthologs.Genbank.utils import multi_fasta_manipulator
 import subprocess
+# TODO-ROB:  Create appropriate class variables for Filtered Tree to inherit
+# TODO-ROB:  Create proper class variables to make simpler and for above todo
 
 
 # For one gene at a time
@@ -31,65 +33,82 @@ class FilteredAlignment(object):
 
         na_fasta = str(self.home / Path(self.gene + '_G2.ffn'))  # Pal2Nal NA sequence file
         na_alignment = str(self.home / Path(self.gene + '_P2N_na.aln'))  # Pal2Nal output file
-        # Guidance2 iterations over the nucleic acid sequences
+
+        # Guidance2 iterations over the nucleic acid sequences.
+        # Returns the file name that contains the filtered sequences.
+        rem_na_seqFile = self.nucleic_acid_guidance(seqFile=na_seqFile, outDir=str(self.na_guidance_path),
+                                                bootstraps=na_bootstraps, seqCutoff=na_seqCutoff,
+                                                colCutoff=na_colCutoff)
+
+        # Guidance 2 amino acid alignment filter.  Filters the sequences based on the NA_Guidance2 runs.
+        # Returns the file name that contains the filtered alignment.
+        aa_alignment = self.amino_acid_guidance(seqFile=aa_seqFile, remFile=rem_na_seqFile, outDir=str(self.aa_guidance_path),
+                                                bootstraps=aa_bootstraps, seqCutoff=aa_seqCutoff, colCutoff=aa_colCutoff)
+        g2_seqFile = str(self.home / Path(self.gene + '_G2.ffn'))
+
+        # PAL2NAL nucleic acid alignment
+        self.pal2nal_conversion(str(aa_alignment), g2_seqFile, na_alignment)
+
+    def nucleic_acid_guidance(self, seqFile, outDir, bootstraps, seqCutoff, colCutoff):
+        seqType = 'nuc'
         iteration_flag = True
         iteration = 1
         while iteration_flag is True:
-            if iteration > 1:
-                na_seqCutoff = 0.7
-                na_bootstraps = 1
-            iteration_flag, na_seqFile = self.nucleic_acid_guidance(iteration, seqFile=na_seqFile,
-                                                                 outDir=str(self.na_guidance_path), bootstraps=na_bootstraps,
-                                                                 seqCutoff=na_seqCutoff, colCutoff=na_colCutoff)
+            iterDir = Path(outDir) / Path('iter_%s' % iteration)  # /home/NA_Guidance2/iter_n
+            Path.mkdir(iterDir, parents=True, exist_ok=True)
+
+            g2_seqFile = str(self.home / Path(self.gene + '_G2.ffn'))  # Need for all iterations
+            g2_rem_file = str(Path(iterDir) / Path('Seqs.Orig.fas.FIXED.Removed_Seq'))  # Need for all iterations
+            rem_file = str(self.home / Path(self.gene + '_G2_removed.ffn'))   # Need for all iterations
+
+            if iteration == 1:
+                # seqFile is the given input
+                G2Cmd = Guidance2Commandline(**self.G2C_args, seqFile=seqFile, seqType=seqType, outDir=str(iterDir), bootstraps=bootstraps,
+                                             seqCutoff=seqCutoff, colCutoff=colCutoff)
+                print(G2Cmd)
+                subprocess.check_call([str(G2Cmd)], stderr=subprocess.STDOUT, shell=True)
+                # Copy the Guidance removed seq file and paste it to the home directory
+                # Creates the rem_file
+                SeqIO.write(SeqIO.parse(g2_rem_file, 'fasta'), rem_file, 'fasta')  # Need for iter_1
+
+                # Filter the input NA fasta file using Guidance output
+                # Creates the g2_seqFile
+                multi_fasta_manipulator(seqFile, g2_rem_file, g2_seqFile, manipulation='remove')  # Do after copying (iter_1) or adding (iter_n)
+                iteration_flag = True
+            elif iteration > 1:
+                # seqFile changes to g2_seqFile and the cutoffs change
+                seqCutoff = 0.7
+                colCutoff = 0.1
+                G2Cmd = Guidance2Commandline(**self.G2C_args, seqFile=g2_seqFile, seqType=seqType, outDir=str(iterDir), bootstraps=bootstraps,
+                                             seqCutoff=seqCutoff, colCutoff=colCutoff)
+                print(G2Cmd)
+                subprocess.check_call([str(G2Cmd)], stderr=subprocess.STDOUT, shell=True)
+
+                # Get the removed sequence count
+                rem_count = 0
+                for rec in SeqIO.parse(g2_rem_file, 'fasta'):  # Need for all iterations
+                    rem_count += 1
+
+                if rem_count > 0:
+                    # Add new sequences to the rem_file
+                    multi_fasta_manipulator(rem_file, g2_rem_file, rem_file, manipulation='add')
+                    # Filter the input NA fasta file using the updated rem_file
+                    multi_fasta_manipulator(seqFile, rem_file, g2_seqFile, manipulation='remove')
+                    iteration_flag = True
+                else:
+                    iteration_flag = False
             iteration += 1
 
-        # Guidance 2 amino acid alignment filter.  Returns the path as a string
-        aa_alignment = self.amino_acid_guidance(seqFile=aa_seqFile, remFile=na_seqFile, outDir=str(self.aa_guidance_path),
-                                                bootstraps=aa_bootstraps, seqCutoff=aa_seqCutoff, colCutoff=aa_colCutoff)
-
-        # PAL2NAL nucleic acid alignment
-        self.pal2nal_conversion(str(aa_alignment), na_fasta, na_alignment)
-
-    def nucleic_acid_guidance(self, iteration, seqFile, outDir, bootstraps, seqCutoff, colCutoff):
-        seqType = 'nuc'
-
-        outDir = Path(outDir) / Path('iter_%s' % iteration)
-        Path.mkdir(outDir, parents=True, exist_ok=True)
-
-        G2Cmd = Guidance2Commandline(**self.G2C_args, seqFile=seqFile, seqType=seqType, outDir=str(outDir), bootstraps=bootstraps,
-        seqCutoff=seqCutoff, colCutoff=colCutoff)
-        print(iteration)
-        #print(g2c_args.items())
-        print(G2Cmd)
-        subprocess.check_call([str(G2Cmd)], stderr=subprocess.STDOUT, shell=True)
-        removed_file = str(Path(outDir) / Path('Seqs.Orig.fas.FIXED.Removed_Seq'))
-        renamed_file1 = str(copy(removed_file, str(Path(self.gene + '_G2_removed.ffn'))))
-
-        seq_file = str(Path(outDir) / Path('Seqs.Orig.fas.FIXED.Without_low_SP_Seq.With_Names'))
-        renamed_file2 = str(copy(seq_file, str(Path(self.gene + '_G2.ffn'))))
-
-        # Copy and rename files
-        rem_count = SeqIO.write(SeqIO.parse(removed_file, 'fasta'), renamed_file1, 'fasta')
-        if iteration == 1:
-            iter_flag = True
-            return_file = renamed_file2
-        elif iteration > 1:
-            if rem_count > 0:
-                multi_fasta_manipulator(renamed_file1, removed_file, manipulation='add', added_name='')
-                iter_flag = True
-                return_file = renamed_file2
-            else:
-                iter_flag = False
-                return_file = renamed_file1
-        return iter_flag, return_file
+        return rem_file
 
     def amino_acid_guidance(self, seqFile, remFile, outDir, bootstraps, seqCutoff, colCutoff):
         seqType = 'aa'
-        filtered_fasta = multi_fasta_manipulator(seqFile, remFile)
-        G2Cmd = Guidance2Commandline(**self.G2C_args, seqFile=str(filtered_fasta), seqType=seqType, outDir=outDir, bootstraps=bootstraps,
+        g2_seqFile = str(self.home / Path(self.gene + '_G2.faa'))
+        multi_fasta_manipulator(seqFile, remFile, g2_seqFile)
+        G2Cmd = Guidance2Commandline(**self.G2C_args, seqFile=g2_seqFile, seqType=seqType, outDir=outDir, bootstraps=bootstraps,
                                      seqCutoff=seqCutoff, colCutoff=colCutoff)
         print(G2Cmd)
-        G2Cmd()
+        subprocess.check_call([str(G2Cmd)], stderr=subprocess.STDOUT, shell=True)
         # DO not remove any columns.
         filtered_alignment = Path(outDir) / Path('%s.CLUSTALW.aln.Sorted.With_Names' % self.G2C_args['dataset'])
         renamed_alignment = copy(str(filtered_alignment), str(Path(self.gene + '_G2_aa.aln')))
@@ -99,5 +118,5 @@ class FilteredAlignment(object):
     def pal2nal_conversion(self, aa_alignment, na_fasta, output_file):
         P2Ncmd = Pal2NalCommandline(**self.P2N_args, pepaln=aa_alignment, nucfasta=na_fasta, output_file=output_file)
         print(P2Ncmd)
-        P2Ncmd()
+        subprocess.check_call([str(P2Ncmd)], stderr=subprocess.STDOUT, shell=True)
         print('Align the nucleic acids using the amino acid alignment.')
