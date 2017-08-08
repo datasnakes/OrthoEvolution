@@ -3,7 +3,7 @@
 from Datasnakes.Orthologs import Phylogenetics as Phylo
 #from Orthologs import OrthologsDevelopmentWarning
 
-help(Phylo)
+print("Phylogenetics docstring: %s." % Phylo.__doc__)
 #class Orthologs_Tests(unittest.TestCase):
 #    """Test the Orthologs Package."""
 #    def test_phylo(self):

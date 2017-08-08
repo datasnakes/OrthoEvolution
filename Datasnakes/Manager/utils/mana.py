@@ -2,14 +2,13 @@
 import os
 from pathlib import Path
 import ete3
-from datasnakes.Manager.utils.treelib2.treelib2.tree import Tree
-from datasnakes.Manager.utils.zipper import ZipUtils
+from Datasnakes import Cookies, Orthologs, Manager, Tools
+from Datasnakes.Manager.utils.treelib2.treelib2.tree import Tree
+from Datasnakes.Manager.utils.zipper import ZipUtils
 from cookiecutter.hooks import run_script
 from cookiecutter.main import cookiecutter
 from cookiecutter.prompt import prompt_for_config
 from cookiecutter.generate import generate_context
-# TODO-ROB once this is a pypi package all of these will be unnecessary
-from datasnakes import Cookies, Orthologs, Manager, Tools
 # from Manager.logit.logit import LogIt
 # TODO-ROB use **kwargs and **args to cut down on parameters
 
@@ -35,9 +34,10 @@ class Mana(object):
         """
         self.repo = repo
         self.file_home = Path(home)  # Home of the file calling this class
-        # TODO-ROB:  SOme of these directories don't need to be accessed directly
+        # TODO-ROB:  Some of these directories don't need to be accessed directly
         # Below are the PyPi path strings
-        #    The first group is to access the cookiecutter templates
+
+        # The first group is to access the cookiecutter templates
         self.Cookies = Path(Cookies.__path__[0])
         self.repo_cookie = self.Cookies / Path('new_repository')
         self.user_cookie = self.Cookies / Path('new_user')
@@ -46,13 +46,15 @@ class Mana(object):
         self.app_cookie = self.Cookies / Path('new_app')
         self.db_cookie = self.Cookies / Path('new_database')
         self.website_cookie = self.Cookies / Path('new_website')
-        #    The second group is for the Manager module
+
+        # The second group is for the Manager module
         self.Manager = Path(Manager.__path__[0])
         self.index = self.Manager / Path('index')
         self.logit = self.Manager / Path('logit')
         self.utils = self.Manager / Path('utils')
         self.shiny = self.Manager / Path('shiny')
-        #    The third group is for the Orthologs module
+
+        # The third group is for the Orthologs module
         self.Orthologs = Path(Orthologs.__path__[0])
         self.biosql = Path(self.Orthologs) / Path('biosql')
         self.blast = Path(self.Orthologs) / Path('blast')
@@ -60,7 +62,8 @@ class Mana(object):
         self.genbank = Path(self.Orthologs) / Path('genbank')
         self.manager = Path(self.Orthologs) / Path('manager')
         self.phylogenetics = Path(self.Orthologs) / Path('phylogenetics')
-        #    The fourth group is for the Tools module
+
+        # The fourth group is for the Tools module
         self.Tools = Path(Tools.__path__[0])
         self.ftp = Path(self.Tools) / Path('ftp')
         self.multiprocessing = Path(self.Tools) / Path('multiprocessing')
