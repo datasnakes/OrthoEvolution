@@ -1,13 +1,7 @@
-# -*- coding: utf-8 -*-
-"""
-
-@author: S. Hutchins
-"""
 # Align multiple sequences located in fasta files using alignment
 # via MCSR and create a .phylip output format.
 
 import csv
-# List of modules used
 import os
 import sys
 import time
@@ -25,7 +19,7 @@ file1 = csv.reader(g)
 print("\n" + "The current working directory is "+ os.getcwd() + (2 * "\n"))  # Print current working directory
 Gene_count = 0
 
-from datasnakes.Orthologs import CompGenAnalysis
+from Datasnakes.Orthologs import CompGenAnalysis
 x = CompGenAnalysis.get_master_lists()
 for Gene in file1:
     Gene_count = Gene_count + 1

@@ -4,6 +4,7 @@ import psutil
 from subprocess import PIPE
 from shutil import copyfile
 
+
 def md2rst(path):
     """Converts all markdown documents to rst documents in a folder.
 
@@ -23,7 +24,7 @@ def md2rst(path):
             if file.endswith('.md'):  # Only convert markdown files
                 name = splitext(basename(file))[0]  # Get the file name w/o ext
                 cmd = ["pandoc", "--from=markdown", "--to=rst", "--output=" +
-                           name + ".rst", name + ".md"]
+                       name + ".rst", name + ".md"]
                 convert = psutil.Popen(cmd, stdout=PIPE)
                 convert.wait()
                 print("%s was converted to rst format." % file)
