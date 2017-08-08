@@ -112,6 +112,7 @@ class FilteredAlignment(object):
         # DO not remove any columns.
         filtered_alignment = Path(outDir) / Path('%s.CLUSTALW.aln.Sorted.With_Names' % self.G2C_args['dataset'])
         renamed_alignment = copy(str(filtered_alignment), str(Path(self.gene + '_G2_aa.aln')))
+        renamed_alignment = multi_fasta_manipulator(renamed_alignment, seqFile, renamed_alignment, manipulation='sort')
         print('Align the filtered amino acid sequences using guidance 2')
         return Path(renamed_alignment)
 
