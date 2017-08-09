@@ -1,7 +1,7 @@
 from Bio.Phylo.PAML import codeml
 import os
 from pathlib import Path
-
+from shutil import copy
 
 class CodemlRun(object):
 
@@ -10,8 +10,10 @@ class CodemlRun(object):
         self.paml_path = self.home / Path('PAML')
         self.paml_path.mkdir(exist_ok=True)
         self.gene = str(iqtree_newick).replace('_iqtree.nwk', '')
+        copy(P2N_alignment, str(self.paml_path))
+        copy(iqtree_newick, str(self.paml_path))
 
-        self.cml = codeml.Codeml(P2N_alignment, iqtree_newick, working_dir=home, out_file=self.gene +'_codeml.out')
+        self.cml = codeml.Codeml(P2N_alignment, iqtree_newick, working_dir=self.paml_path, out_file=self.gene +'_codeml.out')
         self.control_setup(control_file)
 
     def control_setup(self, control_file):
