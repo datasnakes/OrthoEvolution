@@ -15,6 +15,6 @@
 # change into ${RAWDATA}
 cd ${RAWDATA}
 
-python36 ${PYTHONFILE} arg1 arg2 arg3
+python36 ${PYTHONFILE} ${GENE} ${RAWDATA}
 
 mail -s "${AUTHOR}_${GENE} script completed" ${EMAIL} <<< 'Check your output'
