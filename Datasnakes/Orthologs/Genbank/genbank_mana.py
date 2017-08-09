@@ -1,6 +1,6 @@
 #import os
 #from pathlib import Path
-from genbank import GenBank as GB
+from .genbank import GenBank as GB
 from Datasnakes.Tools.ftp.ftp2db import FTP
 
 class GenBankMana(FTP, GB):
