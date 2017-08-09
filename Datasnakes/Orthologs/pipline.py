@@ -30,6 +30,7 @@ class OrthologPipeline(object):
         date_time = time.strftime("%H:%M:%S on %d/%m/%Y")
         qsub_command = "qsub -v PYTHONFILE=%s RAWDATA=%s AUTHOR=%s EMAIL=%s GBS=%s GENE=%s DATE=%s %s" % \
                        (python_file, raw_data_path, author, email, memory, gene, date_time, qsub_file)
+        print('Command:  %s' % qsub_command)
         return qsub_command
 
     @staticmethod
