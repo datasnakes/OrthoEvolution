@@ -1,8 +1,6 @@
-from Datasnakes.Orthologs.Align.QualityControl.filter import FilteredAlignment
-from Datasnakes.Orthologs.Phylogenetics.IQTree.best_tree import FilteredTree
-from Datasnakes.Orthologs.Phylogenetics.PAML.codeml import CodemlRun
 import os
 import time
+import csv
 import subprocess
 from shutil import copy
 from pathlib import Path
@@ -19,8 +17,9 @@ class OrthologPipeline(object):
         self.genes = genes
 
     def iterate(self):
-        with open(self.genes, 'r') as gene_list:
-            for gene in gene_list.readlines():
+        with open(self.genes, 'r') as gl:
+            gene_list = csv.reader(gl)
+            for gene in gene_list:
                 command = self.batch_script_setup(str(self.qsub_template), str(self.worker_template), str(self.raw_data / Path(gene)), 'rgilmore',
                                         'rgilmore@gmail.com', '8GB', gene)
                 self.submit(command)
