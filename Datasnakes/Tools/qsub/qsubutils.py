@@ -11,7 +11,7 @@ from datetime import datetime as d
 import platform
 import getpass
 import os
-from Datasnakes.Tools.multiprocess import genes2analyze
+#from Datasnakes.Tools.multiprocess import genes2analyze
 
 
 class QsubUtils:
@@ -152,7 +152,7 @@ class MultiJobber(QsubUtils):
                                           cleanup=True,
                                           prefix="")
 
-        self.clustal_chunks, self.paml_chunks = genes2analyze()
+        #self.clustal_chunks, self.paml_chunks = genes2analyze()
 
         try:
             for key, value in self.clustal_chunks.items():
