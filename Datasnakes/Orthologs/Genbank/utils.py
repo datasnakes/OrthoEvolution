@@ -35,7 +35,7 @@ def multi_fasta_manipulator(target_file, reference_file, output, manipulation='r
         # Concatenate the multifasta files together by chaining the SeqIO.parse generators
         # Allows one to overwrite a file by using temporary files for storage
         # adding generators - https://stackoverflow.com/questions/3211041/how-to-join-two-generators-in-python
-        with TemporaryFile('r+', dir=Path(target_file).parent) as tmp_file:
+        with TemporaryFile('r+', dir=str(Path(target_file).parent)) as tmp_file:
             new_records = itertools.chain(SeqIO.parse(target_file, 'fasta', ), SeqIO.parse(reference_file, 'fasta'))
             count = SeqIO.write(new_records, tmp_file, 'fasta')
             tmp_file.seek(0)
@@ -43,7 +43,7 @@ def multi_fasta_manipulator(target_file, reference_file, output, manipulation='r
             SeqIO.write(SeqIO.parse(tmp_file, 'fasta'), str(new_file), 'fasta')
         print('Sequences have been added.')
     elif manipulation is 'sort':
-        with TemporaryFile('r+', dir=Path(target_file).parent) as tmp_file:
+        with TemporaryFile('r+', dir=str(Path(target_file).parent)) as tmp_file:
             aln = MultipleSeqAlignment([])
             for sorted_seq_record in SeqIO.parse(reference_file, 'fasta'):
                 for unsorted_aln_record in SeqIO.parse(target_file, 'fasta'):
