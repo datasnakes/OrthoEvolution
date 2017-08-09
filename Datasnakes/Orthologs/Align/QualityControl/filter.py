@@ -117,7 +117,8 @@ class FilteredAlignment(object):
         return Path(renamed_alignment)
 
     def pal2nal_conversion(self, aa_alignment, na_fasta, output_file):
-        P2Ncmd = Pal2NalCommandline(**self.P2N_args, pepaln=aa_alignment, nucfasta=na_fasta, output_file=output_file)
+        P2Ncmd = Pal2NalCommandline(**self.P2N_args, pepaln=aa_alignment, nucfasta=na_fasta, output_file=output_file,
+                                    output='paml')
         print(P2Ncmd)
         subprocess.check_call([str(P2Ncmd)], stderr=subprocess.STDOUT, shell=True)
         print('Align the nucleic acids using the amino acid alignment.')
