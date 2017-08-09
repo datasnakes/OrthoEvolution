@@ -32,7 +32,7 @@ class FilteredAlignment(object):
         aa_seqFile = str(self.home / Path(aa_fasta))  # Guidance AA sequence file
 
         na_fasta = str(self.home / Path(self.gene + '_G2.ffn'))  # Pal2Nal NA sequence file
-        na_alignment = str(self.home / Path(self.gene + '_P2N_na.aln'))  # Pal2Nal output file
+        na_alignment = str(self.home / Path(self.gene + '_P2N_na'))  # Pal2Nal output file
 
         # Guidance2 iterations over the nucleic acid sequences.
         # Returns the file name that contains the filtered sequences.
@@ -112,13 +112,21 @@ class FilteredAlignment(object):
         # DO not remove any columns.
         filtered_alignment = Path(outDir) / Path('%s.CLUSTALW.aln.Sorted.With_Names' % self.G2C_args['dataset'])
         renamed_alignment = copy(str(filtered_alignment), str(Path(self.gene + '_G2_aa.aln')))
-        renamed_alignment = multi_fasta_manipulator(renamed_alignment, seqFile, renamed_alignment, manipulation='sort')
+        renamed_alignment = multi_fasta_manipulator(str(renamed_alignment), str(seqFile), str(renamed_alignment), manipulation='sort')
         print('Align the filtered amino acid sequences using guidance 2')
         return Path(renamed_alignment)
 
     def pal2nal_conversion(self, aa_alignment, na_fasta, output_file):
-        P2Ncmd = Pal2NalCommandline(**self.P2N_args, pepaln=aa_alignment, nucfasta=na_fasta, output_file=output_file,
+
+        # Create an alignment for paml input
+        P2Ncmd = Pal2NalCommandline(**self.P2N_args, pepaln=aa_alignment, nucfasta=na_fasta, output_file=output_file + '.paml.aln',
                                     output='paml')
         print(P2Ncmd)
         subprocess.check_call([str(P2Ncmd)], stderr=subprocess.STDOUT, shell=True)
+
+        # Create an alignment for iqtree input
+        P2Ncmd = Pal2NalCommandline(**self.P2N_args, pepaln=aa_alignment, nucfasta=na_fasta, output_file=output_file + '.iqtree.aln',
+                                    output='fasta')
+        print(P2Ncmd)
+        subprocess.check_call([str(P2Ncmd)], stderr=subprocess.STDOUT, shell=True,)
         print('Align the nucleic acids using the amino acid alignment.')
