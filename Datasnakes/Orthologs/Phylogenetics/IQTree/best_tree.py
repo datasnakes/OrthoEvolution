@@ -11,8 +11,8 @@ class FilteredTree(object):
     def __init__(self, alignment, dataType='CODON', home=os.getcwd()):
         self.home = Path(home)
         self.iqtree_path = self.home / Path('IQTREE')
-        self.tree_file = self.iqtree_path / alignment + '.treefile'
-        self.gene = alignment.replace('_P2N_na.aln', '')
+        self.tree_file = self.iqtree_path / Path(alignment + '.treefile')
+        self.gene = alignment.replace('_P2N_na.iqtree.aln', '')
 
         self.aln_File = str(self.home / Path(alignment))
         outDir = self.home / Path('IQTREE')
