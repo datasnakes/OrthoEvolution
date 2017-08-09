@@ -27,16 +27,18 @@ import configparser
 #from cursesmenu import *  # for Linux Only
 #from cursesmenu.items import *  # for Linux Only
 
-class FTP2DB(object):
+from Datasnakes.Orthologs.CompGenetics.comp_gen import CompGenAnalysis
+from Datasnakes.Manager.utils.mana import ProjMana
+#class FTP2DB(object):
 # Set up directories and project
 home = os.getcwd()
 project = "GPCR-Orthologs-Project"
 user = "rgilmore"
-where = dir_mana(home, project)
+#where = ProjMana(home, project)
 # Use lister() class here so that we can easily access our Master RNA
 # Accession File
 # Always make sure this file name is correct
-what = lister('Master_RNA_Accession_File.csv')
+#what = CompGenAnalysis('Master_RNA_Accession_File.csv')
 
 
 class Ftp2Db(object):
@@ -44,7 +46,7 @@ class Ftp2Db(object):
     ncbi = configparser.ConfigParser()
     ncbi.read('ncbiftp.cfg')
     """Private variable initialization"""
-    __NCBI_FTP = ncbi['FTPSITE']['ncbi']
+    #__NCBI_FTP = ncbi['FTPSITE']['ncbi']
     __NCBI_RSYNC = 'rsync://ftp.ncbi.nlm.nih.gov'
     __class_name = ''
     __update_dict = {}

@@ -1,1 +1,1 @@
-from .ftp2db import FTP2DB
+from .ftp2db import Ftp2Db
