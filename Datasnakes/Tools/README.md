@@ -12,16 +12,16 @@ Usage
 
 Import this module if you want to use the tools within it.
 ``` python
-import Tools.pybasher
+import Datasnakes.Tools.pybasher
 ```
 or
 ``` python
-import Tools
+import Datasnakes.Tools
 ```
 or
 
 ``` python
-from Tools import qsub
+from Datasnakes.Tools import qsub
 ```
 
 #### Code Examples

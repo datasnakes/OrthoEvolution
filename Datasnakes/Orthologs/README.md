@@ -16,7 +16,7 @@ but can also be used singularly.
 This is a simple example of using some of the modules.
 
 ``` python
-from Orthologs import Phylogenetics as Phylo
+from Datasnakes.Orthologs import Phylogenetics as Phylo
 
 ```
 
