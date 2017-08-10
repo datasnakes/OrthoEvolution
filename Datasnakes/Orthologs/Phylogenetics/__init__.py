@@ -11,7 +11,7 @@ from Datasnakes.Orthologs.Phylogenetics.PAML import ETE3PAML
 from Datasnakes.Orthologs.Phylogenetics.PhyloTree import TreeViz
 from Datasnakes.Orthologs.Phylogenetics import PhyML
 from Datasnakes.Orthologs.Phylogenetics import Phylip
-
+from Datasnakes.Orthologs.Phylogenetics import IQTree
 
 class RelaxPhylip(object):
     """Convert a multiple sequence alignment file to relaxed-phylip format."""
