@@ -20,7 +20,9 @@ class OrthologPipeline(object):
         with open(self.genes, 'r') as gl:
             gene_list = csv.reader(gl)
             for gene in gene_list:
-                command = self.batch_script_setup(str(self.qsub_template), str(self.worker_template), str(self.raw_data / Path(gene[0])), 'rgilmore',
+                self.gene_path = self.raw_data / Path(gene[0])
+                self.qsub_file = copy(str(self.qsub_template), str(self.gene_path / Path(gene[0] + '.pbs')))
+                command = self.batch_script_setup(str(self.qsub_file), str(self.worker_template), str(self.gene_path), 'rgilmore',
                                         'rgilmore@gmail.com', '8GB', gene[0])
                 self.submit(command)
 
