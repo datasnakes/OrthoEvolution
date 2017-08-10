@@ -58,7 +58,7 @@ class FilteredAlignment(object):
             Path.mkdir(iterDir, parents=True, exist_ok=True)
 
             g2_seqFile = str(self.home / Path(self.gene + '_G2.ffn'))  # Need for all iterations
-            g2_rem_file = str(Path(iterDir) / Path('Seqs.Orig.fas.FIXED.Removed_Seq'))  # Need for all iterations
+            g2_rem_file = str(Path(iterDir) / Path('Seqs.Orig.fas.FIXED.Removed_Seq.With_Names'))  # Need for all iterations
             rem_file = str(self.home / Path(self.gene + '_G2_removed.ffn'))   # Need for all iterations
 
             if iteration == 1:
