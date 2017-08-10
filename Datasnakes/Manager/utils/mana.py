@@ -12,6 +12,7 @@ from Datasnakes import Cookies, Orthologs, Manager, Tools
 # from Manager.logit.logit import LogIt
 # TODO-ROB use **kwargs and **args to cut down on parameters
 
+
 class Mana(object):
     """This is the directory management base class.
 
