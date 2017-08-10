@@ -25,7 +25,7 @@ class OrthologPipeline(object):
                 self.submit(command)
 
     @staticmethod
-    def batch_script_setup(self, qsub_file, python_file, raw_data_path, author, email, memory, gene):
+    def batch_script_setup(qsub_file, python_file, raw_data_path, author, email, memory, gene):
         date_time = time.strftime("%H:%M:%S on %d/%m/%Y")
         qsub_command = "qsub -v PYTHONFILE=%s RAWDATA=%s AUTHOR=%s EMAIL=%s GBS=%s GENE=%s DATE=%s %s" % \
                        (python_file, raw_data_path, author, email, memory, gene, date_time, qsub_file)
@@ -33,5 +33,5 @@ class OrthologPipeline(object):
         return qsub_command
 
     @staticmethod
-    def submit(self, qsub_command):
+    def submit(qsub_command):
         subprocess.check_call([qsub_command], stderr=subprocess.STDOUT, shell=True)
