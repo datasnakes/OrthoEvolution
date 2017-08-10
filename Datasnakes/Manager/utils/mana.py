@@ -3,7 +3,6 @@ import os
 from pathlib import Path
 import ete3
 from Datasnakes.Manager.utils.zipper import ZipUtils
-from Datasnakes.Manager.utils.zipper import ZipUtils
 from cookiecutter.hooks import run_script
 from cookiecutter.main import cookiecutter
 from cookiecutter.prompt import prompt_for_config
@@ -148,10 +147,10 @@ class Mana(object):
         with the ete3.Tree() class.
         """
 
-        tree = Tree()
+        #tree = Tree()
         #t = tree.get_dir_map(top, ignore)
-        Ntree = tree.parse_newick_json()
-        return Ntree
+        #Ntree = tree.parse_newick_json()
+        #return Ntree
 
     def get_ete3_tree(self, top, tree=None):
         """Create the ete3 tree."""
