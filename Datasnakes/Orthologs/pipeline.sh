@@ -13,6 +13,15 @@
 #PBS -e $AUTHOR_$GENE.e$PBS_JOBID
 #PBS -j oe
 
+# echo environment variables for output file
+echo "Author is $AUTHOR"
+echo "Date and time is $DATE"
+echo "Email is $EMAIL"
+echo "Memory allocation is $GBS"
+echo "Target gene is $GENE"
+echo "raw_data path is $RAWDATA"
+echo "Python worker file is $PYTHONFILE"
+
 # change into $RAWDATA
 cd $RAWDATA
 
