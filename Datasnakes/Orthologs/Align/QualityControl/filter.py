@@ -59,11 +59,9 @@ class FilteredAlignment(object):
 
             g2_seqFile = str(self.home / Path(self.gene + '_G2.ffn'))  # Need for all iterations
             g2_rem_file = str(Path(iterDir) / Path('Seqs.Orig.fas.FIXED.Removed_Seq.With_Names'))  # Need for all iterations
-            # Files without any removed don't have the file *.With_Names
-            if os.path.isfile(g2_rem_file):
-                g2_rem_file = g2_rem_file
-            else:
-                g2_rem_file = str(Path(iterDir) / Path('Seqs.Orig.fas.FIXED.Removed_Seq'))
+
+
+
             rem_file = str(self.home / Path(self.gene + '_G2_removed.ffn'))   # Need for all iterations
 
             if iteration == 1:
@@ -74,6 +72,9 @@ class FilteredAlignment(object):
                 subprocess.check_call([str(G2Cmd)], stderr=subprocess.STDOUT, shell=True)
                 # Copy the Guidance removed seq file and paste it to the home directory
                 # Creates the rem_file
+                # Files without any removed don't have the file *.With_Names
+                if os.path.isfile(g2_rem_file) is False:
+                    g2_rem_file = str(Path(iterDir) / Path('Seqs.Orig.fas.FIXED.Removed_Seq'))
                 SeqIO.write(SeqIO.parse(g2_rem_file, 'fasta'), rem_file, 'fasta')  # Need for iter_1
 
                 # Filter the input NA fasta file using Guidance output
@@ -91,6 +92,10 @@ class FilteredAlignment(object):
 
                 # Get the removed sequence count
                 rem_count = 0
+                # Files without any removed don't have the file *.With_Names
+                if os.path.isfile(g2_rem_file) is False:
+                    g2_rem_file = str(Path(iterDir) / Path('Seqs.Orig.fas.FIXED.Removed_Seq'))
+
                 for rec in SeqIO.parse(g2_rem_file, 'fasta'):  # Need for all iterations
                     rem_count += 1
 
