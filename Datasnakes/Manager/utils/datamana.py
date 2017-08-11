@@ -29,34 +29,31 @@ class DataMana(PM):
             elif item.lower() == 'natural selection':
                 self.fasta()
 
+    @classmethod
     def blast(self):
         print('create blast folders')
         # TODO-Create directories for the blast data
         # Setup inside of a project:  ~/raw_data/blast
                                     # ~/raw_data/blast/gi_lists
                                     # ~/raw_data/blast/xml
-
+    @classmethod
     def genbank(self):
         print('genbank folders')
 
 
     def fasta(self):
-        print('fasta foldrs')
+        print('fasta folders')
 
 
 class LogIt(DataMana):
     """LogIt makes logging easier by creating easy loggers."""
-    """Class for improving the ease of use of the logging module."""
     def __init__(self, logfile=None, logname=None):
         """Initialize the logger format based on system platform."""
-        # Set the different formats
-        """Set the different formats based on user's platform."""
+        # Set the different formats based on user's platform
         if sys.platform == 'win32':
             self.archive_format = '%m-%d-%Y_%I-%M-%p'
-            pass
         elif sys.platform == 'linux':
             self.archive_format = '%m-%d-%Y@%I:%M:%S-%p'
-            pass
 
         self.date_format = '%a %b %d at %I:%M:%S %p %Y'  # Used to add as a date
         self.log_format = '%(name)s - [%(levelname)-2s]: %(message)s'

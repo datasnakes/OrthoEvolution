@@ -1,3 +1,4 @@
+#!/bin/bash
 #PBS -S /bin/bash
 #PBS -m bea
 #PBS -M rgilmore@umc.edu

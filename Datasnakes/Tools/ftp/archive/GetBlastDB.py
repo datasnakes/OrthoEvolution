@@ -35,7 +35,6 @@ try:
             ' /work5/r2295/bin/databases/refseqrnadb_archive_' +
             d.now().strftime(format2))
         os.mkdir(dbpath)   # Recreate the database directory
-        pass
     else:  # If the directory does not exist
         os.mkdir(dbpath)
         log.info("The %s directory was created." % str(dbpath))
@@ -52,7 +51,7 @@ try:
     blastdb = '/blast/db/'  # Set variable for the blastdb subdirectory
     ftp = FTP("ftp.ncbi.nlm.nih.gov", timeout=None)
     # Login using email as password
-    ftp.login(user='anonymous', passwd='shutchins2@umc.edu')
+    ftp.login(user='anonymous', passwd='')
     log.info("Successful FTP login.")
 except error_perm:  # This error will be thrown if there's a connection issue.
     log.info("FTP connection error.")
