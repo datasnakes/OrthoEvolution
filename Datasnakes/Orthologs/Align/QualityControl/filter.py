@@ -127,16 +127,29 @@ class FilteredAlignment(object):
         return Path(renamed_alignment)
 
     def pal2nal_conversion(self, aa_alignment, na_fasta, output_file):
-
+        # TODO-ROB:  Add a filter step so if error[0] = Error: #---  ERROR: inconsistency between the following pep and nuc seqs  ---#
+        # TODO-ROB:  ....then remove error[2] which is the sequence it can't read
         # Create an alignment for paml input
         P2Ncmd = Pal2NalCommandline(**self.P2N_args, pepaln=aa_alignment, nucfasta=na_fasta, output_file=output_file + '.paml.aln',
                                     output='paml')
         print(P2Ncmd)
-        subprocess.check_call([str(P2Ncmd)], stderr=subprocess.STDOUT, shell=True)
+        pal2nal = subprocess.Popen([str(P2Ncmd)], stderr=subprocess.PIPE, stdout=subprocess.PIPE, shell=True, encoding='utf-8')
+        error = pal2nal.stderr.read()
+        out = pal2nal.stdout.read()
+        pal2nal.wait()
 
+        print('Error: ' + str(error))
+        print('Out: ' + str(out))
         # Create an alignment for iqtree input
         P2Ncmd = Pal2NalCommandline(**self.P2N_args, pepaln=aa_alignment, nucfasta=na_fasta, output_file=output_file + '.iqtree.aln',
                                     output='fasta')
         print(P2Ncmd)
-        subprocess.check_call([str(P2Ncmd)], stderr=subprocess.STDOUT, shell=True)
+        pal2nal = subprocess.Popen([str(P2Ncmd)], stderr=subprocess.PIPE, stdout=subprocess.PIPE, shell=True, encoding='utf-8')
+        error = pal2nal.stderr.read()
+        out = pal2nal.stdout.read()
+        pal2nal.wait()
+
+        print('Error: ' + str(error))
+        print('Out: ' + str(out))
+
         print('Align the nucleic acids using the amino acid alignment.')
