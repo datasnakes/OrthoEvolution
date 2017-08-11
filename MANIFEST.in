@@ -27,3 +27,6 @@ include Docs/README.md
 
 # Include tests
 include Tests/*
+
+# Include Codeml Control Files
+include Datasnakes/Orthologs/Phylogenetics/PAML/ctlfiles/*
