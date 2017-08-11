@@ -19,6 +19,7 @@ class DotExportCase(unittest.TestCase):
         tree.create_node("George", "george", parent="bill")
         self.tree = tree
 
+    @classmethod
     def read_generated_output(self, filename):
         output = codecs.open(filename, 'r', 'utf-8')
         generated = output.read()

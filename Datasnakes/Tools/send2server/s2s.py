@@ -46,7 +46,6 @@ class S2S(object):
         status = subprocess.call([cmd], shell=True)
         if status == 0:  # Command was successful.
             print("%s file sent." % file)
-            pass  # Continue
         else:  # Unsuccessful. Stdout will be '1'.
             print("%s file not sent." % file)
 
@@ -55,7 +54,6 @@ class S2S(object):
         status = subprocess.call([cmd], shell=True)
         if status == 0:
             print("%s file sent." % file)
-            pass
         else:
             print("%s file not sent." % file)
 

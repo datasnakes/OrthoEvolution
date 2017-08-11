@@ -10,7 +10,6 @@
 # as part of this package.
 
 """Command line wrapper for IQ-Tree
-########################################################################################################################
 Key Features:
 
 # Efficient search algorithm: Fast and effective stochastic algorithm to reconstruct phylogenetic trees by maximum likelihood.
@@ -29,7 +28,6 @@ safe numerical and low memory mode. Multicore CPUs and parallel MPI system are u
 # Phylogenetic testing: Several fast branch tests like SH-aLRT and aBayes test (Anisimova et al., 2011) and tree topology
 tests like the approximately unbiased (AU) test (Shimodaira, 2002).
 
-########################################################################################################################
 The strength of IQ-TREE is the availability of a wide variety of phylogenetic models:
 
 # Common models: All common substitution models for DNA, protein, codon, binary and morphological data with rate
@@ -44,7 +42,6 @@ data (Schrempf et al., 2016)..
 """
 
 from __future__ import print_function
-from pathlib import Path
 from Bio.Application import _Option, AbstractCommandline
 
 
