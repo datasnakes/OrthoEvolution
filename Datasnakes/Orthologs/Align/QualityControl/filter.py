@@ -32,7 +32,7 @@ class FilteredAlignment(object):
         aa_seqFile = str(self.home / Path(aa_fasta))  # Guidance AA sequence file
 
         na_fasta = str(self.home / Path(self.gene + '_G2.ffn'))  # Pal2Nal NA sequence file
-        na_alignment = str(self.home / Path(self.gene + '_P2N_na'))  # Pal2Nal output file
+        na_alignment = str(Path(self.gene + '_P2N_na'))  # Pal2Nal output file
 
         # Guidance2 iterations over the nucleic acid sequences.
         # Returns the file name that contains the filtered sequences.
@@ -129,17 +129,35 @@ class FilteredAlignment(object):
     def pal2nal_conversion(self, aa_alignment, na_fasta, output_file):
         # TODO-ROB:  Add a filter step so if error[0] = Error: #---  ERROR: inconsistency between the following pep and nuc seqs  ---#
         # TODO-ROB:  ....then remove error[2] which is the sequence it can't read
+        removed = []
+        # Create output directory for PAL2NAL
+        outDir = self.home / Path('PAL2NAL')
+        Path.mkdir(outDir, exist_ok=True)
+        output_file = str(outDir / Path(output_file))
+
         # Create an alignment for paml input
         P2Ncmd = Pal2NalCommandline(**self.P2N_args, pepaln=aa_alignment, nucfasta=na_fasta, output_file=output_file + '.paml.aln',
                                     output='paml')
         print(P2Ncmd)
-        pal2nal = subprocess.Popen([str(P2Ncmd)], stderr=subprocess.PIPE, stdout=subprocess.PIPE, shell=True, encoding='utf-8')
-        error = pal2nal.stderr.read()
-        out = pal2nal.stdout.read()
-        pal2nal.wait()
+        pal2nal_flag = True
+        while pal2nal_flag is True:
+            pal2nal = subprocess.Popen([str(P2Ncmd)], stderr=subprocess.PIPE, stdout=subprocess.PIPE, shell=True, encoding='utf-8')
+            error = pal2nal.stderr.readlines()
+            out = pal2nal.stdout.readlines()
+            pal2nal.wait()
+            if 'ERROR: inconsistency between the following pep and nuc seqs' in error[0]:
+                print('Caught the pal2nal error!')
+                print(error[0])
+                for err in error:
+                    if '>' in err:
+                        removed.append(err.strip('>' '\n'))
+                multi_fasta_manipulator(na_fasta, removed, na_fasta)
+                multi_fasta_manipulator(aa_alignment, removed, aa_alignment)
+            else:
+                pal2nal_flag = False
 
-        print('Error: ' + str(error))
-        print('Out: ' + str(out))
+            print('Error: ' + str(error))
+            print('Out: ' + str(out))
         # Create an alignment for iqtree input
         P2Ncmd = Pal2NalCommandline(**self.P2N_args, pepaln=aa_alignment, nucfasta=na_fasta, output_file=output_file + '.iqtree.aln',
                                     output='fasta')
