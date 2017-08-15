@@ -6,7 +6,9 @@ import pandas as pd
 from pathlib import Path
 #from pandas import ExcelWriter
 from Datasnakes.Manager.utils.mana import ProjMana as ProjectManagement
-
+import shutil
+import pkg_resources
+from Datasnakes.Manager import index
 # TODO-ROB Create function for archiving and multiple runs (this can go
 # into the Mana class)
 
@@ -63,6 +65,8 @@ class CompGenAnalysis(ProjectManagement):
             self.paml_org_list = []
         # Handle the master accession file (could be before or after blast)
         if acc_file is not None:
+            if kwargs['copy_from_package']:
+                shutil.copy(pkg_resources.resource_filename(index.__name__, kwargs['MAF']))
             # File init
             self.acc_path = self.project_index / Path(self.acc_filename)
             self.go_list = go_list
