@@ -24,7 +24,7 @@ class Mana(object):
     directories or paths.
     """
 
-    def __init__(self, repo=None, home=os.getcwd(), new_repo=False):
+    def __init__(self, repo=None, home=os.getcwd(), new_repo=False, **kwargs):
         # TODO-ROB ADD a REPOsitory destination path (an output directory for
         # cookiecutter)
         """
@@ -184,7 +184,7 @@ class Mana(object):
 class RepoMana(Mana):
     """Repository Management."""
     def __init__(self, repo, user=None, home=os.getcwd(),
-                 new_user=False, new_repo=False):
+                 new_user=False, new_repo=False, **kwargs):
         """
         :param repo (string):  The name of the repository.
         :param user (string):  The name of the current user if any.
