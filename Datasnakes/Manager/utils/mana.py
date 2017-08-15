@@ -193,7 +193,7 @@ class RepoMana(Mana):
         :param new_repo: Flag for creating a new repository.
         """
         # TODO-ROB change the home parameter to the output directory parameter
-        super().__init__(repo=repo, home=home, new_repo=new_repo)
+        super().__init__(repo=repo, home=home, new_repo=new_repo, **kwargs)
         self.repo = repo
         self.docs = self.repo_path / Path('docs')
         self.misc = self.repo_path / Path('misc')
