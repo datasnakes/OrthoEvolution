@@ -66,7 +66,7 @@ class CompGenAnalysis(ProjectManagement):
         # Handle the master accession file (could be before or after blast)
         if acc_file is not None:
             if kwargs['copy_from_package']:
-                shutil.copy(pkg_resources.resource_filename(index.__name__, kwargs['MAF']))
+                shutil.copy(pkg_resources.resource_filename(index.__name__, kwargs['MAF']), self.project_index)
             # File init
             self.acc_path = self.project_index / Path(self.acc_filename)
             self.go_list = go_list
