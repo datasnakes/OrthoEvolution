@@ -29,8 +29,6 @@ class BLASTAnalysis(CompGenAnalysis):
         self.save_data = save_data
 
         if template is not None:
-            if kwargs['copy_from_package']:
-                shutil.copy(pkg_resources.resource_filename(index.__name__, kwargs['MAF']))
             self.template_filename = template
             self.template_path = self.project_index / \
                 Path(self.template_filename)
