@@ -7,6 +7,8 @@ import time  # Used to delay when dealing with NCBI server errors
 from datetime import datetime as d
 from pathlib import Path
 import pandas as pd
+import pkg_resources
+from Datasnakes.Manager import index
 from Bio import SearchIO  # Used for parsing and sorting XML files.
 from Bio.Blast.Applications import NcbiblastnCommandline
 from Datasnakes.Orthologs.CompGenetics.ncbi_blast import BLASTAnalysis as BT
@@ -27,7 +29,7 @@ class BLASTn(BT):
         # # TODO-ROB Add taxon parameter
         # Manage Directories
         self.__home = Path(os.getcwd())
-        self.__output_path = self.raw_data / Path('blast')  # Output directory
+        self.__output_path = self.raw_data / Path('BLAST')  # Output directory
         self.__gi_list_path = self.__output_path / Path('gi_lists')
         self.__xml_path = self.__output_path / Path('xml')
         Path.mkdir(self.__output_path, parents=True, exist_ok=True)
@@ -208,9 +210,13 @@ class BLASTn(BT):
         taxids = self.taxon_ids
         Path.mkdir(self.__gi_list_path / Path('data'), parents=True, exist_ok=True)
         pd.Series(taxids).to_csv('taxids.csv', index=False)
-        # PBS job submission
-        pbs_script = str(self.__gi_list_path / Path('get_gi_lists.sh'))
-        gi_config = subprocess.check_output('qsub %s' % pbs_script, shell=True)
+        # PBS job submission using the templates
+        pbs_script = 'get_gi_lists.sh'
+        pbs_script_path = self.__gi_list_path / Path(pbs_script)
+        py_script = 'get_gi_lists.py'
+        shutil.copy(pkg_resources.resource_filename(index.__name__, pbs_script), self.raw_data)
+        shutil.copy(pkg_resources.resource_filename(index.__name__, py_script), self.raw_data)
+        gi_config = subprocess.check_output('qsub %s' % str(pbs_script_path), shell=True)
         gi_config = gi_config.decode('utf-8')
         print('The GI list configuration\'s JobID is %s' % gi_config)
         job_id = gi_config.replace('.sequoia', '')
