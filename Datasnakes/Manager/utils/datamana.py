@@ -30,14 +30,12 @@ class DataMana(PM):
                 self.fasta()
 
     def blast(self):
-        print('create blast folders')
+        print('use blast folders')
         # TODO-Create directories for the blast data
-        # Setup inside of a project:  ~/raw_data/blast
-                                    # ~/raw_data/blast/gi_lists
-                                    # ~/raw_data/blast/xml
+        # Do the blasting here using BLASTn
 
     def genbank(self):
-        print('genbank folders')
+        print('create genbank files')
 
 
     def fasta(self):
