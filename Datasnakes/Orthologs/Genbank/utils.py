@@ -8,6 +8,60 @@ from tempfile import TemporaryFile
 import itertools
 
 
+def multi_fasta_manipulator(target_file, reference, output, manipulation='remove'):
+    # Inspired by the BioPython Tutorial and Cookbook ("20.1.1 Filtering a sequence file")
+    """
+    This method manipulated selected sequences in a multi-FASTA files.  The original
+    purpose was to filter files created by the GUIDANCE2 alignment program, but
+    the function has been made in order to accommodate other situations as well.
+
+    :param target_file:  Target multi-FASTA file.
+    :param reference:  Selected sequences for removal in a multi-FASTA file.
+    :param manipulation:  Type of manipulation.  (remove, add, tbd..)
+    :param added_name:  The output file uses this parameter to name itself.
+    :return:  A multi-FASTA file with filter sequences.
+    """
+    # Create path variables
+    file_name = output
+    new_file = Path(target_file).parent / Path(file_name)
+    # Create a new multi-fasta record object using the target_file, reference, and output
+    # Remove specific sequences from a fasta file
+    if manipulation is 'remove':
+        multi_fasta_remove(target_file, reference, new_file)
+    # Combine all the FASTA sequence in one record object
+    elif manipulation is 'add':
+        muli_fasta_add(target_file, reference, new_file)
+    # Sort one fasta file based on the order of another
+    # Works for alignments
+    elif manipulation is 'sort':
+        multi_fasta_sort(target_file, reference, new_file)
+
+    print('A new fasta file has been created.')
+    return new_file
+
+
+def dir_config(path, tier_frame_dict):
+    """
+    Configure the genbank directories.
+    :param path: Path to create directory structure.
+    :param tier_frame_dict:  Dictionary from the blast super class.
+    :return:  Creates a directory structure as follows
+        --Tier_1
+            --Gene_1
+            --Gene_M
+        --Tier_N
+            --Gene_M+1
+            --Gene_N
+    """
+    for G_KEY, G_value in tier_frame_dict.items():
+        tier = G_KEY
+        tier_path = path / Path(tier)
+        Path.mkdir(tier_path, parents=True, exist_ok=True)
+        for GENE in tier_frame_dict[tier].T:
+            gene_path = tier_path / Path(GENE)
+            Path.mkdir(gene_path)
+
+
 def multi_fasta_remove(target_file, reference, new_file):
     rem_file = new_file.stem + '_removed' + new_file.suffix
     rem_file = new_file.parent / Path(rem_file)
@@ -71,36 +125,4 @@ def multi_fasta_sort(target_file, reference, new_file):
     print('temp file count: ' + str(count))
     AlignIO.write(AlignIO.read(tmp_file, 'fasta'), str(new_file), 'fasta')
     print('Alignment has been sorted.')
-
-
-def multi_fasta_manipulator(target_file, reference, output, manipulation='remove'):
-    # Inspired by the BioPython Tutorial and Cookbook ("20.1.1 Filtering a sequence file")
-    """
-    This method manipulated selected sequences in a multi-FASTA files.  The original
-    purpose was to filter files created by the GUIDANCE2 alignment program, but
-    the function has been made in order to accommodate other situations as well.
-
-    :param target_file:  Target multi-FASTA file.
-    :param reference:  Selected sequences for removal in a multi-FASTA file.
-    :param manipulation:  Type of manipulation.  (remove, add, tbd..)
-    :param added_name:  The output file uses this parameter to name itself.
-    :return:  A multi-FASTA file with filter sequences.
-    """
-    # Create path variables
-    file_name = output
-    new_file = Path(target_file).parent / Path(file_name)
-    # Create a new multi-fasta record object using the target_file, reference, and output
-    # Remove specific sequences from a fasta file
-    if manipulation is 'remove':
-        multi_fasta_remove(target_file, reference, new_file)
-    # Combine all the FASTA sequence in one record object
-    elif manipulation is 'add':
-        muli_fasta_add(target_file, reference, new_file)
-    # Sort one fasta file based on the order of another
-    # Works for alignments
-    elif manipulation is 'sort':
-        multi_fasta_sort(target_file, reference, new_file)
-
-    print('A new fasta file has been created.')
-    return new_file
 
