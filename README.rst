@@ -13,7 +13,6 @@
 
 Datasnakes-Scripts
 --------------------
-
 The Datasnakes-Scripts package is a collection of the modules which aids in
 the analysis and visualization of orthologs-related bioinformatics projects.
 
