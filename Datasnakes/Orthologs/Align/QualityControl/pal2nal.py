@@ -23,14 +23,11 @@ class Pal2NalCommandline(AbstractCommandline):
     http://www.bork.embl.de/pal2nal/
     Example:
     --------
-
     \>>> from Bio.Align.Applications import Pal2NalCommandline
-
     You would typically run the command line with clustalomega_cline() or via
         the Python subprocess module, as described in the Biopython tutorial.
     Citation:
     ---------
-
     Mikita Suyama, David Torrents, and Peer Bork (2006)
     PAL2NAL: robust conversion of protein sequence alignments into the corresponding codon alignments.
     Nucleic Acids Res. 34, W609-W612.
