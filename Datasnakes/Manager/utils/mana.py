@@ -263,21 +263,29 @@ class UserMana(RepoMana):
         '''
         if database is None:
             database = []
-        super().__init__(repo=repo, user=user, home=home, new_user=new_user, **kwargs)
-        self.user = user
+        if user or (user and repo):
+            super().__init__(repo=repo, user=user, home=home, new_user=new_user, **kwargs)
+            self.user = user
 
-        # TODO-ROB Add database files to the repository as well
-        self.user_db = self.user_path / Path('databases')
-        self.ncbi_db_repo = self.user_db / Path('NCBI')
-        self.user_index = self.user_path / Path('index')
-        self.user_log = self.user_path / Path('log')
-        self.manuscripts = self.user_path / Path('manuscripts')
-        self.other = self.user_path / Path('other')
-        self.projects = self.user_path / Path('projects')
+            # TODO-ROB Add database files to the repository as well
+            self.user_db = self.user_path / Path('databases')
+            self.ncbi_db_repo = self.user_db / Path('NCBI')
+            self.user_index = self.user_path / Path('index')
+            self.user_log = self.user_path / Path('log')
+            self.manuscripts = self.user_path / Path('manuscripts')
+            self.other = self.user_path / Path('other')
+            self.projects = self.user_path / Path('projects')
         # TODO-ROB Create a DB_mana class in a seperate file that interactsd with the ftp class
+            if project:
+                self.project = project
+                self.project_path = self.projects / Path(project)
+        else:
+            self.projects = home
+            self.Cookies = Path(Cookies.__path__[0])
+            self.project_cookie = self.Cookies / Path('new_project')
         if project:
             self.project = project
-            self.project_path = self.projects / Path(project)
+            self.project_path = home / Path(project)
         if new_project is True:
             self.create_project()
         if len(database) > 0:
@@ -357,7 +365,8 @@ class WebMana(RepoMana):
         :param create_admin:  Flag for creating a new admin for the website via FLASK USER.
         (Note:  This parameter is not used currently in development.)
         """
-        super().__init__(repo=repo, home=home, **kwargs)
+        if repo and website:
+            super().__init__(repo=repo, home=home, **kwargs)
         self.website = website
         self.web_host = host
         self.web_port = port
@@ -421,30 +430,41 @@ class ProjMana(UserMana):
         :param new_app (bool):  Flag for creating a new web app under a research target.
 
         """
-        super().__init__(repo=repo, user=user, project=project, home=home,
-                         new_project=new_project, **kwargs)
-        # TODO-ROB Go back to the drawing board for the public/private/other choices.  (FLASK forms)
-        # TODO-ROB determine how to get cookiecutter to skip over directories
-        # that already exist
-        self.project = project
-        self.research = research
-        self.research_type = research_type
-        # Project/Research Directories
-        self.research_path = self.project_path / \
-            Path(research_type) / Path(research)
-        self.project_archive = self.project_path / Path('archive')
-        self.project_index = self.research_path / Path('index')
-        self.data = self.research_path / Path('data')
-        self.raw_data = self.research_path / Path('raw_data')
-        self.project_web = self.research_path / Path('web')
-        # TODO-ROB:  THis is just a draft.  Rework to use public/private/other
-        if app:
-            self.app = app
-            self.app_path = self.project_web / Path(app)
-        if new_research is True:
-            self.create_research(new_app)
 
-    def create_research(self, new_app=False):
+        #
+        if project or (repo and user and project):
+            super().__init__(repo=repo, user=user, project=project, home=home,
+                             new_project=new_project, **kwargs)
+            # TODO-ROB Go back to the drawing board for the public/private/other choices.  (FLASK forms)
+            # TODO-ROB determine how to get cookiecutter to skip over directories
+            # that already exist
+            self.project = project
+            self.research = research
+            self.research_type = research_type
+            # Project/Research Directories
+            self.research_path = self.project_path / \
+                Path(research_type) / Path(research)
+            self.project_archive = self.project_path / Path('archive')
+            self.project_index = self.research_path / Path('index')
+            self.data = self.research_path / Path('data')
+            self.raw_data = self.research_path / Path('raw_data')
+            self.project_web = self.research_path / Path('web')
+            # TODO-ROB:  THis is just a draft.  Rework to use public/private/other
+            if app:
+                self.app = app
+                self.app_path = self.project_web / Path(app)
+        if new_research is True:
+            self.research_type = research_type
+            self.Cookies = Path(Cookies.__path__[0])
+            self.research_cookie = self.Cookies / Path('new_research')
+            self.create_research()
+            if new_app is True:
+                self.app_cookie = self.Cookies / Path('new_app')
+                self.app = app
+                self.app_path = self.project_path / Path('web') / Path(app)
+                self.create_app()
+
+    def create_research(self):
         """
         :param new_app (bool):  Flag for auto generating an app that
          goes with the research target.
@@ -459,8 +479,7 @@ class ProjMana(UserMana):
         cookiecutter(str(self.research_cookie), no_input=True,
                      extra_context=e_c, output_dir=str(self.project_path))
         os.chmod(str(self.project_path / Path(self.research_type)), mode=0o777)
-        if new_app is True:
-            self.create_app()
+
 
     def create_app(self):
         """Create an app."""
