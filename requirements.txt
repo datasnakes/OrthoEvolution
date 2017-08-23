@@ -15,3 +15,5 @@ Flask-User==0.6.11
 Flask-WTF==0.14.2
 treelib==1.3.5
 psutil==5.1.3
+luigi==2.3.0
+sciluigi==0.9.5b6
