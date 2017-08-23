@@ -1,6 +1,6 @@
-ete3==3.0.0b35
-pandas==0.19.2
-openpyxl==2.4.7
+ete3>=3.0.0b35
+pandas>=0.19.2
+openpyxl>=2.4.7
 pexpect==4.2.1
 slacker==0.9.42
 biopython==1.68
