@@ -430,8 +430,7 @@ class ProjMana(UserMana):
         :param new_app (bool):  Flag for creating a new web app under a research target.
 
         """
-
-        #
+        # Standalone for child/self or full class hierarchy use
         if project or (repo and user and project):
             super().__init__(repo=repo, user=user, project=project, home=home,
                              new_project=new_project, **kwargs)
@@ -461,7 +460,7 @@ class ProjMana(UserMana):
             if new_app is True:
                 self.app_cookie = self.Cookies / Path('new_app')
                 self.app = app
-                self.app_path = self.project_path / Path('web') / Path(app)
+                self.app_path = self.project_path / Path(research_type) / Path(research) / Path('web')
                 self.create_app()
 
     def create_research(self):
@@ -480,10 +479,9 @@ class ProjMana(UserMana):
                      extra_context=e_c, output_dir=str(self.project_path))
         os.chmod(str(self.project_path / Path(self.research_type)), mode=0o777)
 
-
     def create_app(self):
         """Create an app."""
         e_c = {"app_name": self.app}
         cookiecutter(str(self.app_cookie), no_input=True,
                      extra_context=e_c, output_dir=str(self.app_path))
-        os.chmod(str(self.app_path / Path(self.app)), mode=0o777)
+        os.chmod(str(self.app_path), mode=0o777)
