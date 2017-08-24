@@ -43,18 +43,18 @@ class Alignment(GenBank):
         geneDir = self.raw_data / Path(gene)
 
         if seqType is 'nuc':
-            g2_seqFile = str(geneDir / Path(self.gene + '_G2.ffn'))  # Need for all iterations
-            rem_file = str(geneDir / Path(self.gene + '_G2_removed.ffn'))   # Need for all iterations
-            g2_alnFile = str(geneDir / Path(self.gene + '_G2_na.aln'))
-            g2_seqcolFilter = str(geneDir / Path(self.gene + 'G2sfcf_na.aln'))
-            g2_colFilter = str(geneDir / Path(self.gene + '_G2cf_na.aln'))
-            g2_maskFilter = str(geneDir / Path(self.gene + '_G2mf_na.aln'))
+            g2_seqFile = str(geneDir / Path(gene + '_G2.ffn'))  # Need for all iterations
+            rem_file = str(geneDir / Path(gene + '_G2_removed.ffn'))   # Need for all iterations
+            g2_alnFile = str(geneDir / Path(gene + '_G2_na.aln'))
+            g2_seqcolFilter = str(geneDir / Path(gene + 'G2sfcf_na.aln'))
+            g2_colFilter = str(geneDir / Path(gene + '_G2cf_na.aln'))
+            g2_maskFilter = str(geneDir / Path(gene + '_G2mf_na.aln'))
         elif seqType is 'aa':
-            g2_seqFile = str(geneDir / Path(self.gene + '_G2.faa'))  # Need for all iterations
-            rem_file = str(geneDir / Path(self.gene + '_G2_removed.faa'))   # Need for all iterations
-            g2_alnFile = str(geneDir / Path(self.gene + '_G2_aa.aln'))
-            g2_colFilter = str(geneDir / Path(self.gene + '_G2cf_aa.aln'))
-            g2_maskFilter = str(geneDir / Path(self.gene + '_G2mf_aa.aln'))
+            g2_seqFile = str(geneDir / Path(gene + '_G2.faa'))  # Need for all iterations
+            rem_file = str(geneDir / Path(gene + '_G2_removed.faa'))   # Need for all iterations
+            g2_alnFile = str(geneDir / Path(gene + '_G2_aa.aln'))
+            g2_colFilter = str(geneDir / Path(gene + '_G2cf_aa.aln'))
+            g2_maskFilter = str(geneDir / Path(gene + '_G2mf_aa.aln'))
 
         # Add the Guidance 2 cutoffs to the keyword arguments
         if 'seqCutoff' not in kwargs.keys():
@@ -156,25 +156,33 @@ class Alignment(GenBank):
         elif maskFilter is not None:
             print()
 
-    def pal2nal(self, aa_alignment, na_fasta, output_file, nogap=True, nomismatch=True):
-        # TODO-ROB:  Add a filter step so if error[0] = Error: #---  ERROR: inconsistency between the following pep and nuc seqs  ---#
-        # TODO-ROB:  ....then remove error[2] which is the sequence it can't read
+    def pal2nal(self, aa_alignment, na_fasta, output_type='paml', nogap=True, nomismatch=True, downstream='paml'):
         removed = []
         # Create output directory for PAL2NAL
-        outDir = self.home / Path('PAL2NAL')
+        outDir = 'PAL2NAL'
+        gene = Path(na_fasta).stem
+        geneDir = self.raw_data / Path(gene)
+        outDir = geneDir / Path(outDir)
         Path.mkdir(outDir, exist_ok=True)
-        output_file = str(outDir / Path(output_file))
 
-        # Create an alignment for paml input
-        P2Ncmd = Pal2NalCommandline(pepaln=aa_alignment, nucfasta=na_fasta, output_file=output_file + '.paml.aln',
-                                    output='paml', nogap=nogap, nomismatch=nomismatch)
+        # Name the output file using the gene and the downstream application
+        output_file = str(geneDir / Path(gene + '_P2N.%s.aln' % downstream))
+
+        # Create an alignment
+        P2Ncmd = Pal2NalCommandline(pepaln=aa_alignment, nucfasta=na_fasta, output_file=output_file, output=output_type,
+                                    nogap=nogap, nomismatch=nomismatch)
         print(P2Ncmd)
+
+        # Use a while loop to catch errors and remove sequences that aren't working with pal2nal
         pal2nal_flag = True
         while pal2nal_flag is True:
-            pal2nal = subprocess.Popen([str(P2Ncmd)], stderr=subprocess.PIPE, stdout=subprocess.PIPE, shell=True, encoding='utf-8')
+            pal2nal = subprocess.Popen([str(P2Ncmd)], stderr=subprocess.PIPE, stdout=subprocess.PIPE, shell=True,
+                                       encoding='utf-8')
             error = pal2nal.stderr.readlines()
             out = pal2nal.stdout.readlines()
             pal2nal.wait()
+
+            # Catch errors
             if 'ERROR: inconsistency between the following pep and nuc seqs' in error[0]:
                 print('Caught the pal2nal error!')
                 print(error[0])
@@ -183,25 +191,19 @@ class Alignment(GenBank):
                         removed.append(err.strip('>' '\n'))
                 multi_fasta_manipulator(na_fasta, removed, na_fasta)
                 multi_fasta_manipulator(aa_alignment, removed, aa_alignment)
+
+            # If no errors then break the while loop
             else:
+                if removed is not None:
+                    # If any sequences were removed then write them to a file.
+                    p2n_remFile = str(geneDir / Path(gene + '_P2N_removed.txt'))
+                    with open(p2n_remFile, 'w') as p2n_rem:
+                        for name in removed:
+                            p2n_rem.write(name)
                 pal2nal_flag = False
 
             print('Error: ' + str(error))
             print('Out: ' + str(out))
-        # Create an alignment for iqtree input
-        P2Ncmd = Pal2NalCommandline(pepaln=aa_alignment, nucfasta=na_fasta, output_file=output_file + '.iqtree.aln',
-                                    output='fasta', nogap=nogap, nomismatch=nomismatch)
-        print(P2Ncmd)
-        pal2nal = subprocess.Popen([str(P2Ncmd)], stderr=subprocess.PIPE, stdout=subprocess.PIPE, shell=True, encoding='utf-8')
-        error = pal2nal.stderr.read()
-        out = pal2nal.stdout.read()
-        pal2nal.wait()
-
-        print('Error: ' + str(error))
-        print('Out: ' + str(out))
-
-        print('Align the nucleic acids using the amino acid alignment.')
-        print()
 
 
 
