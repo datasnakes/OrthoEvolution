@@ -7,6 +7,7 @@ from Bio import SeqIO
 from pathlib import Path
 import os
 import subprocess
+import shutil
 
 
 class Alignment(GenBank):
@@ -14,15 +15,41 @@ class Alignment(GenBank):
     def __init__(self, program, **kwargs):
         super().__init__(**kwargs)
 
+        self.program = program
+        if kwargs:
+            if program == 'GUIDANCE2':
+                self.align = self.guidance2
+                self.guidance2(kwargs)
+            elif program == 'CLUSTALO':
+                self.align = self.clustalo
+                self.clustalo(kwargs)
+        else:
+            if program == 'GUIDANCE2':
+                self.align = self.guidance2
+            elif program == 'CLUSTALO':
+                self.align = self.clustalo
 
         print()
 
-    def guidance2(self, seqFile, msaProgram, seqType, outDir="GUIDANCE2", seqFilter=None, columnFilter=None, maskFilter=None, **kwargs):
+    def guidance2(self, seqFile, msaProgram, seqType, dataset='MSA', seqFilter=None, columnFilter=None, maskFilter=None, **kwargs):
         # Name and Create the output directory
+        outDir = self.program
         gene = Path(seqFile).stem
         geneDir = self.raw_data / Path(gene)
-        outDir = self.raw_data / Path(gene) / Path(outDir)
-        Path.mkdir(outDir, parents=True, exist_ok=True)
+
+        if seqType is 'nuc':
+            g2_seqFile = str(geneDir / Path(self.gene + '_G2.ffn'))  # Need for all iterations
+            rem_file = str(geneDir / Path(self.gene + '_G2_removed.ffn'))   # Need for all iterations
+            g2_alnFile = str(geneDir / Path(self.gene + '_G2_na.aln'))
+            g2_seqcolFilter = str(geneDir / Path(self.gene + 'G2sfcf_na.aln'))
+            g2_colFilter = str(geneDir / Path(self.gene + '_G2cf_na.aln'))
+            g2_maskFilter = str(geneDir / Path(self.gene + '_G2mf_na.aln'))
+        elif seqType is 'aa':
+            g2_seqFile = str(geneDir / Path(self.gene + '_G2.faa'))  # Need for all iterations
+            rem_file = str(geneDir / Path(self.gene + '_G2_removed.faa'))   # Need for all iterations
+            g2_alnFile = str(geneDir / Path(self.gene + '_G2_aa.aln'))
+            g2_colFilter = str(geneDir / Path(self.gene + '_G2cf_aa.aln'))
+            g2_maskFilter = str(geneDir / Path(self.gene + '_G2mf_aa.aln'))
 
         # Add the Guidance 2 cutoffs to the keyword arguments
         if 'seqCutoff' not in kwargs.keys():
@@ -34,16 +61,21 @@ class Alignment(GenBank):
         if seqFilter is not None:
 
             # Filter "bad" sequences and iterate over the good ones until the cutoff is reached.
-            iter_flag = True
+            iterFlag = True
             iteration = 0
-            while iter_flag is True:
+            while iterFlag is True:
 
                 iteration += 1
                 # Create paths for output files
+                if columnFilter is not None:
+                    outDir = self.raw_data / Path(gene) / Path(outDir + '_sf_cf')
+                elif maskFilter is not None:
+                    outDir = self.raw_data / Path(gene) / Path(outDir + '_sf_mf')
+                else:
+                    outDir = self.raw_data / Path(gene) / Path(outDir + '_sf')
+                Path.mkdir(outDir, parents=True, exist_ok=True)
                 iterDir = Path(outDir) / Path('iter_%s' % iteration)
                 g2_rem_file = str(iterDir / Path('Seqs.Orig.fas.FIXED.Removed_Seq.With_Names'))  # Need for all iterations
-                g2_seqFile = str(geneDir / Path(self.gene + '_G2.ffn'))  # Need for all iterations
-                rem_file = str(geneDir / Path(self.gene + '_G2_removed.ffn'))   # Need for all iterations
                 Path.mkdir(iterDir, parents=True, exist_ok=True)
 
                 if iteration == 1:
@@ -89,14 +121,31 @@ class Alignment(GenBank):
                     if rem_count > 0:
                         # Add new sequences to the rem_file
                         multi_fasta_manipulator(rem_file, g2_rem_file, rem_file, manipulation='add')
-                        # Filter the input NA fasta file using the updated rem_file
+                        # Filter the input fasta file using the updated rem_file
                         multi_fasta_manipulator(seqFile, rem_file, g2_seqFile, manipulation='remove')
                         iterFlag = True
                     else:
+                        filtered_alignment = Path(iterDir) / Path('%s.%s.aln.Sorted.With_Names' % (dataset, msaProgram))
+                        renamed_alignment = shutil.copy(str(filtered_alignment), g2_alnFile)
+                        multi_fasta_manipulator(str(renamed_alignment), str(seqFile), str(renamed_alignment), manipulation='sort')
                         iterFlag = False
+            if columnFilter is not None:
+                col_filt_align = iterDir / Path('%s.%s.Without_low_SP_Col.With_Names' % (dataset, msaProgram))
+                shutil.copy(str(col_filt_align), g2_seqcolFilter)
+            elif maskFilter is not None:
+                print()
+                # TODO-ROB: create masking filter command line option
 
         # Filter the "bad" columns using good sequences
-        if columnFilter is not None:
+        elif columnFilter is not None:
+            outDir = self.raw_data / Path(gene) / Path(outDir + '_cf')
+            Path.mkdir(outDir, parents=True, exist_ok=True)
+            G2Cmd = Guidance2Commandline(seqFile=seqFile, msaProgram=msaProgram, seqType=seqType,
+                                         outDir=str(outDir), **kwargs)
+            print(G2Cmd)
+            subprocess.check_call([str(G2Cmd)], stderr=subprocess.STDOUT, shell=True)
+            col_filt_align = outDir / Path('%s.%s.Without_low_SP_Col.With_Names' % (dataset, msaProgram))
+            shutil.copy(str(col_filt_align), g2_colFilter)
             print()
         # Mask the "bad" residues using the good sequences
         elif maskFilter is not None:
