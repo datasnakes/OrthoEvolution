@@ -37,9 +37,8 @@ class Guidance2Commandline(AbstractCommandline):
         Pac Symp Biocomput 13:15-24
     """
 
-    def __init__(self, cmd="guidance", align=True, mask=False, maskDir=None, **kwargs):
+    def __init__(self, cmd="guidance", align=True, **kwargs):
         # order parameters in the same order as invoking guidance on the cmd line (e.g. 'perl guidance.pl')
-            # TODO-ROB:  Add command lines for the alternative scripts in the guidance package
         if align is True:
             self.parameters = \
                 [
@@ -141,13 +140,15 @@ class Guidance2Commandline(AbstractCommandline):
 
             ACmd = AbstractCommandline.__init__(self, cmd, **kwargs)
             maskDir = ACmd.__getattribute__('outDir')
-        if mask is True:
-            maskDir = maskDir
+
+        if 'maskCutoff' in kwargs.keys():
+            if 'maskDir' in kwargs.keys():
+                maskDir = kwargs['maskDir']
             os.chdir(maskDir)
             cmd = "maskLowScoreResidues"
             self.parameters = \
                 [
-                    _Argument(['msaFile'],
+                    _Argument(['maskFile'],
                               "Input alignment file for masking.",
                               filename=True, is_required=True),
                     _Argument(['rprScores'],
