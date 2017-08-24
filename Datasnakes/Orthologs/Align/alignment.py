@@ -48,13 +48,13 @@ class Alignment(GenBank):
             g2_alnFile = str(geneDir / Path(gene + '_G2_na.aln'))
             g2_seqcolFilter = str(geneDir / Path(gene + 'G2sfcf_na.aln'))
             g2_colFilter = str(geneDir / Path(gene + '_G2cf_na.aln'))
-            g2_maskFilter = str(geneDir / Path(gene + '_G2mf_na.aln'))
+            g2_maskedFile = str(geneDir / Path(gene + '_G2mf_na.aln'))
         elif seqType is 'aa':
             g2_seqFile = str(geneDir / Path(gene + '_G2.faa'))  # Need for all iterations
             rem_file = str(geneDir / Path(gene + '_G2_removed.faa'))   # Need for all iterations
             g2_alnFile = str(geneDir / Path(gene + '_G2_aa.aln'))
             g2_colFilter = str(geneDir / Path(gene + '_G2cf_aa.aln'))
-            g2_maskFilter = str(geneDir / Path(gene + '_G2mf_aa.aln'))
+            g2_maskedFile = str(geneDir / Path(gene + '_G2mf_aa.aln'))
 
         # Add the Guidance 2 cutoffs to the keyword arguments
         if 'seqCutoff' not in kwargs.keys():
@@ -62,14 +62,14 @@ class Alignment(GenBank):
         if 'colCutoff' not in kwargs.keys():
             kwargs['colCutoff'] = 0.93
 
-        # filter = "inclusive", "exclusive", "neutral", or None (default) or "mask" (columnFilter)
+        # Filter Sequences, and then either remove columns, mask residues or do nothing
         if seqFilter is not None:
 
             # Filter "bad" sequences and iterate over the good ones until the cutoff is reached.
             iterFlag = True
             iteration = 0
             while iterFlag is True:
-
+                set_iter = kwargs['iterations']
                 iteration += 1
                 # Create paths for output files
                 if columnFilter is not None:
@@ -82,6 +82,11 @@ class Alignment(GenBank):
                 iterDir = Path(outDir) / Path('iter_%s' % iteration)
                 g2_rem_file = str(iterDir / Path('Seqs.Orig.fas.FIXED.Removed_Seq.With_Names'))  # Need for all iterations
                 Path.mkdir(iterDir, parents=True, exist_ok=True)
+
+                # Create files for masking
+                if maskFilter is not None:
+                    g2_aln2mask = str(iterDir / Path('%s.%s.aln.With_Names' % (dataset, msaProgram)))
+                    g2_rprScores = str(iterDir / Path('%s.%s.Guidance2_res_pair_res.scr' % (dataset, msaProgram)))
 
                 if iteration == 1:
 
@@ -102,7 +107,7 @@ class Alignment(GenBank):
                     multi_fasta_manipulator(seqFile, g2_rem_file, g2_seqFile, manipulation='remove')  # Do after copying (iter_1) or adding (iter_n)
                     iterFlag = True
 
-                elif iteration > 1:
+                elif set_iter >= iteration > 1:
 
                     # Depending on the filter strategy increment the seqCutoff
                     if seqFilter is "inclusive":
@@ -110,7 +115,8 @@ class Alignment(GenBank):
                     elif seqFilter is "exclusive":
                         kwargs['seqCutoff'] += kwargs['increment']
                     # seqFile changes to g2_seqFile and the cutoffs change
-                    G2Cmd = Guidance2Commandline(seqFile=g2_seqFile, msaProgram=msaProgram, seqType=seqType, outDir=str(iterDir), **kwargs)
+                    G2Cmd = Guidance2Commandline(seqFile=g2_seqFile, msaProgram=msaProgram, seqType=seqType,
+                                                 outDir=str(iterDir), **kwargs)
                     print(G2Cmd)
                     subprocess.check_call([str(G2Cmd)], stderr=subprocess.STDOUT, shell=True)
 
@@ -123,25 +129,33 @@ class Alignment(GenBank):
                     for rec in SeqIO.parse(g2_rem_file, 'fasta'):  # Need for all iterations
                         rem_count += 1
 
+                    # If sequences are removed, then iterate again on the "good" sequences
                     if rem_count > 0:
                         # Add new sequences to the rem_file
                         multi_fasta_manipulator(rem_file, g2_rem_file, rem_file, manipulation='add')
                         # Filter the input fasta file using the updated rem_file
                         multi_fasta_manipulator(seqFile, rem_file, g2_seqFile, manipulation='remove')
                         iterFlag = True
-                    else:
+                    # If sequences aren't removed, then stop iterating
+                    if rem_count < 0 or set_iter == iteration:
                         filtered_alignment = Path(iterDir) / Path('%s.%s.aln.Sorted.With_Names' % (dataset, msaProgram))
                         renamed_alignment = shutil.copy(str(filtered_alignment), g2_alnFile)
                         multi_fasta_manipulator(str(renamed_alignment), str(seqFile), str(renamed_alignment), manipulation='sort')
                         iterFlag = False
+
             if columnFilter is not None:
                 col_filt_align = iterDir / Path('%s.%s.Without_low_SP_Col.With_Names' % (dataset, msaProgram))
                 shutil.copy(str(col_filt_align), g2_seqcolFilter)
-            elif maskFilter is not None:
-                print()
-                # TODO-ROB: create masking filter command line option
 
-        # Filter the "bad" columns using good sequences
+            elif maskFilter is not None:
+                G2Cmd = Guidance2Commandline(align=False, seqFile=seqFile, msaProgram=msaProgram, seqType=seqType,
+                                             outDir=str(iterDir), maskCutoff=maskFilter, maskFile=g2_aln2mask,
+                                             rprScores=g2_rprScores, output=g2_maskedFile, **kwargs)
+                print(G2Cmd)
+                subprocess.check_call([str(G2Cmd)], stderr=subprocess.STDOUT, shell=True)
+                multi_fasta_manipulator(g2_maskedFile, str(seqFile), g2_maskedFile, manipulation='sort')
+
+        # Only COLUMN FILTER the bad columns
         elif columnFilter is not None:
             outDir = self.raw_data / Path(gene) / Path(outDir + '_cf')
             Path.mkdir(outDir, parents=True, exist_ok=True)
@@ -152,9 +166,15 @@ class Alignment(GenBank):
             col_filt_align = outDir / Path('%s.%s.Without_low_SP_Col.With_Names' % (dataset, msaProgram))
             shutil.copy(str(col_filt_align), g2_colFilter)
             print()
-        # Mask the "bad" residues using the good sequences
+        # Only MASK the bad residues
         elif maskFilter is not None:
-            print()
+            outDir = self.raw_data / Path(gene) / Path(outDir + '_sf')
+            G2Cmd = Guidance2Commandline(seqFile=seqFile, msaProgram=msaProgram, seqType=seqType,
+                                         outDir=str(outDir), maskCutoff=maskFilter, maskFile=kwargs['aln2mask'],
+                                         rprScores=kwargs['rprScores'], output=kwargs['maskedFile'], **kwargs)
+            print(G2Cmd)
+            subprocess.check_call([str(G2Cmd)], stderr=subprocess.STDOUT, shell=True)
+            multi_fasta_manipulator(kwargs['maskedFile'], str(seqFile), kwargs['maskedFile'], manipulation='sort')
 
     def pal2nal(self, aa_alignment, na_fasta, output_type='paml', nogap=True, nomismatch=True, downstream='paml'):
         removed = []
