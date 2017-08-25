@@ -12,26 +12,26 @@ import shutil
 
 class Alignment(GenBank):
 
-    def __init__(self, program, **kwargs):
-        super().__init__(**kwargs)
+    def __init__(self, aln_program, repo=None, user=None, project=None, research=None, research_type=None, **kwargs):
+        super().__init__(repo=repo, user=user, project=project, research=research, research_type=research_type, **kwargs)
 
-        self.program = program
+        self.program = aln_program
         if kwargs:
-            if program == 'GUIDANCE2':
+            if aln_program == 'GUIDANCE2':
                 self.align = self.guidance2
                 self.guidance2(kwargs)
-            elif program == 'CLUSTALO':
+            elif aln_program == 'CLUSTALO':
                 self.align = self.clustalo
                 self.clustalo(kwargs)
-            elif program == 'PAL2NAL':
+            elif aln_program == 'PAL2NAL':
                 self.align = self.pal2nal
                 self.pal2nal(kwargs)
         else:
-            if program == 'GUIDANCE2':
+            if aln_program == 'GUIDANCE2':
                 self.align = self.guidance2
-            elif program == 'CLUSTALO':
+            elif aln_program == 'CLUSTALO':
                 self.align = self.clustalo
-            elif program == 'PAL2NAL':
+            elif aln_program == 'PAL2NAL':
                 self.align = self.pal2nal
 
         print()
