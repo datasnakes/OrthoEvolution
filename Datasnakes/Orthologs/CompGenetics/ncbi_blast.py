@@ -10,33 +10,31 @@ from Datasnakes.Manager import index
 
 class BLASTAnalysis(CompGenAnalysis):
     """Perform Blast Analysis after completing BLASTn."""
-    def __init__(self, repo, user, project, research, research_type,
-                 template=None, taxon_file=None, post_blast=False, save_data=True, **kwargs):
+    def __init__(self, template=None, taxon_file=None, post_blast=False, save_data=True, **kwargs):
         """Inherited from the CompGenAnalysis class.
 
         If the BLAST was cut short, then a build_file is to be used.
         """
-        super().__init__(repo=repo, user=user, project=project, research=research, research_type=research_type,
-                         acc_file=template, taxon_file=taxon_file, post_blast=post_blast, hgnc=False, **kwargs)
+        super().__init__(acc_file=template, taxon_file=taxon_file, post_blast=post_blast, hgnc=False, **kwargs)
         # TODO-ROB: Inherit or add variable for logger class
         # TODO-ROB Add Mana directories
         # Private variables
         self.__home = os.getcwd()
         if taxon_file is not None:
             self.__taxon_filename = taxon_file
-            self.taxon_path = self.project_index / Path(taxon_file)
+            self.taxon_path = self.proj_mana.project_index / Path(taxon_file)
         self.__post_blast = post_blast
         self.save_data = save_data
 
         if template is not None:
             self.template_filename = template
-            self.template_path = self.project_index / \
+            self.template_path = self.proj_mana.project_index / \
                 Path(self.template_filename)
             self.building_filename = str(template[:-4] + 'building.csv')
             self.building_time_filename = self.building_filename.replace(
                 'building.csv', 'building_time.csv')
         else:
-            self.building_filename = str(project + 'building.csv')
+            self.building_filename = str(self.project + 'building.csv')
             self.building_time_filename = self.building_filename.replace(
                 'building.csv', 'building_time.csv')
 
@@ -115,7 +113,7 @@ class BLASTAnalysis(CompGenAnalysis):
         """
         # TODO-ROB  Fix the output format of the excel file.  View a sample
         # output in /Orthologs/comp_gen
-        pba_file_path = str(self.data / Path(self.project + '_pba.xlsx'))
+        pba_file_path = str(self.proj_mana.data / Path(self.project + '_pba.xlsx'))
         pb_file = pd.ExcelWriter(pba_file_path)
 
         # Removed Genes
