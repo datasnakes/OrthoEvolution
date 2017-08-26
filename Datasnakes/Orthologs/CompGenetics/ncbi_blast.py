@@ -10,7 +10,7 @@ from Datasnakes.Manager import index
 
 class BLASTAnalysis(CompGenAnalysis):
     """Perform Blast Analysis after completing BLASTn."""
-    def __init__(self, template=None, taxon_file=None, post_blast=False, save_data=True, **kwargs):
+    def __init__(self, project, template=None, taxon_file=None, post_blast=False, save_data=True, **kwargs):
         """Inherited from the CompGenAnalysis class.
 
         If the BLAST was cut short, then a build_file is to be used.
