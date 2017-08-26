@@ -159,8 +159,16 @@ class CompGenAnalysis(object):
                 'building.csv', 'building_time.csv')
 
     def proj_mana_config(self):
-        self.proj_mana.project_index = os.getcwd()
-        self.proj_mana.raw_data = os.getcwd()
+        self.project_path = Path(os.getcwd()) / Path(self.project)
+        Path.mkdir(self.project_path, exist_ok=True)
+
+        self.proj_mana.project_index = self.project_path / Path('index')
+        Path.mkdir(self.proj_mana.project_index, exist_ok=True)
+        self.proj_mana.raw_data = self.project_path / Path('raw_data')
+        Path.mkdir(self.proj_mana.raw_data, exist_ok=True)
+        self.proj_mana.data = self.proj_mana.project_index / Path('data')
+        Path.mkdir(self.proj_mana.data, exist_ok=True)
+
 
 # TODO-ROB Add HGNC python module
     @staticmethod
