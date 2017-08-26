@@ -45,61 +45,30 @@ class CompGenAnalysis(object):
         self.__paml_filename = paml_file
         self.acc_filename = acc_file
         self.project = project
+
+        # Initiate the project management variable
         if proj_mana:
             self.proj_mana = proj_mana(kwargs)
+        else:
+            self.proj_mana_config()
 
         # Handle the taxon_id file and blast query
         if taxon_file is not None:
             # File init
-            if proj_mana:
-                self.taxon_path = self.proj_mana.project_index / Path(self.__taxon_filename)
-            else:
-                self.taxon_path = Path(os.getcwd()) / Path(self.__taxon_filename)
+            self.taxon_path = self.proj_mana.project_index / Path(self.__taxon_filename)
         # Handle the paml organism file
         # TODO-ROB Deprecate paml_file
         if paml_file is not None:
             # File init
-            if proj_mana:
-                self.paml_path = self.proj_mana.project_index / Path(self.__paml_filename)
-            else:
-                self.paml_path = Path(os.getcwd()) / Path(self.__paml_filename)
+            self.paml_path = self.proj_mana.project_index / Path(self.__paml_filename)
             self.paml_org_list = []
         # Handle the master accession file (could be before or after blast)
         if acc_file is not None:
-            if proj_mana:
-                if kwargs['copy_from_package']:
-                    shutil.copy(pkg_resources.resource_filename(index.__name__, kwargs['MAF']), self.proj_mana.project_index)
-                # File init
-                self.acc_path = self.proj_mana.project_index / Path(self.acc_filename)
-                self.raw_acc_data = pd.read_csv(str(self.acc_path), dtype=str)
-                # Handles for dataframe init #
-                self.raw_acc_data = pd.read_csv(str(self.acc_path), dtype=str)
-
-                self.building_filename = str(acc_file[:-4] + 'building.csv')
-                self.building_time_filename = self.building_filename.replace(
-                    'building.csv', 'building_time.csv')
-                self.building = pd.read_csv(str(self.acc_path), dtype=str)
-                del self.building['Tier']
-                del self.building['Homo_sapiens']
-                self.building = self.building.set_index('Gene')
-                self.building_file_path = self.proj_mana.raw_data / \
-                                          Path(self.building_filename)
-
-                self.building_time = pd.read_csv(str(self.acc_path), dtype=str)
-                del self.building_time['Tier']
-                del self.building_time['Homo_sapiens']
-                self.building_time = self.building_time.set_index('Gene')
-                self.building_time_file_path = self.proj_mana.raw_data / \
-                                               Path(self.building_time_filename)
-                # self.mygene_df = pd.DataFrame()
-                # self.mygene_filename = "%s_mygene.csv" % self.project
-                # self.mygene_path = self.data / Path(self.mygene_filename)
-
             if kwargs['copy_from_package']:
-                shutil.copy(pkg_resources.resource_filename(index.__name__, kwargs['MAF']), os.getcwd())
+                shutil.copy(pkg_resources.resource_filename(index.__name__, kwargs['MAF']), self.proj_mana.project_index)
 
             # File init
-            self.acc_path = Path(os.getcwd()) / Path(self.acc_filename)
+            self.acc_path = self.proj_mana.project_index / Path(self.acc_filename)
             self.raw_acc_data = pd.read_csv(str(self.acc_path), dtype=str)
             self.go_list = go_list
             # Handles for organism lists #
@@ -132,13 +101,15 @@ class CompGenAnalysis(object):
             del self.building['Tier']
             del self.building['Homo_sapiens']
             self.building = self.building.set_index('Gene')
-            self.building_file_path = Path(os.getcwd()) / Path(self.building_filename)
+            self.building_file_path = self.proj_mana.raw_data / \
+                                      Path(self.building_filename)
 
             self.building_time = pd.read_csv(str(self.acc_path), dtype=str)
             del self.building_time['Tier']
             del self.building_time['Homo_sapiens']
             self.building_time = self.building_time.set_index('Gene')
-            self.building_time_file_path = Path(os.getcwd()) / Path(self.building_time_filename)
+            self.building_time_file_path = self.proj_mana.raw_data / \
+                                           Path(self.building_time_filename)
             # self.mygene_df = pd.DataFrame()
             # self.mygene_filename = "%s_mygene.csv" % self.project
             # self.mygene_path = self.data / Path(self.mygene_filename)
@@ -187,6 +158,9 @@ class CompGenAnalysis(object):
             self.building_time_filename = self.building_filename.replace(
                 'building.csv', 'building_time.csv')
 
+    def proj_mana_config(self):
+        self.proj_mana.project_index = os.getcwd()
+        self.proj_mana.raw_data = os.getcwd()
 
 # TODO-ROB Add HGNC python module
     @staticmethod
