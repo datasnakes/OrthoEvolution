@@ -1,4 +1,4 @@
-#import os
+import os
 #import mygene
 from ete3 import NCBITaxa
 # NCBITaxa().update_taxonomy_database()
@@ -13,7 +13,7 @@ from Datasnakes.Manager import index
 # into the Mana class)
 
 
-class CompGenAnalysis(ProjectManagement):
+class CompGenAnalysis(object):
     """ Comparative Genetics Analysis.
 
     Parses an accession file with the designated format in order to
@@ -37,38 +37,70 @@ class CompGenAnalysis(ProjectManagement):
     __data = ''
 
     # TODO-ROB:  CREAT PRE-BLAST and POST-BLAST functions
-    def __init__(self, repo, user, project, research, research_type, acc_file=None,
-                 taxon_file=None, paml_file=None, go_list=None, post_blast=True, hgnc=False, **kwargs):
-        super().__init__(
-            repo=repo,
-            user=user,
-            project=project,
-            research=research,
-            research_type=research_type,
-            **kwargs)
-
-        self.project = project
+    def __init__(self, project, acc_file=None, taxon_file=None, paml_file=None, go_list=None, post_blast=True, hgnc=False,
+                 proj_mana=ProjectManagement, **kwargs):
         # Private Variables
         self.__post_blast = post_blast
         self.__taxon_filename = taxon_file
         self.__paml_filename = paml_file
         self.acc_filename = acc_file
+        self.project = project
+        if proj_mana:
+            self.proj_mana = proj_mana(kwargs)
+
         # Handle the taxon_id file and blast query
         if taxon_file is not None:
             # File init
-            self.taxon_path = self.project_index / Path(self.__taxon_filename)
+            if proj_mana:
+                self.taxon_path = self.proj_mana.project_index / Path(self.__taxon_filename)
+            else:
+                self.taxon_path = Path(os.getcwd()) / Path(self.__taxon_filename)
         # Handle the paml organism file
         # TODO-ROB Deprecate paml_file
         if paml_file is not None:
             # File init
-            self.paml_path = self.project_index / Path(self.__paml_filename)
+            if proj_mana:
+                self.paml_path = self.proj_mana.project_index / Path(self.__paml_filename)
+            else:
+                self.paml_path = Path(os.getcwd()) / Path(self.__paml_filename)
             self.paml_org_list = []
         # Handle the master accession file (could be before or after blast)
         if acc_file is not None:
+            if proj_mana:
+                if kwargs['copy_from_package']:
+                    shutil.copy(pkg_resources.resource_filename(index.__name__, kwargs['MAF']), self.proj_mana.project_index)
+                # File init
+                self.acc_path = self.proj_mana.project_index / Path(self.acc_filename)
+                self.raw_acc_data = pd.read_csv(str(self.acc_path), dtype=str)
+                # Handles for dataframe init #
+                self.raw_acc_data = pd.read_csv(str(self.acc_path), dtype=str)
+
+                self.building_filename = str(acc_file[:-4] + 'building.csv')
+                self.building_time_filename = self.building_filename.replace(
+                    'building.csv', 'building_time.csv')
+                self.building = pd.read_csv(str(self.acc_path), dtype=str)
+                del self.building['Tier']
+                del self.building['Homo_sapiens']
+                self.building = self.building.set_index('Gene')
+                self.building_file_path = self.proj_mana.raw_data / \
+                                          Path(self.building_filename)
+
+                self.building_time = pd.read_csv(str(self.acc_path), dtype=str)
+                del self.building_time['Tier']
+                del self.building_time['Homo_sapiens']
+                self.building_time = self.building_time.set_index('Gene')
+                self.building_time_file_path = self.proj_mana.raw_data / \
+                                               Path(self.building_time_filename)
+                # self.mygene_df = pd.DataFrame()
+                # self.mygene_filename = "%s_mygene.csv" % self.project
+                # self.mygene_path = self.data / Path(self.mygene_filename)
+
             if kwargs['copy_from_package']:
-                shutil.copy(pkg_resources.resource_filename(index.__name__, kwargs['MAF']), self.project_index)
+                shutil.copy(pkg_resources.resource_filename(index.__name__, kwargs['MAF']), os.getcwd())
+
             # File init
-            self.acc_path = self.project_index / Path(self.acc_filename)
+            self.acc_path = Path(os.getcwd()) / Path(self.acc_filename)
+            self.raw_acc_data = pd.read_csv(str(self.acc_path), dtype=str)
             self.go_list = go_list
             # Handles for organism lists #
             self.org_list = []
@@ -100,15 +132,13 @@ class CompGenAnalysis(ProjectManagement):
             del self.building['Tier']
             del self.building['Homo_sapiens']
             self.building = self.building.set_index('Gene')
-            self.building_file_path = self.raw_data / \
-                Path(self.building_filename)
+            self.building_file_path = Path(os.getcwd()) / Path(self.building_filename)
 
             self.building_time = pd.read_csv(str(self.acc_path), dtype=str)
             del self.building_time['Tier']
             del self.building_time['Homo_sapiens']
             self.building_time = self.building_time.set_index('Gene')
-            self.building_time_file_path = self.raw_data / \
-                Path(self.building_time_filename)
+            self.building_time_file_path = Path(os.getcwd()) / Path(self.building_time_filename)
             # self.mygene_df = pd.DataFrame()
             # self.mygene_filename = "%s_mygene.csv" % self.project
             # self.mygene_path = self.data / Path(self.mygene_filename)
@@ -153,7 +183,7 @@ class CompGenAnalysis(ProjectManagement):
             self.gene_dict = self.df.T.to_dict()
             self.get_master_lists(self.__data)  # populates our lists
         else:
-            self.building_filename = str(project + 'building.csv')
+            self.building_filename = str(self.project + 'building.csv')
             self.building_time_filename = self.building_filename.replace(
                 'building.csv', 'building_time.csv')
 
@@ -223,7 +253,7 @@ class CompGenAnalysis(ProjectManagement):
 
         if self.__taxon_filename is not None:
             # Load taxon ids from a file
-            self.taxon_ids = self.get_file_list(self.__taxon_path)
+            self.taxon_ids = self.get_file_list(self.taxon_path)
         else:
             # Load taxon ids from a local NCBI taxon database via ete3
             ncbi = NCBITaxa()
@@ -235,7 +265,7 @@ class CompGenAnalysis(ProjectManagement):
             self.taxon_dict = dict(zip(self.taxon_orgs, self.taxon_ids))
             self.taxon_lineage = self.get_taxon_dict()
         if self.__paml_filename is not None:
-            self.paml_org_list = self.get_file_list(self.__paml_path)
+            self.paml_org_list = self.get_file_list(self.paml_path)
         else:
             self.paml_org_list = self.paml_org_formatter()
 
