@@ -2,15 +2,16 @@
 import os
 from pathlib import Path
 import ete3
-from Datasnakes import Cookies, Orthologs, Manager, Tools
-from Datasnakes.Manager.utils.treelib2.treelib2.tree import Tree
 from Datasnakes.Manager.utils.zipper import ZipUtils
 from cookiecutter.hooks import run_script
 from cookiecutter.main import cookiecutter
 from cookiecutter.prompt import prompt_for_config
 from cookiecutter.generate import generate_context
+# TODO-ROB once this is a pypi package all of these will be unnecessary
+from Datasnakes import Cookies, Orthologs, Manager, Tools
 # from Manager.logit.logit import LogIt
 # TODO-ROB use **kwargs and **args to cut down on parameters
+
 
 class Mana(object):
     """This is the directory management base class.
@@ -23,7 +24,7 @@ class Mana(object):
     directories or paths.
     """
 
-    def __init__(self, repo=None, home=os.getcwd(), new_repo=False):
+    def __init__(self, repo=None, home=os.getcwd(), new_repo=False, **kwargs):
         # TODO-ROB ADD a REPOsitory destination path (an output directory for
         # cookiecutter)
         """
@@ -151,10 +152,10 @@ class Mana(object):
         with the ete3.Tree() class.
         """
 
-        tree = Tree()
+        #tree = Tree()
         #t = tree.get_dir_map(top, ignore)
-        Ntree = tree.parse_newick_json()
-        return Ntree
+        #Ntree = tree.parse_newick_json()
+        #return Ntree
 
     def get_ete3_tree(self, top, tree=None):
         """Create the ete3 tree."""
@@ -187,7 +188,7 @@ class Mana(object):
 class RepoMana(Mana):
     """Repository Management."""
     def __init__(self, repo, user=None, home=os.getcwd(),
-                 new_user=False, new_repo=False):
+                 new_user=False, new_repo=False, **kwargs):
         """
         :param repo (string):  The name of the repository.
         :param user (string):  The name of the current user if any.
@@ -196,7 +197,7 @@ class RepoMana(Mana):
         :param new_repo: Flag for creating a new repository.
         """
         # TODO-ROB change the home parameter to the output directory parameter
-        super().__init__(repo=repo, home=home, new_repo=new_repo)
+        super().__init__(repo=repo, home=home, new_repo=new_repo, **kwargs)
         self.repo = repo
         self.docs = self.repo_path / Path('docs')
         self.misc = self.repo_path / Path('misc')
@@ -266,21 +267,29 @@ class UserMana(RepoMana):
         '''
         if database is None:
             database = []
-        super().__init__(repo=repo, user=user, home=home, new_user=new_user, **kwargs)
-        self.user = user
+        if user or (user and repo):
+            super().__init__(repo=repo, user=user, home=home, new_user=new_user, **kwargs)
+            self.user = user
 
-        # TODO-ROB Add database files to the repository as well
-        self.user_db = self.user_path / Path('databases')
-        self.ncbi_db_repo = self.user_db / Path('NCBI')
-        self.user_index = self.user_path / Path('index')
-        self.user_log = self.user_path / Path('log')
-        self.manuscripts = self.user_path / Path('manuscripts')
-        self.other = self.user_path / Path('other')
-        self.projects = self.user_path / Path('projects')
+            # TODO-ROB Add database files to the repository as well
+            self.user_db = self.user_path / Path('databases')
+            self.ncbi_db_repo = self.user_db / Path('NCBI')
+            self.user_index = self.user_path / Path('index')
+            self.user_log = self.user_path / Path('log')
+            self.manuscripts = self.user_path / Path('manuscripts')
+            self.other = self.user_path / Path('other')
+            self.projects = self.user_path / Path('projects')
         # TODO-ROB Create a DB_mana class in a seperate file that interactsd with the ftp class
+            if project:
+                self.project = project
+                self.project_path = self.projects / Path(project)
+        else:
+            self.projects = home
+            self.Cookies = Path(Cookies.__path__[0])
+            self.project_cookie = self.Cookies / Path('new_project')
         if project:
             self.project = project
-            self.project_path = self.projects / Path(project)
+            self.project_path = home / Path(project)
         if new_project is True:
             self.create_project()
         if len(database) > 0:
@@ -360,7 +369,8 @@ class WebMana(RepoMana):
         :param create_admin:  Flag for creating a new admin for the website via FLASK USER.
         (Note:  This parameter is not used currently in development.)
         """
-        super().__init__(repo=repo, home=home, **kwargs)
+        if repo and website:
+            super().__init__(repo=repo, home=home, **kwargs)
         self.website = website
         self.web_host = host
         self.web_port = port
@@ -424,30 +434,40 @@ class ProjMana(UserMana):
         :param new_app (bool):  Flag for creating a new web app under a research target.
 
         """
-        super().__init__(repo=repo, user=user, project=project, home=home,
-                         new_project=new_project, **kwargs)
-        # TODO-ROB Go back to the drawing board for the public/private/other choices.  (FLASK forms)
-        # TODO-ROB determine how to get cookiecutter to skip over directories
-        # that already exist
-        self.project = project
-        self.research = research
-        self.research_type = research_type
-        # Project/Research Directories
-        self.research_path = self.project_path / \
-            Path(research_type) / Path(research)
-        self.project_archive = self.project_path / Path('archive')
-        self.project_index = self.research_path / Path('index')
-        self.data = self.research_path / Path('data')
-        self.raw_data = self.research_path / Path('raw_data')
-        self.project_web = self.research_path / Path('web')
-        # TODO-ROB:  THis is just a draft.  Rework to use public/private/other
-        if app:
-            self.app = app
-            self.app_path = self.project_web / Path(app)
+        # Standalone for child/self or full class hierarchy use
+        if project or (repo and user and project):
+            super().__init__(repo=repo, user=user, project=project, home=home,
+                             new_project=new_project, **kwargs)
+            # TODO-ROB Go back to the drawing board for the public/private/other choices.  (FLASK forms)
+            # TODO-ROB determine how to get cookiecutter to skip over directories
+            # that already exist
+            self.project = project
+            self.research = research
+            self.research_type = research_type
+            # Project/Research Directories
+            self.research_path = self.project_path / \
+                Path(research_type) / Path(research)
+            self.project_archive = self.project_path / Path('archive')
+            self.project_index = self.research_path / Path('index')
+            self.data = self.research_path / Path('data')
+            self.raw_data = self.research_path / Path('raw_data')
+            self.project_web = self.research_path / Path('web')
+            # TODO-ROB:  THis is just a draft.  Rework to use public/private/other
+            if app:
+                self.app = app
+                self.app_path = self.project_web / Path(app)
         if new_research is True:
-            self.create_research(new_app)
+            self.research_type = research_type
+            self.Cookies = Path(Cookies.__path__[0])
+            self.research_cookie = self.Cookies / Path('new_research')
+            self.create_research()
+            if new_app is True:
+                self.app_cookie = self.Cookies / Path('new_app')
+                self.app = app
+                self.app_path = self.project_path / Path(research_type) / Path(research) / Path('web')
+                self.create_app()
 
-    def create_research(self, new_app=False):
+    def create_research(self):
         """
         :param new_app (bool):  Flag for auto generating an app that
          goes with the research target.
@@ -462,12 +482,10 @@ class ProjMana(UserMana):
         cookiecutter(str(self.research_cookie), no_input=True,
                      extra_context=e_c, output_dir=str(self.project_path))
         os.chmod(str(self.project_path / Path(self.research_type)), mode=0o777)
-        if new_app is True:
-            self.create_app()
 
     def create_app(self):
         """Create an app."""
         e_c = {"app_name": self.app}
         cookiecutter(str(self.app_cookie), no_input=True,
                      extra_context=e_c, output_dir=str(self.app_path))
-        os.chmod(str(self.app_path / Path(self.app)), mode=0o777)
+        os.chmod(str(self.app_path), mode=0o777)

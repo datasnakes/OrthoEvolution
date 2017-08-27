@@ -4,7 +4,9 @@ from pathlib import Path
 import pandas as pd
 from Datasnakes.Orthologs.CompGenetics import CompGenAnalysis
 from Datasnakes.Manager.logit import LogIt
-
+import pkg_resources
+import shutil
+from Datasnakes.Manager import index
 
 class BLASTAnalysis(CompGenAnalysis):
     """Perform Blast Analysis after completing BLASTn."""
@@ -41,18 +43,8 @@ class BLASTAnalysis(CompGenAnalysis):
         # Initialize Logging
         df = LogIt('blast_test.log', 'blastn')
         self.blastn_log = df.basic
-        #self.postblast_log = df.basic
-        #self.config_log = df.basic(self.user_log / Path('BLAST.log'))
         self.__date_format = df.date_format
         self.get_time = time.time  # To get the time use 'get_time()'
-        # Logging variables
-        # self.__date_format = '%a %b %d at %I:%M:%S %p %Y'  # Used to add as a date
-        # self.__archive_format = '%m-%d-%Y@%I:%M:%S-%p'  # Used to append to archives
-        # self.__log_format = '%(name)s - [%(levelname)-2s]: %(message)s'
-        # log.basicConfig(level=log.DEBUG,
-        #                 format=self.__log_format,
-        #                 filename="logs/accessions2blastxml_%s.log" % str(d.now().strftime(self.__archive_format)))
-        # self.blast_log = log.getLogger('Blastn')
 
     def add_accession(self, gene, organism, accession):
         """Take an accession and add in to the building dataframe & csv file.
