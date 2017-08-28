@@ -13,8 +13,8 @@ It weights, filters or masks unreliably aligned positions in multiple sequence a
 
 from __future__ import print_function
 from pathlib import Path
-from Bio.Application import _Option, AbstractCommandline
-
+from Bio.Application import _Option, _Argument, AbstractCommandline
+import os
 
 class Guidance2Commandline(AbstractCommandline):
     u""""Command line wrapper for GUIDANCE2.
@@ -37,10 +37,9 @@ class Guidance2Commandline(AbstractCommandline):
         Pac Symp Biocomput 13:15-24
     """
 
-    def __init__(self, cmd="guidance", **kwargs):
+    def __init__(self, cmd="guidance", align=True, **kwargs):
         # order parameters in the same order as invoking guidance on the cmd line (e.g. 'perl guidance.pl')
-        if cmd is "guidance":
-            # TODO-ROB:  Add command lines for the alternative scripts in the guidance package
+        if align is True:
             self.parameters = \
                 [
                     # Required Parameters
@@ -136,5 +135,36 @@ class Guidance2Commandline(AbstractCommandline):
                             "number of processors to use (default=1)",
                             equate=False,
                             checker_function=lambda x: isinstance(x, int))
+                    # Other Guidance scripts
+                ]
+
+            ACmd = AbstractCommandline.__init__(self, cmd, **kwargs)
+            maskDir = ACmd.__getattribute__('outDir')
+
+        if 'maskCutoff' in kwargs.keys():
+            if 'maskDir' in kwargs.keys():
+                maskDir = kwargs['maskDir']
+            os.chdir(maskDir)
+            cmd = "maskLowScoreResidues"
+            self.parameters = \
+                [
+                    _Argument(['maskFile'],
+                              "Input alignment file for masking.",
+                              filename=True, is_required=True),
+                    _Argument(['rprScores'],
+                              "Residue pair Residue reliability scores.",
+                              filename=True, is_required=True),
+                    _Argument(['output'],
+                              "Absolute path of output file.",
+                              filename=True, is_required=True),
+                    _Argument(['maskCutoff'],
+                              "Confidence cutoff between 0 to 1.",
+                              filename=True, is_required=True),
+                    _Argument(['seqType'],
+                              "Type of sequences for alignment (amino acids or nucleotides)",
+                              is_required=True,
+                              checker_function=lambda x: x in ['aa', 'nuc'])
                 ]
             AbstractCommandline.__init__(self, cmd, **kwargs)
+
+
