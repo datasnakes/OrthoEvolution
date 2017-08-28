@@ -6,13 +6,13 @@ from pathlib import Path
 from BioSQL import BioSeqDatabase
 from Bio import SeqIO
 from Datasnakes.Orthologs.Blast.blastn import BLASTn
-
 # TODO-ROB:  REMOVED Tier Based Directory System.  Only add tier directories at the end of analysis in the users data folder
 
-class GenBank(BLASTn):
+
+class GenBank(object):
     """Class for managing, downloading and extracting features from genbank files."""
 
-    def __init__(self, solo=False, multi=True, archive=False, min_fasta=True, **kwargs):
+    def __init__(self, project, project_path=None, solo=False, multi=True, archive=False, min_fasta=True, blast=BLASTn, **kwargs):
         """Handle genbank files in various ways for the Orthologs Project.
 
         :param ncbi_db_repo: A path to the .db files of interest.  These
@@ -30,20 +30,45 @@ class GenBank(BLASTn):
         """
 
         # TODO-ROB: Change the way the file systems work.
-        super().__init__(**kwargs)
+        self.project = project
+        if blast:
+            self.blast = BLASTn(project=project, **kwargs)
+            for key, value in self.blast.__dict__.items():
+                setattr(self, str(key), str(value))
+        else:
+            if project_path:
+                self.project_path = Path(project_path) / Path(self.project)
+            else:
+                self.project_path = Path(os.getcwd()) / Path(self.project)
+            Path.mkdir(self.project_path, parents=True, exist_ok=True)
+            self.removed_bn_config(kwargs)
+
         self.gbk_path = self.raw_data / Path('GENBANK')
         self.target_gbk_files_path = self.gbk_path / Path('gbk')  # Deprecate this
-        self.target_gbk_files_path.mkdir(parents=True, exist_ok=True)
+        Path.mkdir(self.target_gbk_files_path, parents=True, exist_ok=True)
 
         self.target_fasta_files = self.gbk_path / Path('fasta')  # Deprecated this
-        self.target_fasta_files.mkdir(parents=True, exist_ok=True)
+        Path.mkdir(self.target_fasta_files, parents=True, exist_ok=True)
 
         self.target_gbk_db_path = self.user_db / Path(self.project)  # Configuration.  Create configuration script.
         # TODO-ROB: Configure GenBank function
-        self.target_gbk_db_path.mkdir(parents=True, exist_ok=True)
+        Path.mkdir(self.target_gbk_db_path, parents=True, exist_ok=True)
         self.solo = solo
         self.multi = multi
         self.min_fasta = min_fasta
+
+    def removed_bn_config(self, kwargs):
+        if kwargs:
+            for key, value in kwargs.items():
+                setattr(self, key, value)
+        else:
+            self.raw_data = self.project_path / Path('raw_data')
+            self.user_db = self.project_path / Path('user_db')
+            self.ncbi_db_repo = self.project_path / Path('ncbi_db_repo')
+
+            Path.mkdir(self.raw_data, exist_ok=True)
+            Path.mkdir(self.user_db, exist_ok=True)
+            Path.mkdir(self.ncbi_db_repo, exist_ok=True)
 
     @staticmethod
     def name_fasta_file(path, gene, org, feat_type, feat_type_rank, extension, mode):
@@ -79,7 +104,7 @@ class GenBank(BLASTn):
                 head, sup, p_gi = x.partition(':')
                 return p_gi
 
-    def get_gbk_files(self, org_list, gene_dict):
+    def blast2_gbk_files(self, org_list, gene_dict):
         """
         :param org_list:  List of organisms
         :param gene_dict:  A nested dictionary for accessing accession numbers.
@@ -87,46 +112,62 @@ class GenBank(BLASTn):
         :return:  Does not return an object, but it does create all the proper
         genbank files.
         """
-        # Make a list of BioSQL database(.db) files that contain GenBank info
-        db_files_list = []
-        for FILE in os.listdir(str(self.ncbi_db_repo)):
-            if FILE.endswith('.db'):
-                db_files_list.append(str(FILE))
-
         # Parse the tier_frame_dict to get the tier
-        for G_KEY, G_value in self.tier_frame_dict.items():
+        for G_KEY, G_value in self.blast.tier_frame_dict.items():
             tier = G_KEY
             # Parse the tier based transformed dataframe to get the gene
-            for GENE in self.tier_frame_dict[tier].T:
-                gene_path = self.target_gbk_files_path / Path(GENE)
-                Path.mkdir(gene_path)
+            for GENE in self.blast.tier_frame_dict[tier].T:
                 # Parse the organism list to get the desired accession number
                 for ORGANISM in org_list:
                     accession = str(gene_dict[GENE][ORGANISM])
                     accession, sup, version = accession.partition('.')
                     accession = accession.upper()
                     server_flag = False
-                    # Parse each database to find the proper GenBank record
-                    for FILE in db_files_list:
-                        db_file_path = self.ncbi_db_repo / Path(FILE)
-                        if server_flag is True:
-                            break
-                        server = BioSeqDatabase.open_database(driver='sqlite3', db=str(db_file_path))
-                        # Parse the sub-databases
-                        for SUB_DB_NAME in server.keys():
-                            db = server[SUB_DB_NAME]
-                            try:
-                                record = db.lookup(accession=accession)
-                                gbk_file = '%s_%s.gbk' % (GENE, ORGANISM)
-                                gbk_file_path = gene_path / Path(gbk_file)
-                                with open(gbk_file_path, 'w') as GB_file:
-                                    GB_file.write(record.format('genbank'))
-                                    print(GB_file.name, 'created')
-                                server_flag = True
-                                break
-                            except IndexError:
-                                print('Index Error in %s.  Moving to the next database...' % SUB_DB_NAME)
-                                continue
+                    self.get_gbk_file(accession, GENE, ORGANISM, server_flag=server_flag)
+
+    def get_gbk_file(self, accession, gene, organism, server_flag=None):
+        """
+        :param accession: Accession number of interest without the version.
+        :param gene: Target gene of accession number parameter.
+        :param organism: Target organism of accession number parameter.
+        :return: This function searches through the given NCBI databases (created by
+        uploading NCBI refseq .gbff files to a BioPython BioSQL database) and creates
+        single GenBank files.  This function can be used after a blast or on its own.
+        If used on it's own then the NCBI .db files must be manually moved to the proper
+        directories.
+        """
+        # TODO-ROB:  Abstract this from the BLAST class.  Make this more independent
+        # Make a list of BioSQL database(.db) files that contain GenBank info
+        db_files_list = []
+        for FILE in os.listdir(str(self.ncbi_db_repo)):
+            if FILE.endswith('.db'):
+                db_files_list.append(str(FILE))
+
+        gene_path = self.target_gbk_files_path / Path(gene)
+        Path.mkdir(gene_path)
+
+
+        # Parse each database to find the proper GenBank record
+        for FILE in db_files_list:
+            db_file_path = self.ncbi_db_repo / Path(FILE)
+            if server_flag is True:
+                break
+            server = BioSeqDatabase.open_database(driver='sqlite3', db=str(db_file_path))
+            # Parse the sub-databases
+            for SUB_DB_NAME in server.keys():
+                db = server[SUB_DB_NAME]
+                try:
+                    record = db.lookup(accession=accession)
+                    gbk_file = '%s_%s.gbk' % (gene , organism)
+                    gbk_file_path = gene_path / Path(gbk_file)
+                    with open(gbk_file_path, 'w') as GB_file:
+                        GB_file.write(record.format('genbank'))
+                        print(GB_file.name, 'created')
+                    server_flag = True
+                    break
+                except IndexError:
+                    print('Index Error in %s.  Moving to the next database...' % SUB_DB_NAME)
+                    continue
 
     def get_fasta_files(self, acc_dict, db=True):
         """Create FASTA files for every GenBank record."""
@@ -155,7 +196,7 @@ class GenBank(BLASTn):
         """Upload the BioSQL database with genbank data."""
         t_count = 0
         Path.mkdir(self.target_gbk_db_path)
-        for TIER in self.tier_frame_dict.keys():
+        for TIER in self.blast.tier_frame_dict.keys():
             db_name = str(TIER) + '.db'
             db_file_path = self.target_gbk_db_path / Path(db_name)
             if os.path.isfile(str(db_file_path)) is False:

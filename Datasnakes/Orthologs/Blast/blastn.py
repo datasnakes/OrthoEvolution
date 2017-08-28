@@ -21,11 +21,9 @@ class BLASTn(BT):
     This class currently only works with the standalone blast.
     """
 
-    def __init__(self, repo, user, project, research, research_type,
-                 template=None, save_data=True, **kwargs):
+    def __init__(self, project, template=None, save_data=True, **kwargs):
         """Inherit from the BLASTing Template."""
-        super().__init__(template=template, repo=repo, user=user, project=project,
-                         research=research, research_type=research_type, save_data=save_data, **kwargs)
+        super().__init__(project=project, template=template, save_data=save_data, **kwargs)
         # # TODO-ROB Add taxon parameter
         # Manage Directories
         self.__home = Path(os.getcwd())
@@ -57,8 +55,7 @@ class BLASTn(BT):
         self.complete_file = self.project + '_MAF.csv'
         self.complete_file_path = self.data / Path(self.complete_file)
         self.complete_time_file = self.project + '_TIME.csv'
-        self.complete_time_file_path = self.data / \
-            Path(self.complete_time_file)
+        self.complete_time_file_path = self.data / Path(self.complete_time_file)
 
     @staticmethod
     def map_func(hit):
