@@ -10,12 +10,24 @@ import subprocess
 import shutil
 
 
-class Alignment(GenBank):
+class Alignment(object):
 
-    def __init__(self, aln_program, repo=None, user=None, project=None, research=None, research_type=None, **kwargs):
-        super().__init__(repo=repo, user=user, project=project, research=research, research_type=research_type, **kwargs)
+    def __init__(self, project, aln_program, project_path=None, genbank=GenBank, **kwargs):
 
         self.program = aln_program
+        self.project = project
+        if genbank:
+            self.genbank = GenBank(project=project, **kwargs)
+            for key, value in self.genbank.__dict__.items():
+                setattr(self, key, value)
+        else:
+            if project_path:
+                self.project_path = Path(project_path) / Path(self.project)
+            else:
+                self.project_path = Path(os.getcwd()) / Path(self.project)
+            Path.mkdir(self.project_path, parents=True, exist_ok=True)
+            self.removed_gb_config(kwargs)
+
         if kwargs:
             if aln_program == 'GUIDANCE2':
                 self.align = self.guidance2
@@ -34,7 +46,15 @@ class Alignment(GenBank):
             elif aln_program == 'PAL2NAL':
                 self.align = self.pal2nal
 
-        print()
+    def removed_gb_config(self, kwargs):
+        self.raw_data = self.project_path / Path('raw_data')
+        self.data = self.project_path / Path('data')
+
+        for key, value in kwargs.items():
+            setattr(self, key, value)
+
+        Path.mkdir(self.raw_data, exist_ok=True)
+        Path.mkdir(self.data, exist_ok=True)
 
     def guidance2(self, seqFile, msaProgram, seqType, dataset='MSA', seqFilter=None, columnFilter=None, maskFilter=None, **kwargs):
         # Name and Create the output directory
