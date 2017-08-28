@@ -4,11 +4,12 @@ import zipfile
 import logging as log
 from pathlib import Path
 from datetime import datetime as d
-from Datasnakes.Manager.utils.mana import ProjMana as PM
+from Datasnakes.Manager.utils.mana import ProjMana
 from Datasnakes.Orthologs.Blast.blastn import BLASTn
+from Datasnakes.Orthologs.CompGenetics.comp_gen import CompGenAnalysis
 from Datasnakes.Orthologs.Genbank.genbank import GenBank
 from Datasnakes.Orthologs.Align.alignment import Alignment
-
+import yaml
 #import configparser
 #from slacker import Slacker
 #import argparse
@@ -18,33 +19,72 @@ from Datasnakes.Orthologs.Align.alignment import Alignment
 # TODO-ROB:  ^^ This will allow the transfer of data
 
 # TODO-ROB:  Add FTP and s2s inheritance
-class DataMana(PM):
+class DataMana(object):
 
-    def __init__(self, research_type=None, **kwargs):
-        super().__init__(**kwargs)
+    def __init__(self, config_file=None, **kwargs):
 
-        if research_type.lower() == 'comparative genetics':
-            if 'BLASTn' in kwargs.keys():
-                self.blast_data = self.ncbi_db_repo / Path()
-                self.blast(kwargs['BLASTn'])
-            if 'GenBank' in kwargs.keys():
-                self.genbank()
-        elif research_type.lower() == 'comparative polymorphism':
-            self.genbank()
-        elif research_type.lower() == 'natural selection':
-            self.fasta()
+        self.ProjectManagment_config = self.CompGenAnalysis_config = self.BLASTn_config = self.GenBank_config = self.Alignment_config = None
 
-    def blast(self, blast_kwargs):
-        print('use blast folders')
+        if config_file is not None:
+            with open(config_file, 'r') as ymlfile:
+                configuration = yaml.load(ymlfile)
+                for key, value in configuration.items():
+                    setattr(self, key, value)
+
+            # Project Management
+            if self.ProjectManagment_config is not None:
+                self.pm = ProjMana(**self.ProjectManagment_config)
+            else:
+                self.pm = self.ProjectManagment_config
+
+            # BLASTn
+            if self.BLASTn_config is not None:
+                self.blast(self.pm)
+            else:
+                self.bl = self.BLASTn_config
+
+            # GenBank
+            if self.GenBank_config is not None:
+                self.genbank(self.bl)
+            else:
+                self.gb = self.GenBank_config
+
+            # Alignment
+            if self.Alignment_config is not None:
+                self.align(self.gb)
+            else:
+                self.al = self.Alignment_config
+
+    def blast(self, proj_mana):
+        self.bl = BLASTn(proj_mana=proj_mana, **self.BLASTn_config)
+        self.bl.blast_config(self.bl.blast_human, 'Homo_sapiens', auto_start=True)
         # TODO-Create directories for the blast data
         # Do the blasting here using BLASTn
 
-    def genbank(self):
-        print('create genbank files')
+    def genbank(self, blast):
+        self.gb = GenBank(blast=blast, **self.GenBank_config)
+        if isinstance(blast, BLASTn):
+            self.gb.blast2_gbk_files(blast.org_list, blast.gene_dict)
+        else:
 
+            cga = CompGenAnalysis(**self.CompGenAnalysis_config)
 
-    def fasta(self):
-        print('fasta foldrs')
+            # Parse the tier_frame_dict to get the tier
+            for G_KEY, G_value in cga.tier_frame_dict.items():
+                tier = G_KEY
+                # Parse the tier based transformed dataframe to get the gene
+                for GENE in cga.tier_frame_dict[tier].T:
+                    # Parse the organism list to get the desired accession number
+                    for ORGANISM in cga.org_list:
+                        accession = str(cga.gene_dict[GENE][ORGANISM])
+                        accession, sup, version = accession.partition('.')
+                        accession = accession.upper()
+                        server_flag = False
+                        self.bl.get_gbk_file(accession, GENE, ORGANISM, server_flag=server_flag)
+
+    def align(self, genbank):
+        self.al = Alignment(genbank=genbank, **self.Alignment_config)
+        self.al.align(self.Alignment_config['kwargs'])
 
 
 class ZipUtils(DataMana):
