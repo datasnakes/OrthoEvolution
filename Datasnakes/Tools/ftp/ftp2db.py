@@ -46,7 +46,7 @@ class Ftp2Db(object):
     ncbi = configparser.ConfigParser()
     ncbi.read('ncbiftp.cfg')
     """Private variable initialization"""
-    __NCBI_FTP = ncbi['FTPSITE']['ncbi']
+    #__NCBI_FTP = ncbi['FTPSITE']['ncbi']
     __NCBI_RSYNC = 'rsync://ftp.ncbi.nlm.nih.gov'
     __class_name = ''
     __update_dict = {}

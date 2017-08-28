@@ -47,16 +47,18 @@ class CompGenAnalysis(object):
         self.project = project
 
         # Initiate the project management variable
-        if proj_mana:
-            self.proj_mana = proj_mana(**kwargs)
+        if proj_mana is not None:
+            self.proj_mana = proj_mana(project=project, **kwargs)
             for key, value in self.proj_mana.__dict__.items():
                 setattr(self, key, value)
+            print('project_path=%s' % self.project_path)
         else:
             if project_path:
                 self.project_path = Path(project_path) / Path(self.project)
             else:
                 self.project_path = Path(os.getcwd()) / Path(self.project)
             Path.mkdir(self.project_path, parents=True, exist_ok=True)
+            print('project_path=%s' % self.project_path)
             self.removed_pm_config(kwargs)
 
         # Handle the taxon_id file and blast query

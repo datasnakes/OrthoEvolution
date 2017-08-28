@@ -283,9 +283,9 @@ class UserMana(RepoMana):
             self.projects = home
             self.Cookies = Path(Cookies.__path__[0])
             self.project_cookie = self.Cookies / Path('new_project')
-        if project:
-            self.project = project
-            self.project_path = home / Path(project)
+            if project:
+                self.project = project
+                self.project_path = home / Path(project)
         if new_project is True:
             self.create_project()
         if len(database) > 0:
