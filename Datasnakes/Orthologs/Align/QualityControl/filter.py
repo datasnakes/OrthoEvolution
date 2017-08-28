@@ -8,8 +8,8 @@ from Datasnakes.Orthologs.Genbank.utils import multi_fasta_manipulator
 import subprocess
 
 
-# For one gene at a time
 class FilteredAlignment(object):
+    """Filters one alignment per gene at a time."""
 
     def __init__(self, na_fasta, aa_fasta, gene_name=None, home=os.getcwd(), msaProgram='CLUSTALW', na_bootstraps=1,
                  aa_bootstraps=1, na_seqCutoff=0.6, aa_seqCutoff=0.6, na_colCutoff=0, aa_colCutoff=0.88):
