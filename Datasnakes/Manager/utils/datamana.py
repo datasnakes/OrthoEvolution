@@ -4,7 +4,13 @@ import zipfile
 import logging as log
 from pathlib import Path
 from datetime import datetime as d
-from Datasnakes.Manager.utils import ProjMana as PM
+
+from Datasnakes.Manager.utils.mana import ProjMana as PM
+from Datasnakes.Orthologs.Blast.blastn import BLASTn
+from Datasnakes.Orthologs.Genbank.genbank import GenBank
+from Datasnakes.Orthologs.Align.alignment import Alignment
+
+
 #import configparser
 #from slacker import Slacker
 #import argparse
@@ -16,96 +22,32 @@ from Datasnakes.Manager.utils import ProjMana as PM
 
 class DataMana(PM):
 
-    def __init__(self, home=os.getcwd(), web_address=None, hpc_address=None, hpc_user=None,
-                 research=None, new_data=False, database=None, new_db=False, **kwargs):
-        super().__init__(database=database, new_db=new_db, **kwargs)
+    def __init__(self, research_type=None, **kwargs):
+        super().__init__(**kwargs)
 
-        for item in research:
-            if item.lower() == 'comparative genetics':
+        if research_type.lower() == 'comparative genetics':
+            if 'BLASTn' in kwargs.keys():
                 self.blast_data = self.ncbi_db_repo / Path()
-                self.blast()
-            elif item.lower() == 'comparative polymorphism':
+                self.blast(kwargs['BLASTn'])
+            if 'GenBank' in kwargs.keys():
                 self.genbank()
-            elif item.lower() == 'natural selection':
-                self.fasta()
+        elif research_type.lower() == 'comparative polymorphism':
+            self.genbank()
+        elif research_type.lower() == 'natural selection':
+            self.fasta()
 
     @classmethod
-    def blast(self):
-        print('create blast folders')
+    def blast(self, blast_kwargs):
+        print('use blast folders')
         # TODO-Create directories for the blast data
-        # Setup inside of a project:  ~/raw_data/blast
-                                    # ~/raw_data/blast/gi_lists
-                                    # ~/raw_data/blast/xml
-    @classmethod
+        # Do the blasting here using BLASTn
+
     def genbank(self):
-        print('genbank folders')
+        print('create genbank files')
 
 
     def fasta(self):
         print('fasta folders')
-
-
-class LogIt(DataMana):
-    """LogIt makes logging easier by creating easy loggers."""
-    def __init__(self, logfile=None, logname=None):
-        """Initialize the logger format based on system platform."""
-        # Set the different formats based on user's platform
-        if sys.platform == 'win32':
-            self.archive_format = '%m-%d-%Y_%I-%M-%p'
-        elif sys.platform == 'linux':
-            self.archive_format = '%m-%d-%Y@%I:%M:%S-%p'
-
-        self.date_format = '%a %b %d at %I:%M:%S %p %Y'  # Used to add as a date
-        self.log_format = '%(name)s - [%(levelname)-2s]: %(message)s'
-        # self.slack = self.slack_config()
-        self.basic = self.generic_logger(logfile, logname, log.DEBUG, self.log_format)
-
-    def _get_file(self, filename):
-        """Create a log file."""
-        base, extension = filename.split('.')
-        file = base + str(d.now().strftime(self.archive_format)) + extension
-        path = os.getcwd() + file
-        return path
-
-    def generic_logger(self, filename, logname, level, fmt, slack=False):
-        """Create a generic logger."""
-        file_path = self._get_file(filename)
-        log.basicConfig(level=level,
-                        format=fmt,
-                        filename=file_path)
-        generic_logger = log.getLogger(logname)
-        if slack is False:
-            return generic_logger
-            #        else:
-            #            slack_logger = log.getLogger('SLACK')
-
-            # ******************************************SLACK****************************************** #
-            # ******************************************SLACK****************************************** #
-            # ******************************************SLACK****************************************** #
-
-            # @staticmethod
-            # def slack_config():
-            #     config = configparser.ConfigParser()
-            #     config.read('bin/orthologs.ini')
-            #     apikey = config['APIKEYS']['slack']
-            #     slack = Slacker(apikey)
-            #     return slack
-            #
-            # # Definition for uploading images
-            # def upload_img(self, channel, imgfile):
-            #     self.slack.files.upload(imgfile, channel=channel)
-            #
-            # # Definition for uploading files
-            # def upload_file(self, channel, file):
-            #     self.slack.files.upload(file, channel=channel)
-            #
-            # # Definition for posting messages
-            # def message_slack(self, channel, message, username):
-            #     self.slack.chat.post_message(channel, message, username, as_user=True)
-
-            # ******************************************SLACK****************************************** #
-            # ******************************************SLACK****************************************** #
-            # ******************************************SLACK****************************************** #
 
 
 class ZipUtils(DataMana):
