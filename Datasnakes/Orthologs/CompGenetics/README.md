@@ -13,7 +13,7 @@ The main classes under CompGenetics are `BLASTAnalysis` and `CompGenAnalysis`.
 ##### Performing Blast Analysis
 
 ``` python
-from Orthologs.CompGenetics import BLASTAnalysis
+from Datasnakes.Orthologs.CompGenetics import BLASTAnalysis
 
 # Take a look at the required and default parameters
 # The default arguments are template, taxon_file, post_blast, save_data
@@ -24,7 +24,7 @@ BLASTAnalysis(self, repo, user, project, research, research_type,
 ##### Performing Comparative Genetics Analysis
 
 ``` python
-from Orthologs.CompGenetics import CompGenAnalysis
+from Datasnakes.Orthologs.CompGenetics import CompGenAnalysis
 
 ```
 

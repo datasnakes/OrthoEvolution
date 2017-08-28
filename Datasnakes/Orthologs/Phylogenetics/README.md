@@ -27,7 +27,7 @@ Biopython's Bio.Phylo class.
 This is a quick example to use this class.
 
 ``` python
-from Orthologs import Phylogenetics
+from Datasnakes.Orthologs import Phylogenetics
 
 # Find out what subclasses are available for use
 dir(Phylogenetics)
@@ -55,7 +55,7 @@ Out[1]:
  'warnings']
 
 # Now you can import a class you want to utilize
-from Orthologs.Phylogenetics import PhyML, RelaxPhylip
+from Datasnakes.Orthologs.Phylogenetics import PhyML, RelaxPhylip
 
 RelaxPhylip("HTR1A_aligned.fasta", "HTR1A_aligned.phy")
 

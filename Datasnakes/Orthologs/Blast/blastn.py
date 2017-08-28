@@ -133,7 +133,8 @@ class BLASTn(BT):
             gi_setup = "blastdbcmd -entry {query} -db refseq_rna -outfmt %g".format(
                 **fmt)
             gi_status = subprocess.call([gi_setup], shell=True)
-            # TODO-ROB:  Add function to add the gi numbers to the dataframe/csv-file, and add a check function to see if thats already there
+            # TODO-ROB:  Add function to add the gi numbers to the dataframe/csv-file,
+            # TODO-ROB: and add a check function to see if thats already there
             # Check the status of the custom blast data extraction
             if gi_status == 0 or fasta_status == 0:  # Command was successful.
                 if gi_status != 0:
@@ -242,6 +243,7 @@ class BLASTn(BT):
         in the middle of the dataset.  This removes the last line of
         the accession file if it is incomplete.
         """
+        global ending
         output_dir_list = os.listdir(
             self.__output_path)  # Make a list of files
         # If the file exists then make a gene list that picks up from the last
@@ -285,6 +287,7 @@ class BLASTn(BT):
 
     def blast_xml_parse(self, xml_file, gene, organism):
         """Parse the XML file created by the BLAST."""
+        global gi, raw_bitscore
         self.blastn_log.info(
             "Parsing %s to find the best accession number." %
             xml_file)
@@ -323,7 +326,7 @@ class BLASTn(BT):
             self.blastn_log.info(
                 "The best accession has been selected from the BLAST xml record.")
             self.blastn_log.info("Accession:  %s" % accession)
-            self.blastn_log.info("GI number: %s" % gi)
+            self.blastn_log.info(f"GI number: {gi}")
             self.blastn_log.info("Raw bitscore: %s" % raw_bitscore)
             self.blastn_log.info("Description: %s" % description)
             self.add_accession(gene, organism, accession)
@@ -342,12 +345,11 @@ class BLASTn(BT):
         self.blastn_log.info(
             "------------------------------------------------------------------")
         self.blastn_log.info(
-            "The script name is %s" %
-            os.path.basename(__file__))
+            f"The script name is {os.path.basename(__file__)}")
         self.blastn_log.info(
-            "The script began on %s" % str(
+            'The script began on {}'.format(str(
                 d.now().strftime(
-                    self.date_format)))
+                    self.date_format))))
         self.blastn_log.info(
             "------------------------------------------------------------------")
 

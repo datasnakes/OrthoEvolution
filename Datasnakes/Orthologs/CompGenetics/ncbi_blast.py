@@ -223,4 +223,3 @@ class BLASTAnalysis(CompGenAnalysis):
             pb_file.save()
         except IndexError:
             print("There are no duplicates or missing genes.")
-            pass

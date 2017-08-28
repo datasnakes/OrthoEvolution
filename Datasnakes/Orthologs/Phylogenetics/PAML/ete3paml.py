@@ -35,7 +35,6 @@ class ETE3PAML(object):
                     branches2keep.append(organism)
                 else:
                     print('No sequence for %s.' % organism)
-                    pass
 
             # Input a list of branches to keep on the base tree
             t.prune(branches2keep, preserve_branch_length=True)
@@ -58,6 +57,6 @@ class ETE3PAML(object):
             # Run the codeml model
             tree.run_model(model + '.' + gene)
 
-        except:
+        except Exception:
             print('Error with %s.' % gene)
             pass

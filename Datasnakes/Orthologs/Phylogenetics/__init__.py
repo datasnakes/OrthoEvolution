@@ -15,7 +15,6 @@ from Datasnakes.Orthologs.Phylogenetics import IQTree
 
 class RelaxPhylip(object):
     """Convert a multiple sequence alignment file to relaxed-phylip format."""
-    
     def __init__(inputfile, outputfile):
         """Fasta to Relaxed Phylip format."""
         AlignIO.convert(inputfile, "fasta",

@@ -46,7 +46,7 @@ class Ftp2Db(object):
     ncbi = configparser.ConfigParser()
     ncbi.read('ncbiftp.cfg')
     """Private variable initialization"""
-    #__NCBI_FTP = ncbi['FTPSITE']['ncbi']
+    __NCBI_FTP = ncbi['FTPSITE']['ncbi']
     __NCBI_RSYNC = 'rsync://ftp.ncbi.nlm.nih.gov'
     __class_name = ''
     __update_dict = {}
@@ -101,7 +101,8 @@ class Ftp2Db(object):
     def ftp_check(self):
         """Check to see if the FTP connection still exists.
 
-        If it doesn't then it reconnects and returns an instance of the connection.
+        If it doesn't then it reconnects and returns an instance of the
+        connection.
         """
         ftp = self.ftp_connect(self.__NCBI_FTP, self.email)
         ftp.voidcmd('NOOP')

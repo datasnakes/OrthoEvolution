@@ -19,7 +19,7 @@ It can also be used fairly easily with multiprocessing.
 This is a quick example to use this class.
 
 ``` python
-from Orthologs.Align import ClustalO
+from Datasnakes.Orthologs.Align import ClustalO
 
 gene_list = ['HTR1A', 'CCR5', 'DRD4']
 

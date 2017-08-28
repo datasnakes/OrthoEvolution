@@ -38,7 +38,7 @@ class PhymlTest(unittest.TestCase):
 
         # Example Phylip file with 13 aligned protein sequences
         EX_PHYLIP = 'HTR1E_aligned.phy'
-        return EX_PHYLIP
+        self.EX_PHYLIP = EX_PHYLIP
 
     def test_phyml(self):
         """Run PhyML using the wrapper."""

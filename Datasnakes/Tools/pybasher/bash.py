@@ -29,7 +29,7 @@ else:
 # TODO-SDH use a config file to load/use a list or group of common commands.
 
 
-class PyBasher(object):
+class BaseBash(object):
     """Utilize bash commands within python."""
     # !!! Only for linux
     def __init__(self, cmd):
@@ -78,3 +78,8 @@ class PyBasher(object):
         if self.stdout:
             return self.stdout.strip().decode(encoding='UTF-8')
         return ''
+
+
+class PyBasher(BaseBash):
+    """Common bash commands."""
+    print("hello.")

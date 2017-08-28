@@ -3,7 +3,7 @@ import os
 import shutil
 import time
 from pathlib import Path
-from datasnakes.Orthologs import treelib2
+from Datasnakes.Orthologs import treelib2
 from Manager.dir_map.json_to_newick import _parse_json
 
 class dir_mana(object):
