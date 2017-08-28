@@ -18,7 +18,6 @@ from Datasnakes.Orthologs.Align.alignment import Alignment
 # TODO-ROB:  ^^ This will allow the transfer of data
 
 # TODO-ROB:  Add FTP and s2s inheritance
-
 class DataMana(PM):
 
     def __init__(self, research_type=None, **kwargs):
@@ -45,7 +44,7 @@ class DataMana(PM):
 
 
     def fasta(self):
-        print('fasta folders')
+        print('fasta foldrs')
 
 
 class ZipUtils(DataMana):
