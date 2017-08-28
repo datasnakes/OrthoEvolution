@@ -11,11 +11,11 @@ import pkg_resources
 from Datasnakes.Manager import index
 from Bio import SearchIO  # Used for parsing and sorting XML files.
 from Bio.Blast.Applications import NcbiblastnCommandline
-from Datasnakes.Orthologs.CompGenetics.ncbi_blast import BLASTAnalysis as BT
+from Datasnakes.Orthologs.CompGenetics import BLASTAnalysis
 # TODO-ROB: Find packages for script timing and analysis
 
 
-class BLASTn(BT):
+class BLASTn(BLASTAnalysis):
     """Use BLASTn to search nucleotide databases using a nucleotide query.
 
     This class currently only works with the standalone blast.
@@ -52,7 +52,7 @@ class BLASTn(BT):
         self.blastn_log.info("These are the genes: " + str(self.gene_list))
         self.blastn_log.info(
             "These are the taxonomy ids: \n\n\n" + str(self.taxon_ids))
-        # ---------------------------------------------------------------------
+
         # For completed blast files
         self.complete_file = self.project + '_MAF.csv'
         self.complete_file_path = self.data / Path(self.complete_file)
