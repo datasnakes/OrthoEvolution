@@ -318,7 +318,7 @@ class BLASTn(BT):
             self.blastn_log.info(
                 "The best accession has been selected from the BLAST xml record.")
             self.blastn_log.info("Accession:  %s" % accession)
-            self.blastn_log.info(f"GI number: {gi}")
+            self.blastn_log.info("GI number: {}".format(str(gi)))
             self.blastn_log.info("Raw bitscore: %s" % raw_bitscore)
             self.blastn_log.info("Description: %s" % description)
             self.add_accession(gene, organism, accession)
@@ -336,8 +336,7 @@ class BLASTn(BT):
 
         self.blastn_log.info(
             "------------------------------------------------------------------")
-        self.blastn_log.info(
-            f"The script name is {os.path.basename(__file__)}")
+        self.blastn_log.info("The script name is str(os.path.basename(__file__)).")
         self.blastn_log.info(
             'The script began on {}'.format(str(
                 d.now().strftime(
