@@ -31,9 +31,9 @@ class GenBank(object):
 
         # TODO-ROB: Change the way the file systems work.
         self.project = project
-        if blast is not None:
-            self.blast = blast(project=project, **kwargs)
-            for key, value in self.blast.__dict__.items():
+        if isinstance(blast, BLASTn):
+            setattr(blast, 'project', project)
+            for key, value in blast.__dict__.items():
                 setattr(self, str(key), str(value))
             print('project_path=%s' % self.project_path)
         else:
