@@ -37,7 +37,7 @@ class CompGenAnalysis(object):
     __data = ''
 
     # TODO-ROB:  CREAT PRE-BLAST and POST-BLAST functions
-    def __init__(self, project, acc_file=None, taxon_file=None, paml_file=None, go_list=None, post_blast=True, hgnc=False,
+    def __init__(self, project, project_path=None, acc_file=None, taxon_file=None, paml_file=None, go_list=None, post_blast=True, hgnc=False,
                  proj_mana=ProjectManagement, **kwargs):
         # Private Variables
         self.__post_blast = post_blast
@@ -48,27 +48,34 @@ class CompGenAnalysis(object):
 
         # Initiate the project management variable
         if proj_mana:
-            self.proj_mana = proj_mana(kwargs)
+            self.proj_mana = proj_mana(**kwargs)
+            for key, value in self.proj_mana.__dict__.items():
+                setattr(self, key, value)
         else:
+            if project_path:
+                self.project_path = Path(project_path) / Path(self.project)
+            else:
+                self.project_path = Path(os.getcwd()) / Path(self.project)
+            Path.mkdir(self.project_path, parents=True, exist_ok=True)
             self.removed_pm_config()
 
         # Handle the taxon_id file and blast query
         if taxon_file is not None:
             # File init
-            self.taxon_path = self.proj_mana.project_index / Path(self.__taxon_filename)
+            self.taxon_path = self.project_index / Path(self.__taxon_filename)
         # Handle the paml organism file
         # TODO-ROB Deprecate paml_file
         if paml_file is not None:
             # File init
-            self.paml_path = self.proj_mana.project_index / Path(self.__paml_filename)
+            self.paml_path = self.project_index / Path(self.__paml_filename)
             self.paml_org_list = []
         # Handle the master accession file (could be before or after blast)
         if acc_file is not None:
             if kwargs['copy_from_package']:
-                shutil.copy(pkg_resources.resource_filename(index.__name__, kwargs['MAF']), self.proj_mana.project_index)
+                shutil.copy(pkg_resources.resource_filename(index.__name__, kwargs['MAF']), str(self.project_index))
 
             # File init
-            self.acc_path = self.proj_mana.project_index / Path(self.acc_filename)
+            self.acc_path = self.project_index / Path(self.acc_filename)
             self.raw_acc_data = pd.read_csv(str(self.acc_path), dtype=str)
             self.go_list = go_list
             # Handles for organism lists #
@@ -101,14 +108,14 @@ class CompGenAnalysis(object):
             del self.building['Tier']
             del self.building['Homo_sapiens']
             self.building = self.building.set_index('Gene')
-            self.building_file_path = self.proj_mana.raw_data / \
+            self.building_file_path = self.raw_data / \
                                       Path(self.building_filename)
 
             self.building_time = pd.read_csv(str(self.acc_path), dtype=str)
             del self.building_time['Tier']
             del self.building_time['Homo_sapiens']
             self.building_time = self.building_time.set_index('Gene')
-            self.building_time_file_path = self.proj_mana.raw_data / \
+            self.building_time_file_path = self.raw_data / \
                                            Path(self.building_time_filename)
             # self.mygene_df = pd.DataFrame()
             # self.mygene_filename = "%s_mygene.csv" % self.project
@@ -159,15 +166,13 @@ class CompGenAnalysis(object):
                 'building.csv', 'building_time.csv')
 
     def removed_pm_config(self):
-        self.project_path = Path(os.getcwd()) / Path(self.project)
-        Path.mkdir(self.project_path, exist_ok=True)
+        self.project_index = self.project_path / Path('index')
+        self.raw_data = self.project_path / Path('raw_data')
+        self.data = self.project_index / Path('data')
 
-        self.proj_mana.project_index = self.project_path / Path('index')
-        Path.mkdir(self.proj_mana.project_index, exist_ok=True)
-        self.proj_mana.raw_data = self.project_path / Path('raw_data')
-        Path.mkdir(self.proj_mana.raw_data, exist_ok=True)
-        self.proj_mana.data = self.proj_mana.project_index / Path('data')
-        Path.mkdir(self.proj_mana.data, exist_ok=True)
+        Path.mkdir(self.project_index, exist_ok=True)
+        Path.mkdir(self.raw_data, exist_ok=True)
+        Path.mkdir(self.data, exist_ok=True)
 
 
 # TODO-ROB Add HGNC python module

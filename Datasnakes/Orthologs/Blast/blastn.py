@@ -27,7 +27,7 @@ class BLASTn(BT):
         # # TODO-ROB Add taxon parameter
         # Manage Directories
         self.__home = Path(os.getcwd())
-        self.__output_path = self.proj_mana.raw_data / Path('BLAST')  # Output directory
+        self.__output_path = self.raw_data / Path('BLAST')  # Output directory
         self.__gi_list_path = self.__output_path / Path('gi_lists')
         self.__xml_path = self.__output_path / Path('xml')
         Path.mkdir(self.__output_path, parents=True, exist_ok=True)
@@ -53,10 +53,9 @@ class BLASTn(BT):
         # ---------------------------------------------------------------------
         # For completed blast files
         self.complete_file = self.project + '_MAF.csv'
-        self.complete_file_path = self.proj_mana.data / Path(self.complete_file)
+        self.complete_file_path = self.data / Path(self.complete_file)
         self.complete_time_file = self.project + '_TIME.csv'
-        self.complete_time_file_path = self.proj_mana.data / \
-            Path(self.complete_time_file)
+        self.complete_time_file_path = self.data / Path(self.complete_time_file)
 
     @staticmethod
     def map_func(hit):
@@ -212,8 +211,8 @@ class BLASTn(BT):
         pbs_script = 'get_gi_lists.sh'
         pbs_script_path = self.__gi_list_path / Path(pbs_script)
         py_script = 'get_gi_lists.py'
-        shutil.copy(pkg_resources.resource_filename(index.__name__, pbs_script), self.proj_mana.raw_data)
-        shutil.copy(pkg_resources.resource_filename(index.__name__, py_script), self.proj_mana.raw_data)
+        shutil.copy(pkg_resources.resource_filename(index.__name__, pbs_script), self.raw_data)
+        shutil.copy(pkg_resources.resource_filename(index.__name__, py_script), self.raw_data)
         gi_config = subprocess.check_output('qsub %s' % str(pbs_script_path), shell=True)
         gi_config = gi_config.decode('utf-8')
         print('The GI list configuration\'s JobID is %s' % gi_config)
