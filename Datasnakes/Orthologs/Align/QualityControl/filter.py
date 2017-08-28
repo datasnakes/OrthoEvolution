@@ -36,14 +36,20 @@ class FilteredAlignment(object):
 
         # Guidance2 iterations over the nucleic acid sequences.
         # Returns the file name that contains the filtered sequences.
-        rem_na_seqFile = self.nucleic_acid_guidance(seqFile=na_seqFile, outDir=str(self.na_guidance_path),
-                                                bootstraps=na_bootstraps, seqCutoff=na_seqCutoff,
-                                                colCutoff=na_colCutoff)
+        rem_na_seqFile = self.nucleic_acid_guidance(seqFile=na_seqFile,
+                                                    outDir=str(self.na_guidance_path),
+                                                    bootstraps=na_bootstraps,
+                                                    seqCutoff=na_seqCutoff,
+                                                    colCutoff=na_colCutoff)
 
         # Guidance 2 amino acid alignment filter.  Filters the sequences based on the NA_Guidance2 runs.
         # Returns the file name that contains the filtered alignment.
-        aa_alignment = self.amino_acid_guidance(seqFile=aa_seqFile, remFile=rem_na_seqFile, outDir=str(self.aa_guidance_path),
-                                                bootstraps=aa_bootstraps, seqCutoff=aa_seqCutoff, colCutoff=aa_colCutoff)
+        aa_alignment = self.amino_acid_guidance(seqFile=aa_seqFile,
+                                                remFile=rem_na_seqFile,
+                                                outDir=str(self.aa_guidance_path),
+                                                bootstraps=aa_bootstraps,
+                                                seqCutoff=aa_seqCutoff,
+                                                colCutoff=aa_colCutoff)
         g2_seqFile = str(self.home / Path(self.gene + '_G2.ffn'))
 
         # PAL2NAL nucleic acid alignment
@@ -66,7 +72,9 @@ class FilteredAlignment(object):
 
             if iteration == 1:
                 # seqFile is the given input
-                G2Cmd = Guidance2Commandline(**self.G2C_args, seqFile=seqFile, seqType=seqType, outDir=str(iterDir), bootstraps=bootstraps,
+                G2Cmd = Guidance2Commandline(**self.G2C_args, seqFile=seqFile,
+                                             seqType=seqType, outDir=str(iterDir),
+                                             bootstraps=bootstraps,
                                              seqCutoff=seqCutoff, colCutoff=colCutoff)
                 print(G2Cmd)
                 subprocess.check_call([str(G2Cmd)], stderr=subprocess.STDOUT, shell=True)
@@ -115,7 +123,7 @@ class FilteredAlignment(object):
         seqType = 'aa'
         g2_seqFile = str(self.home / Path(self.gene + '_G2.faa'))
         multi_fasta_manipulator(seqFile, remFile, g2_seqFile)
-        G2Cmd = Guidance2Commandline(**self.G2C_args, seqFile=g2_seqFile, seqType=seqType, outDir=outDir, bootstraps=bootstraps,
+        G2Cmd = Guidance2Commandline(self.G2C_args, seqFile=g2_seqFile, seqType=seqType, outDir=outDir, bootstraps=bootstraps,
                                      seqCutoff=seqCutoff, colCutoff=colCutoff)
         print(G2Cmd)
         subprocess.check_call([str(G2Cmd)], stderr=subprocess.STDOUT, shell=True)
