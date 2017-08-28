@@ -16,9 +16,9 @@ class Alignment(object):
 
         self.program = aln_program
         self.project = project
-        if genbank is not None:
-            self.genbank = genbank(project=project, **kwargs)
-            for key, value in self.genbank.__dict__.items():
+        if isinstance(genbank, GenBank):
+            setattr(genbank, 'project', project)
+            for key, value in genbank.__dict__.items():
                 setattr(self, key, value)
             print('project_path=%s' % self.project_path)
         else:
@@ -30,23 +30,29 @@ class Alignment(object):
             print('project_path=%s' % self.project_path)
             self.removed_gb_config(kwargs)
 
-        # if kwargs:
-        #     if aln_program == 'GUIDANCE2':
-        #         self.align = self.guidance2
-        #         self.guidance2(**kwargs)
-        #     elif aln_program == 'CLUSTALO':
-        #         self.align = self.clustalo
-        #         self.clustalo(**kwargs)
-        #     elif aln_program == 'PAL2NAL':
-        #         self.align = self.pal2nal
-        #         self.pal2nal(**kwargs)
-        # else:
-        #     if aln_program == 'GUIDANCE2':
-        #         self.align = self.guidance2
-        #     elif aln_program == 'CLUSTALO':
-        #         self.align = self.clustalo
-        #     elif aln_program == 'PAL2NAL':
-        #         self.align = self.pal2nal
+        if kwargs:
+            print('aln-kwargs')
+            if aln_program == 'GUIDANCE2':
+                self.align = self.guidance2
+                self.guidance2(**kwargs)
+            elif aln_program == 'CLUSTALO':
+                self.align = self.clustalo
+                self.clustalo(**kwargs)
+            elif aln_program == 'PAL2NAL':
+                self.align = self.pal2nal
+                self.pal2nal(**kwargs)
+        else:
+            print('aln-notkwargs')
+            if aln_program is 'GUIDANCE2':
+                self.align = self.guidance2
+                print(self.align)
+            elif aln_program is 'CLUSTALO':
+                self.align = self.clustalo
+                print(self.align)
+            elif aln_program is 'PAL2NAL':
+                self.align = self.pal2nal
+                print(self.align)
+
 
     def removed_gb_config(self, kwargs):
         self.raw_data = self.project_path / Path('raw_data')
