@@ -57,7 +57,7 @@ class CompGenAnalysis(object):
             else:
                 self.project_path = Path(os.getcwd()) / Path(self.project)
             Path.mkdir(self.project_path, parents=True, exist_ok=True)
-            self.removed_pm_config()
+            self.removed_pm_config(kwargs)
 
         # Handle the taxon_id file and blast query
         if taxon_file is not None:
@@ -165,10 +165,13 @@ class CompGenAnalysis(object):
             self.building_time_filename = self.building_filename.replace(
                 'building.csv', 'building_time.csv')
 
-    def removed_pm_config(self):
+    def removed_pm_config(self, kwargs):
         self.project_index = self.project_path / Path('index')
         self.raw_data = self.project_path / Path('raw_data')
-        self.data = self.project_index / Path('data')
+        self.data = self.project_path / Path('data')
+
+        for key, value in kwargs.items():
+            setattr(self, key, value)
 
         Path.mkdir(self.project_index, exist_ok=True)
         Path.mkdir(self.raw_data, exist_ok=True)
