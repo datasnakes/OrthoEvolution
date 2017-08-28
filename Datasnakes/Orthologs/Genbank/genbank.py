@@ -114,10 +114,10 @@ class GenBank(object):
         genbank files.
         """
         # Parse the tier_frame_dict to get the tier
-        for G_KEY, G_value in self.blast.tier_frame_dict.items():
+        for G_KEY, G_value in self.tier_frame_dict.items():
             tier = G_KEY
             # Parse the tier based transformed dataframe to get the gene
-            for GENE in self.blast.tier_frame_dict[tier].T:
+            for GENE in self.tier_frame_dict[tier].T:
                 # Parse the organism list to get the desired accession number
                 for ORGANISM in org_list:
                     accession = str(gene_dict[GENE][ORGANISM])
