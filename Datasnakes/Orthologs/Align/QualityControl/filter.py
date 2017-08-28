@@ -72,7 +72,7 @@ class FilteredAlignment(object):
 
             if iteration == 1:
                 # seqFile is the given input
-                G2Cmd = Guidance2Commandline(**self.G2C_args, seqFile=seqFile,
+                G2Cmd = Guidance2Commandline(self.G2C_args, seqFile=seqFile,
                                              seqType=seqType, outDir=str(iterDir),
                                              bootstraps=bootstraps,
                                              seqCutoff=seqCutoff, colCutoff=colCutoff)
@@ -93,7 +93,7 @@ class FilteredAlignment(object):
                 # seqFile changes to g2_seqFile and the cutoffs change
                 seqCutoff = 0.7
                 colCutoff = 0.1
-                G2Cmd = Guidance2Commandline(**self.G2C_args, seqFile=g2_seqFile, seqType=seqType, outDir=str(iterDir), bootstraps=bootstraps,
+                G2Cmd = Guidance2Commandline(self.G2C_args, seqFile=g2_seqFile, seqType=seqType, outDir=str(iterDir), bootstraps=bootstraps,
                                              seqCutoff=seqCutoff, colCutoff=colCutoff)
                 print(G2Cmd)
                 subprocess.check_call([str(G2Cmd)], stderr=subprocess.STDOUT, shell=True)
