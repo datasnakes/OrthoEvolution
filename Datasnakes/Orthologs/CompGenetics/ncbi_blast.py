@@ -4,8 +4,8 @@ from pathlib import Path
 import pandas as pd
 from Datasnakes.Orthologs.CompGenetics import CompGenAnalysis
 from Datasnakes.Manager.logit import LogIt
-import pkg_resources
-import shutil
+# import pkg_resources
+# import shutil
 from Datasnakes.Manager import index
 
 class BLASTAnalysis(CompGenAnalysis):

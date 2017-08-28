@@ -18,7 +18,7 @@ Usage
 In the beginning stages of our project, we tested various phylogenetic programs
 to see which worked well for us.
 
-In this module, we include classes and ways to use PAML, Phylip, PhyML, and
+In this module, we include classes and ways to use PAML, Phylip, PhyML, IQTREE, and
 Biopython's Bio.Phylo class.
 
 
@@ -33,14 +33,16 @@ from Datasnakes.Orthologs import Phylogenetics
 dir(Phylogenetics)
 
 Out[1]:
-['ETE3PAML',
+['AlignIO',
+ 'ETE3PAML',
+ 'IQTree',
+ 'IQTreeCommandline',
  'OrthologsWarning',
  'PAML',
- 'PamlTest',
  'PhyML',
  'Phylip',
  'PhyloTree',
- 'PhymlTest',
+ 'RelaxPhylip',
  'TreeViz',
  '__all__',
  '__builtins__',
@@ -59,15 +61,11 @@ from Datasnakes.Orthologs.Phylogenetics import PhyML, RelaxPhylip
 
 RelaxPhylip("HTR1A_aligned.fasta", "HTR1A_aligned.phy")
 
+# Generate a maximum likelihood tree from the phylip formatted alignment file.
 PhyML("HTR1A_aligned.phy")
 
 
 ```
 
 
-Default Parameters
--------------------
-
-It's important to note the default parameters for `ETE3PAML` are as follows:
- `workdir='data/paml-output/'`, `model='M1'`
 

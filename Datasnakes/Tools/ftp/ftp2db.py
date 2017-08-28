@@ -1,6 +1,4 @@
-# -*- coding: utf-8 -*-
-"""
-"""
+""""""
 # Modules Used
 import os
 import pandas as pd
@@ -9,8 +7,6 @@ import time
 import shutil
 import subprocess
 import configparser
-#from cursesmenu import *  # for Linux Only
-#from cursesmenu.items import *  # for Linux Only
 
 
 class Ftp2Db(object):
@@ -18,7 +14,7 @@ class Ftp2Db(object):
     ncbi = configparser.ConfigParser()
     ncbi.read('ncbiftp.cfg')
     """Private variable initialization"""
-    #__NCBI_FTP = ncbi['FTPSITE']['ncbi']
+    # __NCBI_FTP = ncbi['FTPSITE']['ncbi']
     __NCBI_RSYNC = 'rsync://ftp.ncbi.nlm.nih.gov'
     __class_name = ''
     __update_dict = {}
