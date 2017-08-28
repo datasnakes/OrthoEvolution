@@ -58,17 +58,16 @@ class GenBank(object):
         self.min_fasta = min_fasta
 
     def removed_bn_config(self, kwargs):
-        if kwargs:
-            for key, value in kwargs.items():
-                setattr(self, key, value)
-        else:
-            self.raw_data = self.project_path / Path('raw_data')
-            self.user_db = self.project_path / Path('user_db')
-            self.ncbi_db_repo = self.project_path / Path('ncbi_db_repo')
+        self.raw_data = self.project_path / Path('raw_data')
+        self.user_db = self.project_path / Path('user_db')
+        self.ncbi_db_repo = self.project_path / Path('ncbi_db_repo')
 
-            Path.mkdir(self.raw_data, exist_ok=True)
-            Path.mkdir(self.user_db, exist_ok=True)
-            Path.mkdir(self.ncbi_db_repo, exist_ok=True)
+        for key, value in kwargs.items():
+            setattr(self, key, value)
+
+        Path.mkdir(self.raw_data, exist_ok=True)
+        Path.mkdir(self.user_db, exist_ok=True)
+        Path.mkdir(self.ncbi_db_repo, exist_ok=True)
 
     @staticmethod
     def name_fasta_file(path, gene, org, feat_type, feat_type_rank, extension, mode):
