@@ -11,21 +11,18 @@ import pkg_resources
 from Datasnakes.Manager import index
 from Bio import SearchIO  # Used for parsing and sorting XML files.
 from Bio.Blast.Applications import NcbiblastnCommandline
-from Datasnakes.Orthologs.CompGenetics import BLASTAnalysis
+from Datasnakes.Orthologs.CompGenetics.ncbi_blast import BLASTAnalysis as BT
 # TODO-ROB: Find packages for script timing and analysis
 
 
-class BLASTn(BLASTAnalysis):
+class BLASTn(BT):
     """Use BLASTn to search nucleotide databases using a nucleotide query.
-
     This class currently only works with the standalone blast.
     """
 
-    def __init__(self, repo, user, project, research, research_type,
-                 template=None, save_data=True, **kwargs):
+    def __init__(self, project, template=None, save_data=True, **kwargs):
         """Inherit from the BLASTing Template."""
-        super().__init__(template=template, repo=repo, user=user, project=project,
-                         research=research, research_type=research_type, save_data=save_data, **kwargs)
+        super().__init__(project=project, template=template, save_data=save_data, **kwargs)
         # # TODO-ROB Add taxon parameter
         # Manage Directories
         self.__home = Path(os.getcwd())
@@ -52,18 +49,16 @@ class BLASTn(BLASTAnalysis):
         self.blastn_log.info("These are the genes: " + str(self.gene_list))
         self.blastn_log.info(
             "These are the taxonomy ids: \n\n\n" + str(self.taxon_ids))
-
+        # ---------------------------------------------------------------------
         # For completed blast files
         self.complete_file = self.project + '_MAF.csv'
         self.complete_file_path = self.data / Path(self.complete_file)
         self.complete_time_file = self.project + '_TIME.csv'
-        self.complete_time_file_path = self.data / \
-            Path(self.complete_time_file)
+        self.complete_time_file_path = self.data / Path(self.complete_time_file)
 
     @staticmethod
     def map_func(hit):
         """Use the map function for formatting hit id's.
-
         This will be used later in the script.
         """
         hit.id1 = hit.id.split('|')[3]
@@ -73,7 +68,6 @@ class BLASTn(BLASTAnalysis):
 
     def blast_config(self, query_align, query_organism, auto_start=False):
         """Configure everything for a BLAST.
-
         First the accession file, and gene list is configured.
         """
         # os.chdir(str(self.__output_path))
@@ -200,7 +194,6 @@ class BLASTn(BLASTAnalysis):
         # TODO-ROB THis is for development / testing
         # TODO-ROB Add the ability to do two seperate gi configs
         """Create a gi list based on the refseq_rna database for each taxonomy id on the MCSR.
-
         It will also convert the gi list into a binary file which is more
         efficient to use with NCBI's Standalone Blast tools.
         """
@@ -237,7 +230,6 @@ class BLASTn(BLASTAnalysis):
 
     def blast_file_config(self, file):
         """Create or use a blast configuration file.
-
         This function configures different files for new BLASTS.
         It also helps recognize whether or not a BLAST was terminated
         in the middle of the dataset.  This removes the last line of
@@ -326,7 +318,7 @@ class BLASTn(BLASTAnalysis):
             self.blastn_log.info(
                 "The best accession has been selected from the BLAST xml record.")
             self.blastn_log.info("Accession:  %s" % accession)
-            self.blastn_log.info("GI number: {}".format(gi))
+            self.blastn_log.info(f"GI number: {gi}")
             self.blastn_log.info("Raw bitscore: %s" % raw_bitscore)
             self.blastn_log.info("Description: %s" % description)
             self.add_accession(gene, organism, accession)
