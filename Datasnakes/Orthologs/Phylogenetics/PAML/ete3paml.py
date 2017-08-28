@@ -6,7 +6,7 @@ from Datasnakes.Manager.utils import FormatList
 class ETE3PAML(object):
     """Integration of ETE3 for using PAML's codeml.
 
-    For this project, we start by using the M1 model so it is the default.
+    M1 model is best for orthology inferences.
     """
 
     def __init__(self, gene, paml_path, workdir='data/paml-output/',
@@ -54,9 +54,9 @@ class ETE3PAML(object):
             # Set the binpath of the codeml binary
             tree.execpath = paml_path
 
-            # Run the codeml model
-            tree.run_model(model + '.' + gene)
+            tree.run_model(model + '.' + gene)  # Run the model M1 M2 M3 M0
 
         except Exception:
+            # TODO: Write a better exception.
             print('Error with %s.' % gene)
             pass
