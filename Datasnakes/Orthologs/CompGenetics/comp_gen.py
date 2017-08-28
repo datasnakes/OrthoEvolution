@@ -47,9 +47,9 @@ class CompGenAnalysis(object):
         self.project = project
 
         # Initiate the project management variable
-        if proj_mana is not None:
-            self.proj_mana = proj_mana(project=project, **kwargs)
-            for key, value in self.proj_mana.__dict__.items():
+        if isinstance(proj_mana, ProjectManagement):
+            setattr(proj_mana, 'project', project)
+            for key, value in proj_mana.__dict__.items():
                 setattr(self, key, value)
             print('project_path=%s' % self.project_path)
         else:
@@ -72,10 +72,11 @@ class CompGenAnalysis(object):
             self.paml_path = self.project_index / Path(self.__paml_filename)
             self.paml_org_list = []
         # Handle the master accession file (could be before or after blast)
+        if kwargs['copy_from_package']:
+            shutil.copy(pkg_resources.resource_filename(index.__name__, kwargs['MAF']), str(self.project_index))
+            acc_file = kwargs['MAF']
+            self.acc_filename = acc_file
         if acc_file is not None:
-            if kwargs['copy_from_package']:
-                shutil.copy(pkg_resources.resource_filename(index.__name__, kwargs['MAF']), str(self.project_index))
-
             # File init
             self.acc_path = self.project_index / Path(self.acc_filename)
             self.raw_acc_data = pd.read_csv(str(self.acc_path), dtype=str)
