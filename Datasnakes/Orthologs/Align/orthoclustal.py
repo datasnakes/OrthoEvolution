@@ -21,7 +21,7 @@ class ClustalO:
         clustalo_cline = ClustalOmegaCommandline(infile=infile,
                                                  cmd="clustalo",
                                                  outfile=outfile,
-                                                 seqtype="DNA",  # "RNA"
+                                                 seqtype="PROTEIN",  # "RNA"/"DNA"
                                                  max_hmm_iterations=2,
                                                  infmt="fasta",
                                                  outfmt=outfmt,  # "aln", "phy"
@@ -37,31 +37,31 @@ class ClustalO:
             print(stdout)
 
 
-class SequenceEditor:
-    """Edit sequences prior to running Clustal Omega."""
-    def __init__(self, seqfile, seqtype):
-        """Initialize the sequence file record."""
-        self.seqfile = seqfile
-        self.seqtype = seqtype
-        records = list(SeqIO.parse(self.seqfile, self.seqtype))
-        self.records = records
-
-
-class AlignmentEditor:
-    """Edit alignments to ensure length is a multiple of 3 for PAML."""
-    def __init__(self, seqfile, seqtype):
-        """Initialize the multiple sequence alignment file record."""
-        self.seqfile = seqfile
-        self.seqtype = seqtype
-        self.alignments = AlignIO.parse(self.seqfile, self.seqtype)
-
-    def divby3(self):
-        """Ensure divisibility by 3."""
-        for alignment in self.alignments:
-            if alignment.get_alignment_length() % 3 != 0:
-                print('Sequences in %s are not divisible by 3.' % alignment)
-                break
-
-    def pamlslice(self):
-        """Slice or add to alignments to ensure multiple of 3 for PAML."""
-        print(self.pamlslice.__doc__)
+#class SequenceEditor:
+#    """Edit sequences prior to running Clustal Omega."""
+#    def __init__(self, seqfile, seqtype):
+#        """Initialize the sequence file record."""
+#        self.seqfile = seqfile
+#        self.seqtype = seqtype
+#        records = list(SeqIO.parse(self.seqfile, self.seqtype))
+#        self.records = records
+#
+#
+#class AlignmentEditor:
+#    """Edit alignments to ensure length is a multiple of 3 for PAML."""
+#    def __init__(self, seqfile, seqtype):
+#        """Initialize the multiple sequence alignment file record."""
+#        self.seqfile = seqfile
+#        self.seqtype = seqtype
+#        self.alignments = AlignIO.parse(self.seqfile, self.seqtype)
+#
+#    def divby3(self):
+#        """Ensure divisibility by 3."""
+#        for alignment in self.alignments:
+#            if alignment.get_alignment_length() % 3 != 0:
+#                print('Sequences in %s are not divisible by 3.' % alignment)
+#                break
+#
+#    def pamlslice(self):
+#        """Slice or add to alignments to ensure multiple of 3 for PAML."""
+#        print(self.pamlslice.__doc__)

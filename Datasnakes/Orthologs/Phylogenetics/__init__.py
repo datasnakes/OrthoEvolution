@@ -8,7 +8,7 @@ from Datasnakes.Orthologs.Phylogenetics.PAML import ETE3PAML
 from Datasnakes.Orthologs.Phylogenetics.PhyloTree import TreeViz
 from Datasnakes.Orthologs.Phylogenetics import PhyML
 from Datasnakes.Orthologs.Phylogenetics import Phylip
-from Datasnakes.Orthologs.Phylogenetics import IQTree
+from Datasnakes.Orthologs.Phylogenetics.IQTree import IQTreeCommandline
 
 # Ignore the warning in this init script.
 warnings.simplefilter('ignore', OrthologsWarning)
@@ -28,4 +28,5 @@ __all__ = ("ETE3PAML",
            "TreeViz",
            "RelaxPhylip",
            "Phylip",
+           "IQTreeCommandline",
            )
