@@ -144,7 +144,7 @@ class FilteredAlignment(object):
         output_file = str(outDir / Path(output_file))
 
         # Create an alignment for paml input
-        P2Ncmd = Pal2NalCommandline(**self.P2N_args, pepaln=aa_alignment, nucfasta=na_fasta, output_file=output_file + '.paml.aln',
+        P2Ncmd = Pal2NalCommandline(self.P2N_args, pepaln=aa_alignment, nucfasta=na_fasta, output_file=output_file + '.paml.aln',
                                     output='paml')
         print(P2Ncmd)
         pal2nal_flag = True
@@ -167,7 +167,7 @@ class FilteredAlignment(object):
             print('Error: ' + str(error))
             print('Out: ' + str(out))
         # Create an alignment for iqtree input
-        P2Ncmd = Pal2NalCommandline(**self.P2N_args, pepaln=aa_alignment, nucfasta=na_fasta, output_file=output_file + '.iqtree.aln',
+        P2Ncmd = Pal2NalCommandline(self.P2N_args, pepaln=aa_alignment, nucfasta=na_fasta, output_file=output_file + '.iqtree.aln',
                                     output='fasta')
         print(P2Ncmd)
         pal2nal = subprocess.Popen([str(P2Ncmd)], stderr=subprocess.PIPE, stdout=subprocess.PIPE, shell=True, encoding='utf-8')
