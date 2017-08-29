@@ -73,7 +73,7 @@ class DataMana(object):
             cga = CompGenAnalysis(**self.CompGenAnalysis_config)
 
             # Parse the tier_frame_dict to get the tier
-            for G_KEY, G_value in cga.tier_frame_dict.items():
+            for G_KEY in cga.tier_frame_dict.keys():
                 tier = G_KEY
                 # Parse the tier based transformed dataframe to get the gene
                 for GENE in cga.tier_frame_dict[tier].T:
