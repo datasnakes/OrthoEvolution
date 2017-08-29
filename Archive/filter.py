@@ -1,11 +1,15 @@
 import os
+import subprocess
 from pathlib import Path
 from shutil import copy
-from Datasnakes.Orthologs.Align.QualityControl.guidance2 import Guidance2Commandline
-from Datasnakes.Orthologs.Align.QualityControl.pal2nal import Pal2NalCommandline
+
 from Bio import SeqIO
+from Datasnakes.Orthologs.Align.QualityControl.guidance2 import Guidance2Commandline
+
+from Datasnakes.Orthologs.Align.pal2nal import Pal2NalCommandline
 from Datasnakes.Orthologs.Genbank.utils import multi_fasta_manipulator
-import subprocess
+
+
 # TODO-ROB:  Create appropriate class variables for Filtered Tree to inherit
 # TODO-ROB:  Create proper class variables to make simpler and for above todo
 
