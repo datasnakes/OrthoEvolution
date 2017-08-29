@@ -7,11 +7,9 @@ from .otherutils import FormatList, SplitList
 
 __all__ = ("WebMana",
            "Mana",
-           "ZipUtils",
            "ProjMana",
            "RepoMana",
            "UserMana",
            "FormatList",
            "SplitList",
-           "DataMana",
            )
