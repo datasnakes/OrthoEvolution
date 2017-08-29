@@ -1,4 +1,25 @@
+<<<<<<< HEAD
 """"""
+=======
+# -*- coding: utf-8 -*-
+"""
+Orthologs-Project
+Ftp2Db updated on 11/18/2016 at 3:16 PM
+
+Input:  The class takes an email and an NCBI FTP site path
+(ex..  refseq/release/vertebrate_mammalian) as optional attributes.
+User input is also needed.
+
+Output:  The user gets to choose which files to download.  A cache is also
+created in order update the same files at a later date.
+
+Description:  This class is meant to act as an interface for downloading files
+from NCBI.  Calling the class begins a series questions posed to the user
+to navigate the NCBI FTP site and to begin downloading files from the site.
+
+@author: Rob Gilmore
+"""
+>>>>>>> b4e6bb4ddfa7bc087f1fae5a8844594a6a6198c4
 # Modules Used
 import os
 import pandas as pd
@@ -7,6 +28,24 @@ import time
 import shutil
 import subprocess
 import configparser
+<<<<<<< HEAD
+=======
+#from cursesmenu import *  # for Linux Only
+#from cursesmenu.items import *  # for Linux Only
+
+from Datasnakes.Orthologs.CompGenetics.comp_gen import CompGenAnalysis
+from Datasnakes.Manager.utils.mana import ProjMana
+#class FTP2DB(object):
+# Set up directories and project
+home = os.getcwd()
+project = "GPCR-Orthologs-Project"
+user = "rgilmore"
+#where = ProjMana(home, project)
+# Use lister() class here so that we can easily access our Master RNA
+# Accession File
+# Always make sure this file name is correct
+#what = CompGenAnalysis('Master_RNA_Accession_File.csv')
+>>>>>>> b4e6bb4ddfa7bc087f1fae5a8844594a6a6198c4
 
 
 class Ftp2Db(object):

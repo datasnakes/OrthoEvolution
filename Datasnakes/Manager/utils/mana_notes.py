@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 import os
 from Datasnakes.Manager.utils import ProjMana, WebMana, UserMana, RepoMana, Mana, DataMana
 repo = "Test"
@@ -24,3 +25,5 @@ Mana(repo=None, home=os.getcwd(), new_repo=False)
 DataMana(home, data, new_data, repo, new_repo, user, new_user, project, new_project, app, new_app, database, new_db,
          website, new_website, host, port, create_admin, research, new_research, research_type)
 
+=======
+>>>>>>> b4e6bb4ddfa7bc087f1fae5a8844594a6a6198c4

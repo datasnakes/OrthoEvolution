@@ -10,14 +10,12 @@ from Datasnakes.Manager import index
 
 class BLASTAnalysis(CompGenAnalysis):
     """Perform Blast Analysis after completing BLASTn."""
-    def __init__(self, repo, user, project, research, research_type,
-                 template=None, taxon_file=None, post_blast=False, save_data=True, **kwargs):
+    def __init__(self, project, template=None, taxon_file=None, post_blast=False, save_data=True, **kwargs):
         """Inherited from the CompGenAnalysis class.
 
         If the BLAST was cut short, then a build_file is to be used.
         """
-        super().__init__(repo=repo, user=user, project=project, research=research, research_type=research_type,
-                         acc_file=template, taxon_file=taxon_file, post_blast=post_blast, hgnc=False, **kwargs)
+        super().__init__(project=project, acc_file=template, taxon_file=taxon_file, post_blast=post_blast, hgnc=False, **kwargs)
         # TODO-ROB: Inherit or add variable for logger class
         # TODO-ROB Add Mana directories
         # Private variables
@@ -36,7 +34,7 @@ class BLASTAnalysis(CompGenAnalysis):
             self.building_time_filename = self.building_filename.replace(
                 'building.csv', 'building_time.csv')
         else:
-            self.building_filename = str(project + 'building.csv')
+            self.building_filename = str(self.project + 'building.csv')
             self.building_time_filename = self.building_filename.replace(
                 'building.csv', 'building_time.csv')
 

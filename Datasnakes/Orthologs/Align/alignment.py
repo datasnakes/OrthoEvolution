@@ -10,31 +10,59 @@ import subprocess
 import shutil
 
 
-class Alignment(GenBank):
+class Alignment(object):
 
-    def __init__(self, aln_program, repo=None, user=None, project=None, research=None, research_type=None, **kwargs):
-        super().__init__(repo=repo, user=user, project=project, research=research, research_type=research_type, **kwargs)
+    def __init__(self, project, aln_program, project_path=None, genbank=GenBank, **kwargs):
 
         self.program = aln_program
-        if kwargs:
-            if aln_program == 'GUIDANCE2':
-                self.align = self.guidance2
-                self.guidance2(kwargs)
-            elif aln_program == 'CLUSTALO':
-                self.align = self.clustalo
-                self.clustalo(kwargs)
-            elif aln_program == 'PAL2NAL':
-                self.align = self.pal2nal
-                self.pal2nal(kwargs)
+        self.project = project
+        if isinstance(genbank, GenBank):
+            setattr(genbank, 'project', project)
+            for key, value in genbank.__dict__.items():
+                setattr(self, key, value)
+            print('project_path=%s' % self.project_path)
         else:
+            if project_path:
+                self.project_path = Path(project_path) / Path(self.project)
+            else:
+                self.project_path = Path(os.getcwd()) / Path(self.project)
+            Path.mkdir(self.project_path, parents=True, exist_ok=True)
+            print('project_path=%s' % self.project_path)
+            self.removed_gb_config(kwargs)
+
+        if kwargs:
+            print('aln-kwargs')
             if aln_program == 'GUIDANCE2':
                 self.align = self.guidance2
+                self.guidance2(**kwargs)
             elif aln_program == 'CLUSTALO':
                 self.align = self.clustalo
+                self.clustalo(**kwargs)
             elif aln_program == 'PAL2NAL':
                 self.align = self.pal2nal
+                self.pal2nal(**kwargs)
+        else:
+            print('aln-notkwargs')
+            if aln_program is 'GUIDANCE2':
+                self.align = self.guidance2
+                print(self.align)
+            elif aln_program is 'CLUSTALO':
+                self.align = self.clustalo
+                print(self.align)
+            elif aln_program is 'PAL2NAL':
+                self.align = self.pal2nal
+                print(self.align)
 
-        print()
+
+    def removed_gb_config(self, kwargs):
+        self.raw_data = self.project_path / Path('raw_data')
+        self.data = self.project_path / Path('data')
+
+        for key, value in kwargs.items():
+            setattr(self, key, value)
+
+        Path.mkdir(self.raw_data, exist_ok=True)
+        Path.mkdir(self.data, exist_ok=True)
 
     def guidance2(self, seqFile, msaProgram, seqType, dataset='MSA', seqFilter=None, columnFilter=None, maskFilter=None, **kwargs):
         # Name and Create the output directory
@@ -224,6 +252,22 @@ class Alignment(GenBank):
 
             print('Error: ' + str(error))
             print('Out: ' + str(out))
+
+    def clustalo(self, infile, output_file, logpath, outfmt="fasta"):
+
+        COCmd = ClustalOmegaCommandline(infile=infile, cmd="clustalo", outfile=output_file, seqtype="DNA",
+                                        max_hmm_iterations=2, infmt="fasta", outfmt=outfmt, iterations=3, verbose=True,
+                                        force=True, log=logpath)
+        print(COCmd)
+
+        clustalo = subprocess.Popen([str(COCmd)], stderr=subprocess.PIPE, stdout=subprocess.PIPE, shell=True,
+                                    encoding='utf-8')
+        error = clustalo.stderr.readlines()
+        out = clustalo.stdout.readlines()
+        clustalo.wait()
+        print(error)
+        print(out)
+
 
 
 
