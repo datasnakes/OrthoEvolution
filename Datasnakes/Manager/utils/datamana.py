@@ -82,7 +82,6 @@ class DataMana(object):
                         accession = str(cga.gene_dict[GENE][ORGANISM])
                         parts = list(accession.partition('.'))
                         accession = parts[0]
-                        version = parts[2]
                         accession = accession.upper()
                         server_flag = False
                         self.bl.get_gbk_file(accession, GENE, ORGANISM, server_flag=server_flag)
