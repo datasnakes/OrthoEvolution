@@ -11,15 +11,11 @@ from Datasnakes.Orthologs.Phylogenetics.PAML import ETE3PAML
 from Datasnakes.Orthologs.Phylogenetics.PhyloTree import TreeViz
 from Datasnakes.Orthologs.Phylogenetics import PhyML
 from Datasnakes.Orthologs.Phylogenetics import Phylip
-<<<<<<< HEAD
 from Datasnakes.Orthologs.Phylogenetics.IQTree import IQTreeCommandline
 
 # Ignore the warning in this init script.
 warnings.simplefilter('ignore', OrthologsWarning)
 
-=======
-from Datasnakes.Orthologs.Phylogenetics import IQTree
->>>>>>> b4e6bb4ddfa7bc087f1fae5a8844594a6a6198c4
 
 class RelaxPhylip(object):
     """Convert a multiple sequence alignment file to relaxed-phylip format."""

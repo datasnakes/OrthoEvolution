@@ -4,22 +4,13 @@ import zipfile
 import logging as log
 from pathlib import Path
 from datetime import datetime as d
-<<<<<<< HEAD
-
-from Datasnakes.Manager.utils.mana import ProjMana as PM
-=======
 from Datasnakes.Manager.utils.mana import ProjMana
->>>>>>> b4e6bb4ddfa7bc087f1fae5a8844594a6a6198c4
 from Datasnakes.Orthologs.Blast.blastn import BLASTn
 from Datasnakes.Orthologs.CompGenetics.comp_gen import CompGenAnalysis
 from Datasnakes.Orthologs.Genbank.genbank import GenBank
 from Datasnakes.Orthologs.Align.alignment import Alignment
-<<<<<<< HEAD
-
-
-=======
 import yaml
->>>>>>> b4e6bb4ddfa7bc087f1fae5a8844594a6a6198c4
+
 #import configparser
 #from slacker import Slacker
 #import argparse
@@ -28,36 +19,6 @@ import yaml
 # TODO-ROB:  Mirror the directory creation on MCSR's servers
 # TODO-ROB:  ^^ This will allow the transfer of data
 
-<<<<<<< HEAD
-class DataMana(PM):
-
-    def __init__(self, research_type=None, **kwargs):
-        super().__init__(**kwargs)
-
-        if research_type.lower() == 'comparative genetics':
-            if 'BLASTn' in kwargs.keys():
-                self.blast_data = self.ncbi_db_repo / Path()
-                self.blast(kwargs['BLASTn'])
-            if 'GenBank' in kwargs.keys():
-                self.genbank()
-        elif research_type.lower() == 'comparative polymorphism':
-            self.genbank()
-        elif research_type.lower() == 'natural selection':
-            self.fasta()
-
-    @classmethod
-    def blast(self, blast_kwargs):
-        print('use blast folders')
-        # TODO-Create directories for the blast data
-        # Do the blasting here using BLASTn
-
-    def genbank(self):
-        print('create genbank files')
-
-
-    def fasta(self):
-        print('fasta folders')
-=======
 # TODO-ROB:  Add FTP and s2s inheritance
 class DataMana(object):
 
@@ -125,7 +86,6 @@ class DataMana(object):
     def align(self, genbank):
         self.al = Alignment(genbank=genbank, **self.Alignment_config)
         self.al.align(self.Alignment_config['kwargs'])
->>>>>>> b4e6bb4ddfa7bc087f1fae5a8844594a6a6198c4
 
 
 class ZipUtils(DataMana):

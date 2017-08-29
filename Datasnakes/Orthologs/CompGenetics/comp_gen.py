@@ -1,10 +1,5 @@
-<<<<<<< HEAD
-# import os
-# import mygene
-=======
 import os
 #import mygene
->>>>>>> b4e6bb4ddfa7bc087f1fae5a8844594a6a6198c4
 from ete3 import NCBITaxa
 # NCBITaxa().update_taxonomy_database()
 import pandas as pd
