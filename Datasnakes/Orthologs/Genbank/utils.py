@@ -53,7 +53,7 @@ def dir_config(path, tier_frame_dict):
             --Gene_M+1
             --Gene_N
     """
-    for G_KEY, G_value in tier_frame_dict.items():
+    for G_KEY in tier_frame_dict.keys():
         tier = G_KEY
         tier_path = path / Path(tier)
         Path.mkdir(tier_path, parents=True, exist_ok=True)
