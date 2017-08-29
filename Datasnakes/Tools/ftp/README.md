@@ -1,5 +1,5 @@
 FTP (File Transfer Protocol) Documentation
--------------------------
+=============================================
 The `ftp` module is geared towards making it easier to interface with [NCBI's
 FTP repository](ftp://ftp.ncbi.nlm.nih.gov).
 
@@ -9,7 +9,6 @@ for use with the Orthologs package.
 
 Usage
 -----
-
 These tools are optimized to be used together (very little work to do that), but can also be used singularly.
 
 
@@ -24,11 +23,9 @@ from Tools import ftp
 
 Tests
 -----
-
 Tests will be added soon.
 
 
 :exclamation: Notes
 -------------------
-
 Explain or list any notable information about the contents of this folder.

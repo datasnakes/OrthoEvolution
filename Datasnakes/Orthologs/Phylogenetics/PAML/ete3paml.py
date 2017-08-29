@@ -1,67 +1,62 @@
+from ete3 import EvolTree, Tree
+import pandas as pd
+from Datasnakes.Manager.utils import FormatList
+
+
 class ETE3PAML(object):
-    """Integration of ETE3 for using PAML's codeml. For this project,
-    we start my using the M1 model so it is the default.
+    """Integration of ETE3 for using PAML's codeml.
+
+    For this project, we start by using the M1 model so it is the default.
     """
 
-    def __init__(self, gene, paml_path,
-                 workdir='data/paml-output/', model='M1'):
-        """
-        Improve docstrings here.
-        """
-        # Modules used
-        from ete3 import EvolTree, Tree
-        from OrthoTools import formatlist
-        import pandas as pd
-
-        # First make sure that
+    def __init__(self, gene, paml_path, workdir='data/paml-output/',
+                 model='M1'):
+        """Improve docstrings here."""
+        # Import your species tree
         t = Tree('data/initial-data/species_tree.nw', format=1)
         orgsfile = pd.read_csv('data/initial-data/organisms.csv', header=None)
 
         # Create a list name/variable and use list()
         orgs = list(orgsfile[0])
-        organismslist = formatlist(orgs)
+        organismslist = FormatList(orgs)
 
         # Import alignment file as string
-        alignment_file = open(
-            'data/clustal-output/' +
-            gene +
-            '_Aligned/' +
-            gene +
-            '_aligned_cds_nucl.fasta',
-            'r')
+        alignment_file = open('data/clustal-output/' + gene + '_Aligned/' +
+                              gene + '_aligned_cds_nucl.fasta', 'r')
         alignment_str = alignment_file.read()
         alignment_file.close()
 
-        # Keep the branches in the species tree for species in the alignment file
+        # Keep branches in the species tree for species in the alignment file
         # Some species may not be present in the alignment file
-        branches2keep = []
-        for organism in organismslist:
-            if organism in alignment_str:
-                # print('Yup.')
-                branches2keep.append(organism)
-            else:
-                pass
-                # print('Nope.') Make an error code in the log
+        try:
+            branches2keep = []
+            for organism in organismslist:
+                if organism in alignment_str:
+                    branches2keep.append(organism)
+                else:
+                    print('No sequence for %s.' % organism)
 
-        # Input a list of branches to keep on the base tree
-        speciestree = t.prune(branches2keep, preserve_branch_length=True)
+            # Input a list of branches to keep on the base tree
+            t.prune(branches2keep, preserve_branch_length=True)
 
-        # Run PAML
-        # Import the newick tree
-        tree = EvolTree(speciestree)
+            # Write the tree to a file
+            t.write(outfile='/work2/vallender/Projects/KARG-Project/data/paml-output/' + gene + '_PAML/temptree.nw')
 
-        # Import the alignment
-        tree.link_to_alignment(
-            'data/clustal-output/' +
-            gene +
-            '_Aligned/' +
-            gene +
-            '_aligned_cds_nucl.fasta')
+            # Import the newick tree
+            tree = EvolTree('/work2/vallender/Projects/KARG-Project/data/paml-output/' + gene + '_PAML/temptree.nw')
 
-        tree.workdir = workdir
+            # Import the alignment
+            tree.link_to_alignment('data/clustal-output/' + gene + '_Aligned/' +
+                                   gene + '_aligned_cds_nucl.fasta')
 
-        # Set the binpath of the codeml binary
-        tree.execpath = paml_path
+            tree.workdir = workdir
 
-        # Run the codeml model
-        tree.run_model(model + '.' + gene)
+            # Set the binpath of the codeml binary
+            tree.execpath = paml_path
+
+            # Run the codeml model
+            tree.run_model(model + '.' + gene)
+
+        except Exception:
+            print('Error with %s.' % gene)
+            pass

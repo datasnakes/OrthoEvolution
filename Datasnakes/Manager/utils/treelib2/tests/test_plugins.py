@@ -1,8 +1,8 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
-from treelib import Tree
-from treelib.plugins import *
+from treelib2.treelib2 import Tree
+from treelib2.treelib2.plugins import *
 import os
 import unittest
 
@@ -19,6 +19,7 @@ class DotExportCase(unittest.TestCase):
         tree.create_node("George", "george", parent="bill")
         self.tree = tree
 
+    @classmethod
     def read_generated_output(self, filename):
         output = codecs.open(filename, 'r', 'utf-8')
         generated = output.read()

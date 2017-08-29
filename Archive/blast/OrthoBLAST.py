@@ -1,13 +1,3 @@
-# -*- coding: utf-8 -*-
-"""
-Last updated on November 8, 2016
-@main author: Robert A. Gilmore
-@additional author: Shaurita D. Hutchins
-Edited and updated for use with local/standalone NCBI blast 2.2.30
-"""
-# Insert a description of this script here and print that description to screen.
-
-# List of modules used in this script.
 import os
 import sys
 from Bio import SearchIO        # Used for parsing and sorting XML files.

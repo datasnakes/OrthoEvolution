@@ -1,48 +1,14 @@
-##############################################################################
-# PyCharm Community Edition
-# -*- coding: utf-8 -*-
-"""
-GPCR-Orthologs-Project
-dataviz updated on 1/10/2017 at 6:27 PM
-##############################################################################
-
-    Input:
-
-    Output:
-
-    Description:
-
-##############################################################################
-@author: Work
-"""
-##############################################################################
-# Libraries:
-
 import os
-
 from BioSQL import BioSeqDatabase
-
 from dir_mana import dir_mana
 from lister import Lister
 
-##############################################################################
-# Custom Class Initializations
-# :
-# Use directory_management() class here so that we can stay organized
-# and more easily access the proper directories on command
 home = os.getcwd()
 project = "GPCR-Orthologs-Project"
 user = "Work"
 where = dir_mana(home, project)
 # Use lister() class here so that we can easily access our Master RNA Accession File
 what = Lister('MAFV3.1.csv')  # Always make sure this file name is correct
-
-## Add a path that contains custom libraries for import
-#os.sys.path.append()
-##############################################################################
-# Global Initializations:
-
-##############################################################################
 
 # genes = '%s' % genes.r_repr().rstrip('\n')
 arg_string1 = 'gene'

@@ -1,9 +1,7 @@
+"""This example demonstrates creating an open file dialog."""
 import webview
 import threading
 import os
-"""
-This example demonstrates creating an open file dialog.
-"""
 
 
 def open_file_dialog():

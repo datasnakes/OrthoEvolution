@@ -1,38 +1,12 @@
-##############################################################################
-# PyCharm Community Edition
-# -*- coding: utf-8 -*-
-"""
-GPCR-Orthologs-Project
-shinylookup updated on 1/13/2017 at 10:32 AM
-##############################################################################
-
-    Input:
-
-    Output:
-
-    Description:
-
-##############################################################################
-@author: Work
-"""
-##############################################################################
-# Libraries:
-
+"""Use a biosql database to extract genbank features or files."""
 import os
 import sys
 from pathlib import Path
-
 from Bio import SeqIO
 from BioSQL import BioSeqDatabase
-
 from dir_mana import dir_mana
 from lister import Lister
 
-##############################################################################
-# Custom Class Initializations
-# :
-# Use directory_management() class here so that we can stay organized
-# and more easily access the proper directories on command
 home = os.getcwd()
 project = "GPCR-Orthologs-Project"
 user = "Work"
@@ -43,11 +17,6 @@ what = Lister('MAFV3.1.csv')  # Always make sure this file name is correct
 
 # Add a path that contains custom libraries for import
 # os.sys.path.append()
-##############################################################################
-# Global Initializations:
-
-##############################################################################
-
 # Gene and Organism choices from the R script are used here for database lookup
 Choices = sys.argv
 
@@ -113,7 +82,7 @@ for record in SeqIO.parse(str(where.APP_DATA / Path(GenBank)), 'genbank'):
             if k == 'comment' or k == 'references':
                 continue
             file.write('%s#%s\n' % (k, v))
-            #print(k, v)
+            # print(k, v)
 try:
     with open(where.APP_DATA / Path(Reference), 'w') as file:
         for item in record.annotations['reference']:

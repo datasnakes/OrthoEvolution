@@ -9,8 +9,8 @@ try:
 except ImportError:
     from io import BytesIO
 import unittest
-from treelib import Tree, Node
-from treelib.tree import NodeIDAbsentError, LoopError
+from treelib2.treelib2 import Tree, Node
+from treelib2.treelib2 import NodeIDAbsentError, LoopError
 
 
 def encode(value):

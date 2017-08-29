@@ -2,9 +2,7 @@ from OrthoTools import message_slack
 import argparse
 import textwrap
 import logging as log
-from datetime import datetime as d
 
-#------------------------------------------------------------------------------
 # Set up the logger
 format1 = '%a %b %d at %I:%M:%S %p %Y'  # Used to add as a date
 format2 = '%m-%d-%Y@%I:%M:%S-%p'  # Used to append to archives
@@ -16,8 +14,6 @@ log.basicConfig(level=log.DEBUG,
                 filename="logs/slack_notify.log")
 slack_log = log.getLogger('Slack Message')
 
-#------------------------------------------------------------------------------
-__author__ = 'SDH'
 
 parser = argparse.ArgumentParser(
     formatter_class=argparse.RawDescriptionHelpFormatter,

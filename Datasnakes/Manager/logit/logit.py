@@ -1,29 +1,25 @@
 """Main logging class to make logging easier."""
-
 import logging as log
 import os
 from datetime import datetime as d
 import sys
-#import configparser
-#from slacker import Slacker
-#import argparse
-#import textwrap
+# import configparser
+# from slacker import Slacker
+# import argparse
+# import textwrap
+
 
 class LogIt(object):
     """LogIt makes logging easier by creating easy loggers."""
-    """Class for improving the ease of use of the logging module."""
     def __init__(self, logfile=None, logname=None):
         """Initialize the logger format based on system platform."""
-        # Set the different formats
-        """Set the different formats based on user's platform."""
+        # Set the different formats based on user's platform
         if sys.platform == 'win32':
             self.archive_format = '%m-%d-%Y_%I-%M-%p'
-            pass
         elif sys.platform == 'linux':
             self.archive_format = '%m-%d-%Y@%I:%M:%S-%p'
-            pass
 
-        self.date_format = '%a %b %d at %I:%M:%S %p %Y'  # Used to add as a date
+        self.date_format = '%a %b %d at %I:%M:%S %p %Y'  # Used to add date
         self.log_format = '%(name)s - [%(levelname)-2s]: %(message)s'
         # self.slack = self.slack_config()
         self.basic = self.generic_logger(
@@ -48,9 +44,6 @@ class LogIt(object):
 #        else:
 #            slack_logger = log.getLogger('SLACK')
 
-# ******************************************SLACK****************************************** #
-# ******************************************SLACK****************************************** #
-# ******************************************SLACK****************************************** #
 
     # @staticmethod
     # def slack_config():
@@ -72,6 +65,3 @@ class LogIt(object):
     # def message_slack(self, channel, message, username):
     #     self.slack.chat.post_message(channel, message, username, as_user=True)
 
-# ******************************************SLACK****************************************** #
-# ******************************************SLACK****************************************** #
-# ******************************************SLACK****************************************** #

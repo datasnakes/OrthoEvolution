@@ -1,14 +1,7 @@
 # -*- coding: utf-8 -*-
-"""
-Last updated on January 27, 2017
-
-@author: Shaurita D. Hutchins
-
-
-This script is designed to create a gi list based on the refseq_rna database
+"""This script is designed to create a gi list based on the refseq_rna database
 for each taxonomy id on the MCSR. It will also convert the gi list into a
 binary file which is more efficient to use with NCBI's Standalone Blast tools.
-
 """
 
 #------------------------------------------------------------------------------

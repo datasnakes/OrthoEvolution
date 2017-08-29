@@ -1,12 +1,5 @@
-# -*- coding: utf-8 -*-
-"""
-Created on Fri Sep 23 13:31:08 2016
-
-@author: Shaurita D. Hutchins
-"""
-
 # This script is designed to create a gi list based on the refseq_rna database
-# for each taxonomy id on the MCSR. It will also convert the gi list into a 
+# for each taxonomy id on the MCSR. It will also convert the gi list into a
 # binary file which is more efficient to use with NCBI's Standalone Blast tools.
 
 # List of modules used.
@@ -33,11 +26,11 @@ b = GiLists  # Set a variable for the gi_lists directory
 os.makedirs('%s' % b, exist_ok=True)  # Create the directory
 
 os.chdir(a)  # Change to Orthologs-Project Directory where taxids.csv file is located
-    
+
 # Main "for" loop in this file that creates gi list files in binary format in the current/home directory.
 for ID in file1:
     TaxID_count = TaxID_count + 1
-    
+
     # Use the accession #'s and the blastdbcmd tool to generate gi lists based on Organisms/Taxonomy ID's.
     os.system("blastdbcmd -db refseq_rna -entry all -outfmt '%g %T' | awk ' { if ($2 == " + str(ID[0]) + ") { print $1 } } ' > " + str(ID[0]) + "gi.txt")
     print(str(ID[0]) + "gi.txt" + " has been created.")

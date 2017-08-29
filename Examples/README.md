@@ -1,5 +1,5 @@
 Examples Documentation
--------------------------
+=======================
 As budding data scientists, we understand how important and useful it is to
 provide examples of how to use the tools we create.
 

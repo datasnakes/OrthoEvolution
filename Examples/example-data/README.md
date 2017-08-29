@@ -1,8 +1,10 @@
-# Example Data
+Example Data
+=============
 
 This document will provide information about the various files in this folder.
 
-# Contents
+Contents
+------------
 
 This folder comprises any and all initial data files.
 

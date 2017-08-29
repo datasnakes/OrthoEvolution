@@ -1,2 +1,1 @@
-# -*- coding: utf-8 -*-
-
+from .ftp2db import FTP2DB
