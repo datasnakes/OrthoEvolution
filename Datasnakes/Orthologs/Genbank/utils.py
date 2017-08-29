@@ -1,7 +1,6 @@
 from Bio import SeqIO
 from Bio import AlignIO
 from Bio.Align import MultipleSeqAlignment
-from Bio.Alphabet import IUPAC, Gapped
 import os
 from pathlib import Path
 from tempfile import TemporaryFile
