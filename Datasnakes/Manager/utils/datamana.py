@@ -30,7 +30,7 @@ class DataMana(object):
 
         if config_file is not None:
             with open(config_file, 'r') as ymlfile:
-                configuration = yaml.load(ymlfile)
+                configuration = yaml.safe_load(ymlfile)
                 for key, value in configuration.items():
                     setattr(self, key, value)
 
