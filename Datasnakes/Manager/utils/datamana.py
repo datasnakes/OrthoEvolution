@@ -80,7 +80,9 @@ class DataMana(object):
                     # Parse the organism list to get the desired accession number
                     for ORGANISM in cga.org_list:
                         accession = str(cga.gene_dict[GENE][ORGANISM])
-                        accession, sup, version = accession.partition('.')
+                        parts = list(accession.partition('.'))
+                        accession = parts[0]
+                        version = parts[2]
                         accession = accession.upper()
                         server_flag = False
                         self.bl.get_gbk_file(accession, GENE, ORGANISM, server_flag=server_flag)
