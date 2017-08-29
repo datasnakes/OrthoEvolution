@@ -28,18 +28,21 @@ Ensure that the following software is installed and in your path:
 3. PAML
 4. PhyML
 5. Phylip
+6. IQTREE
+7. Mafft
+8. Prank
+9. Clustalw
+10. Guidance2
+11. Pal2Nal
 
-If you are a sudo user, you may use the script we've provided, [sudo-install.sh](https://github.com/datasnakes/Datasnakes-Scripts/blob/master/Datasnakes/Orthologs/sudo-install.sh).
+If you are a sudo user, you may use the script we've provided, [install.sh](https://github.com/datasnakes/Datasnakes-Scripts/blob/master/Datasnakes/Orthologs/install.sh).
 
-Using `sudo-install.sh` on Debian/Ubuntu:
+Using `install.sh` on Debian/Ubuntu:
 
 ``` bash
 # Change to the directory of the file.
 cd
-chmod +x sudo-install.sh
+chmod +x install.sh
 ./sudo-install.sh
 
 ```
-
-If you don't have sudo privileges, it'd be best to have your system admin
-install the packages unless you are familiar with compiling packages from a source.
