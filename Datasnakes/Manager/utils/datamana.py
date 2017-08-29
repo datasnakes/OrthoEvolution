@@ -10,6 +10,7 @@ from Datasnakes.Orthologs.CompGenetics.comp_gen import CompGenAnalysis
 from Datasnakes.Orthologs.Genbank.genbank import GenBank
 from Datasnakes.Orthologs.Align.alignment import Alignment
 import yaml
+import pkg_resources
 #import configparser
 #from slacker import Slacker
 #import argparse
@@ -21,9 +22,12 @@ import yaml
 # TODO-ROB:  Add FTP and s2s inheritance
 class DataMana(object):
 
-    def __init__(self, config_file=None, **kwargs):
+    def __init__(self, config_file=None, pipeline=None, **kwargs):
 
         self.ProjectManagment_config = self.CompGenAnalysis_config = self.BLASTn_config = self.GenBank_config = self.Alignment_config = None
+
+        if pipeline == 'Ortho_CDS_1':
+            config_file = pkg_resources.resource_filename()
 
         if config_file is not None:
             with open(config_file, 'r') as ymlfile:
