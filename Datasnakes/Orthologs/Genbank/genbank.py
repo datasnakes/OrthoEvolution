@@ -31,12 +31,7 @@ class GenBank(object):
 
         # TODO-ROB: Change the way the file systems work.
         self.project = project
-        if isinstance(blast, BLASTn):
-            setattr(blast, 'project', project)
-            for key, value in blast.__dict__.items():
-                setattr(self, str(key), str(value))
-            print('project_path=%s' % self.project_path)
-        else:
+        if not isinstance(blast, BLASTn):
             if project_path:
                 self.project_path = Path(project_path) / Path(self.project)
             else:
@@ -44,6 +39,11 @@ class GenBank(object):
             Path.mkdir(self.project_path, parents=True, exist_ok=True)
             print('project_path=%s' % self.project_path)
             self.removed_bn_config(kwargs)
+        else:
+            setattr(blast, 'project', project)
+            for key, value in blast.__dict__.items():
+                setattr(self, str(key), str(value))
+            print('project_path=%s' % self.project_path)
 
         self.gbk_path = self.raw_data / Path('GENBANK')
         self.target_gbk_files_path = self.gbk_path / Path('gbk')  # Deprecate this

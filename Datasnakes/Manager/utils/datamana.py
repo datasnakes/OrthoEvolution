@@ -30,7 +30,7 @@ class DataMana(object):
 
         if config_file is not None:
             with open(config_file, 'r') as ymlfile:
-                configuration = yaml.load(ymlfile)
+                configuration = yaml.safe_load(ymlfile)
                 for key, value in configuration.items():
                     setattr(self, key, value)
 
@@ -73,14 +73,15 @@ class DataMana(object):
             cga = CompGenAnalysis(**self.CompGenAnalysis_config)
 
             # Parse the tier_frame_dict to get the tier
-            for G_KEY, G_value in cga.tier_frame_dict.items():
+            for G_KEY in cga.tier_frame_dict.keys():
                 tier = G_KEY
                 # Parse the tier based transformed dataframe to get the gene
                 for GENE in cga.tier_frame_dict[tier].T:
                     # Parse the organism list to get the desired accession number
                     for ORGANISM in cga.org_list:
                         accession = str(cga.gene_dict[GENE][ORGANISM])
-                        accession, sup, version = accession.partition('.')
+                        parts = list(accession.partition('.'))
+                        accession = parts[0]
                         accession = accession.upper()
                         server_flag = False
                         self.bl.get_gbk_file(accession, GENE, ORGANISM, server_flag=server_flag)

@@ -47,12 +47,7 @@ class CompGenAnalysis(object):
         self.project = project
 
         # Initiate the project management variable
-        if isinstance(proj_mana, ProjectManagement):
-            setattr(proj_mana, 'project', project)
-            for key, value in proj_mana.__dict__.items():
-                setattr(self, key, value)
-            print('project_path=%s' % self.project_path)
-        else:
+        if not isinstance(proj_mana, ProjectManagement):
             if project_path:
                 self.project_path = Path(project_path) / Path(self.project)
             else:
@@ -60,6 +55,12 @@ class CompGenAnalysis(object):
             Path.mkdir(self.project_path, parents=True, exist_ok=True)
             print('project_path=%s' % self.project_path)
             self.removed_pm_config(kwargs)
+        else:
+            setattr(proj_mana, 'project', project)
+            for key, value in proj_mana.__dict__.items():
+                setattr(self, key, value)
+            print('project_path=%s' % self.project_path)
+
 
         # Handle the taxon_id file and blast query
         if taxon_file is not None:

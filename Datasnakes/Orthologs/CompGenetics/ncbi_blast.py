@@ -6,7 +6,6 @@ from Datasnakes.Orthologs.CompGenetics import CompGenAnalysis
 from Datasnakes.Manager.logit import LogIt
 # import pkg_resources
 # import shutil
-from Datasnakes.Manager import index
 
 class BLASTAnalysis(CompGenAnalysis):
     """Perform Blast Analysis after completing BLASTn."""
