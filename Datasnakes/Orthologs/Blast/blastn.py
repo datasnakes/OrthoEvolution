@@ -17,7 +17,6 @@ from Datasnakes.Orthologs.CompGenetics.ncbi_blast import BLASTAnalysis as BT
 
 class BLASTn(BT):
     """Use BLASTn to search nucleotide databases using a nucleotide query.
-
     This class currently only works with the standalone blast.
     """
 
@@ -60,7 +59,6 @@ class BLASTn(BT):
     @staticmethod
     def map_func(hit):
         """Use the map function for formatting hit id's.
-
         This will be used later in the script.
         """
         hit.id1 = hit.id.split('|')[3]
@@ -70,7 +68,6 @@ class BLASTn(BT):
 
     def blast_config(self, query_align, query_organism, auto_start=False):
         """Configure everything for a BLAST.
-
         First the accession file, and gene list is configured.
         """
         # os.chdir(str(self.__output_path))
@@ -197,7 +194,6 @@ class BLASTn(BT):
         # TODO-ROB THis is for development / testing
         # TODO-ROB Add the ability to do two seperate gi configs
         """Create a gi list based on the refseq_rna database for each taxonomy id on the MCSR.
-
         It will also convert the gi list into a binary file which is more
         efficient to use with NCBI's Standalone Blast tools.
         """
@@ -234,7 +230,6 @@ class BLASTn(BT):
 
     def blast_file_config(self, file):
         """Create or use a blast configuration file.
-
         This function configures different files for new BLASTS.
         It also helps recognize whether or not a BLAST was terminated
         in the middle of the dataset.  This removes the last line of
@@ -323,7 +318,7 @@ class BLASTn(BT):
             self.blastn_log.info(
                 "The best accession has been selected from the BLAST xml record.")
             self.blastn_log.info("Accession:  %s" % accession)
-            self.blastn_log.info(f"GI number: {gi}")
+            self.blastn_log.info("GI number: {}".format(str(gi)))
             self.blastn_log.info("Raw bitscore: %s" % raw_bitscore)
             self.blastn_log.info("Description: %s" % description)
             self.add_accession(gene, organism, accession)
@@ -341,8 +336,7 @@ class BLASTn(BT):
 
         self.blastn_log.info(
             "------------------------------------------------------------------")
-        self.blastn_log.info(
-            f"The script name is {os.path.basename(__file__)}")
+        self.blastn_log.info("The script name is str(os.path.basename(__file__)).")
         self.blastn_log.info(
             'The script began on {}'.format(str(
                 d.now().strftime(

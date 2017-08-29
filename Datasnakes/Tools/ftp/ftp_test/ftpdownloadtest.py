@@ -4,8 +4,8 @@ import os
 import fnmatch
 
 
-class FTPTest(object):
-    """A simple test for ftp."""
+class NCBIFTPTest(object):
+    """A simple example for ftp."""
     def __init__(self, passwd, user='', site='ftp.ncbi.nlm.nih.gov/',
                  path='blast'):
 

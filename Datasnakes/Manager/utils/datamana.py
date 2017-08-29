@@ -8,9 +8,8 @@ from Datasnakes.Manager.utils.mana import ProjMana
 from Datasnakes.Orthologs.Blast.blastn import BLASTn
 from Datasnakes.Orthologs.CompGenetics.comp_gen import CompGenAnalysis
 from Datasnakes.Orthologs.Genbank.genbank import GenBank
-from Datasnakes.Orthologs.Align.alignment import Alignment
+from Datasnakes.Orthologs.Align.msa import MultipleSequenceAlignment as MSA
 import yaml
-import pkg_resources
 #import configparser
 #from slacker import Slacker
 #import argparse
@@ -87,7 +86,7 @@ class DataMana(object):
                         self.bl.get_gbk_file(accession, GENE, ORGANISM, server_flag=server_flag)
 
     def align(self, genbank):
-        self.al = Alignment(genbank=genbank, **self.Alignment_config)
+        self.al = MSA(genbank=genbank, **self.Alignment_config)
         self.al.align(self.Alignment_config['kwargs'])
 
 

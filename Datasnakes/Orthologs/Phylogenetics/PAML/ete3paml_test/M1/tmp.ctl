@@ -15,9 +15,9 @@
           model = 0
           ncatG = 8
           noisy = 0
-        NSsites = 2
+        NSsites = 1
+          omega = 0.7
       fix_omega = 0
-          omega = 1.7
    RateAncestor = 0
         runmode = 0
         seqtype = 1

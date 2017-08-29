@@ -10,7 +10,7 @@ import subprocess
 import shutil
 
 
-class Alignment(object):
+class MultipleSequenceAlignment(object):
 
     def __init__(self, project, aln_program, project_path=None, genbank=GenBank, **kwargs):
 
@@ -253,20 +253,26 @@ class Alignment(object):
             print('Error: ' + str(error))
             print('Out: ' + str(out))
 
-    def clustalo(self, infile, output_file, logpath, outfmt="fasta"):
+    def clustalo(self, infile, outfile, logpath, outfmt="fasta"):
+        """This class aligns amino acids sequences using parameters similar to
+        the default parameters.
 
-        COCmd = ClustalOmegaCommandline(infile=infile, cmd="clustalo", outfile=output_file, seqtype="DNA",
-                                        max_hmm_iterations=2, infmt="fasta", outfmt=outfmt, iterations=3, verbose=True,
-                                        force=True, log=logpath)
-        print(COCmd)
+        These parameters include 2 additional iterations for the hmm.
+        """
+        clustalo_cline = ClustalOmegaCommandline(infile=infile, cmd="clustalo",
+                                                 outfile=outfile, seqtype="PROTEIN",
+                                                 max_hmm_iterations=2, infmt="fasta",
+                                                 outfmt=outfmt, iterations=3,
+                                                 verbose=True,
+                                                 force=True, log=logpath)
+        stdout, stderr = clustalo_cline()
 
-        clustalo = subprocess.Popen([str(COCmd)], stderr=subprocess.PIPE, stdout=subprocess.PIPE, shell=True,
-                                    encoding='utf-8')
-        error = clustalo.stderr.readlines()
-        out = clustalo.stdout.readlines()
-        clustalo.wait()
-        print(error)
-        print(out)
+        # Run the command
+        clustalo_cline()
+        if stderr:
+            print(stderr)
+        if stdout:
+            print(stdout)
 
 
 
