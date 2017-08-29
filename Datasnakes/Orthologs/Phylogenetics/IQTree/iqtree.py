@@ -90,7 +90,7 @@ class IQTreeCommandline(AbstractCommandline):
             for maximum likelihood analysis. Nucleic Acids Res., 44 (W1):W232-W235. DOI: 10.1093/nar/gkw256
     """
 
-    def __init__(self, cmd="guidance", **kwargs):
+    def __init__(self, cmd="iqtree", **kwargs):
         self.parameters = \
             [
                 _Option(['-s', 'alignment'],

@@ -4,18 +4,18 @@ from pathlib import Path
 import pandas as pd
 from Datasnakes.Orthologs.CompGenetics import CompGenAnalysis
 from Datasnakes.Manager.logit import LogIt
-
+# import pkg_resources
+# import shutil
+from Datasnakes.Manager import index
 
 class BLASTAnalysis(CompGenAnalysis):
     """Perform Blast Analysis after completing BLASTn."""
-    def __init__(self, repo, user, project, research, research_type,
-                 template=None, taxon_file=None, post_blast=False, save_data=True, **kwargs):
+    def __init__(self, project, template=None, taxon_file=None, post_blast=False, save_data=True, **kwargs):
         """Inherited from the CompGenAnalysis class.
 
         If the BLAST was cut short, then a build_file is to be used.
         """
-        super().__init__(repo=repo, user=user, project=project, research=research, research_type=research_type,
-                         acc_file=template, taxon_file=taxon_file, post_blast=post_blast, hgnc=False, **kwargs)
+        super().__init__(project=project, acc_file=template, taxon_file=taxon_file, post_blast=post_blast, hgnc=False, **kwargs)
         # TODO-ROB: Inherit or add variable for logger class
         # TODO-ROB Add Mana directories
         # Private variables
@@ -34,25 +34,15 @@ class BLASTAnalysis(CompGenAnalysis):
             self.building_time_filename = self.building_filename.replace(
                 'building.csv', 'building_time.csv')
         else:
-            self.building_filename = str(project + 'building.csv')
+            self.building_filename = str(self.project + 'building.csv')
             self.building_time_filename = self.building_filename.replace(
                 'building.csv', 'building_time.csv')
 
         # Initialize Logging
         df = LogIt('blast_test.log', 'blastn')
         self.blastn_log = df.basic
-        #self.postblast_log = df.basic
-        #self.config_log = df.basic(self.user_log / Path('BLAST.log'))
         self.__date_format = df.date_format
         self.get_time = time.time  # To get the time use 'get_time()'
-        # Logging variables
-        # self.__date_format = '%a %b %d at %I:%M:%S %p %Y'  # Used to add as a date
-        # self.__archive_format = '%m-%d-%Y@%I:%M:%S-%p'  # Used to append to archives
-        # self.__log_format = '%(name)s - [%(levelname)-2s]: %(message)s'
-        # log.basicConfig(level=log.DEBUG,
-        #                 format=self.__log_format,
-        #                 filename="logs/accessions2blastxml_%s.log" % str(d.now().strftime(self.__archive_format)))
-        # self.blast_log = log.getLogger('Blastn')
 
     def add_accession(self, gene, organism, accession):
         """Take an accession and add in to the building dataframe & csv file.
