@@ -10,6 +10,7 @@ from Datasnakes.Orthologs.CompGenetics.comp_gen import CompGenAnalysis
 from Datasnakes.Orthologs.Genbank.genbank import GenBank
 from Datasnakes.Orthologs.Align.msa import MultipleSequenceAlignment as MSA
 import yaml
+import pkg_resources
 #import configparser
 #from slacker import Slacker
 #import argparse
