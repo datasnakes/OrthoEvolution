@@ -5,12 +5,12 @@ from ete3 import NCBITaxa
 import pandas as pd
 from pathlib import Path
 # from pandas import ExcelWriter
-from Datasnakes.Manager.utils.mana import ProjMana as ProjectManagement
+from Datasnakes.Manager.utils.mana import ProjectManagement
 import shutil
 import pkg_resources
-from Datasnakes.Manager import index
+from Datasnakes.Manager import config
 # TODO-ROB Create function for archiving and multiple runs (this can go
-# into the Mana class)
+# into the Management class)
 
 
 class CompGenAnalysis(object):
@@ -42,12 +42,13 @@ class CompGenAnalysis(object):
         # Private Variables
         self.__post_blast = post_blast
         self.__taxon_filename = taxon_file
-        self.__paml_filename = paml_file
+        # self.__paml_filename = paml_file
         self.acc_filename = acc_file
         self.project = project
 
         # Initiate the project management variable
         if not isinstance(proj_mana, ProjectManagement):
+
             if project_path:
                 self.project_path = Path(project_path) / Path(self.project)
             else:
@@ -61,26 +62,24 @@ class CompGenAnalysis(object):
                 setattr(self, key, value)
             print('project_path=%s' % self.project_path)
 
-
         # Handle the taxon_id file and blast query
         if taxon_file is not None:
             # File init
             self.taxon_path = self.project_index / Path(self.__taxon_filename)
         # Handle the paml organism file
         # TODO-ROB Deprecate paml_file
-        if paml_file is not None:
-            # File init
-            self.paml_path = self.project_index / Path(self.__paml_filename)
-            self.paml_org_list = []
+        # if paml_file is not None:
+        #     # File init
+        #     self.paml_path = self.project_index / Path(self.__paml_filename)
+        #     self.paml_org_list = []
         # Handle the master accession file (could be before or after blast)
         if kwargs['copy_from_package']:
-            shutil.copy(pkg_resources.resource_filename(index.__name__, kwargs['MAF']), str(self.project_index))
+            shutil.copy(pkg_resources.resource_filename(config.__name__, kwargs['MAF']), str(self.project_index))
             acc_file = kwargs['MAF']
             self.acc_filename = acc_file
         if acc_file is not None:
             # File init
             self.acc_path = self.project_index / Path(self.acc_filename)
-            self.raw_acc_data = pd.read_csv(str(self.acc_path), dtype=str)
             self.go_list = go_list
             # Handles for organism lists #
             self.org_list = []
@@ -104,7 +103,6 @@ class CompGenAnalysis(object):
             self.blast_rhesus = []
             # Handles for dataframe init #
             self.raw_acc_data = pd.read_csv(str(self.acc_path), dtype=str)
-
             self.building_filename = str(acc_file[:-4] + 'building.csv')
             self.building_time_filename = self.building_filename.replace(
                 'building.csv', 'building_time.csv')
@@ -112,7 +110,7 @@ class CompGenAnalysis(object):
             del self.building['Tier']
             del self.building['Homo_sapiens']
             self.building = self.building.set_index('Gene')
-            self.building_file_path = self.raw_data / \
+            self.building_file_path = self.data / \
                                       Path(self.building_filename)
 
             self.building_time = pd.read_csv(str(self.acc_path), dtype=str)
@@ -151,11 +149,8 @@ class CompGenAnalysis(object):
             self.df = self.__data
             # #### Format the main pivot table #### #
             self.pt = pd.pivot_table(
-                pd.read_csv(
-                    self.acc_path),
-                index=[
-                    'Tier',
-                    'Gene'],
+                pd.read_csv(self.acc_path),
+                index=['Tier','Gene'],
                 aggfunc='first')
             array = self.pt.axes[1].tolist()  # Organism list
             self.pt.columns = pd.Index(array, name='Organism')
@@ -234,8 +229,10 @@ class CompGenAnalysis(object):
         This function also populates several dictionaries.
         The dictionaries contain separate keys for Missing genes.
         """
+
+        # Usually a only a user would manually add a csv file for their own purposes.
         if csv_file is not None:
-            self.__init__(csv_file)
+            self.__init__(acc_file=csv_file)
             df = self.df
         maf = df
         self.gene_list = maf.index.tolist()
@@ -258,10 +255,10 @@ class CompGenAnalysis(object):
                                    for org in self.taxon_orgs)
             self.taxon_dict = dict(zip(self.taxon_orgs, self.taxon_ids))
             self.taxon_lineage = self.get_taxon_dict()
-        if self.__paml_filename is not None:
-            self.paml_org_list = self.get_file_list(self.paml_path)
-        else:
-            self.paml_org_list = self.paml_org_formatter()
+        # if self.__paml_filename is not None:
+        #     self.paml_org_list = self.get_file_list(self.paml_path)
+        # else:
+        #     self.paml_org_list = self.paml_org_formatter()
 
         self.tier_list = maf['Tier'].tolist()
         self.tier_dict = maf['Tier'].to_dict()
@@ -310,7 +307,7 @@ class CompGenAnalysis(object):
             accession = 'missing'
         return accession
 
-    def get_accessions(self, go_list=None):
+    def get_orthologous_gene_sets(self, go_list=None):
         """ Get a list of acessions.
         Args:
             Can take a gene/organism list as an argument:
@@ -328,7 +325,7 @@ class CompGenAnalysis(object):
                 accessions.append(accession)
         return accessions
 
-    def get_accession_alignment(self, gene):
+    def get_orthologous_accessions(self, gene):
         """Takes a single gene and returns a list of accession numbers
         for the different orthologs.
         """
@@ -355,14 +352,14 @@ class CompGenAnalysis(object):
         return tier_frame_dict
 
     # TODO-ROB turn into a utility
-    # XXX PAML no longer needs a format different than `Homo_sapiens`
-    def paml_org_formatter(self):
-        org_list = []
-        for organism in self.org_list:
-            genus, sep, species = organism.partition('_')
-            org = ''.join([genus[0], sep, species[0:28]])
-            org_list.append(org)
-        return org_list
+    # # XXX PAML no longer needs a format different than `Homo_sapiens`
+    # def paml_org_formatter(self):
+    #     org_list = []
+    #     for organism in self.org_list:
+    #         genus, sep, species = organism.partition('_')
+    #         org = ''.join([genus[0], sep, species[0:28]])
+    #         org_list.append(org)
+    #     return org_list
 
     def get_taxon_dict(self, min=False):
         """Get the taxonomny information about each organism using ETE3.
