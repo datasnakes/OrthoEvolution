@@ -16,7 +16,7 @@ class BLASTAnalysis(CompGenAnalysis):
         """
         super().__init__(project=project, acc_file=template, taxon_file=taxon_file, post_blast=post_blast, hgnc=False, **kwargs)
         # TODO-ROB: Inherit or add variable for logger class
-        # TODO-ROB Add Mana directories
+        # TODO-ROB Add Management directories
         # Private variables
         self.__home = os.getcwd()
         if taxon_file is not None:
