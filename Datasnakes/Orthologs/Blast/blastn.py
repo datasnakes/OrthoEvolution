@@ -8,7 +8,7 @@ from datetime import datetime as d
 from pathlib import Path
 import pandas as pd
 import pkg_resources
-from Datasnakes.Manager import index
+from Datasnakes.Manager import config
 from Bio import SearchIO  # Used for parsing and sorting XML files.
 from Bio.Blast.Applications import NcbiblastnCommandline
 from Datasnakes.Orthologs.CompGenetics.ncbi_blast import BLASTAnalysis as BT
@@ -208,8 +208,8 @@ class BLASTn(BT):
         pbs_script = 'get_gi_lists.sh'
         pbs_script_path = self.__gi_list_path / Path(pbs_script)
         py_script = 'get_gi_lists.py'
-        shutil.copy(pkg_resources.resource_filename(index.__name__, pbs_script), self.raw_data)
-        shutil.copy(pkg_resources.resource_filename(index.__name__, py_script), self.raw_data)
+        shutil.copy(pkg_resources.resource_filename(config.__name__, pbs_script), self.raw_data)
+        shutil.copy(pkg_resources.resource_filename(config.__name__, py_script), self.raw_data)
         gi_config = subprocess.check_output('qsub %s' % str(pbs_script_path), shell=True)
         gi_config = gi_config.decode('utf-8')
         print('The GI list configuration\'s JobID is %s' % gi_config)
