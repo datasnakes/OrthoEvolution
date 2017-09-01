@@ -19,7 +19,7 @@ proj_mana.py updated on 4/3/2017 at 3:39 PM
 # Libraries:
 
 import os
-#from Mana import Mana
+#from Management import Management
 #from lister import Lister
 import json
 import tablib

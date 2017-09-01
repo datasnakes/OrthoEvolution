@@ -35,7 +35,7 @@ from Datasnakes.Orthologs import treelib2
 
 class dir_mana(object):
     """This class organizes a directory tree for a project.
-    The Mana() class will help with organization and it will
+    The Management() class will help with organization and it will
     help to instantly access the proper directories on command.
 
     It is advised to set up a function that is named after the project.

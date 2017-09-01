@@ -1,7 +1,7 @@
 """BLASTn test"""
 import shutil
 #from pathlib import Path
-from Datasnakes.Manager.utils.mana import ProjMana
+from Datasnakes.Manager.utils.mana import ProjectManagement
 from Datasnakes.Manager import index
 from Datasnakes.Orthologs.Blast import BLASTn
 # from ete3 import NCBITaxa
@@ -15,7 +15,7 @@ research = "comparative_genetics"
 research_type = "public"
 template = pkg_resources.resource_filename(index.__name__, "MAFV3.2.csv")
 # Directory setup now combined with blast setup
-# a = ProjMana(
+# a = ProjectManagement(
 #     repo=repo,
 #     user=user,
 #     project=project,

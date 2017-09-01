@@ -8,7 +8,7 @@ from pathlib import Path
 from datetime import datetime as d
 import yaml
 
-from Datasnakes.Manager.utils import ProjMana  # Project Management
+from Datasnakes.Manager.utils import ProjectManagement  # Project Management
 from Datasnakes.Orthologs.Blast import BLASTn
 from Datasnakes.Orthologs.Genbank import GenBank
 from Datasnakes.Orthologs.Align import MultipleSequenceAlignment as MSA
@@ -33,10 +33,10 @@ class Blast2PAML(luigi.Task):
 
 
     def requires(self):
-        return ProjMana(repo=self.repository, user=self.username,
-                                     project=self.project, research_type=self.researchtype,
-                                     new_repo=self.newrepo, new_user=self.newuser,
-                                     new_project=self.newproject, new_research=self.newresearch)
+        return ProjectManagement(repo=self.repository, user=self.username,
+                                 project=self.project, research_type=self.researchtype,
+                                 new_repo=self.newrepo, new_user=self.newuser,
+                                 new_project=self.newproject, new_research=self.newresearch)
 
     def output(self):
         return luigi.LocalTarget('~/')
