@@ -1,15 +1,13 @@
 import os
-import sys
 import zipfile
-import logging as log
 from pathlib import Path
-from datetime import datetime as d
-from Datasnakes.Manager.utils.mana import ProjMana
+from Datasnakes.Manager.utils.mana import ProjectManagement
 from Datasnakes.Orthologs.Blast.blastn import BLASTn
 from Datasnakes.Orthologs.CompGenetics.comp_gen import CompGenAnalysis
 from Datasnakes.Orthologs.Genbank.genbank import GenBank
 from Datasnakes.Orthologs.Align.msa import MultipleSequenceAlignment as MSA
 import yaml
+import pkg_resources
 #import configparser
 #from slacker import Slacker
 #import argparse
@@ -36,7 +34,7 @@ class DataMana(object):
 
             # Project Management
             if self.ProjectManagment_config is not None:
-                self.pm = ProjMana(**self.ProjectManagment_config)
+                self.pm = ProjectManagement(**self.ProjectManagment_config)
             else:
                 self.pm = self.ProjectManagment_config
 
