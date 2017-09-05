@@ -7,6 +7,7 @@ from Datasnakes.Manager.logit import LogIt
 # import pkg_resources
 # import shutil
 
+
 class BLASTAnalysis(CompGenAnalysis):
     """Perform Blast Analysis after completing BLASTn."""
     def __init__(self, project, template=None, taxon_file=None, post_blast=False, save_data=True, **kwargs):
@@ -104,7 +105,7 @@ class BLASTAnalysis(CompGenAnalysis):
         if self.save_data is True:
             temp.to_csv(str(self.building_time_file_path))
 
-    def post_blast_analysis(self, project_name, removed_genes=None):
+    def post_blast_analysis(self, removed_genes=None):
         """Analyze the blast results.
 
         Generate information about any duplicated or missing accessions by gene
