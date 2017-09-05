@@ -1,12 +1,11 @@
 import os
-#import mygene
 from ete3 import NCBITaxa
 # NCBITaxa().update_taxonomy_database()
 import pandas as pd
 from pathlib import Path
 # from pandas import ExcelWriter
 from Datasnakes.Manager.utils.mana import ProjectManagement
-from Datasnakes.Orthologs.Blast.utils import my_gene_info
+from Datasnakes.Orthologs.Blast.utils import my_gene_info, get_dup_acc, get_miss_acc
 import shutil
 import pkg_resources
 from Datasnakes.Manager import config
@@ -179,7 +178,7 @@ class CompGenAnalysis(object):
         Path.mkdir(self.data, exist_ok=True)
 
 
-# TODO-ROB Add HGNC python module
+# //TODO-ROB Add HGNC python module
     @staticmethod
     def get_file_list(file):
         data = pd.read_csv(file, header=None)
@@ -218,10 +217,6 @@ class CompGenAnalysis(object):
                                    for org in self.taxon_orgs)
             self.taxon_dict = dict(zip(self.taxon_orgs, self.taxon_ids))
             self.taxon_lineage = self.get_taxon_dict()
-        # if self.__paml_filename is not None:
-        #     self.paml_org_list = self.get_file_list(self.paml_path)
-        # else:
-        #     self.paml_org_list = self.paml_org_formatter()
 
         self.tier_list = maf['Tier'].tolist()
         self.tier_dict = maf['Tier'].to_dict()
@@ -242,7 +237,7 @@ class CompGenAnalysis(object):
         # Post-Blast accession analysis
         if self.__post_blast:
             # Missing
-            self.missing_dict = self.get_miss_acc()
+            self.missing_dict = get_miss_acc(self.acc_path)
             self.missing_genes = self.missing_dict['genes']
             self.missing_gene_count = self.missing_genes['count']
             del self.missing_genes['count']
@@ -250,7 +245,7 @@ class CompGenAnalysis(object):
             self.missing_organsims_count = self.missing_organsims['count']
             del self.missing_organsims['count']
             # Duplicates
-            self.duplicated_dict = self.get_dup_acc()
+            self.duplicated_dict = get_dup_acc(self.acc_dict, self.gene_list, self.org_list)
             self.duplicated_accessions = self.duplicated_dict['accessions']
             self.duplicated_organisms = self.duplicated_dict['organisms']
             self.duplicated_genes = self.duplicated_dict['genes']
@@ -315,16 +310,6 @@ class CompGenAnalysis(object):
             tier_frame_dict[tier] = maf.groupby('Tier').get_group(tier)
         return tier_frame_dict
 
-    # TODO-ROB turn into a utility
-    # # XXX PAML no longer needs a format different than `Homo_sapiens`
-    # def paml_org_formatter(self):
-    #     org_list = []
-    #     for organism in self.org_list:
-    #         genus, sep, species = organism.partition('_')
-    #         org = ''.join([genus[0], sep, species[0:28]])
-    #         org_list.append(org)
-    #     return org_list
-
     def get_taxon_dict(self, min=False):
         """Get the taxonomny information about each organism using ETE3.
         Returns:
@@ -373,161 +358,3 @@ class CompGenAnalysis(object):
                 # Append so that duplicates can be identified
                 go[query_acc].append(go_list)
         return go
-
-    def get_dup_acc(self):
-        """Get duplicate accessions.
-        This function is used to analyze an accession file post-BLAST.
-        It uses the accession dictionary as a base.
-
-        :return: A master duplication dictionary used to initialize the
-        duplicate class variables.
-        """
-        duplicated_dict = dict()
-        duplicated_dict['accessions'] = {}
-        duplicated_dict['genes'] = {}
-        duplicated_dict['organisms'] = {}
-        duplicated_dict['random'] = {}
-        duplicated_dict['other'] = {}
-        acc_dict = self.acc_dict
-        for accession, go_list in acc_dict.items():
-            # Finding duplicates by using the length of the accession
-            # dictionary
-            if len(go_list) > 1:
-                # dict['accessions']['XM_000000'] = [[g, o], [g, o]]
-                duplicated_dict['accessions'][accession] = go_list
-                genes, orgs = zip(*go_list)
-                genes = list(genes)
-                orgs = list(orgs)
-                # Process the duplicates by categorizing and storing in a
-                # dictionary
-                for go in go_list:
-                    g = go[0]
-                    o = go[1]
-                    # Initialize the dictionaries if they haven't already been
-                    if g not in duplicated_dict['genes']:
-                        duplicated_dict['genes'][g] = {}
-                    if o not in duplicated_dict['organisms']:
-                        duplicated_dict['organisms'][o] = {}
-                # Categorize the different types of duplication
-                    # Duplicates that persist across an organisms
-                    if orgs.count(o) == len(go_list):
-                        duplicated_dict['organisms'][o][accession] = genes
-                        del duplicated_dict['genes'][g]
-                        break
-                    # Duplication across an organisms, but also somewhere else
-                    elif orgs.count(o) != 1:
-                        alt_genes = list(
-                            gene for gene, org in go_list if org == o)
-                        duplicated_dict['organisms'][o][accession] = alt_genes
-
-                    # Duplicates that persist across a gene
-                    if genes.count(g) == len(go_list):
-                        duplicated_dict['genes'][g][accession] = orgs
-                        del duplicated_dict['organisms'][o]
-                        break
-                    # Duplication across a gene, but also somewhere else
-                    elif genes.count(g) != 1:
-                        alt_orgs = list(
-                            org for gene, org in go_list if gene == g)
-                        duplicated_dict['genes'][g][accession] = alt_orgs
-
-                    # This is the "somewhere else" if the duplication is random or not categorized
-                        # The duplication is random
-                    if genes.count(g) == 1 and orgs.count(o) == 1:
-                        del duplicated_dict['organisms'][o]
-                        del duplicated_dict['genes'][g]
-                        if accession not in duplicated_dict['random']:
-                            duplicated_dict['random'][accession] = []
-                        duplicated_dict['random'][accession].append(go)
-                        # There is another category of duplication that I'm missing
-                        # TODO-ROB:  If an other exists throw a warning in the
-                        # logs
-                    else:
-                        del duplicated_dict['organisms'][o]
-                        del duplicated_dict['genes'][g]
-                        if accession not in duplicated_dict['other']:
-                            duplicated_dict['other'][accession] = []
-                        duplicated_dict['other'][accession].append(go)
-            # Duplicate Organism count dictionary
-            dup_org = pd.DataFrame.from_dict(self.duplicated_organisms)
-            for org in self.org_list:
-                try:
-                    self.dup_org_count[org] = dup_org[org].count()
-                except KeyError:
-                    self.dup_org_count[org] = 0
-            # Duplicate Gene count dictionary
-            dup_gene = pd.DataFrame.from_dict(self.duplicated_genes)
-            for gene in self.gene_list:
-                try:
-                    self.dup_gene_count[gene] = dup_gene[gene].count()
-                except KeyError:
-                    self.dup_gene_count[gene] = 0
-            # Duplicate Accession count dictionary
-            for accn, go in duplicated_dict['accessions'].items():
-                self.dup_acc_count[accn] = go.__len__()
-        return duplicated_dict
-
-    def get_miss_acc(self, acc_file=None):
-        """
-        This function is used to analyze an accession file post BLAST.
-        It generates several files and dictionaries regarding missing accession numbers.
-
-        :param acc_file: An accession file (post BLAST).
-        :return: A dictionary with data about the missing accession numbers by Gene and
-        by Organism.
-        """
-        # TODO-ROB: Add Entrez ID validation;  Get info from xml files???
-        missing_dict = dict()
-        missing_dict['organisms'] = {}
-        missing_dict['genes'] = {}
-
-        # Initialize the Data Frames
-        if acc_file is None:
-            miss_gene_df = self.df.isnull()
-            miss_org_df = self.df.T.isnull()
-        else:
-            self.__init__(acc_file=acc_file)
-            miss_gene_df = self.df.isnull()
-            miss_org_df = self.df.T.isnull()
-
-        # Get missing Accessions by Organism
-        organism_dict = miss_org_df.sum(axis=1).to_dict()
-        total_miss = 0
-        for organism, miss in organism_dict.items():
-            if miss != 0:
-                missing_dict['organisms'][organism] = {}
-                # Missing Gene dict {'HTR1A': True}
-                missing_genes = miss_gene_df.ix[:, organism].to_dict()
-                # Do a list comprehension to get a list of genes
-                missing_dict['organisms'][organism]['missing genes'] = list(key for key, value in missing_genes.items()
-                                                                            if value)  # Value is True for miss accns
-
-                # Number of missing accessions per organism
-                missing_dict['organisms'][organism]['count'] = miss
-                total_miss += miss
-        missing_dict['organisms']['count'] = total_miss
-
-        # Get missing Accessions by Gene
-        gene_dict = miss_gene_df.sum(axis=1).to_dict()
-        total_miss = 0
-        for gene, miss in gene_dict.items():
-            if miss != 0:
-                missing_orgs = miss_gene_df.T.ix[:, gene].to_dict()
-                missing_dict['genes'][gene] = {}
-                # Do a list comprehension to get a list of organisms
-                missing_dict['genes'][gene]['missing organisms'] = list(key for key, value in missing_orgs.items()
-                                                                        if value  # Value is True for missing accessions
-                                                                        if key != 'Tier')  # Don't include 'Tier'
-
-                # Number of missing accessions per gene
-                missing_dict['genes'][gene]['count'] = miss
-                total_miss += miss
-        missing_dict['genes']['count'] = total_miss
-
-        return missing_dict
-
-    def get_pseudogenes(self):
-        """ UNDER DEVELOPMENT!!!
-        This subclass will denote which genes are sudogenes.
-        """
-        print(self.__doc__)
