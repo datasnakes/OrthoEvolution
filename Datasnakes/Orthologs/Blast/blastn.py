@@ -25,17 +25,14 @@ class BLASTn(BT):
         super().__init__(project=project, template=template, save_data=save_data, **kwargs)
         # # TODO-ROB Add taxon parameter
         # Manage Directories
-        self.__home = Path(os.getcwd())
-        self.__output_path = self.raw_data / Path('BLAST')  # Output directory
-        self.__gi_list_path = self.__output_path / Path('gi_lists')
-        self.__xml_path = self.__output_path / Path('xml')
-        Path.mkdir(self.__output_path, parents=True, exist_ok=True)
-        Path.mkdir(
-            self.__gi_list_path /
-            Path('data'),
-            parents=True,
-            exist_ok=True)
-        Path.mkdir(self.__xml_path, parents=True, exist_ok=True)
+        self.home = Path(os.getcwd())
+        # self.blast_path = self.raw_data / Path('BLAST')  # Output directory
+        # self.__xml_path = self.blast_path / Path('xml')
+        self.__gi_list_path = self.project_database / Path('gi_lists')
+        Path.mkdir(self.__gi_list_path, parents=True, exist_ok=True)
+        # Path.mkdir(self.blast_path, parents=True, exist_ok=True)
+        # Path.mkdir(self.__xml_path, parents=True, exist_ok=True)
+
         # # Initialize Logging
         # self.__blastn_log = LogIt.blastn()
         #df = LogIt()
@@ -70,7 +67,7 @@ class BLASTn(BT):
         """Configure everything for a BLAST.
         First the accession file, and gene list is configured.
         """
-        # os.chdir(str(self.__output_path))
+        # os.chdir(str(output_path))
         self.blastn_log.info(
             '***********************************BLAST CONFIG START************ \
             ***********************\n\n\n')
@@ -99,13 +96,13 @@ class BLASTn(BT):
                              "query refseq sequence to a temp.fasta file from BLAST database.")
         # Iterate the query accessions numbers
         for query in query_align:
-            # os.chdir(str(self.__output_path))
+            # os.chdir(str(output_path))
             gene = self.acc_dict[query][0][0]
-            gene_path = self.__xml_path / Path(gene)
+            gene_path = self.raw_data / Path(gene) / Path('BLAST')
             org = self.acc_dict[query][0][1]
             # Create the directories for each gene
             try:
-                Path.mkdir(gene_path)
+                Path.mkdir(gene_path, exist_ok=True, parents=True)
                 self.blastn_log.info("Directory Created: %s" % gene)
                 self.blastn_log.info("\n")
                 # os.chdir(gene)
@@ -200,9 +197,8 @@ class BLASTn(BT):
         print('gi_list_config')
         # Directory and file handling
         cd = os.getcwd()
-        os.chdir(str(self.__gi_list_path))
+        os.chdir(str(self.__gi_list_path))  # user/databases/{project-name}/gi_lists
         taxids = self.taxon_ids
-        Path.mkdir(self.__gi_list_path / Path('data'), parents=True, exist_ok=True)
         pd.Series(taxids).to_csv('taxids.csv', index=False)
         # PBS job submission using the templates
         pbs_script = 'get_gi_lists.sh'
@@ -235,9 +231,8 @@ class BLASTn(BT):
         in the middle of the dataset.  This removes the last line of
         the accession file if it is incomplete.
         """
-        global ending
         output_dir_list = os.listdir(
-            self.__output_path)  # Make a list of files
+            self.data)  # Make a list of files
         # If the file exists then make a gene list that picks up from the last
         # BLAST
         if file in output_dir_list:
@@ -277,14 +272,14 @@ class BLASTn(BT):
             self.blastn_log.info("A new BLAST started at %s" % self.get_time())
             return None
 
-    def blast_xml_parse(self, xml_file, gene, organism):
+    def blast_xml_parse(self, xml_path, gene, organism):
         """Parse the XML file created by the BLAST."""
         global gi, raw_bitscore
         self.blastn_log.info(
             "Parsing %s to find the best accession number." %
-            xml_file)
+            xml_path)
         maximum = 0
-        file_path = str(Path(self.__xml_path) / Path(gene) / Path(xml_file))
+        file_path = str(Path(xml_path))
         with open(file_path, 'r') as blast_xml:
             blast_qresult = SearchIO.read(blast_xml, 'blast-xml')
             mapped_qresult = blast_qresult.hit_map(self.map_func)
@@ -354,8 +349,8 @@ class BLASTn(BT):
                 if organism == query_organism:
                     continue
                 # Initialize output variables
-                gene_path = self.__xml_path / Path(gene)
-                files = os.listdir(gene_path)
+                gene_path = self.raw_data / Path(gene) / Path('BLAST')
+                files = os.listdir(str(gene_path))
                 xml = '%s_%s.xml' % (gene, organism)
                 xml_path = gene_path / Path(xml)
 
