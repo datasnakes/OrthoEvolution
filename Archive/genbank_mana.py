@@ -1,4 +1,4 @@
-from .genbank import GenBank as GB
+from Datasnakes.Orthologs.Genbank.genbank import GenBank as GB
 
 class GenBankMana(GB):
     """Genbank file management."""
