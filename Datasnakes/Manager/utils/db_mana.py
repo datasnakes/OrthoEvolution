@@ -8,7 +8,7 @@ class DatabaseManagement(object):
 
     def __init__(self, project, project_path=None, proj_mana=ProjectManagement, **kwargs):
 
-        self.project=project
+        self.project = project
 
         if not isinstance(proj_mana, ProjectManagement):
             if project_path:
