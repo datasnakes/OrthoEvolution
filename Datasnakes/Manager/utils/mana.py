@@ -445,6 +445,7 @@ class ProjectManagement(UserManagement):
                 Path(research_type) / Path(research)
             self.project_archive = self.project_path / Path('archive')
             self.project_index = self.research_path / Path('index')
+            self.project_database = self.user_db / Path(project)
             self.data = self.research_path / Path('data')
             self.raw_data = self.research_path / Path('raw_data')
             self.project_web = self.research_path / Path('web')
