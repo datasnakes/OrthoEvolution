@@ -6,6 +6,7 @@ import pandas as pd
 from pathlib import Path
 # from pandas import ExcelWriter
 from Datasnakes.Manager.utils.mana import ProjectManagement
+from Datasnakes.Orthologs.Blast.utils import my_gene_info
 import shutil
 import pkg_resources
 from Datasnakes.Manager import config
@@ -37,9 +38,10 @@ class CompGenAnalysis(object):
     __data = ''
 
     # TODO-ROB:  CREAT PRE-BLAST and POST-BLAST functions
-    def __init__(self, project, project_path=None, acc_file=None, taxon_file=None, paml_file=None, go_list=None, post_blast=True, hgnc=False,
+    def __init__(self, project, project_path=None, acc_file=None, taxon_file=None, paml_file=None, go_list=None, pre_blast=False, post_blast=True, hgnc=False,
                  proj_mana=ProjectManagement, **kwargs):
         # Private Variables
+        self.__pre_blast = pre_blast
         self.__post_blast = post_blast
         self.__taxon_filename = taxon_file
         # self.__paml_filename = paml_file
@@ -101,28 +103,28 @@ class CompGenAnalysis(object):
             # Handles for blast queries #
             self.blast_human = []
             self.blast_rhesus = []
-            # Handles for dataframe init #
+            # Handles for different dataframe initializations#
             self.raw_acc_data = pd.read_csv(str(self.acc_path), dtype=str)
-            self.building_filename = str(acc_file[:-4] + 'building.csv')
-            self.building_time_filename = self.building_filename.replace(
-                'building.csv', 'building_time.csv')
+            self.building_filename = str(acc_file[:-4] + 'building.csv')  # Master accession file for the blast
+            # #### Pre-Blast objects
+            self.mygene_df = pd.DataFrame()  # MyGene
+            self.mygene_filename = "%s_mygene.csv" % self.project  # MyGene
+            self.mygene_path = self.data / Path(self.mygene_filename)  # MyGene
+            self.header = self.raw_acc_data.axes[1].tolist()
+            # #### Blast accession numbers
             self.building = pd.read_csv(str(self.acc_path), dtype=str)
             del self.building['Tier']
             del self.building['Homo_sapiens']
-            self.building = self.building.set_index('Gene')
-            self.building_file_path = self.data / \
-                                      Path(self.building_filename)
-
+            self.building = self.building.set_index('Gene')  # Object for good user output
+            self.building_file_path = self.data / Path(self.building_filename)
+            # #### Blast time points
+            self.building_time_filename = self.building_filename.replace(
+                'building.csv', 'building_time.csv')  # Master time file for the blast
             self.building_time = pd.read_csv(str(self.acc_path), dtype=str)
             del self.building_time['Tier']
             del self.building_time['Homo_sapiens']
             self.building_time = self.building_time.set_index('Gene')
-            self.building_time_file_path = self.raw_data / \
-                                           Path(self.building_time_filename)
-            # self.mygene_df = pd.DataFrame()
-            # self.mygene_filename = "%s_mygene.csv" % self.project
-            # self.mygene_path = self.data / Path(self.mygene_filename)
-            self.header = self.raw_acc_data.axes[1].tolist()
+            self.building_time_file_path = self.raw_data / Path(self.building_time_filename)
 
             # # Handles for accession file analysis # #
             if self.__post_blast:
@@ -184,45 +186,6 @@ class CompGenAnalysis(object):
         file_list = list(data[0])
         return file_list
 
-# ***********************************************PRE BLAST ANALYSIS TOOLS********************************************* #
-# ***********************************************PRE BLAST ANALYSIS TOOLS********************************************* #
-#     def my_gene_info(self):
-#         # TODO-ROB
-#         # TODO-SDH Add custom mygene options
-#         # Initialize variables and import my-gene search command
-#         urls = []
-#         df = self.raw_acc_data
-#
-#         mg = mygene.MyGeneInfo()
-#         # Create a my-gene query handle to get the data
-#         human = list(x.upper() for x in self.blast_human)
-#         mygene_query = mg.querymany(human, scopes='refseq',
-#                                     fields='symbol,name,entrezgene,summary',
-#                                     species='human', returnall=True, as_dataframe=True,
-#                                     size=1, verbose=True)
-#         # TODO-ROB:  Logging here
-#         # Turn my-gene queries into a data frame and then reset the index
-#         mygene_query['out'].reset_index(level=0, inplace=True)
-#         mg_df = pd.DataFrame(mygene_query['out'])
-#         mg_df.drop(mg_df.columns[[1, 2, 6]], axis=1, inplace=True)
-#         # Rename the columns
-#         mg_df.rename(columns={'entrezgene': 'Entrez ID', 'summary':
-#                              'Gene Summary', 'query': 'RefSeqRNA Accession', 'name': 'Gene Name'},
-#                      inplace=True)
-#
-#         # Create NCBI links using a for loop and the Entrez IDs
-#         urls = [('<a href="{0}">{0}</a>'.format('https://www.ncbi.nlm.nih.gov/gene/' + str(entrez_id)))
-#                 for entrez_id in mg_df['Entrez ID']]
-#
-#         ncbi = pd.DataFrame(urls, columns=['NCBI Link'], dtype=str)
-#         # Merge, sort, and return the my-gene data frame
-#
-#         hot_data = pd.concat([pd.Series(df.Tier, dtype=str), df.Gene, mg_df, ncbi], axis=1)
-#         hot_data.rename(columns={'Gene': 'Gene Symbol'}, inplace=True)
-#         hot_data = hot_data.sort_values(['Tier'], ascending=True)
-#
-#         return hot_data
-
     def get_master_lists(self, df=None, csv_file=None):
         """This function populates the organism and gene lists with a data frame.
 
@@ -232,7 +195,7 @@ class CompGenAnalysis(object):
 
         # Usually a only a user would manually add a csv file for their own purposes.
         if csv_file is not None:
-            self.__init__(acc_file=csv_file)
+            self.__init__(project=self.project, acc_file=csv_file)
             df = self.df
         maf = df
         self.gene_list = maf.index.tolist()
@@ -271,11 +234,12 @@ class CompGenAnalysis(object):
         self.blast_human = self.df.Homo_sapiens.tolist()
         self.blast_rhesus = self.df.Macaca_mulatta.tolist()
 
-        # Gene analysis
-        # self.mygene_df = self.my_gene_info()
-        # self.mygene_df.to_csv(self.mygene_path, index=False)
+        # Pre-Blast gene analysis
+        if self.__pre_blast is True:
+            self.mygene_df = my_gene_info(self.acc_path)
+            self.mygene_df.to_csv(self.mygene_path, index=False)
 
-        # Accession file analysis
+        # Post-Blast accession analysis
         if self.__post_blast:
             # Missing
             self.missing_dict = self.get_miss_acc()
