@@ -167,6 +167,9 @@ class CompGenAnalysis(object):
 
     def removed_pm_config(self, kwargs):
         self.project_index = self.project_path / Path('index')
+        self.user_db = self.project_path / Path('databases')
+        self.ncbi_db_repo = self.user_db / Path('NCBI')
+        self.project_database = self.user_db / Path(self.project)
         self.raw_data = self.project_path / Path('raw_data')
         self.data = self.project_path / Path('data')
 
@@ -174,6 +177,9 @@ class CompGenAnalysis(object):
             setattr(self, key, value)
 
         Path.mkdir(self.project_index, exist_ok=True)
+        Path.mkdir(self.user_db, exist_ok=True)
+        Path.mkdir(self.ncbi_db_repo, exist_ok=True)
+        Path.mkdir(self.project_database, exist_ok=True)
         Path.mkdir(self.raw_data, exist_ok=True)
         Path.mkdir(self.data, exist_ok=True)
 
