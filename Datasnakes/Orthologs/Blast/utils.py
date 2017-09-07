@@ -1,4 +1,18 @@
 import pandas as pd
+import os
+import csv
+from pathlib import Path
+import time
+
+
+def map_func(hit):
+    """Use the map function for formatting hit id's.
+    This will be used later in the script.
+    """
+    hit.id1 = hit.id.split('|')[3]  # accession number
+    hit.id2 = hit.id.split('|')[1]  # gi number
+    hit.id = hit.id[:-2]
+    return hit
 
 
 # # XXX PAML no longer needs a format different than `Homo_sapiens`
@@ -10,6 +24,54 @@ def paml_org_formatter(organisms):
         org_list.append(org)
     return org_list
 
+
+def gene_list_config(file, data_path, gene_list, taxon_dict, logger):
+    """Create or use a blast configuration file.
+    This function configures different files for new BLASTS.
+    It also helps recognize whether or not a BLAST was terminated
+    in the middle of the dataset.  This removes the last line of
+    the accession file if it is incomplete.
+    """
+
+    ending = gene = org = taxid = None
+    output_dir_list = os.listdir(data_path)  # Make a list of files
+    # If the file exists then make a gene list that picks up from the last BLAST
+    if file in output_dir_list:
+        header = pd.read_csv(str(Path(data_path) / Path(file)), dtype=str)
+        header = header.axes[1].tolist()
+        file = Path(data_path) / Path(file)
+        with open(str(file), 'r') as open_file:
+            csv_file = csv.reader(open_file)
+            count = 0
+            # Iterate the csv file and determine the last gene to be blasted
+            for row in csv_file:
+                if count == 0:
+                    header = row
+                count += 1
+                ending = row  # The last row
+                gene = ending[1]  # The last row's gene
+                org = header[len(row) - 1]  # The last column(organism) accessed in the last row
+                taxid = taxon_dict[org]  # The taxon id of the organism
+
+            # ######### Start logging ######### #
+            ncbi = str("""result_handle1 = NcbiblastnCommandline(query="temp.fasta", db="refseq_rna", strand="plus",
+                evalue=0.001, out="%s_%s.xml", outfmt=5, gilist=%s + "gi", max_target_seqs=10, task="blastn")"""
+                       % (gene, org, taxid))
+            logger.warning("An incomplete accession file was produced from the previous BLAST, which was terminated "
+                           "midway through the procedure.")
+            logger.info("The last row looks like: \n\t%s\n\t%s\n" % (header, ending))
+            logger.info("The BLAST ended on the following query: \n%s" % ncbi)
+            if len(ending) < len(header):
+                logger.info("Restarting the BLAST for the previous gene...")
+                count = count - 2
+            # ######## End Logging ######## #
+            # The continued gene list starts with the previous gene.
+            continued_gene_list = list(x for i, x in enumerate(gene_list, 1) if i > count)
+        return continued_gene_list
+    # If the file doesn't exist return nothing
+    else:
+        logger.info("A new BLAST started at %s" % time.time())
+        return None
 # ***********************************************PRE BLAST ANALYSIS TOOLS********************************************* #
 # ***********************************************PRE BLAST ANALYSIS TOOLS********************************************* #
 
@@ -36,8 +98,8 @@ def my_gene_info(acc_path, blast_query='Homo_sapiens'):
     mg_df = pd.DataFrame(mygene_query['out'])
     mg_df.drop(mg_df.columns[[1, 2, 6]], axis=1, inplace=True)
     # Rename the columns
-    mg_df.rename(columns={'entrezgene': 'Entrez ID', 'summary':
-                         'Gene Summary', 'query': 'RefSeqRNA Accession', 'name': 'Gene Name'},
+    mg_df.rename(columns={'entrezgene': 'Entrez ID', 'summary': 'Gene Summary', 'query': 'RefSeqRNA Accession',
+                          'name': 'Gene Name'},
                  inplace=True)
 
     # Create NCBI links using a for loop and the Entrez IDs
