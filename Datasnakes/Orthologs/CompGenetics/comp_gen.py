@@ -13,11 +13,12 @@ from Datasnakes.Manager import config
 # into the Management class)
 
 
-class CompGenAnalysis(object):
+class CompGenObjects(object):
     """ Comparative Genetics Analysis.
 
     Parses an accession file with the designated format in order to
-    provide easy handling for data.
+    provide easy handling for data.  Creates python objects from the given
+    data.
 
     Input:  An open .csv file object that contains a header of organisms.  The
     first column ranks the gene by tier, the second column is a HUGO Gene
@@ -123,7 +124,7 @@ class CompGenAnalysis(object):
             del self.building_time['Tier']
             del self.building_time['Homo_sapiens']
             self.building_time = self.building_time.set_index('Gene')
-            self.building_time_file_path = self.raw_data / Path(self.building_time_filename)
+            self.building_time_file_path = self.data / Path(self.building_time_filename)
 
             # # Handles for accession file analysis # #
             if self.__post_blast:
@@ -162,8 +163,7 @@ class CompGenAnalysis(object):
             self.get_master_lists(self.__data)  # populates our lists
         else:
             self.building_filename = str(self.project + 'building.csv')
-            self.building_time_filename = self.building_filename.replace(
-                'building.csv', 'building_time.csv')
+            self.building_time_filename = self.building_filename.replace('building.csv', 'building_time.csv')
 
     def removed_pm_config(self, kwargs):
         self.project_index = self.project_path / Path('index')
