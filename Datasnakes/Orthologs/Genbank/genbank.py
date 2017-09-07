@@ -5,14 +5,14 @@ import shutil
 from pathlib import Path
 from BioSQL import BioSeqDatabase
 from Bio import SeqIO
-from Datasnakes.Orthologs.Blast.blastn import BLASTn
+from Datasnakes.Orthologs.Blast.blastn import CompGenBLASTn
 # TODO-ROB:  REMOVED Tier Based Directory System.  Only add tier directories at the end of analysis in the users data folder
 
 
 class GenBank(object):
     """Class for managing, downloading and extracting features from genbank files."""
 
-    def __init__(self, project, project_path=None, solo=False, multi=True, archive=False, min_fasta=True, blast=BLASTn, **kwargs):
+    def __init__(self, project, project_path=None, solo=False, multi=True, archive=False, min_fasta=True, blast=CompGenBLASTn, **kwargs):
         """Handle genbank files in various ways for the Orthologs Project.
 
         :param ncbi_db_repo: A path to the .db files of interest.  These
@@ -31,7 +31,7 @@ class GenBank(object):
 
         # TODO-ROB: Change the way the file systems work.
         self.project = project
-        if not isinstance(blast, BLASTn):
+        if not isinstance(blast, CompGenBLASTn):
             if project_path:
                 self.project_path = Path(project_path) / Path(self.project)
             else:

@@ -9,7 +9,7 @@ from datetime import datetime as d
 import yaml
 
 from Datasnakes.Manager.utils import ProjectManagement  # Project Management
-from Datasnakes.Orthologs.Blast import BLASTn
+from Datasnakes.Orthologs.Blast import CompGenBLASTn
 from Datasnakes.Orthologs.Genbank import GenBank
 from Datasnakes.Orthologs.Align import MultipleSequenceAlignment as MSA
 
