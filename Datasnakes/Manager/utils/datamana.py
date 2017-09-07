@@ -2,8 +2,8 @@ import os
 import zipfile
 from pathlib import Path
 from Datasnakes.Manager.utils.mana import ProjectManagement
-from Datasnakes.Orthologs.Blast.blastn import BLASTn
-from Datasnakes.Orthologs.CompGenetics.comp_gen import CompGenAnalysis
+from Datasnakes.Orthologs.Blast.blastn import CompGenBLASTn
+from Datasnakes.Orthologs.CompGenetics.comp_gen import CompGenObjects
 from Datasnakes.Orthologs.Genbank.genbank import GenBank
 from Datasnakes.Orthologs.Align.msa import MultipleSequenceAlignment as MSA
 import yaml
@@ -38,7 +38,7 @@ class DataMana(object):
             else:
                 self.pm = self.ProjectManagment_config
 
-            # BLASTn
+            # CompGenBLASTn
             if self.BLASTn_config is not None:
                 self.blast(self.pm)
             else:
@@ -57,18 +57,18 @@ class DataMana(object):
                 self.al = self.Alignment_config
 
     def blast(self, proj_mana):
-        self.bl = BLASTn(proj_mana=proj_mana, **self.BLASTn_config)
+        self.bl = CompGenBLASTn(proj_mana=proj_mana, **self.BLASTn_config)
         self.bl.blast_config(self.bl.blast_human, 'Homo_sapiens', auto_start=True)
         # TODO-Create directories for the blast data
-        # Do the blasting here using BLASTn
+        # Do the blasting here using CompGenBLASTn
 
     def genbank(self, blast):
         self.gb = GenBank(blast=blast, **self.GenBank_config)
-        if isinstance(blast, BLASTn):
+        if isinstance(blast, CompGenBLASTn):
             self.gb.blast2_gbk_files(blast.org_list, blast.gene_dict)
         else:
 
-            cga = CompGenAnalysis(**self.CompGenAnalysis_config)
+            cga = CompGenObjects(**self.CompGenAnalysis_config)
 
             # Parse the tier_frame_dict to get the tier
             for G_KEY in cga.tier_frame_dict.keys():
