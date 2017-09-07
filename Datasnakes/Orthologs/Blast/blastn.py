@@ -13,6 +13,7 @@ from Datasnakes.Manager import config
 from Bio import SearchIO  # Used for parsing and sorting XML files.
 from Bio.Blast.Applications import NcbiblastnCommandline
 from Datasnakes.Orthologs.CompGenetics.ncbi_blast import CompGenFiles
+from Datasnakes.Orthologs.Blast.utils import gene_list_config, map_func
 # TODO-ROB: Find packages for script timing and analysis
 
 
@@ -51,16 +52,6 @@ class CompGenBLASTn(CompGenFiles):
         self.complete_time_file = self.project + '_TIME.csv'
         self.complete_time_file_path = self.data / Path(self.complete_time_file)
 
-    @staticmethod
-    def map_func(hit):
-        """Use the map function for formatting hit id's.
-        This will be used later in the script.
-        """
-        hit.id1 = hit.id.split('|')[3]  # accession number
-        hit.id2 = hit.id.split('|')[1]  # gi number
-        hit.id = hit.id[:-2]
-        return hit
-
     def blast_config(self, query_accessions, query_organism, auto_start=False):
         """Configure everything for a BLAST.
         First the accession file, and gene list is configured.
@@ -72,7 +63,7 @@ class CompGenBLASTn(CompGenFiles):
 
         # Update the gene_list based on the existence of a incomplete blast
         # file
-        gene_list = self.gene_list_config(self.building_file_path)
+        gene_list = gene_list_config(self.building_file_path, self.data, self.gene_list, self.taxon_dict, self.blastn_log)
         if gene_list is not None:
             start = len(self.blast_human) - len(gene_list)  # What gene to start blasting
             query_accessions = self.blast_human[start:]  # Reconfigured query
@@ -196,67 +187,16 @@ class CompGenBLASTn(CompGenFiles):
                 break
         os.chdir(cd)
 
-    def gene_list_config(self, file):
-        """Create or use a blast configuration file.
-        This function configures different files for new BLASTS.
-        It also helps recognize whether or not a BLAST was terminated
-        in the middle of the dataset.  This removes the last line of
-        the accession file if it is incomplete.
-        """
-        header = ending = gene = org = taxid = None
-        output_dir_list = os.listdir(self.data)  # Make a list of files
-        # If the file exists then make a gene list that picks up from the last BLAST
-        if file in output_dir_list:
-            with open(file, 'r') as open_file:
-                csv_file = csv.reader(open_file)
-                count = 0
-                # Iterate the csv file and determine the last gene to be blasted
-                for row in csv_file:
-                    if count == 0:
-                        header = row
-                    count += 1
-                    ending = row  # The last row
-                    gene = ending[1]  # The last row's gene
-                    org = header[len(row) - 1]  # The last column(organism) accessed in the last row
-                    taxid = self.taxon_dict[org]  # The taxon id of the organism
-
-                # ######### Start logging ######### #
-                ncbi = str("""result_handle1 = NcbiblastnCommandline(query="temp.fasta", db="refseq_rna", strand="plus",
-                evalue=0.001, out="%s_%s.xml", outfmt=5, gilist=%s + "gi", max_target_seqs=10, task="blastn")"""
-                           % (gene, org, taxid))
-                self.blastn_log.warning("An incomplete accession file was produced from the previous BLAST,"
-                                        "which was terminated midway through the procedure.")
-
-                self.blastn_log.info(
-                    "The last row looks like: \n\t%s\n\t%s\n" %
-                    (self.header, ending))
-                self.blastn_log.info(
-                    "The BLAST ended on the following query: \n%s" %
-                    ncbi)
-                if len(ending) < len(self.header):
-                    self.blastn_log.info(
-                        "Restarting the BLAST for the previous gene...")
-                    count = count - 2
-                # ######## End Logging ######## #
-
-                # The continued gene list starts with the previous gene.
-                continued_gene_list = list(x for i, x in enumerate(self.gene_list, 1) if i > count)
-            return continued_gene_list
-        # If the file doesn't exist return nothing
-        else:
-            self.blastn_log.info("A new BLAST started at %s" % self.get_time())
-            return None
-
     def blast_xml_parse(self, xml_path, gene, organism):
         """Parse the XML file created by the BLAST."""
         accession = gi = raw_bitscore = description = None
-
+        record_dict = {}
         self.blastn_log.info("Parsing %s to find the best accession number." % xml_path)
         maximum = 0
         file_path = str(Path(xml_path))
         with open(file_path, 'r') as blast_xml:
             blast_qresult = SearchIO.read(blast_xml, 'blast-xml')
-            mapped_qresult = blast_qresult.hit_map(self.map_func)  # Map the hits
+            mapped_qresult = blast_qresult.hit_map(map_func)  # Map the hits
             for hit in mapped_qresult:
                 for hsp in hit.hsps:
                     # Find the highest scoring hit for each gene
@@ -286,6 +226,12 @@ class CompGenBLASTn(CompGenFiles):
             self.blastn_log.info("Finished parsing the file.")
             self.blastn_log.info(
                 "The best accession has been selected from the BLAST xml record.")
+            record_dict['gene'] = gene
+            record_dict['organism'] = organism
+            record_dict['accession'] = accession
+            record_dict['gi'] = gi
+            record_dict['raw bitscore'] = raw_bitscore
+            record_dict['description'] = description
             self.blastn_log.info("Accession:  %s" % accession)
             self.blastn_log.info("GI number: {}".format(str(gi)))
             self.blastn_log.info("Raw bitscore: %s" % raw_bitscore)
