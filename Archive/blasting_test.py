@@ -3,7 +3,7 @@ import shutil
 #from pathlib import Path
 from Datasnakes.Manager.utils.mana import ProjectManagement
 from Datasnakes.Manager import index
-from Datasnakes.Orthologs.Blast import BLASTn
+from Datasnakes.Orthologs.Blast import CompGenBLASTn
 # from ete3 import NCBITaxa
 # NCBITaxa().update_taxonomy_database()
 import pkg_resources
@@ -28,7 +28,7 @@ template = pkg_resources.resource_filename(index.__name__, "MAFV3.2.csv")
 #             str(a.raw_data / Path('blast') / Path('gi_lists')))
 # shutil.copy(str(a.index / Path('get_gi_lists.py')),
 #             str(a.raw_data / Path('blast') / Path('gi_lists')))
-x = BLASTn(
+x = CompGenBLASTn(
     repo=repo,
     user=user,
     project=project,
