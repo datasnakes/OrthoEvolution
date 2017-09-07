@@ -21,19 +21,19 @@ Management:
 DatabaseManagement:
   proj_mana: "!!python/name:Datasnakes.Manager.utils.mana.ProjectManagement ''\n"
 
-CompGenAnalysis:
+CompGenObjects:
   acc_file: null
   taxon_file: null
   paml_file: null
   go_list: null
   post_blast: true
   proj_mana: "!!python/name:Datasnakes.Manager.utils.mana.ProjectManagement ''\n"
-  BLASTAnalysis:
+  CompGenFiles:
     template: null
     taxon_file: null
     post_blast: false
     save_data: true
-    BLASTn:
+    CompGenBLASTn:
       template: null
       save_data: true
 
@@ -41,7 +41,7 @@ GenBank:
   solo: false
   multi: true
   min_fasta: true
-  blast: "!!python/name:Datasnakes.Orthologs.Blast.blastn.BLASTn ''\n"
+  blast: "!!python/name:Datasnakes.Orthologs.Blast.blastn.CompGenBLASTn ''\n"
 
 MultipleSequenceAlignment:
   aln_program: 'GUIDANCE2'
