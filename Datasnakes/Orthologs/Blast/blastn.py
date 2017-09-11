@@ -14,6 +14,7 @@ from Bio import SearchIO  # Used for parsing and sorting XML files.
 from Bio.Blast.Applications import NcbiblastnCommandline
 from Datasnakes.Orthologs.CompGenetics.ncbi_blast import CompGenFiles
 from Datasnakes.Orthologs.Blast.utils import gene_list_config, map_func
+from Datasnakes.Manager.utils import makedirectory
 # TODO-ROB: Find packages for script timing and analysis
 
 
@@ -30,10 +31,7 @@ class CompGenBLASTn(CompGenFiles):
         self.home = Path(os.getcwd())
         self.__gi_list_path = self.project_database / Path('gi_lists')
 
-        exist_ok = True
-        if not exist_ok and os.path.isdir(self.__gi_list_path):
-            with contextlib.suppress(OSError):
-                Path.mkdir(self.__gi_list_path, parents=True)
+        makedirectory(self.__gi_list_path, parents=True)
 
         # # Initialize Logging
         # self.__blastn_log = LogIt.blastn()

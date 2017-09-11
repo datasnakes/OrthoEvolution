@@ -6,6 +6,7 @@ from pathlib import Path
 from BioSQL import BioSeqDatabase
 from Bio import SeqIO
 from Datasnakes.Orthologs.Blast.blastn import CompGenBLASTn
+from Datasnakes.Manager.utils import makedirectory
 # TODO-ROB:  REMOVED Tier Based Directory System.  Only add tier directories at the end of analysis in the users data folder
 
 
@@ -54,7 +55,7 @@ class GenBank(object):
 
         self.target_gbk_db_path = self.user_db / Path(self.project)  # Configuration.  Create configuration script.
         # TODO-ROB: Configure GenBank function
-        Path.mkdir(self.target_gbk_db_path, parents=True, exist_ok=True)
+        makedirectory(self.target_gbk_db_path)
         self.solo = solo
         self.multi = multi
         self.min_fasta = min_fasta
