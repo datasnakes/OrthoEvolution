@@ -1,5 +1,5 @@
-"""Use python's multiprocessing module to create multiple process and speed up
-the completion of classes."""
+"""Use python's multiprocessing module to create multiple processes and speed
+up the completion of functions/classes."""
 from logzero import logger as log
 from multiprocessing import Pool, cpu_count
 from time import time
