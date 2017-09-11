@@ -11,9 +11,9 @@ def SplitList(listname, basefilename, n):
 
     # Name and save the lists
     for chunk, num in zip(chunks, range(0, num_lists)):
-        l = pd.DataFrame(chunk)
+        listdf = pd.DataFrame(chunk)
         n = basefilename + '_list_' + str(num)
-        l.to_csv(n + ".txt", index=False, header=None)
+        listdf.to_csv(n + ".txt", index=False, header=None)
         list_group.append(n)
     return list_group
 

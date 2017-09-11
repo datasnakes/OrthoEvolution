@@ -22,4 +22,4 @@ print("Phylogenetics docstring: %s." % Phylo.__doc__)
 ##
 ##
 
-# TODO-SDH Write tests for Orthologs module.
+# TODO-SDH Write tests for Orthologs module using unit tests.

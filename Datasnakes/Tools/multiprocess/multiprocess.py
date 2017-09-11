@@ -1,6 +1,5 @@
 """Use python's multiprocessing module to create multiple process and speed up
-the completion of ClustalO and ETE3PAML.
-"""
+the completion of classes."""
 import re
 import os
 import fnmatch
