@@ -2,21 +2,22 @@ import os
 import time
 from pathlib import Path
 import pandas as pd
-from Datasnakes.Orthologs.CompGenetics import CompGenAnalysis
+from Datasnakes.Orthologs.CompGenetics import CompGenObjects
 from Datasnakes.Manager.logit import LogIt
 # import pkg_resources
 # import shutil
 
-class BLASTAnalysis(CompGenAnalysis):
-    """Perform Blast Analysis after completing BLASTn."""
+
+class CompGenFiles(CompGenObjects):
+    """Perform Blast Analysis after completing CompGenBLASTn."""
     def __init__(self, project, template=None, taxon_file=None, post_blast=False, save_data=True, **kwargs):
-        """Inherited from the CompGenAnalysis class.
+        """Inherited from the CompGenObjects class.
 
         If the BLAST was cut short, then a build_file is to be used.
         """
         super().__init__(project=project, acc_file=template, taxon_file=taxon_file, post_blast=post_blast, hgnc=False, **kwargs)
         # TODO-ROB: Inherit or add variable for logger class
-        # TODO-ROB Add Mana directories
+        # TODO-ROB Add Management directories
         # Private variables
         self.__home = os.getcwd()
         if taxon_file is not None:
@@ -104,7 +105,7 @@ class BLASTAnalysis(CompGenAnalysis):
         if self.save_data is True:
             temp.to_csv(str(self.building_time_file_path))
 
-    def post_blast_analysis(self, project_name, removed_genes=None):
+    def post_blast_analysis(self, removed_genes=None):
         """Analyze the blast results.
 
         Generate information about any duplicated or missing accessions by gene

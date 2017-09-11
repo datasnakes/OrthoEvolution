@@ -3,20 +3,22 @@ import csv
 import os
 import shutil
 import subprocess
+import contextlib
 import time  # Used to delay when dealing with NCBI server errors
 from datetime import datetime as d
 from pathlib import Path
 import pandas as pd
 import pkg_resources
-from Datasnakes.Manager import index
+from Datasnakes.Manager import config
 from Bio import SearchIO  # Used for parsing and sorting XML files.
 from Bio.Blast.Applications import NcbiblastnCommandline
-from Datasnakes.Orthologs.CompGenetics.ncbi_blast import BLASTAnalysis as BT
+from Datasnakes.Orthologs.CompGenetics.ncbi_blast import CompGenFiles
+from Datasnakes.Orthologs.Blast.utils import gene_list_config, map_func
 # TODO-ROB: Find packages for script timing and analysis
 
 
-class BLASTn(BT):
-    """Use BLASTn to search nucleotide databases using a nucleotide query.
+class CompGenBLASTn(CompGenFiles):
+    """Use CompGenBLASTn to search nucleotide databases using a nucleotide query.
     This class currently only works with the standalone blast.
     """
 
@@ -25,17 +27,10 @@ class BLASTn(BT):
         super().__init__(project=project, template=template, save_data=save_data, **kwargs)
         # # TODO-ROB Add taxon parameter
         # Manage Directories
-        self.__home = Path(os.getcwd())
-        self.__output_path = self.raw_data / Path('BLAST')  # Output directory
-        self.__gi_list_path = self.__output_path / Path('gi_lists')
-        self.__xml_path = self.__output_path / Path('xml')
-        Path.mkdir(self.__output_path, parents=True, exist_ok=True)
-        Path.mkdir(
-            self.__gi_list_path /
-            Path('data'),
-            parents=True,
-            exist_ok=True)
-        Path.mkdir(self.__xml_path, parents=True, exist_ok=True)
+        self.home = Path(os.getcwd())
+        self.__gi_list_path = self.project_database / Path('gi_lists')
+        Path.mkdir(self.__gi_list_path, parents=True, exist_ok=True)
+
         # # Initialize Logging
         # self.__blastn_log = LogIt.blastn()
         #df = LogIt()
@@ -44,6 +39,7 @@ class BLASTn(BT):
         # TODO-ROB:  Add a query organism variable
         self.query_gi_dict = {}
         self.removed_genes = []
+        self.current_gene_list = []
         # TODO-ROB:  Set up blast config logger, blasting logger, and post blast analysis logger
         self.blastn_log.info("These are the organisms: " + str(self.org_list))
         self.blastn_log.info("These are the genes: " + str(self.gene_list))
@@ -56,21 +52,10 @@ class BLASTn(BT):
         self.complete_time_file = self.project + '_TIME.csv'
         self.complete_time_file_path = self.data / Path(self.complete_time_file)
 
-    @staticmethod
-    def map_func(hit):
-        """Use the map function for formatting hit id's.
-        This will be used later in the script.
-        """
-        hit.id1 = hit.id.split('|')[3]
-        hit.id2 = hit.id.split('|')[1]
-        hit.id = hit.id[:-2]
-        return hit
-
-    def blast_config(self, query_align, query_organism, auto_start=False):
+    def blast_config(self, query_accessions, query_organism, auto_start=False):
         """Configure everything for a BLAST.
         First the accession file, and gene list is configured.
         """
-        # os.chdir(str(self.__output_path))
         self.blastn_log.info(
             '***********************************BLAST CONFIG START************ \
             ***********************\n\n\n')
@@ -78,59 +63,48 @@ class BLASTn(BT):
 
         # Update the gene_list based on the existence of a incomplete blast
         # file
-        gene_list = self.blast_file_config(self.building_file_path)
+        gene_list = gene_list_config(self.building_file_path, self.data, self.gene_list, self.taxon_dict, self.blastn_log)
         if gene_list is not None:
-            # Number of genes already BLASTed
-            start = len(self.blast_human) - len(gene_list)
-            # Reconfigure query_align to reflect the existing accession info
-            query_align = self.blast_human[start:]
+            start = len(self.blast_human) - len(gene_list)  # What gene to start blasting
+            query_accessions = self.blast_human[start:]  # Reconfigured query
             # Reconfigure the gene_list to reflect the existing accession info
-            new_gene_list = gene_list
+            self.current_gene_list = gene_list
         else:
-            new_gene_list = self.gene_list
+            self.current_gene_list = self.gene_list
 
         # Create GI lists
-        self.blastn_log.info(
-            "Configuring GI list using the taxonomy id and the blastdbcmd tool.")
+        self.blastn_log.info("Configuring GI list using the taxonomy id and the blastdbcmd tool.")
         self.gi_list_config()
         # Get GI (stdout) and query sequence (FASTA format)
         self.blastn_log.info("Generating directories.")
         self.blastn_log.info("Extracting query gi number to stdout and "
                              "query refseq sequence to a temp.fasta file from BLAST database.")
         # Iterate the query accessions numbers
-        for query in query_align:
-            # os.chdir(str(self.__output_path))
+        for query in query_accessions:
             gene = self.acc_dict[query][0][0]
-            gene_path = self.__xml_path / Path(gene)
-            org = self.acc_dict[query][0][1]
+            gene_path = self.raw_data / Path(gene) / Path('BLAST')
             # Create the directories for each gene
             try:
-                Path.mkdir(gene_path)
+                Path.mkdir(gene_path, exist_ok=True, parents=True)
                 self.blastn_log.info("Directory Created: %s" % gene)
                 self.blastn_log.info("\n")
-                # os.chdir(gene)
             except FileExistsError:
                 self.blastn_log.info("Directory already exists: %s" % gene)
-                # os.chdir(gene)
 
             # Save sequence data in FASTA file format and print the gi number to stdout with a custom BLAST extraction
             # https://www.ncbi.nlm.nih.gov/books/NBK279689/#_cookbook_Custom_data_extraction_and_form_
             # TODO-SDH Combine these BLAST extractions???
-            fmt = {
-                'query': query,
-                'temp fasta': str(
-                    gene_path /
-                    Path('temp.fasta'))}
-            fasta_setup = "blastdbcmd -entry {query} -db refseq_rna -outfmt %f -out {temp fasta}".format(
-                **fmt)
+            fmt = {'query': query, 'temp fasta': str(gene_path / Path('temp.fasta'))}
+            # Temporary fasta file created by the blastdbcmd
+            fasta_setup = "blastdbcmd -entry {query} -db refseq_rna -outfmt %f -out {temp fasta}".format(**fmt)
             fasta_status = subprocess.call([fasta_setup], shell=True)
-            gi_setup = "blastdbcmd -entry {query} -db refseq_rna -outfmt %g".format(
-                **fmt)
+            # Check the blast databases to see if the query accession even exists
+            gi_setup = "blastdbcmd -entry {query} -db refseq_rna -outfmt %g".format(**fmt)
             gi_status = subprocess.call([gi_setup], shell=True)
             # TODO-ROB:  Add function to add the gi numbers to the dataframe/csv-file,
             # TODO-ROB: and add a check function to see if thats already there
             # Check the status of the custom blast data extraction
-            if gi_status == 0 or fasta_status == 0:  # Command was successful.
+            if gi_status == 0 or fasta_status == 0:  # One of the commands was successful.
                 if gi_status != 0:
                     # Log it.
                     self.blastn_log.error(
@@ -142,7 +116,7 @@ class BLASTn(BT):
                     self.gene_list.remove(gene)
                     self.removed_genes.append(gene)
                     continue
-                if fasta_status != 0:
+                elif fasta_status != 0:
                     self.blastn_log.error(
                         "FASTA sequence for %s not found in the BLAST extraction" %
                         query)
@@ -151,8 +125,9 @@ class BLASTn(BT):
                     self.gene_list.remove(gene)
                     self.removed_genes.append(gene)
                     continue
-                pass
-            else:
+                else:
+                    pass  # Both commands were successful
+            else:  # Both commands failed
                 self.blastn_log.error(
                     "FASTA sequence and GI number for %s not found in the custom BLAST extraction." %
                     query)
@@ -161,34 +136,19 @@ class BLASTn(BT):
                     gene)
                 self.gene_list.remove(gene)
                 self.removed_genes.append(gene)
+                with contextlib.suppress(ValueError):
+                    self.current_gene_list.remove(gene)
                 continue
 
-            # Get the gi number from stdout, format it, and add it to the gi
-            # dictionary
-            gi = subprocess.check_output([gi_setup], shell=True)
-            gi = gi.strip()
-            gi = gi.decode('utf-8')
-            gi = str(gi)
-            gi = gi.replace("'", "")
-            self.query_gi_dict[gene] = gi
-
-        new_query_align = query_align
-        self.blastn_log.info(
-            'Configured query accession list: %s' %
-            new_query_align)
-        self.blastn_log.info('Configured gene list: %s\n\n\n' % new_gene_list)
+        self.blastn_log.info('Configured gene list: %s\n\n\n' % self.current_gene_list)
         self.blastn_log.info(
             '************************************BLAST CONFIG END************************************\n\n\n')
         if auto_start is True:
             # Automatically begin BLASTING after the configuration
             self.blasting(
-                genes=new_gene_list,
+                genes=self.current_gene_list,
                 query_organism=query_organism,
                 pre_configured=auto_start)
-        else:
-            # Manually begin BLASTING and return the new gene and new query
-            # lists
-            return new_gene_list
 
     def gi_list_config(self):
         # TODO-ROB THis is for development / testing
@@ -200,16 +160,15 @@ class BLASTn(BT):
         print('gi_list_config')
         # Directory and file handling
         cd = os.getcwd()
-        os.chdir(str(self.__gi_list_path))
+        os.chdir(str(self.__gi_list_path))  # user/databases/{project-name}/gi_lists
         taxids = self.taxon_ids
-        Path.mkdir(self.__gi_list_path / Path('data'), parents=True, exist_ok=True)
         pd.Series(taxids).to_csv('taxids.csv', index=False)
         # PBS job submission using the templates
         pbs_script = 'get_gi_lists.sh'
         pbs_script_path = self.__gi_list_path / Path(pbs_script)
         py_script = 'get_gi_lists.py'
-        shutil.copy(pkg_resources.resource_filename(index.__name__, pbs_script), self.raw_data)
-        shutil.copy(pkg_resources.resource_filename(index.__name__, py_script), self.raw_data)
+        shutil.copy(pkg_resources.resource_filename(config.__name__, pbs_script), self.raw_data)
+        shutil.copy(pkg_resources.resource_filename(config.__name__, py_script), self.raw_data)
         gi_config = subprocess.check_output('qsub %s' % str(pbs_script_path), shell=True)
         gi_config = gi_config.decode('utf-8')
         print('The GI list configuration\'s JobID is %s' % gi_config)
@@ -228,66 +187,16 @@ class BLASTn(BT):
                 break
         os.chdir(cd)
 
-    def blast_file_config(self, file):
-        """Create or use a blast configuration file.
-        This function configures different files for new BLASTS.
-        It also helps recognize whether or not a BLAST was terminated
-        in the middle of the dataset.  This removes the last line of
-        the accession file if it is incomplete.
-        """
-        global ending
-        output_dir_list = os.listdir(
-            self.__output_path)  # Make a list of files
-        # If the file exists then make a gene list that picks up from the last
-        # BLAST
-        if file in output_dir_list:
-            with open(file, 'r') as fi:
-                f = csv.reader(fi)
-                count = - 1
-                for row in f:
-                    count += 1
-                    ending = row
-                gene = ending[1]
-                taxid = self.taxon_ids[count]
-                org = self.org_list[(len(ending) - 2)]
-
-                ncbi = str("""result_handle1 = NcbiblastnCommandline(query="temp.fasta", db="refseq_rna", strand="plus",
-                evalue=0.001, out="%s_%s.xml", outfmt=5, gilist=%s + "gi", max_target_seqs=10, task="blastn")"""
-                           % (gene, org, taxid))
-                self.blastn_log.warning("An incomplete accession file was produced from the previous BLAST,"
-                                        "which was terminated midway through the procedure.")
-
-                self.blastn_log.info(
-                    "The last row looks like: \n\t%s\n\t%s\n" %
-                    (self.header, ending))
-                self.blastn_log.info(
-                    "The BLAST ended on the following query: \n%s" %
-                    ncbi)
-                if len(ending) < len(self.header):
-                    self.blastn_log.info(
-                        "Restarting the BLAST for the previous gene...")
-                    count = count - 1
-                # The continued gene list starts with the previous gene.
-                continued_gene_list = list(
-                    x for i, x in enumerate(
-                        self.gene_list, 1) if i > count)
-            return continued_gene_list
-        # If the file doesn't exist return nothing
-        else:
-            self.blastn_log.info("A new BLAST started at %s" % self.get_time())
-            return None
-
-    def blast_xml_parse(self, xml_file, gene, organism):
+    def blast_xml_parse(self, xml_path, gene, organism):
         """Parse the XML file created by the BLAST."""
-        global gi, raw_bitscore
-        self.blastn_log.info(
-            "Parsing %s to find the best accession number." %
-            xml_file)
+        accession = gi = raw_bitscore = description = None
+        record_dict = {}
+        self.blastn_log.info("Parsing %s to find the best accession number." % xml_path)
         maximum = 0
-        file_path = str(Path(self.__xml_path) / Path(gene) / Path(xml_file))
+        file_path = str(Path(xml_path))
         with open(file_path, 'r') as blast_xml:
             blast_qresult = SearchIO.read(blast_xml, 'blast-xml')
-            mapped_qresult = blast_qresult.hit_map(self.map_func)
+            mapped_qresult = blast_qresult.hit_map(map_func)  # Map the hits
             for hit in mapped_qresult:
                 for hsp in hit.hsps:
                     # Find the highest scoring hit for each gene
@@ -317,6 +226,12 @@ class BLASTn(BT):
             self.blastn_log.info("Finished parsing the file.")
             self.blastn_log.info(
                 "The best accession has been selected from the BLAST xml record.")
+            record_dict['gene'] = gene
+            record_dict['organism'] = organism
+            record_dict['accession'] = accession
+            record_dict['gi'] = gi
+            record_dict['raw bitscore'] = raw_bitscore
+            record_dict['description'] = description
             self.blastn_log.info("Accession:  %s" % accession)
             self.blastn_log.info("GI number: {}".format(str(gi)))
             self.blastn_log.info("Raw bitscore: %s" % raw_bitscore)
@@ -327,10 +242,8 @@ class BLASTn(BT):
         """Configure the BLAST."""
         if pre_configured is False:
             query = self.df[query_organism].tolist()
-            genes = self.blast_config(
-                query_align=query,
-                query_organism=query_organism,
-                auto_start=True)
+            self.blast_config(query_accessions=query, query_organism=query_organism, auto_start=True)
+            genes = self.current_gene_list  # Gene list populated by blast_config.
         elif pre_configured is True:
             genes = genes
 
@@ -354,28 +267,23 @@ class BLASTn(BT):
                 if organism == query_organism:
                     continue
                 # Initialize output variables
-                gene_path = self.__xml_path / Path(gene)
-                files = os.listdir(gene_path)
+                gene_path = self.raw_data / Path(gene) / Path('BLAST')
+                files = os.listdir(str(gene_path))
                 xml = '%s_%s.xml' % (gene, organism)
                 xml_path = gene_path / Path(xml)
 
                 # Initialize configuration variables
-                # TODO-ROB change the __gi_list_path to current path + 'data'
                 taxon_id = self.taxon_dict[organism]
                 taxon_gi_file = str(taxon_id) + "gi"
-                taxon_gi_path = self.__gi_list_path / \
-                    Path('data') / Path(taxon_gi_file)
-                # taxgi_dest_path = gene_path / Path(taxon_gi_file)
+                taxon_gi_path = self.__gi_list_path / Path(taxon_gi_file)
+
                 if xml in files:
                     self.blast_xml_parse(xml_path, gene, organism)
                 else:
-                    self.blastn_log.warning(
-                        "\n\n\n*******************BLAST START*******************")
+                    self.blastn_log.warning("\n\n\n*******************BLAST START*******************")
                     start_time = self.get_time()
                     self.blastn_log.info("The start time is %s" % start_time)
-                    self.blastn_log.info(
-                        "The current gene is %s (%s)." %
-                        (gene, self.tier_dict[gene]))
+                    self.blastn_log.info("The current gene is %s (%s)." % (gene, self.tier_dict[gene]))
                     self.blastn_log.info(
                         "The current organisms is %s (%s)." %
                         (organism, taxon_id))

@@ -7,13 +7,13 @@ from cookiecutter.hooks import run_script
 from cookiecutter.main import cookiecutter
 from cookiecutter.prompt import prompt_for_config
 from cookiecutter.generate import generate_context
+import pkg_resources
 # TODO-ROB once this is a pypi package all of these will be unnecessary
 from Datasnakes import Cookies, Orthologs, Manager, Tools
 # from Manager.logit.logit import LogIt
 # TODO-ROB use **kwargs and **args to cut down on parameters
 
-
-class Mana(object):
+class Management(object):
     """This is the directory management base class.
 
     It maps the directories in the PyPi package using the pathlib module and
@@ -38,7 +38,7 @@ class Mana(object):
         # TODO-ROB:  SOme of these directories don't need to be accessed directly
         # Below are the PyPi path strings
         #    The first group is to access the cookiecutter templates
-        self.Cookies = Path(Cookies.__path__[0])
+        self.Cookies = Path(pkg_resources.resource_filename(Cookies.__name__, ''))
         self.repo_cookie = self.Cookies / Path('new_repository')
         self.user_cookie = self.Cookies / Path('new_user')
         self.project_cookie = self.Cookies / Path('new_project')
@@ -47,26 +47,26 @@ class Mana(object):
         self.db_cookie = self.Cookies / Path('new_database')
         self.website_cookie = self.Cookies / Path('new_website')
         #    The second group is for the Manager module
-        self.Manager = Path(Manager.__path__[0])
+        self.Manager = Path(pkg_resources.resource_filename(Manager.__name__, ''))
         self.index = self.Manager / Path('index')
         self.logit = self.Manager / Path('logit')
         self.utils = self.Manager / Path('utils')
         self.shiny = self.Manager / Path('shiny')
         #    The third group is for the Orthologs module
-        self.Orthologs = Path(Orthologs.__path__[0])
-        self.biosql = Path(self.Orthologs) / Path('biosql')
-        self.blast = Path(self.Orthologs) / Path('blast')
-        self.comp_gen = Path(self.Orthologs) / Path('comparative_genetics')
-        self.genbank = Path(self.Orthologs) / Path('genbank')
-        self.manager = Path(self.Orthologs) / Path('manager')
-        self.phylogenetics = Path(self.Orthologs) / Path('phylogenetics')
+        self.Orthologs = Path(pkg_resources.resource_filename(Orthologs.__name__, ''))
+        self.biosql = self.Orthologs / Path('biosql')
+        self.blast = self.Orthologs / Path('blast')
+        self.comp_gen = self.Orthologs / Path('comparative_genetics')
+        self.genbank = self.Orthologs / Path('genbank')
+        self.manager = self.Orthologs / Path('manager')
+        self.phylogenetics = self.Orthologs / Path('phylogenetics')
         #    The fourth group is for the Tools module
-        self.Tools = Path(Tools.__path__[0])
-        self.ftp = Path(self.Tools) / Path('ftp')
-        self.multiprocessing = Path(self.Tools) / Path('multiprocessing')
-        self.pandoc = Path(self.Tools) / Path('pandoc')
-        self.pybasher = Path(self.Tools) / Path('pybasher')
-        self.qsub = Path(self.Tools) / Path('qsub')
+        self.Tools = Path(pkg_resources.resource_filename(Tools.__name__, ''))
+        self.ftp = self.Tools / Path('ftp')
+        self.multiprocessing = self.Tools / Path('multiprocessing')
+        self.pandoc = self.Tools / Path('pandoc')
+        self.pybasher = self.Tools / Path('pybasher')
+        self.qsub = self.Tools / Path('qsub')
 
         if self.repo:
             self.repo_path = self.file_home / Path(self.repo)
@@ -181,7 +181,7 @@ class Mana(object):
     #     # Returns path and the time stamp (could be None)
 
 
-class RepoMana(Mana):
+class RepoManagement(Management):
     """Repository Management."""
     def __init__(self, repo, user=None, home=os.getcwd(),
                  new_user=False, new_repo=False, **kwargs):
@@ -239,7 +239,7 @@ class RepoMana(Mana):
 # TODO-ROB:  Edit the setup.py file for cookiecutter.
 
 
-class UserMana(RepoMana):
+class UserManagement(RepoManagement):
     """User Management Class."""
     # TODO-ROB CREATE THESE IN A VIRTUAL ENVIRONMENT FOR EACH USER
     # TODO-ROB The virtual environment can be the name of the user
@@ -344,7 +344,7 @@ class UserMana(RepoMana):
         print('%s is being sent to %s' % (Zipper_path, destination))
 
 
-class WebMana(RepoMana):
+class WebsiteManagement(RepoManagement):
     """Web Management Class."""
 
     def __init__(self, repo, website, host='0.0.0.0', port='5252',
@@ -411,7 +411,7 @@ class WebMana(RepoMana):
         # TODO-SDH Add way to stop the server from running.
 
 
-class ProjMana(UserMana):
+class ProjectManagement(UserManagement):
     """Project Management Class."""
 
     def __init__(self, repo, user, project, research=None, research_type=None,
@@ -445,6 +445,7 @@ class ProjMana(UserMana):
                 Path(research_type) / Path(research)
             self.project_archive = self.project_path / Path('archive')
             self.project_index = self.research_path / Path('index')
+            self.project_database = self.user_db / Path(project)
             self.data = self.research_path / Path('data')
             self.raw_data = self.research_path / Path('raw_data')
             self.project_web = self.research_path / Path('web')
@@ -478,6 +479,8 @@ class ProjMana(UserMana):
         cookiecutter(str(self.research_cookie), no_input=True,
                      extra_context=e_c, output_dir=str(self.project_path))
         os.chmod(str(self.project_path / Path(self.research_type)), mode=0o777)
+        # script_path = self.project_cookie / Path('hooks') / Path('post_gen_project.py')
+        # run_script(script_path, )
 
     def create_app(self):
         """Create an app."""

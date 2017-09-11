@@ -1,15 +1,13 @@
 import os
-import sys
 import zipfile
-import logging as log
 from pathlib import Path
-from datetime import datetime as d
-from Datasnakes.Manager.utils.mana import ProjMana
-from Datasnakes.Orthologs.Blast.blastn import BLASTn
-from Datasnakes.Orthologs.CompGenetics.comp_gen import CompGenAnalysis
+from Datasnakes.Manager.utils.mana import ProjectManagement
+from Datasnakes.Orthologs.Blast.blastn import CompGenBLASTn
+from Datasnakes.Orthologs.CompGenetics.comp_gen import CompGenObjects
 from Datasnakes.Orthologs.Genbank.genbank import GenBank
 from Datasnakes.Orthologs.Align.msa import MultipleSequenceAlignment as MSA
 import yaml
+import pkg_resources
 #import configparser
 #from slacker import Slacker
 #import argparse
@@ -19,6 +17,8 @@ import yaml
 # TODO-ROB:  ^^ This will allow the transfer of data
 
 # TODO-ROB:  Add FTP and s2s inheritance
+
+
 class DataMana(object):
 
     def __init__(self, config_file=None, pipeline=None, **kwargs):
@@ -36,11 +36,11 @@ class DataMana(object):
 
             # Project Management
             if self.ProjectManagment_config is not None:
-                self.pm = ProjMana(**self.ProjectManagment_config)
+                self.pm = ProjectManagement(**self.ProjectManagment_config)
             else:
                 self.pm = self.ProjectManagment_config
 
-            # BLASTn
+            # CompGenBLASTn
             if self.BLASTn_config is not None:
                 self.blast(self.pm)
             else:
@@ -59,18 +59,18 @@ class DataMana(object):
                 self.al = self.Alignment_config
 
     def blast(self, proj_mana):
-        self.bl = BLASTn(proj_mana=proj_mana, **self.BLASTn_config)
+        self.bl = CompGenBLASTn(proj_mana=proj_mana, **self.BLASTn_config)
         self.bl.blast_config(self.bl.blast_human, 'Homo_sapiens', auto_start=True)
         # TODO-Create directories for the blast data
-        # Do the blasting here using BLASTn
+        # Do the blasting here using CompGenBLASTn
 
     def genbank(self, blast):
         self.gb = GenBank(blast=blast, **self.GenBank_config)
-        if isinstance(blast, BLASTn):
+        if isinstance(blast, CompGenBLASTn):
             self.gb.blast2_gbk_files(blast.org_list, blast.gene_dict)
         else:
 
-            cga = CompGenAnalysis(**self.CompGenAnalysis_config)
+            cga = CompGenObjects(**self.CompGenAnalysis_config)
 
             # Parse the tier_frame_dict to get the tier
             for G_KEY in cga.tier_frame_dict.keys():
