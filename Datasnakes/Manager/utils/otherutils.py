@@ -2,7 +2,7 @@
 import pandas as pd
 
 
-def SplitList(listname, basefilename, n):
+def splitlist(listname, basefilename, n):
     """Split a long list into chunks and save chunks as a text file."""
     # Split the list into chunks
     chunks = [listname[x:x + n] for x in range(0, len(listname), n)]
@@ -18,7 +18,7 @@ def SplitList(listname, basefilename, n):
     return list_group
 
 
-def FormatList(input_list):
+def formatlist(input_list):
     """Remove spaces from list items and turn those spaces into underscores."""
     output_list = []
     for item in input_list:
