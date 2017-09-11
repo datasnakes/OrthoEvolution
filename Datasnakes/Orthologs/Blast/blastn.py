@@ -29,7 +29,9 @@ class CompGenBLASTn(CompGenFiles):
         # Manage Directories
         self.home = Path(os.getcwd())
         self.__gi_list_path = self.project_database / Path('gi_lists')
-        Path.mkdir(self.__gi_list_path, parents=True, exist_ok=True)
+
+        with contextlib.suppress(OSError):
+            Path.mkdir(self.__gi_list_path, parents=True, exist_ok=True)
 
         # # Initialize Logging
         # self.__blastn_log = LogIt.blastn()
