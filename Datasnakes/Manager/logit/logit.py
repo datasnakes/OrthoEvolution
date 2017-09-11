@@ -1,12 +1,12 @@
 """Main logging class to make logging easier."""
-import logzero
-from logzero import logger as log
+import logging as log
 import os
 from datetime import datetime as d
 import sys
-import configparser
-#from slacker import Slacker
-
+# import configparser
+# from slacker import Slacker
+# import argparse
+# import textwrap
 
 
 class LogIt(object):
@@ -25,3 +25,19 @@ class LogIt(object):
         self.basic = self.generic_logger(
             logfile, logname, log.DEBUG, self.log_format)
 
+    def _get_file(self, filename):
+        """Create a log file."""
+        base, extension = filename.split('.')
+        file = base + str(d.now().strftime(self.archive_format)) + extension
+        path = os.getcwd() + file
+        return path
+
+    def generic_logger(self, filename, logname, level, fmt, slack=False):
+        """Create a generic logger."""
+        file_path = self._get_file(filename)
+        log.basicConfig(level=level,
+                        format=fmt,
+                        filename=file_path)
+        generic_logger = log.getLogger(logname)
+        if slack is False:
+            return generic_logger
