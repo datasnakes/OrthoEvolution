@@ -9,7 +9,7 @@ from time import time
 import sys
 from Datasnakes.Orthologs.Phylogenetics import ETE3PAML, RelaxPhylip
 from Datasnakes.Orthologs.Align import ClustalO
-from Datasnakes.Manager.utils import SplitList
+from Datasnakes.Manager.utils import splitlist
 
 
 class MultiProc(object):
@@ -92,8 +92,8 @@ class MultiProc(object):
         print("The unaligned genes are: %s " % finalgeneslist)
         print("There are %s unaligned genes." % len(finalgeneslist))
 
-        listgroups = SplitList(finalgeneslist, 'genes', n=int(30))
-        aligneddict = SplitList(geneslist, 'genes', n=int(30))
+        listgroups = splitlist(finalgeneslist, 'genes', n=int(30))
+        aligneddict = splitlist(geneslist, 'genes', n=int(30))
         return listgroups, aligneddict
 
     def multiclustal(self, gene):
