@@ -2,6 +2,8 @@
 import pandas as pd
 import contextlib
 from pathlib import Path
+import pkg_resources
+from importlib import import_module
 import os
 
 
@@ -37,3 +39,15 @@ def makedirectory(path):
     if not exist_ok and os.path.isdir(path):
         with contextlib.suppress(OSError):
             Path.mkdir(path, parents=True)
+
+
+class Version(object):
+    """Get the version of an installed python package."""
+    def __init__(self, packagename):
+        self.packagename = packagename
+        self._getversion()
+
+    def _getversion(self):
+        import_module(self.packagename)
+        version = pkg_resources.get_distribution(self.packagename).version
+        print('Version %s of %s is installed.' % (version, self.packagename))
