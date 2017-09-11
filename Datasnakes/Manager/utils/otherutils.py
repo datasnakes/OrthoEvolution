@@ -1,5 +1,8 @@
 """Other utilities optimized for the Orthologs Project."""
 import pandas as pd
+import contextlib
+from pathlib import Path
+import os
 
 
 def splitlist(listname, basefilename, n):
@@ -26,3 +29,10 @@ def formatlist(input_list):
         item = item.replace(" ", "_")
         output_list.append(item)
         return output_list
+
+
+def makedirectory(path):
+    exist_ok = True
+    if not exist_ok and os.path.isdir(path):
+        with contextlib.suppress(OSError):
+            Path.mkdir(path, parents=True)

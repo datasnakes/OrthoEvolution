@@ -2,7 +2,7 @@
 
 from .mana import Management, ProjectManagement, RepoManagement, UserManagement, WebsiteManagement
 #from .zipper import ZipUtils
-from .otherutils import formatlist, splitlist
+from .otherutils import formatlist, splitlist, makedirectory
 #from .datamana import DataMana, ZipUtils
 
 __all__ = ("WebsiteManagement",
