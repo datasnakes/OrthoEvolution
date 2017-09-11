@@ -11,3 +11,13 @@ supercomputing, then you may find it useful.
 
 Usage
 ------
+
+```python
+from Datasnakes.Tools import Multiprocess
+
+# Write a function that can be used for 1 item in a list of items
+def blast2clustal(gene):
+
+# Map your function to your list and run it using multiple processes
+Multiprocess(n=5, blast2clustal(), geneslist)
+```
