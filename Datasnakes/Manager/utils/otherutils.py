@@ -41,7 +41,7 @@ def makedirectory(path):
             Path.mkdir(path, parents=True)
 
 
-class Version(object):
+class PackageVersion(object):
     """Get the version of an installed python package."""
     def __init__(self, packagename):
         self.packagename = packagename
