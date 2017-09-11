@@ -12,4 +12,5 @@ __all__ = ("WebsiteManagement",
            "UserManagement",
            "formatlist",
            "splitlist",
+           "makedirectory",
            )

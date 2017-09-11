@@ -1,4 +1,4 @@
-"""Other utilities optimized for the Orthologs Project."""
+"""Other utilities optimized for this package/project."""
 import pandas as pd
 import contextlib
 from pathlib import Path
@@ -32,6 +32,7 @@ def formatlist(input_list):
 
 
 def makedirectory(path):
+    """Creates path/parents and is compatible for python 3.4 and upwards."""
     exist_ok = True
     if not exist_ok and os.path.isdir(path):
         with contextlib.suppress(OSError):
