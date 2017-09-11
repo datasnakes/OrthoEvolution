@@ -31,7 +31,7 @@ class CompGenBLASTn(CompGenFiles):
         self.home = Path(os.getcwd())
         self.__gi_list_path = self.project_database / Path('gi_lists')
 
-        makedirectory(self.__gi_list_path, parents=True)
+        makedirectory(self.__gi_list_path)
 
         # # Initialize Logging
         # self.__blastn_log = LogIt.blastn()
