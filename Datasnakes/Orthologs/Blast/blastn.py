@@ -13,7 +13,7 @@ from Datasnakes.Manager import config
 from Bio import SearchIO  # Used for parsing and sorting XML files.
 from Bio.Blast.Applications import NcbiblastnCommandline
 from Datasnakes.Orthologs.CompGenetics.ncbi_blast import CompGenFiles
-from Datasnakes.Orthologs.Blast.utils import gene_list_config, map_func
+from Datasnakes.Orthologs.Blast.utils import gene_list_config, map_func, gi_list_config
 # TODO-ROB: Find packages for script timing and analysis
 
 
@@ -74,7 +74,7 @@ class CompGenBLASTn(CompGenFiles):
 
         # Create GI lists
         self.blastn_log.info("Configuring GI list using the taxonomy id and the blastdbcmd tool.")
-        self.gi_list_config()
+        gi_list_config(self.__gi_list_path, self.project_path, self.taxon_ids, config)
         # Get GI (stdout) and query sequence (FASTA format)
         self.blastn_log.info("Generating directories.")
         self.blastn_log.info("Extracting query gi number to stdout and "
@@ -149,43 +149,6 @@ class CompGenBLASTn(CompGenFiles):
                 genes=self.current_gene_list,
                 query_organism=query_organism,
                 pre_configured=auto_start)
-
-    def gi_list_config(self):
-        # TODO-ROB THis is for development / testing
-        # TODO-ROB Add the ability to do two seperate gi configs
-        """Create a gi list based on the refseq_rna database for each taxonomy id on the MCSR.
-        It will also convert the gi list into a binary file which is more
-        efficient to use with NCBI's Standalone Blast tools.
-        """
-        print('gi_list_config')
-        # Directory and file handling
-        cd = os.getcwd()
-        os.chdir(str(self.__gi_list_path))  # user/databases/{project-name}/gi_lists
-        taxids = self.taxon_ids
-        pd.Series(taxids).to_csv('taxids.csv', index=False)
-        # PBS job submission using the templates
-        pbs_script = 'get_gi_lists.sh'
-        pbs_script_path = self.__gi_list_path / Path(pbs_script)
-        py_script = 'get_gi_lists.py'
-        shutil.copy(pkg_resources.resource_filename(config.__name__, pbs_script), self.raw_data)
-        shutil.copy(pkg_resources.resource_filename(config.__name__, py_script), self.raw_data)
-        gi_config = subprocess.check_output('qsub %s' % str(pbs_script_path), shell=True)
-        gi_config = gi_config.decode('utf-8')
-        print('The GI list configuration\'s JobID is %s' % gi_config)
-        job_id = gi_config.replace('.sequoia', '')
-        time.sleep(20)  # Wait for the job to be queued properly
-        while True:
-            out, err = subprocess.Popen('qsig -s SIGNULL %s' % job_id, shell=True, stderr=subprocess.PIPE, stdout=subprocess.PIPE)
-            print("Waiting...")
-            time.sleep(30)
-            if err.decode('utf-8') == 'qsig: Request invalid for state of job %s.sequoia\n' % job_id:
-                print('The blast config is in MCSR\'s queue.  Waiting...')
-                continue
-            else:
-                print('out:', out)
-                print('err:', err)
-                break
-        os.chdir(cd)
 
     def blast_xml_parse(self, xml_path, gene, organism):
         """Parse the XML file created by the BLAST."""
