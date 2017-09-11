@@ -37,7 +37,7 @@ class GenBank(object):
                 self.project_path = Path(project_path) / Path(self.project)
             else:
                 self.project_path = Path(os.getcwd()) / Path(self.project)
-            Path.mkdir(self.project_path, parents=True, exist_ok=True)
+            makedirectory(self.project_path)
             print('project_path=%s' % self.project_path)
             self.removed_bn_config(kwargs)
         else:
@@ -47,13 +47,17 @@ class GenBank(object):
             print('project_path=%s' % self.project_path)
 
         self.gbk_path = self.raw_data / Path('GENBANK')
-        self.target_gbk_files_path = self.gbk_path / Path('gbk')  # Deprecate this
-        Path.mkdir(self.target_gbk_files_path, parents=True, exist_ok=True)
+        # TODO deprecate
+        self.target_gbk_files_path = self.gbk_path / Path('gbk')
+        makedirectory(self.target_gbk_files_path)
 
-        self.target_fasta_files = self.gbk_path / Path('fasta')  # Deprecated this
-        Path.mkdir(self.target_fasta_files, parents=True, exist_ok=True)
+        # TODO deprecate
+        self.target_fasta_files = self.gbk_path / Path('fasta')
+        makedirectory(self.target_fasta_files)
 
-        self.target_gbk_db_path = self.user_db / Path(self.project)  # Configuration.  Create configuration script.
+        # Configuration
+        # TODO Create configuration script.
+        self.target_gbk_db_path = self.user_db / Path(self.project)
         # TODO-ROB: Configure GenBank function
         makedirectory(self.target_gbk_db_path)
         self.solo = solo
@@ -68,9 +72,9 @@ class GenBank(object):
         for key, value in kwargs.items():
             setattr(self, key, value)
 
-        Path.mkdir(self.raw_data, exist_ok=True)
-        Path.mkdir(self.user_db, exist_ok=True)
-        Path.mkdir(self.ncbi_db_repo, exist_ok=True)
+        makedirectory(self.raw_data)
+        makedirectory(self.user_db)
+        makedirectory(self.ncbi_db_repo)
 
     @staticmethod
     def name_fasta_file(path, gene, org, feat_type, feat_type_rank, extension, mode):
@@ -92,7 +96,7 @@ class GenBank(object):
             file_path = feat_path / Path(multi % (gene, feat_type_rank, extension))
 
         # Make the base directory and return an open file.
-        feat_path.mkdir(parents=True, exist_ok=True)
+        makedirectory(feat_path)
         file = open(file_path, mode)
         return file
 
