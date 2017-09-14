@@ -1,21 +1,21 @@
-import pandas as pd
 import os
 import csv
-from pathlib import Path
 import time
+import shutil
+import subprocess
+import pkg_resources
+import pandas as pd
+from pathlib import Path
 
 
 def map_func(hit):
-    """Use the map function for formatting hit id's.
-    This will be used later in the script.
-    """
+    """Use the map function for formatting hit id's."""
     hit.id1 = hit.id.split('|')[3]  # accession number
     hit.id2 = hit.id.split('|')[1]  # gi number
     hit.id = hit.id[:-2]
     return hit
 
-
-# # XXX PAML no longer needs a format different than `Homo_sapiens`
+# XXX PAML no longer needs a format different than `Homo_sapiens`
 def paml_org_formatter(organisms):
     org_list = []
     for organism in organisms:
@@ -25,8 +25,69 @@ def paml_org_formatter(organisms):
     return org_list
 
 
+def get_gilists(id, gi_list_path, logger):
+    """ This function uses the blastdbcmd tool to get gi lists. It then uses the
+    blastdb_aliastool to turn the list into a binary file.
+    The input (id) for the function is a taxonomy id.
+    """
+    binary = str(id) + 'gi'
+    if binary not in os.listdir(gi_list_path):
+        # Use the accession #'s and the blastdbcmd tool to generate gi lists
+        # based on Organisms/Taxonomy id's.
+        os.system("blastdbcmd -db refseq_rna -entry all -outfmt '%g %T' | awk ' { if ($2 == " + id +
+                  ") { print $1 } } ' > " + id + "gi.txt")
+        logger.info(id + "gi.txt has been created.")
+        # Convert the .txt file to a binary file using the blastdb_aliastool.
+        os.system("blastdb_aliastool -gi_file_in " + id + "gi.txt -gi_file_out " + id + "gi")
+        logger.info(id + "gi binary file has been created.")
+        # Remove the gi.text file
+        os.system("rm " + id + "gi.txt")
+        logger.info(id + "gi.text file has been deleted.")
+
+
+def my_gene_info(acc_path, blast_query='Homo_sapiens'):
+    import mygene
+
+    # Initialize variables and import my-gene search command
+    urls = []
+    df = pd.read_csv(str(acc_path), dtype=str)
+    df_gene = df.set_index('Gene')
+    blast_query_list = df_gene[blast_query].tolist()
+    mg = mygene.MyGeneInfo()
+
+    # Create a my-gene query handle to get the data
+    human = list(x.upper() for x in blast_query_list)
+    mygene_query = mg.querymany(human, scopes='refseq',
+                                fields='symbol,name,entrezgene,summary',
+                                species='human', returnall=True, as_dataframe=True,
+                                size=1, verbose=True)
+    # TODO-ROB:  Logging here
+    # Turn my-gene queries into a data frame and then reset the index
+    mygene_query['out'].reset_index(level=0, inplace=True)
+    mg_df = pd.DataFrame(mygene_query['out'])
+    mg_df.drop(mg_df.columns[[1, 2, 6]], axis=1, inplace=True)
+    # Rename the columns
+    mg_df.rename(columns={'entrezgene': 'Entrez ID', 'summary': 'Gene Summary', 'query': 'RefSeqRNA Accession',
+                          'name': 'Gene Name'},
+                 inplace=True)
+
+    # Create NCBI links using a for loop and the Entrez IDs
+    urls = [('<a href="{0}">{0}</a>'.format('https://www.ncbi.nlm.nih.gov/gene/' + str(entrez_id)))
+            for entrez_id in mg_df['Entrez ID']]
+
+    ncbi = pd.DataFrame(urls, columns=['NCBI Link'], dtype=str)
+    # Merge, sort, and return the my-gene data frame
+
+    hot_data = pd.concat([pd.Series(df.Tier, dtype=str), df.Gene, mg_df, ncbi], axis=1)
+    hot_data.rename(columns={'Gene': 'Gene Symbol'}, inplace=True)
+    hot_data = hot_data.sort_values(['Tier'], ascending=True)
+
+    return hot_data
+
+
 def gene_list_config(file, data_path, gene_list, taxon_dict, logger):
     """Create or use a blast configuration file.
+
     This function configures different files for new BLASTS.
     It also helps recognize whether or not a BLAST was terminated
     in the middle of the dataset.  This removes the last line of
@@ -72,57 +133,52 @@ def gene_list_config(file, data_path, gene_list, taxon_dict, logger):
     else:
         logger.info("A new BLAST started at %s" % time.time())
         return None
-# ***********************************************PRE BLAST ANALYSIS TOOLS********************************************* #
-# ***********************************************PRE BLAST ANALYSIS TOOLS********************************************* #
 
 
-def my_gene_info(acc_path, blast_query='Homo_sapiens'):
-    import mygene
+def gi_list_config(gi_list_path, research_path, taxon_ids, config):
+    # TODO-ROB THis is for development / testing
+    # TODO-ROB Add the ability to do two seperate gi configs
+    """Create a gi list based on the refseq_rna database for each taxonomy id on the MCSR.
+    It will also convert the gi list into a binary file which is more
+    efficient to use with NCBI's Standalone Blast tools.
+    """
+    # Directory and file handling
+    raw_data_path = research_path / Path('raw_data')
+    index_path = research_path / Path('index')
+    taxid_file = index_path / Path('taxids.csv')
+    pd.Series(taxon_ids).to_csv(str(taxid_file), index=False)
+    pbs_script = 'get_gi_lists.sh'
+    py_script = 'get_gi_lists.py'
 
-    # Initialize variables and import my-gene search command
-    urls = []
-    df = pd.read_csv(str(acc_path), dtype=str)
-    df_gene = df.set_index('Gene')
-    blast_query_list = df_gene[blast_query].tolist()
-    mg = mygene.MyGeneInfo()
+    # PBS job submission using the templates
+    pbs_script = shutil.copy(pkg_resources.resource_filename(config.__name__, pbs_script), str(raw_data_path))
+    py_script = shutil.copy(pkg_resources.resource_filename(config.__name__, py_script), str(raw_data_path))
+    gi_config = subprocess.check_output('qsub -v PYTHONFILE=%s,GILISTPATH=%s,PROJECTPATH=%s, %s' %
+                                        (py_script, gi_list_path, research_path, pbs_script), shell=True)
+    gi_config = gi_config.decode('utf-8')
+    print('The GI list configuration\'s JobID is %s' % gi_config)
+    job_id = gi_config.replace('.sequoia', '')
+    time.sleep(20)  # Wait for the job to be queued properly
+    while True:
+        out, err = subprocess.Popen('qsig -s SIGNULL %s' % job_id, shell=True, stderr=subprocess.PIPE, stdout=subprocess.PIPE)
+        print("Waiting...")
+        time.sleep(30)
+        if err.decode('utf-8') == 'qsig: Request invalid for state of job %s.sequoia\n' % job_id:
+            print('The blast config is in MCSR\'s queue.  Waiting...')
+            continue
+        else:
+            print('out:', out)
+            print('err:', err)
+            break
 
-    # Create a my-gene query handle to get the data
-    human = list(x.upper() for x in blast_query_list)
-    mygene_query = mg.querymany(human, scopes='refseq',
-                                fields='symbol,name,entrezgene,summary',
-                                species='human', returnall=True, as_dataframe=True,
-                                size=1, verbose=True)
-    # TODO-ROB:  Logging here
-    # Turn my-gene queries into a data frame and then reset the index
-    mygene_query['out'].reset_index(level=0, inplace=True)
-    mg_df = pd.DataFrame(mygene_query['out'])
-    mg_df.drop(mg_df.columns[[1, 2, 6]], axis=1, inplace=True)
-    # Rename the columns
-    mg_df.rename(columns={'entrezgene': 'Entrez ID', 'summary': 'Gene Summary', 'query': 'RefSeqRNA Accession',
-                          'name': 'Gene Name'},
-                 inplace=True)
-
-    # Create NCBI links using a for loop and the Entrez IDs
-    urls = [('<a href="{0}">{0}</a>'.format('https://www.ncbi.nlm.nih.gov/gene/' + str(entrez_id)))
-            for entrez_id in mg_df['Entrez ID']]
-
-    ncbi = pd.DataFrame(urls, columns=['NCBI Link'], dtype=str)
-    # Merge, sort, and return the my-gene data frame
-
-    hot_data = pd.concat([pd.Series(df.Tier, dtype=str), df.Gene, mg_df, ncbi], axis=1)
-    hot_data.rename(columns={'Gene': 'Gene Symbol'}, inplace=True)
-    hot_data = hot_data.sort_values(['Tier'], ascending=True)
 
     return hot_data
-# **********************************************POST BLAST ANALYSIS TOOLS******************************************** #
-# **********************************************POST BLAST ANALYSIS TOOLS******************************************** #
-
 
 def get_dup_acc(acc_dict, gene_list, org_list):
     """Get duplicate accessions.
+
     This function is used to analyze an accession file post-BLAST.
     It uses the accession dictionary as a base.
-
     :return: A master duplication dictionary used to initialize the
     duplicate class variables.
     """
@@ -218,10 +274,10 @@ def get_dup_acc(acc_dict, gene_list, org_list):
 
 
 def get_miss_acc(acc_file_path):
-    """
-    This function is used to analyze an accession file post BLAST.
-    It generates several files and dictionaries regarding missing accession numbers.
+    """This function is used to analyze an accession file post BLAST.
 
+    It generates several files and dictionaries regarding missing accession
+    numbers.
     :param acc_file_path: An accession file (post BLAST).
     :return: A dictionary with data about the missing accession numbers by Gene and
     by Organism.

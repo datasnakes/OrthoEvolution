@@ -3,7 +3,7 @@
 # import sys
 # import zipfile
 import luigi
-import logzero as log
+from logzero import logger as log
 from pathlib import Path
 from datetime import datetime as d
 import yaml
@@ -13,7 +13,7 @@ from Datasnakes.Orthologs.Blast import CompGenBLASTn
 from Datasnakes.Orthologs.Genbank import GenBank
 from Datasnakes.Orthologs.Align import MultipleSequenceAlignment as MSA
 
-#logger = log.logger('luigi-interface')
+luigi_log = log.logger('luigi-interface')
 
 # TODO Check out https://stackoverflow.com/questions/39996544/handling-a-lot-of-parameters-in-luigi
 
