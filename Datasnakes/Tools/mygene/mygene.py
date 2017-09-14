@@ -1,18 +1,18 @@
-"""This script is designed to generate some basic gene information from a list
-of refseqrna accession numbers for human genes."""
-
+"""Get gene information from the mygene api at http://mygene.info/ """
 import mygene
 import pandas as pd
 
 
 class MG(object):
-    """Get gene information from mygene."""
+    """Import a csv of refseq accessions & get gene information from mygene."""
 
     def __init__(self, filepath, outfile):
         """Initialize my gene handle and refseq/accessions list.
+
         Get the basic gene information. It's best to use a csv file and title
         the row of the accessions list `Accessions`.
         """
+        # TODO add definition for doing the work of this.
         accfile = pd.read_csv(filepath)
         self.acclist = list([accession.upper() for accession
                              in accfile.Accessions])
@@ -20,6 +20,7 @@ class MG(object):
         # Set up mygene handle
         self.mg = mygene.MyGeneInfo()
 
+        # TODO add kwargs
         basic_info = self.mg.querymany(self.acclist, scopes='refseq',
                                        fields='symbol,name,entrezgene,summary',
                                        species='human', returnall=True,

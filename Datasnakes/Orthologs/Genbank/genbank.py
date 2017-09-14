@@ -6,7 +6,11 @@ from pathlib import Path
 from BioSQL import BioSeqDatabase
 from Bio import SeqIO
 from Datasnakes.Orthologs.Blast.blastn import CompGenBLASTn
+<<<<<<< HEAD
+from Datasnakes.Manager.utils import makedirectory
+=======
 from Datasnakes.Orthologs.CompGenetics import CompGenObjects
+>>>>>>> 78a7b843c4c3507d3cb867224d09e6143391b61c
 # TODO-ROB:  REMOVED Tier Based Directory System.  Only add tier directories at the end of analysis in the users data folder
 
 
@@ -42,6 +46,26 @@ class GenBank(object):
                     setattr(self, str(key), str(value))
                 print('project_path=%s' % self.project_path)
             else:
+<<<<<<< HEAD
+                self.project_path = Path(os.getcwd()) / Path(self.project)
+            makedirectory(self.project_path)
+            print('project_path=%s' % self.project_path)
+            self.removed_bn_config(kwargs)
+        else:
+            setattr(blast, 'project', project)
+            for key, value in blast.__dict__.items():
+                setattr(self, str(key), str(value))
+            print('project_path=%s' % self.project_path)
+
+        self.gbk_path = self.raw_data / Path('GENBANK')
+        # TODO deprecate
+        self.target_gbk_files_path = self.gbk_path / Path('gbk')
+        makedirectory(self.target_gbk_files_path)
+
+        # TODO deprecate
+        self.target_fasta_files = self.gbk_path / Path('fasta')
+        makedirectory(self.target_fasta_files)
+=======
                 if project_path:
                     self.project_path = self.repo_path
                 else:
@@ -49,10 +73,13 @@ class GenBank(object):
                 Path.mkdir(self.project_path, parents=True, exist_ok=True)
                 print('project_path=%s' % self.project_path)
                 self.removed_bn_config(kwargs)
+>>>>>>> 78a7b843c4c3507d3cb867224d09e6143391b61c
 
-        self.target_gbk_db_path = self.user_db / Path(self.project)  # Configuration.  Create configuration script.
+        # Configuration
+        # TODO Create configuration script.
+        self.target_gbk_db_path = self.user_db / Path(self.project)
         # TODO-ROB: Configure GenBank function
-        Path.mkdir(self.target_gbk_db_path, parents=True, exist_ok=True)
+        makedirectory(self.target_gbk_db_path)
         self.solo = solo
         self.multi = multi
         self.min_fasta = min_fasta
@@ -65,9 +92,9 @@ class GenBank(object):
         for key, value in kwargs.items():
             setattr(self, key, value)
 
-        Path.mkdir(self.raw_data, exist_ok=True)
-        Path.mkdir(self.user_db, exist_ok=True)
-        Path.mkdir(self.ncbi_db_repo, exist_ok=True)
+        makedirectory(self.raw_data)
+        makedirectory(self.user_db)
+        makedirectory(self.ncbi_db_repo)
 
     @staticmethod
     def name_fasta_file(path, gene, org, feat_type, feat_type_rank, extension, mode):
@@ -89,7 +116,7 @@ class GenBank(object):
             file_path = feat_path / Path(multi % (gene, feat_type_rank, extension))
 
         # Make the base directory and return an open file.
-        feat_path.mkdir(parents=True, exist_ok=True)
+        makedirectory(feat_path)
         file = open(file_path, mode)
         return file
 
