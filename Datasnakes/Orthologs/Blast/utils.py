@@ -6,16 +6,13 @@ import time
 
 
 def map_func(hit):
-    """Use the map function for formatting hit id's.
-    This will be used later in the script.
-    """
+    """Use the map function for formatting hit id's."""
     hit.id1 = hit.id.split('|')[3]  # accession number
     hit.id2 = hit.id.split('|')[1]  # gi number
     hit.id = hit.id[:-2]
     return hit
 
-
-# # XXX PAML no longer needs a format different than `Homo_sapiens`
+# XXX PAML no longer needs a format different than `Homo_sapiens`
 def paml_org_formatter(organisms):
     org_list = []
     for organism in organisms:
@@ -27,6 +24,7 @@ def paml_org_formatter(organisms):
 
 def gene_list_config(file, data_path, gene_list, taxon_dict, logger):
     """Create or use a blast configuration file.
+
     This function configures different files for new BLASTS.
     It also helps recognize whether or not a BLAST was terminated
     in the middle of the dataset.  This removes the last line of
@@ -72,9 +70,6 @@ def gene_list_config(file, data_path, gene_list, taxon_dict, logger):
     else:
         logger.info("A new BLAST started at %s" % time.time())
         return None
-# ***********************************************PRE BLAST ANALYSIS TOOLS********************************************* #
-# ***********************************************PRE BLAST ANALYSIS TOOLS********************************************* #
-
 
 def my_gene_info(acc_path, blast_query='Homo_sapiens'):
     import mygene
@@ -114,15 +109,12 @@ def my_gene_info(acc_path, blast_query='Homo_sapiens'):
     hot_data = hot_data.sort_values(['Tier'], ascending=True)
 
     return hot_data
-# **********************************************POST BLAST ANALYSIS TOOLS******************************************** #
-# **********************************************POST BLAST ANALYSIS TOOLS******************************************** #
-
 
 def get_dup_acc(acc_dict, gene_list, org_list):
     """Get duplicate accessions.
+
     This function is used to analyze an accession file post-BLAST.
     It uses the accession dictionary as a base.
-
     :return: A master duplication dictionary used to initialize the
     duplicate class variables.
     """
@@ -218,10 +210,10 @@ def get_dup_acc(acc_dict, gene_list, org_list):
 
 
 def get_miss_acc(acc_file_path):
-    """
-    This function is used to analyze an accession file post BLAST.
-    It generates several files and dictionaries regarding missing accession numbers.
+    """This function is used to analyze an accession file post BLAST.
 
+    It generates several files and dictionaries regarding missing accession
+    numbers.
     :param acc_file_path: An accession file (post BLAST).
     :return: A dictionary with data about the missing accession numbers by Gene and
     by Organism.

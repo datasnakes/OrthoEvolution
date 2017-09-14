@@ -1,5 +1,4 @@
-"""Test creation of directory structure for a project."""
-
+"""This is the test suite for Manager."""
 from Datasnakes.Manager.utils import (Management, ProjectManagement, RepoManagement,
                                       UserManagement, WebsiteManagement)
 import unittest
@@ -23,7 +22,7 @@ class TestManager(unittest.TestCase):
                           new_research=True)
         self.assertEqual(str(self.repo), 'test-repo')
         self.delete_repo()
-    # TODO add tests for each individual subclass.
+    # TODO add tests for each individual subclass
 
 if __name__ == '__main__':
     unittest.main()
