@@ -141,7 +141,7 @@ def gene_list_config(file, data_path, gene_list, taxon_dict, logger):
         return None
 
 
-def gi_list_config(gi_list_path, project_path, taxon_ids, config):
+def gi_list_config(gi_list_path, research_path, taxon_ids, config):
     # TODO-ROB THis is for development / testing
     # TODO-ROB Add the ability to do two seperate gi configs
     """Create a gi list based on the refseq_rna database for each taxonomy id on the MCSR.
@@ -149,8 +149,8 @@ def gi_list_config(gi_list_path, project_path, taxon_ids, config):
     efficient to use with NCBI's Standalone Blast tools.
     """
     # Directory and file handling
-    raw_data_path = project_path / Path('raw_data')
-    index_path = project_path / Path('index')
+    raw_data_path = research_path / Path('raw_data')
+    index_path = research_path / Path('index')
     taxid_file = index_path / Path('taxids.csv')
     pd.Series(taxon_ids).to_csv(str(taxid_file), index=False)
     pbs_script = 'get_gi_lists.sh'
@@ -160,7 +160,7 @@ def gi_list_config(gi_list_path, project_path, taxon_ids, config):
     pbs_script = shutil.copy(pkg_resources.resource_filename(config.__name__, pbs_script), str(raw_data_path))
     py_script = shutil.copy(pkg_resources.resource_filename(config.__name__, py_script), str(raw_data_path))
     gi_config = subprocess.check_output('qsub -v PYTHONFILE=%s,GILISTPATH=%s,PROJECTPATH=%s, %s' %
-                                        (py_script, gi_list_path, project_path, pbs_script), shell=True)
+                                        (py_script, gi_list_path, research_path, pbs_script), shell=True)
     gi_config = gi_config.decode('utf-8')
     print('The GI list configuration\'s JobID is %s' % gi_config)
     job_id = gi_config.replace('.sequoia', '')
