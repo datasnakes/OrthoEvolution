@@ -2,11 +2,10 @@ import os
 import shutil
 import subprocess
 from pathlib import Path
-
 from Bio import SeqIO
 from Bio.Align.Applications import ClustalOmegaCommandline
-from Datasnakes.Orthologs.Align.guidance2 import Guidance2Commandline
 
+from Datasnakes.Orthologs.Align.guidance2 import Guidance2Commandline
 from Datasnakes.Orthologs.Align.pal2nal import Pal2NalCommandline
 from Datasnakes.Orthologs.Genbank.genbank import GenBank
 from Datasnakes.Orthologs.Genbank.utils import multi_fasta_manipulator

@@ -1,6 +1,6 @@
 from ete3 import EvolTree, Tree
 import pandas as pd
-from Datasnakes.Manager.utils import FormatList
+from Datasnakes.Manager.utils import formatlist
 
 
 class ETE3PAML(object):
@@ -18,7 +18,7 @@ class ETE3PAML(object):
 
         # Create a list name/variable and use list()
         orgs = list(orgsfile[0])
-        organismslist = FormatList(orgs)
+        organismslist = formatlist(orgs)
 
         # Import alignment file as string
         alignment_file = open('data/clustal-output/' + gene + '_Aligned/' +
