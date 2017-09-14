@@ -1,15 +1,18 @@
 """Utilities & Management classes"""
 
-from .mana import Mana, ProjMana, RepoMana, UserMana, WebMana
+from .management import (Management, ProjectManagement, RepoManagement,
+                         UserManagement, WebsiteManagement)
 #from .zipper import ZipUtils
-from .otherutils import FormatList, SplitList
+from .other_utils import formatlist, splitlist, makedirectory, PackageVersion
 #from .datamana import DataMana, ZipUtils
 
-__all__ = ("WebMana",
-           "Mana",
-           "ProjMana",
-           "RepoMana",
-           "UserMana",
-           "FormatList",
-           "SplitList",
+__all__ = ("WebsiteManagement",
+           "Management",
+           "ProjectManagement",
+           "RepoManagement",
+           "UserManagement",
+           "formatlist",
+           "splitlist",
+           "makedirectory",
+           "PackageVersion",
            )

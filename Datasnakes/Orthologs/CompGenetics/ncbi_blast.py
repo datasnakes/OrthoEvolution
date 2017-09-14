@@ -2,21 +2,23 @@ import os
 import time
 from pathlib import Path
 import pandas as pd
-from Datasnakes.Orthologs.CompGenetics import CompGenAnalysis
+from Datasnakes.Orthologs.CompGenetics import CompGenObjects
 from Datasnakes.Manager.logit import LogIt
 # import pkg_resources
 # import shutil
 
-class BLASTAnalysis(CompGenAnalysis):
-    """Perform Blast Analysis after completing BLASTn."""
+
+class CompGenFiles(CompGenObjects):
+    """Perform Blast Analysis after completing CompGenBLASTn."""
     def __init__(self, project, template=None, taxon_file=None, post_blast=False, save_data=True, **kwargs):
-        """Inherited from the CompGenAnalysis class.
+        """Inherited from the CompGenObjects class.
 
         If the BLAST was cut short, then a build_file is to be used.
         """
-        super().__init__(project=project, acc_file=template, taxon_file=taxon_file, post_blast=post_blast, hgnc=False, **kwargs)
+        super().__init__(project=project, acc_file=template, taxon_file=taxon_file,
+                         post_blast=post_blast, hgnc=False, **kwargs)
         # TODO-ROB: Inherit or add variable for logger class
-        # TODO-ROB Add Mana directories
+        # TODO-ROB Add Management directories
         # Private variables
         self.__home = os.getcwd()
         if taxon_file is not None:
@@ -43,6 +45,10 @@ class BLASTAnalysis(CompGenAnalysis):
         self.__date_format = df.date_format
         self.get_time = time.time  # To get the time use 'get_time()'
 
+        # Create variable for log separator
+        log_sep = 50*'*'
+        self.sep = log_sep
+
     def add_accession(self, gene, organism, accession):
         """Take an accession and add in to the building dataframe & csv file.
 
@@ -52,19 +58,14 @@ class BLASTAnalysis(CompGenAnalysis):
         if pd.isnull(self.building.get_value(gene, organism)) is False:
             existing = self.building.get_value(gene, organism)
             if existing == accession:
-                self.blastn_log.warning(
-                    "***********************************************************************")
-                self.blastn_log.warning(
-                    "This gene has already been BLASTed...")
+                self.blastn_log.warning(self.sep)
+                self.blastn_log.warning("BlastN has run on this gene.")
                 self.blastn_log.warning("The ACCESSION(%s) for the %s %s gene already exists in our data set."
                                         % (accession, organism, gene))
-                self.blastn_log.warning(
-                    "***********************************************************************")
+                self.blastn_log.warning(self.sep)
             else:
-                self.blastn_log.critical(
-                    "***********************************************************************")
-                self.blastn_log.critical(
-                    "The gene has already been BLASTed...")
+                self.blastn_log.critical(self.sep)
+                self.blastn_log.critical("BlastN has run on this gene.")
                 self.blastn_log.critical("The queried ACCESSION (%s) does not match the existing ACCESSION (%s)"
                                          % (accession, existing))
 
@@ -78,8 +79,7 @@ class BLASTAnalysis(CompGenAnalysis):
                 self.blastn_log.critical(
                     "Existing Accession Organism: %s" %
                     self.acc_dict[existing][0][1])
-                self.blastn_log.critical(
-                    "***********************************************************************")
+                self.blastn_log.critical(self.sep)
                 raise ValueError("The queried ACCESSION (%s) does not match the existing ACCESSION (%s).  Please see"
                                  "the log file." % (accession, existing))
 
@@ -104,7 +104,7 @@ class BLASTAnalysis(CompGenAnalysis):
         if self.save_data is True:
             temp.to_csv(str(self.building_time_file_path))
 
-    def post_blast_analysis(self, project_name, removed_genes=None):
+    def post_blast_analysis(self, removed_genes=None):
         """Analyze the blast results.
 
         Generate information about any duplicated or missing accessions by gene

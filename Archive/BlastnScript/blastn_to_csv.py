@@ -187,7 +187,7 @@ def map_func(hit):
 os.chdir(h)  # Change to home directory
 
 # 1st column - tiers, 2nd column - genes, 3rd column - Human accession numbers
-# TODO-ROB: CompGenAnalysis here
+# TODO-ROB: CompGenObjects here
 file1 = csv.reader(open('data/initial-data/homo_sapiens_accessions.csv'))
 os.chdir(output)
 
@@ -198,7 +198,7 @@ for Accession in file1:
 
 #  Begin listing I/O information
 # ------------------------------------------------------------------------------
-    # TODO-ROB:  CompGenAnalysis here
+    # TODO-ROB:  CompGenObjects here
     blastn_log.info('#' + (50 * '-'))
     blastn_log.info('The following contains information about the BLAST input and output:')
     blastn_log.info('Human Accession: %s' % Accession[2])
@@ -584,7 +584,7 @@ blastn_log.info("This blastn portion of the script has completed. Check your out
 # Set up the post blastn analysis logger and log file
 post_blast_log = log.getLogger('Post Blast Analysis')
 # ------------------------------------------------------------------------------
-# TODO-ROB:  Add post blast analysis to CompGenAnalysis
+# TODO-ROB:  Add post blast analysis to CompGenObjects
 # Read output accessions file and create dictionaries for data types.
 # Change to home directory
 os.chdir(h)
