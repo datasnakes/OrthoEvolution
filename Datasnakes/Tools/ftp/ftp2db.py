@@ -1,43 +1,12 @@
-# -*- coding: utf-8 -*-
-"""
-Orthologs-Project
-Ftp2Db updated on 11/18/2016 at 3:16 PM
-
-Input:  The class takes an email and an NCBI FTP site path
-(ex..  refseq/release/vertebrate_mammalian) as optional attributes.
-User input is also needed.
-
-Output:  The user gets to choose which files to download.  A cache is also
-created in order update the same files at a later date.
-
-Description:  This class is meant to act as an interface for downloading files
-from NCBI.  Calling the class begins a series questions posed to the user
-to navigate the NCBI FTP site and to begin downloading files from the site.
-
-@author: Rob Gilmore
-"""
+""""""
 # Modules Used
 import os
 import pandas as pd
 from ftplib import FTP
-from dir_mana import dir_mana
-from lister import lister
 import time
 import shutil
 import subprocess
 import configparser
-#from cursesmenu import *  # for Linux Only
-#from cursesmenu.items import *  # for Linux Only
-
-# Set up directories and project
-home = os.getcwd()
-project = "GPCR-Orthologs-Project"
-user = "rgilmore"
-where = dir_mana(home, project)
-# Use lister() class here so that we can easily access our Master RNA
-# Accession File
-# Always make sure this file name is correct
-what = lister('Master_RNA_Accession_File.csv')
 
 
 class Ftp2Db(object):
@@ -45,7 +14,7 @@ class Ftp2Db(object):
     ncbi = configparser.ConfigParser()
     ncbi.read('ncbiftp.cfg')
     """Private variable initialization"""
-    __NCBI_FTP = ncbi['FTPSITE']['ncbi']
+    # __NCBI_FTP = ncbi['FTPSITE']['ncbi']
     __NCBI_RSYNC = 'rsync://ftp.ncbi.nlm.nih.gov'
     __class_name = ''
     __update_dict = {}
@@ -98,8 +67,10 @@ class Ftp2Db(object):
         # If db_update_flag is true it updates the databases
 
     def ftp_check(self):
-        """ Checks to see if the FTP connection still exists.
-        If it doesn't then it reconnects and returns an instance of the connection.
+        """Check to see if the FTP connection still exists.
+
+        If it doesn't then it reconnects and returns an instance of the
+        connection.
         """
         ftp = self.ftp_connect(self.__NCBI_FTP, self.email)
         ftp.voidcmd('NOOP')
@@ -108,8 +79,7 @@ class Ftp2Db(object):
 
     @staticmethod
     def ftp_connect(ftpsite, email):
-        """Connects to the FTP server and returns and instance of the connection.
-        """
+        """Connect to the FTP server."""
         ftp = FTP(ftpsite, timeout=None)
         ftp.login(user='anonymous', passwd=email)
         return ftp
@@ -128,7 +98,7 @@ class Ftp2Db(object):
 
     @staticmethod
     def ftp_unzip(local_dir, downloaded_list):
-        """Creates a new unzipped file.
+        """Create a new unzipped file.
         Deletes the old compressed file that was downloaded."""
         for f in os.listdir(local_dir):
             _p = local_dir + '/' + f
@@ -427,8 +397,8 @@ class Ftp2Db(object):
 
         if self.db_update_flag is False:
             self.db_upload(('%s_' % self.__class_name) + log_name + '.log')
-        # //TODO-ROB come up with a better naming convention thats good for UPDATE module and Mana()
-        # //TODO-ROB append a file with different paths for the databases for use in Mana()
+        # //TODO-ROB come up with a better naming convention thats good for UPDATE module and Management()
+        # //TODO-ROB append a file with different paths for the databases for use in Management()
         # //TODO-ROB make a logging function
 
         if self.ftp_update_flag is False:

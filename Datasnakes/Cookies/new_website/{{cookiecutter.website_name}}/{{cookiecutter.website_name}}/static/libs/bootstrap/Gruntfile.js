@@ -46,7 +46,7 @@ module.exports = function (grunt) {
             ' * Copyright 2011-<%= grunt.template.today("yyyy") %> <%= pkg.author %>\n' +
             ' * Licensed under the <%= pkg.license %> license\n' +
             ' */\n',
-    jqueryCheck: configBridge.config.jqueryCheck.join('\n'),
+    jqueryCheck: configBridge.config.jqueryCheck.join("\n"),
     jqueryVersionCheck: configBridge.config.jqueryVersionCheck.join('\n'),
 
     // Task configuration.
@@ -63,7 +63,7 @@ module.exports = function (grunt) {
         options: {
           jshintrc: 'grunt/.jshintrc'
         },
-        src: ['Gruntfile.js', 'package.js', 'grunt/*.js']
+        src: ["Gruntfile.js", "package.js", "grunt/*.js"]
       },
       core: {
         src: 'js/*.js'

@@ -3,7 +3,7 @@ import warnings
 
 from Bio import Phylo
 
-from datasnakes.Orthologs import OrthologsDevelopmentWarning
+from Datasnakes.Orthologs import OrthologsDevelopmentWarning
 
 # Warn users about this module
 warnings.warn('Orthologs.Phylogenetics.PhyloTree is still under development and '

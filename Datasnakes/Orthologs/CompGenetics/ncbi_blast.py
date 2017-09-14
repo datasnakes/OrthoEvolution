@@ -1,24 +1,23 @@
 import os
 import time
 from pathlib import Path
-
 import pandas as pd
-from Datasnakes.Orthologs.CompGenetics.comp_gen import CompGenAnalysis
+from Datasnakes.Orthologs.CompGenetics import CompGenObjects
+from Datasnakes.Manager.logit import LogIt
+# import pkg_resources
+# import shutil
 
-from Datasnakes.Manager.logit.logit import LogIt
 
-
-class BLASTAnalysis(CompGenAnalysis):
-    def __init__(self, repo, user, project, research, research_type,
-                 template=None, taxon_file=None, post_blast=False, save_data=True, **kwargs):
-        """Inherited from the CompGenAnalysis class.
+class CompGenFiles(CompGenObjects):
+    """Perform Blast Analysis after completing CompGenBLASTn."""
+    def __init__(self, project, template=None, taxon_file=None, post_blast=False, save_data=True, **kwargs):
+        """Inherited from the CompGenObjects class.
 
         If the BLAST was cut short, then a build_file is to be used.
         """
-        super().__init__(repo=repo, user=user, project=project, research=research, research_type=research_type,
-                         acc_file=template, taxon_file=taxon_file, post_blast=post_blast, hgnc=False, **kwargs)
+        super().__init__(project=project, acc_file=template, taxon_file=taxon_file, post_blast=post_blast, hgnc=False, **kwargs)
         # TODO-ROB: Inherit or add variable for logger class
-        # TODO-ROB Add Mana directories
+        # TODO-ROB Add Management directories
         # Private variables
         self.__home = os.getcwd()
         if taxon_file is not None:
@@ -35,29 +34,19 @@ class BLASTAnalysis(CompGenAnalysis):
             self.building_time_filename = self.building_filename.replace(
                 'building.csv', 'building_time.csv')
         else:
-            self.building_filename = str(project + 'building.csv')
+            self.building_filename = str(self.project + 'building.csv')
             self.building_time_filename = self.building_filename.replace(
                 'building.csv', 'building_time.csv')
 
         # Initialize Logging
         df = LogIt('blast_test.log', 'blastn')
         self.blastn_log = df.basic
-        #self.postblast_log = df.basic
-        #self.config_log = df.basic(self.user_log / Path('BLAST.log'))
         self.__date_format = df.date_format
         self.get_time = time.time  # To get the time use 'get_time()'
-        # Logging variables
-        # self.__date_format = '%a %b %d at %I:%M:%S %p %Y'  # Used to add as a date
-        # self.__archive_format = '%m-%d-%Y@%I:%M:%S-%p'  # Used to append to archives
-        # self.__log_format = '%(name)s - [%(levelname)-2s]: %(message)s'
-        # log.basicConfig(level=log.DEBUG,
-        #                 format=self.__log_format,
-        #                 filename="logs/accessions2blastxml_%s.log" % str(d.now().strftime(self.__archive_format)))
-        # self.blast_log = log.getLogger('Blastn')
 
     def add_accession(self, gene, organism, accession):
-        """Takes an accession and adds in to the building dataframe,
-        and also adds to the csv file.
+        """Take an accession and add in to the building dataframe & csv file.
+
         This returns a log.
         """
         # TODO-ROB:  Create this in the log file
@@ -105,10 +94,7 @@ class BLASTAnalysis(CompGenAnalysis):
             temp.to_csv(str(self.building_file_path))
 
     def add_blast_time(self, gene, organism, start, end):
-        """
-        Takes the start/end times and adds in to the building_time
-        dataframe, and also adds to the csv file.
-        """
+        """Retrieve the start/end times and add in to the building_time dataframe & csv file."""
         elapsed_time = end - start
         # Edit the data frame
         self.building_time.set_value(gene, organism, elapsed_time)
@@ -119,7 +105,12 @@ class BLASTAnalysis(CompGenAnalysis):
         if self.save_data is True:
             temp.to_csv(str(self.building_time_file_path))
 
-    def post_blast_analysis(self, project_name, removed_genes=None):
+    def post_blast_analysis(self, removed_genes=None):
+        """Analyze the blast results.
+
+        Generate information about any duplicated or missing accessions by gene
+        and by organism.
+        """
         # TODO-ROB  Fix the output format of the excel file.  View a sample
         # output in /Orthologs/comp_gen
         pba_file_path = str(self.data / Path(self.project + '_pba.xlsx'))
@@ -230,4 +221,3 @@ class BLASTAnalysis(CompGenAnalysis):
             pb_file.save()
         except IndexError:
             print("There are no duplicates or missing genes.")
-            pass

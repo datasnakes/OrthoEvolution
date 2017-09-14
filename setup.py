@@ -17,7 +17,7 @@ sys.stderr = open('err.txt', 'w')
 
 # Set the home path of the setup script/package
 home = path.abspath(path.dirname(__file__))
-name = 'Datasnakes-Scripts'
+name = 'Datasnakes'
 
 
 def readme():
@@ -30,7 +30,7 @@ setup(
     name=name,
     author='Rob Gilmore & Shaurita Hutchins',
     description="This package helps in the analysis of orthologous genes.",
-    version='0.1.0a1',
+    version='0.1.1a1',
     long_description=readme(),
     url='https://github.com/datasnakes/Datasnakes-Scripts',
     license='MIT',

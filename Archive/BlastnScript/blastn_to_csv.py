@@ -1,33 +1,14 @@
-#!/usr/local/apps/anaconda3/bin/python3
-# -*- coding: utf-8 -*-
-"""
-File Name: blastntest.py
-Description: This script inputs a list of organisms & genes. It tests a script.
-
-@authors: Robert A. Gilmore & Shaurita D. Hutchins
-Date Created: March 29, 2017
-Project Name: Orthologs Project
-
-Edited and updated for use with local/standalone NCBI BLAST 2.6.0
-"""
 import csv
-# Modules as custom
 import logging as log
-# Modules used
 import os
 import subprocess
 import time  # Used to delay when dealing with NCBI server errors
 from datetime import datetime as d
-
 import pandas as pd  # Used for dealing with CSV files
 from Bio import SearchIO  # Used for parsing and sorting XML files.
 from Bio.Blast.Applications import NcbiblastnCommandline  # Used for Local Blasting.
-# Proprietary Modules
-from manager.ortho_analysis import OrthologAnalysis
-
-from datasnakes.Orthologs import BLASTAnalysis as BT
-
-# TODO-ROB: Find packages for script timing and analysis
+from Datasnakes.Manager.ortho_analysis import OrthologAnalysis
+from Datasnakes.Orthologs import BLASTAnalysis as BT
 
 # Set up the blastn logger & log file
 format1 = '%a %b %d at %I:%M:%S %p %Y'  # Used to add as a date
@@ -206,7 +187,7 @@ def map_func(hit):
 os.chdir(h)  # Change to home directory
 
 # 1st column - tiers, 2nd column - genes, 3rd column - Human accession numbers
-# TODO-ROB: CompGenAnalysis here
+# TODO-ROB: CompGenObjects here
 file1 = csv.reader(open('data/initial-data/homo_sapiens_accessions.csv'))
 os.chdir(output)
 
@@ -217,7 +198,7 @@ for Accession in file1:
 
 #  Begin listing I/O information
 # ------------------------------------------------------------------------------
-    # TODO-ROB:  CompGenAnalysis here
+    # TODO-ROB:  CompGenObjects here
     blastn_log.info('#' + (50 * '-'))
     blastn_log.info('The following contains information about the BLAST input and output:')
     blastn_log.info('Human Accession: %s' % Accession[2])
@@ -603,7 +584,7 @@ blastn_log.info("This blastn portion of the script has completed. Check your out
 # Set up the post blastn analysis logger and log file
 post_blast_log = log.getLogger('Post Blast Analysis')
 # ------------------------------------------------------------------------------
-# TODO-ROB:  Add post blast analysis to CompGenAnalysis
+# TODO-ROB:  Add post blast analysis to CompGenObjects
 # Read output accessions file and create dictionaries for data types.
 # Change to home directory
 os.chdir(h)

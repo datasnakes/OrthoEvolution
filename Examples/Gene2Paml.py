@@ -1,3 +1,0 @@
-"""
-Test the entire pipeline.
-"""

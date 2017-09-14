@@ -1,24 +1,6 @@
-# -*- coding: utf-8 -*-
-"""
-WARNING!!!
-This script is underdevelopment because mygene is having an issue finding the
-entrez id for GPR21. When that Entrez ID is added manually, the NCBI urls can
-be created.
-
-It's best to use the accession #'s!
-
-@author: S. Hutchins
-"""
-#------------------------------------------------------------------------------
-# Modules Used
-#------------------------------------------------------------------------------
-
 import mygene
-
 import pandas as pd
-#import sys
 
-# Import mygene.MyGeneInfo() search command
 mg = mygene.MyGeneInfo()
 
 

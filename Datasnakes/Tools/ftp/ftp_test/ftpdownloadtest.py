@@ -1,41 +1,42 @@
-"""
-Test the ftp module.
-"""
-
-# Modules used
+"""Test the ftp module. This won't remain."""
 from ftplib import FTP, error_perm
 import os
 import fnmatch
 
-#------------------------------------------------------------------------------
-# Connect to the NCBI directory
-ncbi = 'ftp.ncbi.nlm.nih.gov/'
-refseqrna = '/blast/db/'  # Connect to this blastdb
-blast = '/blast/'
-ftp = FTP("ftp.ncbi.nlm.nih.gov", timeout=None)
 
-# Login using email as password
-ftp.login(user='anonymous', passwd='shutchins2@umc.edu')
+class NCBIFTPTest(object):
+    """A simple example for ftp."""
+    def __init__(self, passwd, user='', site='ftp.ncbi.nlm.nih.gov/',
+                 path='blast'):
 
-# Change to the desired directory
-# ftp.cwd(refseqrna)
-ftp.cwd(blast)
-# Use ftp.pwd() to find out the current directory
+        # Connect to the NCBI directory
+        self.ftpsite = site
+        sitepath = path
+        ftp = FTP(self.ftpsite, timeout=None)
 
-# Get a list of all the files in the directory
-# ftp.retrlines('LIST')
+        # Login using email as password
+        ftp.login(user=user, passwd=passwd)
 
-# This is a list of the file names
-filenames = ftp.nlst()
+        # Change to the desired directory
+        # ftp.cwd(refseqrna)
+        ftp.cwd(sitepath)
+        # Use ftp.pwd() to find out the current directory
 
-# Create a for loop that downloads the files
-for filename in filenames:
-    if fnmatch.fnmatch(filename, 'blastftp*'):
-        host_file = os.path.join(filename)
-        try:
-            with open(host_file, 'wb') as local_file:
-                ftp.retrbinary('RETR %s' % filename, local_file.write)
-        except error_perm:
-            pass
+        # Get a list of all the files in the directory
+        # ftp.retrlines('LIST')
 
-ftp.quit()
+        # This is a list of the file names
+        filenames = ftp.nlst()
+        file2download = 'blastftp*'
+
+        # Create a for loop that downloads the files
+        for filename in filenames:
+            if fnmatch.fnmatch(filename, file2download):
+                host_file = os.path.join(filename)
+                try:
+                    with open(host_file, 'wb') as local_file:
+                        ftp.retrbinary('RETR %s' % filename, local_file.write)
+                except error_perm:
+                    pass
+
+        ftp.quit()

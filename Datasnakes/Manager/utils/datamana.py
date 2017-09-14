@@ -1,10 +1,14 @@
 import os
-import sys
 import zipfile
-import logging as log
 from pathlib import Path
-from datetime import datetime as d
-from Datasnakes.Manager.utils.mana import ProjMana as PM
+from Datasnakes.Manager import config
+from Datasnakes.Manager.utils.mana import ProjectManagement
+from Datasnakes.Orthologs.Blast.blastn import CompGenBLASTn
+from Datasnakes.Orthologs.CompGenetics.comp_gen import CompGenObjects
+from Datasnakes.Orthologs.Genbank.genbank import GenBank
+from Datasnakes.Orthologs.Align.msa import MultipleSequenceAlignment as MSA
+import yaml
+import pkg_resources
 #import configparser
 #from slacker import Slacker
 #import argparse
@@ -12,94 +16,105 @@ from Datasnakes.Manager.utils.mana import ProjMana as PM
 # TODO-ROB: Use this class to move data back and forth between local and remote servers
 # TODO-ROB:  Mirror the directory creation on MCSR's servers
 # TODO-ROB:  ^^ This will allow the transfer of data
-class DataMana(PM):
-    def __init__(self, home=os.getcwd(), data=None, new_data=False, database=None, new_db=False, **kwargs):
-        super().__init__(database=database, new_db=new_db, **kwargs)
 
-        for item in data:
-            if item.lower() == 'blast':
-                self.blast_data = self.ncbi_db_repo / Path()
-                self.blast()
-            elif item.lower() == 'genbank':
-                self.genbank()
-            elif item.lower() == 'fasta':
-                self.fasta()
-
-    def blast(self):
-        print('blast folders')
-
-    def genbank(self):
-        print('genbank folders')
-
-    def fasta(self):
-        print('fasta foldrs')
+# TODO-ROB:  Add FTP and s2s inheritance
 
 
-class LogIt(DataMana):
-    """LogIt makes logging easier by creating easy loggers."""
-    """Class for improving the ease of use of the logging module."""
-    def __init__(self, logfile=None, logname=None):
-        """Initialize the logger format based on system platform."""
-        # Set the different formats
-        """Set the different formats based on user's platform."""
-        if sys.platform == 'win32':
-            self.archive_format = '%m-%d-%Y_%I-%M-%p'
-            pass
-        elif sys.platform == 'linux':
-            self.archive_format = '%m-%d-%Y@%I:%M:%S-%p'
-            pass
+class DataMana(object):
 
-        self.date_format = '%a %b %d at %I:%M:%S %p %Y'  # Used to add as a date
-        self.log_format = '%(name)s - [%(levelname)-2s]: %(message)s'
-        # self.slack = self.slack_config()
-        self.basic = self.generic_logger(logfile, logname, log.DEBUG, self.log_format)
+    def __init__(self, config_file=None, pipeline=None, new=False, start=False, **kwargs):
 
-    def _get_file(self, filename):
-        """Create a log file."""
-        base, extension = filename.split('.')
-        file = base + str(d.now().strftime(self.archive_format)) + extension
-        path = os.getcwd() + file
-        return path
+        # Initialize the attributes that can be used as keys in the config_file
+        self.Management_config = self.CompGenAnalysis_config = self.BLASTn_config = self.GenBank_config = self.Alignment_config = None
+        self.pm = self.bl = self.gb = self.al = None
+        if pipeline == 'Ortho_CDS_1':
+            if new is True:
+                config_file = pkg_resources.resource_filename(config.__name__, 'config_template_new.yaml')
+            else:
+                config_file = pkg_resources.resource_filename(config.__name__, 'config_template_existing.yaml')
+        if config_file is not None:
+            if start is True:
+                self.configure(config_file)
 
-    def generic_logger(self, filename, logname, level, fmt, slack=False):
-        """Create a generic logger."""
-        file_path = self._get_file(filename)
-        log.basicConfig(level=level,
-                        format=fmt,
-                        filename=file_path)
-        generic_logger = log.getLogger(logname)
-        if slack is False:
-            return generic_logger
-            #        else:
-            #            slack_logger = log.getLogger('SLACK')
+    def configure(self, config_file):
+        '''
+        This method uses YAML configuration in order to initialize different classes.
+        :param config_file: A YAML file that is used to create a dictionary(kwargs) for each class.
+        :return:
+        '''
+        with open(config_file, 'r') as ymlfile:
+            configuration = yaml.safe_load(ymlfile)
+            for key, value in configuration.items():
+                setattr(self, key, value)
+                print('key:' + str(key) + '\nvalue: ' + str(value))
 
-            # ******************************************SLACK****************************************** #
-            # ******************************************SLACK****************************************** #
-            # ******************************************SLACK****************************************** #
+                # Project Management
+            if self.Management_config is not None:
+                self.pm = ProjectManagement(**self.Management_config)
+                print('mana_config')
+                print(self.pm)
+            else:
+                self.pm = self.Management_config
 
-            # @staticmethod
-            # def slack_config():
-            #     config = configparser.ConfigParser()
-            #     config.read('bin/orthologs.ini')
-            #     apikey = config['APIKEYS']['slack']
-            #     slack = Slacker(apikey)
-            #     return slack
-            #
-            # # Definition for uploading images
-            # def upload_img(self, channel, imgfile):
-            #     self.slack.files.upload(imgfile, channel=channel)
-            #
-            # # Definition for uploading files
-            # def upload_file(self, channel, file):
-            #     self.slack.files.upload(file, channel=channel)
-            #
-            # # Definition for posting messages
-            # def message_slack(self, channel, message, username):
-            #     self.slack.chat.post_message(channel, message, username, as_user=True)
+                # CompGenAnalysis and BLASTn Configuration
+            if self.BLASTn_config is not None and self.CompGenAnalysis_config is not None:
+                self.BLASTn_config.update(self.CompGenAnalysis_config)
+            if self.BLASTn_config is not None:
+                # Blast has not taken place so it will happen here
+                self.blast(self.pm, self.BLASTn_config)
+            elif self.CompGenAnalysis_config is not None:
+                self.blast(self.pm, self.CompGenAnalysis_config)
+            else:
+                # Blast has taken place so
+                self.bl = self.BLASTn_config
 
-            # ******************************************SLACK****************************************** #
-            # ******************************************SLACK****************************************** #
-            # ******************************************SLACK****************************************** #
+                # GenBank
+            if self.GenBank_config is not None:
+                self.genbank(self.pm, self.bl)
+            else:
+                self.gb = self.GenBank_config
+
+                # Alignment
+            if self.Alignment_config is not None:
+                self.align(self.gb)
+            else:
+                self.al = self.Alignment_config
+
+    def blast(self, proj_mana, blast_config):
+        self.bl = CompGenBLASTn(proj_mana=proj_mana, **self.Management_config, **blast_config)
+        self.bl.blast_config(self.bl.blast_human, 'Homo_sapiens', auto_start=True)
+        # TODO-Create directories for the blast data
+        # Do the blasting here using CompGenBLASTn
+
+    def genbank(self, proj_mana, blast):
+        if blast is not None:
+            self.gb = GenBank(blast=blast, **self.Management_config, **self.GenBank_config)
+        else:
+            self.gb = GenBank(**self.Management_config, **self.GenBank_config)
+        if blast is not None and not isinstance(blast, dict):
+            if issubclass(blast, CompGenBLASTn):
+                self.gb.blast2_gbk_files(blast.org_list, blast.gene_dict)
+        else:
+            print(proj_mana.__dict__)
+            cga = CompGenObjects(proj_mana=proj_mana, **self.CompGenAnalysis_config)
+
+            # Parse the tier_frame_dict to get the tier
+            for G_KEY in cga.tier_frame_dict.keys():
+                tier = G_KEY
+                # Parse the tier based transformed dataframe to get the gene
+                for GENE in cga.tier_frame_dict[tier].T:
+                    # Parse the organism list to get the desired accession number
+                    for ORGANISM in cga.org_list:
+                        accession = str(cga.gene_dict[GENE][ORGANISM])
+                        parts = list(accession.partition('.'))
+                        accession = parts[0]
+                        accession = accession.upper()
+                        server_flag = False
+                        self.gb.get_gbk_file(accession, GENE, ORGANISM, server_flag=server_flag)
+
+    def align(self, genbank):
+        self.al = MSA(genbank=genbank, **self.Alignment_config)
+        self.al.align(self.Alignment_config['kwargs'])
 
 
 class ZipUtils(DataMana):

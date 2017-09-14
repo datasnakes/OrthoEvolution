@@ -26,7 +26,7 @@ from pathlib import Path
 
 from Manager.dir_map.json_to_newick import _parse_json
 
-from datasnakes.Orthologs import treelib2
+from Datasnakes.Orthologs import treelib2
 
 
 #from project_mana import project_mana  # //TODO-ROB: Add a configure function to proj_mana to get the root directory using the project name
@@ -35,7 +35,7 @@ from datasnakes.Orthologs import treelib2
 
 class dir_mana(object):
     """This class organizes a directory tree for a project.
-    The Mana() class will help with organization and it will
+    The Management() class will help with organization and it will
     help to instantly access the proper directories on command.
 
     It is advised to set up a function that is named after the project.
@@ -78,7 +78,7 @@ class dir_mana(object):
 
         self.dataset_dict = {}
         self.dataset_dict['data_set'] = self.user_project_dict[self.project_status] / Path(self.current_dataset)
-        self.dataset_dict[]
+        #self.dataset_dict = []
 
         self.re
         #self.__venv_home = os.environ['VIRTUAL_ENV']
