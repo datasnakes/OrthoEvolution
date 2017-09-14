@@ -1,14 +1,18 @@
 import os
 import zipfile
 from pathlib import Path
-from Datasnakes.Manager import config
-from Datasnakes.Manager.utils.management import ProjectManagement
-from Datasnakes.Orthologs.Blast.blastn import CompGenBLASTn
-from Datasnakes.Orthologs.CompGenetics.comp_gen import CompGenObjects
-from Datasnakes.Orthologs.Genbank.genbank import GenBank
-from Datasnakes.Orthologs.Align.msa import MultipleSequenceAlignment as MSA
-import yaml
+
 import pkg_resources
+import yaml
+
+from Datasnakes.Manager import config
+from Datasnakes.Manager.management import ProjectManagement
+from Datasnakes.Orthologs.Align.msa import MultipleSequenceAlignment as MSA
+from Datasnakes.Orthologs.Blast.comparative_genetics_blastn import CompGenBLASTn
+from Datasnakes.Orthologs.Blast.comparative_genetics_objects import CompGenObjects
+from Datasnakes.Orthologs.Genbank.genbank import GenBank
+
+
 #import configparser
 #from slacker import Slacker
 #import argparse

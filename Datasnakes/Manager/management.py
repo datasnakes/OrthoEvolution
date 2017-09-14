@@ -1,17 +1,22 @@
 """Management tools for the package."""
 import os
 from pathlib import Path
+
 import ete3
-from Datasnakes.Manager.utils.zipper import ZipUtils
+import pkg_resources
+from cookiecutter.generate import generate_context
 from cookiecutter.hooks import run_script
 from cookiecutter.main import cookiecutter
 from cookiecutter.prompt import prompt_for_config
-from cookiecutter.generate import generate_context
-import pkg_resources
+
 # TODO-ROB once this is a pypi package all of these will be unnecessary
 from Datasnakes import Cookies, Orthologs, Manager, Tools
+from Datasnakes.Tools.zipper.zipper import ZipUtils
+
+
 # from Manager.logit.logit import LogIt
 # TODO-ROB use **kwargs and **args to cut down on parameters
+
 
 class Management(object):
     """This is the directory management base class.

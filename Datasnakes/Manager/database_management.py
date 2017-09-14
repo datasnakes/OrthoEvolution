@@ -1,7 +1,8 @@
 #from Datasnakes.Tools.ftp import FTP2DB
-from Datasnakes.Manager.utils import ProjectManagement
-from pathlib import Path
 import os
+from pathlib import Path
+
+from Datasnakes.Tools.utils import ProjectManagement
 
 
 class DatabaseManagement(object):
