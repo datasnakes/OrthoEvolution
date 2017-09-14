@@ -171,7 +171,6 @@ def gi_list_config(gi_list_path, research_path, taxon_ids, config):
             print('err:', err)
             break
 
-
     return hot_data
 
 def get_dup_acc(acc_dict, gene_list, org_list):
