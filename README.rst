@@ -55,7 +55,7 @@ Contributors
    `:email: <mailto:sdhutchins@outlook.com>`__
 
 If you would like to contribute to this package, install the package in development mode,
-and check out our `contributing guidelines <>`_.
+and check out our `contributing guidelines <https://github.com/datasnakes/Datasnakes-Scripts/blob/sdh-patch/CONTRIBUTING.rst>`__.
 
 Development Mode Installation
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

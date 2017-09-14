@@ -1,17 +1,18 @@
 """Optimized for use with local/standalone NCBI BLAST 2.6.0."""
-import csv
 import os
 import shutil
 import subprocess
 import contextlib
 import time  # Used to delay when dealing with NCBI server errors
 from datetime import datetime as d
+import pkg_resources
+
 from pathlib import Path
 import pandas as pd
-import pkg_resources
-from Datasnakes.Manager import config
 from Bio import SearchIO  # Used for parsing and sorting XML files.
 from Bio.Blast.Applications import NcbiblastnCommandline
+
+from Datasnakes.Manager import config
 from Datasnakes.Orthologs.CompGenetics.ncbi_blast import CompGenFiles
 from Datasnakes.Manager.utils import makedirectory
 from Datasnakes.Orthologs.Blast.utils import gene_list_config, map_func, gi_list_config
