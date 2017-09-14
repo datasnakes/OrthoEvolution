@@ -45,10 +45,6 @@ def get_gilists(id, gi_list_path, logger):
         logger.info(id + "gi.text file has been deleted.")
 
 
-# ***********************************************PRE BLAST ANALYSIS TOOLS********************************************* #
-# ***********************************************PRE BLAST ANALYSIS TOOLS********************************************* #
-
-
 def my_gene_info(acc_path, blast_query='Homo_sapiens'):
     import mygene
 
@@ -176,13 +172,7 @@ def gi_list_config(gi_list_path, research_path, taxon_ids, config):
             break
 
 
-<<<<<<< HEAD
-# **********************************************POST BLAST ANALYSIS TOOLS******************************************** #
-# **********************************************POST BLAST ANALYSIS TOOLS******************************************** #
-
-=======
     return hot_data
->>>>>>> 87e4014af6ffad3caf2884c7c7e8e0bffac38f98
 
 def get_dup_acc(acc_dict, gene_list, org_list):
     """Get duplicate accessions.
