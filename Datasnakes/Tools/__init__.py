@@ -1,3 +1,3 @@
 # TODO-SDH Consider dissolving the folders.
 
-from Datasnakes.Tools import Multiprocess
+from Datasnakes.Tools.parallel import Multiprocess
