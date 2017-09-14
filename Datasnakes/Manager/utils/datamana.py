@@ -1,6 +1,7 @@
 import os
 import zipfile
 from pathlib import Path
+from Datasnakes.Manager import config
 from Datasnakes.Manager.utils.mana import ProjectManagement
 from Datasnakes.Orthologs.Blast.blastn import CompGenBLASTn
 from Datasnakes.Orthologs.CompGenetics.comp_gen import CompGenObjects
@@ -21,56 +22,79 @@ import pkg_resources
 
 class DataMana(object):
 
-    def __init__(self, config_file=None, pipeline=None, **kwargs):
+    def __init__(self, config_file=None, pipeline=None, start=False, **kwargs):
 
-        self.ProjectManagment_config = self.CompGenAnalysis_config = self.BLASTn_config = self.GenBank_config = self.Alignment_config = None
-
+        # Initialize the attributes that can be used as keys in the config_file
+        self.Management_config = self.CompGenAnalysis_config = self.BLASTn_config = self.GenBank_config = self.Alignment_config = None
+        self.pm = self.bl = self.gb = self.al = None
         if pipeline == 'Ortho_CDS_1':
-            config_file = pkg_resources.resource_filename()
+            config_file = pkg_resources.resource_filename(config.__name__, 'config_template.yaml')
 
         if config_file is not None:
-            with open(config_file, 'r') as ymlfile:
-                configuration = yaml.safe_load(ymlfile)
-                for key, value in configuration.items():
-                    setattr(self, key, value)
+            if start is True:
+                self.configure(config_file)
 
-            # Project Management
-            if self.ProjectManagment_config is not None:
-                self.pm = ProjectManagement(**self.ProjectManagment_config)
+    def configure(self, config_file):
+        '''
+        This method uses YAML configuration in order to initialize different classes.
+        :param config_file: A YAML file that is used to create a dictionary(kwargs) for each class.
+        :return:
+        '''
+        with open(config_file, 'r') as ymlfile:
+            configuration = yaml.safe_load(ymlfile)
+            for key, value in configuration.items():
+                setattr(self, key, value)
+                print('key:' + str(key) + '\nvalue: ' + str(value))
+
+                # Project Management
+            if self.Management_config is not None:
+                self.pm = ProjectManagement(**self.Management_config)
+                print('mana_config')
+                print(self.pm)
             else:
-                self.pm = self.ProjectManagment_config
+                self.pm = self.Management_config
 
-            # CompGenBLASTn
+                # CompGenAnalysis and BLASTn Configuration
+            if self.BLASTn_config is not None and self.CompGenAnalysis_config is not None:
+                self.BLASTn_config.update(self.CompGenAnalysis_config)
             if self.BLASTn_config is not None:
-                self.blast(self.pm)
+                # Blast has not taken place so it will happen here
+                self.blast(self.pm, self.BLASTn_config)
+            elif self.CompGenAnalysis_config is not None:
+                self.blast(self.pm, self.CompGenAnalysis_config)
             else:
+                # Blast has taken place so
                 self.bl = self.BLASTn_config
 
-            # GenBank
+                # GenBank
             if self.GenBank_config is not None:
-                self.genbank(self.bl)
+                self.genbank(self.pm, self.bl)
             else:
                 self.gb = self.GenBank_config
 
-            # Alignment
+                # Alignment
             if self.Alignment_config is not None:
                 self.align(self.gb)
             else:
                 self.al = self.Alignment_config
 
-    def blast(self, proj_mana):
-        self.bl = CompGenBLASTn(proj_mana=proj_mana, **self.BLASTn_config)
+    def blast(self, proj_mana, blast_config):
+        self.bl = CompGenBLASTn(proj_mana=proj_mana, **self.Management_config, **blast_config)
         self.bl.blast_config(self.bl.blast_human, 'Homo_sapiens', auto_start=True)
         # TODO-Create directories for the blast data
         # Do the blasting here using CompGenBLASTn
 
-    def genbank(self, blast):
-        self.gb = GenBank(blast=blast, **self.GenBank_config)
-        if isinstance(blast, CompGenBLASTn):
-            self.gb.blast2_gbk_files(blast.org_list, blast.gene_dict)
+    def genbank(self, proj_mana, blast):
+        if blast is not None:
+            self.gb = GenBank(blast=blast, **self.Management_config, **self.GenBank_config)
         else:
-
-            cga = CompGenObjects(**self.CompGenAnalysis_config)
+            self.gb = GenBank(**self.Management_config, **self.GenBank_config)
+        if blast is not None and not isinstance(blast, dict):
+            if issubclass(blast, CompGenBLASTn):
+                self.gb.blast2_gbk_files(blast.org_list, blast.gene_dict)
+        else:
+            print(proj_mana.__dict__)
+            cga = CompGenObjects(proj_mana=proj_mana, **self.CompGenAnalysis_config)
 
             # Parse the tier_frame_dict to get the tier
             for G_KEY in cga.tier_frame_dict.keys():
@@ -84,7 +108,7 @@ class DataMana(object):
                         accession = parts[0]
                         accession = accession.upper()
                         server_flag = False
-                        self.bl.get_gbk_file(accession, GENE, ORGANISM, server_flag=server_flag)
+                        self.gb.get_gbk_file(accession, GENE, ORGANISM, server_flag=server_flag)
 
     def align(self, genbank):
         self.al = MSA(genbank=genbank, **self.Alignment_config)
