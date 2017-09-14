@@ -29,9 +29,9 @@ class DataMana(object):
         self.pm = self.bl = self.gb = self.al = None
         if pipeline == 'Ortho_CDS_1':
             if new is True:
-                config_file = pkg_resources.resource_filename(config.__name__, 'config_template_new.yaml')
+                config_file = pkg_resources.resource_filename(config.__name__, 'config_template_new.yml')
             else:
-                config_file = pkg_resources.resource_filename(config.__name__, 'config_template_existing.yaml')
+                config_file = pkg_resources.resource_filename(config.__name__, 'config_template_existing.yml')
         if config_file is not None:
             if start is True:
                 self.configure(config_file)
