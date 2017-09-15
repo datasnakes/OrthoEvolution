@@ -30,7 +30,7 @@ setup(
     name=name,
     author='Rob Gilmore & Shaurita Hutchins',
     description="This package helps in the analysis of orthologous genes.",
-    version='0.1.1a1',
+    version='0.1.0a1',
     long_description=readme(),
     url='https://github.com/datasnakes/Datasnakes-Scripts',
     license='MIT',
