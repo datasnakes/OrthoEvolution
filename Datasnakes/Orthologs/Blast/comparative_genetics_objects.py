@@ -1,15 +1,19 @@
 import os
-from ete3 import NCBITaxa
+import shutil
+from pathlib import Path
+from pprint import pprint as print
+
 # NCBITaxa().update_taxonomy_database()
 import pandas as pd
-from pathlib import Path
-# from pandas import ExcelWriter
-from Datasnakes.Manager.utils.management import ProjectManagement
-from Datasnakes.Orthologs.Blast.utils import my_gene_info, get_dup_acc, get_miss_acc
-import shutil
 import pkg_resources
+from ete3 import NCBITaxa
+
 from Datasnakes.Manager import config
-from pprint import pprint as print
+# from pandas import ExcelWriter
+from Datasnakes.Manager.management import ProjectManagement
+from Datasnakes.Orthologs.Blast.utils import my_gene_info, get_dup_acc, get_miss_acc
+
+
 # TODO-ROB Create function for archiving and multiple runs (this can go
 # into the Management class)
 

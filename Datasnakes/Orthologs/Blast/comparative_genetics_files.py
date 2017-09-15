@@ -1,9 +1,13 @@
 import os
 import time
 from pathlib import Path
+
 import pandas as pd
-from Datasnakes.Orthologs.CompGenetics import CompGenObjects
-from Datasnakes.Manager.logit import LogIt
+from Datasnakes.Orthologs.Blast import CompGenObjects
+
+from Datasnakes.Tools.logit import LogIt
+
+
 # import pkg_resources
 # import shutil
 

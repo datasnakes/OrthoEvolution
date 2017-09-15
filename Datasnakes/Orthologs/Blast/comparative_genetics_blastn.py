@@ -8,10 +8,11 @@ from pathlib import Path
 
 from Bio import SearchIO  # Used for parsing and sorting XML files.
 from Bio.Blast.Applications import NcbiblastnCommandline
+
 from Datasnakes.Manager import config
-from Datasnakes.Manager.utils import makedirectory
 from Datasnakes.Orthologs.Blast.comparative_genetics_files import CompGenFiles
 from Datasnakes.Orthologs.Blast.utils import gene_list_config, map_func, gi_list_config
+from Datasnakes.Tools.utils import makedirectory
 
 
 # TODO-ROB: Find packages for script timing and analysis
