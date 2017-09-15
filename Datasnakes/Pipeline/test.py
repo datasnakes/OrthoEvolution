@@ -3,17 +3,17 @@
 # import sys
 # import zipfile
 import luigi
-from logzero import logger as log
+import logzero as log
 from pathlib import Path
 from datetime import datetime as d
 import yaml
 
-from Datasnakes.Manager.utils import ProjectManagement  # Project Management
-from Datasnakes.Orthologs.Blast import CompGenBLASTn
+from Datasnakes.Manager.utils import ProjMana  # Project Management
+from Datasnakes.Orthologs.Blast import BLASTn
 from Datasnakes.Orthologs.Genbank import GenBank
 from Datasnakes.Orthologs.Align import MultipleSequenceAlignment as MSA
 
-luigi_log = log.logger('luigi-interface')
+#logger = log.logger('luigi-interface')
 
 # TODO Check out https://stackoverflow.com/questions/39996544/handling-a-lot-of-parameters-in-luigi
 
@@ -33,10 +33,10 @@ class Blast2PAML(luigi.Task):
 
 
     def requires(self):
-        return ProjectManagement(repo=self.repository, user=self.username,
-                                 project=self.project, research_type=self.researchtype,
-                                 new_repo=self.newrepo, new_user=self.newuser,
-                                 new_project=self.newproject, new_research=self.newresearch)
+        return ProjMana(repo=self.repository, user=self.username,
+                                     project=self.project, research_type=self.researchtype,
+                                     new_repo=self.newrepo, new_user=self.newuser,
+                                     new_project=self.newproject, new_research=self.newresearch)
 
     def output(self):
         return luigi.LocalTarget('~/')

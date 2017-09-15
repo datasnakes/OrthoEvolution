@@ -6,7 +6,7 @@ of interest across a group of [species](ftp://ftp.ncbi.nlm.nih.gov/genomes/refse
 
 Usage
 -----
-The main classes under CompGenetics are `CompGenFiles` and `CompGenObjects`.
+The main classes under CompGenetics are `BLASTAnalysis` and `CompGenAnalysis`.
 
 #### Code Examples
 

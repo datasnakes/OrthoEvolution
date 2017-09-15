@@ -1,7 +1,7 @@
 Class Naming Conventions
 -------------------------------------------
 
-CompGenObjects(ProjectMana) *comp\_gen.py*
+CompGenAnalysis(ProjectMana) *comp\_gen.py*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 User Generated Files
@@ -41,7 +41,7 @@ Programmatically Generated Files
    -  path *project\_index* / Path(pba\_file)
    -  name = "*projectname*\ \_pba.xlsx"
 
-CompGenFiles(CompGenObjects) *ncbi\_blast.py*
+BLASTAnalysis(CompGenAnalysis) *ncbi\_blast.py*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 User Generated Files
@@ -71,7 +71,7 @@ Programmatically Generated Files
    -  path = *project\_raw\_data* / Path(builder\_time\_file)
    -  name = "*projectname*\ \_building\_time.csv"
 
-CompGenBLASTn(BT) *blastn.py*
+BLASTn(BT) *blastn.py*
 ~~~~~~~~~~~~~~~~~~~~~~~~
 
 User Generated Files
