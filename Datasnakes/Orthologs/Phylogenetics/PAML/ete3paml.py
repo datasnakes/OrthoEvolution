@@ -1,6 +1,7 @@
-from ete3 import EvolTree, Tree
 import pandas as pd
-from Datasnakes.Manager.utils import formatlist
+from ete3 import EvolTree, Tree
+
+from Datasnakes.Tools.utils import formatlist
 
 
 class ETE3PAML(object):
