@@ -1,8 +1,9 @@
 """This is the test suite for Manager."""
-from Datasnakes.Manager.utils import (Management, ProjectManagement, RepoManagement,
-                                      UserManagement, WebsiteManagement)
 import unittest
 from shutil import rmtree
+
+from Datasnakes.Manager import ProjectManagement
+
 
 class TestManager(unittest.TestCase):
     """Test the Manager module."""
