@@ -4,7 +4,7 @@ from ete3 import NCBITaxa
 import pandas as pd
 from pathlib import Path
 # from pandas import ExcelWriter
-from Datasnakes.Manager.utils.management import ProjectManagement
+from Datasnakes.Manager.utils.mana import ProjectManagement
 from Datasnakes.Orthologs.Blast.utils import my_gene_info, get_dup_acc, get_miss_acc
 import shutil
 import pkg_resources

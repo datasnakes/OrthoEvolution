@@ -1,21 +1,19 @@
 """Optimized for use with local/standalone NCBI BLAST 2.6.0."""
+import csv
 import os
 import shutil
 import subprocess
 import contextlib
 import time  # Used to delay when dealing with NCBI server errors
 from datetime import datetime as d
-import pkg_resources
-
 from pathlib import Path
 import pandas as pd
+import pkg_resources
+from Datasnakes.Manager import config
 from Bio import SearchIO  # Used for parsing and sorting XML files.
 from Bio.Blast.Applications import NcbiblastnCommandline
-
-from Datasnakes.Manager import config
 from Datasnakes.Orthologs.CompGenetics.ncbi_blast import CompGenFiles
 from Datasnakes.Orthologs.Blast.utils import gene_list_config, map_func
-from Datasnakes.Manager.utils import makedirectory
 # TODO-ROB: Find packages for script timing and analysis
 
 
@@ -31,8 +29,7 @@ class CompGenBLASTn(CompGenFiles):
         # Manage Directories
         self.home = Path(os.getcwd())
         self.__gi_list_path = self.project_database / Path('gi_lists')
-
-        makedirectory(self.__gi_list_path)
+        Path.mkdir(self.__gi_list_path, parents=True, exist_ok=True)
 
         # # Initialize Logging
         # self.__blastn_log = LogIt.blastn()
@@ -154,8 +151,9 @@ class CompGenBLASTn(CompGenFiles):
                 pre_configured=auto_start)
 
     def gi_list_config(self):
-        """Create a gi list based on the refseq_rna db for each taxonomy id.
-
+        # TODO-ROB THis is for development / testing
+        # TODO-ROB Add the ability to do two seperate gi configs
+        """Create a gi list based on the refseq_rna database for each taxonomy id on the MCSR.
         It will also convert the gi list into a binary file which is more
         efficient to use with NCBI's Standalone Blast tools.
         """
