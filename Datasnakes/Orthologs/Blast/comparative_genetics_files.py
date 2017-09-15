@@ -19,8 +19,7 @@ class CompGenFiles(CompGenObjects):
 
         If the BLAST was cut short, then a build_file is to be used.
         """
-        super().__init__(project=project, acc_file=template, taxon_file=taxon_file,
-                         post_blast=post_blast, hgnc=False, **kwargs)
+        super().__init__(project=project, acc_file=template, taxon_file=taxon_file, post_blast=post_blast, hgnc=False, **kwargs)
         # TODO-ROB: Inherit or add variable for logger class
         # TODO-ROB Add Management directories
         # Private variables
@@ -49,10 +48,6 @@ class CompGenFiles(CompGenObjects):
         self.__date_format = df.date_format
         self.get_time = time.time  # To get the time use 'get_time()'
 
-        # Create variable for log separator
-        log_sep = 50*'*'
-        self.sep = log_sep
-
     def add_accession(self, gene, organism, accession):
         """Take an accession and add in to the building dataframe & csv file.
 
@@ -62,14 +57,19 @@ class CompGenFiles(CompGenObjects):
         if pd.isnull(self.building.get_value(gene, organism)) is False:
             existing = self.building.get_value(gene, organism)
             if existing == accession:
-                self.blastn_log.warning(self.sep)
-                self.blastn_log.warning("BlastN has run on this gene.")
+                self.blastn_log.warning(
+                    "***********************************************************************")
+                self.blastn_log.warning(
+                    "This gene has already been BLASTed...")
                 self.blastn_log.warning("The ACCESSION(%s) for the %s %s gene already exists in our data set."
                                         % (accession, organism, gene))
-                self.blastn_log.warning(self.sep)
+                self.blastn_log.warning(
+                    "***********************************************************************")
             else:
-                self.blastn_log.critical(self.sep)
-                self.blastn_log.critical("BlastN has run on this gene.")
+                self.blastn_log.critical(
+                    "***********************************************************************")
+                self.blastn_log.critical(
+                    "The gene has already been BLASTed...")
                 self.blastn_log.critical("The queried ACCESSION (%s) does not match the existing ACCESSION (%s)"
                                          % (accession, existing))
 
@@ -83,7 +83,8 @@ class CompGenFiles(CompGenObjects):
                 self.blastn_log.critical(
                     "Existing Accession Organism: %s" %
                     self.acc_dict[existing][0][1])
-                self.blastn_log.critical(self.sep)
+                self.blastn_log.critical(
+                    "***********************************************************************")
                 raise ValueError("The queried ACCESSION (%s) does not match the existing ACCESSION (%s).  Please see"
                                  "the log file." % (accession, existing))
 

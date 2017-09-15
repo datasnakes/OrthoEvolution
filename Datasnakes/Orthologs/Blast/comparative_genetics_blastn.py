@@ -1,11 +1,11 @@
 """Optimized for use with local/standalone NCBI BLAST 2.6.0."""
-import contextlib
 import os
 import shutil
 import subprocess
+import contextlib
+import time  # Used to delay when dealing with NCBI server errors
 from datetime import datetime as d
 from pathlib import Path
-
 from Bio import SearchIO  # Used for parsing and sorting XML files.
 from Bio.Blast.Applications import NcbiblastnCommandline
 
