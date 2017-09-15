@@ -4,12 +4,11 @@ from ete3 import NCBITaxa
 import pandas as pd
 from pathlib import Path
 # from pandas import ExcelWriter
-from Datasnakes.Manager.utils.management import ProjectManagement
+from Datasnakes.Manager.utils.mana import ProjectManagement
 from Datasnakes.Orthologs.Blast.utils import my_gene_info, get_dup_acc, get_miss_acc
 import shutil
 import pkg_resources
 from Datasnakes.Manager import config
-from pprint import pprint as print
 # TODO-ROB Create function for archiving and multiple runs (this can go
 # into the Management class)
 
@@ -39,7 +38,7 @@ class CompGenObjects(object):
     __data = ''
 
     # TODO-ROB:  CREAT PRE-BLAST and POST-BLAST functions
-    def __init__(self, project=None, project_path=None, acc_file=None, taxon_file=None, go_list=None, pre_blast=False, post_blast=True, hgnc=False,
+    def __init__(self, project, project_path=None, acc_file=None, taxon_file=None, paml_file=None, go_list=None, pre_blast=False, post_blast=True, hgnc=False,
                  proj_mana=ProjectManagement, **kwargs):
         # Private Variables
         self.__pre_blast = pre_blast
@@ -48,32 +47,22 @@ class CompGenObjects(object):
         # self.__paml_filename = paml_file
         self.acc_filename = acc_file
         self.project = project
-        print(proj_mana)
-        # print(proj_mana.__dict__)
+
         # Initiate the project management variable
-        if proj_mana is not None and not isinstance(proj_mana, dict):
-            # print(type(proj_mana))
-            print('proj_mana isinstance dict')
-            if not issubclass(type(proj_mana), ProjectManagement):
-                print('proj_mana is not instance ProjectManagement')
-                if project_path:
-                    self.project_path = Path(project_path) / Path(self.project)
-                else:
-                    self.project_path = Path(os.getcwd()) / Path(self.project)
-                Path.mkdir(self.project_path, parents=True, exist_ok=True)
-                print('1project_path=%s' % self.project_path)
-                self.removed_pm_config(kwargs)
+        if not isinstance(proj_mana, ProjectManagement):
+
+            if project_path:
+                self.project_path = Path(project_path) / Path(self.project)
             else:
-                setattr(proj_mana, 'project', project)
-                for key, value in proj_mana.__dict__.items():
-                    setattr(self, key, value)
-                    print('key:' + str(key) + '\nvalue: ' + str(value))
-                if 'project_path' not in proj_mana.__dict__.keys():
-                    if project_path:
-                        self.project_path = self.repo_path
-                    else:
-                        self.project_path = Path(os.getcwd()) / Path(self.project)
-                print('2project_path=%s' % self.project_path)
+                self.project_path = Path(os.getcwd()) / Path(self.project)
+            Path.mkdir(self.project_path, parents=True, exist_ok=True)
+            print('project_path=%s' % self.project_path)
+            self.removed_pm_config(kwargs)
+        else:
+            setattr(proj_mana, 'project', project)
+            for key, value in proj_mana.__dict__.items():
+                setattr(self, key, value)
+            print('project_path=%s' % self.project_path)
 
         # Handle the taxon_id file and blast query
         if taxon_file is not None:
@@ -183,7 +172,6 @@ class CompGenObjects(object):
         self.project_database = self.user_db / Path(self.project)
         self.raw_data = self.project_path / Path('raw_data')
         self.data = self.project_path / Path('data')
-        self.research_path = self.project_path
 
         for key, value in kwargs.items():
             setattr(self, key, value)
