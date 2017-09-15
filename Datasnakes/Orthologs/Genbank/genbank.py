@@ -6,11 +6,9 @@ from pathlib import Path
 from BioSQL import BioSeqDatabase
 from Bio import SeqIO
 from Datasnakes.Orthologs.Blast.blastn import CompGenBLASTn
-<<<<<<< HEAD
 from Datasnakes.Manager.utils import makedirectory
-=======
 from Datasnakes.Orthologs.CompGenetics import CompGenObjects
->>>>>>> 78a7b843c4c3507d3cb867224d09e6143391b61c
+
 # TODO-ROB:  REMOVED Tier Based Directory System.  Only add tier directories at the end of analysis in the users data folder
 
 
@@ -46,7 +44,7 @@ class GenBank(object):
                     setattr(self, str(key), str(value))
                 print('project_path=%s' % self.project_path)
             else:
-<<<<<<< HEAD
+
                 self.project_path = Path(os.getcwd()) / Path(self.project)
             makedirectory(self.project_path)
             print('project_path=%s' % self.project_path)
@@ -65,15 +63,14 @@ class GenBank(object):
         # TODO deprecate
         self.target_fasta_files = self.gbk_path / Path('fasta')
         makedirectory(self.target_fasta_files)
-=======
-                if project_path:
-                    self.project_path = self.repo_path
-                else:
-                    self.project_path = Path(os.getcwd()) / Path(self.project)
-                Path.mkdir(self.project_path, parents=True, exist_ok=True)
-                print('project_path=%s' % self.project_path)
-                self.removed_bn_config(kwargs)
->>>>>>> 78a7b843c4c3507d3cb867224d09e6143391b61c
+
+        if project_path:
+            self.project_path = self.repo_path
+        else:
+            self.project_path = Path(os.getcwd()) / Path(self.project)
+        Path.mkdir(self.project_path, parents=True, exist_ok=True)
+        print('project_path=%s' % self.project_path)
+        self.removed_bn_config(kwargs)
 
         # Configuration
         # TODO Create configuration script.
