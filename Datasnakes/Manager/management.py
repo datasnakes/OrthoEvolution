@@ -53,8 +53,6 @@ class Management(object):
         self.website_cookie = self.Cookies / Path('new_website')
         #    The second group is for the Manager module
         self.Manager = Path(pkg_resources.resource_filename(Manager.__name__, ''))
-        self.index = self.Manager / Path('index')
-        self.logit = self.Manager / Path('logit')
         self.utils = self.Manager / Path('utils')
         self.shiny = self.Manager / Path('shiny')
         #    The third group is for the Orthologs module
