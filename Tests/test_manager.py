@@ -2,7 +2,7 @@
 import unittest
 from shutil import rmtree
 
-from Datasnakes.Tools.utils import (ProjectManagement)
+from Datasnakes.Manager import ProjectManagement
 
 
 class TestManager(unittest.TestCase):
