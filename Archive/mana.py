@@ -1,13 +1,16 @@
 import os
 from pathlib import Path
-from Datasnakes import Manager
+
 import Tools
 import ete3
-from Datasnakes.Manager.utils.treelib2.treelib2.tree import Tree
 from cookiecutter.hooks import run_script
 from cookiecutter.main import cookiecutter
+
 # TODO-ROB once this is a pypi package all of these will be unnecessary
 from Datasnakes import Cookies, Orthologs
+from Datasnakes import Manager
+from Datasnakes.Tools.utils import Tree
+
 
 class Mana(object):
     """
