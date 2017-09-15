@@ -13,50 +13,28 @@
 
 Datasnakes-Scripts
 --------------------
-The Datasnakes-Scripts package is a collection of the modules which aids in
-the analysis and visualization of orthologs-related bioinformatics projects.
+An **easy to use** and comprehensive package which aids in the **analysis and visualization of comparative genomics** & related bioinformatics projects.
+This package places emphasis on the **inference of orthologs** using NCBI's blast, aligning sequences,
+and phylogenetics analyses including PAML, PhymL, ete3, and more tools.
+
+The goal of this project was to create a simple, short, & effective pipeline (refseq accession to phyloanalysis) to infer orthologs.
 
 Check out our `wiki docs <https://github.com/datasnakes/Datasnakes-Scripts/wiki>`__ and our `read the docs <http://datasnakes-scripts.readthedocs.io/en/master/>`__!
+
 
 Installation
 ------------
 ``pip install Datasnakes-Scripts``
 
-Development Mode Installation
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-1. ``git clone http://github.com/datasnakes/Datasnakes-Scripts``
-2. ``cd Datasnakes-Scripts``
-3. ``pip install -e .``
-
-Manual Installation
-~~~~~~~~~~~~~~~~~~~~~
 Alternatively, you can set install the package manually.
 
 1. Download the zip file and unzip it or ``git clone https://github.com/datasnakes/Datasnakes-Scripts.git``
 2. ``cd Datasnakes-Scripts``
 3. ``pip install .``
 
-Project Setup
-~~~~~~~~~~~~~~~~
-This package is under development but still working. To test you'll want to create a virtual
-environment so that cleanup is easy. Using *virtualenv* with python3
-insures that ``python`` invokes py3.5 and ``python3`` invokes py36. Invoke
-python36.
 
-.. code:: bash
-
-    $ mkdir dev
-    $ cd dev
-    $ virtualenv PackageTest --python=python3
-    $ source activate PackageTest
-    $ git clone http://github.com/datasnakes/Datasnakes-Scripts
-    $ cd Datasnakes-Scripts
-    $ python3 setup.py install or pip install .
-
-Usage
------
-
-After installation, you'll be able to easily import each module via:
+Examples
+---------
 
 .. code:: python
 
@@ -75,6 +53,15 @@ Contributors
    `@sdhutchins <https://github.com/sdhutchins>`__ \| Twitter:
    `@MavenNBA <https://twitter.com/MavenNBA/>`__ \|
    `:email: <mailto:sdhutchins@outlook.com>`__
+
+If you would like to contribute to this package, install the package in development mode,
+and check out our `contributing guidelines <https://github.com/datasnakes/Datasnakes-Scripts/blob/sdh-patch/CONTRIBUTING.rst>`__.
+
+Development Mode Installation
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+1. ``git clone http://github.com/datasnakes/Datasnakes-Scripts``
+2. ``cd Datasnakes-Scripts``
+3. ``pip install -e .``
 
 Citation
 ----------
