@@ -1,12 +1,12 @@
 """BLASTn test"""
-import shutil
-#from pathlib import Path
-from Datasnakes.Manager.utils.mana import ProjectManagement
-from Datasnakes.Manager import index
-from Datasnakes.Orthologs.Blast import CompGenBLASTn
 # from ete3 import NCBITaxa
 # NCBITaxa().update_taxonomy_database()
 import pkg_resources
+
+# from pathlib import Path
+from Datasnakes.Manager import index
+from Datasnakes.Orthologs.Blast import CompGenBLASTn
+
 # Initializations
 repo = "Test2"
 user = "johndoe"

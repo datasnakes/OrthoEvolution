@@ -1,11 +1,11 @@
-from Bio.Phylo.PAML import codeml
 import os
-import pkg_resources
 from pathlib import Path
 from shutil import copy
-from Datasnakes.Orthologs.Phylogenetics.PAML import ctlfiles
 
+import pkg_resources
+from Bio.Phylo.PAML import codeml
 
+from Datasnakes.Manager.config import paml_control_files
 
 
 class CodemlRun(object):
@@ -19,7 +19,7 @@ class CodemlRun(object):
         # Set up genes control file name and get the datasnakes control file path
         self.gene = str(iqtree_newick).replace('_iqtree.nwk', '')
         self.control_file = self.paml_path / Path(self.gene + '.ctl')
-        self.control_template = pkg_resources.resource_filename(ctlfiles.__name__, control_file)
+        self.control_template = pkg_resources.resource_filename(paml_control_files.__name__, control_file)
         print(self.control_template)
 
         # Set up CODEML input files

@@ -8,7 +8,7 @@ import pandas as pd  # Used for dealing with CSV files
 from Bio import SearchIO  # Used for parsing and sorting XML files.
 from Bio.Blast.Applications import NcbiblastnCommandline  # Used for Local Blasting.
 from Datasnakes.Manager.ortho_analysis import OrthologAnalysis
-from Datasnakes.Orthologs import BLASTAnalysis as BT
+from Datasnakes.Orthologs.CompGenetics import CompGenFiles as BT
 
 # Set up the blastn logger & log file
 format1 = '%a %b %d at %I:%M:%S %p %Y'  # Used to add as a date
