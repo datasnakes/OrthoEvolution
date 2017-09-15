@@ -9,4 +9,4 @@
 #PBS -j oe
 
 cd ${PBS_O_WORKDIR}
-python36 $PYTHONFILE $GILISTPATH $PROJECTPATH
+mpiexec python get_gi_lists.py
