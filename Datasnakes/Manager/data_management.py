@@ -6,7 +6,7 @@ import pkg_resources
 import yaml
 
 from Datasnakes.Manager import config
-from Datasnakes.Manager.management import ProjectManagement
+from Datasnakes.Manager import ProjectManagement
 from Datasnakes.Orthologs.Align.msa import MultipleSequenceAlignment as MSA
 from Datasnakes.Orthologs.Blast.comparative_genetics_blastn import CompGenBLASTn
 from Datasnakes.Orthologs.Blast.comparative_genetics_objects import CompGenObjects
