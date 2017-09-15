@@ -1,8 +1,14 @@
-Blast Documentation
+Comparative Genetics Documentation and Blast Documentation
 =====================
 Use [NCBI's standalone blast](https://blast.ncbi.nlm.nih.gov/Blast.cgi?PAGE_TYPE=BlastDocs&DOC_TYPE=Download) 
 to generate blastn results.
 
+What is Comparative Genetics?
+-----------------------------
+_TODO: Add a better description._
+
+Perform comparative genetics bioinformatics studies on [genes](http://www.guidetopharmacology.org/targets.jsp)
+of interest across a group of [species](ftp://ftp.ncbi.nlm.nih.gov/genomes/refseq/multiprocessing/).
 
 What is BLAST?
 ----------------
@@ -17,16 +23,26 @@ NCBI's BLASTN programs search nucleotide databases using a nucleotide query.
 Usage
 -----
 
-Provide code examples and explanations of how to get the project.
-
+The main classes under CompGenetics are `CompGenFiles` and `CompGenObjects`.
 
 #### Code Examples
 
-``` python
-gene_list = ['HTR1A', 'CCR5', 'DRD4']
-print(gene_list)
-```
+##### Performing Blast Analysis
 
+``` python
+from Datasnakes.Orthologs.CompGenetics import BLASTAnalysis
+
+# Take a look at the required and default parameters
+# The default arguments are template, taxon_file, post_blast, save_data
+BLASTAnalysis(self, repo, user, project, research, research_type,
+              template=None, taxon_file=None, post_blast=False, save_data=True)
+```
+##### Performing Comparative Genetics Analysis
+
+``` python
+from Datasnakes.Orthologs.CompGenetics import CompGenAnalysis
+
+```
 Tests
 -----
 
