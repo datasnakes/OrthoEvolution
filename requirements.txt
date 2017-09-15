@@ -3,7 +3,7 @@ pandas>=0.19.2
 openpyxl>=2.4.7
 pexpect==4.2.1
 slacker==0.9.42
-biopython==1.70
+biopython==1.68
 tablib==0.11.4
 mygene==3.0.0
 cookiecutter==1.5.1
@@ -11,10 +11,10 @@ Flask==0.12.1
 Flask-Login==0.4.0
 Flask-Mail==0.9.1
 Flask-SQLAlchemy==2.2
- Flask-User==0.6.13
+Flask-User>=0.6.11
 Flask-WTF>=0.14.2
 treelib==1.3.5
-psutil==5.2.2
+psutil==5.1.3
 luigi==2.3.0
 sciluigi==0.9.5b6
 logzero>=1.2.1

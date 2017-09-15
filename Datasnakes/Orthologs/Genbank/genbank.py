@@ -5,19 +5,14 @@ import shutil
 from pathlib import Path
 from BioSQL import BioSeqDatabase
 from Bio import SeqIO
-from Datasnakes.Orthologs.Blast.blastn import CompGenBLASTn
-<<<<<<< HEAD
-from Datasnakes.Manager.utils import makedirectory
-=======
-from Datasnakes.Orthologs.CompGenetics import CompGenObjects
->>>>>>> 78a7b843c4c3507d3cb867224d09e6143391b61c
+from Datasnakes.Orthologs.Blast.blastn import BLASTn
 # TODO-ROB:  REMOVED Tier Based Directory System.  Only add tier directories at the end of analysis in the users data folder
 
 
 class GenBank(object):
     """Class for managing, downloading and extracting features from genbank files."""
 
-    def __init__(self, project, project_path=None, solo=False, multi=True, archive=False, min_fasta=True, blast=CompGenBLASTn, **kwargs):
+    def __init__(self, project, project_path=None, solo=False, multi=True, archive=False, min_fasta=True, blast=BLASTn, **kwargs):
         """Handle genbank files in various ways for the Orthologs Project.
 
         :param ncbi_db_repo: A path to the .db files of interest.  These
@@ -36,19 +31,12 @@ class GenBank(object):
 
         # TODO-ROB: Change the way the file systems work.
         self.project = project
-        print(blast)
-        if blast is not None and not isinstance(blast, dict):
-            print(blast)
-            print(type(blast))
-            if issubclass(blast, CompGenObjects) or issubclass(blast, CompGenBLASTn):
-                setattr(blast, 'project', project)
-                for key, value in blast.__dict__.items():
-                    setattr(self, str(key), str(value))
-                print('project_path=%s' % self.project_path)
+        if not isinstance(blast, BLASTn):
+            if project_path:
+                self.project_path = Path(project_path) / Path(self.project)
             else:
-<<<<<<< HEAD
                 self.project_path = Path(os.getcwd()) / Path(self.project)
-            makedirectory(self.project_path)
+            Path.mkdir(self.project_path, parents=True, exist_ok=True)
             print('project_path=%s' % self.project_path)
             self.removed_bn_config(kwargs)
         else:
@@ -58,28 +46,15 @@ class GenBank(object):
             print('project_path=%s' % self.project_path)
 
         self.gbk_path = self.raw_data / Path('GENBANK')
-        # TODO deprecate
-        self.target_gbk_files_path = self.gbk_path / Path('gbk')
-        makedirectory(self.target_gbk_files_path)
+        self.target_gbk_files_path = self.gbk_path / Path('gbk')  # Deprecate this
+        Path.mkdir(self.target_gbk_files_path, parents=True, exist_ok=True)
 
-        # TODO deprecate
-        self.target_fasta_files = self.gbk_path / Path('fasta')
-        makedirectory(self.target_fasta_files)
-=======
-                if project_path:
-                    self.project_path = self.repo_path
-                else:
-                    self.project_path = Path(os.getcwd()) / Path(self.project)
-                Path.mkdir(self.project_path, parents=True, exist_ok=True)
-                print('project_path=%s' % self.project_path)
-                self.removed_bn_config(kwargs)
->>>>>>> 78a7b843c4c3507d3cb867224d09e6143391b61c
+        self.target_fasta_files = self.gbk_path / Path('fasta')  # Deprecated this
+        Path.mkdir(self.target_fasta_files, parents=True, exist_ok=True)
 
-        # Configuration
-        # TODO Create configuration script.
-        self.target_gbk_db_path = self.user_db / Path(self.project)
+        self.target_gbk_db_path = self.user_db / Path(self.project)  # Configuration.  Create configuration script.
         # TODO-ROB: Configure GenBank function
-        makedirectory(self.target_gbk_db_path)
+        Path.mkdir(self.target_gbk_db_path, parents=True, exist_ok=True)
         self.solo = solo
         self.multi = multi
         self.min_fasta = min_fasta
@@ -92,9 +67,9 @@ class GenBank(object):
         for key, value in kwargs.items():
             setattr(self, key, value)
 
-        makedirectory(self.raw_data)
-        makedirectory(self.user_db)
-        makedirectory(self.ncbi_db_repo)
+        Path.mkdir(self.raw_data, exist_ok=True)
+        Path.mkdir(self.user_db, exist_ok=True)
+        Path.mkdir(self.ncbi_db_repo, exist_ok=True)
 
     @staticmethod
     def name_fasta_file(path, gene, org, feat_type, feat_type_rank, extension, mode):
@@ -116,7 +91,7 @@ class GenBank(object):
             file_path = feat_path / Path(multi % (gene, feat_type_rank, extension))
 
         # Make the base directory and return an open file.
-        makedirectory(feat_path)
+        feat_path.mkdir(parents=True, exist_ok=True)
         file = open(file_path, mode)
         return file
 
@@ -169,8 +144,9 @@ class GenBank(object):
             if FILE.endswith('.db'):
                 db_files_list.append(str(FILE))
 
-        gene_path = self.raw_data / Path(gene) / Path('GENBANK')
-        Path.mkdir(gene_path, parents=True, exist_ok=True)
+        gene_path = self.target_gbk_files_path / Path(gene)
+        Path.mkdir(gene_path)
+
 
         # Parse each database to find the proper GenBank record
         for FILE in db_files_list:
@@ -210,8 +186,6 @@ class GenBank(object):
                 except:
                     raise()
         # Get FASTA files from the GenBank files.
-        # TODO-ROB change this.  Broken by new directory structure
-        # TODO-ROB directory looks like /raw_data/Gene_1/GENBANK/*.gbk
         elif db is False:
             for root, dirs, gbk_files in os.walk(str(self.target_gbk_files_path)):
                 for gbk_file in gbk_files:
@@ -223,7 +197,7 @@ class GenBank(object):
         """Upload the BioSQL database with genbank data."""
         t_count = 0
         Path.mkdir(self.target_gbk_db_path)
-        for TIER in self.tier_frame_dict.keys():
+        for TIER in self.blast.tier_frame_dict.keys():
             db_name = str(TIER) + '.db'
             db_file_path = self.target_gbk_db_path / Path(db_name)
             if os.path.isfile(str(db_file_path)) is False:
@@ -231,16 +205,16 @@ class GenBank(object):
                 # TODO-ROB:  Create a utility function for creating BioSQL databases
                 shutil.copy2('Template_BioSQL_DB.db', str(db_file_path))
             else:
-                # TODO-ROB: This part is broken until the template db creation and management is added
+                # This part is broken until the template db creation and management is added
                 os.remove(str(db_file_path))
                 print('Copying Template BioSQL Database...  This may take a few minutes...')
                 shutil.copy2('Template_BioSQL_DB.db', str(db_file_path))
 
             server = BioSeqDatabase.open_database(driver='sqlite3', db=str(db_file_path))
-            gene_path = self.raw_data
+            gene_path = self.target_gbk_files_path
             for GENE in os.listdir(str(gene_path)):
                 sub_db_name = GENE
-                gene_path = gene_path / Path(GENE) / Path('GENBANK')
+                gene_path = gene_path / Path(GENE)
                 for FILE in os.listdir(str(gene_path)):
                     try:
                         if sub_db_name not in server.keys():
@@ -303,7 +277,7 @@ class GenBank(object):
                 'min_org': str(min_org),
                 'feat_type': str(feat_type),
                 'feat_type_rank': str(feat_type_rank),
-                'path': str(self.raw_data / Path(gene) / Path('GENBANK'))
+                'path': self.target_fasta_files
             }
             # Set up minimalistic FASTA headers and sequence entries for Nucleic Acid and Amino Acid sequences.
             na_entry = ">{min_org}\n{na_seq}\n".format(**fmt)

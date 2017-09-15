@@ -397,8 +397,8 @@ class Ftp2Db(object):
 
         if self.db_update_flag is False:
             self.db_upload(('%s_' % self.__class_name) + log_name + '.log')
-        # //TODO-ROB come up with a better naming convention thats good for UPDATE module and Management()
-        # //TODO-ROB append a file with different paths for the databases for use in Management()
+        # //TODO-ROB come up with a better naming convention thats good for UPDATE module and Mana()
+        # //TODO-ROB append a file with different paths for the databases for use in Mana()
         # //TODO-ROB make a logging function
 
         if self.ftp_update_flag is False:

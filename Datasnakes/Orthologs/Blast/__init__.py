@@ -1,1 +1,1 @@
-from .blastn import CompGenBLASTn
+from .blastn import BLASTn

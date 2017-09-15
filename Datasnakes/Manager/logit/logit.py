@@ -1,6 +1,5 @@
 """Main logging class to make logging easier."""
 import logging as log
-from logzero import logger
 import os
 from datetime import datetime as d
 import sys
@@ -42,3 +41,27 @@ class LogIt(object):
         generic_logger = log.getLogger(logname)
         if slack is False:
             return generic_logger
+#        else:
+#            slack_logger = log.getLogger('SLACK')
+
+
+    # @staticmethod
+    # def slack_config():
+    #     config = configparser.ConfigParser()
+    #     config.read('bin/orthologs.ini')
+    #     apikey = config['APIKEYS']['slack']
+    #     slack = Slacker(apikey)
+    #     return slack
+    #
+    # # Definition for uploading images
+    # def upload_img(self, channel, imgfile):
+    #     self.slack.files.upload(imgfile, channel=channel)
+    #
+    # # Definition for uploading files
+    # def upload_file(self, channel, file):
+    #     self.slack.files.upload(file, channel=channel)
+    #
+    # # Definition for posting messages
+    # def message_slack(self, channel, message, username):
+    #     self.slack.chat.post_message(channel, message, username, as_user=True)
+
