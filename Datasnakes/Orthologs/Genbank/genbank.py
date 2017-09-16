@@ -5,9 +5,9 @@ import shutil
 from pathlib import Path
 from BioSQL import BioSeqDatabase
 from Bio import SeqIO
-from Datasnakes.Orthologs.Blast.blastn import CompGenBLASTn
-from Datasnakes.Manager.utils import makedirectory
-from Datasnakes.Orthologs.CompGenetics import CompGenObjects
+from Datasnakes.Orthologs.Blast import CompGenBLASTn
+from Datasnakes.Tools.utils import makedirectory
+from Datasnakes.Orthologs.Blast import CompGenObjects
 
 # TODO-ROB:  REMOVED Tier Based Directory System.  Only add tier directories at the end of analysis in the users data folder
 
