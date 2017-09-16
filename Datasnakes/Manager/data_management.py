@@ -7,10 +7,10 @@ import yaml
 
 from Datasnakes.Manager import config
 from Datasnakes.Manager import ProjectManagement
-from Datasnakes.Orthologs.Align.msa import MultipleSequenceAlignment as MSA
-from Datasnakes.Orthologs.Blast.comparative_genetics_blastn import CompGenBLASTn
-from Datasnakes.Orthologs.Blast.comparative_genetics_objects import CompGenObjects
-from Datasnakes.Orthologs.Genbank.genbank import GenBank
+from Datasnakes.Orthologs.Align import MultipleSequenceAlignment as MSA
+from Datasnakes.Orthologs.Blast import CompGenBLASTn
+from Datasnakes.Orthologs.Blast import CompGenObjects
+from Datasnakes.Orthologs.Genbank import GenBank
 
 
 #import configparser
