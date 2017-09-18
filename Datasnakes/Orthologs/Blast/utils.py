@@ -112,7 +112,6 @@ def my_gene_info(acc_path, blast_query='Homo_sapiens'):
     hot_data.rename(columns={'Gene': 'Gene Symbol'}, inplace=True)
     hot_data = hot_data.sort_values(['Tier'], ascending=True)
 
-    return hot_data
 
 def get_dup_acc(acc_dict, gene_list, org_list):
     """Get duplicate accessions.
