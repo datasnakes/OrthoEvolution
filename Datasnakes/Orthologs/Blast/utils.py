@@ -1,8 +1,10 @@
+"""Helpful utilities for performing Blastn"""
 import pandas as pd
 import os
 import csv
 from pathlib import Path
 import time
+from importlib import import_module
 
 
 def map_func(hit):
@@ -15,7 +17,7 @@ def map_func(hit):
     return hit
 
 
-# # XXX PAML no longer needs a format different than `Homo_sapiens`
+# XXX PAML no longer needs a format different than `Homo_sapiens`
 def paml_org_formatter(organisms):
     org_list = []
     for organism in organisms:
@@ -72,12 +74,9 @@ def gene_list_config(file, data_path, gene_list, taxon_dict, logger):
     else:
         logger.info("A new BLAST started at %s" % time.time())
         return None
-# ***********************************************PRE BLAST ANALYSIS TOOLS********************************************* #
-# ***********************************************PRE BLAST ANALYSIS TOOLS********************************************* #
-
 
 def my_gene_info(acc_path, blast_query='Homo_sapiens'):
-    import mygene
+    mygene = import_module('mygene')
 
     # Initialize variables and import my-gene search command
     urls = []
@@ -112,10 +111,6 @@ def my_gene_info(acc_path, blast_query='Homo_sapiens'):
     hot_data = pd.concat([pd.Series(df.Tier, dtype=str), df.Gene, mg_df, ncbi], axis=1)
     hot_data.rename(columns={'Gene': 'Gene Symbol'}, inplace=True)
     hot_data = hot_data.sort_values(['Tier'], ascending=True)
-
-    return hot_data
-# **********************************************POST BLAST ANALYSIS TOOLS******************************************** #
-# **********************************************POST BLAST ANALYSIS TOOLS******************************************** #
 
 
 def get_dup_acc(acc_dict, gene_list, org_list):
