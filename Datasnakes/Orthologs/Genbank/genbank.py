@@ -5,7 +5,7 @@ import shutil
 from pathlib import Path
 from BioSQL import BioSeqDatabase
 from Bio import SeqIO
-from Datasnakes.Orthologs.Blast.comparative_genetics_blastn import CompGenBLASTn
+from Datasnakes.Orthologs.Blast.blastn_comparative_genetics import CompGenBLASTn
 from Datasnakes.Tools.utils.other_utils import makedirectory
 from Datasnakes.Orthologs.Blast.comparative_genetics_objects import CompGenObjects
 
