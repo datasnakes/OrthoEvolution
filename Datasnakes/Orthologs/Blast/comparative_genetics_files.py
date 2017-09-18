@@ -3,7 +3,7 @@ import time
 from pathlib import Path
 
 import pandas as pd
-from Datasnakes.Orthologs.Blast import CompGenObjects
+from Datasnakes.Orthologs.Blast.comparative_genetics_objects import CompGenObjects
 
 from Datasnakes.Tools.logit import LogIt
 
