@@ -4,6 +4,9 @@ import os
 import csv
 from pathlib import Path
 import time
+import shutil
+import pkg_resources
+import subprocess
 from importlib import import_module
 
 
@@ -74,6 +77,64 @@ def gene_list_config(file, data_path, gene_list, taxon_dict, logger):
     else:
         logger.info("A new BLAST started at %s" % time.time())
         return None
+
+
+def gi_list_config(gi_list_path, research_path, taxon_ids, config):
+    # TODO-ROB THis is for development / testing
+    # TODO-ROB Add the ability to do two seperate gi configs
+    """Create a gi list based on the refseq_rna database for each taxonomy id on the MCSR.
+    It will also convert the gi list into a binary file which is more
+    efficient to use with NCBI's Standalone Blast tools.
+    """
+    # Directory and file handling
+    raw_data_path = research_path / Path('raw_data')
+    index_path = research_path / Path('index')
+    taxid_file = index_path / Path('taxids.csv')
+    pd.Series(taxon_ids).to_csv(str(taxid_file), index=False)
+    pbs_script = 'get_gi_lists.sh'
+    py_script = 'get_gi_lists.py'
+
+    # PBS job submission using the templates
+    pbs_script = shutil.copy(pkg_resources.resource_filename(config.__name__, pbs_script), str(raw_data_path))
+    py_script = shutil.copy(pkg_resources.resource_filename(config.__name__, py_script), str(raw_data_path))
+    gi_config = subprocess.check_output('qsub -v PYTHONFILE=%s,GILISTPATH=%s,PROJECTPATH=%s, %s' %
+                                        (py_script, gi_list_path, research_path, pbs_script), shell=True)
+    gi_config = gi_config.decode('utf-8')
+    print('The GI list configuration\'s JobID is %s' % gi_config)
+    job_id = gi_config.replace('.sequoia', '')
+    time.sleep(20)  # Wait for the job to be queued properly
+    while True:
+        out, err = subprocess.Popen('qsig -s SIGNULL %s' % job_id, shell=True, stderr=subprocess.PIPE, stdout=subprocess.PIPE)
+        print("Waiting...")
+        time.sleep(30)
+        if err.decode('utf-8') == 'qsig: Request invalid for state of job %s.sequoia\n' % job_id:
+            print('The blast config is in MCSR\'s queue.  Waiting...')
+            continue
+        else:
+            print('out:', out)
+            print('err:', err)
+            break
+
+
+def get_gilists(id, gi_list_path, logger):
+    """ This function uses the blastdbcmd tool to get gi lists. It then uses the
+    blastdb_aliastool to turn the list into a binary file.
+    The input (id) for the function is a taxonomy id.
+    """
+    binary = str(id) + 'gi'
+    if binary not in os.listdir(gi_list_path):
+        # Use the accession #'s and the blastdbcmd tool to generate gi lists
+        # based on Organisms/Taxonomy id's.
+        os.system("blastdbcmd -db refseq_rna -entry all -outfmt '%g %T' | awk ' { if ($2 == " + id +
+                  ") { print $1 } } ' > " + id + "gi.txt")
+        logger.info(id + "gi.txt has been created.")
+        # Convert the .txt file to a binary file using the blastdb_aliastool.
+        os.system("blastdb_aliastool -gi_file_in " + id + "gi.txt -gi_file_out " + id + "gi")
+        logger.info(id + "gi binary file has been created.")
+        # Remove the gi.text file
+        os.system("rm " + id + "gi.txt")
+        logger.info(id + "gi.text file has been deleted.")
+
 
 def my_gene_info(acc_path, blast_query='Homo_sapiens'):
     mygene = import_module('mygene')
