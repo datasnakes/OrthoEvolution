@@ -18,7 +18,6 @@ class LogIt(object):
         self.log_format = '%(color)s[%(levelname)s | %(name)s] [%(asctime)s | %(module)s - line %(lineno)d]:%(end_color)s %(message)s'
         self.formatter = LogFormatter(fmt=self.log_format,
                                       datefmt=self.date_format)
-
         # TODO Allow customization
 #        if not default:
 #            self.custom_log = self.custom(logname, logfile, level, fmt)
