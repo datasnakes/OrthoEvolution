@@ -1,7 +1,7 @@
 """Main logging class to make logging easier."""
-from logzero import setup_logger, LogFormatter, logging
 import os
 import sys
+from logzero import setup_logger, LogFormatter, logging
 
 
 class LogIt(object):
@@ -26,7 +26,8 @@ class LogIt(object):
                                    level=logging.DEBUG, formatter=self.formatter)
         return default_log
 
-    def custom(self, logname, logfile, level, fmt='default'):
+    @staticmethod
+    def custom(logname, logfile, level, fmt='default'):
         """Create a log handler or logger."""
         if fmt is 'default':
             fmt = '[%(levelname)-2s - %(name)s]: %(message)s'
@@ -47,7 +48,8 @@ class LogIt(object):
         if os.path.exists(logfile) and os.path.isfile(logfile):
             os.remove(logfile)
 
-    def shutdown(self):
+    @staticmethod
+    def shutdown():
         """Shutdown the log handlers."""
         # HINT https://www.programcreek.com/python/example/3517/logging.shutdown
         logging.shutdown()
