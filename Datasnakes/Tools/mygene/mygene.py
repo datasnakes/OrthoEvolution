@@ -1,24 +1,26 @@
 """Get gene information from the mygene api at http://mygene.info/ """
 import mygene
 import pandas as pd
+# TODO add a template csv file for users.
 
-
-class MG(object):
+class MyGene(object):
     """Import a csv of refseq accessions & get gene information from mygene."""
 
-    def __init__(self, filepath, outfile):
+    def __init__(self, infile, outfile):
         """Initialize my gene handle and refseq/accessions list.
 
         Get the basic gene information. It's best to use a csv file and title
         the row of the accessions list `Accessions`.
         """
-        # TODO add definition for doing the work of this.
-        accfile = pd.read_csv(filepath)
-        self.acclist = list([accession.upper() for accession
-                             in accfile.Accessions])
+        self.infile = infile
+        self.outfile = outfile
 
         # Set up mygene handle
         self.mg = mygene.MyGeneInfo()
+        # TODO add definition for doing the work of this.
+        accfile = pd.read_csv(self.infile)
+        self.acclist = list([accession.upper() for accession
+                             in accfile.Accessions])
 
         # TODO add kwargs
         basic_info = self.mg.querymany(self.acclist, scopes='refseq',
@@ -65,4 +67,4 @@ class MG(object):
         alldata = pd.concat(frames, axis=1)
 
         # Save the merged dataframes to a file
-        alldata.to_csv(outfile, index=False)
+        alldata.to_csv(self.outfile, index=False)
