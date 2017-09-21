@@ -15,12 +15,10 @@ class LogIt(object):
             self.archive_format = '%m-%d-%Y@%I:%M:%S-%p'
 
         self.date_format = '%b-%d-%Y at %I:%M:%S %p'  # Used to add date
-        self.log_format = '%(color)s[%(levelname)s | %(name)s] [%(asctime)s | %(module)s - line %(lineno)d]:%(end_color)s %(message)s'
+        self.log_format = ("%(color)s[%(levelname)s | %(name)s] [%(asctime)s | "
+                           "%(module)s - line %(lineno)d]:%(end_color)s %(message)s")
         self.formatter = LogFormatter(fmt=self.log_format,
                                       datefmt=self.date_format)
-        # TODO Allow customization
-#        if not default:
-#            self.custom_log = self.custom(logname, logfile, level, fmt)
 
     def default(self, logname, logfile):
         """Create a log handler using default formatting."""
@@ -33,7 +31,8 @@ class LogIt(object):
         if fmt is 'default':
             fmt = '[%(levelname)-2s - %(name)s]: %(message)s'
         elif fmt is 'custom':
-            fmt = self.formatcreator()
+            # TODO Allow customization
+            print('Feature not integrated yet!')
         elif fmt is not 'default' or 'custom':
             raise Exception('User did not provide a format for the logger.')
 
@@ -44,8 +43,8 @@ class LogIt(object):
     def deletelog(self, logfile):
         """Delete the log file."""
         self.shutdown()
-        # TODO Use contextlib here
-        if os.path.exists(logfile):
+        # TODO Use contextlib here; See makedirectory function
+        if os.path.exists(logfile) and os.path.isfile(logfile):
             os.remove(logfile)
 
     def shutdown(self):
