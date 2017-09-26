@@ -6,8 +6,10 @@ from logzero import setup_logger, LogFormatter, logging
 
 class LogIt(object):
     """LogIt makes logging easier by creating easy loggers."""
-    def __init__(self):
+    def __init__(self, logname, logfile):
         """Initialize the logger format based on system platform."""
+        self.logname = logname
+        self.logfile = logfile
         # Set the different formats based on user's platform
         if sys.platform == 'win32':
             self.archive_format = '%m-%d-%Y_%I-%M-%p'
@@ -20,14 +22,14 @@ class LogIt(object):
         self.formatter = LogFormatter(fmt=self.log_format,
                                       datefmt=self.date_format)
 
-    def default(self, logname, logfile):
+    def default(self):
         """Create a log handler using default formatting."""
-        default_log = setup_logger(name=logname.upper(), logfile=logfile,
+        default_log = setup_logger(name=self.logname.upper(), logfile=self.logfile,
                                    level=logging.DEBUG, formatter=self.formatter)
         return default_log
 
     @staticmethod
-    def custom(logname, logfile, level, fmt='default'):
+    def custom(self, level, fmt='default'):
         """Create a log handler or logger."""
         if fmt is 'default':
             fmt = '[%(levelname)-2s - %(name)s]: %(message)s'
@@ -37,19 +39,19 @@ class LogIt(object):
         elif fmt is not 'default' or 'custom':
             raise Exception('User did not provide a format for the logger.')
 
-        custom_log = setup_logger(name=logname, logfile=logfile, level=level,
-                                  formatter=fmt)
+        custom_log = setup_logger(name=self.logname, logfile=self.logfile,
+                                  level=level, formatter=fmt)
         return custom_log
 
-    def deletelog(self, logfile):
+    def deletelog(self):
         """Delete the log file."""
         self.shutdown()
         # TODO Use contextlib here; See makedirectory function
-        if os.path.exists(logfile) and os.path.isfile(logfile):
-            os.remove(logfile)
+        if os.path.exists(self.logfile) and os.path.isfile(self.logfile):
+            os.remove(self.logfile)
 
     @staticmethod
-    def shutdown():
+    def shutdown(self):
         """Shutdown the log handlers."""
         # HINT https://www.programcreek.com/python/example/3517/logging.shutdown
         logging.shutdown()
