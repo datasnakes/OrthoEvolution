@@ -38,7 +38,7 @@ class GenBank(object):
         if blast is not None and not isinstance(blast, dict):
             print(blast)
             print(type(blast))
-            if issubclass(blast, CompGenObjects) or issubclass(blast, CompGenBLASTn):
+            if issubclass(type(blast), CompGenObjects) or issubclass(type(blast), CompGenBLASTn):
                 setattr(blast, 'project', project)
                 for key, value in blast.__dict__.items():
                     setattr(self, str(key), str(value))
