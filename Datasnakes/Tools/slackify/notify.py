@@ -12,13 +12,12 @@ class Slackify(object):
         if not cfg:
             apikey = input('Insert your slack apikey here: ')
             if len(apikey) is not 42:  # Standard length of slack apikey
-                print('Your slack APIKEY is incorrect.')
-                raise ValueError
+                raise ValueError('Your slack APIKEY is incorrect.')
             self.slack = Slacker(apikey)
 
         # If there is a config file
         if not os.path.isfile(slackconfig):
-            raise OSError
+            raise FileNotFoundError('Slack configuriation file not found.')
         config.read(slackconfig)
         # HINT Create a config file like the one described in the readme
         apikey = config['APIKEYS']['slack']
