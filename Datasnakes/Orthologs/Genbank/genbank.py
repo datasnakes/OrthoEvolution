@@ -41,7 +41,7 @@ class GenBank(object):
             if issubclass(type(blast), CompGenObjects) or issubclass(type(blast), CompGenBLASTn):
                 setattr(blast, 'project', project)
                 for key, value in blast.__dict__.items():
-                    setattr(self, str(key), str(value))
+                    setattr(self, key, value)
                 print('project_path=%s' % self.project_path)
             else:
 
@@ -52,7 +52,7 @@ class GenBank(object):
         else:
             setattr(blast, 'project', project)
             for key, value in blast.__dict__.items():
-                setattr(self, str(key), str(value))
+                setattr(self, key, value)
             print('project_path=%s' % self.project_path)
 
         self.gbk_path = self.raw_data / Path('GENBANK')
