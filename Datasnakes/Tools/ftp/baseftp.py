@@ -10,7 +10,7 @@ class BaseFTP(object):
     """The BaseFTP class provides basic functions for managing ftp clients."""
     def __init__(self, ftpsite, email):
         """Initialize the class by using the ftp site and email."""
-        self.site = ftpsite
+        self.ftpsite = ftpsite
         self.email = email
 
     def ftp_check(self):
@@ -20,14 +20,14 @@ class BaseFTP(object):
         If it doesn't then it reconnects and returns an instance of the
         connection.
         """
+        raise NotImplementedError('ftp_check has not been implemented yet.')
         ftp = self.ftp_connect(self.__NCBI_FTP, self.email)
         ftp.voidcmd('NOOP')
         ftp.cwd(self.path)
         return ftp
 
-    @classmethod
-    def ftp_login(self):
+    def login(self):
         """Connect to the FTP server anonymously."""
-        ftp = FTP(self.site, timeout=None)
+        ftp = FTP(self.ftpsite, timeout=None)
         ftp.login(user='anonymous', passwd=self.email)
         return ftp
