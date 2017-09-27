@@ -46,15 +46,14 @@ setup(
         'Operating System :: Unix',
         'Natural Language :: English',
         'Programming Language :: Python :: 3 :: Only',
-        'Programming Language :: Python :: 3.3',
-        'Programming Language :: Python :: 3.4',
         'Programming Language :: Python :: 3.5',
+        'Programming Language :: Python :: 3.6',
         'Framework :: Flask',
         'Framework :: R-Shiny',
         'Framework :: Cookiecutter'
     ],
     # Packages will be automatically found if not in this list.
-    packages=find_packages(exclude=['Docs', 'Archive', 'Examples']),
+    packages=find_packages(exclude=['Docs', 'Examples']),
     include_package_data=True,
     entry_points={
         'console_scripts': ['d~s=Orthologs.command_line:main']

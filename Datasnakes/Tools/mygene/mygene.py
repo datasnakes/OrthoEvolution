@@ -1,29 +1,45 @@
 """Get gene information from the mygene api at http://mygene.info/ """
+import pkg_resources
+from Datasnakes.Manager import config
 import mygene
 import pandas as pd
+# TODO add ability for custom fields
+# TODO add ability for custom species.
+# TODO add a template csv file for users using pkg_resources.
 
 
-class MG(object):
+class MyGene(object):
     """Import a csv of refseq accessions & get gene information from mygene."""
 
-    def __init__(self, filepath, outfile):
+    def __init__(self, infile, outfile, species='human',
+                 fields='symbol,name,entrezgene,summary'):
         """Initialize my gene handle and refseq/accessions list.
 
         Get the basic gene information. It's best to use a csv file and title
         the row of the accessions list `Accessions`.
         """
-        # TODO add definition for doing the work of this.
-        accfile = pd.read_csv(filepath)
-        self.acclist = list([accession.upper() for accession
-                             in accfile.Accessions])
+        mygene_temp = pkg_resources.resource_filename(config.__name__,
+                                                      'mygenetemp.csv')
+        self.infile = infile
+        self.outfile = outfile
 
-        # Set up mygene handle
-        self.mg = mygene.MyGeneInfo()
+        self.mg = mygene.MyGeneInfo() # Set up mygene handle
+        self.accessions_list = self._import_accfile() # Create accessions list
 
-        # TODO add kwargs
-        basic_info = self.mg.querymany(self.acclist, scopes='refseq',
-                                       fields='symbol,name,entrezgene,summary',
-                                       species='human', returnall=True,
+        self.fields = fields # Default fields
+        self.species = species # Species to use.
+
+    def _import_accfile(self):
+        """Import the accession file and turn it into a list."""
+        accfile = pd.read_csv(self.infile)
+        acclist = list([accession.upper() for accession in accfile.Accessions])
+        return acclist
+
+    def query_mygene(self):
+        """Query mygene for gene information."""
+        basic_info = self.mg.querymany(self.accessions_list, scopes='refseq',
+                                       fields=self.fields,
+                                       species=self.species, returnall=True,
                                        as_dataframe=True, size=1, verbose=True)
 
         # basic_info['out'] is the output dataframe.
@@ -42,7 +58,7 @@ class MG(object):
         # Create the NCBI links using a for loop
         baseurl = 'https://www.ncbi.nlm.nih.gov/gene/'
 
-        # Create an empty list that can be appended
+        # Create an empty list that can be appended to
         urllist = []
 
         # Create a for loop that creates the url using the Entrez ID
@@ -65,4 +81,6 @@ class MG(object):
         alldata = pd.concat(frames, axis=1)
 
         # Save the merged dataframes to a file
-        alldata.to_csv(outfile, index=False)
+        alldata.to_csv(self.outfile, index=False)
+        print('%s has been created.' % str(self.outfile))
+
