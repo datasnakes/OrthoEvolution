@@ -93,9 +93,9 @@ class DataMana(object):
         if blast is not None:
             self.gb = GenBank(blast=blast, **self.Management_config, **self.GenBank_config)
         else:
-            self.gb = GenBank(**self.Management_config, **self.GenBank_config)
+            self.gb = GenBank(blast=blast, **self.Management_config, **self.GenBank_config)
         if blast is not None and not isinstance(blast, dict):
-            if issubclass(blast, CompGenBLASTn):
+            if issubclass(type(blast), CompGenBLASTn):
                 self.gb.blast2_gbk_files(blast.org_list, blast.gene_dict)
         else:
             print(proj_mana.__dict__)
