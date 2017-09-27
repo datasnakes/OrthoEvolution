@@ -95,7 +95,7 @@ class DataMana(object):
             self.gb = GenBank(blast=blast, **self.Management_config, **self.GenBank_config)
         else:
             self.gb = GenBank(blast=blast, **self.Management_config, **self.GenBank_config)
-        if blast is not None and not isinstance(blast, dict):
+        if blast is not None:
             if issubclass(type(blast), CompGenBLASTn):
                 self.gb.blast2_gbk_files(blast.org_list, blast.gene_dict)
         else:
@@ -117,7 +117,7 @@ class DataMana(object):
                         self.gb.get_gbk_file(accession, GENE, ORGANISM, server_flag=server_flag)
 
     def align(self, genbank):
-        self.al = MSA(genbank=genbank, **self.Alignment_config)
+        self.al = MSA(genbank=genbank, **self.Management_config, **self.Alignment_config)
         self.al.align(self.Alignment_config['kwargs'])
 
 
