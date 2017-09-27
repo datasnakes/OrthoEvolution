@@ -10,7 +10,7 @@ from Bio.Blast.Applications import NcbiblastnCommandline
 
 from Datasnakes.Manager import config
 from Datasnakes.Orthologs.Blast.comparative_genetics_files import CompGenFiles
-from Datasnakes.Orthologs.Blast.utils import gene_list_config, map_func
+from Datasnakes.Orthologs.Blast.utils import gene_list_config, map_func, gi_list_config
 from Datasnakes.Tools.utils import makedirectory
 
 
@@ -75,7 +75,7 @@ class CompGenBLASTn(CompGenFiles):
 
         # Create GI lists
         self.blastn_log.info("Configuring GI list using the taxonomy id and the blastdbcmd tool.")
-        gi_list_config(self.__gi_list_path, self.research_path, self.taxon_ids, config)
+        #gi_list_config(self.__gi_list_path, self.research_path, self.taxon_ids, config)
         # Get GI (stdout) and query sequence (FASTA format)
         self.blastn_log.info("Generating directories.")
         self.blastn_log.info("Extracting query gi number to stdout and "

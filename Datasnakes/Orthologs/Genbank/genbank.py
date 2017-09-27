@@ -5,7 +5,7 @@ import shutil
 from pathlib import Path
 from BioSQL import BioSeqDatabase
 from Bio import SeqIO
-from Datasnakes.Orthologs.Blast.comparative_genetics_blastn import CompGenBLASTn
+from Datasnakes.Orthologs.Blast.blastn_comparative_genetics import CompGenBLASTn
 from Datasnakes.Tools.utils.other_utils import makedirectory
 from Datasnakes.Orthologs.Blast.comparative_genetics_objects import CompGenObjects
 
@@ -38,10 +38,10 @@ class GenBank(object):
         if blast is not None and not isinstance(blast, dict):
             print(blast)
             print(type(blast))
-            if issubclass(blast, CompGenObjects) or issubclass(blast, CompGenBLASTn):
+            if issubclass(type(blast), CompGenObjects) or issubclass(type(blast), CompGenBLASTn):
                 setattr(blast, 'project', project)
                 for key, value in blast.__dict__.items():
-                    setattr(self, str(key), str(value))
+                    setattr(self, key, value)
                 print('project_path=%s' % self.project_path)
             else:
 
@@ -52,7 +52,7 @@ class GenBank(object):
         else:
             setattr(blast, 'project', project)
             for key, value in blast.__dict__.items():
-                setattr(self, str(key), str(value))
+                setattr(self, key, value)
             print('project_path=%s' % self.project_path)
 
         self.gbk_path = self.raw_data / Path('GENBANK')
