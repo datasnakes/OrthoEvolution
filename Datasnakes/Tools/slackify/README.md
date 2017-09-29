@@ -13,7 +13,7 @@ Make sure to practice secure methods. Don't upload your apikey to github as that
 Examples
 --------
 
-Import the class and set up the slack handler.
+#### Import the class and set up the slack handler.
 
 ```python
 from Datasnakes.Tools import Slackify
@@ -21,7 +21,7 @@ from Datasnakes.Tools import Slackify
 slack = Slackify(slackconfig='path/to/slackconfig.cfg')
 ```
 
-Message a channel and link to a user with `<@username>` in your message.
+#### Message a channel and link to a user with `<@username>` in your message.
 
 ```python
 
@@ -31,14 +31,14 @@ slack.send_msg(channel='channelname', message=message_to_channel)
 
 ```
 
-Get all users and channels.
+#### Get all users and channels.
 
 ```python
 slack.list_users() # Returns a list of all users.
 slack.list_channels() # Returns a list of channels
 ```
 
-Upload a file. The file can an image, pdf, doc, text, python file, etc.
+####  Upload a file. The file can be an image, pdf, doc, text, python file, etc.
 
 ```python
 slack.upload_file()
