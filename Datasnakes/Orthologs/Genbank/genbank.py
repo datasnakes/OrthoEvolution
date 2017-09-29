@@ -35,48 +35,46 @@ class GenBank(object):
         # TODO-ROB: Change the way the file systems work.
         self.project = project
         print(blast)
-        if blast is not None and not isinstance(blast, dict):
+        if blast is not None:
             print(blast)
-            print(type(blast))
-            if issubclass(type(blast), CompGenObjects) or issubclass(type(blast), CompGenBLASTn):
+            # print(type(blast))
+            if not issubclass(type(blast), CompGenObjects) and issubclass(type(blast), CompGenBLASTn):
+                if project_path:
+                    self.project_path = Path(project_path) / Path(self.project)
+                else:
+                    self.project_path = Path(os.getcwd()) / Path(self.project)
+                Path.mkdir(self.project_path, parents=True, exist_ok=True)
+                print('project_path=%s' % self.project_path)
+                self.removed_bn_config(kwargs)
+            else:
                 setattr(blast, 'project', project)
                 for key, value in blast.__dict__.items():
                     setattr(self, key, value)
+                if 'project_path' not in blast.__dict__.keys():
+                    if project_path:
+                        self.project_path = self.repo_path
+                    else:
+                        self.project_path = Path(os.getcwd()) / Path(self.project)
                 print('project_path=%s' % self.project_path)
-            else:
 
-                self.project_path = Path(os.getcwd()) / Path(self.project)
-            makedirectory(self.project_path)
-            print('project_path=%s' % self.project_path)
-            self.removed_bn_config(kwargs)
-        else:
-            setattr(blast, 'project', project)
-            for key, value in blast.__dict__.items():
-                setattr(self, key, value)
-            print('project_path=%s' % self.project_path)
+        # self.gbk_path = self.raw_data / Path('GENBANK')
+        # # TODO deprecate
+        # self.target_gbk_files_path = self.gbk_path / Path('gbk')
+        # makedirectory(self.target_gbk_files_path)
+        #
+        # # TODO deprecate
+        # self.target_fasta_files = self.gbk_path / Path('fasta')
+        # makedirectory(self.target_fasta_files)
 
-        self.gbk_path = self.raw_data / Path('GENBANK')
-        # TODO deprecate
-        self.target_gbk_files_path = self.gbk_path / Path('gbk')
-        makedirectory(self.target_gbk_files_path)
-
-        # TODO deprecate
-        self.target_fasta_files = self.gbk_path / Path('fasta')
-        makedirectory(self.target_fasta_files)
-
-        if project_path:
-            self.project_path = self.repo_path
-        else:
-            self.project_path = Path(os.getcwd()) / Path(self.project)
-        Path.mkdir(self.project_path, parents=True, exist_ok=True)
-        print('project_path=%s' % self.project_path)
-        self.removed_bn_config(kwargs)
+        # Path.mkdir(self.project_path, parents=True, exist_ok=True)
+        # print('project_path=%s' % self.project_path)
+        # self.removed_bn_config(kwargs)
 
         # Configuration
         # TODO Create configuration script.
         self.target_gbk_db_path = self.user_db / Path(self.project)
         # TODO-ROB: Configure GenBank function
-        makedirectory(self.target_gbk_db_path)
+        Path.mkdir(self.target_gbk_db_path, parents=True, exist_ok=True)
         self.solo = solo
         self.multi = multi
         self.min_fasta = min_fasta
@@ -85,7 +83,6 @@ class GenBank(object):
         self.raw_data = self.project_path / Path('raw_data')
         self.user_db = self.project_path / Path('user_db')
         self.ncbi_db_repo = self.project_path / Path('ncbi_db_repo')
-
         for key, value in kwargs.items():
             setattr(self, key, value)
 
