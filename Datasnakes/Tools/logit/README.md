@@ -35,4 +35,7 @@ paml.info('muah')
 
 # Shutdown the loggers and delete the logfile
 logit.deletelog(logfile=logfile)
+
+# Shutdown logging without deleting the logfile
+logit.shutdown()
 ```
