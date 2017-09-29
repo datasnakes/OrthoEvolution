@@ -11,6 +11,7 @@ from cookiecutter.prompt import prompt_for_config
 
 # TODO-ROB once this is a pypi package all of these will be unnecessary
 from Datasnakes import Cookies, Orthologs, Manager, Tools
+from Datasnakes.Cookies.cookie_jar import Oven
 from Datasnakes.Tools.zipper.zipper import ZipUtils
 
 
@@ -40,17 +41,18 @@ class Management(object):
         """
         self.repo = repo
         self.file_home = Path(home)  # Home of the file calling this class
+        self.Baker = Oven()
         # TODO-ROB:  SOme of these directories don't need to be accessed directly
         # Below are the PyPi path strings
         #    The first group is to access the cookiecutter templates
-        self.Cookies = Path(pkg_resources.resource_filename(Cookies.__name__, ''))
-        self.repo_cookie = self.Cookies / Path('new_repository')
-        self.user_cookie = self.Cookies / Path('new_user')
-        self.project_cookie = self.Cookies / Path('new_project')
-        self.research_cookie = self.Cookies / Path('new_research')
-        self.app_cookie = self.Cookies / Path('new_app')
-        self.db_cookie = self.Cookies / Path('new_database')
-        self.website_cookie = self.Cookies / Path('new_website')
+        self.CookieJar = self.Baker.CookieJar
+        # self.repo_cookie = self.Cookies / Path('new_repository')
+        # self.user_cookie = self.Cookies / Path('new_user')
+        # self.project_cookie = self.Cookies / Path('new_project')
+        # self.research_cookie = self.Cookies / Path('new_research')
+        # self.app_cookie = self.Cookies / Path('new_app')
+        # self.db_cookie = self.Cookies / Path('new_database')
+        # self.website_cookie = self.Cookies / Path('new_website')
         #    The second group is for the Manager module
         self.Manager = Path(pkg_resources.resource_filename(Manager.__name__, ''))
         self.utils = self.Manager / Path('utils')
@@ -74,36 +76,13 @@ class Management(object):
         if self.repo:
             self.repo_path = self.file_home / Path(self.repo)
         if new_repo is True:
-            self.create_repo()
+            self.Baker.bake_the_repo()
 
         # Create a directory management logger
         # TODO-ROB add logging to manager class
         #log = LogIt('user/path/userfile.log', 'Directory Management')
         #self.dm_log = log.basic
 
-    def create_repo(self):
-        print('Creating directories from repository cookie.')
-        # print(self.__class__.__name__)
-        """This function creates a new repository.  If a repository name
-        is given to the class then it is given a name.  If not, cookiecutters
-        takes input from the user.
-
-        The base class will be the only class that allows cookiecutters parameter
-        no_input to be False.
-        """
-        if self.repo:
-            no_input = True
-            e_c = {
-                "repository_name": self.repo
-            }
-        else:
-            no_input = False
-            e_c = None
-            # TODO-ROB change cookiecutter so that it can take pathlike objects
-        cookiecutter(str(self.repo_cookie), no_input=no_input,
-                     extra_context=e_c, output_dir=str(self.file_home))
-        os.chmod(str(self.file_home / Path(self.repo)), mode=0o777)
-        print('Directories have been created. ✔')
 
     # def git_ignore(self, path):
     #     """Get the ignored file patterns from the .gitignore file in the repo."""
