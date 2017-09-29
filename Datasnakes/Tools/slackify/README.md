@@ -10,16 +10,36 @@ The bot you create (if you choose that route) must be invited to the channel you
 After generating an apikey, it's best to create a configuration file so that you can easily keep up with your apikey.
 Make sure to practice secure methods. Don't upload your apikey to github as that is very insecure. Keep a local copy of your key.
 
-Example
+Examples
 --------
+
+Import the class and set up the slack handler.
+
+```python
+from Datasnakes.Tools import Slackify
+
+slack = Slackify(slackconfig='path/to/slackconfig.cfg')
+```
 
 Message a channel and link to a user with `<@username>` in your message.
 
 ```python
 
-slack = Slackify(slackconfig='path/to/slackconfig.cfg')
-
 message_to_channel = 'Hey, <@username>. This is an update for the current script.'
 
 slack.send_msg(channel='channelname', message=message_to_channel)
+
+```
+
+Get all users and channels.
+
+```python
+slack.list_users() # Returns a list of all users.
+slack.list_channels() # Returns a list of channels
+```
+
+Upload a file. The file can an image, pdf, doc, text, python file, etc.
+
+```python
+slack.upload_file()
 ```

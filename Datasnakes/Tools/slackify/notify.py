@@ -65,4 +65,4 @@ class Slackify(object):
     def log2slack(self):
         """Send a formatted text string to slack similar to logging."""
         raise NotImplementedError('This function is not yet implemented.')
-        # TODO Create logging format for logging to slack.
+        # TODO One day...create logging format for logging to slack.
