@@ -5,6 +5,7 @@ import fnmatch
 
 
 class NCBIFTPTest(object):
+    # TODO write a real and better test.
     """A simple example for ftp."""
     def __init__(self, passwd, user='', site='ftp.ncbi.nlm.nih.gov/',
                  path='blast'):

@@ -17,7 +17,7 @@ These tools are optimized to be used together (very little work to do that), but
 This is a simple example of using some of the modules.
 
 ``` python
-from Tools import ftp
+from Datasnakes.Tools import ftp
 
 ```
 

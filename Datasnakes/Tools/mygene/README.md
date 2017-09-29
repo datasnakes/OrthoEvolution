@@ -2,5 +2,5 @@ mygene
 =============
 
 
-Usage
+Example
 ------

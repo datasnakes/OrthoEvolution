@@ -27,8 +27,7 @@ from Datasnakes.Orthologs.Genbank import GenBank
 class DataMana(object):
 
     def __init__(self, config_file=None, pipeline=None, new=False, start=False, **kwargs):
-
-        # Initialize the attributes that can be used as keys in the config_file
+        """Initialize the attributes that can be used as keys in the config_file."""
         self.Management_config = self.CompGenAnalysis_config = self.BLASTn_config = self.GenBank_config = self.Alignment_config = None
         self.pm = self.bl = self.gb = self.al = None
         if pipeline == 'Ortho_CDS_1':
