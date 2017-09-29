@@ -1,7 +1,7 @@
 Datasnakes Mini-Tutorial
 ========================
-Datasnakes has been built with Python3.6 as a pipeline framework for current
-(comparative genetics for orthologs), and furute (RNA-seq) bioinformatic data analysis.
+Datasnakes has been built with Python 3.6 as a pipeline framework for current
+(comparative genetics for orthologous genes), and future (RNA-seq) bioinformatic data analysis.
 Currently, this python package is comprised of 4 major modules:
 1.  Cookies - Deploys directory structures using cookiecutter.
 2.  Manager - Pipeline configuration and management.
@@ -28,19 +28,19 @@ Cookies can also be used to create standalone projects that don't require an ent
 
 #### TODO - After creating a cookie class, add real examples here.
 #### Examples
-Templates used when creating a full repository:
-* _Cookies/new_repository_
-* _Cookies/new_user_
-* _Cookies/new_project_
-* _Cookies/new_research_
-* _Cookies/new_database_ (for NCBI, proprietary, etc. databases)
-* _Cookies/new_app_ (for [R-Shiny](https://github.com/grabear/awesome-rshiny) applications)
-* _Cookies/new_website_ (for [Flask](http://flask.pocoo.org/) applications)
+* Templates used when creating a full repository:
+  * _Cookies/new_repository_
+  * _Cookies/new_user_
+  * _Cookies/new_project_
+  * _Cookies/new_research_
+  * _Cookies/new_database_ (for NCBI, proprietary, etc. databases)
+  * _Cookies/new_app_ (for [R-Shiny](https://github.com/grabear/awesome-rshiny) applications)
+  * _Cookies/new_website_ (for [Flask](http://flask.pocoo.org/) applications)
 
-**Template for standalone projects**
-* _Cookies/new_basic_project_
+* Template for standalone projects
+  * _Cookies/new_basic_project_
 
-Using Manager
+Using the Manager module
 --------------
 #### Overview
 The Manager module uses the Cookie class in order to deploy a bioinformatics repository
@@ -54,27 +54,81 @@ The web interface will give each user access to the Tools and Orthologs modules 
 
 #### Examples
 ```python
+# Manager classes can be used explicitly, or...
 from Datasnakes.Manager.management import Management
 from Datasnakes.Manager.management import RepoManagement
-from Datasnakes.Manager.management import UserManagemnt
+from Datasnakes.Manager.management import UserManagement
 from Datasnakes.Manager.management import WebsiteManagement
 from Datasnakes.Manager.management import ProjectManagement
-```
-Using Orthologs
-----------------
-#### What is Orthologs?
 
-#### Why Orthologs?
+# ...they can be use implicitly through the main pipeline class.
+from Datasnakes.Manager.data_management import DataMana
+
+# Use a prebuilt configuration file in Manager/config/
+# *start* a *new* project automatically
+import os
+pipeline = DataMana(pipeline='Ortho_CDS_1', project_path=os.getcwd(), start=True, new=True)
+```
+Using the Orthologs Modules
+----------------
+#### Overview
+The Orthologs module is the central data processing unit of our package.  Any published data will be generated using these submodules.
+
+The sub modules are used for BLASTing NCBI's refseq database to discover orthologous genes, 
+parsing and analyzing BLASTn data, generating GenBank files for the orthologs, generating sequence data
+for the orthologs, aligning the orthologous sequences for each gene, generating phylogenetic trees for each gene, 
+and doing phylogenetic analysis for each gene.
 
 #### Examples
-    - Blast - Classes for our very specific NCBI-BLAST needs.  (Gathering Accessions)
-    - GenBank - Class for handling GenBank, BioSQL, and FASTA sequences.
-    - Alignment - Class for using various Sequence aligners.
-    - Phylogenetics - Class for doing phylogenetic analysis
+```python
+from Datasnakes.Manager.management import ProjectManagement
+from Datasnakes.Orthologs.Blast.blastn_comparative_genetics import CompGenBLASTn
+from Datasnakes.Orthologs.Genbank.genbank import GenBank
+from Datasnakes.Orthologs.Align.msa import MultipleSequenceAlignment as MSA
+from Datasnakes.Orthologs.
+# In a real situation a dictionary configuration from YAML files will be used
+# However a dictionary can be manually set up by the user within the script
+# See the config files in Manager/config or use data_management.py as an example
+Management_config = Blast_config = GenBank_config = Alignment_config = {}
+
+# Initialize the Project Manager
+proj_mana = ProjectManagement(**Management_config)
+
+# Initialize the BLAST tool
+# Compose this class with the Project Manager
+blast = CompGenBLASTn(proj_mana=proj_mana, **Management_config, **Blast_config)
+blast.blast_config(blast.blast_human, 'Homo_sapiens', auto_start=True)
+
+# Initialize the GenBank parser
+# Compose this class with the BLAST tool
+# Implicitly uses the Project Manager as well
+genbank = GenBank(blast=blast, **Management_config, **GenBank_config)
+# Use the Blast tool data to get the desired GenBank files
+genbank.blast2_gbk_files(blast.org_list, blast.gene_dict)
+
+# Initialize the Aligner
+# Compose this class with the GenBank parser
+# Implicitly uses the Project Manager and the BLAST tool as well
+al = MSA(genbank=genbank, **Management_config, **Alignment_config)
+al.align(Alignment_config['kwargs'])  # Underdeveloped
+
+# TODO-ROB:  Develop Documentation for Phylogenetics class
+```
 Using Tools
 ------------
-#### What is Tools?
+#### Using the Tools module
+The tools module is a grouping of utilities used by our package.  While they could have be stored in each
+modules util.py file, they were used and developed on a global scale, and hence required their own module.
+Below is a list of submodules and a brief description:
 
-#### Why Tools?
 
 #### Examples
+```python
+# Import a tools module
+from Datasnakes.Tools.slackify.notify import Slackify
+
+# Slack takes a config file thats already set up
+# This tools sends a message to a Slack channel
+Slackify()
+```
+See the documentation in the various Tools submodules.
