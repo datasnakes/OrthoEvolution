@@ -32,4 +32,7 @@ align, paml = logit.default('alignlog', logfile), logit.default('pamllog', logfi
 # Start logging
 align.info('hi')
 paml.info('muah')
+
+# Shutdown the loggers and delete the logfile
+logit.deletelog(logfile=logfile)
 ```
