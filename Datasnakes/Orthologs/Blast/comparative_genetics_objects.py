@@ -11,7 +11,8 @@ from ete3 import NCBITaxa
 from Datasnakes.Manager import config
 # from pandas import ExcelWriter
 from Datasnakes.Manager.management import ProjectManagement
-from Datasnakes.Orthologs.Blast.utils import my_gene_info, get_dup_acc, get_miss_acc
+from Datasnakes.Orthologs.Blast.utils import (my_gene_info, get_dup_acc,
+                                              get_miss_acc)
 
 
 # TODO-ROB Create function for archiving and multiple runs (this can go
