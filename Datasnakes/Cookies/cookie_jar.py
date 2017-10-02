@@ -14,6 +14,7 @@ class CookieRecipes(object):
         self.repo_cookie = self.CookieJar / Path('new_repository')
         self.user_cookie = self.CookieJar / Path('new_user')
         self.project_cookie = self.CookieJar / Path('new_project')
+        self.basic_project_cookie = self.CookieJar / Path('new_basic_project')
         self.research_cookie = self.CookieJar / Path('new_research')
         self.app_cookie = self.CookieJar / Path('new_app')
         self.db_cookie = self.CookieJar / Path('new_database')
@@ -22,13 +23,14 @@ class CookieRecipes(object):
 
 class Oven(object):
 
-    def __init__(self, repo=None, user=None, project=None, databases=None, website=None, output_dir=os.getcwd(), cookies=CookieRecipes()):
+    def __init__(self, repo=None, user=None, project=None, basic_project=False, databases=None, website=None, output_dir=os.getcwd(), cookies=CookieRecipes()):
         self.cookie_jar = output_dir
         # Below are the PyPi path strings
         #    The first group is to access the cookiecutter templates
         self.repo = repo
         self.user = user
         self.project = project
+        self.basic_project = basic_project
         self.databases = databases
         self.website = website
         self.Ingredients = cookies
@@ -84,14 +86,22 @@ class Oven(object):
         :return: A new project inside the user's
         project directory.
         """
+        # Add the project
         if self.project:
             no_input = True
             e_c = {"project_name": self.project}
         else:
             no_input = False
             e_c = None
-        cookiecutter(str(self.Ingredients.project_cookie), extra_context=e_c,
-                     no_input=no_input, output_dir=str(self.cookie_jar))
+
+        if not self.basic_project:
+            print('Full Project')
+            cookiecutter(str(self.Ingredients.project_cookie), extra_context=e_c, no_input=no_input,
+                         output_dir=str(self.cookie_jar))
+        else:
+            print('Basic Project')
+            cookiecutter(str(self.Ingredients.basic_project_cookie), extra_context=e_c, no_input=no_input,
+                         output_dir=str(self.cookie_jar))
         os.chmod(str(self.cookie_jar / Path(self.project)), mode=0o777)
         print('Directories have been created. ✔')
 
