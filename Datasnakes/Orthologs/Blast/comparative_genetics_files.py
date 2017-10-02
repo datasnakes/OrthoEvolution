@@ -3,7 +3,7 @@ import time
 from pathlib import Path
 
 import pandas as pd
-from Datasnakes.Orthologs.Blast import CompGenObjects
+from Datasnakes.Orthologs.Blast.comparative_genetics_objects import CompGenObjects
 from Datasnakes.Tools import LogIt
 
 
@@ -42,8 +42,8 @@ class CompGenFiles(CompGenObjects):
                 'building.csv', 'building_time.csv')
 
         # Initialize Logging
-        logit = LogIt()
-        self.blastn_log = logit.default('blastn', 'blastn.log')
+        logit = LogIt('blastn', 'blastn.log')
+        self.blastn_log = logit.default()
         self.__date_format = logit.date_format
         self.get_time = time.time  # To get the time use 'get_time()'
 
