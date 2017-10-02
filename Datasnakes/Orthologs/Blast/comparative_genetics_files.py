@@ -42,8 +42,8 @@ class CompGenFiles(CompGenObjects):
                 'building.csv', 'building_time.csv')
 
         # Initialize Logging
-        logit = LogIt('blastn', 'blastn.log')
-        self.blastn_log = logit.default()
+        logit = LogIt()
+        self.blastn_log = logit.default('blastn', 'blastn.log')
         self.__date_format = logit.date_format
         self.get_time = time.time  # To get the time use 'get_time()'
 
