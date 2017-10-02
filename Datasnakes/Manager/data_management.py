@@ -10,7 +10,7 @@ from Datasnakes.Manager import ProjectManagement
 from Datasnakes.Orthologs.Align import MultipleSequenceAlignment as MSA
 from Datasnakes.Orthologs.Blast.blastn_comparative_genetics import CompGenBLASTn
 from Datasnakes.Orthologs.Blast.comparative_genetics_objects import CompGenObjects
-from Datasnakes.Orthologs.Genbank.genbank import GenBank
+from Datasnakes.Orthologs.GenBank.genbank import GenBank
 
 
 #import configparser

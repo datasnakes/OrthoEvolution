@@ -46,4 +46,4 @@ GenBank:
 MultipleSequenceAlignment:
   aln_program: 'GUIDANCE2'
   project_path: null
-  genbank: "!!python/name:Datasnakes.Orthologs.Genbank.genbank.GenBank ''\n"
+  genbank: "!!python/name:Datasnakes.Orthologs.GenBank.genbank.GenBank ''\n"
