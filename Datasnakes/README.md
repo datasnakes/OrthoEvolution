@@ -20,10 +20,10 @@ Using the Cookies module
 #### Overview
 The Cookies module acts as a repository for custom [cookiecutter](https://github.com/audreyr/cookiecutter) templates.  
 
-Each "Cookie" allows us to quickly create and deploy different projects with various directory structures.  They are meant to help organize projects
+Each "CookieRecipes" allows us to quickly create and deploy different projects with various directory structures.  They are meant to help organize projects
 and data in a standardized way.  This module is used almost extensively by the Manager module.
 
-In the context of the Manager module the Cookie class is used to deploy an entire repository geared towards developing a web-page using Flask and R-Shiny.
+In the context of the Manager module the CookieRecipes class is used to deploy an entire repository geared towards developing a web-page using Flask and R-Shiny.
 Cookies can also be used to create standalone projects that don't require an entire repository.
 
 #### TODO - After creating a cookie class, add real examples here.
@@ -43,7 +43,7 @@ Cookies can also be used to create standalone projects that don't require an ent
 Using the Manager module
 --------------
 #### Overview
-The Manager module uses the Cookie class in order to deploy a bioinformatics repository
+The Manager module uses the CookieRecipes class in order to deploy a bioinformatics repository
 with an organized directory structure based on specific users and the projects that they create.
 Pipeline customization and configuration will also be possible through YAML files.
 
