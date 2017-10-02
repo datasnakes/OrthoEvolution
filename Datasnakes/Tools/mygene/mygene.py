@@ -23,11 +23,11 @@ class MyGene(object):
         self.infile = infile
         self.outfile = outfile
 
-        self.mg = mygene.MyGeneInfo() # Set up mygene handle
-        self.accessions_list = self._import_accfile() # Create accessions list
+        self.mg = mygene.MyGeneInfo()  # Set up mygene handle
+        self.accessions_list = self._import_accfile()  # Create accessions list
 
-        self.fields = fields # Default fields
-        self.species = species # Species to use.
+        self.fields = fields  # Default fields
+        self.species = species  # Species to use.
 
     def _import_accfile(self):
         """Import the accession file and turn it into a list."""
