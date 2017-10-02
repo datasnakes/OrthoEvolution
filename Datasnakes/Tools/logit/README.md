@@ -1,7 +1,31 @@
 LogIt
 =======
-Use the LogIt class to make logging easier by creating a log for different levels
-that is uniquely named.
+Use the LogIt class to make logging very simple. This short and sweet class
+wraps around [logzero]() which allows color coded logging. We created our own
+default logger with a default dateformat, logformat, and logging level (default
+is debug). Setting up a logger is an easy 1 liner.
 
-Usage
--------
+1. Import the LogIt class and create a variable. ex: `logit = LogIt()`
+2. Create your logger. ex: `blastn = logit.default('blastn', 'blastn.log')`
+2. Start logging. ex: `blastn.error('Your refseq accession was not found')`
+
+Multiple loggers can exist for the same logfile and multiple loggers can be set
+up for one script.
+
+Example
+---------
+
+```python
+from Datasnakes.Tools import LogIt
+from Datasnakes.Orthologs.Phylogenetics import ETE3PAML
+
+# Set up your loggers
+logit = LogIt()
+logfile = 'align2paml.log'
+
+align, paml = logit.default('alignlog', logfile), logit.default('pamllog', logfile)
+
+# Start logging
+align.info('hi')
+paml.info('muah')
+```

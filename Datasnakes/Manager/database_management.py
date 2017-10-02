@@ -2,7 +2,7 @@
 import os
 from pathlib import Path
 
-from Datasnakes.Manager.management import ProjectManagement
+from Datasnakes.Manager import ProjectManagement
 
 
 class DatabaseManagement(object):

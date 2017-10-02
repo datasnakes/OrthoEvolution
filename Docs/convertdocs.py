@@ -6,6 +6,7 @@ from shutil import copyfile
 
 
 def md2rst(path):
+    # TODO Edit this to make it more dynamic.
     """Converts all markdown documents to rst documents in a folder.
 
     It does not include the readme, but it does copy the readme and rename it
