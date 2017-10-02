@@ -11,6 +11,7 @@ from cookiecutter.prompt import prompt_for_config
 
 # TODO-ROB once this is a pypi package all of these will be unnecessary
 from Datasnakes import Cookies, Orthologs, Manager, Tools
+from Datasnakes.Cookies.cookie_jar import Oven
 from Datasnakes.Tools.zipper.zipper import ZipUtils
 
 
@@ -40,17 +41,18 @@ class Management(object):
         """
         self.repo = repo
         self.file_home = Path(home)  # Home of the file calling this class
+        self.Kitchen = Oven(repo=self.repo, output_dir=self.file_home)
         # TODO-ROB:  SOme of these directories don't need to be accessed directly
         # Below are the PyPi path strings
         #    The first group is to access the cookiecutter templates
-        self.Cookies = Path(pkg_resources.resource_filename(Cookies.__name__, ''))
-        self.repo_cookie = self.Cookies / Path('new_repository')
-        self.user_cookie = self.Cookies / Path('new_user')
-        self.project_cookie = self.Cookies / Path('new_project')
-        self.research_cookie = self.Cookies / Path('new_research')
-        self.app_cookie = self.Cookies / Path('new_app')
-        self.db_cookie = self.Cookies / Path('new_database')
-        self.website_cookie = self.Cookies / Path('new_website')
+        self.Pantry = self.Kitchen.Ingredients
+        # self.repo_cookie = self.Cookies / Path('new_repository')
+        # self.user_cookie = self.Cookies / Path('new_user')
+        # self.project_cookie = self.Cookies / Path('new_project')
+        # self.research_cookie = self.Cookies / Path('new_research')
+        # self.app_cookie = self.Cookies / Path('new_app')
+        # self.db_cookie = self.Cookies / Path('new_database')
+        # self.website_cookie = self.Cookies / Path('new_website')
         #    The second group is for the Manager module
         self.Manager = Path(pkg_resources.resource_filename(Manager.__name__, ''))
         self.utils = self.Manager / Path('utils')
@@ -74,36 +76,13 @@ class Management(object):
         if self.repo:
             self.repo_path = self.file_home / Path(self.repo)
         if new_repo is True:
-            self.create_repo()
+            self.Kitchen.bake_the_repo()
 
         # Create a directory management logger
         # TODO-ROB add logging to manager class
         #log = LogIt('user/path/userfile.log', 'Directory Management')
         #self.dm_log = log.basic
 
-    def create_repo(self):
-        print('Creating directories from repository cookie.')
-        # print(self.__class__.__name__)
-        """This function creates a new repository.  If a repository name
-        is given to the class then it is given a name.  If not, cookiecutters
-        takes input from the user.
-
-        The base class will be the only class that allows cookiecutters parameter
-        no_input to be False.
-        """
-        if self.repo:
-            no_input = True
-            e_c = {
-                "repository_name": self.repo
-            }
-        else:
-            no_input = False
-            e_c = None
-            # TODO-ROB change cookiecutter so that it can take pathlike objects
-        cookiecutter(str(self.repo_cookie), no_input=no_input,
-                     extra_context=e_c, output_dir=str(self.file_home))
-        os.chmod(str(self.file_home / Path(self.repo)), mode=0o777)
-        print('Directories have been created. ✔')
 
     # def git_ignore(self, path):
     #     """Get the ignored file patterns from the .gitignore file in the repo."""
@@ -218,28 +197,9 @@ class RepoManagement(Management):
         if user:
             self.user = user  # FROM Flask
             self.user_path = self.users / Path(self.user)
+        self.Kitchen = Oven(repo=self.repo, user=self.user, output_dir=self.users)
         if new_user is True:
-            self.create_user()
-
-    def create_user(self):
-        """This function uses the username given by our FLASK framework
-        and creates a new directory system for the active user using
-        our  new_user cookiecutter template.
-        """
-        print('Creating directories from user cookie.')
-        # print(self.__class__.__name__)
-
-        # This is used ONLY when the user registers in flask
-        # TODO-ROB:  Create the cookiecutter.json file
-
-        # extra_context overrides user and default configs
-        cookiecutter(str(self.user_cookie), no_input=True, extra_context={
-                     "user_name": self.user}, output_dir=str(self.users))
-
-        # Change user permissions with flask later (this is for testing
-        # purposes
-        os.chmod(str(self.users / Path(self.user)), mode=0o777)
-        print('Directories have been created. ✔')
+            self.Kitchen.bake_the_user()
         # TODO-ROB do we need create user hooks?
 # TODO-ROB:  Edit the setup.py file for cookiecutter.
 
@@ -291,8 +251,9 @@ class UserManagement(RepoManagement):
             if project:
                 self.project = project
                 self.project_path = home / Path(project)
+        self.Kitchen = Oven(repo=self.repo, user=self.user, project=self.project, output_dir=self.projects)
         if new_project is True:
-            self.create_project()
+            self.Kitchen.bake_the_project()
         if len(database) > 0:
             self.db_list = database
             self.db_path_dict = {}
@@ -300,48 +261,51 @@ class UserManagement(RepoManagement):
             for item in database:
                 self.db_path_dict[item] = self.user_db / Path(item)
                 self.db_archive_dict[item] = self.db_path_dict[item] / Path('archive')
+        else:
+            self.db_path_dict = None
+            self.db_archive_dict = None
         if new_db is True:
-            self.create_db_repo()
+            self.Kitchen.bake_the_db_repo(user_db=self.user_db, db_path_dict=self.db_path_dict, ncbi_db_repo=self.ncbi_db_repo)
 
-    def create_project(self):
-        print('Creating directoriess from project cookie.')
-        # print(self.__class__.__name__)
-        """
-        :return: A new project inside the user's
-        project directory.
-        """
-        if self.project:
-            no_input = True
-            e_c = {"project_name": self.project}
-        else:
-            no_input = False
-            e_c = None
-        cookiecutter(str(self.project_cookie), extra_context=e_c,
-                     no_input=no_input, output_dir=str(self.projects))
-        os.chmod(str(self.projects / Path(self.project)), mode=0o777)
-        print('Directories have been created. ✔')
-
-    def create_db_repo(self):
-        print('Creating directories from database cookie.')
-        """
-        :return: A new database inside the users database directory
-        """
-        if self.databases:
-            for db, path in self.db_path_dict.items():
-                e_c = {"db_name": db}
-                cookiecutter(str(self.db_cookie), extra_context=e_c, no_input=True, output_dir=str(self.user_db))
-                os.chmod(str(self.user_db / Path(db)), mode=0o777)
-
-        else:
-            db_num = int(input("How many NCBI databases do you need to create?"))
-            for db in range(1, db_num + 1):
-                # Manually set up cookiecutter prompting
-                context_file = str(self.db_cookie / Path('cookiecutter.json'))
-                e_c = prompt_for_config(context=generate_context(context_file=context_file))
-                # Create the cookiecutter repo with no input, and add extra content from manual prompts
-                cookiecutter(str(self.db_cookie), output_dir=str(self.ncbi_db_repo), extra_context=e_c, no_input=True)
-                # Use cookiecutter_dict from manual prompts to change the user permissions.
-                os.chmod(str(self.ncbi_db_repo / Path(e_c['db_name'])), mode=0o777)
+    # def bake_the_project(self):
+    #     print('Creating directoriess from project cookie.')
+    #     # print(self.__class__.__name__)
+    #     """
+    #     :return: A new project inside the user's
+    #     project directory.
+    #     """
+    #     if self.project:
+    #         no_input = True
+    #         e_c = {"project_name": self.project}
+    #     else:
+    #         no_input = False
+    #         e_c = None
+    #     cookiecutter(str(self.project_cookie), extra_context=e_c,
+    #                  no_input=no_input, output_dir=str(self.projects))
+    #     os.chmod(str(self.projects / Path(self.project)), mode=0o777)
+    #     print('Directories have been created. ✔')
+    #
+    # def bake_the_db_repo(self):
+    #     print('Creating directories from database cookie.')
+    #     """
+    #     :return: A new database inside the users database directory
+    #     """
+    #     if self.databases:
+    #         for db, path in self.db_path_dict.items():
+    #             e_c = {"db_name": db}
+    #             cookiecutter(str(self.db_cookie), extra_context=e_c, no_input=True, output_dir=str(self.user_db))
+    #             os.chmod(str(self.user_db / Path(db)), mode=0o777)
+    #
+    #     else:
+    #         db_num = int(input("How many NCBI databases do you need to create?"))
+    #         for db in range(1, db_num + 1):
+    #             # Manually set up cookiecutter prompting
+    #             context_file = str(self.db_cookie / Path('cookiecutter.json'))
+    #             e_c = prompt_for_config(context=generate_context(context_file=context_file))
+    #             # Create the cookiecutter repo with no input, and add extra content from manual prompts
+    #             cookiecutter(str(self.db_cookie), output_dir=str(self.ncbi_db_repo), extra_context=e_c, no_input=True)
+    #             # Use cookiecutter_dict from manual prompts to change the user permissions.
+    #             os.chmod(str(self.ncbi_db_repo / Path(e_c['db_name'])), mode=0o777)
 
     def zip_mail(self, comp_filename, zip_path, destination=''):
         Zipper = ZipUtils(comp_filename, zip_path)
@@ -382,35 +346,35 @@ class WebsiteManagement(RepoManagement):
         self.website_public = self.website_scripts / Path('public')
         self.website_user = self.website_scripts / Path('user')
         print('Website directory structure created. ✔ Server not running.')
-
+        self.Kitchen = Oven(repo=self.repo, user=self.user, website=self.website, output_dir=self.flask)
         if new_website is True:
-            self.create_website()
+            self.Kitchen.bake_the_website(host=self.web_host, port=self.web_port, website_path=self.website_path)
 
-    def create_website(self):
-        """Create a website using the new_website cookie.
-
-        After creating the directory structure, the run_script function
-        from cookiecutter finds the hooks folder which contains a
-        post-cookiecutter-template-generation bash script.  The bash script
-        sets up the proper dependencies and environment variables for the website,
-        and runs the website on the specified host and port
-
-        :return: Runs the website.
-        """
-        # TODO-ROB Add heavy logging here
-        e_c = {"website_name": self.website,
-               "website_path": os.path.join(str(self.website_path), ''),
-               "website_host": self.web_host,
-               "website_port": self.web_port}
-        cookiecutter(str(self.website_cookie), no_input=True,
-                     extra_context=e_c, output_dir=str(self.flask))
-        os.chmod(str(self.flask / Path(self.website)), mode=0o777)
-        # Get the absolute path to the script that starts the flask server
-        script_path = self.website_path / \
-            Path('hooks') / Path('post_gen_project.sh')
-        #scripts_file_path = find_hook('post_gen_project.sh', hooks_dir=str(script_path))
-        # TODO-ROB add screening to the bash script for flask run -h -p
-        run_script(script_path=str(script_path), cwd=str(self.website_path))
+    # def bake_the_website(self):
+    #     """Create a website using the new_website cookie.
+    #
+    #     After creating the directory structure, the run_script function
+    #     from cookiecutter finds the hooks folder which contains a
+    #     post-cookiecutter-template-generation bash script.  The bash script
+    #     sets up the proper dependencies and environment variables for the website,
+    #     and runs the website on the specified host and port
+    #
+    #     :return: Runs the website.
+    #     """
+    #     # TODO-ROB Add heavy logging here
+    #     e_c = {"website_name": self.website,
+    #            "website_path": os.path.join(str(self.website_path), ''),
+    #            "website_host": self.web_host,
+    #            "website_port": self.web_port}
+    #     cookiecutter(str(self.website_cookie), no_input=True,
+    #                  extra_context=e_c, output_dir=str(self.flask))
+    #     os.chmod(str(self.flask / Path(self.website)), mode=0o777)
+    #     # Get the absolute path to the script that starts the flask server
+    #     script_path = self.website_path / \
+    #         Path('hooks') / Path('post_gen_project.sh')
+    #     #scripts_file_path = find_hook('post_gen_project.sh', hooks_dir=str(script_path))
+    #     # TODO-ROB add screening to the bash script for flask run -h -p
+    #     run_script(script_path=str(script_path), cwd=str(self.website_path))
 
     def stop_server(self):
         """Stop the server running the website."""
@@ -459,40 +423,42 @@ class ProjectManagement(UserManagement):
             if app:
                 self.app = app
                 self.app_path = self.project_web / Path(app)
+
         if new_research is True:
             self.research_type = research_type
             self.Cookies = Path(Cookies.__path__[0])
             self.research_cookie = self.Cookies / Path('new_research')
-            self.create_research()
+            self.Kitchen = Oven(repo=self.repo, user=self.user, project=self.project, output_dir=self.project_path)
+            self.Kitchen.bake_the_research(research_type=self.research_type, research=self.research)
             if new_app is True:
                 self.app_cookie = self.Cookies / Path('new_app')
                 self.app = app
                 self.app_path = self.project_path / Path(research_type) / Path(research) / Path('web')
-                self.create_app()
+                self.Kitchen.bake_the_app(app=self.app)
         print('The project structure for %s has been created.' % project)
 
-    def create_research(self):
-        """
-        :param new_app (bool):  Flag for auto generating an app that
-         goes with the research target.
-        :return:  Adds new directories in the current project labeled
-        with the proper names.
-        """
-        print('Creating directories from research cookie.')
-        # print(self.__class__.__name__)
-
-        e_c = {"research_type": self.research_type,
-               "research_name": self.research}
-        cookiecutter(str(self.research_cookie), no_input=True,
-                     extra_context=e_c, output_dir=str(self.project_path))
-        os.chmod(str(self.project_path / Path(self.research_type)), mode=0o777)
-        # script_path = self.project_cookie / Path('hooks') / Path('post_gen_project.py')
-        # run_script(script_path, )
-        print('Directories have been created. ✔')
-
-    def create_app(self):
-        """Create an app."""
-        e_c = {"app_name": self.app}
-        cookiecutter(str(self.app_cookie), no_input=True,
-                     extra_context=e_c, output_dir=str(self.app_path))
-        os.chmod(str(self.app_path), mode=0o777)
+    # def bake_the_research(self):
+    #     """
+    #     :param new_app (bool):  Flag for auto generating an app that
+    #      goes with the research target.
+    #     :return:  Adds new directories in the current project labeled
+    #     with the proper names.
+    #     """
+    #     print('Creating directories from research cookie.')
+    #     # print(self.__class__.__name__)
+    #
+    #     e_c = {"research_type": self.research_type,
+    #            "research_name": self.research}
+    #     cookiecutter(str(self.research_cookie), no_input=True,
+    #                  extra_context=e_c, output_dir=str(self.project_path))
+    #     os.chmod(str(self.project_path / Path(self.research_type)), mode=0o777)
+    #     # script_path = self.project_cookie / Path('hooks') / Path('post_gen_project.py')
+    #     # run_script(script_path, )
+    #     print('Directories have been created. ✔')
+    #
+    # def bake_the_app(self):
+    #     """Create an app."""
+    #     e_c = {"app_name": self.app}
+    #     cookiecutter(str(self.app_cookie), no_input=True,
+    #                  extra_context=e_c, output_dir=str(self.app_path))
+    #     os.chmod(str(self.app_path), mode=0o777)
