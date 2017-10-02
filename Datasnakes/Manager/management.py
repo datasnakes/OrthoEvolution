@@ -1,22 +1,11 @@
 """Management tools for the package."""
 import os
-from pathlib import Path
-
-import ete3
 import pkg_resources
-from cookiecutter.generate import generate_context
-from cookiecutter.hooks import run_script
-from cookiecutter.main import cookiecutter
-from cookiecutter.prompt import prompt_for_config
-
-# TODO-ROB once this is a pypi package all of these will be unnecessary
+from pathlib import Path
 from Datasnakes import Cookies, Orthologs, Manager, Tools
 from Datasnakes.Cookies.cookie_jar import Oven
 from Datasnakes.Tools.zipper.zipper import ZipUtils
-
-
 # from Manager.logit.logit import LogIt
-# TODO-ROB use **kwargs and **args to cut down on parameters
 
 
 class Management(object):
@@ -46,32 +35,30 @@ class Management(object):
         # Below are the PyPi path strings
         #    The first group is to access the cookiecutter templates
         self.Pantry = self.Kitchen.Ingredients
-        # self.repo_cookie = self.Cookies / Path('new_repository')
-        # self.user_cookie = self.Cookies / Path('new_user')
-        # self.project_cookie = self.Cookies / Path('new_project')
-        # self.research_cookie = self.Cookies / Path('new_research')
-        # self.app_cookie = self.Cookies / Path('new_app')
-        # self.db_cookie = self.Cookies / Path('new_database')
-        # self.website_cookie = self.Cookies / Path('new_website')
         #    The second group is for the Manager module
         self.Manager = Path(pkg_resources.resource_filename(Manager.__name__, ''))
-        self.utils = self.Manager / Path('utils')
-        self.shiny = self.Manager / Path('shiny')
+        self.BioSQL = self.Manager / Path('BioSQL')
+        self.config = self.Manager / Path('config')
         #    The third group is for the Orthologs module
         self.Orthologs = Path(pkg_resources.resource_filename(Orthologs.__name__, ''))
-        self.biosql = self.Orthologs / Path('biosql')
-        self.blast = self.Orthologs / Path('blast')
-        self.comp_gen = self.Orthologs / Path('comparative_genetics')
-        self.genbank = self.Orthologs / Path('genbank')
-        self.manager = self.Orthologs / Path('manager')
-        self.phylogenetics = self.Orthologs / Path('phylogenetics')
+        self.Align = self.Orthologs / Path('Align')
+        self.Blast = self.Orthologs / Path('Blast')
+        self.GenBank = self.Orthologs / Path('GenBank')
+        self.Phylogenetics = self.Orthologs / Path('Phylogenetics')
         #    The fourth group is for the Tools module
         self.Tools = Path(pkg_resources.resource_filename(Tools.__name__, ''))
         self.ftp = self.Tools / Path('ftp')
-        self.multiprocessing = self.Tools / Path('multiprocessing')
+        self.logit = self.Tools / Path('logit')
+        self.mpi = self.Tools / Path('mpi')
+        self.mygene = self.Tools / Path('mygene')
         self.pandoc = self.Tools / Path('pandoc')
+        self.parallel = self.Tools / Path('parallel')
         self.pybasher = self.Tools / Path('pybasher')
         self.qsub = self.Tools / Path('qsub')
+        self.send2server = self.Tools / Path('send2server')
+        self.slackify = self.Tools / Path('slackify')
+        self.utils = self.Tools / Path('utils')
+        self.zipper = self.Tools / Path('zipper')
 
         if self.repo:
             self.repo_path = self.file_home / Path(self.repo)
@@ -82,86 +69,6 @@ class Management(object):
         # TODO-ROB add logging to manager class
         #log = LogIt('user/path/userfile.log', 'Directory Management')
         #self.dm_log = log.basic
-
-
-    # def git_ignore(self, path):
-    #     """Get the ignored file patterns from the .gitignore file in the repo."""
-    #     with open(Path(path) / Path('.gitignore'), 'r', newline='') as ignore:
-    #         ignored = ignore.read().splitlines()
-    #     return ignored
-    #
-    # # Map the main project directory.
-    # def get_dir_map(self, top, gitignore=None):
-    #     # TODO-ROB:  Change ignore to a .gitignore filename
-    #     default_ignore = self.git_ignore(top)
-    #     if gitignore is not None:
-    #         gitignore += default_ignore
-    #     else:
-    #         gitignore = default_ignore
-    #     # Treelib will help to map everything and create a json at the same time
-    #     tree = Tree()
-    #     tree.create_node('.', top)
-    #     # Walk through the directory of choice (top)
-    #     # Topdown is true so that directories can be modified in place
-    #     for root, dirs, files in os.walk(top, topdown=True):
-    #         # Only remove directories from the top
-    #         if root == top:
-    #             print(root)
-    #             try:
-    #                 dirs[:] = set(dirs) - set(gitignore)  # Remove directories from os.walk()
-    #                 print(dirs)
-    #             except ValueError:
-    #                 pass
-    #         for d in dirs:
-    #             rd = str(Path(root) / Path(d))
-    #             tree.create_node(d, identifier=rd, parent=root)
-    #         for f in files:
-    #             tree.create_node(f, parent=root)
-    #     return tree
-
-    def get_newick_dir_map(self, top, ignore=None):
-        """Takes a treelib tree created by get_dir_map and returns
-        a tree a dir_map in newick format.  This will be useful for Bio.Phylo
-        applications."""
-        """
-        :param top (path):  The root at which the directory map is made.
-        :param ignore (list):  The files to ignore.  The  get_dir_map function
-        adds this to the .gitignore list.
-        :return (tree):  A newick formatted string in style #8.  Can be used
-        with the ete3.Tree() class.
-        """
-
-        #tree = Tree()
-        #t = tree.get_dir_map(top, ignore)
-        #Ntree = tree.parse_newick_json()
-        #return Ntree
-
-    def get_ete3_tree(self, top, tree=None):
-        """Create the ete3 tree."""
-        if not tree:
-            tree = self.get_newick_dir_map(top)
-        t = ete3.Tree(tree, format=8)
-        return t
-
-    # DEPRECATED Change this IN OTHER CLASSES
-   # def path_list_make(self, path, o_path=None):
-        # Takes a path and reduces it to a list of directories within the project
-        # An optional attribute (o_path) is give so that a deeper path within
-        # the project can be used
-
-    # //TODO-ROB utilize Path.mkdir(parents=TRUE) instead
-        # DEPRECATED Change this IN OTHER CLASSES
-  #  def dir_make(self, path, path_list):
-        # Takes a path list which is a list of folder names
-        # path_list created by str(path).split('/')
-        # The path_list appends to path, which is already an established
-        # directory inside the project
-
-    # # //TODO-ROB Change to using a compression module https://pymotw.com/2/compression.html
-        # DEPRECATED Change this IN OTHER CLASSES
-    # def dir_archive(self, path, path_list):
-    #     # Use the path that you want to update/add to
-    #     # Returns path and the time stamp (could be None)
 
 
 class RepoManagement(Management):
@@ -179,13 +86,7 @@ class RepoManagement(Management):
         super().__init__(repo=repo, home=home, new_repo=new_repo, **kwargs)
         self.repo = repo
         self.docs = self.repo_path / Path('docs')
-        self.misc = self.repo_path / Path('misc')
         self.users = self.repo_path / Path('users')
-
-        self.lib = self.repo_path / Path('lib')
-        self.archives = self.lib / Path('archives')
-        self.databases = self.lib / Path('databases')
-        self.repo_index = self.lib / Path('index')
 
         self.repo_web = self.repo_path / Path('web')
         self.repo_shiny = self.repo_web / Path('shiny')
@@ -267,46 +168,6 @@ class UserManagement(RepoManagement):
         if new_db is True:
             self.Kitchen.bake_the_db_repo(user_db=self.user_db, db_path_dict=self.db_path_dict, ncbi_db_repo=self.ncbi_db_repo)
 
-    # def bake_the_project(self):
-    #     print('Creating directoriess from project cookie.')
-    #     # print(self.__class__.__name__)
-    #     """
-    #     :return: A new project inside the user's
-    #     project directory.
-    #     """
-    #     if self.project:
-    #         no_input = True
-    #         e_c = {"project_name": self.project}
-    #     else:
-    #         no_input = False
-    #         e_c = None
-    #     cookiecutter(str(self.project_cookie), extra_context=e_c,
-    #                  no_input=no_input, output_dir=str(self.projects))
-    #     os.chmod(str(self.projects / Path(self.project)), mode=0o777)
-    #     print('Directories have been created. ✔')
-    #
-    # def bake_the_db_repo(self):
-    #     print('Creating directories from database cookie.')
-    #     """
-    #     :return: A new database inside the users database directory
-    #     """
-    #     if self.databases:
-    #         for db, path in self.db_path_dict.items():
-    #             e_c = {"db_name": db}
-    #             cookiecutter(str(self.db_cookie), extra_context=e_c, no_input=True, output_dir=str(self.user_db))
-    #             os.chmod(str(self.user_db / Path(db)), mode=0o777)
-    #
-    #     else:
-    #         db_num = int(input("How many NCBI databases do you need to create?"))
-    #         for db in range(1, db_num + 1):
-    #             # Manually set up cookiecutter prompting
-    #             context_file = str(self.db_cookie / Path('cookiecutter.json'))
-    #             e_c = prompt_for_config(context=generate_context(context_file=context_file))
-    #             # Create the cookiecutter repo with no input, and add extra content from manual prompts
-    #             cookiecutter(str(self.db_cookie), output_dir=str(self.ncbi_db_repo), extra_context=e_c, no_input=True)
-    #             # Use cookiecutter_dict from manual prompts to change the user permissions.
-    #             os.chmod(str(self.ncbi_db_repo / Path(e_c['db_name'])), mode=0o777)
-
     def zip_mail(self, comp_filename, zip_path, destination=''):
         Zipper = ZipUtils(comp_filename, zip_path)
         Zipper_path = Zipper.to_zip()
@@ -342,39 +203,10 @@ class WebsiteManagement(RepoManagement):
         self.web_port = port
         self.website_path = self.flask / Path(self.website)
 
-        self.website_scripts = self.website_path / Path(self.website)
-        self.website_public = self.website_scripts / Path('public')
-        self.website_user = self.website_scripts / Path('user')
         print('Website directory structure created. ✔ Server not running.')
         self.Kitchen = Oven(repo=self.repo, user=self.user, website=self.website, output_dir=self.flask)
         if new_website is True:
             self.Kitchen.bake_the_website(host=self.web_host, port=self.web_port, website_path=self.website_path)
-
-    # def bake_the_website(self):
-    #     """Create a website using the new_website cookie.
-    #
-    #     After creating the directory structure, the run_script function
-    #     from cookiecutter finds the hooks folder which contains a
-    #     post-cookiecutter-template-generation bash script.  The bash script
-    #     sets up the proper dependencies and environment variables for the website,
-    #     and runs the website on the specified host and port
-    #
-    #     :return: Runs the website.
-    #     """
-    #     # TODO-ROB Add heavy logging here
-    #     e_c = {"website_name": self.website,
-    #            "website_path": os.path.join(str(self.website_path), ''),
-    #            "website_host": self.web_host,
-    #            "website_port": self.web_port}
-    #     cookiecutter(str(self.website_cookie), no_input=True,
-    #                  extra_context=e_c, output_dir=str(self.flask))
-    #     os.chmod(str(self.flask / Path(self.website)), mode=0o777)
-    #     # Get the absolute path to the script that starts the flask server
-    #     script_path = self.website_path / \
-    #         Path('hooks') / Path('post_gen_project.sh')
-    #     #scripts_file_path = find_hook('post_gen_project.sh', hooks_dir=str(script_path))
-    #     # TODO-ROB add screening to the bash script for flask run -h -p
-    #     run_script(script_path=str(script_path), cwd=str(self.website_path))
 
     def stop_server(self):
         """Stop the server running the website."""
@@ -437,28 +269,3 @@ class ProjectManagement(UserManagement):
                 self.Kitchen.bake_the_app(app=self.app)
         print('The project structure for %s has been created.' % project)
 
-    # def bake_the_research(self):
-    #     """
-    #     :param new_app (bool):  Flag for auto generating an app that
-    #      goes with the research target.
-    #     :return:  Adds new directories in the current project labeled
-    #     with the proper names.
-    #     """
-    #     print('Creating directories from research cookie.')
-    #     # print(self.__class__.__name__)
-    #
-    #     e_c = {"research_type": self.research_type,
-    #            "research_name": self.research}
-    #     cookiecutter(str(self.research_cookie), no_input=True,
-    #                  extra_context=e_c, output_dir=str(self.project_path))
-    #     os.chmod(str(self.project_path / Path(self.research_type)), mode=0o777)
-    #     # script_path = self.project_cookie / Path('hooks') / Path('post_gen_project.py')
-    #     # run_script(script_path, )
-    #     print('Directories have been created. ✔')
-    #
-    # def bake_the_app(self):
-    #     """Create an app."""
-    #     e_c = {"app_name": self.app}
-    #     cookiecutter(str(self.app_cookie), no_input=True,
-    #                  extra_context=e_c, output_dir=str(self.app_path))
-    #     os.chmod(str(self.app_path), mode=0o777)
