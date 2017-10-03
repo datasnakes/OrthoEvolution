@@ -4,7 +4,7 @@ from ftplib import FTP
 from Datasnakes import DatasnakesDevelopmentWarning
 
 
-class NCBIFTPClient(BaseFTPClient):
+class NcbiFTPClient(BaseFTPClient):
     """Access NCBI's FTP servers with ease."""
     # raise DatasnakesDevelopmentWarning('NCBIFTP is not ready to be used.')
     def __init__(self, email, ftpsite='ftp.ncbi.nlm.nih.gov'):
