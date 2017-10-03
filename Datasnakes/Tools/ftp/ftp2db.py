@@ -6,6 +6,7 @@ import time
 import shutil
 import subprocess
 import configparser
+from .base_ftp import BaseFTP
 
 
 class Ftp2Db(object):
