@@ -12,20 +12,16 @@ Usage
 These tools are optimized to be used together (very little work to do that), but can also be used singularly.
 
 
-#### Simple Example
+#### Blastdb Download Example
 
 This is a simple example of using some of the modules.
 
 ``` python
-from Datasnakes.Tools import ftp
+from Datasnakes.Tools.ftp import NCBIFTP
 
 ```
 
-Tests
------
-Tests will be added soon.
-
-
 :exclamation: Notes
 -------------------
-Explain or list any notable information about the contents of this folder.
+Check the [NCBI README](NCBIREADME.md) for information about the preformatted blast databases that we use
+and suggest you use. We also provide an easy way to download them which is referenced in the above example.

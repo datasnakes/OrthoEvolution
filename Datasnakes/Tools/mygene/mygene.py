@@ -18,16 +18,16 @@ class MyGene(object):
         Get the basic gene information. It's best to use a csv file and title
         the row of the accessions list `Accessions`.
         """
-        mygene_temp = pkg_resources.resource_filename(config.__name__,
-                                                      'mygenetemp.csv')
+#        mygene_temp = pkg_resources.resource_filename(config.__name__,
+#                                                      'mygenetemp.csv')
         self.infile = infile
         self.outfile = outfile
 
-        self.mg = mygene.MyGeneInfo() # Set up mygene handle
-        self.accessions_list = self._import_accfile() # Create accessions list
+        self.mg = mygene.MyGeneInfo()  # Set up mygene handle
+        self.accessions_list = self._import_accfile()  # Create accessions list
 
-        self.fields = fields # Default fields
-        self.species = species # Species to use.
+        self.fields = fields  # Default fields
+        self.species = species  # Species to use.
 
     def _import_accfile(self):
         """Import the accession file and turn it into a list."""
