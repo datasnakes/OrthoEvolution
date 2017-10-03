@@ -7,7 +7,7 @@ import fnmatch
 class NCBIFTPTest(object):
     # TODO write a real and better test.
     """A simple example for ftp."""
-    def __init__(self, passwd, user='', site='ftp.ncbi.nlm.nih.gov/',
+    def __init__(self, passwd, user='', site='ftp.ncbi.nlm.nih.gov',
                  path='blast'):
 
         # Connect to the NCBI directory
@@ -35,9 +35,16 @@ class NCBIFTPTest(object):
             if fnmatch.fnmatch(filename, file2download):
                 host_file = os.path.join(filename)
                 try:
+                    current_dir = os.path.dirname(os.path.realpath(__file__))
+                    os.chdir(current_dir)
                     with open(host_file, 'wb') as local_file:
                         ftp.retrbinary('RETR %s' % filename, local_file.write)
+                        print('%s was downloaded.' % str(filename))
                 except error_perm:
                     pass
 
         ftp.quit()
+
+
+if __name__ == '__main__':
+    NCBIFTPTest(passwd='')

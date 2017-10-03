@@ -2,7 +2,6 @@
 # Modules Used
 import os
 import pandas as pd
-from ftplib import FTP
 import time
 import shutil
 import subprocess
@@ -11,7 +10,7 @@ from .base_ftp import BaseFTP
 
 
 class Ftp2Db(object):
-    raise DeprecationWarning
+    raise DeprecationWarning('This class is deprecated.')
     global user
     ncbi = configparser.ConfigParser()
     ncbi.read('ncbiftp.cfg')

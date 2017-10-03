@@ -15,12 +15,16 @@ up for one script.
 Example
 ---------
 
+#### Use logging with ETE3PAML
+
 ```python
 from Datasnakes.Tools import LogIt
 from Datasnakes.Orthologs.Phylogenetics import ETE3PAML
 
 # Set up your loggers
 logit = LogIt()
+
+# Log to one file
 logfile = 'align2paml.log'
 
 align, paml = logit.default('alignlog', logfile), logit.default('pamllog', logfile)
@@ -28,4 +32,10 @@ align, paml = logit.default('alignlog', logfile), logit.default('pamllog', logfi
 # Start logging
 align.info('hi')
 paml.info('muah')
+
+# Shutdown the loggers and delete the logfile
+logit.deletelog(logfile=logfile)
+
+# Shutdown logging without deleting the logfile
+logit.shutdown()
 ```
