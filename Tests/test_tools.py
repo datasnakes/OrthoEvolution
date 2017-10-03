@@ -14,7 +14,7 @@ class TestTools(unittest.TestCase):
 
     def test_logit(self):
         logit = LogIt()
-        test = logit.default('testlog', self.logfile)
+        test = logit.default(logname='testlog', logfile=self.logfile)
         self.assertEqual(str(test.name), 'TESTLOG')
         self.assertTrue(os.path.isfile(self.logfile))
         logit.shutdown()
