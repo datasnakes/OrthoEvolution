@@ -11,11 +11,11 @@ class BaseFTPClient(object):
         """Sets up the class by using the ftp site and email."""
         self._ftpsite = ftpsite
         self._email = email
-        self.debug_lvl = debug_lvl
+        self._debug_lvl = debug_lvl
         self.ftp = self._login()
-        self.keepalive = keepalive
+        self._keepalive = keepalive
 
-        if self.keepalive:
+        if self._keepalive:
             self._voidcmd_repeat, self._filetransfer_repeat = self._keepalive()
 
     def _keepalive(self):
@@ -39,7 +39,7 @@ class BaseFTPClient(object):
         """Close the ftp connection."""
         self.ftp.close()
 
-        if self.keepalive:
+        if self._keepalive:
             self._voidcmd_repeat.stop()
             self._filetransfer_repeat.stop()
 
