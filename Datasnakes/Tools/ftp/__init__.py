@@ -1,1 +1,2 @@
-#from .ftp2db import Ftp2Db
+"""Initialize FTP class"""
+from .baseftp import BaseFTP
