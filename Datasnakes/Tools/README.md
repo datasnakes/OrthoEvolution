@@ -28,3 +28,9 @@ from Datasnakes.Tools import qsub
 
 ``` python
 ```
+
+
+#### More Information
+
+Check the specific modules for more detailed readmes and examples of using the
+tools with this package.

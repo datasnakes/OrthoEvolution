@@ -2,14 +2,15 @@
 # Modules Used
 import os
 import pandas as pd
-from ftplib import FTP
 import time
 import shutil
 import subprocess
 import configparser
+from .base_ftp import BaseFTP
 
 
 class Ftp2Db(object):
+    raise DeprecationWarning('This class is deprecated.')
     global user
     ncbi = configparser.ConfigParser()
     ncbi.read('ncbiftp.cfg')
@@ -20,7 +21,7 @@ class Ftp2Db(object):
     __update_dict = {}
     __server_dict = {}
     __user = user
-    __path_list = []  # Uses user input in order to change the desired self.path
+    __path_list = []  # Uses user input to change the desired self.path
     __file_list = []  # A list of files in the particular directory
     __dir_list = []  # A dynamic list of current directories
     __log_files = []
@@ -66,23 +67,6 @@ class Ftp2Db(object):
         # Initializes __update_dict with class variables if ftp_update_flag is true
         # If db_update_flag is true it updates the databases
 
-    def ftp_check(self):
-        """Check to see if the FTP connection still exists.
-
-        If it doesn't then it reconnects and returns an instance of the
-        connection.
-        """
-        ftp = self.ftp_connect(self.__NCBI_FTP, self.email)
-        ftp.voidcmd('NOOP')
-        ftp.cwd(self.path)
-        return ftp
-
-    @staticmethod
-    def ftp_connect(ftpsite, email):
-        """Connect to the FTP server."""
-        ftp = FTP(ftpsite, timeout=None)
-        ftp.login(user='anonymous', passwd=email)
-        return ftp
 
     @staticmethod
     def ftp_mkdir(path, p_list, update):

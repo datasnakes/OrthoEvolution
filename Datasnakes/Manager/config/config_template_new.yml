@@ -33,4 +33,7 @@ GenBank_config:
 
 Alignment_config:
   aln_program: 'GUIDANCE2'
-  project_path: null
+  Guidance_config:
+    seqFile: null
+    msaProgram: null
+    seqType: null

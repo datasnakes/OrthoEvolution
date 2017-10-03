@@ -1,13 +1,13 @@
 Examples Documentation
 =======================
 As budding data scientists, we understand how important and useful it is to
-provide examples of how to use the tools we create.
+provide working examples of how to use the tools we create.
 
 Usage
 -----
 
 This folder provides some standalone scripts, data examples, and additional
-examples that should help in using
+examples that should help in using this package.
 
 #### Pipeline Example
 
@@ -25,6 +25,5 @@ from Examples import Gene2PAML
 :exclamation: Notes
 -------------------
 
-This pipeline is optimized for **python version 3.5** and onward. It should be
-compatible for python 3 and onward.
+This pipeline is optimized for **python version 3.5** and onward.
 
