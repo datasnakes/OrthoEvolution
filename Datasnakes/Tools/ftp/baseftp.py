@@ -5,7 +5,7 @@ import os
 from Datasnakes.Tools.utils import FunctionRepeater
 
 
-class BaseFTP(object):
+class BaseFTPClient(object):
     """The BaseFTP class provides basic functions for managing ftp clients."""
     def __init__(self, ftpsite, email, keepalive=False, debug_lvl=0):
         """Sets up the class by using the ftp site and email."""

@@ -1,2 +1,2 @@
 """Initialize FTP class"""
-from .baseftp import BaseFTP
+from .baseftp import BaseFTPClient
