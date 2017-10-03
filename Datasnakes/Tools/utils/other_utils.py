@@ -53,4 +53,4 @@ class PackageVersion(object):
         print('Version %s of %s is installed.' % (version, self.packagename))
 
 def set_paths(parent, **children):
-    print('xyz')
+    raise NotImplementedError("This function is being developed.")
