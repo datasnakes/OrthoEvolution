@@ -41,3 +41,5 @@ class NCBIFTPTest(object):
                     pass
 
         ftp.quit()
+
+NCBIFTPTest(passwd='shutchins2@umc.edu')

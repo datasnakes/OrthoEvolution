@@ -12,6 +12,7 @@ class BaseFTP(object):
         """Initialize the class by using the ftp site and email."""
         self.ftpsite = ftpsite
         self.email = email
+        self.login()
 
     def ftp_check(self):
         # TODO reevaluate how to do this.
