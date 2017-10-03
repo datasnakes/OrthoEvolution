@@ -12,6 +12,7 @@ import sys
 import logging as log
 from datetime import datetime as d
 import subprocess
+from .base_ftp import BaseFTP
 
 
 # Set up the logger for logging
