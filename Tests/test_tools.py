@@ -1,24 +1,24 @@
 """This is the test suite for Tools."""
 
 import unittest
-from shutil import rmtree
+import os
 
 from Datasnakes.Tools import LogIt, Multiprocess
-
 
 
 class TestTools(unittest.TestCase):
     """Test the Tools module."""
 
-    def setUp(self, project='test-project', repository='test-repo'):
-        self.project = project
-        self.repo = repository
-
-    def delete_repo(self):
-        rmtree(self.repo)
+    def setUp(self, logfile='test.log'):
+        self.logfile = logfile
 
     def test_logit(self):
-        print()
+        logit = LogIt()
+        test = logit.default('testlog', self.logfile)
+        self.assertEqual(str(test.name), 'TESTLOG')
+        self.assertTrue(os.path.isfile(self.logfile))
+        logit.shutdown()
+        logit.deletelog(self.logfile)
 
     def test_multiprocess(self):
         print()
