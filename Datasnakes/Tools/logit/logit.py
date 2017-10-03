@@ -8,8 +8,6 @@ class LogIt(object):
     """LogIt makes logging easier by creating easy loggers."""
     def __init__(self):
         """Initialize the logger format based on system platform."""
-        self.logname = logname
-        self.logfile = logfile
         # Set the different formats based on user's platform
         if sys.platform == 'win32':
             self._archive_format = '%m-%d-%Y_%I-%M-%p'

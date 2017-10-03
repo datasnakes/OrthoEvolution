@@ -13,6 +13,7 @@ class TestTools(unittest.TestCase):
         self.logfile = logfile
 
     def test_logit(self):
+        """Test the LogIt class."""
         logit = LogIt()
         test = logit.default(logname='testlog', logfile=self.logfile)
         self.assertEqual(str(test.name), 'TESTLOG')
