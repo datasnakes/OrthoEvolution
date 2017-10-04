@@ -6,14 +6,13 @@ from Bio import Phylo
 from Datasnakes.Orthologs import OrthologsDevelopmentWarning
 
 # Warn users about this module
-warnings.warn('Orthologs.Phylogenetics.PhyloTree is still under development and '
+warnings.warn('This module is still under development and '
               'may undergo significant changes prior to its official release.',
               OrthologsDevelopmentWarning)
 
 
 class TreeViz(object):
-    """Vizualize a newick tree."""
-
+    """Tools that allow visualization of a newick formatted tree."""
     def __init__(self, path2tree):
         """Import the path to the tree."""
         self.path2tree = path2tree
