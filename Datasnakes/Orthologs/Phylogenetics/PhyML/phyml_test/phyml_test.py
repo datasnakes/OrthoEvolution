@@ -60,3 +60,7 @@ class PhymlTest(unittest.TestCase):
                 fname = self.EX_PHYLIP + suffix
                 if os.path.isfile(fname):
                     os.remove(fname)
+
+
+if __name__ == '__main__':
+    unittest.main()
