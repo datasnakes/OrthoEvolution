@@ -10,6 +10,7 @@ from ete3 import NCBITaxa
 from Datasnakes.Manager import config
 # from pandas import ExcelWriter
 from Datasnakes.Manager.management import ProjectManagement
+from Datasnakes.Orthologs.utils import config_composition
 from Datasnakes.Orthologs.Blast.utils import (my_gene_info, get_dup_acc,
                                               get_miss_acc)
 
@@ -43,52 +44,39 @@ class CompGenObjects(object):
     __data = ''
 
     # TODO-ROB:  CREAT PRE-BLAST and POST-BLAST functions
-    def __init__(self, project=None, project_path=None, acc_file=None, taxon_file=None, go_list=None, pre_blast=False, post_blast=True, hgnc=False,
+    def __init__(self, project=None, project_path=os.getcwd(), acc_file=None, taxon_file=None, go_list=None, pre_blast=False, post_blast=True, hgnc=False,
                  proj_mana=ProjectManagement, **kwargs):
         # Private Variables
         self.__pre_blast = pre_blast
         self.__post_blast = post_blast
         self.__taxon_filename = taxon_file
-        # self.__paml_filename = paml_file
         self.acc_filename = acc_file
+
         self.project = project
-        print(proj_mana)
-        # print(proj_mana.__dict__)
-        # Initiate the project management variable
-        if proj_mana is not None:
-            # print(type(proj_mana))
-            print('proj_mana isinstance dict')
-            if not issubclass(type(proj_mana), ProjectManagement):
-                print('proj_mana is not instance ProjectManagement')
-                if project_path:
-                    self.project_path = Path(project_path) / Path(self.project)
-                else:
-                    self.project_path = Path(os.getcwd()) / Path(self.project)
-                Path.mkdir(self.project_path, parents=True, exist_ok=True)
-                print('1project_path=%s' % self.project_path)
+        self.project_path = Path(project_path)
+
+        # Attribute configuration using ProjectManagement composition
+        if issubclass(type(proj_mana), ProjectManagement):
+            setattr(proj_mana, 'project', project)
+            for key, value in proj_mana.__dict__.items():
+                setattr(self, key, value)
+                # print('key:' + str(key) + '\nvalue: ' + str(value))
+        # Attribute configuration using a dictionary.
+        elif isinstance(proj_mana, dict):
+            for key, value in proj_mana.items():
+                setattr(self, key, value)
+                # print('key:' + str(key) + '\nvalue: ' + str(value))
+        # Attribute configuration without proj_mana
+        elif proj_mana is None:
+            if project and project_path:
                 self.removed_pm_config(kwargs)
-            else:
-                setattr(proj_mana, 'project', project)
-                for key, value in proj_mana.__dict__.items():
-                    setattr(self, key, value)
-                    print('key:' + str(key) + '\nvalue: ' + str(value))
-                if 'project_path' not in proj_mana.__dict__.keys():
-                    if project_path:
-                        self.project_path = self.repo_path
-                    else:
-                        self.project_path = Path(os.getcwd()) / Path(self.project)
-                print('2project_path=%s' % self.project_path)
+            elif acc_file is None:
+                raise BrokenPipeError("proj_mana and acc_file cannot both be none")
 
         # Handle the taxon_id file and blast query
         if taxon_file is not None:
             # File init
             self.taxon_path = self.project_index / Path(self.__taxon_filename)
-        # Handle the paml organism file
-        # TODO-ROB Deprecate paml_file
-        # if paml_file is not None:
-        #     # File init
-        #     self.paml_path = self.project_index / Path(self.__paml_filename)
-        #     self.paml_org_list = []
         # Handle the master accession file (could be before or after blast)
         if kwargs['copy_from_package']:
             shutil.copy(pkg_resources.resource_filename(config.__name__, kwargs['MAF']), str(self.project_index))
