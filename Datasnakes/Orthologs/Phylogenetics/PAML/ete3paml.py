@@ -37,7 +37,6 @@ class ETE3PAML(object):
         if organisms_file:
             organismslist = csvtolist(organisms_file)
 
-
         branches2keep = []
         for organism in organismslist:
             if organism in self.aln_str:
@@ -52,7 +51,14 @@ class ETE3PAML(object):
                                                          'temptree.nw'))
 
     def run(self, pamlsrc, outfile, model='M1'):
-        """Run PAML using ETE."""
+        """Run PAML using ETE.
+
+        The default model is M1 as it is best for orthology inference in
+        our case. You can use models `M2`, `M0`, `M3`.
+
+        Ensure that you have the correct path to your codeml binary. It should
+        be in the paml `/bin`.
+        """
         # Import the newick tree
         tree = EvolTree('temptree.nw')
 
