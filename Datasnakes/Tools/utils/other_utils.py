@@ -88,7 +88,7 @@ class FunctionRepeater(object):
 
 def csvtolist(csvfile, column_header='Organism'):
     """Turn column from csv file into a list."""
-    file = pd.read_csv(csvfile, header=None)
+    file = pd.read_csv(csvfile)
     # Create a list name/variable and use list()
     listfromcolumn = list(file[column_header])
     return listfromcolumn
