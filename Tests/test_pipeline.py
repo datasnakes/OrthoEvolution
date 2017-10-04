@@ -1,6 +1,6 @@
 #from Datasnakes.Manager.utils import ProjectManagement
 #from Datasnakes.Orthologs.Blast.blastn import CompGenBLASTn
-#from Datasnakes.Orthologs.Genbank.genbank import GenBank
+#from Datasnakes.Orthologs.GenBank.genbank import GenBank
 #from Datasnakes.Orthologs.Align.msa import MultipleSequenceAlignment
 #
 #project='test-project'

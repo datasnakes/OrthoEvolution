@@ -4,7 +4,7 @@ from pathlib import Path
 
 import pandas as pd
 from Datasnakes.Orthologs.Blast.comparative_genetics_objects import CompGenObjects
-from Datasnakes.Tools.logit import LogIt
+from Datasnakes.Tools import LogIt
 
 
 # import pkg_resources
@@ -42,9 +42,9 @@ class CompGenFiles(CompGenObjects):
                 'building.csv', 'building_time.csv')
 
         # Initialize Logging
-        df = LogIt('blast_test.log', 'blastn')
-        self.blastn_log = df.basic
-        self.__date_format = df.date_format
+        logit = LogIt()
+        self.blastn_log = logit.default('blastn', 'blastn.log')
+        self.__date_format = logit.date_format
         self.get_time = time.time  # To get the time use 'get_time()'
 
         # Create variable for log separator

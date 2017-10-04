@@ -8,8 +8,8 @@ from Bio.Align.Applications import ClustalOmegaCommandline
 from Datasnakes.Orthologs.Align.guidance2 import Guidance2Commandline
 
 from Datasnakes.Orthologs.Align.pal2nal import Pal2NalCommandline
-from Datasnakes.Orthologs.Genbank import GenBank
-from Datasnakes.Orthologs.Genbank import multi_fasta_manipulator
+from Datasnakes.Orthologs.GenBank import GenBank
+from Datasnakes.Orthologs.GenBank import multi_fasta_manipulator
 
 
 class MultipleSequenceAlignment(object):
@@ -18,31 +18,37 @@ class MultipleSequenceAlignment(object):
 
         self.program = aln_program
         self.project = project
-        if isinstance(genbank, GenBank):
-            setattr(genbank, 'project', project)
-            for key, value in genbank.__dict__.items():
-                setattr(self, key, value)
-            print('project_path=%s' % self.project_path)
-        else:
-            if project_path:
-                self.project_path = Path(project_path) / Path(self.project)
+        if genbank is not None:
+            print(genbank)
+            if not issubclass(type(genbank), GenBank):
+                if project_path:
+                    self.project_path = Path(project_path) / Path(self.project)
+                else:
+                    self.project_path = Path(os.getcwd()) / Path(self.project)
+                Path.mkdir(self.project_path, parents=True, exist_ok=True)
+                print('project_path=%s' % self.project_path)
+                self.removed_gb_config(kwargs)
             else:
-                self.project_path = Path(os.getcwd()) / Path(self.project)
-            Path.mkdir(self.project_path, parents=True, exist_ok=True)
-            print('project_path=%s' % self.project_path)
-            self.removed_gb_config(kwargs)
+                setattr(genbank, 'project', project)
+                for key, value in genbank.__dict__.items():
+                    setattr(self, key, value)
+                if 'project_path' not in genbank.__dict__.keys():
+                    if project_path:
+                        self.project_path = self.repo_path
+                    else:
+                        self.project_path = Path(os.getcwd()) / Path(self.project)
+                print('project_path=%s' % self.project_path)
 
-        if kwargs:
-            print('aln-kwargs')
-            if aln_program == 'GUIDANCE2':
-                self.align = self.guidance2
-                self.guidance2(**kwargs)
-            elif aln_program == 'CLUSTALO':
-                self.align = self.clustalo
-                self.clustalo(**kwargs)
-            elif aln_program == 'PAL2NAL':
-                self.align = self.pal2nal
-                self.pal2nal(**kwargs)
+        print('aln-kwargs')
+        if kwargs['Guidance_config']:
+            self.align = self.guidance2
+            self.guidance2(**kwargs)
+        elif kwargs['ClustalO_config']:
+            self.align = self.clustalo
+            self.clustalo(**kwargs)
+        elif kwargs['Pal2Nal_config']:
+            self.align = self.pal2nal
+            self.pal2nal(**kwargs)
         else:
             print('aln-notkwargs')
             if aln_program is 'GUIDANCE2':
@@ -54,7 +60,6 @@ class MultipleSequenceAlignment(object):
             elif aln_program is 'PAL2NAL':
                 self.align = self.pal2nal
                 print(self.align)
-
 
     def removed_gb_config(self, kwargs):
         self.raw_data = self.project_path / Path('raw_data')

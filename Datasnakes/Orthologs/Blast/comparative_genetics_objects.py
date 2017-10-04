@@ -1,7 +1,6 @@
 import os
 import shutil
 from pathlib import Path
-from pprint import pprint as print
 
 # NCBITaxa().update_taxonomy_database()
 import pandas as pd
@@ -56,7 +55,7 @@ class CompGenObjects(object):
         print(proj_mana)
         # print(proj_mana.__dict__)
         # Initiate the project management variable
-        if proj_mana is not None and not isinstance(proj_mana, dict):
+        if proj_mana is not None:
             # print(type(proj_mana))
             print('proj_mana isinstance dict')
             if not issubclass(type(proj_mana), ProjectManagement):

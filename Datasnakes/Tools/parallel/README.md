@@ -19,5 +19,5 @@ from Datasnakes.Tools import Multiprocess
 def blast2clustal(gene):
 
 # Map your function to your list and run it using multiple processes
-Multiprocess(n=5, blast2clustal(), geneslist)
+Multiprocess('5', blast2clustal(), geneslist)
 ```
