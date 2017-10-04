@@ -1,8 +1,7 @@
-import pandas as pd
-from Datasnakes.Manager.utils import FormatList
+import os
 from ete3 import EvolTree, Tree
 
-from Datasnakes.Tools.utils import formatlist
+from Datasnakes.Tools.utils import csvtolist
 
 
 class ETE3PAML(object):
@@ -11,54 +10,58 @@ class ETE3PAML(object):
     M1 model is best for orthology inferences.
     """
 
-    def __init__(self, gene, paml_path, workdir='data/paml-output/',
-                 model='M1'):
-        """Improve docstrings here."""
-        # Import your species tree
-        t = Tree('data/initial-data/species_tree.nw', format=1)
-        orgsfile = pd.read_csv('data/initial-data/organisms.csv', header=None)
+    def __init__(self, inputfile, speciestree, workdir=''):
+        """Initialize main variables/files to be used."""
+        self.inputfile = inputfile
+        self.speciestree = speciestree
+        self.workdir = workdir
 
-        # Create a list name/variable and use list()
-        orgs = list(orgsfile[0])
-        organismslist = FormatList(orgs)
+        # Import your species tree
+        self._speciestree = Tree(self.speciestree, format=1)
+        # TODO import organisms list
 
         # Import alignment file as string
-        alignment_file = open('data/clustal-output/' + gene + '_Aligned/' +
-                              gene + '_aligned_cds_nucl.fasta', 'r')
+        alignment_file = open(self.alignmentfile, 'r')
         alignment_str = alignment_file.read()
+        self.aln_str = alignment_str
         alignment_file.close()
 
-        # Keep branches in the species tree for species in the alignment file
-        # Some species may not be present in the alignment file
-        try:
-            branches2keep = []
-            for organism in organismslist:
-                if organism in alignment_str:
-                    branches2keep.append(organism)
-                else:
-                    print('No sequence for %s.' % organism)
+    def prune_tree(self, organismslist, organisms_file=None):
+        """Prune branches for species not in the alignment file.
 
-            # Input a list of branches to keep on the base tree
-            t.prune(branches2keep, preserve_branch_length=True)
+        Keep branches in the species tree for species in the alignment file
+        Some species may not be present in the alignment file due to lack of
+        matching with blast or simply the gene not being in the genome.
+        """
+
+        if organisms_file:
+            organismslist = csvtolist(organisms_file)
+
+
+        branches2keep = []
+        for organism in organismslist:
+            if organism in self.aln_str:
+                branches2keep.append(organism)
+            else:
+                print('No sequence for %s.' % organism)
+
+            self._speciestree.prune(branches2keep, preserve_branch_length=True)
 
             # Write the tree to a file
-            t.write(outfile='/work2/vallender/Projects/KARG-Project/data/paml-output/' + gene + '_PAML/temptree.nw')
+            self._speciestree.write(outfile=os.path.join(self.workdir,
+                                                         'temptree.nw'))
 
-            # Import the newick tree
-            tree = EvolTree('/work2/vallender/Projects/KARG-Project/data/paml-output/' + gene + '_PAML/temptree.nw')
+    def run(self, pamlsrc, outfile, model='M1'):
+        """Run PAML using ETE."""
+        # Import the newick tree
+        tree = EvolTree('temptree.nw')
 
-            # Import the alignment
-            tree.link_to_alignment('data/clustal-output/' + gene + '_Aligned/' +
-                                   gene + '_aligned_cds_nucl.fasta')
+        # Import the alignment
+        tree.link_to_alignment(self.alignmentfile)
 
-            tree.workdir = workdir
+        tree.workdir = self.workdir
 
-            # Set the binpath of the codeml binary
-            tree.execpath = paml_path
+        # Set the binpath of the codeml binary
+        tree.execpath = pamlsrc
 
-            tree.run_model(model + '.' + gene)  # Run the model M1 M2 M3 M0
-
-        except Exception:
-            # TODO: Write a better exception.
-            print('Error with %s.' % gene)
-            pass
+        tree.run_model(model + '.' + outfile)  # Run the model M1 M2 M3 M0
