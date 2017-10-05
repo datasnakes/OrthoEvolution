@@ -1,68 +1,77 @@
 from pathlib import Path
-import os
 from Datasnakes.Cookies import Oven
-
-def config_composition(instance, project_path, project, composer, checker, **kwargs):
-
-    # Outline
-    # if composer issubclass(checker):
-    # elif composer issubclass(dict):
-    # else (none):
-
-    if composer is not None:
-        # print(type(composer))
-        print('composer isinstance dict')
-        if not issubclass(type(composer), checker):
-            print('composer is not instance checker')
-            if project_path:
-                instance.project_path = Path(project_path) / Path(instance.project)
-            else:
-                instance.project_path = Path(os.getcwd()) / Path(instance.project)
-            Path.mkdir(instance.project_path, parents=True, exist_ok=True)
-            print('1project_path=%s' % instance.project_path)
-            instance.removed_pm_config(kwargs)
-        else:
-            setattr(composer, 'project', project)
-            for key, value in composer.__dict__.items():
-                setattr(instance, key, value)
-                print('key:' + str(key) + '\nvalue: ' + str(value))
-            if 'project_path' not in composer.__dict__.keys():
-                if project_path:
-                    instance.project_path = instance.repo_path
-                else:
-                    instance.project_path = Path(os.getcwd()) / Path(instance.project)
-            print('2project_path=%s' % instance.project_path)
-    return instance
+from Datasnakes.Tools import LogIt
 
 
-def removed_pm_config(instance, project, project_path, basic_project=True, custom=None):
-    # Parameters:
-        # P1 Do we use a basic project cookie?
-        # P2 Do we use custom file locations?
-            # Use a dictionary with the names below
-        # If we are using P1 and P2 then P2 will override P1.
-            # Below are the variables that can be overridden
-            # The key is one of those variable names
-            # The value is a Path-Like object
-    if basic_project:
-        Kitchen = Oven(project=project, basic_project=basic_project)
+def attribute_config(cls, composer, checker, project=None, project_path=None):
+    """
+    :param cls: An instance of a class that will retain the attributes.
+    :param composer: A class that will yield attributes to the cls parameter.
+    :param checker: A checker class used to check the type of the composer.
+            Dictionary composers will be treated differently.
+    :param project:  The name of the project.
+    :param project_path:  The relative path of the project.
+    :return:  Returns the instance (cls) with new attributes.
+    """
+    ac_log = LogIt().default(logname="Orthologs", logfile=None)
+    # Attribute configuration using checker composition.
+    if issubclass(type(composer), checker):
+        for key, value in composer.__dict__.items():
+            setattr(cls, key, value)
+        ac_log.info("The Attribute Configuration was accomplished by composing %s with %s." % (cls.__class__.__name__, composer.__class__.__name__))
+    # Attribute configuration using a dictionary.
+    elif isinstance(composer, dict):
+        for key, value in composer.items():
+            setattr(cls, key, value)
+        ac_log.info("The Attribute Configuration of %s was accomplished by using a dictionary." % cls.__class__.__name__)
+    # Attribute configuration without composer
+    elif composer is None:
+        if not (project or project_path):
+            raise BrokenPipeError("Without a Project Manager, a project name and project path must be included.")
+        cls = standalone_config(cls, project, project_path)
+        ac_log.info("The Attribute Configuration of %s was accomplished by using a standalone project." % cls.__class__.__name__)
+
+    # Make sure self.project and self.project_path have values
+    if not (cls.project or cls.project_path):
+        raise BrokenPipeError("The project name and project path attributes have not been set.")
+
+    return cls
+
+
+def standalone_config(cls, project, project_path, new=False, custom=None):
+    """
+    :param cls: An instance of a class that will retain the attributes.
+    :param project: The name of the project.
+    :param project_path: The relative path of a project.
+    :param new: The new project flag.
+    :param custom: The custom flag which can be None or a dictionary.
+    :return: Returns the instance (cls) with new attributes.
+    """
+    # Initialize the cls class variables.
+    # When creating a basic project, these will stay the same.
+    # When creating a custom basic project, these will change.
+    # When using the basic project AND a custom configuration,
+    # the variables in the custom dictionary will change.
+    cls.project_path = project_path / Path(project)
+    cls.project_index = cls.project_path / Path('index')
+    cls.user_db = cls.project_path / Path('databases')
+    cls.ncbi_db_repo = cls.user_db / Path('NCBI')
+    cls.project_database = cls.user_db / Path(project)
+    cls.raw_data = cls.project_path / Path('raw_data')
+    cls.data = cls.project_path / Path('data')
+    cls.research_path = cls.project_path
+
+    # Use the basic_project cookie to create the directory structure
+    if new or not Path(cls.project_path).is_dir():
+        Kitchen = Oven(project=project, basic_project=True)
         Kitchen.bake_the_project(cookie_jar=project_path)
 
-    instance.project_index = project_path / Path('index')
-    instance.user_db = project_path / Path('databases')
-    instance.ncbi_db_repo = instance.user_db / Path('NCBI')
-    instance.project_database = instance.user_db / Path(project)
-    instance.raw_data = project_path / Path('raw_data')
-    instance.data = project_path / Path('data')
-    instance.research_path = project_path
-
+    # Use the custom dictionary to set the path variables
+    # and to make the directories if necessary.  This overrides
     if custom:
         for key, value in custom.items():
-            setattr(instance, key, value)
+            setattr(cls, key, value)
+            if not Path(str(value)).is_dir():
+                Path.mkdir(value, exist_ok=True)
 
-    Path.mkdir(instance.project_index, exist_ok=True)
-    Path.mkdir(instance.user_db, exist_ok=True)
-    Path.mkdir(instance.ncbi_db_repo, exist_ok=True)
-    Path.mkdir(instance.project_database, exist_ok=True)
-    Path.mkdir(instance.raw_data, exist_ok=True)
-    Path.mkdir(instance.data, exist_ok=True)
+    return cls
