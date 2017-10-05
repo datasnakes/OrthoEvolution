@@ -30,7 +30,7 @@ class MultipleSequenceAlignment(object):
         print('aln-kwargs')
         if kwargs['Guidance_config']:
             self.align = self.guidance2
-            self.guidance2(**kwargs)
+            self.guidance2(**kwargs['Guidance_config'])
         elif kwargs['ClustalO_config']:
             self.align = self.clustalo
             self.clustalo(**kwargs)
