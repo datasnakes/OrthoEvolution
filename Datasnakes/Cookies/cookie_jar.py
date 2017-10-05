@@ -6,6 +6,7 @@ from cookiecutter.generate import generate_context
 from cookiecutter.hooks import run_script
 from pathlib import Path
 from Datasnakes import Cookies
+from Datasnakes.Tools import LogIt
 
 
 class CookieRecipes(object):
@@ -24,6 +25,7 @@ class CookieRecipes(object):
 class Oven(object):
 
     def __init__(self, repo=None, user=None, project=None, basic_project=False, databases=None, website=None, output_dir=os.getcwd(), cookies=CookieRecipes()):
+        self.cookielog = LogIt().default(logname="Cookies", logfile=None)
         self.cookie_jar = output_dir
         # Below are the PyPi path strings
         #    The first group is to access the cookiecutter templates
@@ -36,7 +38,7 @@ class Oven(object):
         self.Ingredients = cookies
 
     def bake_the_repo(self, cookie_jar=None):
-            print('Creating directories from repository cookie.')
+            self.cookielog.warn('Creating directories from the Repository Cookie template.')
             # print(self.__class__.__name__)
             """This function creates a new repository.  If a repository name
             is given to the class then it is given a name.  If not, cookiecutters
@@ -59,17 +61,16 @@ class Oven(object):
             cookiecutter(str(self.Ingredients.repo_cookie), no_input=no_input,
                          extra_context=e_c, output_dir=str(self.cookie_jar))
             os.chmod(str(self.cookie_jar / Path(self.repo)), mode=0o777)
-            print('Directories have been created. ✔')
+            self.cookielog.info('Repository directories have been created. ✔')
 
     def bake_the_user(self, cookie_jar=None):
+        self.cookielog.warn('Creating directories from the User Cookie template.')
         """This function uses the username given by our FLASK framework
         and creates a new directory system for the active user using
         our  new_user cookiecutter template.
         """
         if cookie_jar:
             self.cookie_jar = cookie_jar
-        print('Creating directories from user cookie.')
-        # print(self.__class__.__name__)
 
         # This is used ONLY when the user registers in flask
         # TODO-ROB:  Create the cookiecutter.json file
@@ -81,10 +82,10 @@ class Oven(object):
         # Change user permissions with flask later (this is for testing
         # purposes
         os.chmod(str(self.cookie_jar / Path(self.user)), mode=0o777)
-        print('Directories have been created. ✔')
+        self.cookielog.info('Directories have been created for the user, %s. ✔' % self.user)
 
     def bake_the_project(self, cookie_jar=None):
-        print('Creating directoriess from project cookie.')
+        self.cookielog.warn('Creating directories from the Project Cookie template.')
         # print(self.__class__.__name__)
         """
         :return: A new project inside the user's
@@ -96,23 +97,30 @@ class Oven(object):
         if self.project:
             no_input = True
             e_c = {"project_name": self.project}
+            project_log_message = "(%s)" % self.project
         else:
             no_input = False
             e_c = None
+            project_log_message = "that has been named with user input"
 
         if not self.basic_project:
-            print('Full Project')
+            self.cookielog.warn('A project linked to a user/repository is being created.')
             cookiecutter(str(self.Ingredients.project_cookie), extra_context=e_c, no_input=no_input,
                          output_dir=str(self.cookie_jar))
+            # Logging
+            if self.user:
+                self.cookielog.info('Directories have been created for %s\'s project %s. ✔' % (self.user, project_log_message))
+            else:
+                self.cookielog.info('Directories have been created for %s.' % project_log_message)
         else:
-            print('Basic Project')
+            self.cookielog.warn('A basic standalone project is being created.')
             cookiecutter(str(self.Ingredients.basic_project_cookie), extra_context=e_c, no_input=no_input,
                          output_dir=str(self.cookie_jar))
+            self.cookielog.info('Directories have been created for a standalone project %s. ✔' % project_log_message)
         os.chmod(str(self.cookie_jar / Path(self.project)), mode=0o777)
-        print('Directories have been created. ✔')
 
     def bake_the_db_repo(self, user_db, db_path_dict=None, ncbi_db_repo=None):
-        print('Creating directories from database cookie.')
+        self.cookielog.warn('Creating directories from the Database Cookie.')
         """
         :return: A new database inside the users database directory
         """
@@ -123,6 +131,7 @@ class Oven(object):
                 e_c = {"db_name": db}
                 cookiecutter(str(self.Ingredients.db_cookie), extra_context=e_c, no_input=True, output_dir=str(user_db))
                 os.chmod(str(user_db / Path(db)), mode=0o777)
+                self.cookielog.info('Directories have been created for the database, %s. ✔' % db)
 
         else:
             db_num = int(input("How many NCBI databases do you need to create?"))
@@ -134,8 +143,10 @@ class Oven(object):
                 cookiecutter(str(self.Ingredients.db_cookie), output_dir=str(ncbi_db_repo), extra_context=e_c, no_input=True)
                 # Use cookiecutter_dict from manual prompts to change the user permissions.
                 os.chmod(str(ncbi_db_repo / Path(e_c['db_name'])), mode=0o777)
+                self.cookielog.info('Directories have been created for the database, %s. ✔' % e_c['db_name'])
 
     def bake_the_website(self, host, port, website_path, cookie_jar=None):
+        self.cookielog.warn('Creating directories from the Website Cookie template.')
         """Create a website using the new_website cookie.
 
         After creating the directory structure, the run_script function
@@ -162,8 +173,11 @@ class Oven(object):
         #scripts_file_path = find_hook('post_gen_project.sh', hooks_dir=str(script_path))
         # TODO-ROB add screening to the bash script for flask run -h -p
         run_script(script_path=str(script_path), cwd=str(website_path))
+        self.cookielog.info('Directories have been created for the Flask Web Server, %s. ✔' % self.website)
+        self.cookielog.warn('The %s Flask Server should now be running on http://%s:%s' % (self.website, host, port))
 
     def bake_the_research(self, research_type, research, cookie_jar=None):
+        self.cookielog.warn('Creating directories from the Research Cookie template.')
         """
         :param new_app (bool):  Flag for auto generating an app that
          goes with the research target.
@@ -172,8 +186,6 @@ class Oven(object):
         """
         if cookie_jar:
             self.cookie_jar = cookie_jar
-        print('Creating directories from research cookie.')
-        # print(self.__class__.__name__)
 
         e_c = {"research_type": research_type,
                "research_name": research}
@@ -182,9 +194,10 @@ class Oven(object):
         os.chmod(str(self.cookie_jar / Path(research_type)), mode=0o777)
         # script_path = self.project_cookie / Path('hooks') / Path('post_gen_project.py')
         # run_script(script_path, )
-        print('Directories have been created. ✔')
+        self.cookielog.info('Directories have been created for the %s research project, %s. ✔' % (research_type, research))
 
     def bake_the_app(self, app, cookie_jar=None):
+        self.cookielog.warn('Creating directories from the App Cookie template.')
         """Create an app."""
         if cookie_jar:
             self.cookie_jar = cookie_jar
@@ -192,3 +205,4 @@ class Oven(object):
         cookiecutter(str(self.Ingredients.app_cookie), no_input=True,
                      extra_context=e_c, output_dir=str(self.cookie_jar))
         os.chmod(str(self.cookie_jar), mode=0o777)
+        self.cookielog.info("Directories have been created for an R-Shiny app, %s. ✔" % app)

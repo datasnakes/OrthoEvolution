@@ -5,6 +5,7 @@ from pathlib import Path
 
 from Bio import SeqIO
 from Bio.Align.Applications import ClustalOmegaCommandline
+from Datasnakes.Orthologs.utils import attribute_config
 from Datasnakes.Orthologs.Align.guidance2 import Guidance2Commandline
 
 from Datasnakes.Orthologs.Align.pal2nal import Pal2NalCommandline
@@ -14,35 +15,22 @@ from Datasnakes.Orthologs.GenBank import multi_fasta_manipulator
 
 class MultipleSequenceAlignment(object):
 
-    def __init__(self, project, aln_program, project_path=None, genbank=GenBank, **kwargs):
+    def __init__(self, aln_program, project=None, project_path=os.getcwd(), genbank=GenBank, **kwargs):
 
         self.program = aln_program
         self.project = project
-        if genbank is not None:
-            print(genbank)
-            if not issubclass(type(genbank), GenBank):
-                if project_path:
-                    self.project_path = Path(project_path) / Path(self.project)
-                else:
-                    self.project_path = Path(os.getcwd()) / Path(self.project)
-                Path.mkdir(self.project_path, parents=True, exist_ok=True)
-                print('project_path=%s' % self.project_path)
-                self.removed_gb_config(kwargs)
-            else:
-                setattr(genbank, 'project', project)
-                for key, value in genbank.__dict__.items():
-                    setattr(self, key, value)
-                if 'project_path' not in genbank.__dict__.keys():
-                    if project_path:
-                        self.project_path = self.repo_path
-                    else:
-                        self.project_path = Path(os.getcwd()) / Path(self.project)
-                print('project_path=%s' % self.project_path)
+        if project_path and project:
+            self.project_path = Path(project_path) / Path(project)
+
+        # Configuration of class attributes
+        add_self = attribute_config(self, composer=genbank, checker=GenBank, project=project, project_path=project_path)
+        for var, attr in add_self.__dict__.items():
+            setattr(self, var, attr)
 
         print('aln-kwargs')
         if kwargs['Guidance_config']:
             self.align = self.guidance2
-            self.guidance2(**kwargs)
+            self.guidance2(**kwargs['Guidance_config'])
         elif kwargs['ClustalO_config']:
             self.align = self.clustalo
             self.clustalo(**kwargs)
@@ -60,16 +48,6 @@ class MultipleSequenceAlignment(object):
             elif aln_program is 'PAL2NAL':
                 self.align = self.pal2nal
                 print(self.align)
-
-    def removed_gb_config(self, kwargs):
-        self.raw_data = self.project_path / Path('raw_data')
-        self.data = self.project_path / Path('data')
-
-        for key, value in kwargs.items():
-            setattr(self, key, value)
-
-        Path.mkdir(self.raw_data, exist_ok=True)
-        Path.mkdir(self.data, exist_ok=True)
 
     def guidance2(self, seqFile, msaProgram, seqType, dataset='MSA', seqFilter=None, columnFilter=None, maskFilter=None, **kwargs):
         # Name and Create the output directory
