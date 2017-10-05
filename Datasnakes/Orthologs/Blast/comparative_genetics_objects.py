@@ -54,7 +54,8 @@ class CompGenObjects(object):
         self.acc_filename = acc_file
 
         self.project = project
-        self.project_path = Path(project_path) / Path(project)
+        if project_path and project:
+            self.project_path = Path(project_path) / Path(project)
 
         # Configuration of class attributes.
         add_self = attribute_config(self, composer=proj_mana, checker=ProjectManagement, project=project, project_path=project_path)

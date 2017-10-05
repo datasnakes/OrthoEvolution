@@ -19,7 +19,8 @@ class MultipleSequenceAlignment(object):
 
         self.program = aln_program
         self.project = project
-        self.project_path = Path(project_path) / Path(project)
+        if project_path and project:
+            self.project_path = Path(project_path) / Path(project)
 
         # Configuration of class attributes
         add_self = attribute_config(self, composer=genbank, checker=GenBank, project=project, project_path=project_path)
