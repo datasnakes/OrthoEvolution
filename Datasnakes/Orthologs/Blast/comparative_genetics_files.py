@@ -44,7 +44,7 @@ class CompGenFiles(CompGenObjects):
         # Initialize Logging
         logit = LogIt()
         self.blastn_log = logit.default('blastn', 'blastn.log')
-        self.__date_format = logit.date_format
+        self.__date_format = logit._date_format
         self.get_time = time.time  # To get the time use 'get_time()'
 
         # Create variable for log separator
