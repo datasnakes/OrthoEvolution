@@ -8,13 +8,13 @@ import logzero
 
 
 class Multiprocess(object):
-    """Use multiple processes with functions."""
+    """Use multiple processes with a function."""
     def __init__(self, num_procs, function, listinput):
         self.num_procs = num_procs  # Number of processes to run
 
         # Force user to use optimal number of processes
         if int(self.num_procs) > (int(cpu_count) - 1):
-            raise ValueError('Too many processes assingned.')
+            raise ValueError('Too many processes assigned.')
 
         self.function = function  # User function that takes 1 item or list
         self.listinput = listinput  # List to map to a function
