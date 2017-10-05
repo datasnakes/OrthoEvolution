@@ -5,6 +5,11 @@ from Datasnakes.Tools import LogIt
 
 def attribute_config(cls, composer, checker, project=None, project_path=None):
     """
+    Attribute Configuration takes an instance of a class and sets various attributes.
+    The attributes are set by determining the type of configuration.  The class attributes
+    can be composed by another class, they can be set with a dictionary, or they can
+    be set using the basic project template.
+
     :param cls: An instance of a class that will retain the attributes.
     :param composer: A class that will yield attributes to the cls parameter.
     :param checker: A checker class used to check the type of the composer.
@@ -40,6 +45,10 @@ def attribute_config(cls, composer, checker, project=None, project_path=None):
 
 def standalone_config(cls, project, project_path, new=False, custom=None):
     """
+    A standalone configuration uses the variables listed.  These variables are
+    either mapped to a basic project, used in a custom configuration, or they
+    are mapped to some basic project directories with some custom options.
+
     :param cls: An instance of a class that will retain the attributes.
     :param project: The name of the project.
     :param project_path: The relative path of a project.
@@ -47,11 +56,7 @@ def standalone_config(cls, project, project_path, new=False, custom=None):
     :param custom: The custom flag which can be None or a dictionary.
     :return: Returns the instance (cls) with new attributes.
     """
-    # Initialize the cls class variables.
-    # When creating a basic project, these will stay the same.
-    # When creating a custom basic project, these will change.
-    # When using the basic project AND a custom configuration,
-    # the variables in the custom dictionary will change.
+
     cls.project_path = project_path / Path(project)
     cls.project_index = cls.project_path / Path('index')
     cls.user_db = cls.project_path / Path('databases')
@@ -62,7 +67,7 @@ def standalone_config(cls, project, project_path, new=False, custom=None):
     cls.research_path = cls.project_path
 
     # Use the basic_project cookie to create the directory structure
-    if new or not Path(cls.project_path).is_dir():
+    if new or (not Path(cls.project_path).is_dir()):
         Kitchen = Oven(project=project, basic_project=True)
         Kitchen.bake_the_project(cookie_jar=project_path)
 
