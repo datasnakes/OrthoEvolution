@@ -56,7 +56,7 @@ class CompGenObjects(object):
         self.project = project
         self.project_path = Path(project_path) / Path(project)
 
-        # Configuration
+        # Configuration of class attributes.
         add_self = attribute_config(self, composer=proj_mana, checker=ProjectManagement, project=project, project_path=project_path)
         for var, attr in add_self.__dict__.items():
             setattr(self, var, attr)
