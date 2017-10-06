@@ -50,6 +50,9 @@ class DataMana(object):
         '''
         with open(config_file, 'r') as ymlfile:
             configuration = yaml.safe_load(ymlfile)
+            # TODO-ROB:  Set up configuratioin to parse this full list.  For each sub configuration do something.
+            # TODO-ROB:  Before doing the above set up Airflow.
+            setattr(self, "CONFIGURATION", configuration)
             for key, value in configuration.items():
                 setattr(self, key, value)
                 print('key:' + str(key) + '\nvalue: ' + str(value))
@@ -120,7 +123,10 @@ class DataMana(object):
 
     def align(self, genbank):
         self.al = MSA(genbank=genbank, **self.Management_config, **self.Alignment_config)
-        self.al.align(self.Alignment_config['kwargs'])
+        for program, aligner_config_list in self.al.alignment_dict.items():
+            aligner = aligner_config_list[0]
+            configuration = aligner_config_list[1]
+            aligner(**configuration)
 
 
 class ZipUtils(DataMana):
