@@ -41,6 +41,7 @@ class MultipleSequenceAlignment(object):
                 self.alignment_dict[program] = [aligner, aligner_configuration]
 
     def guidance2(self, seqFile, msaProgram, seqType, dataset='MSA', seqFilter=None, columnFilter=None, maskFilter=None, **kwargs):
+        self.alignmentlog.info("Guidance2 will be used.")
         # Name and Create the output directory
         self.program = "GUIDANCE2"
         outDir = self.program
