@@ -5,6 +5,7 @@ from pathlib import Path
 
 from Bio import SeqIO
 from Bio.Align.Applications import ClustalOmegaCommandline
+from Datasnakes.Tools import LogIt
 from Datasnakes.Orthologs.utils import attribute_config
 from Datasnakes.Orthologs.Align.guidance2 import Guidance2Commandline
 
@@ -18,6 +19,7 @@ class MultipleSequenceAlignment(object):
     def __init__(self, aln_program=None, project=None, project_path=os.getcwd(), genbank=GenBank, **kwargs):
         self.config_options = {"Guidance_config": ["GUIDANCE2", self.guidance2], "Pal2Nal_config": ["PAL2NAL", self.pal2nal],
                           "ClustalO_config": ["CLUSTALO", self.clustalo]}
+        self.alignmentlog = LogIt().default(logname="Alignment", logfile=None)
         self.program = None
         self.alignment_dict = {}
         self.project = project
@@ -38,35 +40,13 @@ class MultipleSequenceAlignment(object):
                 aligner_configuration = kwargs[config]
                 self.alignment_dict[program] = [aligner, aligner_configuration]
 
-        # print('aln-kwargs')
-        # if kwargs['Guidance_config']:
-        #     self.align = self.guidance2
-        #     self.guidance2(**kwargs['Guidance_config'])
-        # elif kwargs['ClustalO_config']:
-        #     self.align = self.clustalo
-        #     self.clustalo(**kwargs)
-        # elif kwargs['Pal2Nal_config']:
-        #     self.align = self.pal2nal
-        #     self.pal2nal(**kwargs)
-        # else:
-        #     print('aln-notkwargs')
-        #     if aln_program is 'GUIDANCE2':
-        #         self.align = self.guidance2
-        #         print(self.align)
-        #     elif aln_program is 'CLUSTALO':
-        #         self.align = self.clustalo
-        #         print(self.align)
-        #     elif aln_program is 'PAL2NAL':
-        #         self.align = self.pal2nal
-        #         print(self.align)
-
     def guidance2(self, seqFile, msaProgram, seqType, dataset='MSA', seqFilter=None, columnFilter=None, maskFilter=None, **kwargs):
         # Name and Create the output directory
         self.program = "GUIDANCE2"
         outDir = self.program
         gene = Path(seqFile).stem
         geneDir = self.raw_data / Path(gene)
-
+        self.alignmentlog.info(geneDir)
         if seqType is 'nuc':
             g2_seqFile = str(geneDir / Path(gene + '_G2.ffn'))  # Need for all iterations
             rem_file = str(geneDir / Path(gene + '_G2_removed.ffn'))   # Need for all iterations
@@ -118,7 +98,7 @@ class MultipleSequenceAlignment(object):
                     # seqFile is the given input
                     G2Cmd = Guidance2Commandline(seqFile=seqFile, msaProgram=msaProgram, seqType=seqType,
                                                  outDir=str(iterDir), **kwargs)
-                    print(G2Cmd)
+                    self.alignmentlog.info(G2Cmd)
                     subprocess.check_call([str(G2Cmd)], stderr=subprocess.STDOUT, shell=True)
                     # Copy the Guidance removed seq file and paste it to the home directory
                     # Creates the rem_file
@@ -142,7 +122,7 @@ class MultipleSequenceAlignment(object):
                     # seqFile changes to g2_seqFile and the cutoffs change
                     G2Cmd = Guidance2Commandline(seqFile=g2_seqFile, msaProgram=msaProgram, seqType=seqType,
                                                  outDir=str(iterDir), **kwargs)
-                    print(G2Cmd)
+                    self.alignmentlog.info(G2Cmd)
                     subprocess.check_call([str(G2Cmd)], stderr=subprocess.STDOUT, shell=True)
 
                     # Get the removed sequence count
@@ -176,7 +156,7 @@ class MultipleSequenceAlignment(object):
                 G2Cmd = Guidance2Commandline(align=False, seqFile=seqFile, msaProgram=msaProgram, seqType=seqType,
                                              outDir=str(iterDir), maskCutoff=maskFilter, maskFile=g2_aln2mask,
                                              rprScores=g2_rprScores, output=g2_maskedFile, **kwargs)
-                print(G2Cmd)
+                self.alignmentlog.info(G2Cmd)
                 subprocess.check_call([str(G2Cmd)], stderr=subprocess.STDOUT, shell=True)
                 multi_fasta_manipulator(g2_maskedFile, str(seqFile), g2_maskedFile, manipulation='sort')
 
@@ -186,18 +166,18 @@ class MultipleSequenceAlignment(object):
             Path.mkdir(outDir, parents=True, exist_ok=True)
             G2Cmd = Guidance2Commandline(seqFile=seqFile, msaProgram=msaProgram, seqType=seqType,
                                          outDir=str(outDir), **kwargs)
-            print(G2Cmd)
+            self.alignmentlog.info(G2Cmd)
             subprocess.check_call([str(G2Cmd)], stderr=subprocess.STDOUT, shell=True)
             col_filt_align = outDir / Path('%s.%s.Without_low_SP_Col.With_Names' % (dataset, msaProgram))
             shutil.copy(str(col_filt_align), g2_colFilter)
-            print()
+
         # Only MASK the bad residues
         elif maskFilter is not None:
             outDir = self.raw_data / Path(gene) / Path(outDir + '_sf')
             G2Cmd = Guidance2Commandline(seqFile=seqFile, msaProgram=msaProgram, seqType=seqType,
                                          outDir=str(outDir), maskCutoff=maskFilter, maskFile=kwargs['aln2mask'],
                                          rprScores=kwargs['rprScores'], output=kwargs['maskedFile'], **kwargs)
-            print(G2Cmd)
+            self.alignmentlog.info(G2Cmd)
             subprocess.check_call([str(G2Cmd)], stderr=subprocess.STDOUT, shell=True)
             multi_fasta_manipulator(kwargs['maskedFile'], str(seqFile), kwargs['maskedFile'], manipulation='sort')
 
@@ -216,7 +196,7 @@ class MultipleSequenceAlignment(object):
         # Create an alignment
         P2Ncmd = Pal2NalCommandline(pepaln=aa_alignment, nucfasta=na_fasta, output_file=output_file, output=output_type,
                                     nogap=nogap, nomismatch=nomismatch)
-        print(P2Ncmd)
+        self.alignmentlog.info(P2Ncmd)
 
         # Use a while loop to catch errors and remove sequences that aren't working with pal2nal
         pal2nal_flag = True
@@ -229,8 +209,8 @@ class MultipleSequenceAlignment(object):
 
             # Catch errors
             if 'ERROR: inconsistency between the following pep and nuc seqs' in error[0]:
-                print('Caught the pal2nal error!')
-                print(error[0])
+                self.alignmentlog.warning('Caught the pal2nal error!')
+                self.alignmentlog.warning(error[0])
                 for err in error:
                     if '>' in err:
                         removed.append(err.strip('>' '\n'))
@@ -247,8 +227,8 @@ class MultipleSequenceAlignment(object):
                             p2n_rem.write(name)
                 pal2nal_flag = False
 
-            print('Error: ' + str(error))
-            print('Out: ' + str(out))
+            self.alignmentlog.info('Error: ' + str(error))
+            self.alignmentlog.info('Out: ' + str(out))
 
     def clustalo(self, infile, outfile, logpath, outfmt="fasta"):
         """This class aligns amino acids sequences using parameters similar to
@@ -267,9 +247,9 @@ class MultipleSequenceAlignment(object):
         # Run the command
         clustalo_cline()
         if stderr:
-            print(stderr)
+            self.alignmentlog.info(stderr)
         if stdout:
-            print(stdout)
+            self.alignmentlog.info(stdout)
 
 
 
