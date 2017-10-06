@@ -5,6 +5,8 @@ import shutil
 from pathlib import Path
 from BioSQL import BioSeqDatabase
 from Bio import SeqIO
+from Datasnakes.Tools import LogIt
+from Datasnakes.Orthologs.utils import attribute_config
 from Datasnakes.Orthologs.Blast.blastn_comparative_genetics import CompGenBLASTn
 from Datasnakes.Tools.utils.other_utils import makedirectory
 from Datasnakes.Orthologs.Blast.comparative_genetics_objects import CompGenObjects
@@ -34,28 +36,13 @@ class GenBank(object):
 
         # TODO-ROB: Change the way the file systems work.
         self.project = project
-        print(blast)
-        if blast is not None:
-            print(blast)
-            # print(type(blast))
-            if not issubclass(type(blast), CompGenObjects) and issubclass(type(blast), CompGenBLASTn):
-                if project_path:
-                    self.project_path = Path(project_path) / Path(self.project)
-                else:
-                    self.project_path = Path(os.getcwd()) / Path(self.project)
-                Path.mkdir(self.project_path, parents=True, exist_ok=True)
-                print('project_path=%s' % self.project_path)
-                self.removed_bn_config(kwargs)
-            else:
-                setattr(blast, 'project', project)
-                for key, value in blast.__dict__.items():
-                    setattr(self, key, value)
-                if 'project_path' not in blast.__dict__.keys():
-                    if project_path:
-                        self.project_path = self.repo_path
-                    else:
-                        self.project_path = Path(os.getcwd()) / Path(self.project)
-                print('project_path=%s' % self.project_path)
+        self.genbanklog = LogIt().default(logname="GenBank", logfile=None)
+
+        # Configuration of class attributes
+        add_self = attribute_config(self, composer=blast, checker=CompGenBLASTn, checker2=CompGenObjects,
+                                    project=project, project_path=project_path)
+        for var, attr in add_self.__dict__.items():
+            setattr(self, var, attr)
 
         # self.gbk_path = self.raw_data / Path('GENBANK')
         # # TODO deprecate
@@ -78,17 +65,6 @@ class GenBank(object):
         self.solo = solo
         self.multi = multi
         self.min_fasta = min_fasta
-
-    def removed_bn_config(self, kwargs):
-        self.raw_data = self.project_path / Path('raw_data')
-        self.user_db = self.project_path / Path('user_db')
-        self.ncbi_db_repo = self.project_path / Path('ncbi_db_repo')
-        for key, value in kwargs.items():
-            setattr(self, key, value)
-
-        makedirectory(self.raw_data)
-        makedirectory(self.user_db)
-        makedirectory(self.ncbi_db_repo)
 
     @staticmethod
     def name_fasta_file(path, gene, org, feat_type, feat_type_rank, extension, mode):
@@ -181,11 +157,11 @@ class GenBank(object):
                     gbk_file_path = gene_path / Path(gbk_file)
                     with open(gbk_file_path, 'w') as GB_file:
                         GB_file.write(record.format('genbank'))
-                        print(GB_file.name, 'created')
+                        self.genbanklog.info(GB_file.name, 'created')
                     server_flag = True
                     break
                 except IndexError:
-                    print('Index Error in %s.  Moving to the next database...' % SUB_DB_NAME)
+                    self.genbanklog.critical('Index Error in %s.  Moving to the next database...' % SUB_DB_NAME)
                     continue
 
     def get_fasta_files(self, acc_dict, db=True):
@@ -201,6 +177,7 @@ class GenBank(object):
                         for item in db.keys():
                             record = db.lookup(item)
                             self.write_fasta_files(record, acc_dict)
+                            self.genbanklog.info("FASTA files for %s created from BioSQL database." % item)
                 except:
                     raise()
         # Get FASTA files from the GenBank files.
@@ -212,6 +189,7 @@ class GenBank(object):
                     if Path(gbk_file).suffix is '.gbk':
                         record = SeqIO.read(gbk_file, 'genbank')
                         self.write_fasta_files(record, acc_dict)
+                        self.genbanklog.info("FASTA files for %s created." % gbk_file)
 
     def gbk_upload(self):
         """Upload the BioSQL database with genbank data."""
@@ -221,13 +199,13 @@ class GenBank(object):
             db_name = str(TIER) + '.db'
             db_file_path = self.target_gbk_db_path / Path(db_name)
             if os.path.isfile(str(db_file_path)) is False:
-                print('Copying Template BioSQL Database...  This may take a few minutes...')
+                self.genbanklog.warn('Copying Template BioSQL Database...  This may take a few minutes...')
                 # TODO-ROB:  Create a utility function for creating BioSQL databases
                 shutil.copy2('Template_BioSQL_DB.db', str(db_file_path))
             else:
                 # TODO-ROB: This part is broken until the template db creation and management is added
                 os.remove(str(db_file_path))
-                print('Copying Template BioSQL Database...  This may take a few minutes...')
+                self.genbanklog.warn('Copying Template BioSQL Database...  This may take a few minutes...')
                 shutil.copy2('Template_BioSQL_DB.db', str(db_file_path))
 
             server = BioSeqDatabase.open_database(driver='sqlite3', db=str(db_file_path))
@@ -242,11 +220,11 @@ class GenBank(object):
                         db = server[sub_db_name]
                         count = db.load(SeqIO.parse(FILE, 'genbank'))
                         server.commit()
-                        print('Server Commited %s' % sub_db_name)
-                        print('%s database loaded with %s.' % (db.dbid, FILE))
-                        print("That file contains %s genbank records." % str(count))
+                        self.genbanklog.info('Server Commited %s' % sub_db_name)
+                        self.genbanklog.info('%s database loaded with %s.' % (db.dbid, FILE))
+                        self.genbanklog.info("That file contains %s genbank records." % str(count))
                         t_count = t_count + count
-                        print('The total number of files loaded so far is %i.' % t_count)
+                        self.genbanklog.info('The total number of files loaded so far is %i.' % t_count)
                     except BaseException:
                         server.rollback()
                         try:
