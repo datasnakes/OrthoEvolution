@@ -34,8 +34,10 @@ class NCBIFTPTest(object):
         for filename in filenames:
             if fnmatch.fnmatch(filename, file2download):
                 host_file = os.path.join(filename)
+                print(host_file)
                 try:
                     current_dir = os.path.dirname(os.path.realpath(__file__))
+                    print(current_dir)
                     os.chdir(current_dir)
                     with open(host_file, 'wb') as local_file:
                         ftp.retrbinary('RETR %s' % filename, local_file.write)
