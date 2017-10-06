@@ -1,7 +1,7 @@
-Qsub Documentation
+sge Documentation
 -------------------------
-Collection of tools for using PBS, a job scheduler for high-performance
-computing environments. The command is usually `qsub <options>` on most systems.
+Collection of tools for using PBBS, a job scheduler for high-performance
+computing environments on SGE. The command is usually `qsub <options>` on most systems.
 
 
 Usage
@@ -29,4 +29,9 @@ with the class using the `pbs_dict` function.
 
 :exclamation: Notes
 -------------------
-Explain or list any notable information about the contents of this folder.
+<br>
+
+Thanks
+-------------------
+Thanks to [@relleums](https://github.com/relleums) for his work on [qstat](https://github.com/relleums/qstat).
+
