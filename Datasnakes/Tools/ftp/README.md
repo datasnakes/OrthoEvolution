@@ -23,6 +23,19 @@ ncbiftp = NcbiFTPClient(email='somebody@gmail.com')
 
 ```
 
+#### List all directories in a path
+```python
+
+ncbiftp.listdirectories('/blast/db/')
+Out[54]: ['FASTA', 'cloud']
+```
+
+#### List all files in a path
+```python
+
+ncbiftp.listfiles('/blast/db/')
+```
+
 :exclamation: Notes
 -------------------
 Check the [NCBI README](NCBIREADME.md) for information about the preformatted blast databases that we use
