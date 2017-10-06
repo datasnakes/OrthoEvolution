@@ -15,9 +15,11 @@ from Datasnakes.Orthologs.GenBank import multi_fasta_manipulator
 
 class MultipleSequenceAlignment(object):
 
-    def __init__(self, aln_program, project=None, project_path=os.getcwd(), genbank=GenBank, **kwargs):
-
-        self.program = aln_program
+    def __init__(self, aln_program=None, project=None, project_path=os.getcwd(), genbank=GenBank, **kwargs):
+        self.config_options = {"Guidance_config": ["GUIDANCE2", self.guidance2], "Pal2Nal_config": ["PAL2NAL", self.pal2nal],
+                          "ClustalO_config": ["CLUSTALO", self.clustalo]}
+        self.program = None
+        self.alignment_dict = {}
         self.project = project
         if project_path and project:
             self.project_path = Path(project_path) / Path(project)
@@ -27,30 +29,40 @@ class MultipleSequenceAlignment(object):
         for var, attr in add_self.__dict__.items():
             setattr(self, var, attr)
 
-        print('aln-kwargs')
-        if kwargs['Guidance_config']:
-            self.align = self.guidance2
-            self.guidance2(**kwargs['Guidance_config'])
-        elif kwargs['ClustalO_config']:
-            self.align = self.clustalo
-            self.clustalo(**kwargs)
-        elif kwargs['Pal2Nal_config']:
-            self.align = self.pal2nal
-            self.pal2nal(**kwargs)
-        else:
-            print('aln-notkwargs')
-            if aln_program is 'GUIDANCE2':
-                self.align = self.guidance2
-                print(self.align)
-            elif aln_program is 'CLUSTALO':
-                self.align = self.clustalo
-                print(self.align)
-            elif aln_program is 'PAL2NAL':
-                self.align = self.pal2nal
-                print(self.align)
+        # Determine which alignment to configure
+        # And then run that alignment with the configuration.
+        for config in self.config_options.keys():
+            if config in kwargs.keys():
+                program = self.config_options[config][0]
+                aligner = self.config_options[config][1]
+                aligner_configuration = kwargs[config]
+                self.alignment_dict[program] = [aligner, aligner_configuration]
+
+        # print('aln-kwargs')
+        # if kwargs['Guidance_config']:
+        #     self.align = self.guidance2
+        #     self.guidance2(**kwargs['Guidance_config'])
+        # elif kwargs['ClustalO_config']:
+        #     self.align = self.clustalo
+        #     self.clustalo(**kwargs)
+        # elif kwargs['Pal2Nal_config']:
+        #     self.align = self.pal2nal
+        #     self.pal2nal(**kwargs)
+        # else:
+        #     print('aln-notkwargs')
+        #     if aln_program is 'GUIDANCE2':
+        #         self.align = self.guidance2
+        #         print(self.align)
+        #     elif aln_program is 'CLUSTALO':
+        #         self.align = self.clustalo
+        #         print(self.align)
+        #     elif aln_program is 'PAL2NAL':
+        #         self.align = self.pal2nal
+        #         print(self.align)
 
     def guidance2(self, seqFile, msaProgram, seqType, dataset='MSA', seqFilter=None, columnFilter=None, maskFilter=None, **kwargs):
         # Name and Create the output directory
+        self.program = "GUIDANCE2"
         outDir = self.program
         gene = Path(seqFile).stem
         geneDir = self.raw_data / Path(gene)
