@@ -16,7 +16,7 @@ class NcbiFTPClient(BaseFTPClient):
         super().__init__(_NCBI, email, keepalive=False, debug_lvl=0)
         self.blastdb_path = '/blast/db/'
         self.blastfasta_path = '/blast/db/FASTA/'
-        self.vertebrate_mammalian_path = ''
+        self.vertebratemammalian_path = '/refseq/release/vertebrate_mammalian/'
         self._taxdb = 'taxdb.tar.gz'  # Located in self.blastdb_path
 
         # Use python to get these and turn into a json file or dict
@@ -154,4 +154,4 @@ class NcbiFTPClient(BaseFTPClient):
             self.getblastdb(dbname, download_path=database_path, extract=True)
 
         else:
-            print('\nYour database has been updated within the last week.')
+            print('\nour database has been updated within the last week.')
