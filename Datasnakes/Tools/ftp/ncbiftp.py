@@ -1,22 +1,23 @@
 """Class to access NCBI's ftp server and easily download databases."""
 import tarfile
 import re
-import concurrent.futures
 from time import time
+from datetime import datetime
+from multiprocessing.pool import ThreadPool
+import os
 
 from baseftp import BaseFTPClient
-from Datasnakes.Tools.parallel import num_procs
 
 
 class NcbiFTPClient(BaseFTPClient):
     """Access NCBI's FTP servers with ease."""
     def __init__(self, email):
         _NCBI = 'ftp.ncbi.nlm.nih.gov'
-        super().__init__(ftpsite=_NCBI, email=email, keepalive=False, debug_lvl=0)
+        super().__init__(_NCBI, email, keepalive=False, debug_lvl=0)
         self.blastdb_path = '/blast/db/'
         self.blastfasta_path = '/blast/db/FASTA/'
+        self.vertebrate_mammalian_path = ''
         self._taxdb = 'taxdb.tar.gz'  # Located in self.blastdb_path
-        self._cpus = num_procs
 
         # Use python to get these and turn into a json file or dict
         self.blastdbs = []
@@ -53,6 +54,7 @@ class NcbiFTPClient(BaseFTPClient):
             print('%s was downloaded.' % str(filename))
 
     def extract_file(self, file2extract):
+        """Extract a tar.gz file."""
         if str(file2extract).endswith('tar.gz'):
             tar = tarfile.open(file2extract)
             tar.extractall()
@@ -73,7 +75,7 @@ class NcbiFTPClient(BaseFTPClient):
         directories, files = self._walk(path)
         return directories
 
-    def getblastdb(self, database_name, download_path='', extract=False):
+    def getblastdb(self, database_name, download_path='', extract=True):
         """Download the preformatted blast database."""
         if str(database_name).startswith('est'):
             raise NotImplementedError('Est dbs cannot be downloaded yet.')
@@ -90,23 +92,24 @@ class NcbiFTPClient(BaseFTPClient):
         print('You are about to download theses files: %s' % files2download)
 
         # Download the files using multiprocessing
-        procs = self._cpus
         download_time_secs = time()
-        with concurrent.futures.ProcessPoolExecutor(max_workers=procs) as executor:
-            executor.map(self.download_file, files2download)
+        with ThreadPool(1) as download_pool:
+            download_pool.map(self.download_file, files2download)
             minutes = (time() - download_time_secs) / 60
         print("Took %s minutes to download the files." % minutes)
 
         if extract:
             extract_time_secs = time()
-            with concurrent.futures.ProcessPoolExecutor(max_workers=procs) as executor:
-                executor.map(self._extract_file, files2download)
+            with ThreadPool(1) as extract_pool:
+                extract_pool.map(self._extract_file, files2download)
                 minutes = (time() - extract_time_secs) / 60
             print("Took %s minutes to extract from all files." % minutes)
 
     def getblastfasta(self, database_name, extract=True):
         """Download the fasta sequence database (not formatted)."""
-        self.ftp.cwd(self.blastdb_path)
+        if str(database_name).startswith('est'):
+            raise NotImplementedError('Est dbs cannot be downloaded yet.')
+        self.ftp.cwd(self.blastfasta_path)
         blastdbfiles = self.listfiles(self.blastdb_path)
 
         files2download = []
@@ -118,11 +121,37 @@ class NcbiFTPClient(BaseFTPClient):
         files2download.append(self._taxdb)
         print('You are about to download theses files: %s' % files2download)
 
-        downloaded = []
-        for file in files2download:
-            self.download_file(file)
-            downloaded.append(file)
+        # Download the files using multiprocessing
+        download_time_secs = time()
+        with ThreadPool(1) as download_pool:
+            download_pool.map(self.download_file, files2download)
+            minutes = (time() - download_time_secs) / 60
+        print("Took %s minutes to download the files." % minutes)
 
         if extract:
-            for downloaded_file in downloaded:
-                self.extract_file(downloaded_file)
+            extract_time_secs = time()
+            with ThreadPool(1) as extract_pool:
+                extract_pool.map(self._extract_file, files2download)
+                minutes = (time() - extract_time_secs) / 60
+            print("Took %s minutes to extract from all files." % minutes)
+
+    def updatedb(self, database_path=os.getcwd(), update_days=7):
+        """Check for when the database was last updated."""
+        # Get a list of the files in the path
+        filesinpath = os.listdir(database_path)
+        for fileinpath in filesinpath:
+            if str(fileinpath).endswith('.nal'):
+                nalfile = str(fileinpath)
+                dbname, ext = nalfile.split('.')
+                filetime = datetime.fromtimestamp(os.path.getctime(nalfile))
+                format_filetime = filetime.strftime("%b %d, %Y at %I:%M:%S %p")
+
+        print("Your database was last updated on: %s" % format_filetime)
+
+        time_elapsed = datetime.now() - filetime
+        if time_elapsed.days >= update_days:
+            print('\nYour database needs updating.')
+            self.getblastdb(dbname, download_path=database_path, extract=True)
+
+        else:
+            print('\nYour database has been updated within the last week.')
