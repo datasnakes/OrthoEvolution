@@ -2,6 +2,43 @@
 Contributing to this project
 ====================================
 
+Thanks for your desire to contribute to this project.
+
+First, install the package in development mode and check out the dev-master branch
+
+
+Preparing your Fork
+^^^^^^^^^^^^^^^^^^^
+1. Hit 'fork' on Github, creating e.g. ``yourname/Datasnakes-Scripts``.
+2. Clone your project: ``git clone git@github.com:yourname/Datasnakes-Scripts``.
+3. Create a branch: ``cd Datasnakes-Scripts; git checkout -b foo-the-bars 1.3``.
+
+Development Mode Installation
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+1. Change to the project repository on your machine: ``cd Datasnakes-Scripts``
+2. Install in development mode: ``pip install -e .``
+
+
+Making your Changes
+^^^^^^^^^^^^^^^^^^^
+1. Add your contributions
+2. Run tests and make sure they pass. (We use unittest.)
+3. Commit your changes: ``git commit -m "Foo the bars"``
+
+
+
+Creating Pull Requests
+^^^^^^^^^^^^^^^^^^^^^^
+
+1. Push your commit to get it back up to your fork: ``git push origin HEAD``
+2. Visit Github, click handy "Pull request" button that it will make upon
+   noticing your new branch.
+3. In the description field, write down issue number (if submitting code fixing
+   an existing issue) or describe the issue + your fix (if submitting a wholly
+   new bugfix).
+4. Hit 'submit'! And please be patient - we will get to you when
+   we can.
+
 Version control branching
 -------------------------
 
@@ -66,32 +103,6 @@ We've found that test-first development really helps make features better
 architected and identifies potential edge cases earlier instead of later.
 Writing tests before the implementation is strongly encouraged.
 
-
-Preparing your Fork
-^^^^^^^^^^^^^^^^^^^
-
-1. Hit 'fork' on Github, creating e.g. ``yourname/theproject``.
-2. Clone your project: ``git clone git@github.com:yourname/theproject``.
-3. Create a branch: ``cd theproject; git checkout -b foo-the-bars 1.3``.
-
-Making your Changes
-^^^^^^^^^^^^^^^^^^^
-
-1. Add your contributions
-2. Run tests and make sure they pass.
-3. Commit your changes: ``git commit -m "Foo the bars"``
-
-Creating Pull Requests
-^^^^^^^^^^^^^^^^^^^^^^
-
-1. Push your commit to get it back up to your fork: ``git push origin HEAD``
-2. Visit Github, click handy "Pull request" button that it will make upon
-   noticing your new branch.
-3. In the description field, write down issue number (if submitting code fixing
-   an existing issue) or describe the issue + your fix (if submitting a wholly
-   new bugfix).
-4. Hit 'submit'! And please be patient - we will get to you when
-   we can.
 
 
 Thanks to https://contribution-guide-org.readthedocs.io/ for the general guide.
