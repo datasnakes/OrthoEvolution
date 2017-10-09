@@ -27,6 +27,6 @@ def printwords(word):
 words = ['bae', 'luh', 'cuh']
 
 if __name__ == '__main__':
-    mp = Multiprocess('3', printwords, words)
-    mp.map2function()
+    mp = Multiprocess()
+    mp.map2function(printwords, words)
 ```
