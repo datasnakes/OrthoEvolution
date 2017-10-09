@@ -11,6 +11,7 @@ from datetime import datetime as d
 import platform
 import getpass
 import os
+
 #from Datasnakes.Tools.multiprocess import genes2analyze
 
 
@@ -102,6 +103,7 @@ class QsubUtils:
         with open(base + '.py', 'w') as pyfile:
             pyfile.write(code)
             pyfile.close()
+
         # TIP If python is in your environment as only 'python' update that.
         # TODO-SDH add a default parameter or custom parameter
         # If default, python file will be created from code that is used.

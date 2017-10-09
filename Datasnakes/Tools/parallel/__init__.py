@@ -1,1 +1,1 @@
-from .multiprocess import Multiprocess
+from .multiprocess import map2function, num_procs
