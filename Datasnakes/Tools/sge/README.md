@@ -1,6 +1,6 @@
-sge Documentation
+SGE Documentation
 -------------------------
-Collection of tools for using PBBS, a job scheduler for high-performance
+Collection of tools for using PBS, a job scheduler for high-performance
 computing environments on SGE. The command is usually `qsub <options>` on most systems.
 
 
@@ -26,6 +26,13 @@ with the class using the `pbs_dict` function.
 ``` python
 
 ```
+
+##### Get Job Info
+
+``` python
+
+```
+
 
 :exclamation: Notes
 -------------------
