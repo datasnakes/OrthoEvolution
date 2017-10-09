@@ -4,9 +4,6 @@ Contributing to this project
 
 Thanks for your desire to contribute to this project.
 
-First, install the package in development mode and check out the dev-master branch
-
-
 Preparing your Fork
 ^^^^^^^^^^^^^^^^^^^
 1. Hit 'fork' on Github, creating e.g. ``yourname/Datasnakes-Scripts``.
