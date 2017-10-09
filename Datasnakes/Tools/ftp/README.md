@@ -7,7 +7,7 @@ More specifically, we provide a way to easily find and list directories and thei
 respective contents as well as to download blast databases and other databases
 for use with the Orthologs package.
 
-Usage
+Examples
 -----
 These tools are optimized to be used together (very little work to do that), but can also be used singularly.
 
@@ -20,6 +20,7 @@ This is a simple example of using some of the modules.
 from Datasnakes.Tools.ftp import NcbiFTPClient
 
 ncbiftp = NcbiFTPClient(email='somebody@gmail.com')
+ncbiftp.getblastdb(database_name='refseq_rna')
 
 ```
 
@@ -40,3 +41,7 @@ ncbiftp.listfiles('/blast/db/')
 -------------------
 Check the [NCBI README](NCBIREADME.md) for information about the preformatted blast databases that we use
 and suggest you use. We also provide an easy way to download them which is referenced in the above example.
+
+
+If you're using Linux and do not want to use threading to download ftp databases,
+you can look at [this]() standalone script.
