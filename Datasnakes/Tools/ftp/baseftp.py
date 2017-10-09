@@ -32,6 +32,7 @@ class BaseFTPClient(object):
         """Connect to the FTP server anonymously."""
         ftp = FTP(self._ftpsite, timeout=None)
         ftp.login(user='anonymous', passwd=self._email)
+        ftp.voidcmd('NOOP')
         ftp.set_debuglevel(self._debug_lvl)
         return ftp
 
