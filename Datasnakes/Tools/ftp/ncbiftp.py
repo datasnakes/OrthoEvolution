@@ -6,7 +6,7 @@ from datetime import datetime
 from multiprocessing.pool import ThreadPool
 import os
 
-from baseftp import BaseFTPClient
+from Datasnakes.Tools.ftp.baseftp import BaseFTPClient
 
 
 class NcbiFTPClient(BaseFTPClient):
