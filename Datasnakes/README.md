@@ -15,10 +15,18 @@ these tools will also be accessible from the command line and from a web applica
 READMEs are provided in each module's directory, but we've compiled a mini tutorial here
 that can inform users on how to use these modules.
 
-Using the Cookies module
-------------------------
+
+## Table of Contents
+1. [Cookies Module](#using-the-cookies-module)
+2. [Manager Module](#using-the-manager-module)
+3. [Orthologs Module](#using-the-orthologs-module)
+4. [Tools Module](#using-the-tools-module)
+
+
+## Using the Cookies module
+
 #### Overview
-The Cookies module acts as a repository for custom [cookiecutter](https://github.com/audreyr/cookiecutter) templates.  
+The Cookies module acts as a repository for custom [cookiecutter](https://github.com/audreyr/cookiecutter) templates.
 
 Each "CookieRecipes" allows us to quickly create and deploy different projects with various directory structures.  They are meant to help organize projects
 and data in a standardized way.  This module is used almost extensively by the Manager module.
@@ -38,7 +46,7 @@ Cookies can also be used to create standalone projects that don't require an ent
 
 * Template for standalone projects
   * _Cookies/new_basic_project_
-  
+
 ### Examples
 
 ```python
@@ -57,7 +65,7 @@ research_type = "Comparative Genetics"
 repo_path = Path(home) / Path(repo)
 user_path = repo_path / Path('users')
 project_path = user_path / Path(user) / Path('projects')
-research_path = project_path / Path(project) 
+research_path = project_path / Path(project)
 
 # Initialize the Oven object to create a full repository
 Full_Kitchen = Oven(repo=repo, user=user, project=project, basic_project=False, output_dir=home)
@@ -73,8 +81,8 @@ Basic_Kitchen = Oven(project=project, basic_project=True, output_dir=home)
 Basic_Kitchen.bake_the_project()
 ```
 
-Using the Manager module
---------------
+## Using the Manager module
+
 #### Overview
 The Manager module uses the CookieRecipes class in order to deploy a bioinformatics repository
 with an organized directory structure based on specific users and the projects that they create.
@@ -102,7 +110,7 @@ from Datasnakes.Manager.data_management import DataMana
 ```python
 from Datasnakes.Manager.management import ProjectManagement
 # Use the flags to create a new repository/user/project/research directory system
-pm = ProjectManagement(repo="repository1", user='user1', project='project1', research='research1', 
+pm = ProjectManagement(repo="repository1", user='user1', project='project1', research='research1',
     research_type='comparative_genetics', new_repo=True, new_user=True, new_project=True, new_research=True)
 # Access the path variables
 print(pm.research_path)
@@ -118,14 +126,13 @@ from Datasnakes.Manager.data_management import DataMana
 import os
 pipeline = DataMana(pipeline='Ortho_CDS_1', project_path=os.getcwd(), start=True, new=True)
 ```
-Using the Orthologs Modules
-----------------
+## Using the Orthologs Module
 #### Overview
 The Orthologs module is the central data processing unit of our package.  Any published data will be generated using these submodules.
 
-The sub modules are used for BLASTing NCBI's refseq database to discover orthologous genes, 
+The sub modules are used for BLASTing NCBI's refseq database to discover orthologous genes,
 parsing and analyzing BLASTn data, generating GenBank files for the orthologs, generating sequence data
-for the orthologs, aligning the orthologous sequences for each gene, generating phylogenetic trees for each gene, 
+for the orthologs, aligning the orthologous sequences for each gene, generating phylogenetic trees for each gene,
 and doing phylogenetic analysis for each gene.
 
 #### Examples
@@ -163,9 +170,8 @@ al.align(Alignment_config['kwargs'])  # Underdeveloped
 
 # TODO-ROB:  Develop Documentation for Phylogenetics class
 ```
-Using Tools
-------------
-#### Using the Tools module
+
+## Using the Tools module
 The tools module is a grouping of utilities used by our package.  While they could have be stored in each
 modules util.py file, they were used and developed on a global scale, and hence required their own module.
 Below is a list of submodules and a brief description:
