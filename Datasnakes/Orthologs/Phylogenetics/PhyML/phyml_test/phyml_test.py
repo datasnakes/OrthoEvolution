@@ -17,12 +17,12 @@ class PhymlTest(unittest.TestCase):
         os.environ['LANG'] = 'C'
 
         phyml_exe = None
-        exe_name = "PhyML-3.1_win32.exe" if sys.platform == "win32" else "phyml"
+        exename = "PhyML-3.1_win32.exe" if sys.platform == "win32" else "phyml"
         from Bio._py3k import getoutput
         try:
-            output = getoutput(exe_name + " --version")
+            output = getoutput(exename + " --version")
             if "not found" not in output and "20" in output:
-                phyml_exe = exe_name
+                phyml_exe = exename
         except OSError:
             # Python 2.6 or 2.7 on Windows XP:
             # WindowsError: [Error 2] The system cannot find the file specified
@@ -60,3 +60,7 @@ class PhymlTest(unittest.TestCase):
                 fname = self.EX_PHYLIP + suffix
                 if os.path.isfile(fname):
                     os.remove(fname)
+
+
+if __name__ == '__main__':
+    unittest.main()
