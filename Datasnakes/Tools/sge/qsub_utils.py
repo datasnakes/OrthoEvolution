@@ -13,7 +13,7 @@ import getpass
 import os
 
 
-class QsubUtils:
+class Qsubutils:
     """Create a pbs job and submit it using qsub.
 
     This class also provides functionality for creating multiple pbs jobs that
@@ -57,7 +57,7 @@ class QsubUtils:
                  gigabytes='6gb', cput='75:00:00', walltime='75:00:00'):
         """Add PBS script attributes."""
 
-        # TODO simplify this function
+        # TODO simplify this function. Add configuration script.
 
         # Date format. Used to add as a date
         format1 = '%a %b %d %I:%M:%S %p %Y'
