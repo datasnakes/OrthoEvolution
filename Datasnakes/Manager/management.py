@@ -5,7 +5,7 @@ from pathlib import Path
 from Datasnakes import Cookies, Orthologs, Manager, Tools
 from Datasnakes.Cookies.cookie_jar import Oven
 from Datasnakes.Tools.zipper.zipper import ZipUtils
-# from Manager.logit.logit import LogIt
+from Datasnakes.Tools.logit import LogIt
 
 
 class Management(object):
@@ -30,10 +30,11 @@ class Management(object):
         """
         self.repo = repo
         self.file_home = Path(home)  # Home of the file calling this class
-        self.Kitchen = Oven(repo=self.repo, output_dir=self.file_home)
+        self.managementlog = LogIt().default(logname="Management", logfile=None)
         # TODO-ROB:  SOme of these directories don't need to be accessed directly
         # Below are the PyPi path strings
         #    The first group is to access the cookiecutter templates
+        self.Kitchen = Oven(repo=self.repo, output_dir=self.file_home)
         self.Pantry = self.Kitchen.Ingredients
         #    The second group is for the Manager module
         self.Manager = Path(pkg_resources.resource_filename(Manager.__name__, ''))
@@ -62,8 +63,13 @@ class Management(object):
 
         if self.repo:
             self.repo_path = self.file_home / Path(self.repo)
+
+        self.managementlog.info('The BaseManagement class variables have been set.')
+
         if new_repo is True:
             self.Kitchen.bake_the_repo()
+
+
 
         # Create a directory management logger
         # TODO-ROB add logging to manager class
@@ -92,13 +98,15 @@ class RepoManagement(Management):
         self.repo_shiny = self.repo_web / Path('shiny')
         self.ftp = self.repo_web / Path('ftp')
         self.wasabi = self.repo_web / Path('wasabi')
-
         self.flask = self.repo_web / Path('flask')
 
         if user:
             self.user = user  # FROM Flask
             self.user_path = self.users / Path(self.user)
+
         self.Kitchen = Oven(repo=self.repo, user=self.user, output_dir=self.users)
+        self.managementlog.info('The Repository Management class variables have been set.')
+
         if new_user is True:
             self.Kitchen.bake_the_user()
         # TODO-ROB do we need create user hooks?
@@ -153,8 +161,7 @@ class UserManagement(RepoManagement):
                 self.project = project
                 self.project_path = home / Path(project)
         self.Kitchen = Oven(repo=self.repo, user=self.user, project=self.project, output_dir=self.projects)
-        if new_project is True:
-            self.Kitchen.bake_the_project()
+
         if len(database) > 0:
             self.db_list = database
             self.db_path_dict = {}
@@ -165,6 +172,11 @@ class UserManagement(RepoManagement):
         else:
             self.db_path_dict = None
             self.db_archive_dict = None
+
+        self.managementlog.info('The User Management class variables have been set.')
+
+        if new_project is True:
+            self.Kitchen.bake_the_project()
         if new_db is True:
             self.Kitchen.bake_the_db_repo(user_db=self.user_db, db_path_dict=self.db_path_dict, ncbi_db_repo=self.ncbi_db_repo)
 
@@ -172,7 +184,7 @@ class UserManagement(RepoManagement):
         Zipper = ZipUtils(comp_filename, zip_path)
         Zipper_path = Zipper.to_zip()
         # TODO-ROB add proper destination syntax.
-        print('%s is being sent to %s' % (Zipper_path, destination))
+        self.managementlog.info('%s is being sent to %s' % (Zipper_path, destination))
 
 
 class WebsiteManagement(RepoManagement):
@@ -203,8 +215,10 @@ class WebsiteManagement(RepoManagement):
         self.web_port = port
         self.website_path = self.flask / Path(self.website)
 
-        print('Website directory structure created. ✔ Server not running.')
         self.Kitchen = Oven(repo=self.repo, user=self.user, website=self.website, output_dir=self.flask)
+
+        self.managementlog.info('The Website Management class variables have been set.')
+
         if new_website is True:
             self.Kitchen.bake_the_website(host=self.web_host, port=self.web_port, website_path=self.website_path)
 
@@ -256,16 +270,14 @@ class ProjectManagement(UserManagement):
                 self.app = app
                 self.app_path = self.project_web / Path(app)
 
+        self.managementlog.info('The User Management class variables have been set.')
+
         if new_research is True:
             self.research_type = research_type
-            self.Cookies = Path(Cookies.__path__[0])
-            self.research_cookie = self.Cookies / Path('new_research')
             self.Kitchen = Oven(repo=self.repo, user=self.user, project=self.project, output_dir=self.project_path)
             self.Kitchen.bake_the_research(research_type=self.research_type, research=self.research)
             if new_app is True:
-                self.app_cookie = self.Cookies / Path('new_app')
                 self.app = app
                 self.app_path = self.project_path / Path(research_type) / Path(research) / Path('web')
                 self.Kitchen.bake_the_app(app=self.app)
-        print('The project structure for %s has been created.' % project)
 

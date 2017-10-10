@@ -57,11 +57,6 @@ Contributors
 If you would like to contribute to this package, install the package in development mode,
 and check out our `contributing guidelines <https://github.com/datasnakes/Datasnakes-Scripts/blob/master/CONTRIBUTING.rst>`__.
 
-Development Mode Installation
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-1. ``git clone http://github.com/datasnakes/Datasnakes-Scripts``
-2. ``cd Datasnakes-Scripts``
-3. ``pip install -e .``
 
 Citation
 ----------

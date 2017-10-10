@@ -1,6 +1,7 @@
 """Base FTP module for connecting to FTP servers."""
-from ftplib import FTP
+from ftplib import FTP, error_perm
 import os
+import contextlib
 
 from Datasnakes.Tools.utils import FunctionRepeater
 
@@ -30,9 +31,12 @@ class BaseFTPClient(object):
 
     def _login(self):
         """Connect to the FTP server anonymously."""
-        ftp = FTP(self._ftpsite, timeout=None)
-        ftp.login(user='anonymous', passwd=self._email)
-        ftp.set_debuglevel(self.debug_lvl)
+        with contextlib.suppress(error_perm):
+            ftp = FTP(self._ftpsite, timeout=None)
+            ftp.login(user='anonymous', passwd=self._email)
+            ftp.voidcmd('NOOP')
+            ftp.set_debuglevel(self._debug_lvl)
+
         return ftp
 
     def close_connection(self):
