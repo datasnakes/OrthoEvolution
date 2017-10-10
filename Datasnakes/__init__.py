@@ -1,8 +1,8 @@
 class DatasnakesWarning(Warning):
     """This is the Datasnakes main warning class.
 
-    The Datasnakes-Scripts package/module will use this warning to alert uses about
-    potential tricky code or code under development.
+    The Datasnakes-Scripts package/module will use this warning to alert uses
+    about potential tricky code or code under development.
 
     >>> import warnings
     >>> from Datasnakes import DatasnakesWarning

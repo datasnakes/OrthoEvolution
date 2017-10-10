@@ -1,17 +1,15 @@
-
 #### Contents of the /blast/db/ directory
 
-The pre-formatted BLAST databases are archived in this directory. The names of
-these databases and their contents are listed below.
+The names of these databases and their contents are listed below.
 
  File Name                    | Content Description
 |-----------------------------|------------------------------------------------|
-16SMicrobial.tar.gz | Bacterial and Archaeal 16S rRNA sequences from BioProjects 33175 and 33117
+16SMicrobial.tar.gz           | Bacterial and Archaeal 16S rRNA sequences from BioProjects 33175 and 33117
 FASTA/                        | Subdirectory for FASTA formatted sequences
 README                        | README for this subdirectory (this file)
 Representative_Genomes.*tar.gz| Representative bacterial/archaeal genomes database
 cdd_delta.tar.gz              | Conserved Domain Database sequences for use with stand alone deltablast
-cloud/	                      | Subdirectory of databases for BLAST AMI; see http://1.usa.gov/TJAnEt
+cloud/	                       | Subdirectory of databases for BLAST AMI; see http://1.usa.gov/TJAnEt
 env_nr.*tar.gz                | Protein sequences for metagenomes
 env_nt.*tar.gz                | Nucleotide sequences for metagenomes
 est.tar.gz                    | This file requires est_human.*.tar.gz, est_mouse.*.tar.gz, and est_others.*.tar.gz files to function. It contains the est.nal alias so that searches against est (-db est) will include est_human, est_mouse and est_others.

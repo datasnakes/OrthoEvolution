@@ -3,14 +3,15 @@
 import unittest
 import os
 
-from Datasnakes.Tools import LogIt, Multiprocess
+from Datasnakes.Tools import LogIt, Multiprocess, NcbiFTPClient
 
 
 class TestTools(unittest.TestCase):
     """Test the Tools module."""
 
-    def setUp(self, logfile='test.log'):
+    def setUp(self, logfile='test.log', filename='README.ftp'):
         self.logfile = logfile
+        self.filename = filename
 
     def test_logit(self):
         """Test the LogIt class."""
@@ -22,7 +23,16 @@ class TestTools(unittest.TestCase):
         logit.deletelog(self.logfile)
 
     def test_multiprocess(self):
-        print()
+        mp = Multiprocess()
+        self.assertIsNotNone(mp.cpus)
+
+    def test_ncbiftpclient(self):
+        """Simple download."""
+        ncbiftp = NcbiFTPClient(self.assertTrue('someone@gmail.com'))
+        ncbiftp.download_file(self.filename)
+
+    def cleanUp(self):
+        os.remove(self.filename)
 
 
 if __name__ == '__main__':

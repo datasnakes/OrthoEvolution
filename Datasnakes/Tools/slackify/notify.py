@@ -14,7 +14,7 @@ class Slackify(object):
             apikey = input('Insert your slack apikey here: ')
             if len(apikey) is not 42:  # Standard length of slack apikey
                 raise ValueError('Your slack APIKEY is incorrect.')
-                
+
             slack = Slacker(apikey)
 
         else:
