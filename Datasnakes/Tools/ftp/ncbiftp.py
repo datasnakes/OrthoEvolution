@@ -23,7 +23,8 @@ class NcbiFTPClient(BaseFTPClient):
         self.blastdbs = []
         self.blastfastadbs = []
 
-    def _pathformat(self, path):
+    @classmethod
+    def _pathformat(cls, path):
         """Ensure proper formatting of the path."""
         pattern = re.compile('^/(.*?)/$')
         if not re.match(pattern, path):
@@ -53,7 +54,8 @@ class NcbiFTPClient(BaseFTPClient):
             self.ftp.retrbinary('RETR %s' % filename, localfile.write)
             print('%s was downloaded.' % str(filename))
 
-    def extract_file(self, file2extract):
+    @classmethod
+    def extract_file(cls, file2extract):
         """Extract a tar.gz file."""
         if str(file2extract).endswith('tar.gz'):
             tar = tarfile.open(file2extract)
@@ -67,12 +69,14 @@ class NcbiFTPClient(BaseFTPClient):
         """List all files in a path."""
         self._pathformat(path)
         directories, files = self._walk(path)
+        del directories
         return files
 
     def listdirectories(self, path='/'):
         """List all directories in a path."""
         self._pathformat(path)
         directories, files = self._walk(path)
+        del files
         return directories
 
     def getblastdb(self, database_name, download_path='', extract=True):
@@ -143,6 +147,7 @@ class NcbiFTPClient(BaseFTPClient):
             if str(fileinpath).endswith('.nal'):
                 nalfile = str(fileinpath)
                 dbname, ext = nalfile.split('.')
+                del ext
                 filetime = datetime.fromtimestamp(os.path.getctime(nalfile))
                 format_filetime = filetime.strftime("%b %d, %Y at %I:%M:%S %p")
 
