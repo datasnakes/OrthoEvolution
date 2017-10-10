@@ -123,7 +123,7 @@ class DataMana(object):
 
     def align(self, genbank):
         self.al = MSA(genbank=genbank, **self.Management_config, **self.Alignment_config)
-        for program, aligner_config_list in self.al.alignment_dict.items():
+        for _program, aligner_config_list in self.al.alignment_dict.items():
             aligner = aligner_config_list[0]
             configuration = aligner_config_list[1]
             aligner(**configuration)
