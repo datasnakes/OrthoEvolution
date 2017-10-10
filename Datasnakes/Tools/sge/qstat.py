@@ -21,9 +21,10 @@ class Qstat(object):
         """
         xml = self._qstat2xml(qstat_path='qstat', xml_option='-' + xml_option)
         self.xml = xml
-        queue_info, job_info = self._qstatinfo(self.xml)
+        self._qstatinfo(self.xml)
 
-    def _qstat2xml(self, qstat_path='qstat', xml_option='-xml'):
+    @classmethod
+    def _qstat2xml(cls, qstat_path='qstat', xml_option='-xml'):
         """
         Parameters
         ----------
@@ -45,7 +46,8 @@ class Qstat(object):
             raise
         return qstatxml
 
-    def _qstatinfo(self, qstatxml):
+    @classmethod
+    def _qstatinfo(cls, qstatxml):
         """
         Parameters
         ----------
