@@ -39,26 +39,26 @@ def multi_fasta_manipulator(target_file, reference, output, manipulation='remove
     return new_file
 
 
-def dir_config(path, tier_frame_dict):
-    """
-    Configure the genbank directories.
-    :param path: Path to create directory structure.
-    :param tier_frame_dict:  Dictionary from the blast super class.
-    :return:  Creates a directory structure as follows
-        --Tier_1
-            --Gene_1
-            --Gene_M
-        --Tier_N
-            --Gene_M+1
-            --Gene_N
-    """
-    for G_KEY in tier_frame_dict.keys():
-        tier = G_KEY
-        tier_path = path / Path(tier)
-        Path.mkdir(tier_path, parents=True, exist_ok=True)
-        for GENE in tier_frame_dict[tier].T:
-            gene_path = tier_path / Path(GENE)
-            Path.mkdir(gene_path)
+# def dir_config(path, tier_frame_dict):
+#     """
+#     Configure the genbank directories.
+#     :param path: Path to create directory structure.
+#     :param tier_frame_dict:  Dictionary from the blast super class.
+#     :return:  Creates a directory structure as follows
+#         --Tier_1
+#             --Gene_1
+#             --Gene_M
+#         --Tier_N
+#             --Gene_M+1
+#             --Gene_N
+#     """
+#     for G_KEY in tier_frame_dict.keys():
+#         tier = G_KEY
+#         tier_path = path / Path(tier)
+#         Path.mkdir(tier_path, parents=True, exist_ok=True)
+#         for GENE in tier_frame_dict[tier].T:
+#             gene_path = tier_path / Path(GENE)
+#             Path.mkdir(gene_path)
 
 
 def multi_fasta_remove(target_file, reference, new_file):
