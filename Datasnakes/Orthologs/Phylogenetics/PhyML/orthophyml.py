@@ -23,13 +23,18 @@ class PhyML(object):
         # file
         exe_name = "PhyML-3.1_win32.exe" if sys.platform == "win32" else "phyml"
         phyml_exe = exe_name
-        phyml_exe = phyml_exe
+        self.phyml_exe = phyml_exe
+        self.datatype = datatype
+        self.phyml_input = phyml_input
+        self._runphyml()
 
-        # Create the command & run phyml
-        # Input a phylip formatted alignment file and describe the datatype
-        # ('nt' or 'aa')
-        run_phyml = PhymlCommandline(phyml_exe,
-                                     input=phyml_input,
-                                     datatype=datatype)
-        print(run_phyml)
+    def _runphyml(self):
+        """"Runs phyml.
+
+        Input a phylip formatted alignment file and describe the datatype
+        ('nt' or 'aa').
+        """
+        run_phyml = PhymlCommandline(self.phyml_exe,
+                                     input=self.phyml_input,
+                                     datatype=self.datatype)
         out_log, err_log = run_phyml()
