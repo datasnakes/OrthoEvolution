@@ -50,8 +50,7 @@ Contributors
 -  Rob Gilmore \| Github: `@grabear <https://github.com/grabear>`__ \|
    `:email: <mailto:robgilmore127@gmail.com>`__
 -  Shaurita Hutchins \| Github:
-   `@sdhutchins <https://github.com/sdhutchins>`__ \| Twitter:
-   `@MavenNBA <https://twitter.com/MavenNBA/>`__ \|
+   `@sdhutchins <https://github.com/sdhutchins>`__ \|
    `:email: <mailto:sdhutchins@outlook.com>`__
 
 If you would like to contribute to this package, install the package in development mode,
