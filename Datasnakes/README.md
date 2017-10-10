@@ -3,10 +3,11 @@ Datasnakes Mini-Tutorial
 Datasnakes has been built with Python 3.6 as a pipeline framework for current
 (comparative genetics for orthologous genes), and future (RNA-seq) bioinformatic data analysis.
 Currently, this python package is comprised of 4 major modules:
-1.  Cookies - Deploys directory structures using cookiecutter.
-2.  Manager - Pipeline configuration and management.
-3.  Tools - Established and developed utility tools.
-4.  Orthologs - Pipeline generation for comparative genetics.
+
+1. [Cookies Module](#using-the-cookies-module) - Project structure creation using cookiecutter.
+2. [Manager Module](#using-the-manager-module) - Configuration management as well project deployment.
+3. [Orthologs Module](#using-the-orthologs-module) - Tools for comparative genetics analysis including alignment analysis and phylogenetics.
+4. [Tools Module](#using-the-tools-module) - Utilities that aid in ftp downloading, server communication, and reusable everyday functions
 
 When used together, these 4 modules offer a cohesive environment for easily creating,
 managing, and deploying a bioinformatics pipeline for orthologous genes/species.  In the future
@@ -14,13 +15,6 @@ these tools will also be accessible from the command line and from a web applica
 
 READMEs are provided in each module's directory, but we've compiled a mini tutorial here
 that can inform users on how to use these modules.
-
-
-## Table of Contents
-1. [Cookies Module](#using-the-cookies-module)
-2. [Manager Module](#using-the-manager-module)
-3. [Orthologs Module](#using-the-orthologs-module)
-4. [Tools Module](#using-the-tools-module)
 
 
 ## Using the Cookies module
