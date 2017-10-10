@@ -54,8 +54,10 @@ class QsubUtils:
 
     def pbs_dict(self, default, author='', email='', description='', project='', select='1',
                  jobname='', script_name='', logname='', python='python3',
-                 gb='6gb', cput='75:00:00', walltime='75:00:00'):
+                 gigabytes='6gb', cput='75:00:00', walltime='75:00:00'):
         """Add PBS script attributes."""
+
+        # TODO simplify this function
 
         # Date format. Used to add as a date
         format1 = '%a %b %d %I:%M:%S %p %Y'
@@ -79,7 +81,7 @@ class QsubUtils:
             'PBS_O_WORKDIR': '${PBS_O_WORKDIR}',
             'proj_name': project,
             'select': int(select),
-            'memgb': gb,
+            'memgb': gigabytes,
             'cput': cput,
             'wt': walltime,
             'job_name': jobname,
@@ -135,11 +137,3 @@ class QsubUtils:
             if cleanup:  # When finished, remove the qsub files & python files.
                 os.remove(base + '.qsub')
                 os.remove(base + '.py')
-
-
-class MultiJobber(QsubUtils):
-    """Create multiple jobs & scripts for each job to run based on
-    splitting a list into chunks.
-    """
-    # TODO-SDH This needs testing.
-    # TODO-SDH Create a more simplified process/algorithm.
