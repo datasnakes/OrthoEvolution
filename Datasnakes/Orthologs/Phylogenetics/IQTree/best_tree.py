@@ -28,6 +28,7 @@ class FilteredTree(object):
         """Generate and save the best tree from IQTree by importing the filtered
         alignment.
         """
-        iqtree_cline = IQTreeCommandline(alignment=alignment, dataType=dataType)
+        iqtree_cline = IQTreeCommandline(alignment=alignment,
+                                         dataType=dataType)
         print(iqtree_cline)
         check_call([str(iqtree_cline)], stderr=STDOUT, shell=True)
