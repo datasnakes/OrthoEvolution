@@ -18,3 +18,4 @@ psutil==5.2.2
 luigi==2.3.0
 sciluigi==0.9.5b6
 logzero>=1.2.1
+xmltodict>=0.11.0

@@ -1,23 +1,32 @@
-Multiprocess
+parallel
 =============
-The multiprocess module and class, `MultiPro`, use python's native multiprocessing
-module. Find more information [here](https://docs.python.org/3.6/library/multiprocessing.html).
+The parellel module is home to the `Multiprocess` class which uses python's native multiprocessing
+module. Find more information [here](https://docs.python.org/3.6/library/multiprocessing.html). It will
+soon be home to [MPI (Message Passing Interface)](http://mpi4py.readthedocs.io/en/stable/) which is also a form of parallel computing.
 
 In order to take advantage of using our supercomputer's processing power, we
 looked into mpi and multiprocessing. Both were found to be useful.
 
 This is an optional class in our pipeline, but if you're using AWS or Google's
-supercomputing, then you may find it useful.
+supercomputing, then you may find it useful unless you're interested in or
+using clustering or SGE (Sun Grid Engine). We have a sge module for that.
 
-Usage
+Examples
 ------
+
+#### Random Example
 
 ```python
 from Datasnakes.Tools import Multiprocess
 
-# Write a function that can be used for 1 item in a list of items
-def blast2clustal(gene):
 
-# Map your function to your list and run it using multiple processes
-Multiprocess('5', blast2clustal(), geneslist)
+def printwords(word):
+    print(word)
+
+
+words = ['bae', 'luh', 'cuh']
+
+if __name__ == '__main__':
+    mp = Multiprocess()
+    mp.map2function(printwords, words)
 ```
