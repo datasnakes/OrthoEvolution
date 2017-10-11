@@ -24,7 +24,7 @@ class CookBook(object):
         The Cookie Recipes are used for the Recipes attribute
         in the Oven class.
 
-        New Recipes can also be added..
+        New Recipes can also be added...
         """
         self.CookieJar = Path(pkg_resources.resource_filename(Cookies.__name__, ''))
         self.repo_cookie = self.CookieJar / Path('new_repository')
@@ -59,9 +59,12 @@ class Oven(object):
 
     def __init__(self, repo=None, user=None, project=None, basic_project=False, databases=None, website=None, output_dir=os.getcwd(), recipes=CookBook()):
         """
+        This class uses cookiecutter to deploy custom cookiecutter templates:
+
         The Oven uses the different Ingredients (parameters/attributes) and
-         the Recipe Book(cookiecutter templates) to bake_the_cookies
+        the Cook Book(cookiecutter templates) to bake_the_cookies
         in the Oven(class methods).
+
         After the cookies cool, they are put in the cookie_jar (output directory).
 
         :param repo (string):  An ingredient representing the repository name.
@@ -71,7 +74,7 @@ class Oven(object):
         :param databases (list):  An ingredient representing a list of databases.
         :param website (string):  An ingredient representing the website name.
         :param output_dir (path or pathlike):  The cookie jar for storing the cookies.
-        :param recipes (pathlike):
+        :param recipes (pathlike):  An index for the different recipe templates.
         """
         self.cookielog = LogIt().default(logname="Cookies", logfile=None)
         self.cookie_jar = output_dir
@@ -94,8 +97,8 @@ class Oven(object):
 
     def bake_the_repo(self, cookie_jar=None):
             self.cookielog.warn('Creating directories from the Repository Cookie template.')
-            # print(self.__class__.__name__)
-            """This function creates a new repository.  If a repository name
+            """
+            This function creates a new repository.  If a repository name
             is given to the class then it is given a name.  If not, cookiecutters
             takes input from the user.
     
@@ -120,7 +123,8 @@ class Oven(object):
 
     def bake_the_user(self, cookie_jar=None):
         self.cookielog.warn('Creating directories from the User Cookie template.')
-        """This function uses the username given by our FLASK framework
+        """
+        This function uses the username given by our FLASK framework
         and creates a new directory system for the active user using
         our  new_user cookiecutter template.
         """
@@ -141,7 +145,6 @@ class Oven(object):
 
     def bake_the_project(self, cookie_jar=None):
         self.cookielog.warn('Creating directories from the Project Cookie template.')
-        # print(self.__class__.__name__)
         """
         :return: A new project inside the user's
         project directory.
@@ -202,7 +205,8 @@ class Oven(object):
 
     def bake_the_website(self, host, port, website_path, cookie_jar=None):
         self.cookielog.warn('Creating directories from the Website Cookie template.')
-        """Create a website using the new_website cookie.
+        """
+        Create a website using the new_website cookie.
 
         After creating the directory structure, the run_script function
         from cookiecutter finds the hooks folder which contains a
@@ -253,7 +257,9 @@ class Oven(object):
 
     def bake_the_app(self, app, cookie_jar=None):
         self.cookielog.warn('Creating directories from the App Cookie template.')
-        """Create an app."""
+        """
+        Create an app.
+        """
         if cookie_jar:
             self.cookie_jar = cookie_jar
         e_c = {"app_name": app}
