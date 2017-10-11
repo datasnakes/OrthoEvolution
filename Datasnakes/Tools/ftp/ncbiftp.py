@@ -5,6 +5,9 @@ from time import time
 from datetime import datetime
 from multiprocessing.pool import ThreadPool
 import os
+# from progress.bar import Bar
+# TODO Create a progress bar; Integrate with Threading/downloading
+# TODO Use logit to log which files were downloaded
 
 from Datasnakes.Tools.ftp.baseftp import BaseFTPClient
 
@@ -19,7 +22,7 @@ class NcbiFTPClient(BaseFTPClient):
         self.refseqrelease_path = '/refseq/release/'
         self._taxdb = 'taxdb.tar.gz'  # Located in self.blastdb_path
 
-        # TODO Use python to get these and turn into a json file or dict
+        # TODO Use Turn into a json file, dict, orconfig
         self.blastdbs = []
         self.blastfastadbs = []
 
@@ -29,6 +32,11 @@ class NcbiFTPClient(BaseFTPClient):
         pattern = re.compile('^/(.*?)/$')
         if not re.match(pattern, path):
             raise ValueError('Your path is not in a proper format.')
+            
+    def _archive(self, path):
+        """Archive all the files in the folder and compress the archive."""
+        # TODO Write archive function
+        pass
 
     def _walk(self, path):
         """Walk the ftp server and get files and directories."""
@@ -112,7 +120,7 @@ class NcbiFTPClient(BaseFTPClient):
         if extract:
             extract_time_secs = time()
             with ThreadPool(1) as extract_pool:
-                extract_pool.map(self._extract_file, files2download)
+                extract_pool.map(self.extract_file, files2download)
                 minutes = (time() - extract_time_secs) / 60
             print("Took %s minutes to extract from all files." % minutes)
 
@@ -145,7 +153,7 @@ class NcbiFTPClient(BaseFTPClient):
         if extract:
             extract_time_secs = time()
             with ThreadPool(1) as extract_pool:
-                extract_pool.map(self._extract_file, files2download)
+                extract_pool.map(self.extract_file, files2download)
                 minutes = (time() - extract_time_secs) / 60
             print("Took %s minutes to extract from all files." % minutes)
 
@@ -178,28 +186,42 @@ class NcbiFTPClient(BaseFTPClient):
         if extract:
             extract_time_secs = time()
             with ThreadPool(1) as extract_pool:
-                extract_pool.map(self._extract_file, files2download)
+                extract_pool.map(self.extract_file, files2download)
                 minutes = (time() - extract_time_secs) / 60
             print("Took %s minutes to extract from all files." % minutes)
 
     def updatedb(self, database_path=os.getcwd(), update_days=7):
-        """Check for when the database was last updated."""
+        """Check for when the database was last updated.
+        
+        Refseq/release databases should only be updated every few months.        
+        """
+        # TODO Prevent users from updated refseq if certain days
         # Get a list of the files in the path
         filesinpath = os.listdir(database_path)
         for fileinpath in filesinpath:
             if str(fileinpath).endswith('.nal'):
                 nalfile = str(fileinpath)
                 dbname, ext = nalfile.split('.')
-                del ext
                 filetime = datetime.fromtimestamp(os.path.getctime(nalfile))
                 format_filetime = filetime.strftime("%b %d, %Y at %I:%M:%S %p")
+                
+            elif str(fileinpath).endswith('.gbff'):
+                gbff_file = str(fileinpath)
+                dbname, ext = gbff_file.split('.')
+                filetime = datetime.fromtimestamp(os.path.getctime(gbff_file))
+                format_filetime = filetime.strftime("%b %d, %Y at %I:%M:%S %p")                
+                
 
         print("Your database was last updated on: %s" % format_filetime)
 
         time_elapsed = datetime.now() - filetime
-        if time_elapsed.days >= update_days:
-            print('\nYour database needs updating.')
+        
+        if ext == 'nal' and time_elapsed.days >= update_days:
+            print('\nYour blast database needs updating.')
             self.getblastdb(dbname, download_path=database_path, extract=True)
-
+            
+        elif ext == 'gbff' and time_elapsed.days >= 70:
+            print('\nYour refseq release database needs updating.')
+            self.getblastdb(dbname, download_path=database_path, extract=True)
         else:
-            print('\nYour database has been updated within the last week.')
+            print('\nYour database is still up to date.')
