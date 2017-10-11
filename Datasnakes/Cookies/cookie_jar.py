@@ -1,5 +1,6 @@
 import os
 import pkg_resources
+import yaml
 from cookiecutter.main import cookiecutter
 from cookiecutter.prompt import prompt_for_config
 from cookiecutter.generate import generate_context
@@ -7,10 +8,24 @@ from cookiecutter.hooks import run_script
 from pathlib import Path
 from Datasnakes import Cookies
 from Datasnakes.Tools import LogIt
+from Datasnakes.Manager import config
+from pkg_resources import resource_filename
 
 
-class CookieRecipes(object):
-    def __init__(self):
+class CookBook(object):
+    _config_file = resource_filename(config.__name__, "cookie_recipes.yml")
+
+    def __init__(self, config_file=_config_file, **NewRecipes):
+        """
+        The Cookie Recipes are public attributes for accessing
+        the paths to the various cookiecutter templates in the
+        Cookies module.
+
+        The Cookie Recipes are used for the Recipes attribute
+        in the Oven class.
+
+        New Recipes can also be added..
+        """
         self.CookieJar = Path(pkg_resources.resource_filename(Cookies.__name__, ''))
         self.repo_cookie = self.CookieJar / Path('new_repository')
         self.user_cookie = self.CookieJar / Path('new_user')
@@ -21,10 +36,38 @@ class CookieRecipes(object):
         self.db_cookie = self.CookieJar / Path('new_database')
         self.website_cookie = self.CookieJar / Path('new_website')
 
+        # Load the cookies that are in the cookie_jar config file
+        with open(config_file, 'r') as ymlfile:
+            configuration = yaml.safe_load(ymlfile)
+            setattr(self, "CONFIGURATION", configuration)
+            for key, value in configuration.items():
+                setattr(self, key, value)
+
+        # For custom cookies use a dictionary to create attributes
+        if NewRecipes:
+            for cookie, path in NewRecipes.items():
+                setattr(self, cookie, path)
+
+
 
 class Oven(object):
 
-    def __init__(self, repo=None, user=None, project=None, basic_project=False, databases=None, website=None, output_dir=os.getcwd(), cookies=CookieRecipes()):
+    def __init__(self, repo=None, user=None, project=None, basic_project=False, databases=None, website=None, output_dir=os.getcwd(), recipes=CookBook()):
+        """
+        The Oven uses the different Ingredients (parameters/attributes) and
+         the Recipe Book(cookiecutter templates) to bake_the_cookies
+        in the Oven(class methods).
+        After the cookies cool, they are put in the cookie_jar (output directory).
+
+        :param repo (string):  An ingredient representing the repository name.
+        :param user (string):  An ingredient representing the user name
+        :param project (string):  An ingredient representing the project name.
+        :param basic_project (bool):  A secret ingredient ONLY for the basic project cookie.
+        :param databases (list):  An ingredient representing a list of databases.
+        :param website (string):  An ingredient representing the website name.
+        :param output_dir (path or pathlike):  The cookie jar for storing the cookies.
+        :param recipes (:
+        """
         self.cookielog = LogIt().default(logname="Cookies", logfile=None)
         self.cookie_jar = output_dir
         # Below are the PyPi path strings
@@ -35,7 +78,14 @@ class Oven(object):
         self.basic_project = basic_project
         self.databases = databases
         self.website = website
-        self.Ingredients = cookies
+        self.Recipes = recipes
+        self.Ingredients = {"repo": self.repo,
+                            "user": self.user,
+                            "project": self.project,
+                            "basic_project": self.basic_project,
+                            "databases": self.databases,
+                            "website": self.website,
+                            "recipes": self.Recipes.__dict__}
 
     def bake_the_repo(self, cookie_jar=None):
             self.cookielog.warn('Creating directories from the Repository Cookie template.')
@@ -58,7 +108,7 @@ class Oven(object):
                 no_input = False
                 e_c = None
                 # TODO-ROB change cookiecutter so that it can take pathlike objects
-            cookiecutter(str(self.Ingredients.repo_cookie), no_input=no_input,
+            cookiecutter(str(self.Recipes.repo_cookie), no_input=no_input,
                          extra_context=e_c, output_dir=str(self.cookie_jar))
             os.chmod(str(self.cookie_jar / Path(self.repo)), mode=0o777)
             self.cookielog.info('Repository directories have been created. ✔')
@@ -76,7 +126,7 @@ class Oven(object):
         # TODO-ROB:  Create the cookiecutter.json file
 
         # extra_context overrides user and default configs
-        cookiecutter(str(self.Ingredients.user_cookie), no_input=True, extra_context={
+        cookiecutter(str(self.Recipes.user_cookie), no_input=True, extra_context={
             "user_name": self.user}, output_dir=str(self.cookie_jar))
 
         # Change user permissions with flask later (this is for testing
@@ -105,7 +155,7 @@ class Oven(object):
 
         if not self.basic_project:
             self.cookielog.warn('A project linked to a user/repository is being created.')
-            cookiecutter(str(self.Ingredients.project_cookie), extra_context=e_c, no_input=no_input,
+            cookiecutter(str(self.Recipes.project_cookie), extra_context=e_c, no_input=no_input,
                          output_dir=str(self.cookie_jar))
             # Logging
             if self.user:
@@ -114,7 +164,7 @@ class Oven(object):
                 self.cookielog.info('Directories have been created for %s.' % project_log_message)
         else:
             self.cookielog.warn('A basic standalone project is being created.')
-            cookiecutter(str(self.Ingredients.basic_project_cookie), extra_context=e_c, no_input=no_input,
+            cookiecutter(str(self.Recipes.basic_project_cookie), extra_context=e_c, no_input=no_input,
                          output_dir=str(self.cookie_jar))
             self.cookielog.info('Directories have been created for a standalone project %s. ✔' % project_log_message)
         os.chmod(str(self.cookie_jar / Path(self.project)), mode=0o777)
@@ -129,7 +179,7 @@ class Oven(object):
         if db_path_dict:
             for db, path in db_path_dict.items():
                 e_c = {"db_name": db}
-                cookiecutter(str(self.Ingredients.db_cookie), extra_context=e_c, no_input=True, output_dir=str(user_db))
+                cookiecutter(str(self.Recipes.db_cookie), extra_context=e_c, no_input=True, output_dir=str(user_db))
                 os.chmod(str(user_db / Path(db)), mode=0o777)
                 self.cookielog.info('Directories have been created for the database, %s. ✔' % db)
 
@@ -137,10 +187,10 @@ class Oven(object):
             db_num = int(input("How many NCBI databases do you need to create?"))
             for db in range(1, db_num + 1):
                 # Manually set up cookiecutter prompting
-                context_file = str(self.Ingredients.db_cookie / Path('cookiecutter.json'))
+                context_file = str(self.Recipes.db_cookie / Path('cookiecutter.json'))
                 e_c = prompt_for_config(context=generate_context(context_file=context_file))
                 # Create the cookiecutter repo with no input, and add extra content from manual prompts
-                cookiecutter(str(self.Ingredients.db_cookie), output_dir=str(ncbi_db_repo), extra_context=e_c, no_input=True)
+                cookiecutter(str(self.Recipes.db_cookie), output_dir=str(ncbi_db_repo), extra_context=e_c, no_input=True)
                 # Use cookiecutter_dict from manual prompts to change the user permissions.
                 os.chmod(str(ncbi_db_repo / Path(e_c['db_name'])), mode=0o777)
                 self.cookielog.info('Directories have been created for the database, %s. ✔' % e_c['db_name'])
@@ -164,7 +214,7 @@ class Oven(object):
                "website_path": os.path.join(str(website_path), ''),
                "website_host": host,
                "website_port": port}
-        cookiecutter(str(self.Ingredients.website_cookie), no_input=True,
+        cookiecutter(str(self.Recipes.website_cookie), no_input=True,
                      extra_context=e_c, output_dir=str(self.cookie_jar))
         os.chmod(str(self.cookie_jar / Path(self.website)), mode=0o777)
         # Get the absolute path to the script that starts the flask server
@@ -189,7 +239,7 @@ class Oven(object):
 
         e_c = {"research_type": research_type,
                "research_name": research}
-        cookiecutter(str(self.Ingredients.research_cookie), no_input=True,
+        cookiecutter(str(self.Recipes.research_cookie), no_input=True,
                      extra_context=e_c, output_dir=str(self.cookie_jar))
         os.chmod(str(self.cookie_jar / Path(research_type)), mode=0o777)
         # script_path = self.project_cookie / Path('hooks') / Path('post_gen_project.py')
@@ -202,7 +252,7 @@ class Oven(object):
         if cookie_jar:
             self.cookie_jar = cookie_jar
         e_c = {"app_name": app}
-        cookiecutter(str(self.Ingredients.app_cookie), no_input=True,
+        cookiecutter(str(self.Recipes.app_cookie), no_input=True,
                      extra_context=e_c, output_dir=str(self.cookie_jar))
         os.chmod(str(self.cookie_jar), mode=0o777)
         self.cookielog.info("Directories have been created for an R-Shiny app, %s. ✔" % app)
