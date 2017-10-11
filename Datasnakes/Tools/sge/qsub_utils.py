@@ -60,13 +60,27 @@ class Qsubutils:
             string.ascii_letters + string.digits, length))
 
     @staticmethod            
-    def writepythonfile(filename,  code):
+    def writecodefile(filename, code, language):
         """Create a python file and write the code to it."""
-        with open(filename + '.py', 'w') as pyfile:
-            pyfile.write(code)
-            pyfile.close()
-            
+        if language == 'python':
+            with open(filename + '.py', 'w') as pyfile:
+                pyfile.write(code)
+                pyfile.close()
+                
+        elif language == 'bash':
+            with open(filename + '.sh', 'w') as bashfile:
+                bashfile.write(code)
+                bashfile.close()
+                
+        elif language == 'R' or 'r':
+            with open(filename + '.R', 'w') as rfile:
+                rfile.write(code)
+                rfile.close()    
+        else:
+            raise NotImplementedError('%s is unsupported.' % language)
+                
     def _checkjobstatus(self):
+        raise NotImplementedError
         with contextlib.suppress(OSError):
             cmd = 'qstat'  # this is the command
             cmd_status = run([cmd], shell=True)  # must = TRUE
@@ -135,7 +149,7 @@ class Qsubutils:
             baseid, base = self.basejobids()
             if prefix != None:
                 base = prefix + '_' + base
-            self.writepythonfile(filename=base, code=code)
+            self.writecodefile(filename=base, code=code, language=language)
             outfile = 'orthoevol_{}.out'.format(baseid)
             errfile = 'orthoevol_{}.err'.format(baseid)
             # Create the pbs script from the template or dict
