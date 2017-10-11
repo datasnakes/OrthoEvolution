@@ -77,7 +77,7 @@ class NcbiFTPClient(BaseFTPClient):
         directories, _ = self._walk(path)
         return directories
 
-    def getrefseqrelease(self, database_name, data_type, file_type, download_path='', 
+    def getrefseqrelease(self, database_name, seqtype, filetype, download_path='', 
                          extract=True):
         """Download the preformatted blast database."""
         self.ftp.cwd(self.refseqrelease_path)
@@ -88,15 +88,20 @@ class NcbiFTPClient(BaseFTPClient):
             raise FileNotFoundError('%s does not exist.' % database_name)
         
         self.ftp.cwd(database_name)
-        releasefiles = self.listfiles()
+        curpath = self.ftp.pwd() + '/'
+        releasefiles = self.listfiles(curpath)
 
         files2download = []
+        pattern = re.compile('^' + database_name + '[.](.*?)[.]' + seqtype + '[.]' + filetype + '[.]gz$')
         for releasefile in releasefiles:
-            if data_type and file_type in str(releasefile):
+            if re.match(pattern, releasefile):
                 files2download.append(releasefile)
 
         print('You are about to download theses files: %s' % files2download)
-
+        
+        # Move to directory for file downloads
+        os.chdir(download_path)
+        
         # Download the files using multiprocessing
         download_time_secs = time()
         with ThreadPool(1) as download_pool:
@@ -111,7 +116,7 @@ class NcbiFTPClient(BaseFTPClient):
                 minutes = (time() - extract_time_secs) / 60
             print("Took %s minutes to extract from all files." % minutes)
 
-    def getblastfasta(self, database_name, extract=True):
+    def getblastfasta(self, database_name, download_path='', extract=True):
         """Download the fasta sequence database (not formatted)."""
         if str(database_name).startswith('est'):
             raise NotImplementedError('Est dbs cannot be downloaded yet.')
@@ -127,6 +132,9 @@ class NcbiFTPClient(BaseFTPClient):
         files2download.append(self._taxdb)
         print('You are about to download theses files: %s' % files2download)
 
+        # Move to directory for file downloads
+        os.chdir(download_path)
+        
         # Download the files using multiprocessing
         download_time_secs = time()
         with ThreadPool(1) as download_pool:
@@ -141,7 +149,7 @@ class NcbiFTPClient(BaseFTPClient):
                 minutes = (time() - extract_time_secs) / 60
             print("Took %s minutes to extract from all files." % minutes)
 
-    def getblastdb(self, database_name, extract=True):
+    def getblastdb(self, database_name, download_path='', extract=True):
         """Download the fasta sequence database (not formatted)."""
         if str(database_name).startswith('est'):
             raise NotImplementedError('Est dbs cannot be downloaded yet.')
@@ -157,6 +165,9 @@ class NcbiFTPClient(BaseFTPClient):
         files2download.append(self._taxdb)
         print('You are about to download theses files: %s' % files2download)
 
+        # Move to directory for file downloads
+        os.chdir(download_path)
+        
         # Download the files using multiprocessing
         download_time_secs = time()
         with ThreadPool(1) as download_pool:
