@@ -16,10 +16,10 @@ class NcbiFTPClient(BaseFTPClient):
         super().__init__(_NCBI, email, keepalive=False, debug_lvl=0)
         self.blastdb_path = '/blast/db/'
         self.blastfasta_path = '/blast/db/FASTA/'
-        self.vertebratemammalian_path = '/refseq/release/vertebrate_mammalian/'
+        self.refseqrelease_path = '/refseq/release/'
         self._taxdb = 'taxdb.tar.gz'  # Located in self.blastdb_path
 
-        # Use python to get these and turn into a json file or dict
+        # TODO Use python to get these and turn into a json file or dict
         self.blastdbs = []
         self.blastfastadbs = []
 
@@ -61,38 +61,40 @@ class NcbiFTPClient(BaseFTPClient):
             tar = tarfile.open(file2extract)
             tar.extractall()
             tar.close()
-            print('')
+            print('Files were successfully extracted from %s.' % file2extract)
         else:
             raise ValueError('%s does not end in tar.gz' % file2extract)
 
     def listfiles(self, path='/'):
         """List all files in a path."""
         self._pathformat(path)
-        directories, files = self._walk(path)
-        del directories
+        _, files = self._walk(path)
         return files
 
     def listdirectories(self, path='/'):
         """List all directories in a path."""
         self._pathformat(path)
-        directories, files = self._walk(path)
-        del files
+        directories, _ = self._walk(path)
         return directories
 
-    def getblastdb(self, database_name, download_path='', extract=True):
+    def getrefseqrelease(self, database_name, data_type, file_type, download_path='', 
+                         extract=True):
         """Download the preformatted blast database."""
-        if str(database_name).startswith('est'):
-            raise NotImplementedError('Est dbs cannot be downloaded yet.')
-        self.ftp.cwd(self.blastdb_path)
-        blastdbfiles = self.listfiles(self.blastdb_path)
+        self.ftp.cwd(self.refseqrelease_path)
+        releasedirs = self.listdirectories(self.refseqrelease_path)
+        
+        # Change to directory input
+        if database_name not in releasedirs:
+            raise FileNotFoundError('%s does not exist.' % database_name)
+        
+        self.ftp.cwd(database_name)
+        releasefiles = self.listfiles()
 
         files2download = []
-        for dbfile in blastdbfiles:
-            if database_name in str(dbfile):
-                files2download.append(dbfile)
+        for releasefile in releasefiles:
+            if data_type and file_type in str(releasefile):
+                files2download.append(releasefile)
 
-        # Append the taxonomy database
-        files2download.append(self._taxdb)
         print('You are about to download theses files: %s' % files2download)
 
         # Download the files using multiprocessing
@@ -114,6 +116,36 @@ class NcbiFTPClient(BaseFTPClient):
         if str(database_name).startswith('est'):
             raise NotImplementedError('Est dbs cannot be downloaded yet.')
         self.ftp.cwd(self.blastfasta_path)
+        blastfastafiles = self.listfiles(self.blastfasta_path)
+
+        files2download = []
+        for dbfile in blastfastafiles:
+            if database_name in str(dbfile):
+                files2download.append(dbfile)
+
+        # Append the taxonomy database
+        files2download.append(self._taxdb)
+        print('You are about to download theses files: %s' % files2download)
+
+        # Download the files using multiprocessing
+        download_time_secs = time()
+        with ThreadPool(1) as download_pool:
+            download_pool.map(self.download_file, files2download)
+            minutes = (time() - download_time_secs) / 60
+        print("Took %s minutes to download the files." % minutes)
+
+        if extract:
+            extract_time_secs = time()
+            with ThreadPool(1) as extract_pool:
+                extract_pool.map(self._extract_file, files2download)
+                minutes = (time() - extract_time_secs) / 60
+            print("Took %s minutes to extract from all files." % minutes)
+
+    def getblastdb(self, database_name, extract=True):
+        """Download the fasta sequence database (not formatted)."""
+        if str(database_name).startswith('est'):
+            raise NotImplementedError('Est dbs cannot be downloaded yet.')
+        self.ftp.cwd(self.blastdb_path)
         blastdbfiles = self.listfiles(self.blastdb_path)
 
         files2download = []
@@ -159,4 +191,4 @@ class NcbiFTPClient(BaseFTPClient):
             self.getblastdb(dbname, download_path=database_path, extract=True)
 
         else:
-            print('\nour database has been updated within the last week.')
+            print('\nYour database has been updated within the last week.')
