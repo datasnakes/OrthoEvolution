@@ -15,7 +15,7 @@ from pkg_resources import resource_filename
 class CookBook(object):
     _config_file = resource_filename(config.__name__, "cookie_recipes.yml")
 
-    def __init__(self, config_file=_config_file, **NewRecipes):
+    def __init__(self, config_file=_config_file, **new_recipes):
         """
         The Cookie Recipes are public attributes for accessing
         the paths to the various cookiecutter templates in the
@@ -44,10 +44,15 @@ class CookBook(object):
                 setattr(self, key, value)
 
         # For custom cookies use a dictionary to create attributes
-        if NewRecipes:
-            for cookie, path in NewRecipes.items():
+        if new_recipes:
+            for cookie, path in new_recipes.items():
                 setattr(self, cookie, path)
+            # Add the new recipes to the configuration file dictionary
+            configuration.update(new_recipes)
 
+        # Overwrite the yaml config file.
+        with open(config_file, 'w') as ymlfile:
+            yaml.dump(configuration, ymlfile)
 
 
 class Oven(object):
@@ -66,7 +71,7 @@ class Oven(object):
         :param databases (list):  An ingredient representing a list of databases.
         :param website (string):  An ingredient representing the website name.
         :param output_dir (path or pathlike):  The cookie jar for storing the cookies.
-        :param recipes (:
+        :param recipes (pathlike):
         """
         self.cookielog = LogIt().default(logname="Cookies", logfile=None)
         self.cookie_jar = output_dir
