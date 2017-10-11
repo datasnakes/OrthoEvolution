@@ -35,7 +35,7 @@ class Management(object):
         # Below are the PyPi path strings
         #    The first group is to access the cookiecutter templates
         self.Kitchen = Oven(repo=self.repo, output_dir=self.file_home)
-        self.Pantry = self.Kitchen.Ingredients
+        self.Pantry = self.Kitchen.Recipes
         #    The second group is for the Manager module
         self.Manager = Path(pkg_resources.resource_filename(Manager.__name__, ''))
         self.BioSQL = self.Manager / Path('BioSQL')
