@@ -2,15 +2,15 @@
 computing environments. The command is usually `qsub <options>` on most
 systems.
 """
-import sys
 import random
 import string
 from string import Template
-import subprocess
+from subprocess import run, CalledProcessError, PIPE
 from datetime import datetime as d
 import platform
 import getpass
 import os
+import contextlib
 
 
 class Qsubutils:
@@ -19,13 +19,20 @@ class Qsubutils:
     This class also provides functionality for creating multiple pbs jobs that
     by creating chunks of lists for each python script and job.
     """
-    def __init__(self):
+    def __init__(self, default=True):
         """UNLESS A WINDOWS MACHINE HAS PBS. IT LIKELY WONT"""
         if "windows" in platform.system().lower():
             raise ImportError("QsubUtils is only supported on linux/osx.")
 
-        default = True  # Default job is TRUE
         self.default = default
+        
+    def basejobids(self):
+        """"Create base job attributes."""
+        base_id = self.randomid()
+        self.base_id = base_id
+        base = "submit_{0}".format(self.base_id)
+        
+        return base_id, base
 
     @classmethod
     def import_temp(cls, filepath):
@@ -51,9 +58,22 @@ class Qsubutils:
         """Generate a random ID of 5 characters to append to qsub job name."""
         return ''.join(random.sample(
             string.ascii_letters + string.digits, length))
+            
+    def _checkjobstatus(self):
+        with contextlib.suppress(OSError):
+            cmd = 'qstat'  # this is the command
+            cmd_status = run([cmd], shell=True)  # must = TRUE
+            if cmd_status == 0:  # Command was successful.
+                print('Job submitted.')
+            else:  # Unsuccessful. Stdout will be '1'.
+                print("PBS job not submitted.")
+                
+    def _cleanup(self, base):
+        os.remove(base + '.pbs')
+        os.remove(base + '.py')
 
-    def pbs_dict(self, default, author='', email='', description='', project='', select='1',
-                 jobname='', script_name='', logname='', python='python3',
+    def pbs_dict(self, default=True, author='', email='', description='', project='', select='1',
+                 jobname='', script_name='', logname='', outfile='', errfile='', python='python3',
                  gigabytes='6gb', cput='75:00:00', walltime='75:00:00'):
         """Add PBS script attributes."""
 
@@ -63,14 +83,17 @@ class Qsubutils:
         format1 = '%a %b %d %I:%M:%S %p %Y'
 
         if self.default == default:
+            base, baseid = self.basejobids()
             author = getpass.getuser().upper()
             email = 'n/a'
             description = 'This is a default pbs job.'
             project = 'Datasnakes-Orthologs'
             select = '3'
-            jobname = 'ds-ortho'
-            script_name = 'datasnakes'
-            logname = 'datasnakes'.format(self.randomid(length=3))
+            jobname = 'orthoevol'
+            script_name = script_name
+            outfile = outfile
+            errfile = errfile
+            logname = 'ortho-evol.{}'.format(self.randomid(length=3))
 
         # Fill in the pbs script attributes
         job_attributes = {
@@ -85,6 +108,8 @@ class Qsubutils:
             'cput': cput,
             'wt': walltime,
             'job_name': jobname,
+            'outfile': outfile,
+            'errfile': errfile,
             'script': script_name,
             'log_name': logname.format(self.randomid()),
             'cmd': python + " " + script_name + ".py",
@@ -95,9 +120,8 @@ class Qsubutils:
 
     def submitpythoncode(self, code, default=True, cleanup=True, prefix=""):
         """Creates and submit a qsub job. Also uses python code."""
-
-        # Create a base name for the jobs and python scripts
-        base = prefix + "submit_{0}".format(self.randomid())
+        
+        baseid, base = self.basejobids()
 
         # Create a python file and write the code to it
         with open(base + '.py', 'w') as pyfile:
@@ -108,32 +132,34 @@ class Qsubutils:
         # TODO-SDH add a default parameter or custom parameter
         # If default, python file will be created from code that is used.
         if self.default == default:
+            outfile = 'orthoevol_{}.out'.format(baseid)
+            errfile = 'orthoevol_{}.err'.format(baseid)
             # Create the pbs script from the template or dict
             pbstemp = self.import_temp('temp.pbs')
             with open(base + '.pbs', 'w') as pbsfile:
-                pbsfile.write(pbstemp.substitute(self.pbs_dict(self.default)))
+                pbsfile.write(pbstemp.substitute(self.pbs_dict(outfile=outfile, errfile=errfile, script_name=base.format(baseid))))
                 pbsfile.close()
         else:
             pbstemp = self.import_temp('temp.pbs')
             with open(base + '.pbs', 'w') as pbsfile:
-                pbsfile.write(pbstemp.substitute(self.pbs_dict(default=False)))
+                pbsfile.write(pbstemp.substitute(self.pbs_dict))
                 pbsfile.close()
 
-        userprompt = input('Are you sure you want to submit this job? [Y/N]')
-        if userprompt != 'Y' or 'y':
+        userprompt = input('Are you sure you want to submit this job? [Y/N] ')
+        accepted = ['Y', 'y', 'yes']
+        if userprompt not in accepted:
             # Delete the jobs that were just created if job not performed.
             os.remove(base + '.pbs')
             os.remove(base + '.py')
-            sys.exit('You do not want to submit this job.')  # Exit.
+            raise UserWarning('You do not want to submit this job.')
 
-        try:
-            cmd = 'qsub  ' + base + '.pbs'  # this is the command
-            cmd_status = subprocess.call([cmd], shell=True)  # must = TRUE
-            if cmd_status == 0:  # Command was successful.
-                pass  # Continue
-            else:  # Unsuccessful. Stdout will be '1'.
+        with contextlib.suppress(CalledProcessError):
+            cmd = ['qsub ' + base + '.pbs']  # this is the command
+            cmd_status = run(cmd, stdout=PIPE, stderr=PIPE, shell=True)  # must = TRUE
+            if cmd_status.returncode == 0:  # Command was successful.
+                print('Job submitted.\n')
+                #TODO add a check to for job errors or check for error file.
+                
+            else:  # Unsuccessful. Stdout will be '1'
                 print("PBS job not submitted.")
-        finally:
-            if cleanup:  # When finished, remove the qsub files & python files.
-                os.remove(base + '.qsub')
-                os.remove(base + '.py')
+                self._cleanup(base=base)
