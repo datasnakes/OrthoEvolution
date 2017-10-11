@@ -58,6 +58,13 @@ class Qsubutils:
         """Generate a random ID of 5 characters to append to qsub job name."""
         return ''.join(random.sample(
             string.ascii_letters + string.digits, length))
+
+    @staticmethod            
+    def writepythonfile(filename,  code):
+        """Create a python file and write the code to it."""
+        with open(filename + '.py', 'w') as pyfile:
+            pyfile.write(code)
+            pyfile.close()
             
     def _checkjobstatus(self):
         with contextlib.suppress(OSError):
@@ -117,41 +124,39 @@ class Qsubutils:
             }
 
         return job_attributes
-
-    def submitpythoncode(self, code, default=True, cleanup=True, prefix=""):
-        """Creates and submit a qsub job. Also uses python code."""
         
-        baseid, base = self.basejobids()
 
-        # Create a python file and write the code to it
-        with open(base + '.py', 'w') as pyfile:
-            pyfile.write(code)
-            pyfile.close()
-
+    def submitjob(self, code, language='python', default=True, prefix=None):
+        """Creates and submit a qsub job. Also uses python code."""
         # TIP If python is in your environment as only 'python' update that.
         # TODO-SDH add a default parameter or custom parameter
-        # If default, python file will be created from code that is used.
-        if self.default == default:
+        # If default, a python file will be created from code that is used.
+        if self.default == default and language == 'python':
+            baseid, base = self.basejobids()
+            if prefix != None:
+                base = prefix + '_' + base
+            self.writepythonfile(filename=base, code=code)
             outfile = 'orthoevol_{}.out'.format(baseid)
             errfile = 'orthoevol_{}.err'.format(baseid)
             # Create the pbs script from the template or dict
             pbstemp = self.import_temp('temp.pbs')
+            
+            script_name=base.format(baseid)
+            
+            attributes = self.pbs_dict(outfile=outfile, 
+                                       errfile=errfile, 
+                                       script_name=script_name)
+                                       
             with open(base + '.pbs', 'w') as pbsfile:
-                pbsfile.write(pbstemp.substitute(self.pbs_dict(outfile=outfile, errfile=errfile, script_name=base.format(baseid))))
+                pbsfile.write(pbstemp.substitute(attributes))
                 pbsfile.close()
         else:
+            raise NotImplementedError('Custom qsub jobs are forbidden.')
+            # TODO Improve custom job creation
             pbstemp = self.import_temp('temp.pbs')
             with open(base + '.pbs', 'w') as pbsfile:
                 pbsfile.write(pbstemp.substitute(self.pbs_dict))
                 pbsfile.close()
-
-        userprompt = input('Are you sure you want to submit this job? [Y/N] ')
-        accepted = ['Y', 'y', 'yes']
-        if userprompt not in accepted:
-            # Delete the jobs that were just created if job not performed.
-            os.remove(base + '.pbs')
-            os.remove(base + '.py')
-            raise UserWarning('You do not want to submit this job.')
 
         with contextlib.suppress(CalledProcessError):
             cmd = ['qsub ' + base + '.pbs']  # this is the command
