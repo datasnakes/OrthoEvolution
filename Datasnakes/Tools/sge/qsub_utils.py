@@ -47,7 +47,7 @@ class Qsubutils:
         return file_str
 
     @staticmethod
-    def _randomid(length=5):
+    def randomid(length=5):
         """Generate a random ID of 5 characters to append to qsub job name."""
         return ''.join(random.sample(
             string.ascii_letters + string.digits, length))
@@ -70,7 +70,7 @@ class Qsubutils:
             select = '3'
             jobname = 'ds-ortho'
             script_name = 'datasnakes'
-            logname = 'datasnakes'.format(self._randomid(length=3))
+            logname = 'datasnakes'.format(self.randomid(length=3))
 
         # Fill in the pbs script attributes
         job_attributes = {
@@ -86,7 +86,7 @@ class Qsubutils:
             'wt': walltime,
             'job_name': jobname,
             'script': script_name,
-            'log_name': logname.format(self._randomid()),
+            'log_name': logname.format(self.randomid()),
             'cmd': python + " " + script_name + ".py",
             'email': email
             }
@@ -97,7 +97,7 @@ class Qsubutils:
         """Creates and submit a qsub job. Also uses python code."""
 
         # Create a base name for the jobs and python scripts
-        base = prefix + "submit_{0}".format(self._randomid())
+        base = prefix + "submit_{0}".format(self.randomid())
 
         # Create a python file and write the code to it
         with open(base + '.py', 'w') as pyfile:
