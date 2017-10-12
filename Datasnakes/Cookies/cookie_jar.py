@@ -39,9 +39,10 @@ class CookBook(object):
         # Load the cookies that are in the cookie_jar config file
         with open(config_file, 'r') as ymlfile:
             configuration = yaml.safe_load(ymlfile)
-            setattr(self, "CONFIGURATION", configuration)
-            for key, value in configuration.items():
-                setattr(self, key, value)
+            if configuration is not None:
+                setattr(self, "CONFIGURATION", configuration)
+                for key, value in configuration.items():
+                    setattr(self, key, value)
 
         # For custom cookies use a dictionary to create attributes
         if new_recipes:
