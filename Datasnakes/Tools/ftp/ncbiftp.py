@@ -32,7 +32,7 @@ class NcbiFTPClient(BaseFTPClient):
         pattern = re.compile('^/(.*?)/$')
         if not re.match(pattern, path):
             raise ValueError('Your path is not in a proper format.')
-            
+
     def _archive(self, path):
         """Archive all the files in the folder and compress the archive."""
         # TODO Write archive function
@@ -85,16 +85,16 @@ class NcbiFTPClient(BaseFTPClient):
         directories, _ = self._walk(path)
         return directories
 
-    def getrefseqrelease(self, database_name, seqtype, filetype, download_path='', 
+    def getrefseqrelease(self, database_name, seqtype, filetype, download_path='',
                          extract=True):
         """Download the preformatted blast database."""
         self.ftp.cwd(self.refseqrelease_path)
         releasedirs = self.listdirectories(self.refseqrelease_path)
-        
+
         # Change to directory input
         if database_name not in releasedirs:
             raise FileNotFoundError('%s does not exist.' % database_name)
-        
+
         self.ftp.cwd(database_name)
         curpath = self.ftp.pwd() + '/'
         releasefiles = self.listfiles(curpath)
@@ -106,10 +106,10 @@ class NcbiFTPClient(BaseFTPClient):
                 files2download.append(releasefile)
 
         print('You are about to download theses files: %s' % files2download)
-        
+
         # Move to directory for file downloads
         os.chdir(download_path)
-        
+
         # Download the files using multiprocessing
         download_time_secs = time()
         with ThreadPool(1) as download_pool:
@@ -142,7 +142,7 @@ class NcbiFTPClient(BaseFTPClient):
 
         # Move to directory for file downloads
         os.chdir(download_path)
-        
+
         # Download the files using multiprocessing
         download_time_secs = time()
         with ThreadPool(1) as download_pool:
@@ -175,7 +175,7 @@ class NcbiFTPClient(BaseFTPClient):
 
         # Move to directory for file downloads
         os.chdir(download_path)
-        
+
         # Download the files using multiprocessing
         download_time_secs = time()
         with ThreadPool(1) as download_pool:
@@ -192,8 +192,8 @@ class NcbiFTPClient(BaseFTPClient):
 
     def updatedb(self, database_path=os.getcwd(), update_days=7):
         """Check for when the database was last updated.
-        
-        Refseq/release databases should only be updated every few months.        
+
+        Refseq/release databases should only be updated every few months.
         """
         # TODO Prevent users from updated refseq if certain days
         # Get a list of the files in the path
@@ -204,22 +204,22 @@ class NcbiFTPClient(BaseFTPClient):
                 dbname, ext = nalfile.split('.')
                 filetime = datetime.fromtimestamp(os.path.getctime(nalfile))
                 format_filetime = filetime.strftime("%b %d, %Y at %I:%M:%S %p")
-                
+
             elif str(fileinpath).endswith('.gbff'):
                 gbff_file = str(fileinpath)
                 dbname, ext = gbff_file.split('.')
                 filetime = datetime.fromtimestamp(os.path.getctime(gbff_file))
-                format_filetime = filetime.strftime("%b %d, %Y at %I:%M:%S %p")                
-                
+                format_filetime = filetime.strftime("%b %d, %Y at %I:%M:%S %p")
+
 
         print("Your database was last updated on: %s" % format_filetime)
 
         time_elapsed = datetime.now() - filetime
-        
+
         if ext == 'nal' and time_elapsed.days >= update_days:
             print('\nYour blast database needs updating.')
             self.getblastdb(dbname, download_path=database_path, extract=True)
-            
+
         elif ext == 'gbff' and time_elapsed.days >= 70:
             print('\nYour refseq release database needs updating.')
             self.getblastdb(dbname, download_path=database_path, extract=True)
