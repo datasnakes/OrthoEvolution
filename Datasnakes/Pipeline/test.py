@@ -4,9 +4,7 @@
 # import zipfile
 import luigi
 from logzero import logger as log
-from pathlib import Path
-from datetime import datetime as d
-import yaml
+
 
 from Datasnakes.Tools.utils import ProjectManagement  # Project Management
 
@@ -43,5 +41,5 @@ class Blast2PAML(luigi.Task):
 
 
 if __name__ == '__main__':
-    #from luigi.mock import MockFile
+    # from luigi.mock import MockFile
     luigi.run(["--local-scheduler"], main_task_cls='Blast2PAML')
