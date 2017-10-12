@@ -105,7 +105,6 @@ class Qsubutils:
         format1 = '%a %b %d %I:%M:%S %p %Y'
 
         if self.default == default:
-            _, baseid = self.basejobids()
             author = getpass.getuser().upper()
             email = 'n/a'
             description = 'This is a default pbs job.'
