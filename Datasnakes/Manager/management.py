@@ -108,6 +108,7 @@ class RepoManagement(Management):
         self.managementlog.info('The Repository Management class variables have been set.')
 
         if new_user is True:
+            self.managementlog.info('The user cookie is being prepared for the Oven.')
             self.Kitchen.bake_the_user()
 # TODO-ROB:  Edit the setup.py file for cookiecutter.
 
@@ -121,9 +122,9 @@ class UserManagement(RepoManagement):
     def __init__(self, repo, user, project=None, database=None, home=os.getcwd(),
                  new_user=False, new_project=False, new_db=False, **kwargs):
         """
-        This is the User Management class manages the current users directories.  This class has to be paired with a
-        repository and a user.  It gives access to user paths, and provides functionality for creating new projects and
-        new project databases for the current user.  It also give the option of creating a new user.
+        This is the User Management class, which manages the current users directories.  This class has to be paired
+        with a repository and a user.  It gives access to user paths, and provides functionality for creating new
+        projects and new project databases for the current user.  It also give the option of creating a new user.
 
         This class maps a users directory, which gives access to directories for databases (NCBI and proprietary), index
         files for quickly retrieving project data, project log files, user affiliated journal articles, and projects.
@@ -180,8 +181,10 @@ class UserManagement(RepoManagement):
         self.managementlog.info('The User Management class variables have been set.')
 
         if new_project is True:
+            self.managementlog.info('The project cookie is being prepared for the Oven.')
             self.Kitchen.bake_the_project()
         if new_db is True:
+            self.managementlog.info('The database cookie is being prepared for the Oven.')
             self.Kitchen.bake_the_db_repo(user_db=self.user_db, db_path_dict=self.db_path_dict, ncbi_db_repo=self.ncbi_db_repo)
 
     def zip_mail(self, comp_filename, zip_path, destination=''):
@@ -195,10 +198,9 @@ class WebsiteManagement(RepoManagement):
 
     def __init__(self, repo, website, host='0.0.0.0', port='5252',
                  home=os.getcwd(), new_website=False, create_admin=False, **kwargs):
-        """Install a template for Flask using cookiecutter.
-
-        The custom datasnakes cookie for this template has been edited for
-        our own purposes.
+        """This is the Website Management class, which installs a template for Flask using cookiecutter.  The
+        official cookiecutter-flask template (https://github.com/sloria/cookiecutter-flask) has been edited for our own
+        purposes.  This app class uses cookiecutter hooks to deploy the flask server.
 
         :param repo (string):  The name of the repository.
         :param website (string):  The name of the website.  Not a url, so
@@ -213,16 +215,19 @@ class WebsiteManagement(RepoManagement):
         """
         if repo and website:
             super().__init__(repo=repo, home=home, **kwargs)
+
+        # Website Deployment Information:
         self.website = website
         self.web_host = host
         self.web_port = port
+        # Path to Flask's Web-Server Files
         self.website_path = self.flask / Path(self.website)
 
         self.Kitchen = Oven(repo=self.repo, user=self.user, website=self.website, output_dir=self.flask)
-
         self.managementlog.info('The Website Management class variables have been set.')
 
         if new_website is True:
+            self.managementlog.info('The website cookie is being prepared for the Oven.')
             self.Kitchen.bake_the_website(host=self.web_host, port=self.web_port, website_path=self.website_path)
 
     def stop_server(self):
@@ -231,12 +236,18 @@ class WebsiteManagement(RepoManagement):
 
 
 class ProjectManagement(UserManagement):
-    """Project Management Class."""
 
     def __init__(self, repo, user, project, research=None, research_type=None,
                  app=None, home=os.getcwd(), new_project=False, new_research=False,
                  new_app=False, **kwargs):
         """
+        This is the Project Management class, which manages the directories of the current project.  Each project
+        requires a repository, user, and project name.  It gives the option of starting a new type of research within
+        an existing project.  An application directory for the specific research/dataset can also be generated
+
+        It gives access to the project directories including index
+        files, the raw data, the processed data, the project databases, and the web files for serving data.
+
         :param repo (string):  The name of the repository.
         :param user (string):  The name of the current user if any.
         :param project(string):  The name of the current project if any.
@@ -247,28 +258,24 @@ class ProjectManagement(UserManagement):
         :param new_project (bool):  Flag for creating a new project.
         :param new_research (bool):  Flag for creating new research under a project.
         :param new_app (bool):  Flag for creating a new web app under a research target.
-
         """
         # Standalone for child/self or full class hierarchy use
         if project or (repo and user and project):
             super().__init__(repo=repo, user=user, project=project, home=home,
                              new_project=new_project, **kwargs)
-            # TODO-ROB Go back to the drawing board for the public/private/other choices.  (FLASK forms)
-            # TODO-ROB determine how to get cookiecutter to skip over directories
-            # that already exist
+
             self.project = project
             self.research = research
             self.research_type = research_type
-            # Project/Research Directories
-            self.research_path = self.project_path / \
-                Path(research_type) / Path(research)
+            # Project Directories:
+            self.research_path = self.project_path / Path(research_type) / Path(research)
             self.project_archive = self.project_path / Path('archive')
-            self.project_index = self.research_path / Path('index')
             self.project_database = self.user_db / Path(project)
+            # Dataset Directories:
+            self.project_index = self.research_path / Path('index')
             self.data = self.research_path / Path('data')
             self.raw_data = self.research_path / Path('raw_data')
             self.project_web = self.research_path / Path('web')
-            # TODO-ROB:  THis is just a draft.  Rework to use public/private/other
             if app:
                 self.app = app
                 self.app_path = self.project_web / Path(app)
@@ -276,10 +283,12 @@ class ProjectManagement(UserManagement):
         self.managementlog.info('The User Management class variables have been set.')
 
         if new_research is True:
+            self.managementlog.info('The research cookie is being prepared for the Oven.')
             self.research_type = research_type
             self.Kitchen = Oven(repo=self.repo, user=self.user, project=self.project, output_dir=self.project_path)
             self.Kitchen.bake_the_research(research_type=self.research_type, research=self.research)
             if new_app is True:
+                self.managementlog.info('The app cookie is being prepared for the Oven.')
                 self.app = app
                 self.app_path = self.project_path / Path(research_type) / Path(research) / Path('web')
                 self.Kitchen.bake_the_app(app=self.app)
