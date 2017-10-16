@@ -29,14 +29,15 @@ class CompGenObjects(object):
     Input:  An open .csv file object that contains a header of organisms.  The
     first column ranks the gene by tier, the second column is a HUGO Gene
     Nomenclature Committee(HGNC) symbol for the genes of interest.  The .csv
-    has to be located in the same directory as this module unless a full path is
-    specified.
+    has to be located in the same directory as this module unless a full path
+    is specified.
 
     The organisms are taken from
     ftp://ftp.ncbi.nlm.nih.gov/genomes/refseq/multiprocessing/
-    and the genes are taken from http://www.guidetopharmacology.org/targets.jsp.
+    and the genes are taken from http://www.guidetopharmacology.org/targets.jsp
 
-    Output:  A pandas Data-Frame, Pivot-Table, and associated lists and dictionaries.
+    Output:  A pandas Data-Frame, Pivot-Table, and associated lists and
+             dictionaries.
     """
     __acc_filename = ''
     __paml_filename = ''
@@ -44,7 +45,8 @@ class CompGenObjects(object):
     __data = ''
 
     # TODO-ROB:  CREAT PRE-BLAST and POST-BLAST functions
-    def __init__(self, project=None, project_path=os.getcwd(), acc_file=None, taxon_file=None, pre_blast=False, post_blast=True, hgnc=False,
+    def __init__(self, project=None, project_path=os.getcwd(), acc_file=None,
+                 taxon_file=None, pre_blast=False, post_blast=True, hgnc=False,
                  proj_mana=ProjectManagement, **kwargs):
 
         # Private Variables
@@ -72,31 +74,34 @@ class CompGenObjects(object):
             acc_file = kwargs['MAF']
             self.acc_filename = acc_file
         if acc_file is not None:
+
             # File init
             self.acc_path = self.project_index / Path(self.acc_filename)
-            # Handles for organism lists #
-            self.org_list = []
-            self.ncbi_orgs = []
-            self.org_count = 0
-            self.taxon_ids = []
-            self.taxon_orgs = []
-            self.taxon_dict = {}
-            # Handles for gene lists #
-            self.gene_list = []
-            self.gene_count = 0
-            # Handles for tier lists #
+
+            # Handles for organism lists
+            self.org_list = [], self.ncbi_orgs = [], self.org_count = 0
+            self.taxon_ids = [], self.taxon_orgs = [], self.taxon_dict = {}
+
+            # Handles for gene lists
+            self.gene_list = [], self.gene_count = 0
+
+            # Handles for tier lists
             self.tier_list = []
             self.tier_dict = {}
             self.tier_frame_dict = {}
-            # Handles for accession lists #
+
+            # Handles for accession lists
             self.acc_dict = {}
             self.acc_list = []
-            # Handles for blast queries #
-            self.blast_human = []
-            self.blast_rhesus = []
+
+            # Handles for blast queries
+            self.blast_human = [], self.blast_rhesus = []
+
             # Handles for different dataframe initializations#
             self.raw_acc_data = pd.read_csv(str(self.acc_path), dtype=str)
-            self.building_filename = str(acc_file[:-4] + 'building.csv')  # Master accession file for the blast
+
+            # Master accession file for the blast
+            self.building_filename = str(acc_file[:-4] + 'building.csv')
             # #### Pre-Blast objects
             self.mygene_df = pd.DataFrame()  # MyGene
             self.mygene_filename = "%s_mygene.csv" % self.project  # MyGene
@@ -125,6 +130,7 @@ class CompGenObjects(object):
                 self.missing_organsims = {}
                 self.missing_gene_count = 0
                 self.missing_organsims_count = 0
+
                 # Duplicates
                 self.duplicated_dict = {}
                 self.duplicated_accessions = {}
@@ -171,7 +177,8 @@ class CompGenObjects(object):
         The dictionaries contain separate keys for Missing genes.
         """
 
-        # Usually a only a user would manually add a csv file for their own purposes.
+        # Usually only a user would manually add a csv file for their own
+        # purposes.
         if csv_file is not None:
             self.__init__(project=self.project, acc_file=csv_file)
             df = self.df
@@ -215,6 +222,7 @@ class CompGenObjects(object):
 
         # Post-Blast accession analysis
         if self.__post_blast:
+
             # Missing
             self.missing_dict = get_miss_acc(self.acc_path)
             self.missing_genes = self.missing_dict['genes']
@@ -223,8 +231,10 @@ class CompGenObjects(object):
             self.missing_organsims = self.missing_dict['organisms']
             self.missing_organsims_count = self.missing_organsims['count']
             del self.missing_organsims['count']
+
             # Duplicates
-            self.duplicated_dict = get_dup_acc(self.acc_dict, self.gene_list, self.org_list)
+            self.duplicated_dict = get_dup_acc(self.acc_dict, self.gene_list,
+                                               self.org_list)
             self.duplicated_accessions = self.duplicated_dict['accessions']
             self.duplicated_organisms = self.duplicated_dict['organisms']
             self.duplicated_genes = self.duplicated_dict['genes']
@@ -264,9 +274,7 @@ class CompGenObjects(object):
         return accessions
 
     def get_orthologous_accessions(self, gene):
-        """Takes a single gene and returns a list of accession numbers
-        for the different orthologs.
-        """
+        """Takes a single gene and returns a list of accession numbers for the different orthologs."""
         maf = self.df
         accession_alignment = maf.T[gene].tolist()[1:]
         return accession_alignment
