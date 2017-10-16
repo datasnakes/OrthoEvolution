@@ -2,13 +2,16 @@
 import os
 import csv
 import time
-import shutil
-import pkg_resources
-import subprocess
+# import shutil
+# import pkg_resources
+import contextlib
+from subprocess import run, CalledProcessError, PIPE
 from importlib import import_module
 from multiprocessing.pool import ThreadPool
 from pathlib import Path
 import pandas as pd
+import platform
+
 
 def map_func(hit):
     """Use the map function for formatting hit id's.
@@ -40,6 +43,7 @@ def gene_list_config(file, data_path, gene_list, taxon_dict, logger):
 
     ending = gene = org = taxid = None
     output_dir_list = os.listdir(data_path)  # Make a list of files
+
     # If the file exists then make a gene list that picks up from the last BLAST
     if file in output_dir_list:
         header = pd.read_csv(str(Path(data_path) / Path(file)), dtype=str)
@@ -79,43 +83,27 @@ def gene_list_config(file, data_path, gene_list, taxon_dict, logger):
         return None
 
 
-def gi_list_config(gi_list_path, research_path, taxon_ids, config):
+def gi_list_config(gi_list_path, taxonomy_ids, research_path=None, config=False):
     """Create a gi list based on the refseq_rna database for each taxonomy id.
 
     It will also convert the gi list into a binary file which is more
     efficient to use with NCBI's Standalone Blast tools.
     """
-    # Directory and file handling
-    raw_data_path = research_path / Path('raw_data')
-    index_path = research_path / Path('index')
-    taxid_file = index_path / Path('taxids.csv')
-    pd.Series(taxon_ids).to_csv(str(taxid_file), index=False)
-    pbs_script = 'get_gi_lists.sh'
-    py_script = 'get_gi_lists.py'
+    if config:
+        # Directory and file handling
+        raw_data_path = research_path / Path('raw_data')
+        index_path = research_path / Path('index')
+        taxid_file = index_path / Path('taxids.csv')
+        pd.Series(taxonomy_ids).to_csv(str(taxid_file), index=False)
 
-    # PBS job submission using the templates
-    pbs_script = shutil.copy(pkg_resources.resource_filename(config.__name__, pbs_script), str(raw_data_path))
-    py_script = shutil.copy(pkg_resources.resource_filename(config.__name__, py_script), str(raw_data_path))
-    gi_config = subprocess.check_output('qsub -v PYTHONFILE=%s,GILISTPATH=%s,PROJECTPATH=%s, %s' %
-                                        (py_script, gi_list_path, research_path, pbs_script), shell=True)
-    gi_config = gi_config.decode('utf-8')
-    print('The GI list configuration\'s JobID is %s' % gi_config)
-    job_id = gi_config.replace('.sequoia', '')
-    time.sleep(20)  # Wait for the job to be queued properly
-    while True:
-        out, err = subprocess.Popen('qsig -s SIGNULL %s' % job_id, shell=True, stderr=subprocess.PIPE, stdout=subprocess.PIPE)
-        print("Waiting...")
-        time.sleep(30)
-        if err.decode('utf-8') == 'qsig: Request invalid for state of job %s.sequoia\n' % job_id:
-            print('The blast config is in MCSR\'s queue.  Waiting...')
-            continue
-        else:
-            print('out:', out)
-            print('err:', err)
-            break
+        # TODO Rework this
+        creategilists(gi_list_path=raw_data_path, taxonomy_ids=taxonomy_ids)
+
+    else:
+        creategilists(gi_list_path=gi_list_path, taxonomy_ids=taxonomy_ids)
 
 
-def creategilists(taxonomy_ids, gi_list_path):
+def creategilists(gi_list_path, taxonomy_ids):
     """ This function uses the blastdbcmd tool to get gi lists.
     It then uses the blastdb_aliastool to turn the list into a binary file.
     The input (id) for the function is a taxonomy id.
@@ -131,22 +119,54 @@ def creategilists(taxonomy_ids, gi_list_path):
             minutes = (time.time() - gi_time_secs) / 60
         print("Took %s minutes to create gi binary files." % minutes)
 
+
 def _taxid2gilist(taxonomy_id):
     """Use a taxonomy id in order to get the list of GI numbers."""
     tid = taxonomy_id
     binary = str(tid) + 'gi'
-    if binary not in os.getcwd():
-        os.system("blastdbcmd -db refseq_rna -entry all -outfmt '%g %T' | awk ' { if ($2 == " + tid +
-                  ") { print $1 } } ' > " + tid + "gi.txt")
-        print(tid + "gi.txt has been created.")
+    if platform.system() == 'Linux':
+        if binary not in os.getcwd():
+            # TODO Convert to subprocess
+            # TODO Test this on Linux
+            os.system("blastdbcmd -db refseq_rna -entry all -outfmt '%g %T' | awk ' { if ($2 == " + tid + ") { print $1 } } ' > " + tid + "gi.txt")
+            print(tid + "gi.txt has been created.")
 
-        # Convert the .txt file to a binary file using the blastdb_aliastool.
-        os.system("blastdb_aliastool -gi_file_in " + tid + "gi.txt -gi_file_out " + tid + "gi")
-        print(tid + "gi binary file has been created.")
+            # Convert the .txt file to a binary file using the blastdb_aliastool.
+            os.system("blastdb_aliastool -gi_file_in " + tid + "gi.txt -gi_file_out " + tid + "gi")
+            print(tid + "gi binary file has been created.")
 
-    # Remove the gi.text file
-    os.remove(tid + "gi.txt")
-    print(tid + "gi.text file has been deleted.")
+        # Remove the gi.text file
+        os.remove(tid + "gi.txt")
+        print(tid + "gi.text file has been deleted.")
+
+    elif platform.system() == 'Windows':
+        raise NotImplementedError('Windows is not supported')
+        if binary not in os.getcwd():
+            with contextlib.suppress(CalledProcessError):
+                cmd = 'blastdbcmd -db refseq_rna -entry all -outfmt "%g %T"'
+                # Shell MUST be True
+                cmd_status = run(cmd, stdout=PIPE, stderr=PIPE, shell=True)
+
+                if cmd_status.returncode == 0:  # Command was successful.
+                    print('Command successful.\n')
+                    # TODO add a check to for job errors or check for error file.
+
+                else:  # Unsuccessful. Stdout will be '1'
+                    print("Command unsuccessful.")
+
+            os.system("blastdbcmd -db refseq_rna -entry all -outfmt '%g %T' | awk ' { if ($2 == " + tid + ") { print $1 } } ' > " + tid + "gi.txt")
+            print(tid + "gi.txt has been created.")
+
+            # Convert the .txt file to a binary file using the blastdb_aliastool.
+            convert_cmd = "blastdb_aliastool -gi_file_in " + tid + "gi.txt -gi_file_out " + tid + "gi"
+            print(tid + "gi binary file has been created.")
+
+        # Remove the gi.text file
+        os.remove(tid + "gi.txt")
+        print(tid + "gi.text file has been deleted.")
+
+    else:
+        raise NotImplementedError(platform.system() + 'is not supported')
 
 
 def my_gene_info(acc_path, blast_query='Homo_sapiens'):
