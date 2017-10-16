@@ -1,14 +1,14 @@
 """Helpful utilities for performing Blastn"""
-import pandas as pd
 import os
 import csv
-from pathlib import Path
 import time
 import shutil
 import pkg_resources
 import subprocess
 from importlib import import_module
-
+from multiprocessing.pool import ThreadPool
+from pathlib import Path
+import pandas as pd
 
 def map_func(hit):
     """Use the map function for formatting hit id's.
@@ -80,9 +80,8 @@ def gene_list_config(file, data_path, gene_list, taxon_dict, logger):
 
 
 def gi_list_config(gi_list_path, research_path, taxon_ids, config):
-    # TODO-ROB THis is for development / testing
-    # TODO-ROB Add the ability to do two seperate gi configs
-    """Create a gi list based on the refseq_rna database for each taxonomy id on the MCSR.
+    """Create a gi list based on the refseq_rna database for each taxonomy id.
+
     It will also convert the gi list into a binary file which is more
     efficient to use with NCBI's Standalone Blast tools.
     """
@@ -116,27 +115,42 @@ def gi_list_config(gi_list_path, research_path, taxon_ids, config):
             break
 
 
-def get_gilists(id, gi_list_path, logger):
-    """ This function uses the blastdbcmd tool to get gi lists. It then uses the
-    blastdb_aliastool to turn the list into a binary file.
+def creategilists(taxonomy_ids, gi_list_path):
+    """ This function uses the blastdbcmd tool to get gi lists.
+    It then uses the blastdb_aliastool to turn the list into a binary file.
     The input (id) for the function is a taxonomy id.
     """
-    binary = str(id) + 'gi'
-    if binary not in os.listdir(gi_list_path):
+    if os.path.exists(gi_list_path):
+        os.chdir(gi_list_path)
         # Use the accession #'s and the blastdbcmd tool to generate gi lists
         # based on Organisms/Taxonomy id's.
-        os.system("blastdbcmd -db refseq_rna -entry all -outfmt '%g %T' | awk ' { if ($2 == " + id +
-                  ") { print $1 } } ' > " + id + "gi.txt")
-        logger.info(id + "gi.txt has been created.")
+        # TODO Create blastdbcmd commandline tools
+        gi_time_secs = time.time()
+        with ThreadPool(1) as gilist_pool:
+            gilist_pool.map(_taxid2gilist, taxonomy_ids)
+            minutes = (time.time() - gi_time_secs) / 60
+        print("Took %s minutes to create gi binary files." % minutes)
+
+def _taxid2gilist(taxonomy_id):
+    """Use a taxonomy id in order to get the list of GI numbers."""
+    tid = taxonomy_id
+    binary = str(tid) + 'gi'
+    if binary not in os.getcwd():
+        os.system("blastdbcmd -db refseq_rna -entry all -outfmt '%g %T' | awk ' { if ($2 == " + tid +
+                  ") { print $1 } } ' > " + tid + "gi.txt")
+        print(tid + "gi.txt has been created.")
+
         # Convert the .txt file to a binary file using the blastdb_aliastool.
-        os.system("blastdb_aliastool -gi_file_in " + id + "gi.txt -gi_file_out " + id + "gi")
-        logger.info(id + "gi binary file has been created.")
-        # Remove the gi.text file
-        os.system("rm " + id + "gi.txt")
-        logger.info(id + "gi.text file has been deleted.")
+        os.system("blastdb_aliastool -gi_file_in " + tid + "gi.txt -gi_file_out " + tid + "gi")
+        print(tid + "gi binary file has been created.")
+
+    # Remove the gi.text file
+    os.remove(tid + "gi.txt")
+    print(tid + "gi.text file has been deleted.")
 
 
 def my_gene_info(acc_path, blast_query='Homo_sapiens'):
+    """Use Biothings' MyGene api to get information about genes."""
     mygene = import_module('mygene')
 
     # Initialize variables and import my-gene search command
