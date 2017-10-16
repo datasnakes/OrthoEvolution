@@ -1,32 +1,32 @@
-#from Datasnakes.Tools.ftp import FTP2DB
 import os
 from pathlib import Path
 
 from Datasnakes.Manager import ProjectManagement
+from Datasnakes.Orthologs.utils import attribute_config
 
 
 class DatabaseManagement(object):
 
     def __init__(self, project, project_path=None, proj_mana=ProjectManagement, **kwargs):
-
+        self.config_options = {
+            "GI_config": self.get_gi_lists,
+            "Blast_config": self.get_blast_database,
+            "Taxonomy_config": self.get_taxonomy_database,
+            "GenBank_config": self.get_genbank_database
+                               }
         self.project = project
 
-        if not isinstance(proj_mana, ProjectManagement):
-            if project_path:
-                self.project_path = Path(project_path) / Path(self.project)
-            else:
-                self.project_path = Path(os.getcwd()) / Path(self.project)
-                Path.mkdir(self.project_path, parents=True, exist_ok=True)
-                print('project_path=%s' % self.project_path)
-                self.removed_pm_config(kwargs)
-        else:
-            setattr(proj_mana, 'project', project)
-            for key, value in proj_mana.__dict__.items():
-                setattr(self, str(key), str(value))
-            print('project_path=%s' % self.project_path)
+        # Configuration of class attributes.
+        add_self = attribute_config(self, composer=proj_mana, checker=ProjectManagement, project=project, project_path=project_path)
+        for var, attr in add_self.__dict__.items():
+            setattr(self, var, attr)
 
-    def removed_pm_config(self, kwargs):
-        print()
+        # Determine which database to update
+        # And then run that script with the configuration.
+        for config in self.config_options.keys():
+            if config in kwargs.keys():
+                db_config_method = self.config_options[config]
+                db_config_method(kwargs[config])
 
     def get_gi_lists(self):
         print()
