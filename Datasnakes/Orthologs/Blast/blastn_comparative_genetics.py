@@ -32,7 +32,7 @@ class CompGenBLASTn(CompGenFiles):
 
         Path.mkdir(self.__gi_list_path, parents=True, exist_ok=True)
 
-        # # Initialize Logging
+        # Initialize Logging
         # self.__blastn_log = LogIt.blastn()
         #df = LogIt()
         self.date_format = '%a %b %d at %I:%M:%S %p %Y'
@@ -41,12 +41,13 @@ class CompGenBLASTn(CompGenFiles):
         self.query_gi_dict = {}
         self.removed_genes = []
         self.current_gene_list = []
-        # TODO-ROB:  Set up blast config logger, blasting logger, and post blast analysis logger
+        # TODO-ROB:  Set up blast config logger, blasting logger, and
+        # post blast analysis logger
         self.blastn_log.info("These are the organisms: " + str(self.org_list))
         self.blastn_log.info("These are the genes: " + str(self.gene_list))
-        self.blastn_log.info(
-            "These are the taxonomy ids: \n\n\n" + str(self.taxon_ids))
-        # ---------------------------------------------------------------------
+        self.blastn_log.info("These are the taxonomy ids: \n\n\n" +
+                             str(self.taxon_ids))
+
         # For completed blast files
         self.complete_file = self.project + '_MAF.csv'
         self.complete_file_path = self.data / Path(self.complete_file)
@@ -57,9 +58,8 @@ class CompGenBLASTn(CompGenFiles):
         """Configure everything for a BLAST.
         First the accession file, and gene list is configured.
         """
-        self.blastn_log.info(
-            '***********************************BLAST CONFIG START************ \
-            ***********************\n\n\n')
+        sep = 20 * '*'
+        self.blastn_log.info(sep + 'BLAST CONFIG START' + sep + '\n\n\n')
         self.blastn_log.info('Configuring the accession file...')
 
         # Update the gene_list based on the existence of a incomplete blast
@@ -75,7 +75,8 @@ class CompGenBLASTn(CompGenFiles):
 
         # Create GI lists
         self.blastn_log.info("Configuring GI list using the taxonomy id and the blastdbcmd tool.")
-        #gi_list_config(self.__gi_list_path, self.research_path, self.taxon_ids, config)
+        gi_list_config(self.__gi_list_path, self.taxon_ids, self.research_path)
+
         # Get GI (stdout) and query sequence (FASTA format)
         self.blastn_log.info("Generating directories.")
         self.blastn_log.info("Extracting query gi number to stdout and "
@@ -108,21 +109,15 @@ class CompGenBLASTn(CompGenFiles):
             if gi_status == 0 or fasta_status == 0:  # One of the commands was successful.
                 if gi_status != 0:
                     # Log it.
-                    self.blastn_log.error(
-                        "GI number for %s not found in the BLAST extraction" %
-                        query)
+                    self.blastn_log.error("GI number for %s not found in the BLAST extraction" % query)
                     # TODO-SDH Is this the correct move below???
-                    self.blastn_log.error(
-                        "Removing %s from the BLAST list..." % gene)
+                    self.blastn_log.error("Removing %s from the BLAST list." % gene)
                     self.gene_list.remove(gene)
                     self.removed_genes.append(gene)
                     continue
                 elif fasta_status != 0:
-                    self.blastn_log.error(
-                        "FASTA sequence for %s not found in the BLAST extraction" %
-                        query)
-                    self.blastn_log.error(
-                        "Removing %s from the BLAST list..." % gene)
+                    self.blastn_log.error("FASTA sequence for %s not found in the BLAST extraction" % query)
+                    self.blastn_log.error("Removing %s from the BLAST list." % gene)
                     self.gene_list.remove(gene)
                     self.removed_genes.append(gene)
                     continue
@@ -142,14 +137,12 @@ class CompGenBLASTn(CompGenFiles):
                 continue
 
         self.blastn_log.info('Configured gene list: %s\n\n\n' % self.current_gene_list)
-        self.blastn_log.info(
-            '************************************BLAST CONFIG END************************************\n\n\n')
+        self.blastn_log.info(sep + 'BLAST CONFIG END' + sep + '\n\n\n')
         if auto_start is True:
             # Automatically begin BLASTING after the configuration
-            self.blasting(
-                genes=self.current_gene_list,
-                query_organism=query_organism,
-                pre_configured=auto_start)
+            self.blasting(genes=self.current_gene_list,
+                          query_organism=query_organism,
+                          pre_configured=auto_start)
 
     def blast_xml_parse(self, xml_path, gene, organism):
         """Parse the XML file created by the BLAST."""
@@ -167,7 +160,7 @@ class CompGenBLASTn(CompGenFiles):
                     if hsp.bitscore_raw > maximum:
                         # If the gene is a predicted non-coding RefSeq gene then go the the next hit
                         # https://en.wikipedia.org/wiki/RefSeq
-                        # TODO-ROB:  TODO-SHAE:  Add another check here???
+                        # TODO Add another check here???
                         if "xr" in str(hit.id.lower()):
                             self.blastn_log.info("Encountered a predicted(X*_00000) "
                                                  "non-coding (XR_000000)(ncRNA) RefSeq gene.  Moving to the next hit.")
@@ -204,6 +197,7 @@ class CompGenBLASTn(CompGenFiles):
 
     def blasting(self, genes=None, query_organism=None, pre_configured=False):
         """Configure the BLAST."""
+        linesep = 40 * '-'
         if pre_configured is False:
             query = self.df[query_organism].tolist()
             self.blast_config(query_accessions=query, query_organism=query_organism, auto_start=True)
@@ -211,17 +205,15 @@ class CompGenBLASTn(CompGenFiles):
         elif pre_configured is True:
             genes = genes
 
-        self.blastn_log.info(
-            "------------------------------------------------------------------")
+        self.blastn_log.info(linesep)
         self.blastn_log.info("The script name is str(os.path.basename(__file__)).")
         self.blastn_log.info(
             'The script began on {}'.format(str(
                 d.now().strftime(
                     self.date_format))))
-        self.blastn_log.info(
-            "------------------------------------------------------------------")
+        self.blastn_log.info(linesep)
 
-        # Steps to a bulk blast
+        # TIP Steps to a bulk blast
         # 1.  Iterate the gene of interest
         # 2.  Iterate the organisms of interest
         # 3.  BLAST
