@@ -5,6 +5,9 @@ from time import time
 from datetime import datetime
 from multiprocessing.pool import ThreadPool
 import os
+# from progress.bar import Bar
+# TODO Create a progress bar; Integrate with Threading/downloading
+# TODO Use logit to log which files were downloaded
 
 from Datasnakes.Tools.ftp.baseftp import BaseFTPClient
 
@@ -16,10 +19,10 @@ class NcbiFTPClient(BaseFTPClient):
         super().__init__(_NCBI, email, keepalive=False, debug_lvl=0)
         self.blastdb_path = '/blast/db/'
         self.blastfasta_path = '/blast/db/FASTA/'
-        self.vertebratemammalian_path = '/refseq/release/vertebrate_mammalian/'
+        self.refseqrelease_path = '/refseq/release/'
         self._taxdb = 'taxdb.tar.gz'  # Located in self.blastdb_path
 
-        # Use python to get these and turn into a json file or dict
+        # TODO Use Turn into a json file, dict, orconfig
         self.blastdbs = []
         self.blastfastadbs = []
 
@@ -29,6 +32,11 @@ class NcbiFTPClient(BaseFTPClient):
         pattern = re.compile('^/(.*?)/$')
         if not re.match(pattern, path):
             raise ValueError('Your path is not in a proper format.')
+
+    def _archive(self, path):
+        """Archive all the files in the folder and compress the archive."""
+        # TODO Write archive function
+        pass
 
     def _walk(self, path):
         """Walk the ftp server and get files and directories."""
@@ -61,26 +69,96 @@ class NcbiFTPClient(BaseFTPClient):
             tar = tarfile.open(file2extract)
             tar.extractall()
             tar.close()
-            print('')
+            print('Files were successfully extracted from %s.' % file2extract)
         else:
             raise ValueError('%s does not end in tar.gz' % file2extract)
 
     def listfiles(self, path='/'):
         """List all files in a path."""
         self._pathformat(path)
-        directories, files = self._walk(path)
-        del directories
+        _, files = self._walk(path)
         return files
 
     def listdirectories(self, path='/'):
         """List all directories in a path."""
         self._pathformat(path)
-        directories, files = self._walk(path)
-        del files
+        directories, _ = self._walk(path)
         return directories
 
-    def getblastdb(self, database_name, download_path='', extract=True):
+    def getrefseqrelease(self, database_name, seqtype, filetype, download_path='',
+                         extract=True):
         """Download the preformatted blast database."""
+        self.ftp.cwd(self.refseqrelease_path)
+        releasedirs = self.listdirectories(self.refseqrelease_path)
+
+        # Change to directory input
+        if database_name not in releasedirs:
+            raise FileNotFoundError('%s does not exist.' % database_name)
+
+        self.ftp.cwd(database_name)
+        curpath = self.ftp.pwd() + '/'
+        releasefiles = self.listfiles(curpath)
+
+        files2download = []
+        pattern = re.compile('^' + database_name + '[.](.*?)[.]' + seqtype + '[.]' + filetype + '[.]gz$')
+        for releasefile in releasefiles:
+            if re.match(pattern, releasefile):
+                files2download.append(releasefile)
+
+        print('You are about to download theses files: %s' % files2download)
+
+        # Move to directory for file downloads
+        os.chdir(download_path)
+
+        # Download the files using multiprocessing
+        download_time_secs = time()
+        with ThreadPool(1) as download_pool:
+            download_pool.map(self.download_file, files2download)
+            minutes = (time() - download_time_secs) / 60
+        print("Took %s minutes to download the files." % minutes)
+
+        if extract:
+            extract_time_secs = time()
+            with ThreadPool(1) as extract_pool:
+                extract_pool.map(self.extract_file, files2download)
+                minutes = (time() - extract_time_secs) / 60
+            print("Took %s minutes to extract from all files." % minutes)
+
+    def getblastfasta(self, database_name, download_path='', extract=True):
+        """Download the fasta sequence database (not formatted)."""
+        if str(database_name).startswith('est'):
+            raise NotImplementedError('Est dbs cannot be downloaded yet.')
+        self.ftp.cwd(self.blastfasta_path)
+        blastfastafiles = self.listfiles(self.blastfasta_path)
+
+        files2download = []
+        for dbfile in blastfastafiles:
+            if database_name in str(dbfile):
+                files2download.append(dbfile)
+
+        # Append the taxonomy database
+        files2download.append(self._taxdb)
+        print('You are about to download theses files: %s' % files2download)
+
+        # Move to directory for file downloads
+        os.chdir(download_path)
+
+        # Download the files using multiprocessing
+        download_time_secs = time()
+        with ThreadPool(1) as download_pool:
+            download_pool.map(self.download_file, files2download)
+            minutes = (time() - download_time_secs) / 60
+        print("Took %s minutes to download the files." % minutes)
+
+        if extract:
+            extract_time_secs = time()
+            with ThreadPool(1) as extract_pool:
+                extract_pool.map(self.extract_file, files2download)
+                minutes = (time() - extract_time_secs) / 60
+            print("Took %s minutes to extract from all files." % minutes)
+
+    def getblastdb(self, database_name, download_path='', extract=True):
+        """Download the fasta sequence database (not formatted)."""
         if str(database_name).startswith('est'):
             raise NotImplementedError('Est dbs cannot be downloaded yet.')
         self.ftp.cwd(self.blastdb_path)
@@ -95,35 +173,8 @@ class NcbiFTPClient(BaseFTPClient):
         files2download.append(self._taxdb)
         print('You are about to download theses files: %s' % files2download)
 
-        # Download the files using multiprocessing
-        download_time_secs = time()
-        with ThreadPool(1) as download_pool:
-            download_pool.map(self.download_file, files2download)
-            minutes = (time() - download_time_secs) / 60
-        print("Took %s minutes to download the files." % minutes)
-
-        if extract:
-            extract_time_secs = time()
-            with ThreadPool(1) as extract_pool:
-                extract_pool.map(self._extract_file, files2download)
-                minutes = (time() - extract_time_secs) / 60
-            print("Took %s minutes to extract from all files." % minutes)
-
-    def getblastfasta(self, database_name, extract=True):
-        """Download the fasta sequence database (not formatted)."""
-        if str(database_name).startswith('est'):
-            raise NotImplementedError('Est dbs cannot be downloaded yet.')
-        self.ftp.cwd(self.blastfasta_path)
-        blastdbfiles = self.listfiles(self.blastdb_path)
-
-        files2download = []
-        for dbfile in blastdbfiles:
-            if database_name in str(dbfile):
-                files2download.append(dbfile)
-
-        # Append the taxonomy database
-        files2download.append(self._taxdb)
-        print('You are about to download theses files: %s' % files2download)
+        # Move to directory for file downloads
+        os.chdir(download_path)
 
         # Download the files using multiprocessing
         download_time_secs = time()
@@ -135,28 +186,42 @@ class NcbiFTPClient(BaseFTPClient):
         if extract:
             extract_time_secs = time()
             with ThreadPool(1) as extract_pool:
-                extract_pool.map(self._extract_file, files2download)
+                extract_pool.map(self.extract_file, files2download)
                 minutes = (time() - extract_time_secs) / 60
             print("Took %s minutes to extract from all files." % minutes)
 
     def updatedb(self, database_path=os.getcwd(), update_days=7):
-        """Check for when the database was last updated."""
+        """Check for when the database was last updated.
+
+        Refseq/release databases should only be updated every few months.
+        """
+        # TODO Prevent users from updated refseq if certain days
         # Get a list of the files in the path
         filesinpath = os.listdir(database_path)
         for fileinpath in filesinpath:
             if str(fileinpath).endswith('.nal'):
                 nalfile = str(fileinpath)
                 dbname, ext = nalfile.split('.')
-                del ext
                 filetime = datetime.fromtimestamp(os.path.getctime(nalfile))
                 format_filetime = filetime.strftime("%b %d, %Y at %I:%M:%S %p")
+
+            elif str(fileinpath).endswith('.gbff'):
+                gbff_file = str(fileinpath)
+                dbname, ext = gbff_file.split('.')
+                filetime = datetime.fromtimestamp(os.path.getctime(gbff_file))
+                format_filetime = filetime.strftime("%b %d, %Y at %I:%M:%S %p")
+
 
         print("Your database was last updated on: %s" % format_filetime)
 
         time_elapsed = datetime.now() - filetime
-        if time_elapsed.days >= update_days:
-            print('\nYour database needs updating.')
+
+        if ext == 'nal' and time_elapsed.days >= update_days:
+            print('\nYour blast database needs updating.')
             self.getblastdb(dbname, download_path=database_path, extract=True)
 
+        elif ext == 'gbff' and time_elapsed.days >= 70:
+            print('\nYour refseq release database needs updating.')
+            self.getblastdb(dbname, download_path=database_path, extract=True)
         else:
-            print('\nour database has been updated within the last week.')
+            print('\nYour database is still up to date.')

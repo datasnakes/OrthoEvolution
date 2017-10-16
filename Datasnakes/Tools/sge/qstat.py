@@ -40,8 +40,8 @@ class Qstat(object):
         except CalledProcessError as cpe:
             return_code = 'qstat returncode: %s' % cpe.returncode
             std_error = 'qstat standard output: %s' % cpe.stderr
-            raise CalledProcessError(return_code + '\n' + std_error)
-        except FileNotFoundError as fnfe:
+            print(return_code + '\n' + std_error)
+        except FileNotFoundError:
             raise FileNotFoundError('qstat -xml is not on your machine.')
         return qstatxml
 

@@ -10,9 +10,8 @@
 #PBS -l cput=$cput
 #PBS -l walltime=$wt
 #PBS -N $job_name
-#PBS -o $job_name.o$PBS_JOBID
-#PBS -e $job_name.e$PBS_JOBID
-#PBS -j oe
+#PBS -o $outfile
+#PBS -e $errfile
 
 cd $PBS_O_WORKDIR
 
