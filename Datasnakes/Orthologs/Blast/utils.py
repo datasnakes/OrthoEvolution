@@ -1,4 +1,4 @@
-"""Helpful utilities for performing Blastn"""
+"""Helpful utilities for performing Blastn."""
 import os
 import csv
 import time
