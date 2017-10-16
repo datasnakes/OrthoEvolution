@@ -22,7 +22,7 @@ class NcbiFTPClient(BaseFTPClient):
         self.refseqrelease_path = '/refseq/release/'
         self._taxdb = 'taxdb.tar.gz'  # Located in self.blastdb_path
 
-        # TODO Use Turn into a json file, dict, orconfig
+        # TODO Use Turn into a json file, dict, or config
         self.blastdbs = []
         self.blastfastadbs = []
 
