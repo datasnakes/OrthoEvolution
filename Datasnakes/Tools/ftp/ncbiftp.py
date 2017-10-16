@@ -69,9 +69,9 @@ class NcbiFTPClient(BaseFTPClient):
             tar = tarfile.open(file2extract)
             tar.extractall()
             tar.close()
-            print('Files were successfully extracted from %s.' % file2extract)
-        else:
-            raise ValueError('%s does not end in tar.gz' % file2extract)
+            print('Files were successfully extracted from %s' % file2extract)
+#        else:
+#            raise ValueError('%s does not end in tar.gz' % file2extract)
 
     def listfiles(self, path='/'):
         """List all files in a path."""
@@ -85,7 +85,7 @@ class NcbiFTPClient(BaseFTPClient):
         directories, _ = self._walk(path)
         return directories
 
-    def getrefseqrelease(self, database_name, seqtype, filetype, download_path='',
+    def getrefseqrelease(self, database_name, seqtype, filetype, download_path,
                          extract=True):
         """Download the preformatted blast database."""
         self.ftp.cwd(self.refseqrelease_path)
@@ -124,7 +124,7 @@ class NcbiFTPClient(BaseFTPClient):
                 minutes = (time() - extract_time_secs) / 60
             print("Took %s minutes to extract from all files." % minutes)
 
-    def getblastfasta(self, database_name, download_path='', extract=True):
+    def getblastfasta(self, database_name, download_path, extract=True):
         """Download the fasta sequence database (not formatted)."""
         if str(database_name).startswith('est'):
             raise NotImplementedError('Est dbs cannot be downloaded yet.')
@@ -157,7 +157,7 @@ class NcbiFTPClient(BaseFTPClient):
                 minutes = (time() - extract_time_secs) / 60
             print("Took %s minutes to extract from all files." % minutes)
 
-    def getblastdb(self, database_name, download_path='', extract=True):
+    def getblastdb(self, database_name, download_path, extract=True):
         """Download the fasta sequence database (not formatted)."""
         if str(database_name).startswith('est'):
             raise NotImplementedError('Est dbs cannot be downloaded yet.')
@@ -171,24 +171,38 @@ class NcbiFTPClient(BaseFTPClient):
 
         # Append the taxonomy database
         files2download.append(self._taxdb)
-        print('You are about to download theses files: %s' % files2download)
 
         # Move to directory for file downloads
         os.chdir(download_path)
 
-        # Download the files using multiprocessing
-        download_time_secs = time()
-        with ThreadPool(1) as download_pool:
-            download_pool.map(self.download_file, files2download)
-            minutes = (time() - download_time_secs) / 60
-        print("Took %s minutes to download the files." % minutes)
+        absentfiles = []
+        # Ensure that files aren't already downloaded
+        for file2download in files2download:
+            if not os.path.exists(os.path.join(download_path, file2download)):
+                absentfiles.append(file2download)
+
+        if len(absentfiles) > 0:
+            print('You are about to download these files: %s\n' % absentfiles)
+            # Download the files using multiprocessing
+            download_time_secs = time()
+            with ThreadPool(1) as download_pool:
+                download_pool.map(self.download_file, files2download)
+                minutes = (time() - download_time_secs) / 60
+            print("Took %s minutes to download the files.\n" % minutes)
 
         if extract:
+            print('Now it\'s time to extract files.')
             extract_time_secs = time()
-            with ThreadPool(1) as extract_pool:
+            with ThreadPool(3) as extract_pool:
                 extract_pool.map(self.extract_file, files2download)
                 minutes = (time() - extract_time_secs) / 60
-            print("Took %s minutes to extract from all files." % minutes)
+            print("Took %s minutes to extract from all files.\n" % minutes)
+
+        # Remove all tar.gz files
+        curfiles = os.listdir()
+        for curfile in curfiles:
+            if str(curfile).endswith('tar.gz'):
+                os.remove(curfile)
 
     def updatedb(self, database_path=os.getcwd(), update_days=7):
         """Check for when the database was last updated.
@@ -210,7 +224,6 @@ class NcbiFTPClient(BaseFTPClient):
                 dbname, ext = gbff_file.split('.')
                 filetime = datetime.fromtimestamp(os.path.getctime(gbff_file))
                 format_filetime = filetime.strftime("%b %d, %Y at %I:%M:%S %p")
-
 
         print("Your database was last updated on: %s" % format_filetime)
 
