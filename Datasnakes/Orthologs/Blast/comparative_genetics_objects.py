@@ -20,24 +20,6 @@ from Datasnakes.Orthologs.Blast.utils import (my_gene_info, get_dup_acc,
 
 
 class CompGenObjects(object):
-    """ Comparative Genetics Analysis.
-
-    Parses an accession file with the designated format in order to
-    provide easy handling for data.  Creates python objects from the given
-    data.
-
-    Input:  An open .csv file object that contains a header of organisms.  The
-    first column ranks the gene by tier, the second column is a HUGO Gene
-    Nomenclature Committee(HGNC) symbol for the genes of interest.  The .csv
-    has to be located in the same directory as this module unless a full path is
-    specified.
-
-    The organisms are taken from
-    ftp://ftp.ncbi.nlm.nih.gov/genomes/refseq/multiprocessing/
-    and the genes are taken from http://www.guidetopharmacology.org/targets.jsp.
-
-    Output:  A pandas Data-Frame, Pivot-Table, and associated lists and dictionaries.
-    """
     __acc_filename = ''
     __paml_filename = ''
     __acc_path = ''
@@ -46,6 +28,37 @@ class CompGenObjects(object):
     # TODO-ROB:  CREAT PRE-BLAST and POST-BLAST functions
     def __init__(self, project=None, project_path=os.getcwd(), acc_file=None, taxon_file=None, pre_blast=False, post_blast=True, hgnc=False,
                  proj_mana=ProjectManagement, **kwargs):
+        """
+        This is the base class for the Blast module.  It parses an accession file in order to provide easy handling for
+        data.  The .csv accession file contains the following header info:
+                            * "Tier" - User defined.
+                            * "Gene" - HUGO Gene Nomenclature Committee(HGNC) symbol for the genes of interest.
+                            * Query Organism - A well annotated query organism.
+                            * Other organisms - The other headers are Genus_species of other taxa.
+
+        The organisms are taken from:
+        ftp://ftp.ncbi.nlm.nih.gov/genomes/refseq/multiprocessing/
+        And the genes are taken from:
+        http://www.guidetopharmacology.org/targets.jsp.
+
+        The API gives the user access to their data in a higher level for downstream processing or for basic
+        observation of the data.
+
+        :param project:  The name of the project.
+        :param project_path:  The location of the project, which is generally defined by the ProjectManagement configuration.
+        :param acc_file:  The name of the accession file.
+        :param taxon_file:  A file that contains an ordered list of taxonomy ids.
+        :param pre_blast:  A flag that gives the user access to an API that contains extra information about their genes
+                           using the mygene package.
+        :param post_blast:  A flag that is used to handle a BLAST result file, which returns information about misssing
+                            data, duplicates, etc.
+        :param hgnc:  A flag used as a placeholder for future work with HGNC files.
+        :param proj_mana:  This parameter is used to compose (vs inherit) the ProjectManagement class with the
+                           CompGenObjects class.  This parameter allows the various blast classes to function with or
+                           without the Manager module.
+        :param kwargs:  The kwargs here are generally used for standalone blasting or for development.
+        :returns:  A pandas data-frame, pivot-table, and associated lists and dictionaries.
+        """
 
         # Private Variables
         self.__pre_blast = pre_blast
