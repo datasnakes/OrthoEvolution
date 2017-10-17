@@ -215,6 +215,19 @@ class MultipleSequenceAlignment(object):
             multi_fasta_manipulator(kwargs['maskedFile'], str(seqFile), kwargs['maskedFile'], manipulation='sort')
 
     def pal2nal(self, aa_alignment, na_fasta, output_type='paml', nogap=True, nomismatch=True, downstream='paml'):
+        """
+        This Pal2Nal method works with the Pal2Nal command line wrapper.  It uses a protein alignment to generate a
+        codon alignment from the corresponding nucleic acid sequences.  This is useful for downstream PAML analysis.
+        This function also catches and removes taxa that are inconsistent with Pal2Nal's algorithm.
+
+        :param aa_alignment:  An amino acid alignment that is used as a guide for a nucleic acid alignment.
+        :param na_fasta:  The FASTA file that contains matching/ordered sequences corresponding to the aa_alignment.
+        :param output_type:  The format of the resulting alignment.  ("clustal", "paml", "fasta", "codon")
+        :param nogap:  Removes the gaps and in-frame stop codons from the alignment to work better with PAML.
+        :param nomismatch:  Removes mismatched codons between protein and DNA sequences.
+        :param downstream:  Used as a naming convention for a better and more obvious pipeline.
+        :return:  A codon alignment.
+        """
         removed = []
         # Create output directory for PAL2NAL
         outDir = 'PAL2NAL'
