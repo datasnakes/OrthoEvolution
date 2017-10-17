@@ -13,32 +13,42 @@
 
 Datasnakes-Scripts
 --------------------
-An **easy to use** and comprehensive package which aids in the **analysis and visualization of comparative genomics** & related bioinformatics projects.
-This package places emphasis on the **inference of orthologs** using NCBI's blast, aligning sequences,
+An **easy to use** and comprehensive package which aids in the **analysis and visualization of comparative genetics** & related bioinformatics projects.
+The current implementation of this package places an emphasis on the **inference of orthologs** using NCBI's blast, various sequence alignment strategies,
 and phylogenetics analyses including PAML, PhymL, ete3, and more tools.
 
-The goal of this project was to create a simple, short, & effective pipeline (refseq accession to phyloanalysis) to infer orthologs.
+The goal of this project is to create a pipeline framework for current (inference of orthologs) and future (RNA-seek) projects.  The Cookies, Manager, Pipeline,
+and Tools modules act as a framework for our workflow, while the Orthologs module provides access to specific functions for our various ortholog inference projects.
 
 Check out our `wiki docs <https://github.com/datasnakes/Datasnakes-Scripts/wiki>`__ and our `read the docs <http://datasnakes-scripts.readthedocs.io/en/master/>`__!
 
 
 Installation
 ------------
+#### Python Package Index
 ``pip install Datasnakes-Scripts``
 
-Alternatively, you can set install the package manually.
-
+#### GitHub
 1. Download the zip file and unzip it or ``git clone https://github.com/datasnakes/Datasnakes-Scripts.git``
 2. ``cd Datasnakes-Scripts``
 3. ``pip install .``
 
+#### Development Code
+_**WARNING**_:  _This code is actively under development and may not be reliable.  Please create an
+[Issue](https://github.com/datasnakes/Datasnakes-Scripts/issues) for questions about development._
+
+1. Download the zip file and unzip it or ``git clone -b dev-master https://github.com/datasnakes/Datasnakes-Scripts.git``
+2. ``cd Datasnakes-Scripts``
+3. ``pip install .``
 
 Examples
 ---------
 
 .. code:: python
 
-    from Datasnakes.Orthologs import Align, BioSQL, Blast, CompGenetics, Phylogenetics, Genbank
+    import Datasnakes
+A short overview of the package can be found in the Datasnakes module.
+For more advanced documentation see the README.md files in each of the sub-modules.
 
 Tests
 ------
