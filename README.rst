@@ -48,7 +48,8 @@ Examples
 
     import Datasnakes
 A short overview of the package can be found in the Datasnakes module.
-For more advanced documentation see the README.md files in each of the sub-modules.
+For more advanced documentation see the README.md files in each of the sub-modules.  A good place to start would be the
+Orthologs/Blast module for understanding the bioinformatics workflow.
 
 Tests
 ------
