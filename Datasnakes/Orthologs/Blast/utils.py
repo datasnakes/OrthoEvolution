@@ -8,6 +8,9 @@ import shutil
 import pkg_resources
 import subprocess
 from importlib import import_module
+from Datasnakes.Tools.logit import LogIt
+
+bu_log = LogIt().default(logname="BLAST-UTILS", logfile=None)
 
 
 def map_func(hit):
@@ -31,11 +34,17 @@ def paml_org_formatter(organisms):
 
 
 def gene_list_config(file, data_path, gene_list, taxon_dict, logger):
-    """Create or use a blast configuration file.
-    This function configures different files for new BLASTS.
-    It also helps recognize whether or not a BLAST was terminated
-    in the middle of the dataset.  This removes the last line of
-    the accession file if it is incomplete.
+    """
+    Create or use a blast configuration file (accession file).  This function configures different files for new BLASTS.
+    It also helps recognize whether or not a BLAST was terminated in the middle of the workflow.  This removes the last
+    line of the accession file if it is incomplete.
+
+    :param file:  An accession file to analyze.
+    :param data_path:  The path of the accession file.
+    :param gene_list:  A gene list in the same order as the accession file.
+    :param taxon_dict:  A taxon id dictionary for logging purposes.
+    :param logger:  A logger.
+    :return:  Returns a continued gene_list to pick up from an interrupted Blast.
     """
 
     ending = gene = org = taxid = None
@@ -137,8 +146,15 @@ def get_gilists(id, gi_list_path, logger):
 
 
 def my_gene_info(acc_path, blast_query='Homo_sapiens'):
-    mygene = import_module('mygene')
+    """
+    This function gathers pre Blast information about the target genes using the MyGene package.
 
+    :param acc_path:  An absolute path to the accession file of interest.
+    :param blast_query:  The query organism for used during Blasting.
+    :return:  Returns a data-frame with hot data about each gene.
+    """
+    mygene = import_module('mygene')
+    bu_log.info("Getting Pre-BLAST information about the target genes using MyGene...")
     # Initialize variables and import my-gene search command
     urls = []
     df = pd.read_csv(str(acc_path), dtype=str)
@@ -173,14 +189,18 @@ def my_gene_info(acc_path, blast_query='Homo_sapiens'):
     hot_data.rename(columns={'Gene': 'Gene Symbol'}, inplace=True)
     hot_data = hot_data.sort_values(['Tier'], ascending=True)
 
+    return hot_data
+
 
 def get_dup_acc(acc_dict, gene_list, org_list):
-    """Get duplicate accessions.
-    This function is used to analyze an accession file post-BLAST.
-    It uses the accession dictionary as a base.
+    """
+    This function is used to analyze an accession file post-BLAST.  It uses the accession dictionary as a base to get
+    duplicated accession numbers.
 
-    :return: A master duplication dictionary used to initialize the
-    duplicate class variables.
+    :param acc_dict:  A dictionary with accession numbers as keys, and a gene/organism list as values.
+    :param gene_list:  A full list of genes.
+    :param org_list:  A full list of organisms.
+    :return:  A master duplication dictionary used to initialize the duplicate class variables.
     """
 
     duplicated_dict = dict()
@@ -216,6 +236,7 @@ def get_dup_acc(acc_dict, gene_list, org_list):
                     # Categorize the different types of duplication
                 # Duplicates that persist across an organisms
                 if orgs.count(o) == len(go_list):
+                    bu_log.warning("A duplicate accession number(%s) persists ONLY across %s for %s." % (accession, o, genes))
                     duplicated_dict['organisms'][o][accession] = genes
                     del duplicated_dict['genes'][g]
                     break
@@ -223,10 +244,13 @@ def get_dup_acc(acc_dict, gene_list, org_list):
                 elif orgs.count(o) != 1:
                     alt_genes = list(
                         gene for gene, org in go_list if org == o)
+                    bu_log.warn("A duplicate accession number(%s) persists across %s for %s." % (accession, o, alt_genes))
+                    bu_log.warn("%s is also duplicated elsewhere." % accession)
                     duplicated_dict['organisms'][o][accession] = alt_genes
 
                 # Duplicates that persist across a gene
                 if genes.count(g) == len(go_list):
+                    bu_log.critical("A duplicate accession number(%s) persists across %s for %s." % (accession, g, orgs))
                     duplicated_dict['genes'][g][accession] = orgs
                     del duplicated_dict['organisms'][o]
                     break
@@ -234,6 +258,8 @@ def get_dup_acc(acc_dict, gene_list, org_list):
                 elif genes.count(g) != 1:
                     alt_orgs = list(
                         org for gene, org in go_list if gene == g)
+                    bu_log.critical("A duplicate accession number(%s) persists across %s for %s." % (accession, g, alt_orgs))
+                    bu_log.critical("%s is also duplicated elsewhere." % accession)
                     duplicated_dict['genes'][g][accession] = alt_orgs
 
                     # This is the "somewhere else" if the duplication is random or not categorized
@@ -243,6 +269,7 @@ def get_dup_acc(acc_dict, gene_list, org_list):
                     del duplicated_dict['genes'][g]
                     if accession not in duplicated_dict['random']:
                         duplicated_dict['random'][accession] = []
+                    bu_log.critical("%s is randomly duplicated." % accession)
                     duplicated_dict['random'][accession].append(go)
                     # There is another category of duplication that I'm missing
                     # TODO-ROB:  If an other exists throw a warning in the
@@ -252,6 +279,7 @@ def get_dup_acc(acc_dict, gene_list, org_list):
                     del duplicated_dict['genes'][g]
                     if accession not in duplicated_dict['other']:
                         duplicated_dict['other'][accession] = []
+                    bu_log.critical("%s is duplicated, but cannot be categorized as random." % accession)
                     duplicated_dict['other'][accession].append(go)
         # Duplicate Organism count dictionary
         dup_org = pd.DataFrame.from_dict(duplicated_dict['organisms'])
@@ -275,8 +303,8 @@ def get_dup_acc(acc_dict, gene_list, org_list):
 
 def get_miss_acc(acc_file_path):
     """
-    This function is used to analyze an accession file post BLAST.
-    It generates several files and dictionaries regarding missing accession numbers.
+    This function is used to analyze an accession file post BLAST.  It generates several files and dictionaries
+    regarding missing accession numbers.
 
     :param acc_file_path: An accession file (post BLAST).
     :return: A dictionary with data about the missing accession numbers by Gene and
@@ -304,7 +332,7 @@ def get_miss_acc(acc_file_path):
             # Do a list comprehension to get a list of genes
             missing_dict['organisms'][organism]['missing genes'] = list(key for key, value in missing_genes.items()
                                                                         if value)  # Value is True for miss accns
-
+            bu_log.critical("%s is missing %s." % (organism, str(missing_dict['organisms'][organism]['missing genes'])))
             # Number of missing accessions per organism
             missing_dict['organisms'][organism]['count'] = miss
             total_miss += miss
@@ -321,7 +349,7 @@ def get_miss_acc(acc_file_path):
             missing_dict['genes'][gene]['missing organisms'] = list(key for key, value in missing_orgs.items()
                                                                     if value  # Value is True for missing accessions
                                                                     if key != 'Tier')  # Don't include 'Tier'
-
+            bu_log.critical("%s is missing %s." % (gene, str(missing_dict['genes'][gene]['missing organisms'])))
             # Number of missing accessions per gene
             missing_dict['genes'][gene]['count'] = miss
             total_miss += miss
