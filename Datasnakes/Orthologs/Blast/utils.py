@@ -15,6 +15,7 @@ import platform
 
 def map_func(hit):
     """Use the map function for formatting hit id's.
+    
     This will be used later in the script.
     """
     hit.id1 = hit.id.split('|')[3]  # accession number
@@ -35,6 +36,7 @@ def paml_org_formatter(organisms):
 
 def gene_list_config(file, data_path, gene_list, taxon_dict, logger):
     """Create or use a blast configuration file.
+    
     This function configures different files for new BLASTS.
     It also helps recognize whether or not a BLAST was terminated
     in the middle of the dataset.  This removes the last line of
@@ -114,7 +116,7 @@ def creategilists(gi_list_path, taxonomy_ids):
         # based on Organisms/Taxonomy id's.
         # TODO Create blastdbcmd commandline tools
         gi_time_secs = time.time()
-        with ThreadPool(1) as gilist_pool:
+        with ThreadPool(3) as gilist_pool:
             gilist_pool.map(_taxid2gilist, taxonomy_ids)
             minutes = (time.time() - gi_time_secs) / 60
         print("Took %s minutes to create gi binary files." % minutes)
@@ -125,19 +127,19 @@ def _taxid2gilist(taxonomy_id):
     tid = taxonomy_id
     binary = str(tid) + 'gi'
     if platform.system() == 'Linux':
-        if binary not in os.getcwd():
+        if binary not in os.listdir():
             # TODO Convert to subprocess
             # TODO Test this on Linux
             os.system("blastdbcmd -db refseq_rna -entry all -outfmt '%g %T' | awk ' { if ($2 == " + tid + ") { print $1 } } ' > " + tid + "gi.txt")
             print(tid + "gi.txt has been created.")
 
-            # Convert the .txt file to a binary file using the blastdb_aliastool.
+            # Convert the .txt file to a binary file using the blastdb_aliastool
             os.system("blastdb_aliastool -gi_file_in " + tid + "gi.txt -gi_file_out " + tid + "gi")
             print(tid + "gi binary file has been created.")
 
-        # Remove the gi.text file
-        os.remove(tid + "gi.txt")
-        print(tid + "gi.text file has been deleted.")
+            # Remove the gi.text file
+            # os.remove(tid + "gi.txt")
+            print(tid + "gi.text file has been deleted.")
 
     elif platform.system() == 'Windows':
         raise NotImplementedError('Windows is not supported')
