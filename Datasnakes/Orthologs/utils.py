@@ -19,9 +19,12 @@ def attribute_config(cls, composer, checker, project=None, project_path=None, ch
     :return:  Returns the instance (cls) with new attributes.
     """
     ac_log = LogIt().default(logname="%s" % cls.__class__.__name__, logfile=None)
-
+    if checker2:
+        check2 = issubclass(type(composer), checker2)
+    else:
+        check2 = None
     # Attribute configuration using checker composition.
-    if issubclass(type(composer), checker) or issubclass(type(composer), checker2):
+    if issubclass(type(composer), checker) or check2:
         for key, value in composer.__dict__.items():
             setattr(cls, key, value)
         ac_log.info("The Attribute Configuration was accomplished by composing %s with %s." % (cls.__class__.__name__, composer.__class__.__name__))
