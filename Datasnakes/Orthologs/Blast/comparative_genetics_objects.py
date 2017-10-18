@@ -1,7 +1,7 @@
 import os
 import shutil
 from pathlib import Path
-
+import time
 # NCBITaxa().update_taxonomy_database()
 import pandas as pd
 import pkg_resources
@@ -13,6 +13,7 @@ from Datasnakes.Manager.management import ProjectManagement
 from Datasnakes.Orthologs.utils import attribute_config
 from Datasnakes.Orthologs.Blast.utils import (my_gene_info, get_dup_acc,
                                               get_miss_acc)
+from Datasnakes.Tools.logit import LogIt
 
 
 # TODO-ROB Create function for archiving and multiple runs (this can go
@@ -67,6 +68,12 @@ class CompGenObjects(object):
         self.acc_filename = acc_file
 
         self.project = project
+
+        # Initialize Logging
+        self.blastn_log = LogIt().default(logname="BLATN", logfile=None)
+        self.get_time = time.time
+        self.sep = 50*'*'
+
         if project_path and project:
             self.project_path = Path(project_path) / Path(project)
 
@@ -190,6 +197,7 @@ class CompGenObjects(object):
         """
 
         # Usually a only a user would manually add a csv file for their own purposes.
+        self.blastn_log.info("Getting the master lists.")
         if csv_file is not None:
             self.__init__(project=self.project, acc_file=csv_file)
             df = self.df
