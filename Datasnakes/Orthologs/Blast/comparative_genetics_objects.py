@@ -177,11 +177,16 @@ class CompGenObjects(object):
         file_list = list(data[0])
         return file_list
 
-    def get_master_lists(self, df=None, csv_file=None):
-        """This function populates the organism and gene lists with a data frame.
+    def get_master_lists(self, df, csv_file=None):
+        """
+        This function populates the organism and gene lists with a data frame.  It will also populate pre-blast
+        attributes (mygene) and post-blast attributes (missing and duplicates) under the proper conditions.
 
-        This function also populates several dictionaries.
-        The dictionaries contain separate keys for Missing genes.
+        :param df:  The preferred way of utilizing the function is with a data-frame.
+        :param csv_file:  If a csv_file is given, then a data-frame will be created by reinitializing the object.
+        :returns:  An API can be utilized to access a gene list, organism list, taxon-id list,
+                   tier list/dict/data-frame, accession list/data-frame, blast query list, mygene information, and
+                   missing/duplicate information.
         """
 
         # Usually a only a user would manually add a csv file for their own purposes.
@@ -245,12 +250,12 @@ class CompGenObjects(object):
             self.duplicated_other = self.duplicated_dict['other']
 
     def get_accession(self, gene, organism):
-        """Get the accession of a gene.
-        Args:
-            gene = input a gene
-            organism = input an organism
-        Returns:
-            accession = the accession will be returned.
+        """
+        This method accesses a single accession number.
+
+        :param gene:  An input gene.
+        :param organism:  An input organism.
+        :return:  A single accession number of the target gene/organism.
         """
         maf = self.df
         accession = maf.get_value(gene, organism)
@@ -259,13 +264,12 @@ class CompGenObjects(object):
         return accession
 
     def get_orthologous_gene_sets(self, go_list=None):
-        """ Get a list of acessions.
-        Args:
-            Can take a gene/organism list as an argument:
-            go_list = [[gene.1, org.1], ... , [gene.n, org.n]]
-            It also takes an empty gene/organisms list.
-        Returns:
-            It returns an entire list of accession numbers.
+        """
+         This method accesses a list of accession numbers.
+
+        :param go_list:  A nested list of gene/organism lists (go_list = [[gene.1, org.1], ... , [gene.n, org.n]]).
+                         This parameter can also be None.
+        :return:  An ordered list of accession numbers (or "missing") that correspond to the go_list index.
         """
         if go_list is None:
             accessions = self.acc_list
@@ -277,8 +281,11 @@ class CompGenObjects(object):
         return accessions
 
     def get_orthologous_accessions(self, gene):
-        """Takes a single gene and returns a list of accession numbers
-        for the different orthologs.
+        """
+        Takes a single gene and returns a list of accession numbers for the different orthologs.
+
+        :param gene:  An input gene from the accession file.
+        :return:  A list of accession numbers that correspond to the orthologs of the target gene.
         """
         maf = self.df
         accession_alignment = maf.T[gene].tolist()[1:]
@@ -286,12 +293,11 @@ class CompGenObjects(object):
 
     def get_tier_frame(self, tiers=None):
         """
-        Args:
-            Takes a list of tiers or nothing.
-        Returns:
-            It returns a dictionary.
-            keys:  Tier list
-            values:  Data-Frame for each tier.
+        This function organizes a dictionary by tier.  Each tier (key) has a value, which is a data-frame of genes
+        associated with that tier.
+
+        :param tiers:  A list of tiers in the accession file.
+        :return:  A nested dictionary for accessing information by tier.
         """
         maf = self.df
         tier_frame_dict = {}
@@ -302,10 +308,14 @@ class CompGenObjects(object):
             tier_frame_dict[tier] = maf.groupby('Tier').get_group(tier)
         return tier_frame_dict
 
-    def get_taxon_dict(self, min=False):
-        """Get the taxonomny information about each organism using ETE3.
-        Returns:
-            taxa_dict = dict of organisms and their taxonomy ids.
+    def get_taxon_dict(self):
+        """
+        This function gets the taxonomy information about each organism using ETE3.
+
+        :return:  Returns several dictionaries.  One is a basic organism (key) to taxonomy id (value) dictionary, and
+        the other is a lineage dictionary with the an organism key and a lineage dictionary as the value.  The lineage
+        dictionary keys for each organism are ["class", "family", "genus", "kingdowm", "order", "phylum", "species",
+        "superkingdom"].
         """
         ncbi = NCBITaxa()
         taxa_dict = {}
@@ -331,9 +341,7 @@ class CompGenObjects(object):
         This function takes a list of accession numbers and returns a dictionary
         which contains the corresponding genes/organisms.
 
-        :return: A dictionary with values that are nested lists.  Unique accessions
-        will have a nested list with a length of 1.  Accessions that are duplicated
-        will have a nested list with a length > 1.
+        :return: An accession dictionary who's values are nest gene/organism lists.
         """
         gene_list = self.gene_list
         org_list = self.org_list
