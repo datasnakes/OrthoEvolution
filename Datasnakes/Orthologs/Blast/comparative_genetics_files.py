@@ -1,10 +1,8 @@
 import os
-import time
 from pathlib import Path
 
 import pandas as pd
 from Datasnakes.Orthologs.Blast.comparative_genetics_objects import CompGenObjects
-from Datasnakes.Tools import LogIt
 
 
 # import pkg_resources
@@ -40,16 +38,6 @@ class CompGenFiles(CompGenObjects):
             self.building_filename = str(self.project + 'building.csv')
             self.building_time_filename = self.building_filename.replace(
                 'building.csv', 'building_time.csv')
-
-        # Initialize Logging
-        logit = LogIt()
-        self.blastn_log = logit.default('blastn', 'blastn.log')
-        self.__date_format = logit._date_format
-        self.get_time = time.time  # To get the time use 'get_time()'
-
-        # Create variable for log separator
-        log_sep = 50*'*'
-        self.sep = log_sep
 
     def add_accession(self, gene, organism, accession):
         """Take an accession and add in to the building dataframe & csv file.
