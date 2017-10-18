@@ -21,6 +21,7 @@ Adapted by Jake Feala (@jfeala) from
 `LSF extension <https://github.com/dattalab/luigi/blob/lsf/luigi/lsf.py>`_
 by Alex Wiltschko (@alexbw)
 Maintained by Jake Feala (@jfeala)
+edited by Shaurita Hutchins (@sdhutchins) and Robert Gilmore (@grabear)
 
 SunGrid Engine is a job scheduler used to allocate compute resources on a
 shared cluster. Jobs are submitted using the ``qsub`` command and monitored
@@ -115,7 +116,6 @@ def _parse_qstat_state(qstat_out, job_id):
 
     Returns state for the *first* job matching job_id. Returns 'u' if
     `qstat` output is empty or job_id is not found.
-
     """
     if qstat_out.strip() == '':
         return 'u'
@@ -137,9 +137,7 @@ def _parse_qsub_job_id(qsub_out):
     """Parse job id from qsub output string.
 
     Assume format:
-
-        "Your job <job_id> ("<job_name>") has been submitted"
-
+        "<job_id>.<job_scheduler>"
     """
     qsub_out = qsub_out.decode('utf-8')
     qsub_out = qsub_out.split('.')[0]
@@ -155,8 +153,7 @@ def _build_qsub_command(cmd, job_name, outfile, errfile, select):
 
 # TODO Change ncpu parameter description
 class SGEJobTask(luigi.Task):
-
-    """Base class for executing a job on SunGrid Engine
+    """Base class for executing a job on SunGrid Engine.
 
     Override ``work()`` (rather than ``run()``) with your job code.
 
@@ -182,7 +179,6 @@ class SGEJobTask(luigi.Task):
     - no_tarball: Don't create a tarball of the luigi project directory.  Can be
         useful to reduce I/O requirements when the luigi directory is accessible
         from cluster nodes already.
-
     """
 
     select = luigi.IntParameter(default=3, significant=False)
@@ -288,13 +284,13 @@ class SGEJobTask(luigi.Task):
                 pickle.dump(self, open(self.job_file, "w"))
 
     def _run_job(self):
-
-        # Build a qsub argument that will run sge_runner.py on the directory we've specified
+        """Build a qsub argument that will run sge_runner.py on the directory"""
         runner_path = sge_runner.__file__
         if runner_path.endswith("pyc"):
             runner_path = runner_path[:-3] + "py"
+        # enclose tmp_dir in quotes to protect from special escape chars
         job_str = 'python {0} "{1}" "{2}"'.format(
-            runner_path, self.tmp_dir, os.getcwd())  # enclose tmp_dir in quotes to protect from special escape chars
+            runner_path, self.tmp_dir, os.getcwd())
         if self.no_tarball:
             job_str += ' "--no-tarball"'
 
