@@ -107,6 +107,7 @@ def gi_list_config(gi_list_path, taxonomy_ids, research_path=None, config=False)
 
 def creategilists(gi_list_path, taxonomy_ids):
     """ This function uses the blastdbcmd tool to get gi lists.
+    
     It then uses the blastdb_aliastool to turn the list into a binary file.
     The input (id) for the function is a taxonomy id.
     """
@@ -143,7 +144,7 @@ def _taxid2gilist(taxonomy_id):
 
     elif platform.system() == 'Windows':
         raise NotImplementedError('Windows is not supported')
-        if binary not in os.getcwd():
+        if binary not in os.listdir():
             with contextlib.suppress(CalledProcessError):
                 cmd = 'blastdbcmd -db refseq_rna -entry all -outfmt "%g %T"'
                 # Shell MUST be True
@@ -310,9 +311,10 @@ def get_dup_acc(acc_dict, gene_list, org_list):
 
 
 def get_miss_acc(acc_file_path):
-    """
-    This function is used to analyze an accession file post BLAST.
-    It generates several files and dictionaries regarding missing accession numbers.
+    """This function is used to analyze an accession file post BLAST.
+    
+    It generates several files and dictionaries regarding missing accession 
+    numbers.
 
     :param acc_file_path: An accession file (post BLAST).
     :return: A dictionary with data about the missing accession numbers by Gene and
@@ -367,7 +369,8 @@ def get_miss_acc(acc_file_path):
 
 
 def get_pseudogenes():
-    """ UNDER DEVELOPMENT!!!
+    """UNDER DEVELOPMENT!!!
+    
     This subclass will denote which genes are sudogenes.
     """
     print(__doc__)
