@@ -11,25 +11,19 @@ from Datasnakes.Orthologs.Blast.blastn_comparative_genetics import CompGenBLASTn
 from Datasnakes.Tools.utils.other_utils import makedirectory
 from Datasnakes.Orthologs.Blast.comparative_genetics_objects import CompGenObjects
 
-# TODO-ROB:  REMOVED Tier Based Directory System.  Only add tier directories at the end of analysis in the users data folder
-
 
 class GenBank(object):
-    """Class for managing, downloading and extracting features from genbank files."""
-
     def __init__(self, project, project_path=None, solo=False, multi=True, archive=False, min_fasta=True, blast=CompGenBLASTn, **kwargs):
         """
-        This class will handle genbank files in various ways for the
-        Orthologs Project.  It allows for .gbff files to be downloaded
-        from NCBI and uploaded to a BioSQL database (biopython).  Single
-        .gbk files can be downloaded from the .gbff, and uploaded to a
-        custom database file for faster acquisition of GenBank data.
+        This class will handle GenBank files in various ways.  It allows for refseq-release .gbff files to be downloaded
+        from NCBI and uploaded to a BioSQL database (biopython).  Single .gbk files can be downloaded from the .gbff,
+        and uploaded to a custom BopSQL database for faster acquisition of GenBank data.
 
         :param project:  The name of the project.
         :param project_path: The relative path to the project.
         :param solo:  A flag for adding single fasta files.
         :param multi:  A flag for adding multi-fasta files.
-        :param archive: A flag for archiving current GenBank Data.
+        :param archive: A flag for archiving current GenBank Data.  # TODO
         :param min_fasta: A flag for minimizing FASTA file headers.
         :param blast:  The blast parameter is used for composing various
                        Orthologs.Blast classes.  Can be a class, a dict,
@@ -49,7 +43,6 @@ class GenBank(object):
 
         # Configuration
         self.target_gbk_db_path = self.user_db / Path(self.project)
-        # TODO-ROB: Configure GenBank function
         Path.mkdir(self.target_gbk_db_path, parents=True, exist_ok=True)
         self.solo = solo
         self.multi = multi
@@ -57,10 +50,28 @@ class GenBank(object):
 
     @staticmethod
     def name_fasta_file(path, gene, org, feat_type, feat_type_rank, extension, mode):
-        """Provide a unique name for the fasta file."""
+        """
+        Provide a uniquely named FASTA file:
+        * Coding sequence:
+            * Single - "<path>/<gene>_<organism><feat_type_rank>.<extension>"
+            * Multi  - "<path>/<gene><feat_type_rank>.<extension>"
+        * Other:
+            * Single - "<path>/<gene>_<organism>_<feat_type_rank>.<extension>"
+            * Multi  - "<path>/<gene>_<feat_type_rank>.<extension>"
 
-        # Create path variables.
-        feat_path = path / Path(feat_type) / Path(gene)
+        :param path:  The path where the file will be made.
+        :param gene:  The gene name.
+        :param org:  The organism name.
+        :param feat_type:  The type of feature from the GenBank record.  (CDS, UTR, misc_feature, variation, etc.)
+        :param feat_type_rank:  The feature type  + the rank.  (There can be multiple misc_features and variations)
+        :param extension:  The file extension.  (".ffn", ".faa", ".fna", ".fasta")
+        :param mode:  The mode ("w" or "a") for writing the file.  Write to a solo-FASTA file.  Append a multi-FASTA
+        file.
+        :return:  The uniquely named FASTA file.
+        """
+
+        # Create path variables.  (typically raw_data/<gene>/GENBANK
+        feat_path = path
         # Create a format-able string for file names
         if feat_type_rank is "CDS":
             single = '%s_%s%s%s'
@@ -81,7 +92,12 @@ class GenBank(object):
 
     @staticmethod
     def protein_gi_fetch(feature):
-        """Retrieve the protein gi number."""
+        """
+        Retrieve the protein gi number.
+
+        :param feature:  Search the protein feature for the GI number.
+        :return:  The protein GI number as a string.
+        """
 
         # Find the protein gi number under the features qualifiers.
         for x in feature.qualifiers:
@@ -89,17 +105,18 @@ class GenBank(object):
                 head, sup, p_gi = x.partition(':')
                 return p_gi
 
-    def blast2_gbk_files(self, org_list, gene_dict):
+    def create_post_blast_gbk_records(self, org_list, gene_dict):
         """
-        The blast2_gbk_files is only callable if the blast parameter
-        inherits one of the blast classes.  This method also requires
-        the BioSQL databases of NCBI's .gbffs to be set up.
+        After a blast has completed and the accession numbers have been compiled into an accession file, this class
+        searches a local NCBI refseq release database composed of GenBank records.  This method will create a single
+        GenBank file (.gbk) for each ortholog with an accession number.  The create_post_blast_gbk_records is only callable if the
+        the instance is composed by one of the Blast classes.  This method also requires an NCBI refseq release
+        database to be set up with the proper GenBank Flat Files (.gbff) files.
 
         :param org_list:  List of organisms
         :param gene_dict:  A nested dictionary for accessing accession numbers.
         (e.g. gene_dict[GENE][ORGANISM} yields an accession number)
-        :return:  Does not return an object, but it does create all the proper
-        genbank files.
+        :return:  Does not return an object, but it does create all the proper genbank files.
         """
         # Parse the tier_frame_dict to get the tier
         for G_KEY, G_value in self.tier_frame_dict.items():
