@@ -173,8 +173,8 @@ class GenBank(object):
                     with open(gbk_file_path, 'w') as GB_file:
                         GB_file.write(record.format('genbank'))
                         self.genbanklog.info(GB_file.name, 'created')
-                    # TODO-ROB:  Add quality control method here
-                    # self.gbk_quality_control()
+                    # Make sure we have the correct GenBank file.
+                    self.gbk_quality_control(gbk_file_path, gene, organism)
                     # Stop searching if the GenBank record has been created.
                     server_flag = True
                     break
@@ -188,9 +188,69 @@ class GenBank(object):
             raise FileNotFoundError
 
     def gbk_quality_control(self, gbk_file, gene, organism):
-        print(self)
-        print("Add this method to GenBank/utils.py")
-        print("Check the GenBank file for proper data")
+        """
+        This is a quality control method.  It makes sure that the data we're using is correct.  It takes the GenBank
+        record and check to make sure the Gene and Organism from the GenBank record match the Gene and Organism from the
+        accession file.  If not, then the Blast has returned the wrong accession number.
+
+        :param gbk_file:  The path to a GenBank file.
+        :param gene:  A gene name from the Accession file.
+        :param organism:  A gene name from the Accession file.
+        :return:
+        """
+
+        # TODO-ROB:  Check the bad data here against the misssing/duplicate files
+        # TODO-ROB:  Verify the Accession files here.
+        record = SeqIO.read(gbk_file, 'genbank')
+        gene_flag = False
+        organism_flag = False
+
+        # Get the organism name from the GenBank file
+        gbk_organism = record.features[0].qualifiers["organism"]  # A list with one entry
+        if len(gbk_organism) == 1:
+            gbk_organism = gbk_organism[0]
+            gbk_organism = gbk_organism.replace(" ", "_")
+        else:
+            self.genbanklog.critical("Two organisms exist in the GenBank file.  Is this normal?")
+            raise BrokenPipeError
+
+        # Check to make sure the organism in the GenBank file matches the organism from the accession file
+        if gbk_organism == organism:
+            self.genbanklog.info("The GenBank organism, %s, has been verified for %s." % (organism, gene))
+        else:
+            organism_flag = True
+
+        # Get the gene from the GenBank files
+        gbk_genes = record.features[1].qualifiers["gene"]
+        # Get the synonyms from the GenBank file if they exist and add them to the list.
+        if "gene_synonym" in str(record.features[1].qualifiers.keys()):
+            gbk_genes.extend(record.features[1].qualifiers["gene_synonym"])
+
+        # Check to make sure the gene in the GenBank file matches the gene from the accession file
+        for gbk_gene in gbk_genes:
+            if gbk_gene == gene:
+                gene_flag = False
+                self.genbanklog.info("The GenBank gene, %s, has been verified for %s." % (gene, organism))
+                break
+            else:
+                gene_flag = True
+
+        # TODO-ROB:  Add a verified key to the duplicates dictionary.
+        # Raise errors.
+        if organism_flag is True and gene_flag is True:
+            self.genbanklog.critical("The organisms don't match.\n\tGenBank: %s \n\tAccession File: %s" %
+                                     (gbk_organism, organism))
+            self.genbanklog.critical("The genes don't match. \n\tGenBank: %s \n\tAccession File: %s" %
+                                     (gbk_genes, gene))
+            raise BrokenPipeError
+        elif organism_flag is True:
+            self.genbanklog.critical("The organisms don't match.\n\tGenBank: %s \n\tAccession File: %s" %
+                                     (gbk_organism, organism))
+            raise BrokenPipeError
+        elif gene_flag is True:
+            self.genbanklog.critical("The genes don't match. \n\tGenBank: %s \n\tAccession File: %s" %
+                                     (gbk_genes, gene))
+            raise BrokenPipeError
 
     def gbk_upload(self):
         """
