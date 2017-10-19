@@ -205,7 +205,7 @@ class GenBank(object):
         organism_flag = False
         accession = record.id
         self.gbk_gene_synonym = {}
-
+        self.duplicated_dict["validated"] = {}
         # Get the organism name from the GenBank file
         gbk_organism = record.features[0].qualifiers["organism"]  # A list with one entry
         if len(gbk_organism) == 1:
