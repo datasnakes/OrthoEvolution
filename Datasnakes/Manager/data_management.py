@@ -102,7 +102,7 @@ class DataMana(object):
             self.gb = GenBank(blast=blast, **self.Management_config, **self.GenBank_config)
         if blast is not None:
             if issubclass(type(blast), CompGenBLASTn):
-                self.gb.blast2_gbk_files(blast.org_list, blast.gene_dict)
+                self.gb.create_post_blast_gbk_records(blast.org_list, blast.gene_dict)
         else:
             print(proj_mana.__dict__)
             cga = CompGenObjects(proj_mana=proj_mana, **self.CompGenAnalysis_config)
