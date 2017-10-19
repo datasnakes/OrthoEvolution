@@ -33,6 +33,9 @@ class GenBank(object):
 
         # TODO-ROB: Change the way the file systems work.
         self.project = project
+        self.solo = solo
+        self.multi = multi
+        self.min_fasta = min_fasta
         self.genbanklog = LogIt().default(logname="GenBank", logfile=None)
 
         # Configuration of class attributes
@@ -44,9 +47,12 @@ class GenBank(object):
         # Configuration
         self.target_gbk_db_path = self.user_db / Path(self.project)
         Path.mkdir(self.target_gbk_db_path, parents=True, exist_ok=True)
-        self.solo = solo
-        self.multi = multi
-        self.min_fasta = min_fasta
+
+        # Make a list of BioSQL database(.db) files that contain GenBank info
+        self.db_files_list = []
+        for FILE in os.listdir(str(self.ncbi_db_repo)):
+            if FILE.endswith('.db'):
+                self.db_files_list.append(str(FILE))
 
     @staticmethod
     def name_fasta_file(path, gene, org, feat_type, feat_type_rank, extension, mode):
@@ -127,8 +133,10 @@ class GenBank(object):
                 for ORGANISM in org_list:
                     accession = str(gene_dict[GENE][ORGANISM])
                     accession, sup, version = accession.partition('.')
+                    # When parsing a GenBank database, the version needs to be removed.
                     accession = accession.upper()
                     server_flag = False
+                    # Search the databases and create a GenBank file.
                     self.get_gbk_file(accession, GENE, ORGANISM, server_flag=server_flag)
 
     def get_gbk_file(self, accession, gene, organism, server_flag=None):
@@ -145,18 +153,13 @@ class GenBank(object):
                  directories.
         """
 
-        # Make a list of BioSQL database(.db) files that contain GenBank info
-        db_files_list = []
-        for FILE in os.listdir(str(self.ncbi_db_repo)):
-            if FILE.endswith('.db'):
-                db_files_list.append(str(FILE))
-
         gene_path = self.raw_data / Path(gene) / Path('GENBANK')
         Path.mkdir(gene_path, parents=True, exist_ok=True)
 
         # Parse each database to find the proper GenBank record
-        for FILE in db_files_list:
+        for FILE in self.db_files_list:
             db_file_path = self.ncbi_db_repo / Path(FILE)
+            # Stop searching if the GenBank record has been created.
             if server_flag is True:
                 break
             server = BioSeqDatabase.open_database(driver='sqlite3', db=str(db_file_path))
@@ -170,15 +173,81 @@ class GenBank(object):
                     with open(gbk_file_path, 'w') as GB_file:
                         GB_file.write(record.format('genbank'))
                         self.genbanklog.info(GB_file.name, 'created')
+                    # TODO-ROB:  Add quality control method here
+                    # self.gbk_quality_control()
+                    # Stop searching if the GenBank record has been created.
                     server_flag = True
                     break
                 except IndexError:
                     self.genbanklog.critical('Index Error in %s.  Moving to the next database...' % SUB_DB_NAME)
                     continue
 
+        # If the file has not been created after searching, then raise an error
         if server_flag is not True:
             self.genbanklog.critical("The GenBank file was not created for %s (%s, %s)." % (accession, gene, organism))
             raise FileNotFoundError
+
+    def gbk_quality_control(self, gbk_file, gene, organism):
+        print(self)
+        print("Add this method to GenBank/utils.py")
+        print("Check the GenBank file for proper data")
+
+    def gbk_upload(self):
+        """
+        This method is only usable after creating GenBank records with this class.  It uploads a BioSQL databases with
+        target GenBank data (.gbk files).  This creates a compact set of data for each project.
+
+        :return:  Does not return an object, but creates a database for each gene-tier in the dataset.
+        """
+
+        t_count = 0
+        # Parse the tier dictionary
+        for TIER in self.tier_frame_dict.keys():
+            db_name = str(TIER) + '.db'
+            db_file_path = self.target_gbk_db_path / Path(db_name)
+            # Create the db file if it exists
+            if os.path.isfile(str(db_file_path)) is False:
+                self.genbanklog.warn('Copying Template BioSQL Database...  This may take a few minutes...')
+                shutil.copy2('Template_BioSQL_DB.db', str(db_file_path))
+
+            # If it already exists then the database is bad, or needs to be update.  Delete it.
+            else:
+                # TODO-ROB: This part is broken until the template db creation and management is added
+                os.remove(str(db_file_path))
+                self.genbanklog.warn('Copying Template BioSQL Database...  This may take a few minutes...')
+                shutil.copy2('Template_BioSQL_DB.db', str(db_file_path))
+
+            server = BioSeqDatabase.open_database(driver='sqlite3', db=str(db_file_path))
+            gene_path = self.raw_data
+            # Parse the raw_data folder to get the name of each gene.
+            for GENE in os.listdir(str(gene_path)):
+                sub_db_name = GENE
+                genbank_path = gene_path / Path(GENE) / Path('GENBANK')
+                # Parse the GenBank file names for each gene in order to upload them to a custom BioSQL database
+                for FILE in os.listdir(str(genbank_path)):
+                    # Try to load the database.
+                    try:
+                        if sub_db_name not in server.keys():
+                            server.new_database(sub_db_name)
+                        db = server[sub_db_name]
+                        count = db.load(SeqIO.parse(FILE, 'genbank'))
+                        server.commit()
+                        self.genbanklog.info('Server Commited %s' % sub_db_name)
+                        self.genbanklog.info('%s database loaded with %s.' % (db.dbid, FILE))
+                        self.genbanklog.info("That file contains %s genbank records." % str(count))
+                        t_count = t_count + count
+                        self.genbanklog.info('The total number of files loaded so far is %i.' % t_count)
+                    # If the database cannot be loaded then rollback the server and raise an error.
+                    except BaseException:
+                        server.rollback()
+                        # Try to delete the sub database and commit
+                        try:
+                            del server[sub_db_name]
+                            server.commit()
+                        # If it cannot be deleted then raise an error.
+                        except BaseException:
+                            raise
+                        raise
 
     def get_fasta_files(self, acc_dict, db=True):
         """
@@ -192,11 +261,13 @@ class GenBank(object):
 
         # Get FASTA files from the BioSQL GenBank databases.
         if db is True:
+            # Parse the directory that contains the databases for the project of interest.
             for database in os.listdir(str(self.target_gbk_db_path)):
                 server = BioSeqDatabase.open_database(driver="sqlite3", db=database)
                 try:
                     for db_name in server.keys():
                         db = server[db_name]
+                        # For each GenBank record in the database write a set of FASTA files.
                         for item in db.keys():
                             record = db.lookup(item)
                             self.write_fasta_files(record, acc_dict)
@@ -207,60 +278,14 @@ class GenBank(object):
         # TODO-ROB change this.  Broken by new directory structure
         # TODO-ROB directory looks like /raw_data/Gene_1/GENBANK/*.gbk
         elif db is False:
+            # Parse the directory that contain the GenBank records for the project of interest.
             for root, dirs, gbk_files in os.walk(str(self.target_gbk_files_path)):
+                # For each genbank record write a set of FASTA files.
                 for gbk_file in gbk_files:
                     if Path(gbk_file).suffix is '.gbk':
                         record = SeqIO.read(gbk_file, 'genbank')
                         self.write_fasta_files(record, acc_dict)
                         self.genbanklog.info("FASTA files for %s created." % gbk_file)
-
-    def gbk_upload(self):
-        """
-        This method is only usable after creating GenBank records with this class.  It uploads a BioSQL databases with
-        target GenBank data (.gbk files).  This creates a compact set of data for each project.
-
-        :return:  Does not return an object, but creates a database for each gene-tier in the dataset.
-        """
-
-        t_count = 0
-        for TIER in self.tier_frame_dict.keys():
-            db_name = str(TIER) + '.db'
-            db_file_path = self.target_gbk_db_path / Path(db_name)
-            if os.path.isfile(str(db_file_path)) is False:
-                self.genbanklog.warn('Copying Template BioSQL Database...  This may take a few minutes...')
-                # TODO-ROB:  Create a utility function for creating BioSQL databases
-                shutil.copy2('Template_BioSQL_DB.db', str(db_file_path))
-            else:
-                # TODO-ROB: This part is broken until the template db creation and management is added
-                os.remove(str(db_file_path))
-                self.genbanklog.warn('Copying Template BioSQL Database...  This may take a few minutes...')
-                shutil.copy2('Template_BioSQL_DB.db', str(db_file_path))
-
-            server = BioSeqDatabase.open_database(driver='sqlite3', db=str(db_file_path))
-            gene_path = self.raw_data
-            for GENE in os.listdir(str(gene_path)):
-                sub_db_name = GENE
-                gene_path = gene_path / Path(GENE) / Path('GENBANK')
-                for FILE in os.listdir(str(gene_path)):
-                    try:
-                        if sub_db_name not in server.keys():
-                            server.new_database(sub_db_name)
-                        db = server[sub_db_name]
-                        count = db.load(SeqIO.parse(FILE, 'genbank'))
-                        server.commit()
-                        self.genbanklog.info('Server Commited %s' % sub_db_name)
-                        self.genbanklog.info('%s database loaded with %s.' % (db.dbid, FILE))
-                        self.genbanklog.info("That file contains %s genbank records." % str(count))
-                        t_count = t_count + count
-                        self.genbanklog.info('The total number of files loaded so far is %i.' % t_count)
-                    except BaseException:
-                        server.rollback()
-                        try:
-                            del server[sub_db_name]
-                            server.commit()
-                        except BaseException:
-                            raise
-                        raise
 
     def write_fasta_files(self, record, acc_dict):
         """
