@@ -66,7 +66,7 @@ class GenBank(object):
         :param feat_type_rank:  The feature type  + the rank.  (There can be multiple misc_features and variations)
         :param extension:  The file extension.  (".ffn", ".faa", ".fna", ".fasta")
         :param mode:  The mode ("w" or "a") for writing the file.  Write to a solo-FASTA file.  Append a multi-FASTA
-        file.
+                      file.
         :return:  The uniquely named FASTA file.
         """
 
@@ -115,7 +115,7 @@ class GenBank(object):
 
         :param org_list:  List of organisms
         :param gene_dict:  A nested dictionary for accessing accession numbers.
-        (e.g. gene_dict[GENE][ORGANISM} yields an accession number)
+                           (e.g. gene_dict[GENE][ORGANISM} yields an accession number)
         :return:  Does not return an object, but it does create all the proper genbank files.
         """
         # Parse the tier_frame_dict to get the tier
@@ -133,14 +133,16 @@ class GenBank(object):
 
     def get_gbk_file(self, accession, gene, organism, server_flag=None):
         """
+        This method searches a GenBank database for a target accession number.  Generally, there are multiple GenBank
+        database files for one NCBI dataset.
+
         :param accession: Accession number of interest without the version.
         :param gene: Target gene of the accession number parameter.
         :param organism: Target organism of the accession number parameter.
-        :return: This function searches through the given NCBI databases (created by
-        uploading NCBI refseq .gbff files to a BioPython BioSQL database) and creates
-        single GenBank files.  This function can be used after a blast or on its own.
-        If used on it's own then the NCBI .db files must be manually moved to the proper
-        directories.
+        :return: This function searches through the given NCBI databases (created by uploading NCBI refseq .gbff files
+                 to a BioPython BioSQL database) and creates single GenBank files.  This function can be used after a
+                 blast or on its own.  If used on it's own then the NCBI .db files must be manually moved to the proper
+                 directories.
         """
 
         # Make a list of BioSQL database(.db) files that contain GenBank info
@@ -174,9 +176,19 @@ class GenBank(object):
                     self.genbanklog.critical('Index Error in %s.  Moving to the next database...' % SUB_DB_NAME)
                     continue
 
+        if server_flag is not True:
+            self.genbanklog.critical("The GenBank file was not created for %s (%s, %s)." % (accession, gene, organism))
+            raise FileNotFoundError
+
     def get_fasta_files(self, acc_dict, db=True):
-        """Create FASTA files for every GenBank record in the
-        accession number dictionary."""
+        """
+        This method creates FASTA files for every GenBank record in the accession number dictionary.  It can search
+        through a BioSQL database or it can crawl a directory for .gbk files.
+
+        :param acc_dict:  An accession dictionary like the one created by CompGenObjects.
+        :param db:  A flag that determines whether or not to use the custom BioSQL database or to use .gbk files.
+        :return:  Does not return an object, but it will return a set of FASTA files for each GenBank record.
+        """
 
         # Get FASTA files from the BioSQL GenBank databases.
         if db is True:
@@ -203,7 +215,13 @@ class GenBank(object):
                         self.genbanklog.info("FASTA files for %s created." % gbk_file)
 
     def gbk_upload(self):
-        """Upload BioSQL databases with GenBank data (.gbk files)."""
+        """
+        This method is only usable after creating GenBank records with this class.  It uploads a BioSQL databases with
+        target GenBank data (.gbk files).  This creates a compact set of data for each project.
+
+        :return:  Does not return an object, but creates a database for each gene-tier in the dataset.
+        """
+
         t_count = 0
         for TIER in self.tier_frame_dict.keys():
             db_name = str(TIER) + '.db'
@@ -245,7 +263,15 @@ class GenBank(object):
                         raise
 
     def write_fasta_files(self, record, acc_dict):
-        """Initialize writing a fasta sequence or feature to a file."""
+        """
+        This method initializes a FASTA file by creating a dictionary for formatting the FASTA header and the following
+        sequence.
+
+        :param record:  A GenBank record created by BioPython.
+        :param acc_dict:  The accession dictionary from the CompGenObjects class.
+        :return:
+        """
+
         feat_type_list = []
         for feature in record.features:
             # ############ Set up variables to use for dictionary values ############# #
@@ -303,7 +329,14 @@ class GenBank(object):
                 self.multi_fasta(na_entry, aa_entry, fmt)
 
     def solo_fasta(self, na_entry, aa_entry, fmt):
-        """Write a feature to a file."""
+        """
+        This method writes a sequence of a feature to a uniquely named file using a dictionary for formatting.
+
+        :param na_entry:  A string representing the Nucleic Acid sequence data in FASTA format.
+        :param aa_entry:  A string representing the Amino Acid sequence data in FASTA format.
+        :param fmt:  A dictionary for formatting the FASTA entries and the file names.
+        :return:  Does not return an object, but creates single entry FASTA files.
+        """
         mode = 'w'
 
         # Create the desired variables from the formatter dictionary.
@@ -342,7 +375,15 @@ class GenBank(object):
             file.close()
 
     def multi_fasta(self, na_entry, aa_entry, fmt):
-        """Write multi-fasta files."""
+        """
+        This method appends an othologous sequence of a feature to a uniquely named file using a dictionary for
+        formatting.
+
+        :param na_entry:  A string representing the Nucleic Acid sequence data in FASTA format.
+        :param aa_entry:  A string representing the Amino Acid sequence data in FASTA format.
+        :param fmt:  A dictionary for formatting the FASTA entries and the file names.
+        :return:  Does not return an object, but creates or appends to a multi entry FASTA file.
+        """
         mode = 'a'
 
         # Create the desired variables from the formatter dictionary.
