@@ -200,10 +200,11 @@ class GenBank(object):
         """
 
         # TODO-ROB:  Check the bad data here against the misssing/duplicate files
-        # TODO-ROB:  Verify the Accession files here.
         record = SeqIO.read(gbk_file, 'genbank')
         gene_flag = False
         organism_flag = False
+        accession = record.id
+        self.gbk_gene_synonym = {}
 
         # Get the organism name from the GenBank file
         gbk_organism = record.features[0].qualifiers["organism"]  # A list with one entry
@@ -224,7 +225,11 @@ class GenBank(object):
         gbk_genes = record.features[1].qualifiers["gene"]
         # Get the synonyms from the GenBank file if they exist and add them to the list.
         if "gene_synonym" in str(record.features[1].qualifiers.keys()):
+            base_gene_name = gbk_genes
             gbk_genes.extend(record.features[1].qualifiers["gene_synonym"])
+            # Create a dictionary from the synonyms
+            self.gbk_gene_synonym[base_gene_name] = []
+            self.gbk_gene_synonym[base_gene_name].extend(gbk_genes)
 
         # Check to make sure the gene in the GenBank file matches the gene from the accession file
         for gbk_gene in gbk_genes:
@@ -251,6 +256,8 @@ class GenBank(object):
             self.genbanklog.critical("The genes don't match. \n\tGenBank: %s \n\tAccession File: %s" %
                                      (gbk_genes, gene))
             raise BrokenPipeError
+
+        self.duplicated_dict["validated"][accession] = [gene, organism]
 
     def gbk_upload(self):
         """
