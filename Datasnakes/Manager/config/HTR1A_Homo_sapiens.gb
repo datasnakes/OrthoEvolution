@@ -1,0 +1,331 @@
+LOCUS       NM_000524               2245 bp    mRNA    linear   PRI 25-SEP-2017
+DEFINITION  Homo sapiens 5-hydroxytryptamine receptor 1A (HTR1A), mRNA.
+ACCESSION   NM_000524
+VERSION     NM_000524.3  GI:391353404
+KEYWORDS    RefSeq.
+SOURCE      Homo sapiens (human)
+  ORGANISM  Homo sapiens
+            Eukaryota; Metazoa; Chordata; Craniata; Vertebrata; Euteleostomi;
+            Mammalia; Eutheria; Euarchontoglires; Primates; Haplorrhini;
+            Catarrhini; Hominidae; Homo.
+REFERENCE   1  (bases 1 to 2245)
+  AUTHORS   Jafurulla M, Bandari S, Pucadyil TJ and Chattopadhyay A.
+  TITLE     Sphingolipids modulate the function of human serotonin1A receptors:
+            Insights from sphingolipid-deficient cells
+  JOURNAL   Biochim. Biophys. Acta 1859 (4), 598-604 (2017)
+   PUBMED   27984018
+  REMARK    GeneRIF: Sphingosine modulates the function of human serotonin1A
+            receptors.
+REFERENCE   2  (bases 1 to 2245)
+  AUTHORS   Jafurulla M, Nalli A and Chattopadhyay A.
+  TITLE     Membrane cholesterol oxidation in live cells enhances the function
+            of serotonin1A receptors
+  JOURNAL   Chem. Phys. Lipids 203, 71-77 (2017)
+   PUBMED   28109756
+  REMARK    GeneRIF: results show that the oxidation of the hydroxyl group of
+            cholesterol in live cells resulted in enhancement of agonist
+            binding and G-protein coupling to the serotonin1A receptor with no
+            appreciable change in overall membrane order; results extend our
+            understanding of the structural requirements of cholesterol for
+            receptor function
+REFERENCE   3  (bases 1 to 2245)
+  AUTHORS   Chen SF and Shen YC.
+  TITLE     5-HT1A C-1019G (rs6295) Predicts Aripiprazole Treatment Response
+            Specifically for Cognitive and Depressive Symptoms in Schizophrenia
+  JOURNAL   J Clin Psychopharmacol 37 (1), 114-118 (2017)
+   PUBMED   28027114
+  REMARK    GeneRIF: 5-HT1A C-1019G (rs6295) can predict aripiprazole treatment
+            response specifically for cognitive and depressive symptoms in
+            schizophrenia.
+REFERENCE   4  (bases 1 to 2245)
+  AUTHORS   Zhang R, Bi Y, Niu W, Huang X, Chen S, Li X, Wu X, Cao Y, Yang F,
+            Wang L, Li W, Xu Y, He L, Yu T and He G.
+  TITLE     Association study of 5-HT1A, 5-HT2A polymorphisms with
+            schizophrenia and major depressive disorder in the Han Chinese
+            population
+  JOURNAL   Neurosci. Lett. 635, 39-43 (2016)
+   PUBMED   27756686
+  REMARK    GeneRIF: 5-HT1A rs10042486 was significantly associated with
+            schizophrenia
+REFERENCE   5  (bases 1 to 2245)
+  AUTHORS   Rafalo-Ulinska A, Piotrowska J, Kryczyk A, Opoka W, Sowa-Kucma M,
+            Misztak P, Rajkowska G, Stockmeier CA, Datka W, Nowak G and
+            Szewczyk B.
+  TITLE     Zinc transporters protein level in postmortem brain of depressed
+            subjects and suicide victims
+  JOURNAL   J Psychiatr Res 83, 220-229 (2016)
+   PUBMED   27661418
+  REMARK    GeneRIF: This study demonstrated that a significant decrease in the
+            protein level of 5-HT1A in major depression disorder.
+REFERENCE   6  (bases 1 to 2245)
+  AUTHORS   Varrault A, Bockaert J and Waeber C.
+  TITLE     Activation of 5-HT1A receptors expressed in NIH-3T3 cells induces
+            focus formation and potentiates EGF effect on DNA synthesis
+  JOURNAL   Mol. Biol. Cell 3 (9), 961-969 (1992)
+   PUBMED   1330092
+REFERENCE   7  (bases 1 to 2245)
+  AUTHORS   Levy FO, Gudermann T, Perez-Reyes E, Birnbaumer M, Kaumann AJ and
+            Birnbaumer L.
+  TITLE     Molecular cloning of a human serotonin receptor (S12) with a
+            pharmacological profile resembling that of the 5-HT1D subtype
+  JOURNAL   J. Biol. Chem. 267 (11), 7553-7562 (1992)
+   PUBMED   1559993
+REFERENCE   8  (bases 1 to 2245)
+  AUTHORS   Parks CL, Chang LS and Shenk T.
+  TITLE     A polymerase chain reaction mediated by a single primer: cloning of
+            genomic sequences adjacent to a serotonin receptor protein coding
+            region
+  JOURNAL   Nucleic Acids Res. 19 (25), 7155-7160 (1991)
+   PUBMED   1766875
+REFERENCE   9  (bases 1 to 2245)
+  AUTHORS   Melmer G, Sherrington R, Mankoo B, Kalsi G, Curtis D and Gurling
+            HM.
+  TITLE     A cosmid clone for the 5HT1A receptor (HTR1A) reveals a TaqI RFLP
+            that shows tight linkage to dna loci D5S6, D5S39, and D5S76
+  JOURNAL   Genomics 11 (3), 767-769 (1991)
+   PUBMED   1685484
+REFERENCE   10 (bases 1 to 2245)
+  AUTHORS   el Mestikawy S, Fargin A, Raymond JR, Gozlan H and Hnatowich M.
+  TITLE     The 5-HT1A receptor: an overview of recent advances
+  JOURNAL   Neurochem. Res. 16 (1), 1-10 (1991)
+   PUBMED   2052135
+  REMARK    Review article
+COMMENT     REVIEWED REFSEQ: This record has been curated by NCBI staff. The
+            reference sequence was derived from DA223047.1, AK291429.1,
+            AK314187.1, DA160783.1 and DA527925.1.
+            This sequence is a reference standard in the RefSeqGene project.
+            On Jun 15, 2012 this sequence version replaced gi:55956922.
+            
+            Summary: This gene encodes a G protein-coupled receptor for
+            5-hydroxytryptamine (serotonin), and belongs to the
+            5-hydroxytryptamine receptor subfamily. Serotonin has been
+            implicated in a number of physiologic processes and pathologic
+            conditions. Inactivation of this gene in mice results in behavior
+            consistent with an increased anxiety and stress response. Mutation
+            in the promoter of this gene has been associated with menstrual
+            cycle-dependent periodic fevers. [provided by RefSeq, Jun 2012].
+            
+            Publication Note:  This RefSeq record includes a subset of the
+            publications that are available for this gene. Please see the Gene
+            record to access additional publications.
+            COMPLETENESS: complete on the 3' end.
+PRIMARY     REFSEQ_SPAN         PRIMARY_IDENTIFIER PRIMARY_SPAN        COMP
+            1-339               DA223047.1         1-339
+            340-1205            AK291429.1         1-866
+            1206-1826           AK314187.1         1047-1667
+            1827-1978           DA160783.1         373-524
+            1979-2024           DA527925.1         280-325
+            2025-2029           DA160783.1         571-575
+            2030-2245           DA527925.1         331-546
+FEATURES             Location/Qualifiers
+     source          1..2245
+                     /organism="Homo sapiens"
+                     /mol_type="mRNA"
+                     /db_xref="taxon:9606"
+                     /chromosome="5"
+                     /map="5q12.3"
+     gene            1..2245
+                     /gene="HTR1A"
+                     /gene_synonym="5-HT-1A; 5-HT1A; 5HT1a; ADRB2RL1; ADRBRL1;
+                     G-21; PFMCD"
+                     /note="5-hydroxytryptamine receptor 1A"
+                     /db_xref="GeneID:3350"
+                     /db_xref="HGNC:HGNC:5286"
+                     /db_xref="MIM:109760"
+     exon            1..2245
+                     /gene="HTR1A"
+                     /gene_synonym="5-HT-1A; 5-HT1A; 5HT1a; ADRB2RL1; ADRBRL1;
+                     G-21; PFMCD"
+                     /inference="alignment:Splign:1.39.8"
+     misc_feature    433..435
+                     /gene="HTR1A"
+                     /gene_synonym="5-HT-1A; 5-HT1A; 5HT1a; ADRB2RL1; ADRBRL1;
+                     G-21; PFMCD"
+                     /note="upstream in-frame stop codon"
+     STS             484..1864
+                     /gene="HTR1A"
+                     /gene_synonym="5-HT-1A; 5-HT1A; 5HT1a; ADRB2RL1; ADRBRL1;
+                     G-21; PFMCD"
+                     /db_xref="UniSTS:483224"
+     CDS             574..1842
+                     /gene="HTR1A"
+                     /gene_synonym="5-HT-1A; 5-HT1A; 5HT1a; ADRB2RL1; ADRBRL1;
+                     G-21; PFMCD"
+                     /note="guanine nucleotide-binding regulatory
+                     protein-coupled receptor; 5-HT1a receptor;
+                     5-hydroxytryptamine (serotonin) receptor 1A, G
+                     protein-coupled"
+                     /codon_start=1
+                     /product="5-hydroxytryptamine receptor 1A"
+                     /protein_id="NP_000515.2"
+                     /db_xref="GI:55956923"
+                     /db_xref="CCDS:CCDS34168.1"
+                     /db_xref="GeneID:3350"
+                     /db_xref="HGNC:HGNC:5286"
+                     /db_xref="MIM:109760"
+                     /translation="MDVLSPGQGNNTTSPPAPFETGGNTTGISDVTVSYQVITSLLLG
+                     TLIFCAVLGNACVVAAIALERSLQNVANYLIGSLAVTDLMVSVLVLPMAALYQVLNKW
+                     TLGQVTCDLFIALDVLCCTSSILHLCAIALDRYWAITDPIDYVNKRTPRRAAALISLT
+                     WLIGFLISIPPMLGWRTPEDRSDPDACTISKDHGYTIYSTFGAFYIPLLLMLVLYGRI
+                     FRAARFRIRKTVKKVEKTGADTRHGASPAPQPKKSVNGESGSRNWRLGVESKAGGALC
+                     ANGAVRQGDDGAALEVIEVHRVGNSKEHLPLPSEAGPTPCAPASFERKNERNAEAKRK
+                     MALARERKTVKTLGIIMGTFILCWLPFFIVALVLPFCESSCHMPTLLGAIINWLGYSN
+                     SLLNPVIYAYFNKDFQNAFKKIIKCKFCRQ"
+     misc_feature    682..759
+                     /gene="HTR1A"
+                     /gene_synonym="5-HT-1A; 5-HT1A; 5HT1a; ADRB2RL1; ADRBRL1;
+                     G-21; PFMCD"
+                     /experiment="experimental evidence, no additional details
+                     recorded"
+                     /note="propagated from UniProtKB/Swiss-Prot (P08908.3);
+                     transmembrane region"
+     misc_feature    793..867
+                     /gene="HTR1A"
+                     /gene_synonym="5-HT-1A; 5-HT1A; 5HT1a; ADRB2RL1; ADRBRL1;
+                     G-21; PFMCD"
+                     /experiment="experimental evidence, no additional details
+                     recorded"
+                     /note="propagated from UniProtKB/Swiss-Prot (P08908.3);
+                     transmembrane region"
+     misc_feature    904..969
+                     /gene="HTR1A"
+                     /gene_synonym="5-HT-1A; 5-HT1A; 5HT1a; ADRB2RL1; ADRBRL1;
+                     G-21; PFMCD"
+                     /experiment="experimental evidence, no additional details
+                     recorded"
+                     /note="propagated from UniProtKB/Swiss-Prot (P08908.3);
+                     transmembrane region"
+     misc_feature    907..936
+                     /gene="HTR1A"
+                     /gene_synonym="5-HT-1A; 5-HT1A; 5HT1a; ADRB2RL1; ADRBRL1;
+                     G-21; PFMCD"
+                     /experiment="experimental evidence, no additional details
+                     recorded"
+                     /note="propagated from UniProtKB/Swiss-Prot (P08908.3);
+                     Region: Agonist binding. {ECO:0000250}"
+     misc_feature    970..978
+                     /gene="HTR1A"
+                     /gene_synonym="5-HT-1A; 5-HT1A; 5HT1a; ADRB2RL1; ADRBRL1;
+                     G-21; PFMCD"
+                     /experiment="experimental evidence, no additional details
+                     recorded"
+                     /note="propagated from UniProtKB/Swiss-Prot (P08908.3);
+                     Region: DRY motif, important for ligand-induced
+                     conformation changes. {ECO:0000250}"
+     misc_feature    1030..1107
+                     /gene="HTR1A"
+                     /gene_synonym="5-HT-1A; 5-HT1A; 5HT1a; ADRB2RL1; ADRBRL1;
+                     G-21; PFMCD"
+                     /experiment="experimental evidence, no additional details
+                     recorded"
+                     /note="propagated from UniProtKB/Swiss-Prot (P08908.3);
+                     transmembrane region"
+     misc_feature    1147..1224
+                     /gene="HTR1A"
+                     /gene_synonym="5-HT-1A; 5-HT1A; 5HT1a; ADRB2RL1; ADRBRL1;
+                     G-21; PFMCD"
+                     /experiment="experimental evidence, no additional details
+                     recorded"
+                     /note="propagated from UniProtKB/Swiss-Prot (P08908.3);
+                     transmembrane region"
+     misc_feature    1609..1674
+                     /gene="HTR1A"
+                     /gene_synonym="5-HT-1A; 5-HT1A; 5HT1a; ADRB2RL1; ADRBRL1;
+                     G-21; PFMCD"
+                     /experiment="experimental evidence, no additional details
+                     recorded"
+                     /note="propagated from UniProtKB/Swiss-Prot (P08908.3);
+                     transmembrane region"
+     misc_feature    1645..1659
+                     /gene="HTR1A"
+                     /gene_synonym="5-HT-1A; 5-HT1A; 5HT1a; ADRB2RL1; ADRBRL1;
+                     G-21; PFMCD"
+                     /experiment="experimental evidence, no additional details
+                     recorded"
+                     /note="propagated from UniProtKB/Swiss-Prot (P08908.3);
+                     Region: Agonist binding. {ECO:0000250}"
+     misc_feature    1708..1782
+                     /gene="HTR1A"
+                     /gene_synonym="5-HT-1A; 5-HT1A; 5HT1a; ADRB2RL1; ADRBRL1;
+                     G-21; PFMCD"
+                     /experiment="experimental evidence, no additional details
+                     recorded"
+                     /note="propagated from UniProtKB/Swiss-Prot (P08908.3);
+                     transmembrane region"
+     misc_feature    1759..1773
+                     /gene="HTR1A"
+                     /gene_synonym="5-HT-1A; 5-HT1A; 5HT1a; ADRB2RL1; ADRBRL1;
+                     G-21; PFMCD"
+                     /experiment="experimental evidence, no additional details
+                     recorded"
+                     /note="propagated from UniProtKB/Swiss-Prot (P08908.3);
+                     Region: NPxxY motif, important for ligand-induced
+                     conformation changes and signaling. {ECO:0000250}"
+     STS             574..1842
+                     /gene="HTR1A"
+                     /gene_synonym="5-HT-1A; 5-HT1A; 5HT1a; ADRB2RL1; ADRBRL1;
+                     G-21; PFMCD"
+                     /db_xref="UniSTS:481605"
+     STS             1289..1389
+                     /gene="HTR1A"
+                     /gene_synonym="5-HT-1A; 5-HT1A; 5HT1a; ADRB2RL1; ADRBRL1;
+                     G-21; PFMCD"
+                     /standard_name="HTR1A"
+                     /db_xref="UniSTS:479890"
+     STS             1617..1880
+                     /gene="HTR1A"
+                     /gene_synonym="5-HT-1A; 5-HT1A; 5HT1a; ADRB2RL1; ADRBRL1;
+                     G-21; PFMCD"
+                     /standard_name="RH70818"
+                     /db_xref="UniSTS:27760"
+     regulatory      2208..2213
+                     /regulatory_class="polyA_signal_sequence"
+                     /gene="HTR1A"
+                     /gene_synonym="5-HT-1A; 5-HT1A; 5HT1a; ADRB2RL1; ADRBRL1;
+                     G-21; PFMCD"
+     regulatory      2212..2217
+                     /regulatory_class="polyA_signal_sequence"
+                     /gene="HTR1A"
+                     /gene_synonym="5-HT-1A; 5-HT1A; 5HT1a; ADRB2RL1; ADRBRL1;
+                     G-21; PFMCD"
+ORIGIN      
+        1 agagggataa ataaagggaa gtgaggagga agagggagac tgaaagggaa ggcaggtggg
+       61 gagaaggggg acgaaagagg cagaagagag agaagagagg aggagagagg gggagagagg
+      121 gaaggaagga aatagggaga ggagggtcac agagtgaccg tggaggatgg ggcttctcgg
+      181 ttctagatat ttctgggatt ggagactgtt tgctagtggg gagactccag ctccggcagc
+      241 cagttcggga gcggcaaagt aaaatggaca gcgacagaca gacgttccag ccacctctcc
+      301 gccgccggga gatcctggag ctgctttcag gccaactcca gtttcccagc tggagcttct
+      361 gaacgcgctg gactgcgaga gcccagggag cgcctgaaag ctgctcctcg gagataccct
+      421 tcgccgaagc agtaagaact tcctgcttgg gtctctgcat tcccttcctc cgaaacttcc
+      481 caggagaagg gcggaagacc ccaggggaag gggcgaggcg aatcttcgcg ctgctttttc
+      541 ttccctcccc cttcccgcgc cgggcgcgca ggcatggatg tgctcagccc tggtcagggc
+      601 aacaacacca catcaccacc ggctcccttt gagaccggcg gcaacactac tggtatctcc
+      661 gacgtgaccg tcagctacca agtgatcacc tctctgctgc tgggcacgct catcttctgc
+      721 gcggtgctgg gcaatgcgtg cgtggtggct gccatcgcct tggagcgctc cctgcagaac
+      781 gtggccaatt atcttattgg ctctttggcg gtcaccgacc tcatggtgtc ggtgttggtg
+      841 ctgcccatgg ccgcgctgta tcaggtgctc aacaagtgga cactgggcca ggtaacctgc
+      901 gacctgttca tcgccctcga cgtgctgtgc tgcacctcat ccatcttgca cctgtgcgcc
+      961 atcgcgctgg acaggtactg ggccatcacg gaccccatcg actacgtgaa caagaggacg
+     1021 ccccggcgcg ccgctgcgct catctcgctc acttggctta ttggcttcct catctctatc
+     1081 ccgcccatgc tgggctggcg caccccggaa gaccgctcgg accccgacgc atgcaccatt
+     1141 agcaaggatc atggctacac tatctattcc acctttggag ctttctacat cccgctgctg
+     1201 ctcatgctgg ttctctatgg gcgcatattc cgagctgcgc gcttccgcat ccgcaagacg
+     1261 gtcaaaaagg tggagaagac cggagcggac acccgccatg gagcatctcc cgccccgcag
+     1321 cccaagaaga gtgtgaatgg agagtcgggg agcaggaact ggaggctggg cgtggagagc
+     1381 aaggctgggg gtgctctgtg cgccaatggc gcggtgaggc aaggtgacga tggcgccgcc
+     1441 ctggaggtga tcgaggtgca ccgagtgggc aactccaaag agcacttgcc tctgcccagc
+     1501 gaggctggtc ctaccccttg tgcccccgcc tctttcgaga ggaaaaatga gcgcaacgcc
+     1561 gaggcgaagc gcaagatggc cctggcccga gagaggaaga cagtgaagac gctgggcatc
+     1621 atcatgggca ccttcatcct ctgctggctg cccttcttca tcgtggctct tgttctgccc
+     1681 ttctgcgaga gcagctgcca catgcccacc ctgttgggcg ccataatcaa ttggctgggc
+     1741 tactccaact ctctgcttaa ccccgtcatt tacgcatact tcaacaagga ctttcaaaac
+     1801 gcgtttaaga agatcattaa gtgtaagttc tgccgccagt gatgacggag gagtagccgg
+     1861 ccagtcgagg ctacaggatc cgtcccattc actatgcttc ccccaaccct agggaatcaa
+     1921 cacttaagat aattcgccac ttctcctctt tctctctgct ccgctcacgg cttgcagacc
+     1981 tggtcccctc cccacttcct gctccacggc agggcccttt gtgcaaagga gacccagcgg
+     2041 aggagcgttg agagcccagg aaattcagag agtttgtgag aagcgacatt ggctcagact
+     2101 tcgcctgtat catcagtttt gatcccagta attgcctctt ctctcttcta tctcctaaat
+     2161 ctttgcggtg gatgtttaat gcttagttca aggcagaaaa tccaaaaaat aaataaactg
+     2221 tacacacagc cgccgcgccc actaa
+//
+
