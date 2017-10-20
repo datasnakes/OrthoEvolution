@@ -25,15 +25,20 @@ Check out our `wiki docs <https://github.com/datasnakes/Datasnakes-Scripts/wiki>
 
 Installation
 ------------
-#### Python Package Index
+
+Python Package Index
+====================
+
 ``pip install Datasnakes-Scripts``
 
-#### GitHub
+GitHub
+======
 1. Download the zip file and unzip it or ``git clone https://github.com/datasnakes/Datasnakes-Scripts.git``
 2. ``cd Datasnakes-Scripts``
 3. ``pip install .``
 
-#### Development Code
+Development Code
+================
 _**WARNING**_:  _This code is actively under development and may not be reliable.  Please create an
 [Issue](https://github.com/datasnakes/Datasnakes-Scripts/issues) for questions about development._
 
