@@ -1,5 +1,4 @@
+from .cookie_jar import Oven, CookBook
 
-
-from .cookie_jar import Oven
-
-__all__ = ("Oven")
+__all__ = ("Oven",
+           "CookBook")

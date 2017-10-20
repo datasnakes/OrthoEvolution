@@ -1,7 +1,7 @@
 import os
 import shutil
 from pathlib import Path
-
+import time
 # NCBITaxa().update_taxonomy_database()
 import pandas as pd
 import pkg_resources
@@ -13,6 +13,7 @@ from Datasnakes.Manager.management import ProjectManagement
 from Datasnakes.Orthologs.utils import attribute_config
 from Datasnakes.Orthologs.Blast.utils import (my_gene_info, get_dup_acc,
                                               get_miss_acc)
+from Datasnakes.Tools.logit import LogIt
 
 
 # TODO-ROB Create function for archiving and multiple runs (this can go
@@ -20,24 +21,6 @@ from Datasnakes.Orthologs.Blast.utils import (my_gene_info, get_dup_acc,
 
 
 class CompGenObjects(object):
-    """ Comparative Genetics Analysis.
-
-    Parses an accession file with the designated format in order to
-    provide easy handling for data.  Creates python objects from the given
-    data.
-
-    Input:  An open .csv file object that contains a header of organisms.  The
-    first column ranks the gene by tier, the second column is a HUGO Gene
-    Nomenclature Committee(HGNC) symbol for the genes of interest.  The .csv
-    has to be located in the same directory as this module unless a full path is
-    specified.
-
-    The organisms are taken from
-    ftp://ftp.ncbi.nlm.nih.gov/genomes/refseq/multiprocessing/
-    and the genes are taken from http://www.guidetopharmacology.org/targets.jsp.
-
-    Output:  A pandas Data-Frame, Pivot-Table, and associated lists and dictionaries.
-    """
     __acc_filename = ''
     __paml_filename = ''
     __acc_path = ''
@@ -46,6 +29,37 @@ class CompGenObjects(object):
     # TODO-ROB:  CREAT PRE-BLAST and POST-BLAST functions
     def __init__(self, project=None, project_path=os.getcwd(), acc_file=None, taxon_file=None, pre_blast=False, post_blast=True, hgnc=False,
                  proj_mana=ProjectManagement, **kwargs):
+        """
+        This is the base class for the Blast module.  It parses an accession file in order to provide easy handling for
+        data.  The .csv accession file contains the following header info:
+                            * "Tier" - User defined.
+                            * "Gene" - HUGO Gene Nomenclature Committee(HGNC) symbol for the genes of interest.
+                            * Query Organism - A well annotated query organism.
+                            * Other organisms - The other headers are Genus_species of other taxa.
+
+        The organisms are taken from:
+        ftp://ftp.ncbi.nlm.nih.gov/genomes/refseq/multiprocessing/
+        And the genes are taken from:
+        http://www.guidetopharmacology.org/targets.jsp.
+
+        The API gives the user access to their data in a higher level for downstream processing or for basic
+        observation of the data.
+
+        :param project:  The name of the project.
+        :param project_path:  The location of the project, which is generally defined by the ProjectManagement configuration.
+        :param acc_file:  The name of the accession file.
+        :param taxon_file:  A file that contains an ordered list of taxonomy ids.
+        :param pre_blast:  A flag that gives the user access to an API that contains extra information about their genes
+                           using the mygene package.
+        :param post_blast:  A flag that is used to handle a BLAST result file, which returns information about misssing
+                            data, duplicates, etc.
+        :param hgnc:  A flag used as a placeholder for future work with HGNC files.
+        :param proj_mana:  This parameter is used to compose (vs inherit) the ProjectManagement class with the
+                           CompGenObjects class.  This parameter allows the various blast classes to function with or
+                           without the Manager module.
+        :param kwargs:  The kwargs here are generally used for standalone blasting or for development.
+        :returns:  A pandas data-frame, pivot-table, and associated lists and dictionaries.
+        """
 
         # Private Variables
         self.__pre_blast = pre_blast
@@ -54,6 +68,12 @@ class CompGenObjects(object):
         self.acc_filename = acc_file
 
         self.project = project
+
+        # Initialize Logging
+        self.blastn_log = LogIt().default(logname="BLATN", logfile=None)
+        self.get_time = time.time
+        self.sep = 50*'*'
+
         if project_path and project:
             self.project_path = Path(project_path) / Path(project)
 
@@ -164,14 +184,20 @@ class CompGenObjects(object):
         file_list = list(data[0])
         return file_list
 
-    def get_master_lists(self, df=None, csv_file=None):
-        """This function populates the organism and gene lists with a data frame.
+    def get_master_lists(self, df, csv_file=None):
+        """
+        This function populates the organism and gene lists with a data frame.  It will also populate pre-blast
+        attributes (mygene) and post-blast attributes (missing and duplicates) under the proper conditions.
 
-        This function also populates several dictionaries.
-        The dictionaries contain separate keys for Missing genes.
+        :param df:  The preferred way of utilizing the function is with a data-frame.
+        :param csv_file:  If a csv_file is given, then a data-frame will be created by reinitializing the object.
+        :returns:  An API can be utilized to access a gene list, organism list, taxon-id list,
+                   tier list/dict/data-frame, accession list/data-frame, blast query list, mygene information, and
+                   missing/duplicate information.
         """
 
         # Usually a only a user would manually add a csv file for their own purposes.
+        self.blastn_log.info("Getting the master lists.")
         if csv_file is not None:
             self.__init__(project=self.project, acc_file=csv_file)
             df = self.df
@@ -232,12 +258,12 @@ class CompGenObjects(object):
             self.duplicated_other = self.duplicated_dict['other']
 
     def get_accession(self, gene, organism):
-        """Get the accession of a gene.
-        Args:
-            gene = input a gene
-            organism = input an organism
-        Returns:
-            accession = the accession will be returned.
+        """
+        This method accesses a single accession number.
+
+        :param gene:  An input gene.
+        :param organism:  An input organism.
+        :return:  A single accession number of the target gene/organism.
         """
         maf = self.df
         accession = maf.get_value(gene, organism)
@@ -246,13 +272,12 @@ class CompGenObjects(object):
         return accession
 
     def get_orthologous_gene_sets(self, go_list=None):
-        """ Get a list of acessions.
-        Args:
-            Can take a gene/organism list as an argument:
-            go_list = [[gene.1, org.1], ... , [gene.n, org.n]]
-            It also takes an empty gene/organisms list.
-        Returns:
-            It returns an entire list of accession numbers.
+        """
+         This method accesses a list of accession numbers.
+
+        :param go_list:  A nested list of gene/organism lists (go_list = [[gene.1, org.1], ... , [gene.n, org.n]]).
+                         This parameter can also be None.
+        :return:  An ordered list of accession numbers (or "missing") that correspond to the go_list index.
         """
         if go_list is None:
             accessions = self.acc_list
@@ -264,8 +289,11 @@ class CompGenObjects(object):
         return accessions
 
     def get_orthologous_accessions(self, gene):
-        """Takes a single gene and returns a list of accession numbers
-        for the different orthologs.
+        """
+        Takes a single gene and returns a list of accession numbers for the different orthologs.
+
+        :param gene:  An input gene from the accession file.
+        :return:  A list of accession numbers that correspond to the orthologs of the target gene.
         """
         maf = self.df
         accession_alignment = maf.T[gene].tolist()[1:]
@@ -273,12 +301,11 @@ class CompGenObjects(object):
 
     def get_tier_frame(self, tiers=None):
         """
-        Args:
-            Takes a list of tiers or nothing.
-        Returns:
-            It returns a dictionary.
-            keys:  Tier list
-            values:  Data-Frame for each tier.
+        This function organizes a dictionary by tier.  Each tier (key) has a value, which is a data-frame of genes
+        associated with that tier.
+
+        :param tiers:  A list of tiers in the accession file.
+        :return:  A nested dictionary for accessing information by tier.
         """
         maf = self.df
         tier_frame_dict = {}
@@ -289,10 +316,14 @@ class CompGenObjects(object):
             tier_frame_dict[tier] = maf.groupby('Tier').get_group(tier)
         return tier_frame_dict
 
-    def get_taxon_dict(self, min=False):
-        """Get the taxonomny information about each organism using ETE3.
-        Returns:
-            taxa_dict = dict of organisms and their taxonomy ids.
+    def get_taxon_dict(self):
+        """
+        This function gets the taxonomy information about each organism using ETE3.
+
+        :return:  Returns several dictionaries.  One is a basic organism (key) to taxonomy id (value) dictionary, and
+        the other is a lineage dictionary with the an organism key and a lineage dictionary as the value.  The lineage
+        dictionary keys for each organism are ["class", "family", "genus", "kingdowm", "order", "phylum", "species",
+        "superkingdom"].
         """
         ncbi = NCBITaxa()
         taxa_dict = {}
@@ -318,9 +349,7 @@ class CompGenObjects(object):
         This function takes a list of accession numbers and returns a dictionary
         which contains the corresponding genes/organisms.
 
-        :return: A dictionary with values that are nested lists.  Unique accessions
-        will have a nested list with a length of 1.  Accessions that are duplicated
-        will have a nested list with a length > 1.
+        :return: An accession dictionary who's values are nest gene/organism lists.
         """
         gene_list = self.gene_list
         org_list = self.org_list

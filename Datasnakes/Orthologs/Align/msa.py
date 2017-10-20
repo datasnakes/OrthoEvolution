@@ -16,8 +16,19 @@ from Datasnakes.Orthologs.GenBank import multi_fasta_manipulator
 
 class MultipleSequenceAlignment(object):
 
-    def __init__(self, aln_program=None, project=None, project_path=os.getcwd(), genbank=GenBank, **kwargs):
-        self.config_options = {"Guidance_config": ["GUIDANCE2", self.guidance2], "Pal2Nal_config": ["PAL2NAL", self.pal2nal],
+    def __init__(self, project=None, project_path=os.getcwd(), genbank=GenBank, **kwargs):
+        """
+        The MultipleSequenceAlignment (MSA) class uses the standard configuration along with function dispatching to
+        give the end-user access to multiple alignment tools.
+
+        :param project: The project name.
+        :param project_path:  The path to the project.
+        :param genbank:  The composer parameter which is used to configure the GenBank class with the MSA class.
+        :param kwargs:  The kwargs are used with the dispatcher as a way to control the alignment pipeline.
+        :returns:  If the kwargs are utilized with YAML or other configurations, then this class returns an alignment
+        dictionary, which can be parsed to run specific alignment algorithms.
+        """
+        self.dispatcher_options = {"Guidance_config": ["GUIDANCE2", self.guidance2], "Pal2Nal_config": ["PAL2NAL", self.pal2nal],
                           "ClustalO_config": ["CLUSTALO", self.clustalo]}
         self.alignmentlog = LogIt().default(logname="Alignment", logfile=None)
         self.program = None
@@ -33,14 +44,35 @@ class MultipleSequenceAlignment(object):
 
         # Determine which alignment to configure
         # And then run that alignment with the configuration.
-        for config in self.config_options.keys():
+        for config in self.dispatcher_options.keys():
             if config in kwargs.keys():
-                program = self.config_options[config][0]
-                aligner = self.config_options[config][1]
+                program = self.dispatcher_options[config][0]
+                aligner = self.dispatcher_options[config][1]
                 aligner_configuration = kwargs[config]
                 self.alignment_dict[program] = [aligner, aligner_configuration]
 
     def guidance2(self, seqFile, msaProgram, seqType, dataset='MSA', seqFilter=None, columnFilter=None, maskFilter=None, **kwargs):
+        """
+        The guidance2 method runs the GUIDANCE2 command line wrapper from BioPython created by Datasnakes.  The
+        Guidance2 algorithm is used to filter sequence alignments in different ways.  Here we employ a few of our
+        own strategies on top of Guidance2.
+
+        :param seqFile:  The sequence file required by GUIDANCE2.
+        :param msaProgram:  The msa program to be used by GUIDANCE2.  ("CLUSTALW", "PRANK", "MAFFT", or "MUSCLE")
+        :param seqType:  The type of sequences to be aligned in GUIDANCE2.  ("aa", "nuc", or "codon")
+        :param dataset:  The name of the dataset, which is used for file naming convention among other things in
+                         GUIDANCE2.
+        :param seqFilter:  The sequence filter parameter is None, "inclusive", or "exclusive".  If inclusive the
+                           SeqCutoff decreases for every iteration.  If exclusive the SeqCutoff increases for every
+                           iteration, and so the algorithm excludes more genes from the alignment.
+                           (A Datasnakes strategy)
+        :param columnFilter:  The column filter removes columns from the alignment using GUIDANCE2.
+        :param maskFilter:  The mask filter uses GUIDANCE2 maskLowScoresResidue script to mask the low scoring residues.
+        :param kwargs:  The kwargs are used to configure GUIDANCE2 with specific parameters including seqCutoff and
+                        colCutoff.  It can also be used to set the number of iterations and the increment number, which
+                        controls how seqCutoff and colCutoff change for each iteration.
+        :return:  Returns Guidance2 files.
+        """
         self.alignmentlog.info("Guidance2 will be used.")
         # Name and Create the output directory
         self.program = "GUIDANCE2"
@@ -183,6 +215,19 @@ class MultipleSequenceAlignment(object):
             multi_fasta_manipulator(kwargs['maskedFile'], str(seqFile), kwargs['maskedFile'], manipulation='sort')
 
     def pal2nal(self, aa_alignment, na_fasta, output_type='paml', nogap=True, nomismatch=True, downstream='paml'):
+        """
+        This Pal2Nal method works with the Pal2Nal command line wrapper.  It uses a protein alignment to generate a
+        codon alignment from the corresponding nucleic acid sequences.  This is useful for downstream PAML analysis.
+        This function also catches and removes taxa that are inconsistent with Pal2Nal's algorithm.
+
+        :param aa_alignment:  An amino acid alignment that is used as a guide for a nucleic acid alignment.
+        :param na_fasta:  The FASTA file that contains matching/ordered sequences corresponding to the aa_alignment.
+        :param output_type:  The format of the resulting alignment.  ("clustal", "paml", "fasta", "codon")
+        :param nogap:  Removes the gaps and in-frame stop codons from the alignment to work better with PAML.
+        :param nomismatch:  Removes mismatched codons between protein and DNA sequences.
+        :param downstream:  Used as a naming convention for a better and more obvious pipeline.
+        :return:  A codon alignment.
+        """
         removed = []
         # Create output directory for PAL2NAL
         outDir = 'PAL2NAL'

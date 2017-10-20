@@ -15,33 +15,36 @@ from Datasnakes.Tools.utils import makedirectory
 
 
 # TODO-ROB: Find packages for script timing and analysis
-
+# TODO-ROB:  Rework the save_data parameter.
+# TODO-ROB:  Rework the query organism stuff.
 
 class CompGenBLASTn(CompGenFiles):
-    """Use CompGenBLASTn to search nucleotide databases using a nucleotide query.
-    This class currently only works with the standalone blast.
-    """
 
     def __init__(self, project, template=None, save_data=True, **kwargs):
-        """Inherit from the BLASTing Template."""
+        #"""Inherit from the BLASTing Template."""
+        """
+        This class inherits from the CompGenFiles class.  This class utilizes it's parent classes to search a standalone
+        Blast database for specific orthologs of a gene using a query organism (usually human).  The best hits from the
+        Blast are filter for the best option in order to get the most accuarate accession numbers for downstream
+        analysis.
+
+        :param project:  The project name.
+        :param template:  The accession file template.
+        :param save_data:  A flag for saving the post_blast data to an excel file.
+        :param kwargs:
+        """
         super().__init__(project=project, template=template, save_data=save_data, **kwargs)
-        # # TODO-ROB Add taxon parameter
+
         # Manage Directories
         self.home = Path(os.getcwd())
         self.__gi_list_path = self.project_database / Path('gi_lists')
 
         Path.mkdir(self.__gi_list_path, parents=True, exist_ok=True)
 
-        # # Initialize Logging
-        # self.__blastn_log = LogIt.blastn()
-        #df = LogIt()
-        self.date_format = '%a %b %d at %I:%M:%S %p %Y'
-        # self.get_time = time.time  # To get the time use 'get_time()'
-        # TODO-ROB:  Add a query organism variable
         self.query_gi_dict = {}
         self.removed_genes = []
         self.current_gene_list = []
-        # TODO-ROB:  Set up blast config logger, blasting logger, and post blast analysis logger
+
         self.blastn_log.info("These are the organisms: " + str(self.org_list))
         self.blastn_log.info("These are the genes: " + str(self.gene_list))
         self.blastn_log.info(
@@ -54,8 +57,15 @@ class CompGenBLASTn(CompGenFiles):
         self.complete_time_file_path = self.data / Path(self.complete_time_file)
 
     def blast_config(self, query_accessions, query_organism, auto_start=False):
-        """Configure everything for a BLAST.
-        First the accession file, and gene list is configured.
+        """
+        This method configures everything for our BLAST workflow.  It configures the accession file, which works with
+        interrupted Blasts.  It configures a gene_list for blasting the right genes.  And it configures a GI list, which
+        helps speed up the Blasting process significantly.
+
+        :param query_accessions:  A list of query accession numbers.  Each gene needs one from the same organism.
+        :param query_organism:  The name of the query organism for post configuration.
+        :param auto_start:  A flag that determines whether the blast starts automatically.
+        :return:
         """
         self.blastn_log.info(
             '***********************************BLAST CONFIG START************ \
@@ -152,7 +162,14 @@ class CompGenBLASTn(CompGenFiles):
                 pre_configured=auto_start)
 
     def blast_xml_parse(self, xml_path, gene, organism):
-        """Parse the XML file created by the BLAST."""
+        """
+        Parse the blast XML record created by the BLAST in order to get the best hit accession number.
+
+        :param xml_path:  Absolute path to the blast record.
+        :param gene:  The gene of interest.
+        :param organism:  The organism of interest.
+        :return:  Returns one accession number in the building accession file.
+        """
         accession = gi = raw_bitscore = description = None
         record_dict = {}
         self.blastn_log.info("Parsing %s to find the best accession number." % xml_path)
@@ -203,7 +220,14 @@ class CompGenBLASTn(CompGenFiles):
             self.add_accession(gene, organism, accession)
 
     def blasting(self, genes=None, query_organism=None, pre_configured=False):
-        """Configure the BLAST."""
+        """
+        This method actually does the Blasting.  It requires configuring before it can be utilized.
+
+        :param genes:  Gene of interest.
+        :param query_organism:  Query organism.
+        :param pre_configured:  A flag to determine if the blast needs configuring.
+        :return:
+        """
         if pre_configured is False:
             query = self.df[query_organism].tolist()
             self.blast_config(query_accessions=query, query_organism=query_organism, auto_start=True)
