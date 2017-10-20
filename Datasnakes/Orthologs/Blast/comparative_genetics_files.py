@@ -149,9 +149,9 @@ class CompGenFiles(CompGenObjects):
             dup_gene_ws.to_excel(pb_file, sheet_name="Duplicate Count by Gene")
 
             gene_org_dup = {}
-            for gene, dup_dict in self.duplicated_genes.items():
+            for gene, _ in self.duplicated_genes.items():
                 gene_org_dup[gene] = []
-                for acc, genes in self.duplicated_genes[gene].items():
+                for _, genes in self.duplicated_genes[gene].items():
                     gene_org_dup[gene].append(genes)
             dup_org_ws2 = pd.DataFrame.from_dict(gene_org_dup, orient='index')
             dup_org_ws2.T.to_excel(

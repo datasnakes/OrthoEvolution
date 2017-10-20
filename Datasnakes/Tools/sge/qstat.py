@@ -38,12 +38,11 @@ class Qstat(object):
         try:
             qstatxml = check_output([qstat_path, xml_option], stderr=STDOUT)
         except CalledProcessError as cpe:
-            print('qstat returncode: ', cpe.returncode)
-            print('qstat standard output: ', cpe.output)
-            raise
-        except FileNotFoundError as fnfe:
-            fnfe.message = 'Maybe qstat -xml is not on your machine.'
-            raise
+            return_code = 'qstat returncode: %s' % cpe.returncode
+            std_error = 'qstat standard output: %s' % cpe.stderr
+            print(return_code + '\n' + std_error)
+        except FileNotFoundError:
+            raise FileNotFoundError('qstat -xml is not on your machine.')
         return qstatxml
 
     @classmethod
