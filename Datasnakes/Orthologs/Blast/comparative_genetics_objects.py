@@ -1,3 +1,4 @@
+"""Comparative Genetics Objects"""
 import os
 import shutil
 from pathlib import Path
@@ -21,25 +22,6 @@ from Datasnakes.Tools.logit import LogIt
 
 
 class CompGenObjects(object):
-    """ Comparative Genetics Analysis.
-
-    Parses an accession file with the designated format in order to
-    provide easy handling for data.  Creates python objects from the given
-    data.
-
-    Input:  An open .csv file object that contains a header of organisms.  The
-    first column ranks the gene by tier, the second column is a HUGO Gene
-    Nomenclature Committee(HGNC) symbol for the genes of interest.  The .csv
-    has to be located in the same directory as this module unless a full path
-    is specified.
-
-    The organisms are taken from
-    ftp://ftp.ncbi.nlm.nih.gov/genomes/refseq/multiprocessing/
-    and the genes are taken from http://www.guidetopharmacology.org/targets.jsp
-
-    Output:  A pandas Data-Frame, Pivot-Table, and associated lists and
-             dictionaries.
-    """
     __acc_filename = ''
     __paml_filename = ''
     __acc_path = ''
