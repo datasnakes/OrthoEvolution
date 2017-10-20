@@ -24,6 +24,13 @@ ncbiftp.getblastdb(database_name='refseq_rna')
 
 ```
 
+```python
+from Datasnakes.Tools.ftp import NcbiFTPClient
+
+ncbiftp = NcbiFTPClient(email='somebody@gmail.com')
+ncbiftp.getrefseqrelease('vertebrate_mammalian', 'rna', 'gbff', os.getcwd())
+```
+
 #### List all directories in a path
 ```python
 

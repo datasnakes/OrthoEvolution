@@ -1,7 +1,8 @@
+"""Comparative Genetics Files"""
 import os
 from pathlib import Path
-
 import pandas as pd
+
 from Datasnakes.Orthologs.Blast.comparative_genetics_objects import CompGenObjects
 
 
@@ -10,11 +11,12 @@ from Datasnakes.Orthologs.Blast.comparative_genetics_objects import CompGenObjec
 
 
 class CompGenFiles(CompGenObjects):
-    def __init__(self, project, template=None, taxon_file=None, post_blast=False, save_data=True, **kwargs):
-        """
-        This class inherits (vs composition) CompGenObjects, and builds a file layer to the Blast workflow.  This class
-        handles all of the files before and after the Blast occurs.  It also uses a building file to pick up where a
-        previous blast left off.
+    def __init__(self, project, template=None, taxon_file=None, post_blast=False,
+                 save_data=True, **kwargs):
+        """Inherit CompGenObjects to build a file layer to the Blast workflow.
+
+        This class handles all of the files before and after the Blast occurs.
+        It also uses a building file to start where a previous blast left off.
 
         :param project:  The name of the project.
         :param template:  A template accession file in the desired format.  See the Blast README for an example.
@@ -47,9 +49,11 @@ class CompGenFiles(CompGenObjects):
                 'building.csv', 'building_time.csv')
 
     def add_accession(self, gene, organism, accession):
-        """
-        This method builds an accession file after a Blastn run.  It senses weather or not the Blast has been
-        interrupted or not, so that the Blast can pick up where it left off.
+        """This method builds an accession file after a Blastn run.
+
+        It finds whether or not the Blast has been interrupted or not, so that
+        the Blast can pick up where it left off.
+
         :param gene:  The gene of interest.
         :param organism:  The organism of interest.
         :param accession:  The accession of interest.
@@ -95,10 +99,11 @@ class CompGenFiles(CompGenObjects):
 
     def add_blast_time(self, gene, organism, start, end):
         # TODO-ROB Add a method that adds the time to the post-blast analysis API.
-        # This will help us see if there is a correlation between gene, organism, or accession with the length of time.
-        """
-        This method builds a file that stores the amount of time it has taken for each gene to finish.  This method is
-        similar to the add_accession() method.
+        # This will help us see if there is a correlation between gene, organism,
+        # or accession with the length of time.
+        """Build a file that stores the amount of time for each gene to blast.
+
+        This method is similar to the add_accession() method.
 
         :param gene:  The gene of interest.
         :param organism:  The organism of interest.
@@ -117,15 +122,15 @@ class CompGenFiles(CompGenObjects):
             temp.to_csv(str(self.building_time_file_path))
 
     def post_blast_analysis(self, removed_genes=None):
-        """
-        This file saves all of the post blast data (duplicate/missing/removed) to an excel file.
+        """Save all of the post blast data (duplicate/missing/removed) to an excel file.
 
         :param removed_genes:  Genes to exclude from the file.
         :return:
         """
         # TODO-ROB  Fix the output format of the excel file.  View a sample
         # output in /Orthologs/comp_gen
-        pba_file_path = str(self.data / Path(self.project + '_pba.xlsx'))
+        pba = '_postblastanalysis'
+        pba_file_path = str(self.data / Path(self.project + pba + '.xlsx'))
         pb_file = pd.ExcelWriter(pba_file_path)
 
         # Removed Genes

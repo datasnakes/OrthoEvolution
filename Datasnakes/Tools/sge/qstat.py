@@ -1,11 +1,10 @@
 """Access a list of SGE jobs."""
-
-from subprocess import check_output, STDOUT, CalledProcessError
-import xmltodict
+from subprocess import run, CalledProcessError, PIPE
+import getpass
 
 
 class Qstat(object):
-    def __init__(self, xml_option='xml'):
+    def __init__(self):
         """
         Parameters
         ----------
@@ -19,12 +18,13 @@ class Qstat(object):
         job_info : list
             A list of jobs in 'job_info'.
         """
-        xml = self._qstat2xml(qstat_path='qstat', xml_option='-' + xml_option)
-        self.xml = xml
-        self._qstatinfo(self.xml)
+        _username = getpass. getuser()
+        self.username = _username
+        self.qstatinfo()
+        
 
     @classmethod
-    def _qstat2xml(cls, qstat_path='qstat', xml_option='-xml'):
+    def qstatinfo(cls, qstat_path='qstat', option=''):
         """
         Parameters
         ----------
@@ -36,37 +36,14 @@ class Qstat(object):
             The xml stdout string of the 'qstat -xml' call.
         """
         try:
-            qstatxml = check_output([qstat_path, xml_option], stderr=STDOUT)
+            qstatinfo = run([qstat_path, option], stdout=PIPE, stderr=PIPE, shell=True)
         except CalledProcessError as cpe:
             return_code = 'qstat returncode: %s' % cpe.returncode
             std_error = 'qstat standard output: %s' % cpe.stderr
             print(return_code + '\n' + std_error)
         except FileNotFoundError:
-            raise FileNotFoundError('qstat -xml is not on your machine.')
-        return qstatxml
+            raise FileNotFoundError('qstat is not on your machine.')
+        
+        return qstatinfo.stdout
 
-    @classmethod
-    def _qstatinfo(cls, qstatxml):
-        """
-        Parameters
-        ----------
-        qstatxml : string
-            The xml string of the 'qstat -xml' call.
-        Returns
-        -------
-        queue_info : list
-            A list of jobs in 'queue_info'. Jobs are dictionaries with both
-            string keys and string names.
-        job_info : list
-            A list of jobs in 'job_info'.
-        """
-        x = xmltodict.parse(qstatxml)
-        queue_info = []
-        if x['job_info']['queue_info'] is not None:
-            for job in x['job_info']['queue_info']['job_list']:
-                queue_info.append(dict(job))
-        job_info = []
-        if x['job_info']['job_info'] is not None:
-            for job in x['job_info']['job_info']['job_list']:
-                job_info.append(dict(job))
-        return queue_info, job_info
+# TODO Add function that will parse output of qstat

@@ -39,14 +39,16 @@ well annotated species for accurate analysis.
 
 What is Comparative Genetics?
 -----------------------------
-_TODO: Add a better description._
+Comparative genetics/genomics  is a field of biological research in which the
+genome sequences of different species — human, mouse, and a wide variety of
+other organisms from bacteria to chimpanzees — are compared
 
-Comparative genetics research is used to compare [genes](http://www.guidetopharmacology.org/targets.jsp)
+For our lab, we compare these [genes](http://www.guidetopharmacology.org/targets.jsp)
 of interest across a group of [species](ftp://ftp.ncbi.nlm.nih.gov/genomes/refseq/vertebrate_mammalian/).
 
 What is BLAST?
 ----------------
-Per NCBI, the Basic Local Alignment Search Tool (BLAST) finds regions of local
+Per NCBI, the [Basic Local Alignment Search Tool (BLAST)](https://blast.ncbi.nlm.nih.gov/Blast.cgi) finds regions of local
 similarity between sequences. The program compares nucleotide or protein
 sequences to sequence databases and calculates the statistical significance of
 matches. BLAST can be used to infer functional and evolutionary relationships
@@ -119,5 +121,4 @@ Describe and show how to run the tests with code examples.
 
 :exclamation: Notes
 -------------------
-
-Explain or list any notable information about the contents of this folder.
+- [ ] Explain GI Lists.

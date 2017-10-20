@@ -7,11 +7,13 @@ __author__ = 'Datasnakes'
 parser = argparse.ArgumentParser(
         formatter_class=argparse.RawDescriptionHelpFormatter,
         description=textwrap.dedent('''\
-                                    This is a command line wrapper for the SGE module.
+                                    This is a command line wrapper for the sge module.
 
                                     ' '''))
 parser.add_argument("-o", "--output", help="Qstat info output type",
-                    required=True)
+                    required=False)
 
 q = Qstat()
 args = parser.parse_args(namespace=q)
+
+# TODO Complete this

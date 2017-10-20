@@ -4,6 +4,7 @@ import pkg_resources
 from importlib import import_module
 import os
 from threading import Timer
+from subprocess import run, CalledProcessError, PIPE
 
 import pandas as pd
 from pathlib import Path
@@ -92,3 +93,17 @@ def csvtolist(csvfile, column_header='Organism'):
     # Create a list name/variable and use list()
     listfromcolumn = list(file[column_header])
     return listfromcolumn
+
+
+def runcmd(cmd):
+    with contextlib.suppress(CalledProcessError):
+        cmd = [cmd]  # this is the command
+        # Shell MUST be True
+        cmd_status = run(cmd, stdout=PIPE, stderr=PIPE, shell=True)
+
+        if cmd_status.returncode == 0:  # Command was successful.
+            print('Command successful.\n')
+            # TODO add a check to for job errors or check for error file.
+
+        else:  # Unsuccessful. Stdout will be '1'
+            print("Command unsuccessful.")
