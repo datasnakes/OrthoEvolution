@@ -100,24 +100,18 @@ class CompGenObjects(object):
             self.acc_path = self.project_index / Path(self.acc_filename)
 
             # Handles for organism lists
-            self.org_list = [], self.ncbi_orgs = [], self.org_count = 0
-            self.taxon_ids = [], self.taxon_orgs = [], self.taxon_dict = {}
-
+            self.org_list, self.ncbi_orgs = [], []
+            self.org_count = 0
+            self.taxon_ids, self.taxon_orgs, self.taxon_dict = [], [], {}
             # Handles for gene lists
-            self.gene_list = [], self.gene_count = 0
-
+            self.gene_list = []
+            self.gene_count = 0
             # Handles for tier lists
-            self.tier_list = []
-            self.tier_dict = {}
-            self.tier_frame_dict = {}
-
+            self.tier_list, self.tier_dict, self.tier_frame_dict = [], {}, {}
             # Handles for accession lists
-            self.acc_dict = {}
-            self.acc_list = []
-
+            self.acc_dict, self.acc_lsit = {}, []
             # Handles for blast queries
-            self.blast_human = [], self.blast_rhesus = []
-
+            self.blast_human, self.blast_rhesus = [], []
             # Handles for different dataframe initializations#
             self.raw_acc_data = pd.read_csv(str(self.acc_path), dtype=str)
 
@@ -128,12 +122,14 @@ class CompGenObjects(object):
             self.mygene_filename = "%s_mygene.csv" % self.project  # MyGene
             self.mygene_path = self.data / Path(self.mygene_filename)  # MyGene
             self.header = self.raw_acc_data.axes[1].tolist()
+
             # #### Blast accession numbers
             self.building = pd.read_csv(str(self.acc_path), dtype=str)
             del self.building['Tier']
             del self.building['Homo_sapiens']
             self.building = self.building.set_index('Gene')  # Object for good user output
             self.building_file_path = self.data / Path(self.building_filename)
+
             # #### Blast time points
             self.building_time_filename = self.building_filename.replace(
                 'building.csv', 'building_time.csv')  # Master time file for the blast
@@ -145,24 +141,14 @@ class CompGenObjects(object):
 
             # # Handles for accession file analysis # #
             if self.__post_blast:
-                    # Missing
-                self.missing_dict = {}
-                self.missing_genes = {}
-                self.missing_organsims = {}
-                self.missing_gene_count = 0
-                self.missing_organsims_count = 0
-
+                # Missing
+                self.missing_dict, self.missing_genes, self.missing_organsims = {}, {}, {},
+                self.missing_gene_count, self.missing_organsims_count = 0, 0
                 # Duplicates
-                self.duplicated_dict = {}
-                self.duplicated_accessions = {}
-                self.dup_acc_count = {}
-                self.duplicated_genes = {}
-                self.dup_gene_count = {}
-                self.duplicated_organisms = {}
-                self.dup_org_count = {}
-                self.duplicated_random = {}
-                self.duplicated_other = {}
-                self.time_dict = {}
+                self.duplicated_dict, self.duplicated_accessions, self.dup_acc_count, self.duplicated_genes, \
+                    self.dup_gene_count, self.duplicated_organisms, self.dup_org_count, self.duplicated_random, \
+                    self.duplicated_other, self.time_dict = {}, {}, {}, {}, {}, {}, {}, {}, {}, {}
+
 
             # #### Format the main data frame #### #
             self.__data = self.raw_acc_data.set_index('Gene')
