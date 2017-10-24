@@ -46,8 +46,8 @@ class BaseBioSQL(object):
 
 
 class SQLiteBioSQL(BaseBioSQL):
-    def __init__(self, database_name):
-        super().__init__(database_name=database_name, driver="SQLite")
+    def __init__(self, database_name, database_type):
+        super().__init__(database_name=database_name, database_type=database_type, driver="SQLite")
         self.schema_cmd = "sqlite3 %s -echo" % database_name
         self.schema_file = "biosqldb-sqlite.sql"
 
