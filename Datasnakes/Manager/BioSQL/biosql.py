@@ -31,7 +31,7 @@ class BaseBioSQL(object):
         return error, out
 
     def load_ncbi_taxonomy(self, cmd):
-        "./load_ncbi_taxonomy.pl --dbname bioseqdb --driver mysql --dbuser root --download true"
+        # ./load_ncbi_taxonomy.pl --dbname bioseqdb --driver mysql --dbuser root --download true
         taxon_cmd = cmd
         taxon_load = subprocess.Popen([taxon_cmd], stderr=subprocess.PIPE, stdout=subprocess.PIPE, shell=True,
                                       encoding='utf-8')
@@ -55,7 +55,8 @@ class SQLiteBioSQL(BaseBioSQL):
                          (self.ncbi_taxon_script, database_name, self.driver)
 
     def sqlite_schema(self):
-        error, out = self.load_biosql_schema(self.schema_cmd, self.schema_file)
+        schema_file = pkg_resources.resource_filename(sql.__name__, self.schema_file)
+        error, out = self.load_biosql_schema(self.schema_cmd, schema_file)
         # TODO-ROB: Parse output and error
 
     def sqlite_taxonomy(self):
