@@ -30,4 +30,11 @@ class BaseBioSQL(object):
         pass
 
 
+class SQLiteBioSQL(BaseBioSQL):
+    def __init__(self, database_name):
+        super().__init__(database_name=database_name, driver="SQLite")
+        self.cmd = "sqlite3 %s -echo" % database_name
+        self.schema_file = "biosqldb-sqlite.sql"
 
+    def sqlite_schema(self):
+        self.load_biosql_schema(self.cmd, self.schema_file)
