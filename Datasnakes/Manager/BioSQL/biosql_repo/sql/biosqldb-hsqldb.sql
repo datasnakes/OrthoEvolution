@@ -25,7 +25,7 @@
 -- Singapore changes by Hilmar Lapp and Aaron Mackey.
 -- Migration to HSQLDB by Len Trigg <len at reeltwo.com>
 --
--- comments to biosql - biosql-l@open-bio.org
+-- comments to biosql_repo - biosql_repo-l@open-bio.org
 --
 -- See biosql schema documentation for general documentation regarding the 
 -- schema. This file contains documetation specific to the hsqldb schema.

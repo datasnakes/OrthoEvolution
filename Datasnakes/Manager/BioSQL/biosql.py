@@ -3,8 +3,8 @@ from pathlib import Path
 import os
 import subprocess
 from Datasnakes.Tools.logit import LogIt
-from Datasnakes.Manager.BioSQL.biosql import sql
-from Datasnakes.Manager.BioSQL.biosql import scripts as sql_scripts
+from Datasnakes.Manager.BioSQL.biosql_repo import sql
+from Datasnakes.Manager.BioSQL.biosql_repo import scripts as sql_scripts
 
 
 class BaseBioSQL(object):

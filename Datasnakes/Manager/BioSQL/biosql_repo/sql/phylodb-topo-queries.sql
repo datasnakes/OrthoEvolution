@@ -40,7 +40,7 @@
 
 -- Authors: Hilmar Lapp
 --
--- comments to biosql - biosql-l@open-bio.org
+-- comments to biosql_repo - biosql_repo-l@open-bio.org
 
 -- 1a) Find the LCA (last common ancestor) of nodes A and B
 SELECT lca.node_id, lca.label, 

@@ -28,7 +28,7 @@
 -- Authors: Hilmar Lapp, hlapp at gmx.net
 --          Bill Piel, william.piel at yale.edu
 --
--- comments to biosql - biosql-l@open-bio.org
+-- comments to biosql_repo - biosql_repo-l@open-bio.org
 
 -- the tree - conceptually equal to a namespace (a way to scope nodes and edges)
 CREATE SEQUENCE tree_pk_seq;
@@ -54,7 +54,7 @@ COMMENT ON COLUMN tree.is_rooted IS 'Whether or not the tree is rooted. By defau
 
 COMMENT ON COLUMN tree.node_id IS 'The starting node of the tree. If the tree is rooted, this will usually be the root node. Note that the root node(s) of a rooted tree must be stored in tree_root, too.';
 
-COMMENT ON COLUMN tree.biodatabase_id IS 'The namespace of the tree itself. Though trees are in a sense named containers themselves (namely for nodes), they also constitute (possibly identifiable!) data objects in their own right. Some data sources may only provide a single tree, so that assigning a namespace for the tree may seem excessive, but others, such as TreeBASE, contain many trees, just as sequence databanks contain many sequences. The choice of how to name a tree is up to the user; one may assign a default namespace (such as "biosql"), or create one named the same as the tree.';
+COMMENT ON COLUMN tree.biodatabase_id IS 'The namespace of the tree itself. Though trees are in a sense named containers themselves (namely for nodes), they also constitute (possibly identifiable!) data objects in their own right. Some data sources may only provide a single tree, so that assigning a namespace for the tree may seem excessive, but others, such as TreeBASE, contain many trees, just as sequence databanks contain many sequences. The choice of how to name a tree is up to the user; one may assign a default namespace (such as "biosql_repo"), or create one named the same as the tree.';
 
 -- qualifier/value pairs (metadata) for trees
 CREATE TABLE tree_qualifier_value (

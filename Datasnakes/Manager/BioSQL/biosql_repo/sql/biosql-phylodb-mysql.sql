@@ -32,7 +32,7 @@
 --
 -- Authors: Hilmar Lapp, Bill Piel, Jamie Estill
 --
--- comments to biosql - biosql-l@open-bio.org
+-- comments to biosql_repo - biosql_repo-l@open-bio.org
 
 
 -- the tree - conceptually equal to a namespace (a way to scope nodes and edges)
