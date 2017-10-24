@@ -1,10 +1,9 @@
 import os
 from pathlib import Path
-
+from importlib import import_module
 from Datasnakes.Manager import ProjectManagement
 from Datasnakes.Orthologs.utils import attribute_config
 from Datasnakes.Tools.ftp import NcbiFTPClient
-
 
 class DatabaseManagement(object):
 
@@ -38,15 +37,20 @@ class DatabaseManagement(object):
     def get_gi_lists(self):
         print()
 
-    def get_blast_database(self, database_name):
+    def get_blast_database(self, database_name, database_path=None):
         # <path>/<user or basic_project>/databases/NCBI/blast/db/<database_name>
         db_path = self.ncbi_db_repo / Path('blast') / Path('db') / Path(database_name)
+        if database_path:
+            db_path = Path(database_path)
         self.ncbiftp.getblastdb(database_name=database_name, download_path=db_path)
+        # TODO-ROB:  set up environment variables.
 
     def get_taxonomy_database(self, db_type):
         db_type = str(db_type).lower()
         if db_type == 'ete3':
-            print('ete3')
+            # DEFAULT_TAXADB = os.path.join(os.environ.get('HOME', '/'), '.etetoolkit', 'taxa.sqlite')
+            ete3 = import_module("ete3")
+            ete3.NCBITaxa.update_taxonomy_database()
         elif db_type == 'ncbi':
             print('ncbi')
         elif db_type == 'biosql':
