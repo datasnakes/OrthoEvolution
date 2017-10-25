@@ -10,6 +10,7 @@ from Datasnakes.Manager.BioSQL.biosql_repo import scripts as sql_scripts
 
 class BaseBioSQL(object):
     # TODO-ROB:  Organize the BioSQL files by driver/RDBMS
+    # TODO-ROB:  Add functionality for database_type="biosqldb"
     def __init__(self, database_name, driver):
 
         self.database_name = database_name
@@ -89,7 +90,7 @@ class SQLiteBioSQL(BaseBioSQL):
         else:
             self.biosqllog.warning("The template, %s, already exists." % self.template)
 
-    def copy_template_database(self, db_path, dest_path, dest_name):
+    def copy_template_database(self, db_path, dest_path, dest_name=""):
         db_path = Path(db_path) / Path(self.template)
         if not db_path.is_file():
             self.create_template_database(db_path=db_path.parent)
