@@ -59,17 +59,27 @@ class BaseBioSQL(object):
 class SQLiteBioSQL(BaseBioSQL):
     def __init__(self, database_name, database_type):
         super().__init__(database_name=database_name, database_type=database_type, driver="SQLite")
-        self.schema_cmd = "sqlite3 %s -echo" % database_name
+        self.schema_cmd = "sqlite3 %s -echo"
         self.schema_file = "biosqldb-sqlite.sql"
+        self.taxon_cmd = "%s --dbname %s --driver %s --download true"
 
-        self.taxon_cmd = "%s --dbname %s --driver %s --download true" % \
-                         (self.ncbi_taxon_script, database_name, self.driver)
-
-    def sqlite_schema(self):
+    def sqlite_schema(self, database_name=None):
         schema_file = pkg_resources.resource_filename(sql.__name__, self.schema_file)
-        error, out = self.load_biosql_schema(self.schema_cmd, schema_file)
+        if database_name:
+            self.database_name = database_name
+        schema_cmd = self.schema_cmd % self.database_name
+        error, out = self.load_biosql_schema(schema_cmd, schema_file)
         # TODO-ROB: Parse output and error
 
-    def sqlite_taxonomy(self):
-        error, out = self.load_ncbi_taxonomy(self.taxon_cmd)
+    def sqlite_taxonomy(self, database_name=None):
+        if database_name:
+            self.database_name = database_name
+        taxon_cmd = self.taxon_cmd % (self.ncbi_taxon_script, self.database_name, self.driver)
+        error, out = self.load_ncbi_taxonomy(taxon_cmd)
         # TODO-ROB: Parse output and error
+
+    def create_template_database(self, db_path, database_name="Template-BioSQL-SQLite.db"):
+        db_path = Path(db_path) / Path(database_name)
+        self.sqlite_schema(database_name=db_path)
+        self.create_executable_scripts()
+        self.sqlite_taxonomy(database_name=db_path)
