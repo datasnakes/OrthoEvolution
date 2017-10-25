@@ -10,7 +10,7 @@
 -- to run this script within a transaction so you can roll it back
 -- when something goes wrong.
 --
--- comments to biosql - biosql-l@open-bio.org 
+-- comments to biosql_repo - biosql_repo-l@open-bio.org
 --
 -- ========================================================================
 --

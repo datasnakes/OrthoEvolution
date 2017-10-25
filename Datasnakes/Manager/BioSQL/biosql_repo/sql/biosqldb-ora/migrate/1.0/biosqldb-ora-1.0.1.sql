@@ -8,7 +8,7 @@
 --
 -- It is strongly recommended to backup your database first.
 --
--- comments to biosql - biosql-l@open-bio.org 
+-- comments to biosql_repo - biosql_repo-l@open-bio.org
 --
 -- ========================================================================
 --

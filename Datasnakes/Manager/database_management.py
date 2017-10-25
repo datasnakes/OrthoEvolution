@@ -5,6 +5,7 @@ from Datasnakes.Manager import ProjectManagement
 from Datasnakes.Orthologs.utils import attribute_config
 from Datasnakes.Tools.ftp import NcbiFTPClient
 
+
 class DatabaseManagement(object):
 
     def __init__(self, project, email, project_path=None, proj_mana=ProjectManagement, **kwargs):
@@ -52,9 +53,13 @@ class DatabaseManagement(object):
             ete3 = import_module("ete3")
             ete3.NCBITaxa.update_taxonomy_database()
         elif db_type == 'ncbi':
-            print('ncbi')
-        elif db_type == 'biosql':
-            print('biosql')
+            # ftp://ftp.ncbi.nlm.nih.gov/pub/taxonomy
+            db_path = self.ncbi_db_repo / Path('pub') / Path('taxonomy')
+            biosql = import_module("Datasnakes.Manager.BioSQL.biosql")
+            ncbi_db = biosql.SQLiteBioSQL(database_name=db_path)
+            ncbi_db.create_taxonomy_database(db_path)
+        elif db_type == 'biosql_repo':
+            print('biosql_repo')
 
     def get_genbank_database(self):
         print()

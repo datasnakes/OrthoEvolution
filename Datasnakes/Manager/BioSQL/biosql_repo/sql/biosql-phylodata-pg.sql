@@ -29,7 +29,7 @@
 --
 -- Authors: Hilmar Lapp, hlapp at gmx.net
 --
--- comments to biosql - biosql-l@open-bio.org
+-- comments to biosql_repo - biosql_repo-l@open-bio.org
 
 -- the character matrix
 CREATE SEQUENCE charmatrix_pk_seq;
@@ -49,7 +49,7 @@ COMMENT ON COLUMN charmatrix.name IS 'The name of the character matrix, in essen
 
 COMMENT ON COLUMN charmatrix.identifier IS 'The identifier of the character matrix, if there is one.';
 
-COMMENT ON COLUMN charmatrix.biodatabase_id IS 'The namespace of the character matrix. If the concept of namespace (often a collection name) encapsulating several matrices does not apply, one may assign a default namespace (such as "biosql"), or create one named the same as the data matrix.';
+COMMENT ON COLUMN charmatrix.biodatabase_id IS 'The namespace of the character matrix. If the concept of namespace (often a collection name) encapsulating several matrices does not apply, one may assign a default namespace (such as "biosql_repo"), or create one named the same as the data matrix.';
 
 COMMENT ON COLUMN charmatrix.type_id IS 'The type of the matrix as a link to an ontology term.';
 
