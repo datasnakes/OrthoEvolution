@@ -2,6 +2,7 @@ import pkg_resources
 from pathlib import Path
 import os
 import subprocess
+import shutil
 from Datasnakes.Tools.logit import LogIt
 from Datasnakes.Manager.BioSQL.biosql_repo import sql
 from Datasnakes.Manager.BioSQL.biosql_repo import scripts as sql_scripts
@@ -9,10 +10,9 @@ from Datasnakes.Manager.BioSQL.biosql_repo import scripts as sql_scripts
 
 class BaseBioSQL(object):
     # TODO-ROB:  Organize the BioSQL files by driver/RDBMS
- # driver "mysql", "Pg", "Oracle", "SQLite"
-    def __init__(self, database_name, database_type, driver):
+    def __init__(self, database_name, driver):
+
         self.database_name = database_name
-        self.database_type = database_type
         self.driver = driver
         self.biosqllog = LogIt().default(logname="BioSQL", logfile=None)
 
@@ -57,11 +57,13 @@ class BaseBioSQL(object):
 
 
 class SQLiteBioSQL(BaseBioSQL):
-    def __init__(self, database_name, database_type):
-        super().__init__(database_name=database_name, database_type=database_type, driver="SQLite")
+    def __init__(self, database_name, template="Template-BioSQL-SQLite.db"):
+        super().__init__(database_name=database_name, driver="SQLite")
         self.schema_cmd = "sqlite3 %s -echo"
         self.schema_file = "biosqldb-sqlite.sql"
         self.taxon_cmd = "%s --dbname %s --driver %s --download true"
+
+        self.template = template
 
     def sqlite_schema(self, database_name=None):
         schema_file = pkg_resources.resource_filename(sql.__name__, self.schema_file)
@@ -78,8 +80,19 @@ class SQLiteBioSQL(BaseBioSQL):
         error, out = self.load_ncbi_taxonomy(taxon_cmd)
         # TODO-ROB: Parse output and error
 
-    def create_template_database(self, db_path, database_name="Template-BioSQL-SQLite.db"):
-        db_path = Path(db_path) / Path(database_name)
-        self.sqlite_schema(database_name=db_path)
-        self.create_executable_scripts()
-        self.sqlite_taxonomy(database_name=db_path)
+    def create_template_database(self, db_path):
+        db_path = Path(db_path) / Path(self.template)
+        if not db_path.is_file():
+            self.sqlite_schema(database_name=db_path)
+            self.create_executable_scripts()
+            self.sqlite_taxonomy(database_name=db_path)
+        else:
+            self.biosqllog.warning("The template, %s, already exists." % self.template)
+
+    def copy_template_database(self, db_path, dest_path, dest_name):
+        db_path = Path(db_path) / Path(self.template)
+        if not db_path.is_file():
+            self.create_template_database(db_path=db_path.parent)
+        dest_path = Path(dest_path) / Path(dest_name)
+        self.biosqllog.warn('Copying Template BioSQL Database...  This may take a few minutes...')
+        shutil.copy2(str(db_path), str(dest_path))
