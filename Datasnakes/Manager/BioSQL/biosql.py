@@ -16,6 +16,7 @@ class BaseBioSQL(object):
         self.driver = driver
         self.biosqllog = LogIt().default(logname="BioSQL", logfile=None)
 
+        self.scripts = pkg_resources.resource_filename(sql_scripts.__name__, "")
         self.ncbi_taxon_script = pkg_resources.resource_filename(sql_scripts.__name__, "load_ncbi_taxonomy.pl")
         pass
 
@@ -43,6 +44,14 @@ class BaseBioSQL(object):
         self.biosqllog.info("Taxon-Out: " + str(out))
         return error, out
         pass
+
+    def create_executable_scripts(self):
+        # Set up the permissions for the BioSQL Perl scripts
+        biosql_scripts = self.scripts
+        for file in os.listdir(biosql_scripts):
+            if '.pl' in file:
+                script_path = os.path.join(biosql_scripts, file)
+                os.chmod(script_path, mode=755)
 
 
 class SQLiteBioSQL(BaseBioSQL):
