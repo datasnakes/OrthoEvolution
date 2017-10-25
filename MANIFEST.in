@@ -27,7 +27,3 @@ include Docs/README.md
 
 # Include tests
 include Tests/*
-
-# Include BioSQL files
-
-recursive-include Datasnakes/Manager/BioSQL/biosql_repo/scripts *
