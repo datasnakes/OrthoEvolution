@@ -43,7 +43,7 @@ class DatabaseManagement(object):
         if database_path:
             db_path = Path(database_path)
         self.ncbiftp.getblastdb(database_name=database_name, download_path=db_path)
-        # TODO-ROB:  set up environment variables.
+        # TODO-ROB:  set up environment variables.  Also add CLI setup
 
     def get_taxonomy_database(self, db_type):
         db_type = str(db_type).lower()
