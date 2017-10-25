@@ -53,7 +53,7 @@ class BaseBioSQL(object):
             if '.pl' in str(file):
                 script_path = os.path.join(biosql_scripts, file)
                 print(script_path)
-                os.chmod(script_path, mode=755)
+                os.chmod(script_path, mode=0o755)
 
 
 class SQLiteBioSQL(BaseBioSQL):
