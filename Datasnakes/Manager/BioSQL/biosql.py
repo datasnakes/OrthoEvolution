@@ -41,6 +41,7 @@ class BaseBioSQL(object):
         """
         This script is a framework for loading the various schemas, the NCBI taxonomy (biosql-db), and the ITIS
         taxonomy (phylo-db) into a database.
+
         :param cmd:  The bash command to use.
         :param schema_file:  The schema file for creating a BioSQL or PhyloDB
         :return:  Returns the Output and the Error messages.
@@ -81,10 +82,11 @@ class BaseBioSQL(object):
 class SQLiteBioSQL(BaseBioSQL):
     def __init__(self, database_path, database_name="Template-BioSQL-SQLite.db"):
         """
-        This class inherits the BaseBioSQL class.  It uses the base methods to load schema, load taxonomy (NCBI, ITIS),
-        and create/copy template sqlite databases loaded with biosql schema and/or taxonomy data.
+        This class inherits the BaseBioSQL class.  It uses the base methods to load schema, load taxonomy (NCBI),
+        and create/copy template SQLite databases loaded with biosql schema and/or taxonomy data.
+
+        :param database_path:  The relative path to the database.
         :param database_name:  The name of the database.
-        :param template:  The standard template name.
         """
         super().__init__(database_name=database_name, database_path=database_path, driver="SQLite")
         self.schema_cmd = "sqlite3 %s -echo"
@@ -118,6 +120,7 @@ class SQLiteBioSQL(BaseBioSQL):
     def create_template_database(self):
         """
         Creates a template database by uploading SQLite schema and NCBI taxonomy.
+
         :param db_path:  The relative path of the database.
         :return:
         """
@@ -133,6 +136,7 @@ class SQLiteBioSQL(BaseBioSQL):
     def copy_template_database(self, dest_path, dest_name):
         """
         This method copies a template sqlite biosql database.
+
         :param db_path:  The relative path of the template database.
         :param dest_path:  The path to copy the template into
         :param dest_name:  The name of the new database file.
@@ -149,6 +153,17 @@ class SQLiteBioSQL(BaseBioSQL):
 
 class MySQLBioSQL(BaseBioSQL):
 
-    def __init__(self):
-        super().__init__(database_name="", database_path="", driver="")
-        pass
+    def __init__(self, database_path, database_name="Template-BioSQL-MySQL.db"):
+        """
+        This class inherits the BaseBioSQL class.  It uses the base methods to load schema, load taxonomy (NCBI, ITIS),
+        and create/copy template MySQL databases loaded with biosql schema and/or taxonomy data.  The MySQL driver
+        for BioPython's BioSQL databases is the most developed.  It can utilize the PhyloDB schema extension and scripts
+        as well as the standard BioSQL schema and scripts.
+
+        :param database_path:  The relative path to the database.
+        :param database_name:  The name of the database.
+        """
+        super().__init__(database_name=database_name, database_path=database_path, driver="MySQL")
+        self.schema_cmd = "sqlite3 %s -echo"
+        self.schema_file = "biosqldb-mysql.sql"
+        self.taxon_cmd = "%s --dbname %s --driver %s --download true"
