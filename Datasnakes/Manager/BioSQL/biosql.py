@@ -18,7 +18,8 @@ class BaseBioSQL(object):
         self.biosqllog = LogIt().default(logname="BioSQL", logfile=None)
 
         self.scripts = pkg_resources.resource_filename(sql_scripts.__name__, "")
-        self.ncbi_taxon_script = pkg_resources.resource_filename(sql_scripts.__name__, "load_ncbi_taxonomy.pl")
+        self.ncbi_taxon_script = pkg_resources.resource_filename(sql_scripts.__name__, "load_taxonomy.pl")
+        self.itis_taxon_script = pkg_resources.resource_filename(sql_scripts.__name__, "load_itis_taxonomy.pl")
         pass
 
     def load_biosql_schema(self, cmd, schema_file):
@@ -32,8 +33,8 @@ class BaseBioSQL(object):
         self.biosqllog.info("Schema-Out: " + str(out))
         return error, out
 
-    def load_ncbi_taxonomy(self, cmd):
-        # ./load_ncbi_taxonomy.pl --dbname bioseqdb --driver mysql --dbuser root --download true
+    def load_taxonomy(self, cmd):
+        # ./load_taxonomy.pl --dbname bioseqdb --driver mysql --dbuser root --download true
         taxon_cmd = cmd
         taxon_load = subprocess.Popen([taxon_cmd], stderr=subprocess.PIPE, stdout=subprocess.PIPE, shell=True,
                                       encoding='utf-8')
@@ -66,7 +67,7 @@ class SQLiteBioSQL(BaseBioSQL):
 
         self.template = template
 
-    def sqlite_schema(self, database_name=None):
+    def load_sqlite_schema(self, database_name=None):
         schema_file = pkg_resources.resource_filename(sql.__name__, self.schema_file)
         if database_name:
             self.database_name = database_name
@@ -74,19 +75,19 @@ class SQLiteBioSQL(BaseBioSQL):
         error, out = self.load_biosql_schema(schema_cmd, schema_file)
         # TODO-ROB: Parse output and error
 
-    def sqlite_taxonomy(self, database_name=None):
+    def load_sqlite_taxonomy(self, database_name=None):
         if database_name:
             self.database_name = database_name
         taxon_cmd = self.taxon_cmd % (self.ncbi_taxon_script, self.database_name, self.driver)
-        error, out = self.load_ncbi_taxonomy(taxon_cmd)
+        error, out = self.load_taxonomy(taxon_cmd)
         # TODO-ROB: Parse output and error
 
     def create_template_database(self, db_path):
         db_path = Path(db_path) / Path(self.template)
         if not db_path.is_file():
-            self.sqlite_schema(database_name=db_path)
+            self.load_sqlite_schema(database_name=db_path)
             self.create_executable_scripts()
-            self.sqlite_taxonomy(database_name=db_path)
+            self.load_sqlite_taxonomy(database_name=db_path)
         else:
             self.biosqllog.warning("The template, %s, already exists." % self.template)
 
@@ -97,3 +98,9 @@ class SQLiteBioSQL(BaseBioSQL):
         dest_path = Path(dest_path) / Path(dest_name)
         self.biosqllog.warn('Copying Template BioSQL Database...  This may take a few minutes...')
         shutil.copy2(str(db_path), str(dest_path))
+
+
+class MySQLBioSQL(BaseBioSQL):
+
+    def __init__(self):
+        pass
