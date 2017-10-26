@@ -52,7 +52,19 @@ class DatabaseManagement(object):
         self.dbmanalog.critical("Please set the BLAST environment variables in your .bash_profile!!")
         # TODO-ROB:  set up environment variables.  Also add CLI setup
 
-    def get_taxonomy_database(self, db_type, db_name=None, dest_name=None, dest_path=None, driver=None):
+    def get_taxonomy_database(self, db_type, dest_name=None, dest_path=None, driver=None):
+        """
+        This method gets the remote data and updates the local databases for ETE3, BioSQL, and PhyloDB taxonomy
+        databases.  Most significant is the "biosql" and "phylodb" types.  The biosql databases use NCBI's taxonomy
+        database along with the biosql schema.  And the phylodb databases use ITIS's taxonomy database along with the
+        biosql schema.
+
+        :param db_type:  The type of database.  ("ete3", "biosq", or "phylodb")
+        :param dest_name:  The name of the new database.
+        :param dest_path:  The location where the new database should go.
+        :param driver:  The type of RDBMS.  ("SQLite", "MySQL", "PostGRE")
+        :return:  An updated taxonomy database.
+        """
         db_type = str(db_type).lower()
         if db_type == 'ete3':
             # DEFAULT_TAXADB = os.path.join(os.environ.get('HOME', '/'), '.etetoolkit', 'taxa.sqlite')
@@ -63,8 +75,8 @@ class DatabaseManagement(object):
             biosql = import_module("Datasnakes.Manager.BioSQL.biosql")
             if driver.lower() == "sqlite":
                 db_path = self.ncbi_db_repo / Path('pub') / Path('taxonomy')
-                ncbi_db = biosql.SQLiteBioSQL(database_name=db_name, database_path=db_path)
-                ncbi_db.copy_template_database(db_path)
+                ncbi_db = biosql.SQLiteBioSQL(database_path=db_path)
+                ncbi_db.copy_template_database(dest_name=dest_name, dest_path=dest_path)
 
             elif driver.lower() == "mysql":
                 db_path = self.ncbi_db_repo / Path('pub') / Path('taxonomy')
@@ -75,6 +87,7 @@ class DatabaseManagement(object):
             print('biosql_repo')
 
     def get_genbank_database(self):
+        self.get_taxonomy_database()
         print()
 
     def get_project_genbank_database(self):
