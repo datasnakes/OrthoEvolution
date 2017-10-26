@@ -52,13 +52,13 @@ class DatabaseManagement(object):
             # DEFAULT_TAXADB = os.path.join(os.environ.get('HOME', '/'), '.etetoolkit', 'taxa.sqlite')
             ete3 = import_module("ete3")
             ete3.NCBITaxa.update_taxonomy_database()
-        elif db_type == 'ncbi':
+        elif db_type == 'biosql':
             # ftp://ftp.ncbi.nlm.nih.gov/pub/taxonomy
             db_path = self.ncbi_db_repo / Path('pub') / Path('taxonomy')
             biosql = import_module("Datasnakes.Manager.BioSQL.biosql")
             ncbi_db = biosql.SQLiteBioSQL(database_name=db_path)
-            ncbi_db.create_taxonomy_database(db_path)
-        elif db_type == 'biosql_repo':
+            ncbi_db.copy_template_database(db_path)
+        elif db_type == 'phylodb':
             print('biosql_repo')
 
     def get_genbank_database(self):
