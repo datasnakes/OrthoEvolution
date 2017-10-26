@@ -12,40 +12,49 @@ class BaseBioSQL(object):
     # TODO-ROB:  Organize the BioSQL files by driver/RDBMS
     # TODO-ROB:  Add functionality for database_type="biosqldb"
     def __init__(self, database_name, driver):
-
-        self.database_name = database_name
-        self.driver = driver
+        """
+        This is the base BioSQL class.  It provides a framework for uploading schemas, loading taxonomy data from NCBI
+        and ITIS using the BioSQL perl scripts and .sql schema files.  We have created a modified version of the
+        BioSQL file system in our package, which can be found on GitHub.
+        :param database_name:  The name of the database.
+        :param driver:  The driver type.  "MySQL" (stable), "SQLite", "PostGRE"
+        """
+        # Logging setup
         self.biosqllog = LogIt().default(logname="BioSQL", logfile=None)
 
+        # Parameter Attributes
+        self.database_name = database_name
+        self.driver = driver
+
+        # Load relative and absolute paths to scripts in the BioSQL module
         self.scripts = pkg_resources.resource_filename(sql_scripts.__name__, "")
         self.ncbi_taxon_script = pkg_resources.resource_filename(sql_scripts.__name__, "load_taxonomy.pl")
         self.itis_taxon_script = pkg_resources.resource_filename(sql_scripts.__name__, "load_itis_taxonomy.pl")
-        pass
 
-    def load_biosql_schema(self, cmd, schema_file):
-        schema_cmd = "%s < %s" % (cmd, schema_file)
-        schema_load = subprocess.Popen([schema_cmd], stderr=subprocess.PIPE, stdout=subprocess.PIPE, shell=True,
-                                       encoding='utf-8')
-        error = schema_load.stderr.readlines()
-        out = schema_load.stdout.readlines()
+    def configure_new_database(self, cmd, schema_file=None):
+        """
+        This script is a framework for loading the various schemas, the NCBI taxonomy (biosql-db), and the ITIS
+        taxonomy (phylo-db) into a database.
+        :param cmd:
+        :param schema_file:
+        :return:
+        """
+        # To upload a schema, a schema file will be necessary.
+        if schema_file:
+            _ = "Schema"
+            cmd = "%s < %s" % (cmd, schema_file)
+        # But not for uploading taxonomy data (NCBI/ITIS)
+        else:
+            _ = "Taxonomy"
+            cmd = cmd
+        # Run the perl scripts or sql scripts
+        _loader = subprocess.Popen([cmd], stderr=subprocess.PIPE, stdout=subprocess.PIPE, shell=True, encoding='utf-8')
+        error = _loader.stderr.readlines()
+        out = _loader.stdout.readlines()
 
-        self.biosqllog.info("Schema-Error: " + str(error))
-        self.biosqllog.info("Schema-Out: " + str(out))
+        self.biosqllog.info(_ + "-Error: " + str(error))
+        self.biosqllog.info(_ + "-Out: " + str(out))
         return error, out
-
-    def load_taxonomy(self, cmd):
-        # ./load_taxonomy.pl --dbname bioseqdb --driver mysql --dbuser root --download true
-        taxon_cmd = cmd
-        taxon_load = subprocess.Popen([taxon_cmd], stderr=subprocess.PIPE, stdout=subprocess.PIPE, shell=True,
-                                      encoding='utf-8')
-
-        error = taxon_load.stderr.readlines()
-        out = taxon_load.stdout.readlines()
-
-        self.biosqllog.info("Taxon-Error: " + str(error))
-        self.biosqllog.info("Taxon-Out: " + str(out))
-        return error, out
-        pass
 
     def create_executable_scripts(self):
         # Set up the permissions for the BioSQL Perl scripts
@@ -72,14 +81,16 @@ class SQLiteBioSQL(BaseBioSQL):
         if database_name:
             self.database_name = database_name
         schema_cmd = self.schema_cmd % self.database_name
-        error, out = self.load_biosql_schema(schema_cmd, schema_file)
+        error, out = self.configure_new_database(schema_cmd, schema_file)
+        return error, out
         # TODO-ROB: Parse output and error
 
     def load_sqlite_taxonomy(self, database_name=None):
         if database_name:
             self.database_name = database_name
         taxon_cmd = self.taxon_cmd % (self.ncbi_taxon_script, self.database_name, self.driver)
-        error, out = self.load_taxonomy(taxon_cmd)
+        error, out = self.configure_new_database(taxon_cmd)
+        return error, out
         # TODO-ROB: Parse output and error
 
     def create_template_database(self, db_path):
