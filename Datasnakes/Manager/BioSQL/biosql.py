@@ -14,8 +14,12 @@ class BaseBioSQL(object):
     def __init__(self, database_name, database_path, driver):
         """
         This is the base BioSQL class.  It provides a framework for uploading schemas, loading taxonomy data from NCBI
-        and ITIS using the BioSQL perl scripts and .sql schema files.  We have created a modified version of the
-        BioSQL file system in our package, which can be found on GitHub.
+        and ITIS using the BioSQL perl scripts and .sql schema files provided by the BioPython package.  We have created
+        a modified version of the BioSQL scripts in our package, which can be found on GitHub.  Taxonomy data can be
+        found at:
+            NCBI:  ftp://ftp.ncbi.nlm.nih.gov/pub/taxonomy
+            ITIS:  http://www.itis.gov/downloads/
+
         :param database_name:  The name of the database.
         :param driver:  The driver type.  "MySQL" (stable), "SQLite", "PostGRE"
         """
@@ -75,14 +79,14 @@ class BaseBioSQL(object):
 
 
 class SQLiteBioSQL(BaseBioSQL):
-    def __init__(self, database_name="Template-BioSQL-SQLite.db"):
+    def __init__(self, database_path, database_name="Template-BioSQL-SQLite.db"):
         """
         This class inherits the BaseBioSQL class.  It uses the base methods to load schema, load taxonomy (NCBI, ITIS),
         and create/copy template sqlite databases loaded with biosql schema and/or taxonomy data.
         :param database_name:  The name of the database.
         :param template:  The standard template name.
         """
-        super().__init__(database_name=database_name, database_path="", driver="SQLite")
+        super().__init__(database_name=database_name, database_path=database_path, driver="SQLite")
         self.schema_cmd = "sqlite3 %s -echo"
         self.schema_file = "biosqldb-sqlite.sql"
         self.taxon_cmd = "%s --dbname %s --driver %s --download true"
@@ -124,9 +128,9 @@ class SQLiteBioSQL(BaseBioSQL):
             # TODO-ROB:  Download the file manually and then use qsub job
             self.load_sqlite_taxonomy()
         else:
-            self.biosqllog.warning("The template, %s, already exists." % db_path)
+            self.biosqllog.warning("The template, %s, already exists." % self.db_abs_path)
 
-    def copy_template_database(self, dest_path, dest_name=""):
+    def copy_template_database(self, dest_path, dest_name):
         """
         This method copies a template sqlite biosql database.
         :param db_path:  The relative path of the template database.
