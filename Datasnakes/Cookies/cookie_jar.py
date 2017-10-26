@@ -179,6 +179,8 @@ class Oven(object):
         os.chmod(str(self.cookie_jar / Path(self.project)), mode=0o777)
 
     def bake_the_db_repo(self, user_db, db_path_dict=None, ncbi_db_repo=None):
+        # TODO-ROB: Change the ncbi_db_repo parameter to db_path
+        # TODO-ROB:  Work work this in with the database management class.
         self.cookielog.warn('Creating directories from the Database Cookie.')
         """
         :return: A new database inside the users database directory

@@ -145,6 +145,7 @@ class UserManagement(RepoManagement):
             # NCBI and Proprietary Database Repositories:
             self.user_db = self.user_path / Path('databases')
             self.ncbi_db_repo = self.user_db / Path('NCBI')
+            self.itis_db_repo = self.user_db / Path('ITIS')
             # Index Files:
             self.user_index = self.user_path / Path('index')
             # User Log Files:
@@ -186,6 +187,7 @@ class UserManagement(RepoManagement):
         if new_db is True:
             self.managementlog.info('The database cookie is being prepared for the Oven.')
             self.Kitchen.bake_the_db_repo(user_db=self.user_db, db_path_dict=self.db_path_dict, ncbi_db_repo=self.ncbi_db_repo)
+            # TODO-ROB:  Determine what type of database as well.
 
     def zip_mail(self, comp_filename, zip_path, destination=''):
         Zipper = ZipUtils(comp_filename, zip_path)
