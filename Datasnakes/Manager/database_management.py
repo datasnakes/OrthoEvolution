@@ -15,7 +15,7 @@ class DatabaseManagement(object):
             "GI_config": self.get_gi_lists,
             "Blast_config": self.download_blast_database,
             "Taxonomy_config": self.download_taxonomy_database,
-            "GenBank_config": self.download_genbank_flatfiles
+            "GenBank_config": self.download_refseq_release_files
                                }
         self.project = project
         self.email = email
@@ -87,7 +87,7 @@ class DatabaseManagement(object):
             print('biosql_repo')
 
     # TODO-ROB:  Update ncbiftp class syntax to reflect NCBI's ftp site
-    def download_genbank_flatfiles(self, database_name, database_path, collection_subset, seqtype, format, driver="sqlite3", extension=".gbk.db"):
+    def download_refseq_release_files(self, database_name, database_path, collection_subset, seqtype, format, driver="sqlite3", extension=".gbk.db"):
         db_name = str(database_name) + str(extension)
         db_path = self.ncbi_db_repo / Path('refseq') / Path('release') / Path(collection_subset)
         self.ncbiftp.getrefseqrelease(database_name=collection_subset, seqtype=seqtype, filetype=format, download_path=db_path)
@@ -95,6 +95,8 @@ class DatabaseManagement(object):
             db_path = Path(database_path)
         self.download_taxonomy_database(db_type="biosql", dest_name=db_name, dest_path=db_path, driver=driver)
 
+    def upload_genbank_flatfiles(self, ):
+        pass
     def get_project_genbank_database(self):
         print()
 
