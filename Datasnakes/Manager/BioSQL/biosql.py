@@ -3,6 +3,7 @@ from pathlib import Path
 import os
 import subprocess
 import shutil
+from BioSQL import BioSeqDatabase
 from Datasnakes.Tools.logit import LogIt
 from Datasnakes.Manager.BioSQL.biosql_repo import sql
 from Datasnakes.Manager.BioSQL.biosql_repo import scripts as sql_scripts
@@ -80,7 +81,7 @@ class BaseBioSQL(object):
 
 
 class SQLiteBioSQL(BaseBioSQL):
-    def __init__(self, database_path, database_name="Template-BioSQL-SQLite.db"):
+    def __init__(self, database_path=None, database_name="Template-BioSQL-SQLite.db", upload_path=None, upload_list=None):
         """
         This class inherits the BaseBioSQL class.  It uses the base methods to load schema, load taxonomy (NCBI),
         and create/copy template SQLite databases loaded with biosql schema and/or taxonomy data.
@@ -92,6 +93,9 @@ class SQLiteBioSQL(BaseBioSQL):
         self.schema_cmd = "sqlite3 %s -echo"
         self.schema_file = "biosqldb-sqlite.sql"
         self.taxon_cmd = "%s --dbname %s --driver %s --download true"
+
+        self.upload_path = upload_path
+        self.upload_list = upload_list
 
     def load_sqlite_schema(self):
         """
@@ -149,6 +153,27 @@ class SQLiteBioSQL(BaseBioSQL):
         dest_abs_path = Path(dest_path) / Path(dest_name)
         self.biosqllog.warn('Copying Template BioSQL Database...  This may take a few minutes...')
         shutil.copy2(str(self.db_abs_path), str(dest_abs_path))
+
+    def upload_files(self, new_db=False):
+
+        # Make sure a BioSQL-SQLite database exists
+        if self.db_abs_path.is_file():
+            pass
+        elif new_db:
+            self.copy_template_database(dest_path=self.database_path, dest_name=self.database_name)
+        else:
+            raise FileNotFoundError("Database not found: %s\mPlease create a BioSQL-SQLite database." % self.db_abs_path)
+
+        # Parse the upload list and upload the files to the BioSQL-SQLite database.
+        for file in self.upload_list:
+            abs_upload_path = Path(str(self.upload_path)) / Path(file)
+            try:
+                server = BioSeqDatabase.open_database(driver=self.driver, db=str(self.db_abs_path))
+                self.biosqllog.info("Server Connected.")
+                pass
+            except:
+                pass
+        pass
 
 
 class MySQLBioSQL(BaseBioSQL):
