@@ -13,9 +13,9 @@ class DatabaseManagement(object):
         self.dbmanalog = LogIt().default(logname="DatabaseManagement", logfile=None)
         self.config_options = {
             "GI_config": self.get_gi_lists,
-            "Blast_config": self.get_blast_database,
-            "Taxonomy_config": self.get_taxonomy_database,
-            "GenBank_config": self.get_genbank_database
+            "Blast_config": self.download_blast_database,
+            "Taxonomy_config": self.download_taxonomy_database,
+            "GenBank_config": self.download_genbank_flatfiles
                                }
         self.project = project
         self.email = email
@@ -40,7 +40,7 @@ class DatabaseManagement(object):
     def get_gi_lists(self):
         print()
 
-    def get_blast_database(self, database_name="refseq_rna", database_path=None):
+    def download_blast_database(self, database_name="refseq_rna", database_path=None):
         # <path>/<user or basic_project>/databases/NCBI/blast/db/<database_name>
         db_path = self.ncbi_db_repo / Path('blast') / Path('db')
         if database_path:
@@ -52,7 +52,7 @@ class DatabaseManagement(object):
         self.dbmanalog.critical("Please set the BLAST environment variables in your .bash_profile!!")
         # TODO-ROB:  set up environment variables.  Also add CLI setup
 
-    def get_taxonomy_database(self, db_type, dest_name=None, dest_path=None, driver=None):
+    def download_taxonomy_database(self, db_type, dest_name=None, dest_path=None, driver=None):
         """
         This method gets the remote data and updates the local databases for ETE3, BioSQL, and PhyloDB taxonomy
         databases.  Most significant is the "biosql" and "phylodb" types.  The biosql databases use NCBI's taxonomy
@@ -73,7 +73,7 @@ class DatabaseManagement(object):
         elif db_type == 'biosql':
             # Loads data from NCBI via ftp://ftp.ncbi.nlm.nih.gov/pub/taxonomy
             biosql = import_module("Datasnakes.Manager.BioSQL.biosql")
-            if driver.lower() == "sqlite":
+            if driver.lower() == "sqlite3":
                 db_path = self.ncbi_db_repo / Path('pub') / Path('taxonomy')
                 ncbi_db = biosql.SQLiteBioSQL(database_path=db_path)
                 ncbi_db.copy_template_database(dest_name=dest_name, dest_path=dest_path)
@@ -86,9 +86,14 @@ class DatabaseManagement(object):
             # Loads data from ITIS via http://www.itis.gov/downloads/
             print('biosql_repo')
 
-    def get_genbank_database(self):
-        self.get_taxonomy_database()
-        print()
+    # TODO-ROB:  Update ncbiftp class syntax to reflect NCBI's ftp site
+    def download_genbank_flatfiles(self, database_name, database_path, collection_subset, seqtype, format, driver="sqlite3", extension=".gbk.db"):
+        db_name = str(database_name) + str(extension)
+        db_path = self.ncbi_db_repo / Path('refseq') / Path('release') / Path(collection_subset)
+        self.ncbiftp.getrefseqrelease(database_name=collection_subset, seqtype=seqtype, filetype=format, download_path=db_path)
+        if database_path:
+            db_path = Path(database_path)
+        self.download_taxonomy_database(db_type="biosql", dest_name=db_name, dest_path=db_path, driver=driver)
 
     def get_project_genbank_database(self):
         print()
