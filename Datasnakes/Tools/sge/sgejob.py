@@ -3,29 +3,30 @@ from subprocess import run, CalledProcessError, PIPE
 import os
 
 from Datasnakes.Tools.sge import basejobids, writecodefile, import_temp
-from Datasnakes.Tools.sgeconfig import __DEFAULT__
+from Datasnakes.Tools.sgeconfig import __DEFAULT__, __CUSTOM__
 
 
 class BaseJob(object):
     """Create a class for simple jobs."""
     def __init__(self):
-        pass
+        self.defaultjob = __DEFAULT__
+        self.customjob = __CUSTOM__
 
     def _cleanup(base):
+        """Clean up job scripts."""
         os.remove(base + '.pbs')
         os.remove(base + '.py')
 
 
 class SGEJob(BaseJob):
-    """Create multiple jobs & scripts for each job to run based on
-    splitting a list into chunks.
-    """
+    """Create multiple jobs & scripts for each job to run."""
     def __init__(self, jobname):
-        self.baseid, self.base = self.basejobids(jobname)
+        self.baseid, self.base = self._configure(jobname)
 
-    def configure(self, jobname):
+    def _configure(self, jobname):
         """Configure job attributes or set it up."""
         baseid, base = basejobids(jobname)
+        return baseid, base
 
     def submit(self, code, default=True):
         """Creates and submit a qsub job. Also uses python code."""
@@ -40,7 +41,7 @@ class SGEJob(BaseJob):
 
             attributes = __DEFAULT__
 
-            with open(base + '.pbs', 'w') as pbsfile:
+            with open(self.base + '.pbs', 'w') as pbsfile:
                 pbsfile.write(pbstemp.substitute(attributes))
                 pbsfile.close()
         else:
