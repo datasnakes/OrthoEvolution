@@ -80,27 +80,33 @@ class DatabaseManagement(object):
                 db_path = self.ncbi_db_repo / Path('pub') / Path('taxonomy')
                 ncbi_db = self.biosql.SQLiteBioSQL(database_path=db_path)
                 ncbi_db.copy_template_database(dest_name=dest_name, dest_path=dest_path)
+                return ncbi_db
 
             elif driver.lower() == "mysql":
                 db_path = self.ncbi_db_repo / Path('pub') / Path('taxonomy')
                 ncbi_db = self.biosql.MySQLBioSQL()
+                return ncbi_db
 
         elif db_type == 'phylodb':
             # Loads data from ITIS via http://www.itis.gov/downloads/
             print('biosql_repo')
 
     # TODO-ROB:  Update ncbiftp class syntax to reflect NCBI's ftp site
-    def download_refseq_release_files(self, database_name, database_path, collection_subset, seqtype, format, driver="sqlite3", extension=".gbk.db"):
+    def download_refseq_release_files(self, database_name, database_path, collection_subset, seqtype, filetype, driver="sqlite3", extension=".gbk.db"):
         db_path = self.ncbi_db_repo / Path('refseq') / Path('release') / Path(collection_subset)
-        self.ncbiftp.getrefseqrelease(database_name=collection_subset, seqtype=seqtype, filetype=format, download_path=db_path)
+        ncbiftp = self.ncbiftp.getrefseqrelease(database_name=collection_subset, seqtype=seqtype, filetype=filetype, download_path=db_path)
         if database_path:
             db_path = Path(database_path)
+        return ncbiftp
 
-    def upload_refseq_release_files(self, database_name, database_path, collection_subset, seqtype, format,
+    def upload_refseq_release_files(self, database_name, collection_subset, seqtype, filetype, upload_list,
                                     driver="sqlite3", extension=".gbk.db"):
         db_name = str(database_name) + str(extension)
         db_path = self.ncbi_db_repo / Path('refseq') / Path('release') / Path(collection_subset)
-        self.download_taxonomy_database(db_type="biosql", dest_name=db_name, dest_path=db_path, driver=driver)
+        ncbi_db = self.download_taxonomy_database(db_type="biosql", dest_name=db_name, dest_path=db_path, driver=driver)
+        ncbi_db.upload_path = db_path
+        ncbi_db.upload_list = upload_list
+        ncbi_db.upload_files(seqtype=seqtype, filetype=filetype)
         pass
 
     def get_project_genbank_database(self):
