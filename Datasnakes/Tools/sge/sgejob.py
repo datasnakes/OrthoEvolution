@@ -3,13 +3,14 @@ from subprocess import run, CalledProcessError, PIPE
 import os
 
 from Datasnakes.Tools.sge import basejobids, writecodefile, import_temp
+from Datasnakes.Tools.sgeconfig import __DEFAULT__
 
 
 class BaseJob(object):
     """Create a class for simple jobs."""
     def __init__(self):
         pass
-    
+
     def _cleanup(base):
         os.remove(base + '.pbs')
         os.remove(base + '.py')
@@ -21,11 +22,11 @@ class SGEJob(BaseJob):
     """
     def __init__(self, jobname):
         self.baseid, self.base = self.basejobids(jobname)
-    
+
     def configure(self, jobname):
         """Configure job attributes or set it up."""
         baseid, base = basejobids(jobname)
-    
+
     def submit(self, code, default=True):
         """Creates and submit a qsub job. Also uses python code."""
         # TIP If python is in your environment as only 'python' update that.
@@ -36,9 +37,9 @@ class SGEJob(BaseJob):
 
             # Create the pbs script from the template or dict
             pbstemp = import_temp('temp.pbs')
-                
+
             attributes = __DEFAULT__
-        
+
             with open(base + '.pbs', 'w') as pbsfile:
                 pbsfile.write(pbstemp.substitute(attributes))
                 pbsfile.close()
@@ -49,16 +50,16 @@ class SGEJob(BaseJob):
         #            with open(base + '.pbs', 'w') as pbsfile:
         #                pbsfile.write(pbstemp.substitute(self.pbs_dict))
         #                pbsfile.close()
-        
+
         with contextlib.suppress(CalledProcessError):
             cmd = ['qsub ' + self.base + '.pbs']  # this is the command
             # Shell MUST be True
             cmd_status = run(cmd, stdout=PIPE, stderr=PIPE, shell=True)
-        
+
             if cmd_status.returncode == 0:  # Command was successful.
                 print('Job submitted.\n')
                 # TODO add a check to for job errors or check for error file.
-        
+
             else:  # Unsuccessful. Stdout will be '1'
                 print("PBS job not submitted.")
 #                _cleanup(base=base)
