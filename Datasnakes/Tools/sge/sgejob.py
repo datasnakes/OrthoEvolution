@@ -3,7 +3,7 @@ from subprocess import run, CalledProcessError, PIPE
 import os
 
 from Datasnakes.Tools.sge import basejobids, writecodefile, import_temp
-from Datasnakes.Tools.sgeconfig import __DEFAULT__, __CUSTOM__
+from Datasnakes.Tools.sge.sgeconfig import __DEFAULT__, __CUSTOM__
 
 
 class BaseJob(object):
