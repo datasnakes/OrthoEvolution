@@ -1,21 +1,19 @@
-"""Access a list of SGE jobs."""
-from subprocess import run, CalledProcessError, PIPE
+"""Access qstat information about SGE jobs."""
+from subprocess import check_output, CalledProcessError
 import getpass
-
+import re
 
 class Qstat(object):
     def __init__(self):
         """Initialize class."""
         _username = getpass.getuser()
         self.username = _username
-        self.qstatinfo()
-
-
-    def qstatinfo(self, qstat_path='qstat', option='-u'):
+        self.split_regex = re.compile(r'\s+')
+        
+    def qstatinfo(self, qstat_path='qstat'):
         """Retrieve qstat output."""
         try:
-            qstatinfo = run([qstat_path, option, self.username],
-                            stdout=PIPE, stderr=PIPE, shell=True)
+            qstatinfo = check_output([qstat_path])
         except CalledProcessError as cpe:
             return_code = 'qstat returncode: %s' % cpe.returncode
             std_error = 'qstat standard output: %s' % cpe.stderr
@@ -23,33 +21,29 @@ class Qstat(object):
         except FileNotFoundError:
             raise FileNotFoundError('qstat is not on your machine.')
 
-        jobs = self._output_parser(qstatinfo.stdout)
+        jobs = self._output_parser(qstatinfo)
+        
+        return jobs
 
-        self.running_jobs = sum(j['status'] in ['R', 'Q'] for j in jobs)
+#        self.running_jobs = sum(j['status'] in ['R', 'Q'] for j in jobs)
+#
+#        return self.running_jobs
 
-        return self.running_jobs
+# TODO Create function for getting a list or dict of running jobs.
+# TODO Create function for getting a list or dict of queued jobs.
+# TODO Create function for getting a list or dict of running jobs for a user.
+# TODO Create a functions that checks every few minutes until job finishes.
 
-# TODO Add function that will parse output of qstat
     def _output_parser(self, output):
-        """
-        Parse output from qstat pbs commandline program
-
-        Arguments:
-        ----------
-        output: str, output obtained from qstat command
-        Returns:
-        ---------
-        list, of all jobs. Each job is represented as a dictionary conainting
-            all relevant information.
-        """
-        lines = output.split('\n')
+        """Parse output from qstat pbs commandline program."""
+        lines = output.decode('utf-8').split('\n')
         del lines[:5]
         jobs = []
         for line in lines:
             els = self.split_regex.split(line)
             try:
-            	j = {"id_": els[0], "user": els[1], "queue": els[2], "name": els[3],
-                 	"status": els[9], "elapsed_time": els[10]}
+            	j = {"job_id": els[0], "name": els[1], "user": els[2], "elapsed_time": els[3],
+                 	"status": els[4], "queue": els[5]}
             	jobs.append(j)
 
             except IndexError:
