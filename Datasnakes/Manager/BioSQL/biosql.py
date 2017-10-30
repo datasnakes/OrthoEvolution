@@ -4,6 +4,7 @@ import os
 import subprocess
 import shutil
 from BioSQL import BioSeqDatabase
+from Bio import SeqIO
 from Datasnakes.Tools.logit import LogIt
 from Datasnakes.Manager.BioSQL.biosql_repo import sql
 from Datasnakes.Manager.BioSQL.biosql_repo import scripts as sql_scripts
@@ -154,26 +155,60 @@ class SQLiteBioSQL(BaseBioSQL):
         self.biosqllog.warn('Copying Template BioSQL Database...  This may take a few minutes...')
         shutil.copy2(str(self.db_abs_path), str(dest_abs_path))
 
-    def upload_files(self, new_db=False):
+    def upload_files(self, seqtype, filetype, new_db=False):
+        db_path = self.db_abs_path.parent
+        db_name = Path(self.db_abs_path.stem + '_' + seqtype + self.db_abs_path.suffix)
+        db_abs_path = db_path / db_name
 
         # Make sure a BioSQL-SQLite database exists
         if self.db_abs_path.is_file():
+            if not db_abs_path.is_file():
+                self.db_abs_path.rename(target=db_abs_path)
             pass
         elif new_db:
-            self.copy_template_database(dest_path=self.database_path, dest_name=self.database_name)
+            self.copy_template_database(dest_path=db_path, dest_name=db_name)
         else:
             raise FileNotFoundError("Database not found: %s\mPlease create a BioSQL-SQLite database." % self.db_abs_path)
 
         # Parse the upload list and upload the files to the BioSQL-SQLite database.
         for file in self.upload_list:
             abs_upload_path = Path(str(self.upload_path)) / Path(file)
+
+            # Make a connection with the BioSQL database
             try:
-                server = BioSeqDatabase.open_database(driver=self.driver, db=str(self.db_abs_path))
+                server = BioSeqDatabase.open_database(driver=self.driver, db=str(db_abs_path))
                 self.biosqllog.info("Server Connected.")
                 pass
             except:
-                pass
-        pass
+                self.biosqllog.warn("The Server did not Connect.  Check the to make sure %s exists." % self.db_abs_path)
+                raise FileNotFoundError
+
+            # See if the sub database exists (rna, protein, or genomic)
+            try:
+                if seqtype not in server.keys():
+                    server.new_database(seqtype)
+                    self.biosqllog.info("New Sub-Database created, %s, for %s." % (seqtype, db_abs_path))
+                # Connect to the sub database
+                sub_db = server[seqtype]
+
+                count = sub_db.load(SeqIO.parse(abs_upload_path, filetype))
+                self.biosqllog.info("%s loaded with %s %s files" % (db_name, count, filetype))
+                server.commit()
+                self.biosqllog.warn("Server committed.")
+                t_count = t_count + count
+                self.biosqllog.info("The server has not loaded a total of %s files." % t_count)
+                # TODO-ROB:  Add something to do with time here.
+            except:
+                self.biosqllog.critical("Unable to load the database...")
+                server.rollback()
+                try:
+                    del server[sub_db]
+                    self.biosqllog.critical("%s sub database deleted from %s.  All of the info will be lost." % (sub_db, db_abs_path))
+                    server.commit()
+                    self.biosqllog.critical("Server committed")
+                except:
+                    raise
+                raise
 
 
 class MySQLBioSQL(BaseBioSQL):
