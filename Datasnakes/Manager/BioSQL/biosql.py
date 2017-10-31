@@ -8,12 +8,14 @@ from Bio import SeqIO
 from Datasnakes.Tools.logit import LogIt
 from Datasnakes.Manager.BioSQL.biosql_repo import sql
 from Datasnakes.Manager.BioSQL.biosql_repo import scripts as sql_scripts
+from Datasnakes.Manager import ProjectManagement
+from Datasnakes.Orthologs.utils import attribute_config
 
 
 class BaseBioSQL(object):
     # TODO-ROB:  Organize the BioSQL files by driver/RDBMS
     # TODO-ROB:  Add functionality for database_type="biosqldb"
-    def __init__(self, database_name, database_path, driver):
+    def __init__(self, database_name, database_path, driver, project=None, project_path=None, proj_mana=ProjectManagement):
         """
         This is the base BioSQL class.  It provides a framework for uploading schemas, loading taxonomy data from NCBI
         and ITIS using the BioSQL perl scripts and .sql schema files provided by the BioPython package.  We have created
@@ -38,6 +40,15 @@ class BaseBioSQL(object):
         self.scripts = pkg_resources.resource_filename(sql_scripts.__name__, "")
         self.ncbi_taxon_script = pkg_resources.resource_filename(sql_scripts.__name__, "load_taxonomy.pl")
         self.itis_taxon_script = pkg_resources.resource_filename(sql_scripts.__name__, "load_itis_taxonomy.pl")
+
+        # Configuration of class attributes for Project Management.
+        if project_path and project:
+            self.project_path = Path(project_path) / Path(project)
+
+        if proj_mana:
+            add_self = attribute_config(self, composer=proj_mana, checker=ProjectManagement, project=project, project_path=project_path)
+            for var, attr in add_self.__dict__.items():
+                setattr(self, var, attr)
 
     def configure_new_database(self, cmd, schema_file=None):
         """
