@@ -8,28 +8,34 @@ from Datasnakes.Tools.logit import LogIt
 from Datasnakes.Manager.BioSQL import biosql
 
 
-
 class DatabaseManagement(object):
 
-    def __init__(self, project, email, project_path=None, proj_mana=ProjectManagement, biosql_mana=biosql, **kwargs):
+    def __init__(self, project, email, driver, project_path=None, proj_mana=ProjectManagement, biosql_mana=biosql, **kwargs):
         self.dbmanalog = LogIt().default(logname="DatabaseManagement", logfile=None)
         self.config_options = {
             "GI_config": self.get_gi_lists,
             "Blast_config": self.download_blast_database,
             "Taxonomy_config": self.download_taxonomy_database,
-            "GenBank_config": [self.download_refseq_release_files, self.upload_genbank_flatfiles]
+            "GenBank_config": {
+                "download_taxonomy_database": self.download_taxonomy_database,
+                "download_refseq_release_files": self.download_refseq_release_files,
+                "upload_refseq_release_files": self.upload_refseq_release_files
+                               }
                                }
         self.project = project
         self.email = email
+        self.driver = driver
         self.database_dict = {}
         self.ncbiftp = NcbiFTPClient(email=self.email)
         # TODO-ROB:  Configure this differently somehow
         self.biosql = biosql_mana
+        self.proj_mana = proj_mana
 
-        # Configuration of class attributes.
-        add_self = attribute_config(self, composer=proj_mana, checker=ProjectManagement, project=project, project_path=project_path)
-        for var, attr in add_self.__dict__.items():
-            setattr(self, var, attr)
+        # Configuration of class attributes for Project Management.
+        if proj_mana:
+            add_self = attribute_config(self, composer=proj_mana, checker=ProjectManagement, project=project, project_path=project_path)
+            for var, attr in add_self.__dict__.items():
+                setattr(self, var, attr)
 
         # Determine which database to update
         # And then run that script with the configuration.
@@ -38,7 +44,6 @@ class DatabaseManagement(object):
                 db_config_type = config
                 db_config_method = self.config_options[config]
                 db_configuration = kwargs[config]
-                # db_config_method(kwargs[config])
                 self.database_dict[db_config_type] = [db_config_method, db_configuration]
 
     def get_gi_lists(self):
@@ -49,24 +54,23 @@ class DatabaseManagement(object):
         db_path = self.ncbi_db_repo / Path('blast') / Path('db')
         if database_path:
             db_path = Path(database_path)
-        self.ncbiftp.getblastdb(database_name=database_name, download_path=db_path)
+        self.ncbiftp.getblastdb(database_name=database_name, download_path=self.blast_db)
         # TODO-ROB Add email or slack notifications
         self.dbmanalog.critical("Please set the BLAST environment variables in your .bash_profile!!")
         self.dbmanalog.info("The appropriate environment variable is \'BLASTDB=%s\'." % str(db_path))
         self.dbmanalog.critical("Please set the BLAST environment variables in your .bash_profile!!")
         # TODO-ROB:  set up environment variables.  Also add CLI setup
 
-    def download_taxonomy_database(self, db_type, dest_name=None, dest_path=None, driver=None):
+    def download_taxonomy_database(self, db_type, sub_path):
         """
         This method gets the remote data and updates the local databases for ETE3, BioSQL, and PhyloDB taxonomy
         databases.  Most significant is the "biosql" and "phylodb" types.  The biosql databases use NCBI's taxonomy
         database along with the biosql schema.  And the phylodb databases use ITIS's taxonomy database along with the
         biosql schema.
 
-        :param db_type:  The type of database.  ("ete3", "biosq", or "phylodb")
+        :param db_type:  The type of database.  ("ete3", "biosql", or "phylodb")
         :param dest_name:  The name of the new database.
         :param dest_path:  The location where the new database should go.
-        :param driver:  The type of RDBMS.  ("SQLite", "MySQL", "PostGRE")
         :return:  An updated taxonomy database.
         """
         db_type = str(db_type).lower()
@@ -76,13 +80,12 @@ class DatabaseManagement(object):
             ete3.NCBITaxa.update_taxonomy_database()
         elif db_type == 'biosql':
             # Loads data from NCBI via ftp://ftp.ncbi.nlm.nih.gov/pub/taxonomy
-            if driver.lower() == "sqlite3":
-                db_path = self.ncbi_db_repo / Path('pub') / Path('taxonomy')
-                ncbi_db = self.biosql.SQLiteBioSQL(database_path=db_path)
-                ncbi_db.copy_template_database(dest_name=dest_name, dest_path=dest_path)
+            if self.driver.lower() == "sqlite3":
+                ncbi_db = self.biosql.SQLiteBioSQL(proj_mana=self.proj_mana)
+                ncbi_db.copy_template_database(sub_path=sub_path)
                 return ncbi_db
 
-            elif driver.lower() == "mysql":
+            elif self.driver.lower() == "mysql":
                 db_path = self.ncbi_db_repo / Path('pub') / Path('taxonomy')
                 ncbi_db = self.biosql.MySQLBioSQL()
                 return ncbi_db
@@ -92,18 +95,14 @@ class DatabaseManagement(object):
             print('biosql_repo')
 
     # TODO-ROB:  Update ncbiftp class syntax to reflect NCBI's ftp site
-    def download_refseq_release_files(self, database_name, database_path, collection_subset, seqtype, filetype, driver="sqlite3", extension=".gbk.db"):
+    def download_refseq_release_files(self, collection_subset, seqtype, filetype):
         db_path = self.ncbi_db_repo / Path('refseq') / Path('release') / Path(collection_subset)
         ncbiftp = self.ncbiftp.getrefseqrelease(database_name=collection_subset, seqtype=seqtype, filetype=filetype, download_path=db_path)
-        if database_path:
-            db_path = Path(database_path)
         return ncbiftp
 
-    def upload_refseq_release_files(self, database_name, collection_subset, seqtype, filetype, upload_list,
-                                    driver="sqlite3", extension=".gbk.db"):
-        db_name = str(database_name) + str(extension)
-        db_path = self.ncbi_db_repo / Path('refseq') / Path('release') / Path(collection_subset)
-        ncbi_db = self.download_taxonomy_database(db_type="biosql", dest_name=db_name, dest_path=db_path, driver=driver)
+    def upload_refseq_release_files(self, collection_subset, seqtype, filetype, upload_list, extension=".gbk.db"):
+        db_path = self.ncbi_refseq_release / Path(collection_subset)
+        ncbi_db = self.download_taxonomy_database(db_type="biosql", sub_path="/refseq/release/%s" % collection_subset)
         ncbi_db.upload_path = db_path
         ncbi_db.upload_list = upload_list
         ncbi_db.upload_files(seqtype=seqtype, filetype=filetype)
