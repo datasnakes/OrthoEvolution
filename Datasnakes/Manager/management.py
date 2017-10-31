@@ -35,6 +35,8 @@ class Management(object):
         # Manager Module:
         self.Manager = Path(pkg_resources.resource_filename(Manager.__name__, ''))
         self.BioSQL = self.Manager / Path('BioSQL')
+        self.SQLite3 = self.BioSQL / Path('sqlite')
+        self.MySQL = self.BioSQL / Path('mysql')
         self.config = self.Manager / Path('config')
         # Orthologs Module:
         self.Orthologs = Path(pkg_resources.resource_filename(Orthologs.__name__, ''))
@@ -145,7 +147,11 @@ class UserManagement(RepoManagement):
             # NCBI and Proprietary Database Repositories:
             self.user_db = self.user_path / Path('databases')
             self.ncbi_db_repo = self.user_db / Path('NCBI')
+            self.ncbi_taxonomy = self.ncbi_db_repo / Path('pub') / Path('taxonomy')
+            self.ncbi_refseq_release = self.ncbi_db_repo / Path('refseq') / Path('release')
+            self.blast_db = self.ncbi_db_repo / Path('blast') / Path('db')
             self.itis_db_repo = self.user_db / Path('ITIS')
+            self.db_archive = self.user_db / Path('archive')
             # Index Files:
             self.user_index = self.user_path / Path('index')
             # User Log Files:
