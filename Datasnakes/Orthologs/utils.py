@@ -65,6 +65,7 @@ def standalone_config(cls, project, project_path, new=False, custom=None):
     cls.project = project
     cls.project_path = project_path / Path(project)
     cls.project_index = cls.project_path / Path('index')
+    cls.user_index = cls.project_path / Path('index')
     cls.user_db = cls.project_path / Path('databases')
     cls.ncbi_db_repo = cls.user_db / Path('NCBI')
     cls.project_database = cls.user_db / Path(project)
