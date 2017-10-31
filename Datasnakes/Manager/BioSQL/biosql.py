@@ -15,7 +15,7 @@ from Datasnakes.Orthologs.utils import attribute_config
 class BaseBioSQL(object):
     # TODO-ROB:  Organize the BioSQL files by driver/RDBMS
     # TODO-ROB:  Add functionality for database_type="biosqldb"
-    def __init__(self, database_name, database_path, driver, project=None, project_path=None, proj_mana=ProjectManagement):
+    def __init__(self, database_name, template_name="", project=None, project_path=None, proj_mana=ProjectManagement, **kwargs):
         """
         This is the base BioSQL class.  It provides a framework for uploading schemas, loading taxonomy data from NCBI
         and ITIS using the BioSQL perl scripts and .sql schema files provided by the BioPython package.  We have created
@@ -25,16 +25,9 @@ class BaseBioSQL(object):
             ITIS:  http://www.itis.gov/downloads/
 
         :param database_name:  The name of the database.
-        :param driver:  The driver type.  "MySQL" (stable), "SQLite", "PostGRE"
         """
         # Logging setup
         self.biosqllog = LogIt().default(logname="BioSQL", logfile=None)
-
-        # Parameter Attributes
-        self.database_name = database_name
-        self.database_path = database_path
-        self.db_abs_path = Path(self.database_path) / Path(self.database_name)
-        self.driver = driver
 
         # Load relative and absolute paths to scripts in the BioSQL module
         self.scripts = pkg_resources.resource_filename(sql_scripts.__name__, "")
@@ -44,11 +37,20 @@ class BaseBioSQL(object):
         # Configuration of class attributes for Project Management.
         if project_path and project:
             self.project_path = Path(project_path) / Path(project)
+            self.template_abs_path = self.project_path / Path("index")
+            self.database_rel_path = self.project_path / Path("database")
 
         if proj_mana:
             add_self = attribute_config(self, composer=proj_mana, checker=ProjectManagement, project=project, project_path=project_path)
             for var, attr in add_self.__dict__.items():
                 setattr(self, var, attr)
+            self.template_abs_path = self.user_index / Path(template_name)
+            self.database_rel_path = self.user_db
+
+        # Parameter Attributes
+        self.database_name = database_name
+        # self.database_path = self.user_index
+        # self.db_abs_path = Path(self.database_path) / Path(self.database_name)
 
     def configure_new_database(self, cmd, schema_file=None):
         """
@@ -93,15 +95,15 @@ class BaseBioSQL(object):
 
 
 class SQLiteBioSQL(BaseBioSQL):
-    def __init__(self, database_path=None, database_name="Template-BioSQL-SQLite.db", upload_path=None, upload_list=None):
+    def __init__(self, database_name=None, proj_mana=ProjectManagement, template_name="Template-BioSQL-SQLite.db", upload_path=None, upload_list=None, **kwargs):
         """
         This class inherits the BaseBioSQL class.  It uses the base methods to load schema, load taxonomy (NCBI),
         and create/copy template SQLite databases loaded with biosql schema and/or taxonomy data.
 
-        :param database_path:  The relative path to the database.
         :param database_name:  The name of the database.
         """
-        super().__init__(database_name=database_name, database_path=database_path, driver="SQLite")
+        super().__init__(template_name=template_name, database_name=database_name, proj_mana=proj_mana, **kwargs)
+        self.driver = "sqlite3"
         self.schema_cmd = "sqlite3 %s -echo"
         self.schema_file = "biosqldb-sqlite.sql"
         self.taxon_cmd = "%s --dbname %s --driver %s --download true"
@@ -115,11 +117,12 @@ class SQLiteBioSQL(BaseBioSQL):
         """
         # Build the command
         schema_file = pkg_resources.resource_filename(sql.__name__, self.schema_file)
-        schema_cmd = self.schema_cmd % str(self.db_abs_path)
+        schema_cmd = self.schema_cmd % str(self.template_abs_path)
         # Run the bash command
         out, error = self.configure_new_database(schema_cmd, schema_file)
         return out, error
         # TODO-ROB: Parse output and error
+        # TODO-ROB:  Make sure the .db file doesn't already exist
 
     def load_sqlite_taxonomy(self):
         """
@@ -127,11 +130,12 @@ class SQLiteBioSQL(BaseBioSQL):
         support for the SQLite PhyloDB.
         """
         # Build the command
-        taxon_cmd = self.taxon_cmd % (self.ncbi_taxon_script, str(self.db_abs_path), self.driver)
+        taxon_cmd = self.taxon_cmd % (self.ncbi_taxon_script, str(self.template_abs_path), self.driver)
         # Run the bash command
         out, error = self.configure_new_database(taxon_cmd)
         return out, error
         # TODO-ROB: Parse output and error
+        # TODO-ROB:  Make sure the .db file doesn't already exist
 
     def create_template_database(self):
         """
@@ -141,15 +145,15 @@ class SQLiteBioSQL(BaseBioSQL):
         :return:
         """
         # Create a template if it doesn't exits.
-        if not self.db_abs_path.is_file():
+        if not self.template_abs_path.is_file():
             self.load_sqlite_schema()
             self.create_executable_scripts()
             # TODO-ROB:  Download the file manually and then use qsub job
             self.load_sqlite_taxonomy()
         else:
-            self.biosqllog.warning("The template, %s, already exists." % self.db_abs_path)
+            self.biosqllog.warning("The template, %s, already exists." % self.template_abs_path)
 
-    def copy_template_database(self, dest_path, dest_name):
+    def copy_template_database(self, sub_path):
         """
         This method copies a template sqlite biosql database.
 
@@ -159,12 +163,12 @@ class SQLiteBioSQL(BaseBioSQL):
         :return:  A new copy of the biosql database.
         """
         # If the template doesn't exists, then create it.
-        if not self.db_abs_path.is_file():
+        if not self.template_abs_path.is_file():
             self.create_template_database()
         # Copy the template into a new folder.
-        dest_abs_path = Path(dest_path) / Path(dest_name)
+        dest_abs_path = self.user_db / Path(sub_path)
         self.biosqllog.warn('Copying Template BioSQL Database...  This may take a few minutes...')
-        shutil.copy2(str(self.db_abs_path), str(dest_abs_path))
+        shutil.copy2(str(self.template_abs_path), str(dest_abs_path))
 
     def upload_files(self, seqtype, filetype, new_db=False):
         db_path = self.db_abs_path.parent
