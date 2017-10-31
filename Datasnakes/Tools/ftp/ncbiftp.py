@@ -5,6 +5,7 @@ from time import time
 from datetime import datetime
 from multiprocessing.pool import ThreadPool
 import os
+from shutil import make_archive
 # from progress.bar import Bar
 # TODO Create a progress bar; Integrate with Threading/downloading
 # TODO Use logit to log which files were downloaded
@@ -33,10 +34,13 @@ class NcbiFTPClient(BaseFTPClient):
         if not re.match(pattern, path):
             raise ValueError('Your path is not in a proper format.')
 
-    def _archive(self, path):
+    def _archive(self, archive_name, folder2archive, archive_type='gztar'):
         """Archive all the files in the folder and compress the archive."""
-        # TODO Write archive function
-        pass
+        os.chdir(folder2archive)  # Enter the full path
+        os.chdir('..')
+        archive_location = os.path.join(os.getcwd(), archive_name)
+        os.chdir(folder2archive)
+        make_archive(archive_location, folder2archive, archive_type)
 
     def _walk(self, path):
         """Walk the ftp server and get files and directories."""
@@ -87,7 +91,7 @@ class NcbiFTPClient(BaseFTPClient):
 
     def getrefseqrelease(self, database_name, seqtype, filetype, download_path,
                          extract=True):
-        """Download the preformatted blast database."""
+        """Download the refseq release database."""
         self.ftp.cwd(self.refseqrelease_path)
         releasedirs = self.listdirectories(self.refseqrelease_path)
 
@@ -158,7 +162,7 @@ class NcbiFTPClient(BaseFTPClient):
             print("Took %s minutes to extract from all files." % minutes)
 
     def getblastdb(self, database_name, download_path, extract=True):
-        """Download the fasta sequence database (not formatted)."""
+        """Download the formatted blast database."""
         if str(database_name).startswith('est'):
             raise NotImplementedError('Est dbs cannot be downloaded yet.')
         self.ftp.cwd(self.blastdb_path)
@@ -231,10 +235,14 @@ class NcbiFTPClient(BaseFTPClient):
 
         if ext == 'nal' and time_elapsed.days >= update_days:
             print('\nYour blast database needs updating.')
+            archive_name = "blastdb_archive_" + self._date
+            self._archive(archive_name, folder2archive=database_path)
             self.getblastdb(dbname, download_path=database_path, extract=True)
 
         elif ext == 'gbff' and time_elapsed.days >= 70:
             print('\nYour refseq release database needs updating.')
-            self.getblastdb(dbname, download_path=database_path, extract=True)
+            archive_name = "refseqrelease_archive_" + self._date
+            self._archive(archive_name, folder2archive=database_path)
+            self.getrefseqrelease(dbname, download_path=database_path, extract=True)
         else:
             print('\nYour database is still up to date.')
