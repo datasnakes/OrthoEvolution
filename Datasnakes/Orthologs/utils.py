@@ -68,7 +68,12 @@ def standalone_config(cls, project, project_path, new=False, custom=None):
     cls.user_index = cls.project_path / Path('index')
     cls.user_db = cls.project_path / Path('databases')
     cls.ncbi_db_repo = cls.user_db / Path('NCBI')
+    cls.blast_db = cls.ncbi_db_repo / Path('blast') / Path('db')
+    cls.ncbi_taxonomy = cls.ncbi_db_repo / Path('pub') / Path('taxonomy')
+    cls.ncbi_refseq_release = cls.ncbi_db_repo / Path('refseq') / Path('release')
+    cls.itis_db_repo = cls.user_db / Path('ITIS')
     cls.project_database = cls.user_db / Path(project)
+    cls.db_archives = cls.user_db / Path('archive')
     cls.raw_data = cls.project_path / Path('raw_data')
     cls.data = cls.project_path / Path('data')
     cls.research_path = cls.project_path
