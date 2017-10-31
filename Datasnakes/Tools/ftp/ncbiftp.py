@@ -18,6 +18,8 @@ class NcbiFTPClient(BaseFTPClient):
     def __init__(self, email):
         _NCBI = 'ftp.ncbi.nlm.nih.gov'
         super().__init__(_NCBI, email, keepalive=False, debug_lvl=0)
+        self._datafmt = '%m-%d-%Y@%I:%M:%S-%p'
+        self._date = str(datetime.now().strftime(self._datafmt))
         self.blastdb_path = '/blast/db/'
         self.blastfasta_path = '/blast/db/FASTA/'
         self.refseqrelease_path = '/refseq/release/'
@@ -26,6 +28,11 @@ class NcbiFTPClient(BaseFTPClient):
         # TODO Use Turn into a json file, dict, or config
         self.blastdbs = []
         self.blastfastadbs = []
+
+        # TODO Create dictionary of refseqrelease dbs, seqtypes, filetypes
+        self.refseqreleasedbs = []
+        self.refseqrelease_seqtypes = []
+        self.refseqrelease_filetypes = []
 
     @classmethod
     def _pathformat(cls, path):
@@ -89,7 +96,7 @@ class NcbiFTPClient(BaseFTPClient):
         directories, _ = self._walk(path)
         return directories
 
-    def getrefseqrelease(self, database_name, seqtype, filetype, download_path,
+    def getrefseqrelease(self, taxon_group, seqtype, seqformat, download_path,
                          extract=True):
         """Download the refseq release database."""
         self.ftp.cwd(self.refseqrelease_path)
@@ -97,14 +104,15 @@ class NcbiFTPClient(BaseFTPClient):
 
         # Change to directory input
         if database_name not in releasedirs:
-            raise FileNotFoundError('%s does not exist.' % database_name)
+            raise FileNotFoundError('%s does not exist.' % taxon_group)
 
-        self.ftp.cwd(database_name)
+        self.ftp.cwd(taxon_group)
         curpath = self.ftp.pwd() + '/'
         releasefiles = self.listfiles(curpath)
 
         files2download = []
-        pattern = re.compile('^' + database_name + '[.](.*?)[.]' + seqtype + '[.]' + filetype + '[.]gz$')
+        pattern = re.compile('^' + taxon_group + '[.](.*?)[.]' + seqtype
+                             + '[.]' + seqformat + '[.]gz$')
         for releasefile in releasefiles:
             if re.match(pattern, releasefile):
                 files2download.append(releasefile)
@@ -225,7 +233,7 @@ class NcbiFTPClient(BaseFTPClient):
 
             elif str(fileinpath).endswith('.gbff'):
                 gbff_file = str(fileinpath)
-                dbname, ext = gbff_file.split('.')
+                taxon_group, _, seqtype, ext = gbff_file.split('.')
                 filetime = datetime.fromtimestamp(os.path.getctime(gbff_file))
                 format_filetime = filetime.strftime("%b %d, %Y at %I:%M:%S %p")
 
@@ -243,6 +251,11 @@ class NcbiFTPClient(BaseFTPClient):
             print('\nYour refseq release database needs updating.')
             archive_name = "refseqrelease_archive_" + self._date
             self._archive(archive_name, folder2archive=database_path)
-            self.getrefseqrelease(dbname, download_path=database_path, extract=True)
+
+            # TODO Create a way to get seqtype and seqformat from filename
+            self.getrefseqrelease(taxon_group, seqtype, ext, database_path,
+                                  extract=True)
+
+        # TODO Add elif for handling databases not handled by this class.
         else:
             print('\nYour database is still up to date.')
