@@ -17,6 +17,24 @@ Management_config:
   host: '0.0.0.0'
   port: '5252'
 
+Database_config:
+  email:  "rgilmore@umc.edu"
+  driver: "sqlite3"
+  GenBank_config:
+    download_taxonomy_database:
+      db_type: "biosql"
+      sub_path: "/refseq/release"
+    download_refseq_release_files:
+      collection_subset: "vertebrate_mammalian"
+      seqtype: "rna"
+      filetype: "gbff"
+    upload_refseq_release_files:
+      collection_subset: "vertebrate_mammalian"
+      seqtype: "rna"
+      filetype: "gbff"
+      upload_list: []
+      extension: ".gbk.db"
+
 CompGenAnalysis_config:
   taxon_file: null
   go_list: null
