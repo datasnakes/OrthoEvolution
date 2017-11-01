@@ -31,7 +31,7 @@ class BaseBioSQL(object):
 
         # Load relative and absolute paths to scripts in the BioSQL module
         self.scripts = pkg_resources.resource_filename(sql_scripts.__name__, "")
-        self.ncbi_taxon_script = pkg_resources.resource_filename(sql_scripts.__name__, "load_taxonomy.pl")
+        self.ncbi_taxon_script = pkg_resources.resource_filename(sql_scripts.__name__, "load_ncbi_taxonomy.pl")
         self.itis_taxon_script = pkg_resources.resource_filename(sql_scripts.__name__, "load_itis_taxonomy.pl")
 
         # Configuration of class attributes for Project Management.
