@@ -27,6 +27,9 @@ class CompGenObjects(object):
     __acc_path = ''
     __data = ''
 
+    # Initialize Logging
+    blastn_log = LogIt().default(logname="blastn", logfile=None)
+
     # TODO-ROB:  CREAT PRE-BLAST and POST-BLAST functions
     def __init__(self, project=None, project_path=os.getcwd(), acc_file=None,
                  taxon_file=None, pre_blast=False, post_blast=True, hgnc=False,
@@ -73,7 +76,6 @@ class CompGenObjects(object):
         self.project = project
 
         # Initialize Logging
-        self.blastn_log = LogIt().default(logname="BLATN", logfile=None)
         self.get_time = time.time
         self.sep = 50*'*'
 
@@ -100,11 +102,16 @@ class CompGenObjects(object):
             self.acc_path = self.project_index / Path(self.acc_filename)
 
             # Handles for organism lists
-            self.org_list = [], self.ncbi_orgs = [], self.org_count = 0
-            self.taxon_ids = [], self.taxon_orgs = [], self.taxon_dict = {}
+            self.org_list = []
+            self.ncbi_orgs = []
+            self.org_count = 0
+            self.taxon_ids = []
+            self.taxon_orgs = []
+            self.taxon_dict = {}
 
             # Handles for gene lists
-            self.gene_list = [], self.gene_count = 0
+            self.gene_list = []
+            self.gene_count = 0
 
             # Handles for tier lists
             self.tier_list = []
@@ -116,7 +123,8 @@ class CompGenObjects(object):
             self.acc_list = []
 
             # Handles for blast queries
-            self.blast_human = [], self.blast_rhesus = []
+            self.blast_human = []
+            self.blast_rhesus = []
 
             # Handles for different dataframe initializations#
             self.raw_acc_data = pd.read_csv(str(self.acc_path), dtype=str)
