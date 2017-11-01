@@ -68,7 +68,7 @@ The main classes under CompGenetics are `CompGenFiles` and `CompGenObjects`.
 ``` python
 # First use the Manager module to set up directories
 
-from Datsnakes.Manager import ProjectManagement
+from Datasnakes.Manager import ProjectManagement
 
 # This is more pythonic with YAML loading
 Management_config = {
