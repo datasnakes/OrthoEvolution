@@ -73,7 +73,7 @@ from Datasnakes.Manager import ProjectManagement
 # This is more pythonic with YAML loading
 Management_config = {
   "new_repo": True,
-  "new_user": "grabear",
+  "new_user": True,
   "new_project": True,
   "new_database": True,
   "new_research": True,
@@ -81,7 +81,7 @@ Management_config = {
   "new_website": False,
   "database": 'Test-Database',
   "repo": 'Test-Repository',
-  "user": 'Test-User',
+  "user": 'grabear',
   "project": 'Test-Project',
   "research": 'Test-Research',
   "research_type": 'Test-Research-Type'
