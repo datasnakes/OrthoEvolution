@@ -75,12 +75,18 @@ class CompGenBLASTn(CompGenFiles):
         self.blastn_log.info(sep + 'BLAST CONFIG START' + sep + '\n\n\n')
         self.blastn_log.info('Configuring the accession file...')
 
-        # Update the gene_list based on the existence of a incomplete blast
-        # file
-        gene_list = gene_list_config(self.building_file_path, self.data, self.gene_list, self.taxon_dict, self.blastn_log)
+        # CONFIGURE and UPDATE the gene_list based on the existence of an
+        # incomplete blast file
+        gene_list = gene_list_config(self.building_file_path, self.data, 
+                                     self.gene_list, self.taxon_dict, 
+                                     self.blastn_log)
         if gene_list is not None:
-            start = len(self.blast_human) - len(gene_list)  # What gene to start blasting
-            query_accessions = self.blast_human[start:]  # Reconfigured query
+            # What gene to start blasting
+            start = len(self.blast_human) - len(gene_list)
+            
+            # Reconfigured query
+            query_accessions = self.blast_human[start:]
+            
             # Reconfigure the gene_list to reflect the existing accession info
             self.current_gene_list = gene_list
         else:
@@ -94,6 +100,7 @@ class CompGenBLASTn(CompGenFiles):
         self.blastn_log.info("Generating directories.")
         self.blastn_log.info("Extracting query gi number to stdout and query "
                              "refseq sequence to a temp.fasta file from BLAST database.")
+                             
         # Iterate the query accessions numbers
         for query in query_accessions:
             gene = self.acc_dict[query][0][0]
@@ -114,7 +121,8 @@ class CompGenBLASTn(CompGenFiles):
             # Temporary fasta file created by the blastdbcmd
             fasta_setup = "blastdbcmd -entry {query} -db refseq_rna -outfmt %f -out {temp fasta}".format(**fmt)
             fasta_status = subprocess.call([fasta_setup], shell=True)
-            # Check the blast databases to see if the query accession even exists
+            
+            # Check the blast databases to see if the query accession exists
             gi_setup = "blastdbcmd -entry {query} -db refseq_rna -outfmt %g".format(**fmt)
             gi_status = subprocess.call([gi_setup], shell=True)
             # TODO-ROB:  Add function to add the gi numbers to the dataframe/csv-file,
@@ -128,13 +136,12 @@ class CompGenBLASTn(CompGenFiles):
                     self.blastn_log.error("Removing %s from the BLAST list." % gene)
                     self.gene_list.remove(gene)
                     self.removed_genes.append(gene)
-                    continue
+
                 elif fasta_status != 0:
                     self.blastn_log.error("FASTA sequence for %s not found in the BLAST extraction" % query)
                     self.blastn_log.error("Removing %s from the BLAST list." % gene)
                     self.gene_list.remove(gene)
                     self.removed_genes.append(gene)
-                    continue
                 else:
                     pass  # Both commands were successful
             else:  # Both commands failed
@@ -159,8 +166,7 @@ class CompGenBLASTn(CompGenFiles):
                           pre_configured=auto_start)
 
     def blast_xml_parse(self, xml_path, gene, organism):
-        """
-        Parse the blast XML record created by the BLAST in order to get the best hit accession number.
+        """Parse the blast XML record get the best hit accession number.
 
         :param xml_path:  Absolute path to the blast record.
         :param gene:  The gene of interest.
@@ -202,8 +208,7 @@ class CompGenBLASTn(CompGenFiles):
                                 raw_bitscore = hsp.bitscore_raw
                                 description = hit.description
             self.blastn_log.info("Finished parsing the file.")
-            self.blastn_log.info(
-                "The best accession has been selected from the BLAST xml record.")
+            self.blastn_log.info("The best accession has been selected from the BLAST xml record.")
             record_dict['gene'] = gene
             record_dict['organism'] = organism
             record_dict['accession'] = accession
@@ -219,7 +224,7 @@ class CompGenBLASTn(CompGenFiles):
     def blasting(self, genes=None, query_organism=None, pre_configured=False):
         """Configure the blast.
 
-        This method actually does the Blasting.
+        This method actually performs NCBI's blastn.
         It requires configuring before it can be utilized.
 
         :param genes:  Gene of interest.
@@ -228,6 +233,7 @@ class CompGenBLASTn(CompGenFiles):
         :return:
         """
         linesep = 40 * '-'
+        ast = 10 * '*'  # Asterisk separator
         if pre_configured is False:
             query = self.df[query_organism].tolist()
             self.blast_config(query_accessions=query, query_organism=query_organism, auto_start=True)
@@ -237,10 +243,7 @@ class CompGenBLASTn(CompGenFiles):
 
         self.blastn_log.info(linesep)
         self.blastn_log.info("The script name is str(os.path.basename(__file__)).")
-        self.blastn_log.info(
-            'The script began on {}'.format(str(
-                d.now().strftime(
-                    self.date_format))))
+        self.blastn_log.info('The script began on {}'.format(str(d.now().strftime(self.date_format))))
         self.blastn_log.info(linesep)
 
         # TIP Steps to a bulk blast
@@ -266,13 +269,11 @@ class CompGenBLASTn(CompGenFiles):
                 if xml in files:
                     self.blast_xml_parse(xml_path, gene, organism)
                 else:
-                    self.blastn_log.warning("\n\n\n*******************BLAST START*******************")
+                    self.blastn_log.warning("\n\n\n" + ast + "BLAST START" + ast)
                     start_time = self.get_time()
                     self.blastn_log.info("The start time is %s" % start_time)
                     self.blastn_log.info("The current gene is %s (%s)." % (gene, self.tier_dict[gene]))
-                    self.blastn_log.info(
-                        "The current organisms is %s (%s)." %
-                        (organism, taxon_id))
+                    self.blastn_log.info("The current organisms is %s (%s)." % (organism, taxon_id))
 
                     with open(xml_path, 'w') as blast_xml:
                         # TODO-ROB: For multiporcessing copy gi lists, but for regular processing just use the one.
