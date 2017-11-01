@@ -103,7 +103,7 @@ class SQLiteBioSQL(BaseBioSQL):
         :param database_name:  The name of the database.
         """
         super().__init__(template_name=template_name, database_name=database_name, proj_mana=proj_mana, **kwargs)
-        self.driver = "sqlite3"
+        self.driver = "sqlite"
         self.schema_cmd = "sqlite3 %s -echo"
         self.schema_file = "biosqldb-sqlite.sql"
         self.taxon_cmd = "%s --dbname %s --driver %s --download true"
