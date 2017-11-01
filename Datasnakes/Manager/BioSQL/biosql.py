@@ -103,7 +103,7 @@ class SQLiteBioSQL(BaseBioSQL):
         :param database_name:  The name of the database.
         """
         super().__init__(template_name=template_name, database_name=database_name, proj_mana=proj_mana, **kwargs)
-        self.driver = "sqlite"
+        self.driver = "SQLite"
         self.schema_cmd = "sqlite3 %s -echo"
         self.schema_file = "biosqldb-sqlite.sql"
         self.taxon_cmd = "%s --dbname %s --driver %s --download true"
@@ -191,7 +191,7 @@ class SQLiteBioSQL(BaseBioSQL):
 
             # Make a connection with the BioSQL database
             try:
-                server = BioSeqDatabase.open_database(driver=self.driver, db=str(db_abs_path))
+                server = BioSeqDatabase.open_database(driver=self.driver.lower(), db=str(db_abs_path))
                 self.biosqllog.info("Server Connected.")
                 pass
             except:
