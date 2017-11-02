@@ -15,18 +15,19 @@ class StreamIEO(object):
         prints to the screen using the LogIT class.
         """
         self.io_q = Queue()
+        self.process = None
         self.streamieolog = LogIt().default(logname="streamieo", logfile=None)
 
     def streamer(self, cmd):
-        process = Popen([cmd], stdin=PIPE, stdout=PIPE, stderr=PIPE)
-        # Watch the standard input and add it to the que
-        Thread(target=self._stream_watcher, name='stdin-watcher', args=('STDIN', process.stdin)).start()
+        self.process = Popen(cmd, stdout=PIPE, stderr=PIPE, shell=True, encoding='utf-8')
+        # Add the command line to the que
+        self.io_q.put(("STDIN", cmd))
         # Watch the standard output and add it to the que
-        Thread(target=self._stream_watcher, name='stdout-watcher', args=('STDOUT', process.stdout)).start()
+        Thread(target=self._stream_watcher, name='stdout-watcher', args=('STDOUT', self.process.stdout)).start()
         # Watch the standard error and add it to the que
-        Thread(target=self._stream_watcher, name='stderr-watcher', args=('STDERR', process.stderr)).start()
+        Thread(target=self._stream_watcher, name='stderr-watcher', args=('STDERR', self.process.stderr)).start()
         # As items are added, print the stream.
-        Thread(target=self._printer, name='_printer', args=process).start()
+        Thread(target=self._printer, name='_printer').start()
 
     def _stream_watcher(self, identifier, stream):
         # Watch the stream and add to the que dynamically
@@ -37,7 +38,7 @@ class StreamIEO(object):
         if not stream.closed:
             stream.close()
 
-    def _printer(self, process):
+    def _printer(self):
         # Prints the que as it is populated with stdout/stderr dynamically.
         while True:
             try:
@@ -45,15 +46,15 @@ class StreamIEO(object):
                 item = self.io_q.get(True, 1)
             except Empty:
                 # No output in either streams for a second. Are we done?
-                if process.poll() is not None:
+                if self.process.poll() is not None:
                     break
             else:
                 identifier, line = item
                 if identifier == "STDIN":
-                    self.streamieolog.warn(line)
+                    self.streamieolog.warn("Command: " + line.strip())
                 elif identifier == "STDERR":
-                    self.streamieolog.error(line)
+                    self.streamieolog.error(line.strip())
                 elif identifier == "STDOUT":
-                    self.streamieolog.info(line)
+                    self.streamieolog.info(line.strip())
                 else:
-                    self.streamieolog.critical(identifier + ':' + line)
+                    self.streamieolog.critical(identifier + ':' + line.strip())
