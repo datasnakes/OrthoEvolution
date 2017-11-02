@@ -1,6 +1,7 @@
 import pkg_resources
 from pathlib import Path
 import os
+import sys
 import subprocess
 import shutil
 from BioSQL import BioSeqDatabase
@@ -74,8 +75,11 @@ class BaseBioSQL(object):
         # Run the perl scripts or sql scripts
         print("cmd: " + str(cmd))
         _loader = subprocess.Popen([cmd], stderr=subprocess.PIPE, stdout=subprocess.PIPE, shell=True, encoding='utf-8')
-        out = _loader.stdout.read()
-        error = _loader.stderr.read()
+        for line in _loader.stdout:
+            self.biosqllog.info(line)
+
+        for line in _loader.stderr:
+            self.biosqllog.war
 
         self.biosqllog.info(_ + "-Error: " + str(error))
         self.biosqllog.info(_ + "-Out: " + str(out))
