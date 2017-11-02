@@ -1,6 +1,7 @@
 """Directory management tools for the package."""
 import os
 import pkg_resources
+import yaml
 from pathlib import Path
 from Datasnakes import Cookies, Orthologs, Manager, Tools
 from Datasnakes.Cookies import Oven
@@ -121,14 +122,14 @@ class UserManagement(RepoManagement):
     # TODO-ROB When the user logs in, they will activate the virtual environment
     # TODO-ROB USE SQL here to see if the user db contains the username
 
-    def __init__(self, repo, user, project=None, database=None, home=os.getcwd(),
-                 new_user=False, new_project=False, new_db=False, **kwargs):
+    def __init__(self, repo, user, project=None, db_config_file=None, home=os.getcwd(),
+                 new_user=False, new_project=False, new_db=False, archive=False, **kwargs):
         """
         This is the User Management class, which manages the current users directories.  This class has to be paired
         with a repository and a user.  It gives access to user paths, and provides functionality for creating new
-        projects and new project databases for the current user.  It also give the option of creating a new user.
+        projects and new project db_config_file for the current user.  It also give the option of creating a new user.
 
-        This class maps a users directory, which gives access to directories for databases (NCBI and proprietary), index
+        This class maps a users directory, which gives access to directories for db_config_file (NCBI and proprietary), index
         files for quickly retrieving project data, project log files, user affiliated journal articles, and projects.
 
         :param repo (string):  The name of the repository.
@@ -139,20 +140,18 @@ class UserManagement(RepoManagement):
         :param new_project (bool):  Flag for creating a new project.
         """
 
-        if database is None:
-            database = []
         if user or (user and repo):
             super().__init__(repo=repo, user=user, home=home, new_user=new_user, **kwargs)
             self.user = user
             # NCBI and Proprietary Database Repositories:
             self.user_db = self.user_path / Path('databases')
+            self.user_archive = self.user_path / Path('archive')
             self.ncbi_db_repo = self.user_db / Path('NCBI')
             self.ncbi_taxonomy = self.ncbi_db_repo / Path('pub') / Path('taxonomy')
             self.ncbi_refseq_release = self.ncbi_db_repo / Path('refseq') / Path('release')
             self.blast_db = self.ncbi_db_repo / Path('blast') / Path('db')
             self.windowmaker_files = self.ncbi_db_repo / Path('blast') / Path('windowmaker_files')
             self.itis_db_repo = self.user_db / Path('ITIS')
-            self.db_archive = self.user_db / Path('archive')
             # Index Files:
             self.user_index = self.user_path / Path('index')
             # User Log Files:
@@ -174,17 +173,6 @@ class UserManagement(RepoManagement):
                 self.project = project
                 self.project_path = home / Path(project)
         self.Kitchen = Oven(repo=self.repo, user=self.user, project=self.project, output_dir=self.projects)
-
-        if len(database) > 0:
-            self.db_list = database
-            self.db_path_dict = {}
-            self.db_archive_dict = {}
-            for item in database:
-                self.db_path_dict[item] = self.user_db / Path(item)
-                self.db_archive_dict[item] = self.db_path_dict[item] / Path('archive')
-        else:
-            self.db_path_dict = None
-            self.db_archive_dict = None
 
         self.managementlog.info('The User Management class variables have been set.')
 
@@ -255,7 +243,7 @@ class ProjectManagement(UserManagement):
         an existing project.  An application directory for the specific research/dataset can also be generated
 
         It gives access to the project directories including index
-        files, the raw data, the processed data, the project databases, and the web files for serving data.
+        files, the raw data, the processed data, the project db_config_file, and the web files for serving data.
 
         :param repo (string):  The name of the repository.
         :param user (string):  The name of the current user if any.
