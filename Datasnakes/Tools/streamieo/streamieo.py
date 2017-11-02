@@ -18,10 +18,12 @@ class StreamIEO(object):
         self.streamieolog = LogIt().default(logname="streamieo", logfile=None)
 
     def streamer(self, cmd):
-        process = Popen([cmd], stdout=PIPE, stderr=PIPE)
+        process = Popen([cmd], stdin=PIPE, stdout=PIPE, stderr=PIPE)
+        # Watch the standard input and add it to the que
+        Thread(target=self._stream_watcher, name='stdin-watcher', args=('STDIN', process.stdin)).start()
         # Watch the standard output and add it to the que
         Thread(target=self._stream_watcher, name='stdout-watcher', args=('STDOUT', process.stdout)).start()
-        # Watch the standard input and add it to the que
+        # Watch the standard error and add it to the que
         Thread(target=self._stream_watcher, name='stderr-watcher', args=('STDERR', process.stderr)).start()
         # As items are added, print the stream.
         Thread(target=self._printer, name='_printer', args=process).start()
@@ -47,7 +49,9 @@ class StreamIEO(object):
                     break
             else:
                 identifier, line = item
-                if identifier == "STDERR":
+                if identifier == "STDIN":
+                    self.streamieolog.warn(line)
+                elif identifier == "STDERR":
                     self.streamieolog.error(line)
                 elif identifier == "STDOUT":
                     self.streamieolog.info(line)
