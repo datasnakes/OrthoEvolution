@@ -4,11 +4,7 @@ from pathlib import Path
 import pandas as pd
 
 from Datasnakes.Orthologs.Blast.comparative_genetics_objects import CompGenObjects
-
-
-# import pkg_resources
-# import shutil
-
+from Datasnakes.Tools.logit import LogIt
 
 class CompGenFiles(CompGenObjects):
     def __init__(self, project, template=None, taxon_file=None, post_blast=False,
@@ -28,6 +24,7 @@ class CompGenFiles(CompGenObjects):
         """
         super().__init__(project=project, acc_file=template, taxon_file=taxon_file, post_blast=post_blast, hgnc=False, **kwargs)
 
+        self.postblastlog = LogIt().default(logname="post blast", logfile=None)
         # Private variables
         self.__home = os.getcwd()
         if taxon_file is not None:
@@ -122,7 +119,7 @@ class CompGenFiles(CompGenObjects):
             temp.to_csv(str(self.building_time_file_path))
 
     def post_blast_analysis(self, removed_genes=None):
-        """Save all of the post blast data (duplicate/missing/removed) to an excel file.
+        """Save the post blast data (duplicate/missing/removed) to an excel file.
 
         :param removed_genes:  Genes to exclude from the file.
         :return:
@@ -135,14 +132,19 @@ class CompGenFiles(CompGenObjects):
 
         # Removed Genes
         if removed_genes is not None:
-            rm_ws = pd.DataFrame(removed_genes)
-            rm_ws.to_excel(pb_file, sheet_name="Removed Genes")
-
+            removed_genes_dict = {'Removed Genes': removed_genes}
+            removed_worksheet = pd.DataFrame.from_dict(removed_genes_dict, orient='index')
+            removed_worksheet.to_excel(pb_file, sheet_name="Removed Genes")
+            msg = "Removed genes were added to your excel file."
+            self.postblastlog.info(msg)
+            
         # Duplicated Accessions
         try:
             acc_ws = pd.DataFrame.from_dict(self.dup_acc_count, orient='index')
             acc_ws.columns = ['Count']
             acc_ws.to_excel(pb_file, sheet_name="Duplicate Count by Accession")
+            msg = "Dupilicate accessions were added to your excel file."
+            self.postblastlog.info(msg)
         except (ValueError, AttributeError):
             pass
 
@@ -161,6 +163,8 @@ class CompGenFiles(CompGenObjects):
             dup_org_ws2 = pd.DataFrame.from_dict(gene_org_dup, orient='index')
             dup_org_ws2.T.to_excel(
                 pb_file, sheet_name="Duplicate Org Groups by Gene")
+            msg = 'Dupilicate genes were added to your excel file.'
+            self.postblastlog.info(msg)
         except (ValueError, AttributeError):
             pass
 
@@ -179,6 +183,8 @@ class CompGenFiles(CompGenObjects):
             dup_org_ws2 = pd.DataFrame.from_dict(org_gene_dup, orient='index')
             dup_org_ws2.T.to_excel(
                 pb_file, sheet_name="Duplicate Gene Groups by Org")
+            msg = 'Dupilicate species were added to your excel file.'
+            self.postblastlog.info(msg)
         except (ValueError, AttributeError):
             pass
 
@@ -187,6 +193,8 @@ class CompGenFiles(CompGenObjects):
             rand_ws = pd.DataFrame.from_dict(
                 self.duplicated_random, orient='index')
             rand_ws.to_excel(pb_file, sheet_name="Random Duplicates")
+            msg = 'Random Duplicates were added to your excel file.'
+            self.postblastlog.info(msg)
         except (ValueError, AttributeError):
             pass
 
@@ -195,6 +203,8 @@ class CompGenFiles(CompGenObjects):
             other_ws = pd.DataFrame.from_dict(
                 self.duplicated_other, orient='index')
             other_ws.to_excel(pb_file, sheet_name="Other Duplicates")
+            msg = 'Other duplicates were added to your excel file.'
+            self.postblastlog.info(msg)
         except (ValueError, AttributeError):
             pass
 
@@ -226,10 +236,8 @@ class CompGenFiles(CompGenObjects):
                         gene_org_ms[gene] = value
                     else:
                         gene_org_ms_count[gene] = value
-            gene_ms_count = pd.DataFrame.from_dict(
-                gene_org_ms_count, orient='index')
-            gene_ms_count.to_excel(
-                pb_file, sheet_name="Missing Organisms Count")
+            gene_ms_count = pd.DataFrame.from_dict(gene_org_ms_count, orient='index')
+            gene_ms_count.to_excel(pb_file, sheet_name="Missing Organisms Count")
             gene_ms = pd.DataFrame.from_dict(gene_org_ms, orient='index')
             gene_ms.to_excel(pb_file, sheet_name="Missing Organisms by Genes")
         except (ValueError, AttributeError):
@@ -237,4 +245,5 @@ class CompGenFiles(CompGenObjects):
         try:
             pb_file.save()
         except IndexError:
-            print("There are no duplicates or missing genes.")
+            msg = "There are no duplicates or missing genes."
+            self.postblastlog.exception(msg)
