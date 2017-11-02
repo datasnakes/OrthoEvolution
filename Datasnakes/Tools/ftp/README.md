@@ -23,12 +23,22 @@ ncbiftp = NcbiFTPClient(email='somebody@gmail.com')
 ncbiftp.getblastdb(database_name='refseq_rna')
 
 ```
+#### Windowmasker files Download Example
 
 ```python
 from Datasnakes.Tools.ftp import NcbiFTPClient
 
+ids = ['9544', '9606']
+
 ncbiftp = NcbiFTPClient(email='somebody@gmail.com')
-ncbiftp.getrefseqrelease('vertebrate_mammalian', 'rna', 'gbff', os.getcwd())
+ncbiftp.getwindowmasker(taxonomy_ids=ids, download_path=os.getcwd())
+```
+#### Refseq Release Download Example
+```python
+from Datasnakes.Tools.ftp import NcbiFTPClient
+
+ncbiftp = NcbiFTPClient(email='somebody@gmail.com')
+ncbiftp.getrefseqrelease(taxon_group='vertebrate_mammalian', seqtyp='rna', seqformat='gbff', download_path=os.getcwd())
 ```
 
 #### List all directories in a path
