@@ -150,6 +150,7 @@ class UserManagement(RepoManagement):
             self.ncbi_taxonomy = self.ncbi_db_repo / Path('pub') / Path('taxonomy')
             self.ncbi_refseq_release = self.ncbi_db_repo / Path('refseq') / Path('release')
             self.blast_db = self.ncbi_db_repo / Path('blast') / Path('db')
+            self.windowmaker_files = self.ncbi_db_repo / Path('blast') / Path('windowmaker_files')
             self.itis_db_repo = self.user_db / Path('ITIS')
             self.db_archive = self.user_db / Path('archive')
             # Index Files:
