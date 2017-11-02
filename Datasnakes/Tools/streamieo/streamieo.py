@@ -8,7 +8,7 @@ from Datasnakes.Tools.logit import LogIt
 
 class StreamIEO(object):
 
-    def __init__(self):
+    def __init__(self, logname):
         """
         A class that individually threads the capture of the stdout stream and the stderr stream of a system command.
         The stdout/stderr are queued in the order they occur.  As the que populates another thread, parse the que and
@@ -16,7 +16,7 @@ class StreamIEO(object):
         """
         self.io_q = Queue()
         self.process = None
-        self.streamieolog = LogIt().default(logname="streamieo", logfile=None)
+        self.streamieolog = LogIt().default(logname="%s - streamieo" % logname, logfile=None)
 
     def streamer(self, cmd):
         self.process = Popen(cmd, stdout=PIPE, stderr=PIPE, shell=True, encoding='utf-8')
