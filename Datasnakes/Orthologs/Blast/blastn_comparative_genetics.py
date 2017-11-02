@@ -10,7 +10,8 @@ from Bio.Blast.Applications import NcbiblastnCommandline
 
 from Datasnakes.Manager import config
 from Datasnakes.Orthologs.Blast.comparative_genetics_files import CompGenFiles
-from Datasnakes.Orthologs.Blast.utils import gene_list_config, map_func, gi_list_config
+from Datasnakes.Orthologs.Blast.utils import gene_list_config, map_func
+    # gi_list_config
 from Datasnakes.Tools.utils import makedirectory
 
 
@@ -39,9 +40,10 @@ class CompGenBLASTn(CompGenFiles):
 
         # Manage Directories
         self.home = Path(os.getcwd())
-        self.__gi_list_path = self.project_database / Path('gi_lists')
+        # TODO-ROB: GI deprecation.  Add a windowmasker path.
+        # self.__gi_list_path = self.project_database / Path('gi_lists')
 
-        Path.mkdir(self.__gi_list_path, parents=True, exist_ok=True)
+        # Path.mkdir(self.__gi_list_path, parents=True, exist_ok=True)
 
         self.query_gi_dict = {}
         self.removed_genes = []
@@ -88,7 +90,10 @@ class CompGenBLASTn(CompGenFiles):
 
         # Create GI lists
         self.blastn_log.info("Configuring GI list using the taxonomy id and the blastdbcmd tool.")
-        gi_list_config(self.__gi_list_path, self.taxon_ids, self.research_path)
+        # TODO-ROB:  GI deprecation.  Do windowmasker config.
+        # gi_list_config(self.__gi_list_path, self.taxon_ids, self.research_path)
+        # TODO-SDH:  GI deprecation.  Do windowmasker config.
+        # TODO:  Abstract the blast configuration to the database management module.  Just do a configuration check.
 
         # Get GI (stdout) and query sequence (FASTA format)
         self.blastn_log.info("Generating directories.")
@@ -259,9 +264,10 @@ class CompGenBLASTn(CompGenFiles):
                 xml_path = gene_path / Path(xml)
 
                 # Initialize configuration variables
-                taxon_id = self.taxon_dict[organism]
-                taxon_gi_file = str(taxon_id) + "gi"
-                taxon_gi_path = self.__gi_list_path / Path(taxon_gi_file)
+                # TODO-ROB:  GI deprecation.  Update NCBIblasnCommandline parameter config for windowmasker update.
+                # taxon_id = self.taxon_dict[organism]
+                # taxon_gi_file = str(taxon_id) + "gi"
+                # taxon_gi_path = self.__gi_list_path / Path(taxon_gi_file)
 
                 if xml in files:
                     self.blast_xml_parse(xml_path, gene, organism)
@@ -270,9 +276,9 @@ class CompGenBLASTn(CompGenFiles):
                     start_time = self.get_time()
                     self.blastn_log.info("The start time is %s" % start_time)
                     self.blastn_log.info("The current gene is %s (%s)." % (gene, self.tier_dict[gene]))
-                    self.blastn_log.info(
-                        "The current organisms is %s (%s)." %
-                        (organism, taxon_id))
+                    # self.blastn_log.info(
+                    #     "The current organisms is %s (%s)." %
+                    #     (organism, taxon_id))
 
                     with open(xml_path, 'w') as blast_xml:
                         # TODO-ROB: For multiporcessing copy gi lists, but for regular processing just use the one.
@@ -281,8 +287,8 @@ class CompGenBLASTn(CompGenFiles):
                         # os.system("cp {src} {dst}".format(**fmt))
 
                         # Set up blast parameters
-                        taxon_gi_path = str(taxon_gi_path)
-                        query_seq_path = str(gene_path / Path('temp.fasta'))
+                        # taxon_gi_path = str(taxon_gi_path)
+                        # query_seq_path = str(gene_path / Path('temp.fasta'))
 
                         # Use Biopython's NCBIBlastnCommandline tool
                         result_handle1 = NcbiblastnCommandline(query=query_seq_path, db="refseq_rna",
