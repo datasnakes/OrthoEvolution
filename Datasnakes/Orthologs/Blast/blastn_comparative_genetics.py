@@ -36,6 +36,10 @@ class CompGenBLASTn(CompGenFiles):
         :param kwargs:
         """
         super().__init__(project=project, template=template, save_data=save_data, **kwargs)
+        
+        # Create a date format
+        self._fmt = '%a %b %d at %I:%M:%S %p %Y'
+        self.date_format = str(d.now().strftime(self._fmt))
 
         # Manage Directories
         self.home = Path(os.getcwd())
@@ -109,7 +113,6 @@ class CompGenBLASTn(CompGenFiles):
             try:
                 Path.mkdir(gene_path, exist_ok=True, parents=True)
                 self.blastn_log.info("Directory Created: %s" % gene)
-                self.blastn_log.info("\n")
             except FileExistsError:
                 self.blastn_log.info("Directory already exists: %s" % gene)
 
@@ -157,8 +160,8 @@ class CompGenBLASTn(CompGenFiles):
                     self.current_gene_list.remove(gene)
                 continue
 
-        self.blastn_log.info('Configured gene list: %s\n\n\n' % self.current_gene_list)
-        self.blastn_log.info(sep + 'BLAST CONFIG END' + sep + '\n\n\n')
+        self.blastn_log.info('Configured gene list: %s' % self.current_gene_list)
+        self.blastn_log.info(sep + 'BLAST CONFIG END' + sep)
         if auto_start is True:
             # Automatically begin BLASTING after the configuration
             self.blasting(genes=self.current_gene_list,
@@ -222,7 +225,7 @@ class CompGenBLASTn(CompGenFiles):
             self.add_accession(gene, organism, accession)
 
     def blasting(self, genes=None, query_organism=None, pre_configured=False):
-        """Configure the blast.
+        """Run NCBI's blastn.
 
         This method actually performs NCBI's blastn.
         It requires configuring before it can be utilized.
@@ -232,7 +235,6 @@ class CompGenBLASTn(CompGenFiles):
         :param pre_configured:  A flag to determine if the blast needs configuring.
         :return:
         """
-        linesep = 40 * '-'
         ast = 10 * '*'  # Asterisk separator
         if pre_configured is False:
             query = self.df[query_organism].tolist()
@@ -241,10 +243,7 @@ class CompGenBLASTn(CompGenFiles):
         elif pre_configured is True:
             genes = genes
 
-        self.blastn_log.info(linesep)
-        self.blastn_log.info("The script name is str(os.path.basename(__file__)).")
         self.blastn_log.info('The script began on {}'.format(str(d.now().strftime(self.date_format))))
-        self.blastn_log.info(linesep)
 
         # TIP Steps to a bulk blast
         # 1.  Iterate the gene of interest
@@ -259,7 +258,7 @@ class CompGenBLASTn(CompGenFiles):
                 gene_path = self.raw_data / Path(gene) / Path('BLAST')
                 files = os.listdir(str(gene_path))
                 xml = '%s_%s.xml' % (gene, organism)
-                xml_path = gene_path / Path(xml)
+                xml_path = str(gene_path / Path(xml))
 
                 # Initialize configuration variables
                 taxon_id = self.taxon_dict[organism]
@@ -269,38 +268,39 @@ class CompGenBLASTn(CompGenFiles):
                 if xml in files:
                     self.blast_xml_parse(xml_path, gene, organism)
                 else:
-                    self.blastn_log.warning("\n\n\n" + ast + "BLAST START" + ast)
+                    self.blastn_log.warning(ast + "BLAST START" + ast)
                     start_time = self.get_time()
                     self.blastn_log.info("The start time is %s" % start_time)
                     self.blastn_log.info("The current gene is %s (%s)." % (gene, self.tier_dict[gene]))
                     self.blastn_log.info("The current organisms is %s (%s)." % (organism, taxon_id))
 
                     with open(xml_path, 'w') as blast_xml:
-                        # TODO-ROB: For multiporcessing copy gi lists, but for regular processing just use the one.
-                        # Create a copy of the gi list file per taxonomy id to be used in blast
-                        # fmt = {'src': str(taxon_gi_path), 'dst': str(taxgi_dest_path)}
-                        # os.system("cp {src} {dst}".format(**fmt))
-
                         # Set up blast parameters
                         taxon_gi_path = str(taxon_gi_path)
                         query_seq_path = str(gene_path / Path('temp.fasta'))
 
                         # Use Biopython's NCBIBlastnCommandline tool
-                        result_handle1 = NcbiblastnCommandline(query=query_seq_path, db="refseq_rna",
-                                                               strand="plus", evalue=0.001,  # DONT GO LOWER
-                                                               outfmt=5, gilist=taxon_gi_path,
-                                                               max_target_seqs=10, task="blastn")
+                        result_handle = NcbiblastnCommandline(query=query_seq_path, 
+                                                               db="refseq_rna",
+                                                               strand="plus", 
+                                                               evalue=0.001,  # DONT GO LOWER
+                                                               outfmt=5, 
+                                                               gilist=taxon_gi_path,
+                                                               max_target_seqs=10, 
+                                                               task="blastn")
+            
                         # Capture blast data
-                        stdout_str, stderr_str = result_handle1()
+                        stdout_str, stderr_str = result_handle()
+                        self.blastn_log.error(stderr_str)
                         blast_xml.write(stdout_str)
                         end_time = self.get_time()
                         elapsed_time = end_time - start_time
                         self.blastn_log.info("%s was create." % blast_xml.name)
                         self.blastn_log.info("The end time is %s." % end_time)
                         self.blastn_log.info("The BLAST took %s." % elapsed_time)
-                    self.blastn_log.warning("********************BLAST END********************\n\n\n")
+                    self.blastn_log.warning(ast + "BLAST END" + ast)
                     self.add_blast_time(gene, organism, start_time, end_time)
-                    self.blast_xml_parse(xml, gene, organism)
+                    self.blast_xml_parse(xml_path, gene, organism)
 
                 # If the BLAST has gone through all orthologs then create a
                 # master accession file.
