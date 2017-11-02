@@ -45,7 +45,7 @@ class CompGenBLASTn(CompGenFiles):
 
         # Path.mkdir(self.__gi_list_path, parents=True, exist_ok=True)
 
-        self.query_gi_dict = {}
+        # self.query_gi_dict = {}
         self.removed_genes = []
         self.current_gene_list = []
 
@@ -61,11 +61,12 @@ class CompGenBLASTn(CompGenFiles):
         self.complete_time_file_path = self.data / Path(self.complete_time_file)
 
     def blast_config(self, query_accessions, query_organism, auto_start=False):
+        # TODO: GI deprecation.  Change the docstring to reflect windowmasker workflow.
         """This method configures everything for our BLAST workflow.
 
         It configures the accession file, which works with
         interrupted Blasts.  It configures a gene_list for blasting the right genes.
-        And it configures a GI list, which helps speed up the Blasting process
+        And it configures the window-masker, which helps speed up the Blasting process
         significantly.
 
         :param query_accessions:  A list of query accession numbers.  Each gene needs one from the same organism.
@@ -89,7 +90,7 @@ class CompGenBLASTn(CompGenFiles):
             self.current_gene_list = self.gene_list
 
         # Create GI lists
-        self.blastn_log.info("Configuring GI list using the taxonomy id and the blastdbcmd tool.")
+        # self.blastn_log.info("Configuring GI list using the taxonomy id and the blastdbcmd tool.")
         # TODO-ROB:  GI deprecation.  Do windowmasker config.
         # gi_list_config(self.__gi_list_path, self.taxon_ids, self.research_path)
         # TODO-SDH:  GI deprecation.  Do windowmasker config.
@@ -97,8 +98,8 @@ class CompGenBLASTn(CompGenFiles):
 
         # Get GI (stdout) and query sequence (FASTA format)
         self.blastn_log.info("Generating directories.")
-        self.blastn_log.info("Extracting query gi number to stdout and query "
-                             "refseq sequence to a temp.fasta file from BLAST database.")
+        # self.blastn_log.info("Extracting query gi number to stdout and query "
+        #                      "refseq sequence to a temp.fasta file from BLAST database.")
         # Iterate the query accessions numbers
         for query in query_accessions:
             gene = self.acc_dict[query][0][0]
@@ -120,40 +121,41 @@ class CompGenBLASTn(CompGenFiles):
             fasta_setup = "blastdbcmd -entry {query} -db refseq_rna -outfmt %f -out {temp fasta}".format(**fmt)
             fasta_status = subprocess.call([fasta_setup], shell=True)
             # Check the blast databases to see if the query accession even exists
-            gi_setup = "blastdbcmd -entry {query} -db refseq_rna -outfmt %g".format(**fmt)
-            gi_status = subprocess.call([gi_setup], shell=True)
+            # gi_setup = "blastdbcmd -entry {query} -db refseq_rna -outfmt %g".format(**fmt)
+            # gi_status = subprocess.call([gi_setup], shell=True)
             # TODO-ROB:  Add function to add the gi numbers to the dataframe/csv-file,
             # TODO-ROB: and add a check function to see if thats already there
             # Check the status of the custom blast data extraction
-            if gi_status == 0 or fasta_status == 0:  # One of the commands was successful.
-                if gi_status != 0:
-                    # Log it.
-                    self.blastn_log.error("GI number for %s not found in the BLAST extraction" % query)
-                    # TODO-SDH Is this the correct move below???
-                    self.blastn_log.error("Removing %s from the BLAST list." % gene)
-                    self.gene_list.remove(gene)
-                    self.removed_genes.append(gene)
-                    continue
-                elif fasta_status != 0:
-                    self.blastn_log.error("FASTA sequence for %s not found in the BLAST extraction" % query)
-                    self.blastn_log.error("Removing %s from the BLAST list." % gene)
-                    self.gene_list.remove(gene)
-                    self.removed_genes.append(gene)
-                    continue
-                else:
-                    pass  # Both commands were successful
-            else:  # Both commands failed
-                self.blastn_log.error(
-                    "FASTA sequence and GI number for %s not found in the custom BLAST extraction." %
-                    query)
-                self.blastn_log.error(
-                    "Removing %s from the BLAST list..." %
-                    gene)
-                self.gene_list.remove(gene)
-                self.removed_genes.append(gene)
-                with contextlib.suppress(ValueError):
-                    self.current_gene_list.remove(gene)
-                continue
+            # if gi_status == 0 or fasta_status == 0:  # One of the commands was successful.
+            #     if gi_status != 0:
+            #         # Log it.
+            #         self.blastn_log.error("GI number for %s not found in the BLAST extraction" % query)
+            #         # TODO-SDH Is this the correct move below???
+            #         self.blastn_log.error("Removing %s from the BLAST list." % gene)
+            #         self.gene_list.remove(gene)
+            #         self.removed_genes.append(gene)
+            #         continue
+            # TODO:  GI deprecation.  Keep the FASTA sequence or not with window-masker?
+            #     if fasta_status != 0:
+            #         self.blastn_log.error("FASTA sequence for %s not found in the BLAST extraction" % query)
+            #         self.blastn_log.error("Removing %s from the BLAST list." % gene)
+            #         self.gene_list.remove(gene)
+            #         self.removed_genes.append(gene)
+            #         continue
+            #     else:
+            #         pass  # Both commands were successful
+            # else:  # Both commands failed
+            #     # self.blastn_log.error(
+            #     #     "FASTA sequence and GI number for %s not found in the custom BLAST extraction." %
+            #     #     query)
+            #     self.blastn_log.error(
+            #         "Removing %s from the BLAST list..." %
+            #         gene)
+            #     self.gene_list.remove(gene)
+            #     self.removed_genes.append(gene)
+            #     with contextlib.suppress(ValueError):
+            #         self.current_gene_list.remove(gene)
+            #     continue
 
         self.blastn_log.info('Configured gene list: %s\n\n\n' % self.current_gene_list)
         self.blastn_log.info(sep + 'BLAST CONFIG END' + sep + '\n\n\n')
@@ -291,12 +293,16 @@ class CompGenBLASTn(CompGenFiles):
                         # query_seq_path = str(gene_path / Path('temp.fasta'))
 
                         # Use Biopython's NCBIBlastnCommandline tool
-                        result_handle1 = NcbiblastnCommandline(query=query_seq_path, db="refseq_rna",
+                        # result_handle1 = NcbiblastnCommandline(query=query_seq_path, db="refseq_rna",
+                        #                                        strand="plus", evalue=0.001,  # DONT GO LOWER
+                        #                                        outfmt=5, gilist=taxon_gi_path,
+                        #                                        max_target_seqs=10, task="blastn")
+                        new_result_handle1 = NcbiblastnCommandline(query=query_seq_path, db="refseq_rna",
                                                                strand="plus", evalue=0.001,  # DONT GO LOWER
-                                                               outfmt=5, gilist=taxon_gi_path,
+                                                               outfmt=5,
                                                                max_target_seqs=10, task="blastn")
                         # Capture blast data
-                        stdout_str, stderr_str = result_handle1()
+                        stdout_str, stderr_str = new_result_handle1()
                         blast_xml.write(stdout_str)
                         end_time = self.get_time()
                         elapsed_time = end_time - start_time
