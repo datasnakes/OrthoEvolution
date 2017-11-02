@@ -17,21 +17,21 @@ class ZipUtils:
         :param zip_path: This is the absolute path of the directory (or file) to be zipped.
         :returns:  A zip file that is created inside of the zip_path.  The path string is returned.
         """
-        self.zip_filename = zip_filename
-        self.zip_path = zip_path
+        self.comp_filename = zip_filename
+        self.comp_path = zip_path
         self.ignore_parts = Path(zip_path).parent.parts
 
-    def to_zip(self):
+    def to_zip(self, compression=zipfile.ZIP_LZMA):
         """Zip a folder."""
-        comp_path = os.path.join(self.zip_path, self.zip_filename)
-        zip_handle = zipfile.ZipFile(comp_path, 'w', zipfile.ZIP_DEFLATED)
-        if os.path.isfile(self.zip_path):
-            zip_handle.write(self.zip_path)
+        zip_path = os.path.join(self.comp_path, self.comp_filename)
+        zip_handle = zipfile.ZipFile(zip_path, 'w', compression)
+        if os.path.isfile(self.comp_path):
+            zip_handle.write(self.comp_path)
         else:
             print('skipped')
-            self.__addfolder2zip(zip_handle, self.zip_path)
+            self.__addfolder2zip(zip_handle, self.comp_path)
         zip_handle.close()
-        return comp_path
+        return zip_path
 
     def __addfolder2zip(self, zip_handle, folder):
         """Not meant to be used explicitly.  Use to_zip.
@@ -43,7 +43,7 @@ class ZipUtils:
         for file in os.listdir(folder):
             full_path = os.path.join(folder, file)
             rel_path = Path(full_path)
-            rel_path = rel_path.relative_to(Path(self.zip_path))
+            rel_path = rel_path.relative_to(Path(self.comp_path))
             if os.path.isfile(full_path):
                 if str(file) == str(self.comp_filename):
                     continue
