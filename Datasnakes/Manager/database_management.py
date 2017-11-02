@@ -13,7 +13,8 @@ class DatabaseManagement(object):
     def __init__(self, project, email, driver, project_path=None, proj_mana=ProjectManagement, biosql_mana=biosql, **kwargs):
         self.dbmanalog = LogIt().default(logname="DatabaseManagement", logfile=None)
         self.config_options = {
-            "GI_config": self.get_gi_lists,
+            # TODO-ROB:  GI deprecation.  Add some type of window-masker config here.
+            # "GI_config": self.get_gi_lists,
             "Blast_config": self.download_blast_database,
             "Taxonomy_config": self.download_taxonomy_database,
             "GenBank_config": {
@@ -46,8 +47,9 @@ class DatabaseManagement(object):
                 db_configuration = kwargs[config]
                 self.database_dict[db_config_type] = [db_config_method, db_configuration]
 
-    def get_gi_lists(self):
-        print()
+# TODO-ROB:  GI deprecation.  Add something for window-masker.
+    # def get_gi_lists(self):
+    #     print()
 
     def download_blast_database(self, database_name="refseq_rna", database_path=None):
         # <path>/<user or basic_project>/databases/NCBI/blast/db/<database_name>
