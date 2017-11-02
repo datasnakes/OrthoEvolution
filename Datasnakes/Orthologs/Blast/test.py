@@ -7,7 +7,7 @@
 #
 #gi_list_config(gi_list_path=p, taxonomy_ids=tids)
 
-from Datasnakes.Orthologs.Blast import CompGenBLASTn
+from Datasnakes.Orthologs.Blast import OrthoBlastN
 import os
 
 # This is more pythonic with YAML loading
@@ -23,5 +23,5 @@ Blast_config = {
 
 
 path = os.getcwd()
-myblast = CompGenBLASTn(proj_mana=None, project="sdh-test", project_path=path, **Blast_config)
+myblast = OrthoBlastN(proj_mana=None, project="sdh-test", project_path=path, **Blast_config)
 myblast.blast_config(myblast.blast_human, 'Homo_sapiens', auto_start=True)
