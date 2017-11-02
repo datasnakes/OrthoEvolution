@@ -121,4 +121,4 @@ Describe and show how to run the tests with code examples.
 
 :exclamation: Notes
 -------------------
-- [ ] Explain GI Lists.
+- [ ] Explain Window Masker.
