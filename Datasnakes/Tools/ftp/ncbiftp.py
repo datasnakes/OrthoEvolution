@@ -20,9 +20,11 @@ class NcbiFTPClient(BaseFTPClient):
         super().__init__(_NCBI, email, keepalive=False, debug_lvl=0)
         self._datafmt = '%m-%d-%Y@%I:%M:%S-%p'
         self._date = str(datetime.now().strftime(self._datafmt))
+        self.blast = '/blast/'
         self.blastdb_path = '/blast/db/'
         self.blastfasta_path = '/blast/db/FASTA/'
         self.refseqrelease_path = '/refseq/release/'
+        self.windowmasker_path = self.blast + 'windowmasker_files/'
         self._taxdb = 'taxdb.tar.gz'  # Located in self.blastdb_path
 
         # TODO Use Turn into a json file, dict, or config
@@ -33,6 +35,8 @@ class NcbiFTPClient(BaseFTPClient):
         self.refseqreleasedbs = []
         self.refseqrelease_seqtypes = []
         self.refseqrelease_filetypes = []
+
+        # Set up logger
 
     @classmethod
     def _pathformat(cls, path):
@@ -96,14 +100,21 @@ class NcbiFTPClient(BaseFTPClient):
         directories, _ = self._walk(path)
         return directories
 
+    def getwindowmaskerfiles(self, taxonomy_id):
+        """Download NCBI's window masker binary files for each taxonomy id."""
+        self.ftp.cwd(self.windowmasker_path)
+        print(self.windowmasker_path)
+        taxonomy_ids = self.listdirectories(self.refseqrelease_path)
+        print(taxonomy_ids)
+
     def getrefseqrelease(self, taxon_group, seqtype, seqformat, download_path,
                          extract=True):
         """Download the refseq release database."""
         self.ftp.cwd(self.refseqrelease_path)
-        releasedirs = self.listdirectories(self.refseqrelease_path)
+        taxon_dirs = self.listdirectories(self.refseqrelease_path)
 
         # Change to directory input
-        if database_name not in releasedirs:
+        if taxon_group not in taxon_dirs:
             raise FileNotFoundError('%s does not exist.' % taxon_group)
 
         self.ftp.cwd(taxon_group)
@@ -188,6 +199,7 @@ class NcbiFTPClient(BaseFTPClient):
         os.chdir(download_path)
 
         absentfiles = []
+
         # Ensure that files aren't already downloaded
         for file2download in files2download:
             if not os.path.exists(os.path.join(download_path, file2download)):
@@ -257,5 +269,9 @@ class NcbiFTPClient(BaseFTPClient):
                                   extract=True)
 
         # TODO Add elif for handling databases not handled by this class.
+
+        elif ext != 'nal' or 'gbff':
+            raise NotImplementedError("Updating for that database is unsupported.")
+
         else:
             print('\nYour database is still up to date.')
