@@ -11,6 +11,7 @@ from Datasnakes.Manager.BioSQL.biosql_repo import sql
 from Datasnakes.Manager.BioSQL.biosql_repo import scripts as sql_scripts
 from Datasnakes.Manager import ProjectManagement
 from Datasnakes.Orthologs.utils import attribute_config
+from Datasnakes.Tools.streamieo import StreamIEO
 
 
 class BaseBioSQL(object):
@@ -29,6 +30,7 @@ class BaseBioSQL(object):
         """
         # Logging setup
         self.biosqllog = LogIt().default(logname="BioSQL", logfile=None)
+        self.biosqlstream = StreamIEO(logname="BioSQL")
 
         # Load relative and absolute paths to scripts in the BioSQL module
         self.scripts = pkg_resources.resource_filename(sql_scripts.__name__, "")
@@ -73,17 +75,7 @@ class BaseBioSQL(object):
             cmd = cmd
 
         # Run the perl scripts or sql scripts
-        print("cmd: " + str(cmd))
-        _loader = subprocess.Popen([cmd], stderr=subprocess.PIPE, stdout=subprocess.PIPE, shell=True, encoding='utf-8')
-        for line in _loader.stdout:
-            self.biosqllog.info(line)
-
-        for line in _loader.stderr:
-            self.biosqllog.war
-
-        self.biosqllog.info(_ + "-Error: " + str(error))
-        self.biosqllog.info(_ + "-Out: " + str(out))
-        return out, error
+        self.biosqlstream.streamer(cmd)
 
     def create_executable_scripts(self):
         """
@@ -124,8 +116,8 @@ class SQLiteBioSQL(BaseBioSQL):
         schema_file = pkg_resources.resource_filename(sql.__name__, self.schema_file)
         schema_cmd = self.schema_cmd % str(self.template_abs_path)
         # Run the bash command
-        out, error = self.configure_new_database(schema_cmd, schema_file)
-        return out, error
+        self.configure_new_database(schema_cmd, schema_file)
+
         # TODO-ROB: Parse output and error
         # TODO-ROB:  Make sure the .db file doesn't already exist
 
@@ -137,8 +129,7 @@ class SQLiteBioSQL(BaseBioSQL):
         # Build the command
         taxon_cmd = self.taxon_cmd % (self.ncbi_taxon_script, str(self.template_abs_path), self.driver)
         # Run the bash command
-        out, error = self.configure_new_database(taxon_cmd)
-        return out, error
+        self.configure_new_database(taxon_cmd)
         # TODO-ROB: Parse output and error
         # TODO-ROB:  Make sure the .db file doesn't already exist
 
