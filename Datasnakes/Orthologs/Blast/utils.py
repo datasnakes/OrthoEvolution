@@ -10,8 +10,10 @@ from multiprocessing.pool import ThreadPool
 from pathlib import Path
 import pandas as pd
 import platform
+from warnings import warn
 
 from Datasnakes.Tools.logit import LogIt
+from Datasnakes import DatasnakesDeprecationWarning
 
 blastutils_log = LogIt().default(logname="blast-utils", logfile=None)
 gilist_log = LogIt().default(logname="gi-lists", logfile=None)
@@ -101,7 +103,7 @@ def gi_list_config(gi_list_path, taxonomy_ids, research_path=None, config=False)
     It will also convert the gi list into a binary file which is more
     efficient to use with NCBI's Standalone Blast tools.
     """
-    raise DeprecationWarning("NCBI has deprecated using GI numbers.")
+    warn("NCBI has deprecated using GI numbers.", DatasnakesDeprecationWarning)
     if config:
         # Directory and file handling
         raw_data_path = research_path / Path('raw_data')
@@ -121,7 +123,7 @@ def creategilists(gi_list_path, taxonomy_ids):
     It then uses the blastdb_aliastool to turn the list into a binary file.
     The input (id) for the function is a taxonomy id.
     """
-    raise DeprecationWarning("NCBI has deprecated using GI numbers.")
+    warn("NCBI has deprecated using GI numbers.", DatasnakesDeprecationWarning)
     if os.path.exists(str(gi_list_path)):
         os.chdir(str(gi_list_path))
         # Use the accession #'s and the blastdbcmd tool to generate gi lists
@@ -136,7 +138,7 @@ def creategilists(gi_list_path, taxonomy_ids):
 
 def _taxid2gilist(taxonomy_id):
     """Use a taxonomy id in order to get the list of GI numbers."""
-    raise DeprecationWarning("NCBI has deprecated using GI numbers.")
+    warn("NCBI has deprecated using GI numbers.", DatasnakesDeprecationWarning)
     tid = str(taxonomy_id)
     binary = tid + 'gi'
 
