@@ -1,4 +1,3 @@
-import os
 from pathlib import Path
 from importlib import import_module
 from Datasnakes.Manager import ProjectManagement
@@ -13,8 +12,7 @@ class DatabaseManagement(object):
     def __init__(self, project, email, driver, project_path=None, proj_mana=ProjectManagement, biosql_mana=biosql, **kwargs):
         self.dbmanalog = LogIt().default(logname="DatabaseManagement", logfile=None)
         self.config_options = {
-            # TODO-ROB:  GI deprecation.  Add some type of window-masker config here.
-            # "GI_config": self.get_gi_lists,
+            "WindowMasker_config": self.download_windowmaskerfiles,
             "Blast_config": self.download_blast_database,
             "Taxonomy_config": self.download_taxonomy_database,
             "GenBank_config": {
@@ -47,9 +45,14 @@ class DatabaseManagement(object):
                 db_configuration = kwargs[config]
                 self.database_dict[db_config_type] = [db_config_method, db_configuration]
 
-# TODO-ROB:  GI deprecation.  Add something for window-masker.
-    # def get_gi_lists(self):
-    #     print()
+    def download_windowmaskerfiles(self, taxonomy_ids, database_path=None):
+        """Download the WindowMasker files."""
+        db_path = self.ncbi_db_repo / Path('blast') / Path('db')
+        if database_path:
+            db_path = Path(database_path)
+
+        # XXX This will work when we merge.
+        # self.ncbiftp.getwindowmasker(taxonomy_ids=taxonomy_ids, download_path)
 
     def download_blast_database(self, database_name="refseq_rna", database_path=None):
         # <path>/<user or basic_project>/databases/NCBI/blast/db/<database_name>
@@ -57,6 +60,7 @@ class DatabaseManagement(object):
         if database_path:
             db_path = Path(database_path)
         self.ncbiftp.getblastdb(database_name=database_name, download_path=self.blast_db)
+
         # TODO-ROB Add email or slack notifications
         self.dbmanalog.critical("Please set the BLAST environment variables in your .bash_profile!!")
         self.dbmanalog.info("The appropriate environment variable is \'BLASTDB=%s\'." % str(db_path))
@@ -98,6 +102,7 @@ class DatabaseManagement(object):
 
     # TODO-ROB:  Update ncbiftp class syntax to reflect NCBI's ftp site
     def download_refseq_release_files(self, collection_subset, seqtype, filetype):
+        """Download NCBI Refseq Release files."""
         db_path = self.ncbi_db_repo / Path('refseq') / Path('release') / Path(collection_subset)
         ncbiftp = self.ncbiftp.getrefseqrelease(database_name=collection_subset, seqtype=seqtype, filetype=filetype, download_path=db_path)
         return ncbiftp
@@ -111,5 +116,6 @@ class DatabaseManagement(object):
         pass
 
     def get_project_genbank_database(self):
+        """"""
         print()
 
