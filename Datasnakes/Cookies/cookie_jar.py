@@ -36,6 +36,7 @@ class CookBook(object):
         self.db_cookie = self.CookieJar / Path('new_database')
         self.website_cookie = self.CookieJar / Path('new_website')
 
+        # TODO-ROB:  Make this function better.
         # Load the cookies that are in the cookie_jar config file
         with open(config_file, 'r') as ymlfile:
             configuration = yaml.safe_load(ymlfile)
@@ -58,7 +59,7 @@ class CookBook(object):
 
 class Oven(object):
 
-    def __init__(self, repo=None, user=None, project=None, basic_project=False, databases=None, website=None, output_dir=os.getcwd(), recipes=CookBook()):
+    def __init__(self, repo=None, user=None, project=None, basic_project=False, website=None, db_config_file=None, output_dir=os.getcwd(), recipes=CookBook()):
         """
         This class uses cookiecutter to deploy custom cookiecutter templates:
 
@@ -72,7 +73,7 @@ class Oven(object):
         :param user (string):  An ingredient representing the user name
         :param project (string):  An ingredient representing the project name.
         :param basic_project (bool):  A secret ingredient ONLY for the basic project cookie.
-        :param databases (list):  An ingredient representing a list of databases.
+        :param db_config_file (list):  An ingredient representing a list of db_config_file.
         :param website (string):  An ingredient representing the website name.
         :param output_dir (path or pathlike):  The cookie jar for storing the cookies.
         :param recipes (pathlike):  An index for the different recipe templates.
@@ -85,14 +86,14 @@ class Oven(object):
         self.user = user
         self.project = project
         self.basic_project = basic_project
-        self.databases = databases
+        self.db_config_file = db_config_file
         self.website = website
         self.Recipes = recipes
         self.Ingredients = {"repo": self.repo,
                             "user": self.user,
                             "project": self.project,
                             "basic_project": self.basic_project,
-                            "databases": self.databases,
+                            "db_config_file": self.db_config_file,
                             "website": self.website,
                             "recipes": self.Recipes.__dict__}
 
@@ -178,33 +179,63 @@ class Oven(object):
             self.cookielog.info('Directories have been created for a standalone project %s. ✔' % project_log_message)
         os.chmod(str(self.cookie_jar / Path(self.project)), mode=0o777)
 
-    def bake_the_db_repo(self, user_db, db_path_dict=None, ncbi_db_repo=None):
+    def bake_the_db_repo(self, db_path):
         # TODO-ROB: Change the ncbi_db_repo parameter to db_path
         # TODO-ROB:  Work work this in with the database management class.
         self.cookielog.warn('Creating directories from the Database Cookie.')
         """
         :return: A new database inside the users database directory
         """
+        archive_path = Path('archive')
+        archive_dict = {}
+        options = {
+            "Full": Path(''),
+            "NCBI": Path('NCBI'),
+            "ITIS": Path('ITIS'),
+            "NCBI_blast": Path('NCBI/blast'),
+            "NCBI_blast_db": Path('NCBI/blast/db'),
+            "NCBI_blast_windowmasker_files": Path('NCBI/blast/windowmasker_files'),
+            "NCBI_pub_taxonomy": Path('NCBI/pub/taxonomy'),
+            "NCBI_refseq_release": Path('NCBI/refseq/release'),
+            "ITIS_taxonomy": Path('ITIS/taxonomy'),
+        }
         # TODO-ROB:  FIx this.  output_dir needs to take self.cookie_jar
         # TODO-ROB:  There is a better way to accomplish this
-        if db_path_dict:
-            for db, path in db_path_dict.items():
-                e_c = {"db_name": db}
-                cookiecutter(str(self.Recipes.db_cookie), extra_context=e_c, no_input=True, output_dir=str(user_db))
-                os.chmod(str(user_db / Path(db)), mode=0o777)
-                self.cookielog.info('Directories have been created for the database, %s. ✔' % db)
+        with open(self.db_config_file, 'r') as yam:
+            db_config_dict = yaml.safe_load(yam)
+            setattr(self, "DB_CONFIG", db_config_dict)
+            if "Archive_Config" in db_config_dict.keys():
+                for archive_key, archive_value in db_config_dict["Archive_Config"].items():
+                    if archive_value:
+                        archive_dict[archive_key] = db_path / options[archive_key]
 
-        else:
-            db_num = int(input("How many NCBI databases do you need to create?"))
-            for db in range(1, db_num + 1):
-                # Manually set up cookiecutter prompting
-                context_file = str(self.Recipes.db_cookie / Path('cookiecutter.json'))
-                e_c = prompt_for_config(context=generate_context(context_file=context_file))
-                # Create the cookiecutter repo with no input, and add extra content from manual prompts
-                cookiecutter(str(self.Recipes.db_cookie), output_dir=str(ncbi_db_repo), extra_context=e_c, no_input=True)
-                # Use cookiecutter_dict from manual prompts to change the user permissions.
-                os.chmod(str(ncbi_db_repo / Path(e_c['db_name'])), mode=0o777)
-                self.cookielog.info('Directories have been created for the database, %s. ✔' % e_c['db_name'])
+                for item in archive_dict.values():
+                    pass
+                # TODO-ROB: Add compression here.  Test Zip Utils, add function that archives a list of folders.
+                # TODO-ROB:  Add line to remake the path that was archived.
+
+            for config_type, config_dict in db_config_dict.items():
+                if config_type is "Database_config":
+                    pass
+
+        # if db_path_dict:
+        #     for db, path in db_path_dict.items():
+        #         e_c = {"db_name": db}
+        #         cookiecutter(str(self.Recipes.db_cookie), extra_context=e_c, no_input=True, output_dir=str(user_db))
+        #         os.chmod(str(user_db / Path(db)), mode=0o777)
+        #         self.cookielog.info('Directories have been created for the database, %s. ✔' % db)
+        #
+        # else:
+        #     db_num = int(input("How many NCBI db_config_file do you need to create?"))
+        #     for db in range(1, db_num + 1):
+        #         # Manually set up cookiecutter prompting
+        #         context_file = str(self.Recipes.db_cookie / Path('cookiecutter.json'))
+        #         e_c = prompt_for_config(context=generate_context(context_file=context_file))
+        #         # Create the cookiecutter repo with no input, and add extra content from manual prompts
+        #         cookiecutter(str(self.Recipes.db_cookie), output_dir=str(ncbi_db_repo), extra_context=e_c, no_input=True)
+        #         # Use cookiecutter_dict from manual prompts to change the user permissions.
+        #         os.chmod(str(ncbi_db_repo / Path(e_c['db_name'])), mode=0o777)
+        #         self.cookielog.info('Directories have been created for the database, %s. ✔' % e_c['db_name'])
 
     def bake_the_website(self, host, port, website_path, cookie_jar=None):
         self.cookielog.warn('Creating directories from the Website Cookie template.')
