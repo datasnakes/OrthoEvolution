@@ -10,8 +10,7 @@ from Bio.Blast.Applications import NcbiblastnCommandline
 
 from Datasnakes.Manager import config
 from Datasnakes.Orthologs.Blast.comparative_genetics_files import CompGenFiles
-from Datasnakes.Orthologs.Blast.utils import gene_list_config, map_func, gi_list_config
-from Datasnakes.Tools.utils import makedirectory
+from Datasnakes.Orthologs.Blast.utils import gene_list_config, map_func
 
 
 # TODO-ROB: Find packages for script timing and analysis
@@ -40,12 +39,18 @@ class OrthoBlastN(CompGenFiles):
         # Create a date format
         self._fmt = '%a %b %d at %I:%M:%S %p %Y'
         self.date_format = str(d.now().strftime(self._fmt))
+        
+        # Ensure paths are set
+        self.environment_vars = dict(os.environ)
+        if 'BLASTDB' not in self.environment_vars.keys():
+            msg = "BLASTDB is not set in your path."
+            raise EnvironmentError(msg)
+        elif 'WINDOW_MASKER_PATH' not in self.environment_vars.keys():
+            msg = "WINDOW_MASKER_PATH is not set in your path."
+            raise EnvironmentError(msg)        
 
         # Manage Directories
-        self.home = Path(os.getcwd())
-        self.__gi_list_path = self.project_database / Path('gi_lists')
-
-        makedirectory(self.__gi_list_path)
+        self.home = Path(os.getcwd())     
 
         self.query_gi_dict = {}
         self.removed_genes = []
@@ -66,8 +71,6 @@ class OrthoBlastN(CompGenFiles):
 
         It configures the accession file, which works with
         interrupted Blasts.  It configures a gene_list for blasting the right genes.
-        And it configures a GI list, which helps speed up the Blasting process
-        significantly.
 
         :param query_accessions:  A list of query accession numbers.  Each gene needs one from the same organism.
         :param query_organism:  The name of the query organism for post configuration.
@@ -95,14 +98,9 @@ class OrthoBlastN(CompGenFiles):
         else:
             self.current_gene_list = self.gene_list
 
-        # Create GI lists
-        self.blastn_log.info("Configuring GI list using the taxonomy id and the blastdbcmd tool.")
-        gi_list_config(self.__gi_list_path, self.taxon_ids, self.research_path)
-
         # Get GI (stdout) and query sequence (FASTA format)
         self.blastn_log.info("Creating directories.")
-        self.blastn_log.info("Extracting query gi number to stdout and query "
-                             "refseq sequence to a temp.fasta file from BLAST database.")
+        self.blastn_log.info("Extracting query refseq sequence to a temp.fasta file from BLAST database.")
                              
         # Iterate the query accessions numbers
         for query in query_accessions:
@@ -123,31 +121,19 @@ class OrthoBlastN(CompGenFiles):
             # Temporary fasta file created by the blastdbcmd
             fasta_setup = "blastdbcmd -entry {query} -db refseq_rna -outfmt %f -out {temp fasta}".format(**fmt)
             fasta_status = subprocess.call([fasta_setup], shell=True)
+
             
-            # Check the blast databases to see if the query accession exists
-            gi_setup = "blastdbcmd -entry {query} -db refseq_rna -outfmt %g".format(**fmt)
-            gi_status = subprocess.call([gi_setup], shell=True)
             # TODO-ROB:  Add function to add the gi numbers to the dataframe/csv-file,
             # TODO-ROB: and add a check function to see if thats already there
             # Check the status of the custom blast data extraction
-            if gi_status == 0 or fasta_status == 0:  # One of the commands was successful.
-                if gi_status != 0:
-                    # Log it.
-                    self.blastn_log.error("GI number for %s not found in the BLAST extraction" % query)
-                    # TODO-SDH Is this the correct move below???
-                    self.blastn_log.error("Removing %s from the BLAST list." % gene)
-                    self.gene_list.remove(gene)
-                    self.removed_genes.append(gene)
+            if fasta_status != 0:  # Command was successful.
+                self.blastn_log.error("FASTA sequence for %s not found in the BLAST extraction" % query)
+                self.blastn_log.error("Removing %s from the BLAST list." % gene)
+                self.gene_list.remove(gene)
+                self.removed_genes.append(gene)
 
-                elif fasta_status != 0:
-                    self.blastn_log.error("FASTA sequence for %s not found in the BLAST extraction" % query)
-                    self.blastn_log.error("Removing %s from the BLAST list." % gene)
-                    self.gene_list.remove(gene)
-                    self.removed_genes.append(gene)
-                else:
-                    pass  # Both commands were successful
-            else:  # Both commands failed
-                self.blastn_log.error("FASTA sequence and GI number for %s not found in the custom BLAST extraction." % query)
+            else:  # Command failed
+                self.blastn_log.error("FASTA sequence not found in the custom BLAST extraction." % query)
                 self.blastn_log.error("Removing %s from the BLAST list." % gene)
                 self.gene_list.remove(gene)
                 self.removed_genes.append(gene)
@@ -259,8 +245,7 @@ class OrthoBlastN(CompGenFiles):
 
                 # Initialize configuration variables
                 taxon_id = self.taxon_dict[organism]
-                taxon_gi_file = str(taxon_id) + "gi"
-                taxon_gi_path = self.__gi_list_path / Path(taxon_gi_file)
+
 
                 if xml in files:
                     self.blast_xml_parse(xml_path, gene, organism)
@@ -273,7 +258,6 @@ class OrthoBlastN(CompGenFiles):
 
                     with open(xml_path, 'w') as blast_xml:
                         # Set up blast parameters
-                        taxon_gi_path = str(taxon_gi_path)
                         query_seq_path = str(gene_path / Path('temp.fasta'))
 
                         # Use Biopython's NCBIBlastnCommandline tool
@@ -282,7 +266,7 @@ class OrthoBlastN(CompGenFiles):
                                                                strand="plus", 
                                                                evalue=0.001,  # DONT GO LOWER
                                                                outfmt=5, 
-                                                               gilist=taxon_gi_path,
+                                                               window_masker_taxid=taxon_id,
                                                                max_target_seqs=10, 
                                                                task="blastn")
             
