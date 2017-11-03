@@ -1,10 +1,57 @@
 Blast Documentation
 =====================
-This package uses [NCBI's standalone blast](https://blast.ncbi.nlm.nih.gov/Blast.cgi?PAGE_TYPE=BlastDocs&DOC_TYPE=Download)
+This module uses [NCBI's standalone blast](https://blast.ncbi.nlm.nih.gov/Blast.cgi?PAGE_TYPE=BlastDocs&DOC_TYPE=Download)
 to generate blastn results.  The results are parsed for the best hit,
 which are used to get accession numbers.
 
-The Accession numbers are stored in a .csv file.  The following table is a good example.  Take note of the headers.
+What is BLAST?
+----------------
+Per NCBI, the [Basic Local Alignment Search Tool (BLAST)](https://blast.ncbi.nlm.nih.gov/Blast.cgi) finds regions of local
+similarity between sequences. The program compares nucleotide or protein
+sequences to sequence databases and calculates the statistical significance of
+matches. BLAST can be used to infer functional and evolutionary relationships
+between sequences as well as help identify members of gene families.
+
+We use NCBI's blastn task to generate a best hit in order to infer orthology which
+is under the umbrella of comparative genetics/genomics  Comparative
+genetics/genomics is a field of biological research in which the
+genome sequences of different species — human, mouse, and a wide variety of
+other organisms from bacteria to chimpanzees — are compared.
+
+Using this package, we compared these [genes](http://www.guidetopharmacology.org/targets.jsp)
+of interest across a group of [species](ftp://ftp.ncbi.nlm.nih.gov/genomes/refseq/vertebrate_mammalian/).
+
+How do we configure and run blast?
+-----------------------------------
+Running blast is the most complex aspect of this package, but we've found a way
+to simplify the automation of blasting.
+
+Before you use this function, you need `NCBI Blast+` must be installed and in your path.
+
+We have perfected the method of using a windowmasker file for each taxonomy id
+of the organisms that we are analyzing. The blastn executable can filter a query
+sequence using the windowmasker data files. This option can be used to mask
+interspersed repeats that may lead to spurious matches. The windowmasker data
+files should be downloaded from the NCBI FTP site.
+
+On a command line, the windowmasker function would look as such:
+```bash
+blastn -query input -db database -window_masker_taxid 9606 -out results.txt
+```
+That requires you to have a `WINDOW_MASKER_PATH` variable in your environment
+variables.
+
+In python:
+```python
+```
+
+In addition to using windowmasker data files, we also use a specifically formatted
+`accession file` with our headers as `Tier`, `Gene`, `Organism` to store blast output and input.
+This allows for distinguishing genes by families or features. The `Tier` header can be omitted, but
+the other headers are requirements.
+
+The Accession numbers are stored in a .csv file.  The following table is an example
+of how we format our blast input file.
 
 Tier      |  Gene    |  Homo_sapiens  |  Macaca_mulatta  |  Mus_musculus  |  Rattus_norvegicus
 ----------|----------|----------------|------------------|----------------|-------------------
@@ -28,73 +75,32 @@ Below we have defined the headers:
 experiment.  These can be user defined or a preset tier system can be used.
 In the future the different tiers will allow the user to control the order
 that each gene is processed.
+
 * **Gene**:  The genes are HGNC aliases for the target genes of interest.
 In the future we will be able to process the HGNC .csv file to further
 automate the creation of this template file.
+
 * **Query**:  The query organism is placed into the 3rd column of the .csv
 file.  In the example Homo sapiens is used.  Each taxa is a string in the
 format of "_Genus\_species_".  The query organism also has to have
 accession numbers for each gene.  It is therefore highly important to pick a
 well annotated species for accurate analysis.
 
-What is Comparative Genetics?
------------------------------
-Comparative genetics/genomics  is a field of biological research in which the
-genome sequences of different species — human, mouse, and a wide variety of
-other organisms from bacteria to chimpanzees — are compared
+Examples
+----------
 
-For our lab, we compare these [genes](http://www.guidetopharmacology.org/targets.jsp)
-of interest across a group of [species](ftp://ftp.ncbi.nlm.nih.gov/genomes/refseq/vertebrate_mammalian/).
+The main class to use is `OrthoBlastN` in order to run blast. In order to
+run `OrthoBlastN` without using our database management features,
+`BLASTDB` and `WINDOW_MASKER_PATH` paths must be set.
 
-What is BLAST?
-----------------
-Per NCBI, the [Basic Local Alignment Search Tool (BLAST)](https://blast.ncbi.nlm.nih.gov/Blast.cgi) finds regions of local
-similarity between sequences. The program compares nucleotide or protein
-sequences to sequence databases and calculates the statistical significance of
-matches. BLAST can be used to infer functional and evolutionary relationships
-between sequences as well as help identify members of gene families.
-
-NCBI's BLASTN programs search nucleotide databases using a nucleotide query.
-
-Usage
------
-
-The main classes under CompGenetics are `CompGenFiles` and `CompGenObjects`.
-
-#### Code Examples
-
-##### Performing Blast Analysis
+##### Performing Blast & Post-Blast Analysis
 
 ``` python
-# First use the Manager module to set up directories
-
-from Datsnakes.Manager import ProjectManagement
-
-# This is more pythonic with YAML loading
-Management_config = {
-  "new_repo": True,
-  "new_user": "grabear",
-  "new_project": True,
-  "new_database": True,
-  "new_research": True,
-  "new_app": False,
-  "new_website": False,
-  "database": 'Test-Database',
-  "repo": 'Test-Repository',
-  "user": 'Test-User',
-  "project": 'Test-Project',
-  "research": 'Test-Research',
-  "research_type": 'Test-Research-Type'
-}
-pm = ProjectManagement(**Management_config)
-
-# Second use the Blast module to start a blast
-# Note:  The current API is being used for development
-
-from Datasnakes.Orthologs.Blast import CompGenBLASTn
+from Datasnakes.Orthologs.Blast import OrthoBlastN
+import os
 
 # This is more pythonic with YAML loading
-Blast_config = {
+blast_config = {
   "taxon_file": None,
   "go_list": None,
   "post_blast": True,
@@ -103,8 +109,11 @@ Blast_config = {
   "copy_from_package": True,
   "MAF": 'MAFV3.2.csv'
 }
-bl = CompGenBLASTn(proj_mana=pm, **Management_config, **Blast_config)
-bl.blast_config(bl.blast_human, 'Homo_sapiens', auto_start=True)
+
+
+path = os.getcwd()
+myblast = OrthoBlastN(proj_mana=None, project="blast-test", project_path=path, **blast_config)
+myblast.blast_config(myblast.blast_human, 'Homo_sapiens', auto_start=True)
 
 ```
 ##### Making the API available with Accession data
@@ -114,11 +123,6 @@ _TODO: This is unfinished._
 from Datasnakes.Orthologs.CompGenetics import CompGenAnalysis
 
 ```
-Tests
------
-
-Describe and show how to run the tests with code examples.
 
 :exclamation: Notes
 -------------------
-- [ ] Explain GI Lists.
