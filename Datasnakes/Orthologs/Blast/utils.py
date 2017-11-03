@@ -5,8 +5,6 @@ import time
 from datetime import datetime
 # import shutil
 # import pkg_resources
-import contextlib
-from subprocess import run, CalledProcessError, PIPE
 from importlib import import_module
 from multiprocessing.pool import ThreadPool
 from pathlib import Path
@@ -106,6 +104,7 @@ def gi_list_config(gi_list_path, taxonomy_ids, research_path=None, config=False)
     It will also convert the gi list into a binary file which is more
     efficient to use with NCBI's Standalone Blast tools.
     """
+    raise DeprecationWarning("NCBI has deprecated using GI numbers.")
     if config:
         # Directory and file handling
         raw_data_path = research_path / Path('raw_data')
@@ -126,6 +125,7 @@ def creategilists(gi_list_path, taxonomy_ids):
     It then uses the blastdb_aliastool to turn the list into a binary file.
     The input (id) for the function is a taxonomy id.
     """
+    raise DeprecationWarning("NCBI has deprecated using GI numbers.")
     if os.path.exists(str(gi_list_path)):
         os.chdir(str(gi_list_path))
         # Use the accession #'s and the blastdbcmd tool to generate gi lists
@@ -140,6 +140,7 @@ def creategilists(gi_list_path, taxonomy_ids):
 
 def _taxid2gilist(taxonomy_id):
     """Use a taxonomy id in order to get the list of GI numbers."""
+    raise DeprecationWarning("NCBI has deprecated using GI numbers.")
     tid = str(taxonomy_id)
     binary = tid + 'gi'
 
@@ -157,33 +158,6 @@ def _taxid2gilist(taxonomy_id):
                 # Remove the gi.text file
                 os.remove(tid + "gi.txt")
                 gilist_log.info(tid + "gi.text file has been deleted.")
-
-        elif platform.system() == 'Windows':
-            raise NotImplementedError('Windows is not supported')
-            if binary not in os.listdir():
-                with contextlib.suppress(CalledProcessError):
-                    cmd = 'blastdbcmd -db refseq_rna -entry all -outfmt "%g %T"'
-                    # Shell MUST be True
-                    cmd_status = run(cmd, stdout=PIPE, stderr=PIPE, shell=True)
-
-                    if cmd_status.returncode == 0:  # Command was successful.
-                        gilist_log.info('Command successful.\n')
-                        # TODO add a check to for job errors or check for error file.
-
-                    else:  # Unsuccessful. Stdout will be '1'
-                        gilist_log.info("Command unsuccessful.")
-
-                os.system("blastdbcmd -db refseq_rna -entry all -outfmt '%g %T' | awk ' { if ($2 == " + tid + ") { print $1 } } ' > " + tid + "gi.txt")
-                gilist_log.info(tid + "gi.txt has been created.")
-
-                # Convert the .txt file to a binary file using the blastdb_aliastool.
-                convert_cmd = "blastdb_aliastool -gi_file_in " + tid + "gi.txt -gi_file_out " + tid + "gi"
-                gilist_log.info(tid + "gi binary file has been created.")
-
-            # Remove the gi.text file
-            os.remove(tid + "gi.txt")
-            gilist_log.info(tid + "gi.text file has been deleted.")
-
         else:
             raise NotImplementedError(platform.system() + 'is not supported')
     else:
@@ -405,8 +379,5 @@ def get_miss_acc(acc_file_path):
 
 
 def get_pseudogenes():
-    """UNDER DEVELOPMENT!!!
-
-    This subclass will denote which genes are sudogenes.
-    """
-    print(__doc__)
+    """Denote which genes are sudogenes."""
+    raise NotImplementedError
