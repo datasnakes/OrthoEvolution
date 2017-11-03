@@ -6,9 +6,9 @@ import pandas as pd
 from Datasnakes.Orthologs.Blast.comparative_genetics_objects import CompGenObjects
 from Datasnakes.Tools.logit import LogIt
 
+
 class CompGenFiles(CompGenObjects):
-    def __init__(self, project, template=None, taxon_file=None, post_blast=False,
-                 save_data=True, **kwargs):
+    def __init__(self, project, template=None, taxon_file=None, post_blast=False, save_data=True, **kwargs):
         """Inherit CompGenObjects to build a file layer to the Blast workflow.
 
         This class handles all of the files before and after the Blast occurs.
@@ -25,6 +25,7 @@ class CompGenFiles(CompGenObjects):
         super().__init__(project=project, acc_file=template, taxon_file=taxon_file, post_blast=post_blast, hgnc=False, **kwargs)
 
         self.postblastlog = LogIt().default(logname="post blast", logfile=None)
+
         # Private variables
         self.__home = os.getcwd()
         if taxon_file is not None:
@@ -137,7 +138,7 @@ class CompGenFiles(CompGenObjects):
             removed_worksheet.to_excel(pb_file, sheet_name="Removed Genes")
             msg = "Removed genes were added to your excel file."
             self.postblastlog.info(msg)
-            
+
         # Duplicated Accessions
         try:
             acc_ws = pd.DataFrame.from_dict(self.dup_acc_count, orient='index')
@@ -208,7 +209,7 @@ class CompGenFiles(CompGenObjects):
         except (ValueError, AttributeError):
             pass
 
-        # Missing by Organism
+        # Missing genes sorted by Organism
         org_gene_ms = {}
         org_gene_ms_count = {}
         try:
@@ -226,7 +227,7 @@ class CompGenFiles(CompGenObjects):
         except (ValueError, AttributeError):
             pass
 
-        # Missing by Gene
+        # Missing Organisms sorted by Gene
         gene_org_ms = {}
         gene_org_ms_count = {}
         try:
@@ -239,7 +240,9 @@ class CompGenFiles(CompGenObjects):
             gene_ms_count = pd.DataFrame.from_dict(gene_org_ms_count, orient='index')
             gene_ms_count.to_excel(pb_file, sheet_name="Missing Organisms Count")
             gene_ms = pd.DataFrame.from_dict(gene_org_ms, orient='index')
-            gene_ms.to_excel(pb_file, sheet_name="Missing Organisms by Genes")
+            gene_ms.to_excel(pb_file, sheet_name="Missing Organisms by Gene")
+            msg = 'Missing Organisms by gene were added to your excel file.'
+            self.postblastlog.exception(msg)
         except (ValueError, AttributeError):
             pass
         try:
