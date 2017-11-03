@@ -2,10 +2,9 @@
 import os
 import csv
 import time
+from datetime import datetime
 # import shutil
 # import pkg_resources
-import contextlib
-from subprocess import run, CalledProcessError, PIPE
 from importlib import import_module
 from multiprocessing.pool import ThreadPool
 from pathlib import Path
@@ -14,8 +13,11 @@ import platform
 
 from Datasnakes.Tools.logit import LogIt
 
-bu_log = LogIt().default(logname="BLAST-UTILS", logfile=None)
+blastutils_log = LogIt().default(logname="blast-utils", logfile=None)
+gilist_log = LogIt().default(logname="gi-lists", logfile=None)
 
+_datefmt = '%I:%M:%S %p on %m-%d-%Y'
+_date = str(datetime.now().strftime(_datefmt))
 
 
 def map_func(hit):
@@ -55,11 +57,11 @@ def gene_list_config(file, data_path, gene_list, taxon_dict, logger):
     """
 
     ending = gene = org = taxid = None
-    output_dir_list = os.listdir(data_path)  # Make a list of files
+    output_dir_list = os.listdir(str(data_path))  # Make a list of files
 
-    # If the file exists then make a gene list that picks up from the last BLAST
+    # If the file exists, make a gene list that picks up from the last BLAST
     if file in output_dir_list:
-        header = pd.read_csv(str(Path(data_path) / Path(file)), dtype=str)
+        header = pd.read_csv(os.path.join(data_path, file), dtype=str)
         header = header.axes[1].tolist()
         file = Path(data_path) / Path(file)
         with open(str(file), 'r') as open_file:
@@ -86,13 +88,13 @@ def gene_list_config(file, data_path, gene_list, taxon_dict, logger):
             if len(ending) < len(header):
                 logger.info("Restarting the BLAST for the previous gene...")
                 count = count - 2
-            # ######## End Logging ######## #
+            # End logging
             # The continued gene list starts with the previous gene.
             continued_gene_list = list(x for i, x in enumerate(gene_list, 1) if i > count)
         return continued_gene_list
     # If the file doesn't exist return nothing
     else:
-        logger.info("A new BLAST started at %s" % time.time())
+        logger.info("A new BLAST started at %s" % _date)
         return None
 
 
@@ -102,6 +104,7 @@ def gi_list_config(gi_list_path, taxonomy_ids, research_path=None, config=False)
     It will also convert the gi list into a binary file which is more
     efficient to use with NCBI's Standalone Blast tools.
     """
+    raise DeprecationWarning("NCBI has deprecated using GI numbers.")
     if config:
         # Directory and file handling
         raw_data_path = research_path / Path('raw_data')
@@ -122,8 +125,9 @@ def creategilists(gi_list_path, taxonomy_ids):
     It then uses the blastdb_aliastool to turn the list into a binary file.
     The input (id) for the function is a taxonomy id.
     """
-    if os.path.exists(gi_list_path):
-        os.chdir(gi_list_path)
+    raise DeprecationWarning("NCBI has deprecated using GI numbers.")
+    if os.path.exists(str(gi_list_path)):
+        os.chdir(str(gi_list_path))
         # Use the accession #'s and the blastdbcmd tool to generate gi lists
         # based on Organisms/Taxonomy id's.
         # TODO Create blastdbcmd commandline tools
@@ -131,56 +135,34 @@ def creategilists(gi_list_path, taxonomy_ids):
         with ThreadPool(3) as gilist_pool:
             gilist_pool.map(_taxid2gilist, taxonomy_ids)
             minutes = (time.time() - gi_time_secs) / 60
-        print("Took %s minutes to create gi binary files." % minutes)
+        gilist_log.info("Took %s minutes to create gi binary files." % minutes)
 
 
 def _taxid2gilist(taxonomy_id):
     """Use a taxonomy id in order to get the list of GI numbers."""
-    tid = taxonomy_id
-    binary = str(tid) + 'gi'
-    if platform.system() == 'Linux':
-        if binary not in os.listdir():
-            # TODO Convert to subprocess
-            # TODO Test this on Linux
-            os.system("blastdbcmd -db refseq_rna -entry all -outfmt '%g %T' | awk ' { if ($2 == " + tid + ") { print $1 } } ' > " + tid + "gi.txt")
-            print(tid + "gi.txt has been created.")
+    raise DeprecationWarning("NCBI has deprecated using GI numbers.")
+    tid = str(taxonomy_id)
+    binary = tid + 'gi'
 
-            # Convert the .txt file to a binary file using the blastdb_aliastool
-            os.system("blastdb_aliastool -gi_file_in " + tid + "gi.txt -gi_file_out " + tid + "gi")
-            print(tid + "gi binary file has been created.")
+    if binary not in os.listdir():
+        if platform.system() == 'Linux':
+                # TODO Convert to subprocess
+                # TODO Test this on Linux
+                os.system("blastdbcmd -db refseq_rna -entry all -outfmt '%g %T' | awk ' { if ($2 == " + tid + ") { print $1 } } ' > " + tid + "gi.txt")
+                gilist_log.info(tid + "gi.txt has been created.")
 
-            # Remove the gi.text file
-            # os.remove(tid + "gi.txt")
-            print(tid + "gi.text file has been deleted.")
+                # Convert the .txt file to a binary file using the blastdb_aliastool
+                os.system("blastdb_aliastool -gi_file_in " + tid + "gi.txt -gi_file_out " + tid + "gi")
+                gilist_log.info(tid + "gi binary file has been created.")
 
-    elif platform.system() == 'Windows':
-        raise NotImplementedError('Windows is not supported')
-        if binary not in os.listdir():
-            with contextlib.suppress(CalledProcessError):
-                cmd = 'blastdbcmd -db refseq_rna -entry all -outfmt "%g %T"'
-                # Shell MUST be True
-                cmd_status = run(cmd, stdout=PIPE, stderr=PIPE, shell=True)
-
-                if cmd_status.returncode == 0:  # Command was successful.
-                    print('Command successful.\n')
-                    # TODO add a check to for job errors or check for error file.
-
-                else:  # Unsuccessful. Stdout will be '1'
-                    print("Command unsuccessful.")
-
-            os.system("blastdbcmd -db refseq_rna -entry all -outfmt '%g %T' | awk ' { if ($2 == " + tid + ") { print $1 } } ' > " + tid + "gi.txt")
-            print(tid + "gi.txt has been created.")
-
-            # Convert the .txt file to a binary file using the blastdb_aliastool.
-            convert_cmd = "blastdb_aliastool -gi_file_in " + tid + "gi.txt -gi_file_out " + tid + "gi"
-            print(tid + "gi binary file has been created.")
-
-        # Remove the gi.text file
-        os.remove(tid + "gi.txt")
-        print(tid + "gi.text file has been deleted.")
-
+                # Remove the gi.text file
+                os.remove(tid + "gi.txt")
+                gilist_log.info(tid + "gi.text file has been deleted.")
+        else:
+            raise NotImplementedError(platform.system() + 'is not supported')
     else:
-        raise NotImplementedError(platform.system() + 'is not supported')
+        gilist_log.info('%s already exists' % str(binary))
+
 
 
 def my_gene_info(acc_path, blast_query='Homo_sapiens'):
@@ -191,7 +173,7 @@ def my_gene_info(acc_path, blast_query='Homo_sapiens'):
     :return:  Returns a data-frame with hot data about each gene.
     """
     mygene = import_module('mygene')
-    bu_log.info("Getting Pre-BLAST information about the target genes using MyGene...")
+    blastutils_log.info("Getting Pre-BLAST information about the target genes using MyGene...")
     # Initialize variables and import my-gene search command
     urls = []
     df = pd.read_csv(str(acc_path), dtype=str)
@@ -273,7 +255,7 @@ def get_dup_acc(acc_dict, gene_list, org_list):
                     # Categorize the different types of duplication
                 # Duplicates that persist across an organisms
                 if orgs.count(o) == len(go_list):
-                    bu_log.warning("A duplicate accession number(%s) persists ONLY across %s for %s." % (accession, o, genes))
+                    blastutils_log.warning("A duplicate accession number(%s) persists ONLY across %s for %s." % (accession, o, genes))
                     duplicated_dict['organisms'][o][accession] = genes
                     del duplicated_dict['genes'][g]
                     break
@@ -281,13 +263,13 @@ def get_dup_acc(acc_dict, gene_list, org_list):
                 elif orgs.count(o) != 1:
                     alt_genes = list(
                         gene for gene, org in go_list if org == o)
-                    bu_log.warn("A duplicate accession number(%s) persists across %s for %s." % (accession, o, alt_genes))
-                    bu_log.warn("%s is also duplicated elsewhere." % accession)
+                    blastutils_log.warn("A duplicate accession number(%s) persists across %s for %s." % (accession, o, alt_genes))
+                    blastutils_log.warn("%s is also duplicated elsewhere." % accession)
                     duplicated_dict['organisms'][o][accession] = alt_genes
 
                 # Duplicates that persist across a gene
                 if genes.count(g) == len(go_list):
-                    bu_log.critical("A duplicate accession number(%s) persists across %s for %s." % (accession, g, orgs))
+                    blastutils_log.critical("A duplicate accession number(%s) persists across %s for %s." % (accession, g, orgs))
                     duplicated_dict['genes'][g][accession] = orgs
                     del duplicated_dict['organisms'][o]
                     break
@@ -295,8 +277,8 @@ def get_dup_acc(acc_dict, gene_list, org_list):
                 elif genes.count(g) != 1:
                     alt_orgs = list(
                         org for gene, org in go_list if gene == g)
-                    bu_log.critical("A duplicate accession number(%s) persists across %s for %s." % (accession, g, alt_orgs))
-                    bu_log.critical("%s is also duplicated elsewhere." % accession)
+                    blastutils_log.critical("A duplicate accession number(%s) persists across %s for %s." % (accession, g, alt_orgs))
+                    blastutils_log.critical("%s is also duplicated elsewhere." % accession)
                     duplicated_dict['genes'][g][accession] = alt_orgs
 
                     # This is the "somewhere else" if the duplication is random or not categorized
@@ -306,7 +288,7 @@ def get_dup_acc(acc_dict, gene_list, org_list):
                     del duplicated_dict['genes'][g]
                     if accession not in duplicated_dict['random']:
                         duplicated_dict['random'][accession] = []
-                    bu_log.critical("%s is randomly duplicated." % accession)
+                    blastutils_log.critical("%s is randomly duplicated." % accession)
                     duplicated_dict['random'][accession].append(go)
                     # There is another category of duplication that I'm missing
                     # TODO-ROB:  If an other exists throw a warning in the
@@ -316,7 +298,7 @@ def get_dup_acc(acc_dict, gene_list, org_list):
                     del duplicated_dict['genes'][g]
                     if accession not in duplicated_dict['other']:
                         duplicated_dict['other'][accession] = []
-                    bu_log.critical("%s is duplicated, but cannot be categorized as random." % accession)
+                    blastutils_log.critical("%s is duplicated, but cannot be categorized as random." % accession)
                     duplicated_dict['other'][accession].append(go)
         # Duplicate Organism count dictionary
         dup_org = pd.DataFrame.from_dict(duplicated_dict['organisms'])
@@ -370,7 +352,7 @@ def get_miss_acc(acc_file_path):
             # Do a list comprehension to get a list of genes
             missing_dict['organisms'][organism]['missing genes'] = list(key for key, value in missing_genes.items()
                                                                         if value)  # Value is True for miss accns
-            bu_log.critical("%s is missing %s." % (organism, str(missing_dict['organisms'][organism]['missing genes'])))
+            blastutils_log.critical("%s is missing %s." % (organism, str(missing_dict['organisms'][organism]['missing genes'])))
             # Number of missing accessions per organism
             missing_dict['organisms'][organism]['count'] = miss
             total_miss += miss
@@ -387,7 +369,7 @@ def get_miss_acc(acc_file_path):
             missing_dict['genes'][gene]['missing organisms'] = list(key for key, value in missing_orgs.items()
                                                                     if value  # Value is True for missing accessions
                                                                     if key != 'Tier')  # Don't include 'Tier'
-            bu_log.critical("%s is missing %s." % (gene, str(missing_dict['genes'][gene]['missing organisms'])))
+            blastutils_log.critical("%s is missing %s." % (gene, str(missing_dict['genes'][gene]['missing organisms'])))
             # Number of missing accessions per gene
             missing_dict['genes'][gene]['count'] = miss
             total_miss += miss
@@ -397,8 +379,5 @@ def get_miss_acc(acc_file_path):
 
 
 def get_pseudogenes():
-    """UNDER DEVELOPMENT!!!
-
-    This subclass will denote which genes are sudogenes.
-    """
-    print(__doc__)
+    """Denote which genes are sudogenes."""
+    raise NotImplementedError
