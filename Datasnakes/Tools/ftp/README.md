@@ -27,15 +27,17 @@ ncbiftp.getblastdb(database_name='refseq_rna')
 
 ```python
 from Datasnakes.Tools.ftp import NcbiFTPClient
+import os
 
 ids = ['9544', '9606']
 
 ncbiftp = NcbiFTPClient(email='somebody@gmail.com')
-ncbiftp.getwindowmasker(taxonomy_ids=ids, download_path=os.getcwd())
+ncbiftp.getwindowmaskerfiles(taxonomy_ids=ids, download_path=os.getcwd())
 ```
 #### Refseq Release Download Example
 ```python
 from Datasnakes.Tools.ftp import NcbiFTPClient
+import os
 
 ncbiftp = NcbiFTPClient(email='somebody@gmail.com')
 ncbiftp.getrefseqrelease(taxon_group='vertebrate_mammalian', seqtyp='rna', seqformat='gbff', download_path=os.getcwd())
