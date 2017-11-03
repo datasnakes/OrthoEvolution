@@ -7,6 +7,7 @@ from multiprocessing.pool import ThreadPool
 import os
 from shutil import make_archive
 import sys
+from warnings import warn
 # from progress.bar import Bar
 # TODO Create a progress bar; Integrate with Threading/downloading
 # TODO Use logit to log which files were downloaded
@@ -131,13 +132,15 @@ class NcbiFTPClient(BaseFTPClient):
         taxonomy_dirs = self.listdirectories(self.windowmasker_path)
 
         # Change to directory input
+        unfound_species = []
         for taxonomy_id in taxonomy_ids:
-            if taxonomy_id not in taxonomy_dirs:
-                raise FileNotFoundError('%s does not exist.' % taxonomy_id)
+            if str(taxonomy_id) not in taxonomy_dirs:
+                self.ncbiftp_log.warning('%s does not exist.' % taxonomy_id)
+                unfound_species.append(taxonomy_id)
 
         windowmaskerfiles = []
         for taxonomy_id in taxonomy_ids:
-            filepath = taxonomy_id + '/wmasker.obinary'
+            filepath = str(taxonomy_id) + '/wmasker.obinary'
             windowmaskerfiles.append(filepath)
 
         self.ncbiftp_log.info('You are about to download theses files: %s' %
@@ -150,6 +153,7 @@ class NcbiFTPClient(BaseFTPClient):
             minutes = round(((time() - download_time_secs) / 60), 2)
         self.ncbiftp_log.info("Took %s minutes to download the files." %
                               minutes)
+        return unfound_species
 
     def getrefseqrelease(self, taxon_group, seqtype, seqformat, download_path,
                          extract=True):
