@@ -18,16 +18,15 @@ from Datasnakes.Orthologs.Blast.utils import gene_list_config, map_func
 # TODO-ROB:  Rework the query organism stuff.
 
 class OrthoBlastN(CompGenFiles):
-
+    """Combines Project Management features with Blasting."""
     def __init__(self, project, template=None, save_data=True, **kwargs):
-        #"""Inherit from the BLASTing Template."""
         """This class inherits from the CompGenFiles class.
 
         This class utilizes it's parent classes to search a standalone
         Blast database for specific orthologs of a gene using a query organism
-        (usually human).  The best hits from the Blast are filtered for the best
-        option in order to get the most accuarate accession numbers for downstream
-        analysis.
+        (usually human).  The best hits from the Blast are filtered for the
+        best option in order to get the most accuarate accession numbers for
+        downstream analysis.
 
         :param project:  The project name.
         :param template:  The accession file template.
@@ -35,11 +34,11 @@ class OrthoBlastN(CompGenFiles):
         :param kwargs:
         """
         super().__init__(project=project, template=template, save_data=save_data, **kwargs)
-        
+
         # Create a date format
         self._fmt = '%a %b %d at %I:%M:%S %p %Y'
         self.date_format = str(d.now().strftime(self._fmt))
-        
+
         # Ensure paths are set
         self.environment_vars = dict(os.environ)
         if 'BLASTDB' not in self.environment_vars.keys():
@@ -47,10 +46,10 @@ class OrthoBlastN(CompGenFiles):
             raise EnvironmentError(msg)
         elif 'WINDOW_MASKER_PATH' not in self.environment_vars.keys():
             msg = "WINDOW_MASKER_PATH is not set in your path."
-            raise EnvironmentError(msg)        
+            raise EnvironmentError(msg)
 
         # Manage Directories
-        self.home = Path(os.getcwd())     
+        self.home = Path(os.getcwd())
 
         self.query_gi_dict = {}
         self.removed_genes = []
@@ -83,16 +82,16 @@ class OrthoBlastN(CompGenFiles):
 
         # CONFIGURE and UPDATE the gene_list based on the existence of an
         # incomplete blast file
-        gene_list = gene_list_config(self.building_file_path, self.data, 
-                                     self.gene_list, self.taxon_dict, 
+        gene_list = gene_list_config(self.building_file_path, self.data,
+                                     self.gene_list, self.taxon_dict,
                                      self.blastn_log)
         if gene_list is not None:
             # What gene to start blasting
             start = len(self.blast_human) - len(gene_list)
-            
+
             # Reconfigured query
             query_accessions = self.blast_human[start:]
-            
+
             # Reconfigure the gene_list to reflect the existing accession info
             self.current_gene_list = gene_list
         else:
@@ -101,7 +100,7 @@ class OrthoBlastN(CompGenFiles):
         # Get GI (stdout) and query sequence (FASTA format)
         self.blastn_log.info("Creating directories.")
         self.blastn_log.info("Extracting query refseq sequence to a temp.fasta file from BLAST database.")
-                             
+
         # Iterate the query accessions numbers
         for query in query_accessions:
             gene = self.acc_dict[query][0][0]
@@ -122,7 +121,7 @@ class OrthoBlastN(CompGenFiles):
             fasta_setup = "blastdbcmd -entry {query} -db refseq_rna -outfmt %f -out {temp fasta}".format(**fmt)
             fasta_status = subprocess.call([fasta_setup], shell=True)
 
-            
+
             # TODO-ROB:  Add function to add the gi numbers to the dataframe/csv-file,
             # TODO-ROB: and add a check function to see if thats already there
             # Check the status of the custom blast data extraction
@@ -145,7 +144,7 @@ class OrthoBlastN(CompGenFiles):
         self.blastn_log.info(sep + 'BLAST CONFIG END' + sep)
         if auto_start is True:
             # Automatically begin BLASTING after the configuration
-            self.blasting(genes=self.current_gene_list, 
+            self.blasting(genes=self.current_gene_list,
                           query_organism=query_organism,
                           pre_configured=auto_start)
 
@@ -215,7 +214,7 @@ class OrthoBlastN(CompGenFiles):
 
         :param genes:  Gene of interest.
         :param query_organism:  Query organism.
-        :param pre_configured:  A flag to determine if the blast needs configuring.
+        :param pre_configured:  Determines if the blast needs configuring.
         :return:
         """
         ast = 10 * '*'  # Asterisk separator
@@ -261,15 +260,15 @@ class OrthoBlastN(CompGenFiles):
                         query_seq_path = str(gene_path / Path('temp.fasta'))
 
                         # Use Biopython's NCBIBlastnCommandline tool
-                        result_handle = NcbiblastnCommandline(query=query_seq_path, 
-                                                               db="refseq_rna",
-                                                               strand="plus", 
-                                                               evalue=0.001,  # DONT GO LOWER
-                                                               outfmt=5, 
-                                                               window_masker_taxid=taxon_id,
-                                                               max_target_seqs=10, 
-                                                               task="blastn")
-            
+                        result_handle = NcbiblastnCommandline(query=query_seq_path,
+                                                              db="refseq_rna",
+                                                              strand="plus",
+                                                              evalue=0.001,
+                                                              outfmt=5,
+                                                              window_masker_taxid=taxon_id,
+                                                              max_target_seqs=10,
+                                                              task="blastn")
+
                         # Capture blast data
                         stdout_str, stderr_str = result_handle()
                         self.blastn_log.error(stderr_str)
@@ -294,4 +293,4 @@ class OrthoBlastN(CompGenFiles):
                         self.post_blast_analysis(self.project)
                         self.blastn_log.info("Post blast analysis is complete")
                     # TODO-ROB Archive function here
-        self.blastn_log.info("BLAST has completed. Check your output data.")    
+        self.blastn_log.info("BLAST has completed. Check your output data.")
