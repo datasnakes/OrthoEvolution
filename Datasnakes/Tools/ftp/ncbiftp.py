@@ -13,7 +13,6 @@ import sys
 
 from Datasnakes.Tools.ftp.baseftp import BaseFTPClient
 from Datasnakes.Tools.logit import LogIt
-from Datasnakes.Tools.utils import makedirectory
 
 
 class NcbiFTPClient(BaseFTPClient):
@@ -135,9 +134,7 @@ class NcbiFTPClient(BaseFTPClient):
         for taxonomy_id in taxonomy_ids:
             if taxonomy_id not in taxonomy_dirs:
                 raise FileNotFoundError('%s does not exist.' % taxonomy_id)
-                pass
 
-        # curpath = self.ftp.pwd() + '/'
         windowmaskerfiles = []
         for taxonomy_id in taxonomy_ids:
             filepath = taxonomy_id + '/wmasker.obinary'
