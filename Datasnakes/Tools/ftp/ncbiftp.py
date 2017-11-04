@@ -133,14 +133,17 @@ class NcbiFTPClient(BaseFTPClient):
 
         # Change to directory input
         unfound_species = []
+        found_species = []
         for taxonomy_id in taxonomy_ids:
             if str(taxonomy_id) not in taxonomy_dirs:
                 self.ncbiftp_log.warning('%s does not exist.' % taxonomy_id)
                 unfound_species.append(taxonomy_id)
+            else:
+                found_species.append(taxonomy_id)
 
         windowmaskerfiles = []
-        for taxonomy_id in taxonomy_ids:
-            filepath = str(taxonomy_id) + '/wmasker.obinary'
+        for found_taxid in found_species:
+            filepath = str(found_taxid) + '/wmasker.obinary'
             windowmaskerfiles.append(filepath)
 
         self.ncbiftp_log.info('You are about to download theses files: %s' %
