@@ -1,6 +1,8 @@
 import os
 import pkg_resources
 import yaml
+import shutil
+import datetime
 from cookiecutter.main import cookiecutter
 from cookiecutter.prompt import prompt_for_config
 from cookiecutter.generate import generate_context
@@ -179,14 +181,15 @@ class Oven(object):
             self.cookielog.info('Directories have been created for a standalone project %s. ✔' % project_log_message)
         os.chmod(str(self.cookie_jar / Path(self.project)), mode=0o777)
 
-    def bake_the_db_repo(self, db_path):
+    def bake_the_db_repo(self, db_path, archive=False, delete=False):
         # TODO-ROB: Change the ncbi_db_repo parameter to db_path
         # TODO-ROB:  Work work this in with the database management class.
         self.cookielog.warn('Creating directories from the Database Cookie.')
         """
         :return: A new database inside the users database directory
         """
-        archive_path = Path('archive')
+        archive_path = db_path / Path('archive')
+        log_path = Path(db_path.parent) / Path('log')
         archive_dict = {}
         options = {
             "Full": Path(''),
@@ -204,13 +207,33 @@ class Oven(object):
         with open(self.db_config_file, 'r') as yam:
             db_config_dict = yaml.safe_load(yam)
             setattr(self, "DB_CONFIG", db_config_dict)
-            if "Archive_Config" in db_config_dict.keys():
-                for archive_key, archive_value in db_config_dict["Archive_Config"].items():
-                    if archive_value:
-                        archive_dict[archive_key] = db_path / options[archive_key]
 
-                for item in archive_dict.values():
-                    pass
+            if archive:
+                if "Archive_Config" in db_config_dict.keys():
+                    for archive_key, archive_value in db_config_dict["Archive_Config"].items():
+                        if archive_value:
+                            archive_dict[archive_key] = db_path / options[archive_key]
+
+                    # Parse archive dictionary.
+                    for arch_name, data_path in archive_dict.items():
+                        root_dir = str(data_path.parent)
+                        base_dir = str(data_path.stem)
+                        d = datetime.datetime.now().strftime(fmt="%Y-%m-%d_%H%M")
+                        output_pathname = archive_path / Path(arch_name + "." + d)
+                        # Archive the desired data.
+                        archive_filename = shutil.make_archive(base_name=str(output_pathname), format="xztar", root_dir=root_dir,
+                                            base_dir=base_dir)
+                        # TODO-ROB:  Logging.  And log to a README.md file.
+                        # Delete the files if desired.
+                        if delete:
+                            from Datasnakes import DatasnakesWarning
+                            DatasnakesWarning("You're about to delete your database (%s).  Are you sure??" % data_path)
+                            shutil.rmtree(path=data_path)
+                        else:
+                            output_pathname.mkdir()
+                            shutil.move(src=str(data_path), dst=str(output_pathname))
+                            shutil.move(src=str(archive_filename), dst=str(output_pathname))
+
                 # TODO-ROB: Add compression here.  Test Zip Utils, add function that archives a list of folders.
                 # TODO-ROB:  Add line to remake the path that was archived.
 
