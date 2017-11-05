@@ -209,37 +209,39 @@ class Oven(object):
             setattr(self, "DB_CONFIG", db_config_dict)
 
             if archive:
-                if "Archive_Config" in db_config_dict.keys():
-                    for archive_key, archive_value in db_config_dict["Archive_Config"].items():
-                        if archive_value:
-                            archive_dict[archive_key] = db_path / options[archive_key]
+                for archive_key, archive_value in db_config_dict["Archive_Config"].items():
+                    if archive_value:
+                        archive_dict[archive_key] = db_path / options[archive_key]
 
-                    # Parse archive dictionary.
-                    for arch_name, data_path in archive_dict.items():
-                        root_dir = str(data_path.parent)
-                        base_dir = str(data_path.stem)
-                        d = datetime.datetime.now().strftime(fmt="%Y-%m-%d_%H%M")
-                        output_pathname = archive_path / Path(arch_name + "." + d)
-                        # Archive the desired data.
-                        archive_filename = shutil.make_archive(base_name=str(output_pathname), format="xztar", root_dir=root_dir,
-                                            base_dir=base_dir)
-                        # TODO-ROB:  Logging.  And log to a README.md file.
-                        # Delete the files if desired.
-                        if delete:
-                            from Datasnakes import DatasnakesWarning
-                            DatasnakesWarning("You're about to delete your database (%s).  Are you sure??" % data_path)
-                            shutil.rmtree(path=data_path)
-                        else:
-                            output_pathname.mkdir()
-                            shutil.move(src=str(data_path), dst=str(output_pathname))
-                            shutil.move(src=str(archive_filename), dst=str(output_pathname))
+                # Parse archive dictionary.
+                for arch_name, data_path in archive_dict.items():
+                    root_dir = str(data_path.parent)
+                    base_dir = str(data_path.stem)
+                    d = datetime.datetime.now().strftime(fmt="%Y-%m-%d_%H%M")
+                    output_pathname = archive_path / Path(arch_name + "." + d)
+                    # Archive the desired data.
+                    archive_filename = shutil.make_archive(base_name=str(output_pathname), format="xztar", root_dir=root_dir,
+                                        base_dir=base_dir)
+                    # TODO-ROB:  Logging.  And log to a README.md file.
+                    # Delete the files if desired.
+                    if delete:
+                        from Datasnakes import DatasnakesWarning
+                        DatasnakesWarning("You're about to delete your database (%s).  Are you sure??" % data_path)
+                        shutil.rmtree(path=data_path)
+                    else:
+                        output_pathname.mkdir()
+                        shutil.move(src=str(data_path), dst=str(output_pathname))
+                        shutil.move(src=str(archive_filename), dst=str(output_pathname))
+
+                    Path(data_path).mkdir(parents=True, exist_ok=True)
 
                 # TODO-ROB: Add compression here.  Test Zip Utils, add function that archives a list of folders.
                 # TODO-ROB:  Add line to remake the path that was archived.
 
-            for config_type, config_dict in db_config_dict.items():
-                if config_type is "Database_config":
+            for db_key, db_value in db_config_dict["Database_Config"].items():
+                if db_value:
                     pass
+                    # TODO-ROB:  Use db_value system with database management configuration.
 
         # if db_path_dict:
         #     for db, path in db_path_dict.items():
