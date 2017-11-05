@@ -7,7 +7,6 @@ from multiprocessing.pool import ThreadPool
 import os
 from shutil import make_archive
 import sys
-from warnings import warn
 # from progress.bar import Bar
 # TODO Create a progress bar; Integrate with Threading/downloading
 # TODO Use logit to log which files were downloaded
