@@ -186,7 +186,7 @@ class UserManagement(RepoManagement):
 
     def zip_mail(self, comp_filename, zip_path, destination=''):
         Zipper = ZipUtils(comp_filename, zip_path)
-        Zipper_path = Zipper.to_zip()
+        Zipper_path = Zipper.compress()
         # TODO-ROB add proper destination syntax.
         self.managementlog.info('%s is being sent to %s' % (Zipper_path, destination))
 

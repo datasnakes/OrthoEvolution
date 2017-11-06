@@ -183,7 +183,7 @@ class ZipUtils(DataMana):
         return comp_path
 
     def add_folder_to_zip(self, zip_handle, folder):
-        """Not meant to be used explicitly.  Use to_zip.
+        """Not meant to be used explicitly.  Use compress.
 
         :param zip_handle: An initialized zipfile.ZipFile handle.
         :param folder: A path that represents an entire folder to be zipped.
