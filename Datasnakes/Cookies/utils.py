@@ -33,11 +33,13 @@ def archive(db_path, arch_path, config_file, delete=False):
     This utility creates a YAML config dictionary that contains path-like objects for archiving.  The original data
     can be moved to the archive path or deleted all together.
 
-    :param db_path:  A path to a folder that consists of an "archive" folder as well as the desired data.
+    :param db_path:  A path to a folder that consists of the desired data.
+    :param arch_path:  A path to an output folder for archived data.
     :param config_file:  The "Archive_Config" file.
     :param delete:  A flag for deleting the original data.  USE WITH CAUTION.
-    :return:  Returns a *.tar.xz archive of the data.
+    :return:  Returns a list of paths to the *.tar.xz archive of the data and/or a path to the original data.
     """
+    archive_list = []
     archive_log = LogIt().default(logname="Archive", logfile=None)
     with open(config_file, 'r') as yam:
         db_config_dict = yaml.safe_load(yam)
@@ -45,9 +47,17 @@ def archive(db_path, arch_path, config_file, delete=False):
     archive_path = arch_path
     archive_dict = {}
 
-    for archive_key, archive_value in db_config_dict["Archive_Config"].items():
-        if archive_value:
-            archive_dict[archive_key] = db_path / archive_options[archive_key]
+    # Create a handle for creating separate archive files.
+    if db_config_dict["Full"]:
+        # For a full archive, individually archive each folder in the user database directory.
+        full_path = db_path / archive_options["Full"]
+        for folder in os.listdir(str(full_path)):
+            archive_dict[folder] = db_path / Path(folder)
+    else:
+        # For custom archive options, set Full to False and select which data you would like to archive.
+        for archive_key, archive_value in db_config_dict["Archive_Config"].items():
+            if archive_value:
+                archive_dict[archive_key] = db_path / archive_options[archive_key]
 
     for arch_name, data_path in archive_dict.items():
         root_dir = str(data_path.parent)
@@ -68,13 +78,16 @@ def archive(db_path, arch_path, config_file, delete=False):
             from Datasnakes import DatasnakesWarning
             DatasnakesWarning("You're about to delete your database (%s).  Are you sure??" % data_path)
             shutil.rmtree(path=data_path)
+            archive_list.append(str(archive_filename))
         else:
             archive_log.critical("The original data will be moved recursively from %s to %s." % (data_path, output_pathname))
             output_pathname.mkdir()
             shutil.move(src=str(data_path), dst=str(output_pathname))
             shutil.move(src=str(archive_filename), dst=str(output_pathname))
+            archive_list.append(str(output_pathname))
 
         Path(data_path).mkdir(parents=True, exist_ok=True)
+    return archive_list
 
 
 def get_size(start_path, units="KB"):
