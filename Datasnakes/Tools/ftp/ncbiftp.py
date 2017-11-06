@@ -6,8 +6,8 @@ from datetime import datetime
 from multiprocessing.pool import ThreadPool
 import os
 from shutil import make_archive
-import sys
-from ftplib import error_perm
+from ftplib import error_perm, all_errors
+import contextlib
 # from progress.bar import Bar
 # TODO Create a progress bar; Integrate with Threading/downloading
 
@@ -90,12 +90,16 @@ class NcbiFTPClient(BaseFTPClient):
         os.makedirs(wmdir, exist_ok=True)
 
         if not os.path.exists(os.path.join(wmdir, wmfile)):
-            with open(os.path.join(wmdir, wmfile), 'wb') as localfile:
-                self.ftp.retrbinary('RETR %s' % windowmaskerfilepath, localfile.write)
-                self.ncbiftp_log.info('%s was downloaded.' % str(windowmaskerfilepath))
+            try:
+                with open(os.path.join(wmdir, wmfile), 'wb') as localfile:
+                    self.ftp.retrbinary('RETR %s' % windowmaskerfilepath, localfile.write)
+                    self.ncbiftp_log.info('%s was downloaded.' % str(windowmaskerfilepath))
+            except all_errors:
+                    os.remove(os.path.join(wmdir, wmfile))
+                    err_msg = '%s could not be download and was deleted.'
+                    self.ncbiftp_log.error(err_msg % str(windowmaskerfilepath))
         else:
             self.ncbiftp_log.info('%s exists.' % str(windowmaskerfilepath))
-
 
     @classmethod
     def extract_file(cls, file2extract):
@@ -104,18 +108,23 @@ class NcbiFTPClient(BaseFTPClient):
             tar = tarfile.open(file2extract)
             tar.extractall()
             tar.close()
-            cls.ncbiftp_log.info('Files were successfully extracted from %s' % file2extract)
-#        else:
-#            raise ValueError('%s does not end in tar.gz' % file2extract)
+            log_msg = 'Files were successfully extracted from %s'
+            cls.ncbiftp_log.info(log_msg % file2extract)
 
-    def listfiles(self, path='/'):
+    def listfiles(self, path=None):
         """List all files in a path."""
+        if path is None:
+            path = self.ftp.pwd()
+        path = path
         self._pathformat(path)
         _, files = self.walk(path)
         return files
 
-    def listdirectories(self, path='/'):
+    def listdirectories(self, path=None):
         """List all directories in a path."""
+        if path is None:
+            path = self.ftp.pwd()
+        path = path
         self._pathformat(path)
         directories, _ = self.walk(path)
         return directories
@@ -142,6 +151,9 @@ class NcbiFTPClient(BaseFTPClient):
 
         self.ncbiftp_log.info('You are about to download theses files: %s' %
                               windowmaskerfiles)
+
+        # Move to directory for file downloads
+        os.chdir(download_path)
 
         # Download the files using multiprocessing
         download_time_secs = time()
