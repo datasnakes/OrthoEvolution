@@ -47,7 +47,7 @@ class DatabaseManagement(object):
 
     def download_windowmaskerfiles(self, taxonomy_ids, database_path=None):
         """Download the WindowMasker files."""
-        db_path = self.ncbi_db_repo / Path('blast') / Path('db')
+        db_path = self.ncbi_db_repo / Path('blast') / Path('windowmasker_files')
         if database_path:
             db_path = Path(database_path)
 
@@ -109,6 +109,7 @@ class DatabaseManagement(object):
 
     def upload_refseq_release_files(self, collection_subset, seqtype, filetype, upload_list, extension=".gbk.db"):
         db_path = self.ncbi_refseq_release / Path(collection_subset)
+        # Get a BioSQL database
         ncbi_db = self.download_taxonomy_database(db_type="biosql", sub_path="/refseq/release/%s" % collection_subset)
         ncbi_db.upload_path = db_path
         ncbi_db.upload_list = upload_list
