@@ -27,6 +27,17 @@ bytesize_options = {
 
 
 def archive(db_path, config_file, delete=False):
+    """
+    Using YAML configuration, archive one or more directories recursively.
+
+    This utility creates a YAML config dictionary that contains path-like objects for archiving.  The original data
+    can be moved to the archive path or deleted all together.
+
+    :param db_path:  A path to a folder that consists of an "archive" folder as well as the desired data.
+    :param config_file:  The "Archive_Config" file.
+    :param delete:  A flag for deleting the original data.  USE WITH CAUTION.
+    :return:  Returns a *.tar.xz archive of the data.
+    """
     archive_log = LogIt().default(logname="Archive", logfile=None)
     with open(config_file, 'r') as yam:
         db_config_dict = yaml.safe_load(yam)
@@ -67,6 +78,13 @@ def archive(db_path, config_file, delete=False):
 
 
 def get_size(start_path, units="KB"):
+    """
+    Determine the size of a directory or a file with the desired units.
+
+    :param start_path:  A file or path for sizing up.
+    :param units:  The denomination of bytes to return.
+    :return:  The size as a string.  (e.g. "3.6 KB")
+    """
     total_size = 0
     if os.path.isfile(start_path):
         size = os.path.getsize(start_path)
