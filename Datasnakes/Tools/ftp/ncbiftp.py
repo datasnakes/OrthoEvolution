@@ -7,9 +7,9 @@ from multiprocessing.pool import ThreadPool
 import os
 from shutil import make_archive
 import sys
+from ftplib import error_perm
 # from progress.bar import Bar
 # TODO Create a progress bar; Integrate with Threading/downloading
-# TODO Use logit to log which files were downloaded
 
 from Datasnakes.Tools.ftp.baseftp import BaseFTPClient
 from Datasnakes.Tools.logit import LogIt
@@ -18,22 +18,16 @@ from Datasnakes.Tools.logit import LogIt
 class NcbiFTPClient(BaseFTPClient):
     """Access NCBI's FTP servers with ease."""
     def __init__(self, email):
-        _NCBI = 'ftp.ncbi.nlm.nih.gov'
-        super().__init__(_NCBI, email, keepalive=False, debug_lvl=0)
+        _ncbi = 'ftp.ncbi.nlm.nih.gov'
+        super().__init__(_ncbi, email, keepalive=False, debug_lvl=0)
         self._datafmt = '%m-%d-%Y@%I:%M:%S-%p'
         self._date = str(datetime.now().strftime(self._datafmt))
-        self.blast = '/blast/'
+        self.blastpath = '/blast/'
         self.blastdb_path = '/blast/db/'
         self.blastfasta_path = '/blast/db/FASTA/'
         self.refseqrelease_path = '/refseq/release/'
-        self.windowmasker_path = self.blast + 'windowmasker_files/'
+        self.windowmasker_path = self.blastpath + 'windowmasker_files/'
         self._taxdb = 'taxdb.tar.gz'  # Located in self.blastdb_path
-
-        if sys.platform == "linux":
-            self.splitter = '/'
-
-        elif sys.platform == "win32":
-            self.splitter = '\\'
 
         # TODO Use Turn into a json file, dict, or config
         self.blastdbs = []
@@ -54,7 +48,8 @@ class NcbiFTPClient(BaseFTPClient):
         if not re.match(pattern, path):
             raise ValueError('Your path is not in a proper format.')
 
-    def _archive(self, archive_name, folder2archive, archive_type='gztar'):
+    @classmethod
+    def _archive(cls, archive_name, folder2archive, archive_type='gztar'):
         """Archive all the files in the folder and compress the archive."""
         os.chdir(folder2archive)  # Enter the full path
         os.chdir('..')
@@ -62,13 +57,13 @@ class NcbiFTPClient(BaseFTPClient):
         os.chdir(folder2archive)
         make_archive(archive_location, folder2archive, archive_type)
 
-    def _walk(self, path):
+    def walk(self, path):
         """Walk the ftp server and get files and directories."""
         file_list, dirs, nondirs = [], [], []
         try:
             self.ftp.cwd(path)
-        except Exception as exp:
-            self.ncbiftp_log.info("Current path: ", self.ftp.pwd(), exp.__str__(), path)
+        except error_perm as ep:
+            self.ncbiftp_log.info("Current path: %s" % self.ftp.pwd() + ep.__str__() + path)
             return [], []
         else:
             self.ftp.retrlines('LIST', lambda x: file_list.append(x.split()))
@@ -116,13 +111,13 @@ class NcbiFTPClient(BaseFTPClient):
     def listfiles(self, path='/'):
         """List all files in a path."""
         self._pathformat(path)
-        _, files = self._walk(path)
+        _, files = self.walk(path)
         return files
 
     def listdirectories(self, path='/'):
         """List all directories in a path."""
         self._pathformat(path)
-        directories, _ = self._walk(path)
+        directories, _ = self.walk(path)
         return directories
 
     def getwindowmaskerfiles(self, taxonomy_ids, download_path):
