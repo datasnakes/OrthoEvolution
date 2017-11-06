@@ -7,6 +7,11 @@ Database_Config:
 
 Archive_Config:
   Full: True
+  Projects:
+    flag: False
+    Project_Name_1: False
+    Project_Name_2: False
+    Project_Name_3: False
   NCBI: False
   ITIS: False
   NCBI_blast: False

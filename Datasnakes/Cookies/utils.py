@@ -56,7 +56,14 @@ def archive(db_path, arch_path, config_file, delete=False):
     else:
         # For custom archive options, set Full to False and select which data you would like to archive.
         for archive_key, archive_value in db_config_dict["Archive_Config"].items():
-            if archive_value:
+            # The desired projects for archiving must be explicitly listed in the config file.
+            if archive_key == "Projects":
+                if archive_value["flag"]:
+                    for proj_key in archive_value.keys():
+                        if proj_key != "flag":
+                            if archive_value[proj_key]:
+                                archive_dict[proj_key] = db_path / Path(proj_key)
+            elif archive_value:
                 archive_dict[archive_key] = db_path / archive_options[archive_key]
 
     for arch_name, data_path in archive_dict.items():
