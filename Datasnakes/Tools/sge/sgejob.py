@@ -31,7 +31,7 @@ class BaseSGEJob(object):
 
 
 class SGEJob(BaseSGEJob):
-    """Create multiple jobs & scripts for each job to run."""
+    """Create a qsub/pbs job & script for the job to execute."""
     def __init__(self, jobname):
         super().__init__(jobname)
 
