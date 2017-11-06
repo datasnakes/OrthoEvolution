@@ -1,8 +1,9 @@
-import textwrap as twrap
 import re
+import textwrap as twrap
 from pathlib import Path
+
+from Datasnakes.Manager.config import references
 from pkg_resources import resource_filename
-from Datasnakes.Manager import references
 
 
 # Based off of https://github.com/etetoolkit/ete/blob/master/ete3/citation.py

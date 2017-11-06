@@ -16,7 +16,7 @@ from Datasnakes.Cookies.utils import archive
 
 
 class CookBook(object):
-    _config_file = resource_filename(config.__name__, "cookie_recipes.yml")
+    _config_file = resource_filename(config.yaml.__name__, "cookie_recipes.yml")
 
     def __init__(self, config_file=_config_file, **new_recipes):
         """
