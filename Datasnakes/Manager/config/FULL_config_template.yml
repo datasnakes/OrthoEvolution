@@ -13,7 +13,7 @@ Management:
   utils : Manager / Path('utils')
   shiny : Manager / Path('shiny')
   Orthologs : Path(pkg_resources.resource_filename(Orthologs.__name__, ''))
-  biosql : Orthologs / Path('biosql')
+  biosql : Orthologs / Path('biosql_repo')
   blast : Orthologs / Path('blast')
   comp_gen : Orthologs / Path('comparative_genetics')
   genbank : Orthologs / Path('genbank')
