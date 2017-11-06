@@ -26,7 +26,7 @@ bytesize_options = {
 }
 
 
-def archive(db_path, config_file, delete=False):
+def archive(db_path, arch_path, config_file, delete=False):
     """
     Using YAML configuration, archive one or more directories recursively.
 
@@ -42,7 +42,7 @@ def archive(db_path, config_file, delete=False):
     with open(config_file, 'r') as yam:
         db_config_dict = yaml.safe_load(yam)
 
-    archive_path = db_path / Path('archive')
+    archive_path = arch_path
     archive_dict = {}
 
     for archive_key, archive_value in db_config_dict["Archive_Config"].items():
