@@ -25,17 +25,13 @@ class Qstat(object):
         
         return jobs
 
-#        self.running_jobs = sum(j['status'] in ['R', 'Q'] for j in jobs)
-#
-#        return self.running_jobs
-
-# TODO Create function for getting a list or dict of running jobs.
-# TODO Create function for getting a list or dict of queued jobs.
-# TODO Create function for getting a list or dict of running jobs for a user.
 # TODO Create a functions that checks every few minutes until job finishes.
 
     def _output_parser(self, output):
-        """Parse output from qstat pbs commandline program."""
+        """Parse output from qstat pbs commandline program.
+        
+        Returns a list of dictionaries for each job.
+        """
         lines = output.decode('utf-8').split('\n')
         del lines[:5]
         jobs = []
@@ -50,3 +46,27 @@ class Qstat(object):
                 pass
 
         return jobs
+
+    def job_ids(self):
+        jobs = self.qstatinfo()
+        ids = [j['job_id'] for j in jobs]
+        return ids
+
+    def running_jobs(self):
+        jobs = self.qstatinfo()
+        ids = [j['job_id'] for j in jobs if j['status'] == 'R']
+        return ids
+        
+    def queued_jobs(self):
+        jobs = self.qstatinfo()
+        ids = [j['job_id'] for j in jobs if j['status'] == 'Q']
+        return ids
+    
+    def myjobs(self):
+        jobs = self.qstatinfo()
+        ids = [j['job_id'] for j in jobs if j['user'] == self.username]
+        if len(ids) < 1:
+            return 'You have no jobs running or queued.'
+        else:
+            return ids
+        
