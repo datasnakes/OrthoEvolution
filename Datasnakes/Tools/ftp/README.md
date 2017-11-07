@@ -67,7 +67,8 @@ ncbiftp.listfiles(path='/blast/db/')
 #### List all files in the current working directory
 ```python
 
-ncbiftp.listfiles(path='cwd')
+# The default path is ftp.pwd() or the current directory
+ncbiftp.listfiles()
 ```
 
 :exclamation: Notes
