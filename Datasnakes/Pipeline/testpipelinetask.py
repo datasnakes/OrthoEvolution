@@ -13,7 +13,7 @@ class TestPipelineTask(SGEPipelineTask):
 
     i = luigi.Parameter()
 
-    def run(self):  # Use work instead of run to DEBUG
+    def work(self):  # Use work instead of run to DEBUG
         logger.info('Running test job...')
         with open(self.output().path, 'w') as f:
             f.write('This is a test job.')
