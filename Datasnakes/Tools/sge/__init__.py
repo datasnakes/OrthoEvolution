@@ -6,7 +6,7 @@ from .sgepipelinetask import SGEPipelineTask
 from Datasnakes import DatasnakesWarning
 
 
-if "windows" in platform.system().lower():
-    raise ImportError("This module is only supported on linux/osx.")
-else:
-    DatasnakesWarning('PBS professional must be installed on your system.')
+#if "windows" in platform.system().lower():
+#    raise ImportError("This module is only supported on linux/osx.")
+#else:
+#    DatasnakesWarning('PBS professional must be installed on your system.')

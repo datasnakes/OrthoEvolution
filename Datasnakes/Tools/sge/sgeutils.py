@@ -14,6 +14,7 @@ def basejobids(length, name='submit'):
 
     return base_id, base
 
+
 def import_temp(filepath):
     """Import the script or file that you need a template of and that has
     temp strings.
@@ -25,15 +26,18 @@ def import_temp(filepath):
     file_temp = Template(file_str)
     return file_temp
 
+
 def file2str(filepath):
     """Turn the contents of a file (python file) into a string."""
     file_temp = open(filepath, 'r')
     file_str = file_temp.read()
     return file_str
 
+
 def randomid(length=5):
     """Generate a random ID of 5 characters to append to qsub job name."""
     return ''.join(random.sample(string.ascii_letters + string.digits, length))
+
 
 def writecodefile(filename, code, language):
     """Create a python file and write the code to it."""
@@ -53,4 +57,3 @@ def writecodefile(filename, code, language):
             rfile.close()
     else:
         raise NotImplementedError('%s is unsupported.' % language)
-
