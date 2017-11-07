@@ -27,6 +27,8 @@ Running blast is the most complex aspect of this package, but we've found a way
 to simplify the automation of blasting.
 
 Before you use this function, you need `NCBI Blast+` must be installed and in your path.
+Download the latest standalone blast executables from 
+[here](ftp://ftp.ncbi.nlm.nih.gov/blast/executables/blast+/LATEST/).
 
 We have perfected the method of using a windowmasker file for each taxonomy id
 of the organisms that we are analyzing. The blastn executable can filter a query
