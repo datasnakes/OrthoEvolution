@@ -48,25 +48,40 @@ class Qstat(object):
         return jobs
 
     def job_ids(self):
+        """Retrieve a list of all jobs running or queued."""
         jobs = self.qstatinfo()
         ids = [j['job_id'] for j in jobs]
         return ids
 
     def running_jobs(self):
+        """Retrieve a list of running jobs."""
         jobs = self.qstatinfo()
         ids = [j['job_id'] for j in jobs if j['status'] == 'R']
         return ids
         
     def queued_jobs(self):
+        """Retrieve a list of queued jobs."""
         jobs = self.qstatinfo()
         ids = [j['job_id'] for j in jobs if j['status'] == 'Q']
         return ids
     
     def myjobs(self):
+        """Retrieve a list of all the current user's jobs."""
         jobs = self.qstatinfo()
         ids = [j['job_id'] for j in jobs if j['user'] == self.username]
         if len(ids) < 1:
             return 'You have no jobs running or queued.'
         else:
             return ids
+            
+    def watch(self, job_id):
+        """Wait until a job or list of job finishes and get updates."""
+        jobs = self.qstatinfo()
+        ids = [j['job_id'] for j in jobs if j['user'] == self.username]
+        if job_id in ids:
+            return 'Waiting for %s to finish running' % job_id
+        else:
+            return 'Job id not found.'
+        
+        
         
