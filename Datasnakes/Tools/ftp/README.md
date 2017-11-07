@@ -5,12 +5,20 @@ FTP repository](ftp://ftp.ncbi.nlm.nih.gov).
 
 More specifically, we provide a way to easily find and list directories and their
 respective contents as well as to download blast databases and other databases
-for use with the Orthologs package.
+for use with the Orthologs package. We have implemented database downloading 
+with threading which is the safest way to implement this cross-platform.
+
+We also provide a parallel module which can be used in conjunction with the 
+`NcbiFTPClient` to download files or databases much quicker if your system can
+handle that.
+
+If you're using Linux or a supercomputer and do not want to use threading to 
+download ftp databases, you can look at [this standalone script]().
+
+
 
 Examples
 -----
-These tools are optimized to be used together (very little work to do that), but can also be used singularly.
-
 
 #### Blastdb Download Example
 
@@ -40,27 +48,30 @@ from Datasnakes.Tools.ftp import NcbiFTPClient
 import os
 
 ncbiftp = NcbiFTPClient(email='somebody@gmail.com')
-ncbiftp.getrefseqrelease(taxon_group='vertebrate_mammalian', seqtyp='rna', seqformat='gbff', download_path=os.getcwd())
+ncbiftp.getrefseqrelease(taxon_group='vertebrate_mammalian', seqtype='rna', seqformat='gbff', download_path=os.getcwd())
 ```
 
 #### List all directories in a path
 ```python
 
-ncbiftp.listdirectories('/blast/db/')
+ncbiftp.listdirectories(path='/blast/db/')
 Out[54]: ['FASTA', 'cloud']
 ```
 
 #### List all files in a path
 ```python
 
-ncbiftp.listfiles('/blast/db/')
+ncbiftp.listfiles(path='/blast/db/')
+```
+
+#### List all files in the current working directory
+```python
+
+ncbiftp.listfiles(path='cwd')
 ```
 
 :exclamation: Notes
 -------------------
-Check the [NCBI README](NCBIREADME.md) for information about the preformatted blast databases that we use
-and suggest you use. We also provide an easy way to download them which is referenced in the above example.
-
-
-If you're using Linux and do not want to use threading to download ftp databases,
-you can look at [this]() standalone script.
+Check the [NCBI README](NCBIREADME.md) for information about the preformatted 
+blast databases that we use and suggest you use. We also provide an easy way to
+ download them which is referenced in the above example.
