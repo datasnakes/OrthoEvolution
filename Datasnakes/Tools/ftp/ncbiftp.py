@@ -7,7 +7,6 @@ from multiprocessing.pool import ThreadPool
 import os
 from shutil import make_archive
 from ftplib import error_perm, all_errors
-import contextlib
 # from progress.bar import Bar
 # TODO Create a progress bar; Integrate with Threading/downloading
 
