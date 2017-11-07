@@ -1,4 +1,3 @@
-import os
 from Datasnakes.Tools.ftp import NcbiFTPClient
 from Datasnakes.Tools.utils import csvtolist
 
