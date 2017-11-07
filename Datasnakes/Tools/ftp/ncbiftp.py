@@ -110,18 +110,18 @@ class NcbiFTPClient(BaseFTPClient):
             log_msg = 'Files were successfully extracted from %s'
             cls.ncbiftp_log.info(log_msg % file2extract)
 
-    def listfiles(self, path=None):
+    def listfiles(self, path='cwd'):
         """List all files in a path."""
-        if path is None:
+        if path == 'cwd':
             path = self.ftp.pwd()
         path = path
         self._pathformat(path)
         _, files = self.walk(path)
         return files
 
-    def listdirectories(self, path=None):
+    def listdirectories(self, path='cwd'):
         """List all directories in a path."""
-        if path is None:
+        if path == 'cwd':
             path = self.ftp.pwd()
         path = path
         self._pathformat(path)
