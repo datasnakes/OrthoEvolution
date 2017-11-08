@@ -2,8 +2,6 @@ import contextlib
 from subprocess import run, CalledProcessError, PIPE
 import os
 from pkg_resources import resource_filename
-import json
-
 
 from Datasnakes.Tools.logit import LogIt
 from Datasnakes.Tools.sge import basejobids, writecodefile, import_temp, file2str
@@ -20,6 +18,7 @@ class BaseSGEJob(object):
         self.file2str = file2str
         self.job_id, self.jobname = self._configure(length, base_jobname)
         self.sgejob_log = LogIt().default(logname="SGE JOB", logfile=None)
+        self.pbsworkdir = os.getcwd()
 
         # Import the temp.pbs file using pkg_resources
         self.temp_pbs = resource_filename(templates.__name__, "temp.pbs")
@@ -30,26 +29,35 @@ class BaseSGEJob(object):
         baseid, base = basejobids(length, base_jobname)
         return baseid, base
 
-    @classmethod
-    def updatedict(dictionary, new_attributes):
-        dict_input = json.dumps(dictionary)
-        dict_input.format(new_attributes)
-        dict_output = json.loads(dict_input)
+    def _update_default_attributes(self, email, jobname):
+        new_attributes = {'email': email,
+                          'job_name': jobname,
+                          'outfile': jobname + '.o',
+                          'errfile': jobname + '.e',
+                          'script': jobname,
+                          'log_name': jobname + '.log',
+                          'cmd': 'python3 ' + os.path.join(os.getcwd(), jobname + '.py'),
+                            }
+        self.default_job_attributes.update(new_attributes)
 
-        return dict_output
+        return self.default_job_attributes
 
-    @classmethod
-    def _cleanup(cls, jobname):
+    def _cleanup(self, jobname):
         """Clean up job scripts."""
         os.remove(jobname + '.pbs')
+        self.sgejob_log.warning('%s.pbs has been deleted' % jobname)
         os.remove(jobname + '.py')
-
+        self.sgejob_log.warning('%s.py has been deleted' % jobname)
+    
+    def wait_on_job_completion():
+        pass
 
 class SGEJob(BaseSGEJob):
     """Create a qsub/pbs job & script for the job to execute."""
-    def __init__(self, base_jobname):
+    def __init__(self, base_jobname, email_address):
         super().__init__(length=5, base_jobname=base_jobname)
-
+        self.email = email_address
+        
     def debug(self, code):
         """Debug the SGEJob."""
         self.submit(code, debug=True)
@@ -59,7 +67,7 @@ class SGEJob(BaseSGEJob):
 
         Submit python code."""
         if debug:
-            self.sgejob_log.info('You decided to debug your SGEJob')
+            self.sgejob_log.info('You decided to debug your SGEJob.')
 
         # TIP If python is in your environment as only 'python' update that.
         # If default, a python file will be created from code that is used.
@@ -78,8 +86,8 @@ class SGEJob(BaseSGEJob):
 
             # Create the pbs script from the template or dict
             pbstemp = import_temp(self.temp_pbs)
-
-            attributes = self.default_job_attributes
+            
+            attributes = self._update_default_attributes(self.email, self.jobname)
             pbsfilename = self.jobname + '.pbs'
             with open(pbsfilename, 'w') as pbsfile:
                 pbsfile.write(pbstemp.substitute(attributes))
@@ -87,7 +95,6 @@ class SGEJob(BaseSGEJob):
             self.sgejob_log.info('%s has been created.' % pbsfilename)
         else:
             msg = 'Custom SGEJob creation is not yet implemented.'
-            self.sgejob_log.error(msg)
             raise NotImplementedError(msg)
             # TODO Add custom job creation
 
@@ -96,14 +103,18 @@ class SGEJob(BaseSGEJob):
                 cmd = 'qsub ' + self.jobname + '.pbs'  # this is the command
                 self.sgejob_log.info('`%s` will be run.' % cmd)
                 self.sgejob_log.info('Job submitted.')
-                self.cleanup(self.jobname)
+                self._cleanup(self.jobname)
 
         else:
-            with contextlib.suppress(CalledProcessError):
+            try:
                 cmd = ['qsub ' + self.jobname + '.pbs']  # this is the command
                 # Shell MUST be True
-                cmd_status = run(cmd, stdout=PIPE, stderr=PIPE, shell=True)
-
+                cmd_status = run(cmd, stdout=PIPE, stderr=PIPE, shell=True, check=True)
+            except CalledProcessError as err:
+                self.sgejob_log.error(err.stderr.decode('utf-8'))
+                if cleanup:
+                    self._cleanup(self.jobname)
+            else:
                 if cmd_status.returncode == 0:  # Command was successful.
                     self.sgejob_log.info('Job submitted.')
                     # TODO add a check to for job errors or check for error file.
