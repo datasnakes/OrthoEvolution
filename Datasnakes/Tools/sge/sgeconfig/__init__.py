@@ -2,6 +2,8 @@
 import getpass
 from datetime import datetime as d
 import sys
+import os
+
 from Datasnakes.Tools.sge import randomid
 
 if sys.version_info.major < 3:
@@ -16,22 +18,21 @@ _format1 = '%a %b %d %I:%M:%S %p %Y'
 _jobname = 'orthoevol_{}'.format(randomid(length=4))
 
 __DEFAULT__ = {
-            'author': getpass.getuser().upper(),
+            'author': getpass.getuser(),
             'description': 'This is a default pbs job.',
             'date': d.now().strftime(_format1),
-            'PBS_JOBID': '${PBS_JOBID}',
-            'PBS_O_WORKDIR': '${PBS_O_WORKDIR}',
             'proj_name': 'Datasnakes-Scripts',
-            'select': 3,
-            'memgb': 6,
-            'cput': '{cput}',
-            'wt': '{walltime}',
-            'job_name': '{jobname}',
-            'outfile': '{jobname}.o',
-            'errfile': '{jobname}.e',
-            'script': '{jobname}',
-            'log_name': '{jobname}.log',
-            'cmd': 'python3 {jobname}.py',
+            'select': '3',
+            'memgb': '6gb',
+            'cput': '72:00:00',
+            'wt': '48:00:00',
+            'job_name': _jobname,
+            'outfile': _jobname + '.o',
+            'errfile': _jobname + '.e',
+            'script': _jobname,
+            'log_name': _jobname,
+            'pbsworkdir': os.getcwd(),
+            'cmd': 'python3 ' + os.path.join(os.getcwd(), _jobname + '.py'),
             'email': 'n/a'
              }
 
