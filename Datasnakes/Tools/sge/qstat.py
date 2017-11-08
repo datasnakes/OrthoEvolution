@@ -25,8 +25,6 @@ class Qstat(object):
         
         return jobs
 
-# TODO Create a functions that checks every few minutes until job finishes.
-
     def _output_parser(self, output):
         """Parse output from qstat pbs commandline program.
         
@@ -82,6 +80,8 @@ class Qstat(object):
             return 'Waiting for %s to finish running' % job_id
         else:
             return 'Job id not found.'
+        # TODO Create a functions that checks every few minutes until job
+        # finishes.
         
         
         
