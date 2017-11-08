@@ -30,13 +30,14 @@ class BaseSGEJob(object):
         return baseid, base
 
     def _update_default_attributes(self, email, jobname):
+        pyfile_path = os.path.join(self.pbsworkdir, jobname + '.py')
         new_attributes = {'email': email,
                           'job_name': jobname,
                           'outfile': jobname + '.o',
                           'errfile': jobname + '.e',
                           'script': jobname,
                           'log_name': jobname + '.log',
-                          'cmd': 'python3 ' + os.path.join(os.getcwd(), jobname + '.py'),
+                          'cmd': 'python3 ' + pyfile_path,
                             }
         self.default_job_attributes.update(new_attributes)
 
