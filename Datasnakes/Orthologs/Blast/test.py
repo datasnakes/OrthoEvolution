@@ -1,12 +1,3 @@
-#from Datasnakes.Orthologs.Blast.utils import gi_list_config
-#import os
-#
-#tids = ['9606', '9544', '9646', '37293', '9913', '9483', '9838', '9615']
-#
-#p = os.getcwd()
-#
-#gi_list_config(gi_list_path=p, taxonomy_ids=tids)
-
 from Datasnakes.Orthologs.Blast import OrthoBlastN
 import os
 
