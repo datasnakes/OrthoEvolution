@@ -308,6 +308,7 @@ class OrthoBlastN(CompGenFiles):
                                             str(self.complete_time_file_path))
                         except FileNotFoundError as fnfe:
                             msg = 'Your blast did not created any building or building time files not created'
+                            self.blastn_log.error(fnfe)
                             self.blastn_log.error(msg)
                             raise BlastFailure('Blast has failed to generate data. Check logs for errors.')
 
