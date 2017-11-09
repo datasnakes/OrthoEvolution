@@ -25,5 +25,6 @@ class TestManager(unittest.TestCase):
         self.delete_repo()
     # TODO add tests for each individual subclass
 
+
 if __name__ == '__main__':
     unittest.main()
