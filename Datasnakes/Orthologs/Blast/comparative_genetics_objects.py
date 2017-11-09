@@ -27,6 +27,9 @@ class CompGenObjects(object):
     __acc_path = ''
     __data = ''
 
+    # Initialize Logging
+    blastn_log = LogIt().default(logname="blastn", logfile=None)
+
     # TODO-ROB:  CREAT PRE-BLAST and POST-BLAST functions
     def __init__(self, project=None, project_path=os.getcwd(), acc_file=None,
                  taxon_file=None, pre_blast=False, post_blast=True, hgnc=False,
@@ -34,17 +37,16 @@ class CompGenObjects(object):
         """This is the base class for the Blast module.
 
         It parses an accession file in order to provide easy handling for data.
+
         The .csv accession file contains the following header info:
             * "Tier" - User defined.
             * "Gene" - HUGO Gene Nomenclature Committee(HGNC) symbol for the genes of interest.
             * Query Organism - A well annotated query organism.
             * Other organisms - The other headers are Genus_species of other taxa.
-
         The organisms are taken from:
         ftp://ftp.ncbi.nlm.nih.gov/genomes/refseq/multiprocessing/
         And the genes are taken from:
         http://www.guidetopharmacology.org/targets.jsp.
-
         The API gives the user access to their data in a higher level for downstream processing or for basic
         observation of the data.
 
@@ -73,7 +75,6 @@ class CompGenObjects(object):
         self.project = project
 
         # Initialize Logging
-        self.blastn_log = LogIt().default(logname="BLATN", logfile=None)
         self.get_time = time.time
         self.sep = 50*'*'
 
@@ -100,11 +101,16 @@ class CompGenObjects(object):
             self.acc_path = self.project_index / Path(self.acc_filename)
 
             # Handles for organism lists
-            self.org_list = [], self.ncbi_orgs = [], self.org_count = 0
-            self.taxon_ids = [], self.taxon_orgs = [], self.taxon_dict = {}
+            self.org_list = []
+            self.ncbi_orgs = []
+            self.org_count = 0
+            self.taxon_ids = []
+            self.taxon_orgs = []
+            self.taxon_dict = {}
 
             # Handles for gene lists
-            self.gene_list = [], self.gene_count = 0
+            self.gene_list = []
+            self.gene_count = 0
 
             # Handles for tier lists
             self.tier_list = []
@@ -116,25 +122,29 @@ class CompGenObjects(object):
             self.acc_list = []
 
             # Handles for blast queries
-            self.blast_human = [], self.blast_rhesus = []
+            self.blast_human = []
+            self.blast_rhesus = []
 
-            # Handles for different dataframe initializations#
+            # Handles for different dataframe initializations
             self.raw_acc_data = pd.read_csv(str(self.acc_path), dtype=str)
 
             # Master accession file for the blast
             self.building_filename = str(acc_file[:-4] + 'building.csv')
-            # #### Pre-Blast objects
+
+            # Pre-Blast objects
             self.mygene_df = pd.DataFrame()  # MyGene
             self.mygene_filename = "%s_mygene.csv" % self.project  # MyGene
             self.mygene_path = self.data / Path(self.mygene_filename)  # MyGene
             self.header = self.raw_acc_data.axes[1].tolist()
-            # #### Blast accession numbers
+
+            # Blast accession numbers
             self.building = pd.read_csv(str(self.acc_path), dtype=str)
             del self.building['Tier']
             del self.building['Homo_sapiens']
             self.building = self.building.set_index('Gene')  # Object for good user output
             self.building_file_path = self.data / Path(self.building_filename)
-            # #### Blast time points
+
+            # Blast time points
             self.building_time_filename = self.building_filename.replace(
                 'building.csv', 'building_time.csv')  # Master time file for the blast
             self.building_time = pd.read_csv(str(self.acc_path), dtype=str)
@@ -143,9 +153,9 @@ class CompGenObjects(object):
             self.building_time = self.building_time.set_index('Gene')
             self.building_time_file_path = self.data / Path(self.building_time_filename)
 
-            # # Handles for accession file analysis # #
+            # Handles for accession file analysis # #
             if self.__post_blast:
-                    # Missing
+                # Missing
                 self.missing_dict = {}
                 self.missing_genes = {}
                 self.missing_organsims = {}
@@ -164,10 +174,10 @@ class CompGenObjects(object):
                 self.duplicated_other = {}
                 self.time_dict = {}
 
-            # #### Format the main data frame #### #
+            # Format the main data frame #### #
             self.__data = self.raw_acc_data.set_index('Gene')
             self.df = self.__data
-            # #### Format the main pivot table #### #
+            # Format the main pivot table #### #
             self.pt = pd.pivot_table(
                 pd.read_csv(self.acc_path),
                 index=['Tier','Gene'],
@@ -175,7 +185,7 @@ class CompGenObjects(object):
             array = self.pt.axes[1].tolist()  # Organism list
             self.pt.columns = pd.Index(array, name='Organism')
 
-            # #### Handles for full dictionaries #### #
+            # Handles for full dictionaries #### #
             self.org_dict = self.df.ix[0:, 'Homo_sapiens':].to_dict()
             self.gene_dict = self.df.T.to_dict()
             self.get_master_lists(self.__data)  # populates our lists
@@ -192,9 +202,10 @@ class CompGenObjects(object):
         return file_list
 
     def get_master_lists(self, df, csv_file=None):
-        """
-        This function populates the organism and gene lists with a data frame.  It will also populate pre-blast
-        attributes (mygene) and post-blast attributes (missing and duplicates) under the proper conditions.
+        """Populate the organism and gene lists with a data frame.
+
+        It will also populate pre-blast attributes (mygene) and post-blast
+        attributes (missing and duplicates) under the proper conditions.
 
         :param df:  The preferred way of utilizing the function is with a data-frame.
         :param csv_file:  If a csv_file is given, then a data-frame will be created by reinitializing the object.
@@ -268,8 +279,7 @@ class CompGenObjects(object):
             self.duplicated_other = self.duplicated_dict['other']
 
     def get_accession(self, gene, organism):
-        """
-        This method accesses a single accession number.
+        """Access a single accession number.
 
         :param gene:  An input gene.
         :param organism:  An input organism.
@@ -282,8 +292,7 @@ class CompGenObjects(object):
         return accession
 
     def get_orthologous_gene_sets(self, go_list=None):
-        """
-         This method accesses a list of accession numbers.
+        """Access a list of accession numbers.
 
         :param go_list:  A nested list of gene/organism lists (go_list = [[gene.1, org.1], ... , [gene.n, org.n]]).
                          This parameter can also be None.
@@ -355,7 +364,7 @@ class CompGenObjects(object):
     def get_acc_dict(self):
         # TODO-ROB set up function to accept a parameter for unique values or
         # potential duplicates
-        """Input a list of accession numbers and returns a dictionary with corresponding genes/organisms.
+        """Input a list of accession numbers and return a dictionary with corresponding genes/organisms.
 
         :return: An accession dictionary who's values are nest gene/organism lists.
         """
