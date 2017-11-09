@@ -1,10 +1,12 @@
 """Optimized for use with local/standalone NCBI BLAST 2.6.0."""
 import os
+from xml.etree.ElementTree import ParseError
 import shutil
-import subprocess
+from subprocess import run, PIPE, CalledProcessError
 import contextlib
 from datetime import datetime as d
 from pathlib import Path
+from Bio.Application import ApplicationError
 from Bio import SearchIO  # Used for parsing and sorting XML files.
 from Bio.Blast.Applications import NcbiblastnCommandline
 
@@ -18,7 +20,7 @@ from Datasnakes.Orthologs.Blast.utils import gene_list_config, map_func
 # TODO-ROB:  Rework the query organism stuff.
 
 class OrthoBlastN(CompGenFiles):
-    """Combines Project Management features with Blasting."""
+    """Combines Project Management features with NCBI's Blast+."""
     def __init__(self, project, template=None, save_data=True, **kwargs):
         """This class inherits from the CompGenFiles class.
 
@@ -50,8 +52,6 @@ class OrthoBlastN(CompGenFiles):
 
         # Manage Directories
         self.home = Path(os.getcwd())
-
-        self.query_gi_dict = {}
         self.removed_genes = []
         self.current_gene_list = []
 
@@ -76,8 +76,7 @@ class OrthoBlastN(CompGenFiles):
         :param auto_start:  A flag that determines whether the blast starts automatically.
         :return:
         """
-        sep = 20 * '*'
-        self.blastn_log.info(sep + 'BLAST CONFIG START' + sep + '\n\n\n')
+        self.blastn_log.info('Blast configuration has began.')
         self.blastn_log.info('Configuring the accession file.')
 
         # CONFIGURE and UPDATE the gene_list based on the existence of an
@@ -117,36 +116,33 @@ class OrthoBlastN(CompGenFiles):
             # https://www.ncbi.nlm.nih.gov/books/NBK279689/#_cookbook_Custom_data_extraction_and_form_
             # TODO-SDH Combine these BLAST extractions???
             fmt = {'query': query, 'temp fasta': str(gene_path / Path('temp.fasta'))}
-            # Temporary fasta file created by the blastdbcmd
-            fasta_setup = "blastdbcmd -entry {query} -db refseq_rna -outfmt %f -out {temp fasta}".format(**fmt)
-            fasta_status = subprocess.call([fasta_setup], shell=True)
 
+            # Create a temporary fasta file using blastdbcmd
+            blastdbcmd_query = "blastdbcmd -entry {query} -db refseq_rna -outfmt %f -out {temp fasta}".format(**fmt)
+            try:
+                blastdbcmd_status = run([blastdbcmd_query], stdout=PIPE,
+                                        stderr=PIPE,shell=True, check=True)
+            except CalledProcessError as err:
+                self.blastn_log.error(err.stderr.decode('utf-8'))
 
-            # TODO-ROB:  Add function to add the gi numbers to the dataframe/csv-file,
-            # TODO-ROB: and add a check function to see if thats already there
             # Check the status of the custom blast data extraction
-            if fasta_status != 0:  # Command was successful.
-                self.blastn_log.error("FASTA sequence for %s not found in the BLAST extraction" % query)
-                self.blastn_log.error("Removing %s from the BLAST list." % gene)
-                self.gene_list.remove(gene)
-                self.removed_genes.append(gene)
+            else:
+                if blastdbcmd_status.returncode != 0:  # Command was not successful.
+                    self.blastn_log.error("FASTA sequence for %s not found in the BLAST extraction" % query)
+                    self.blastn_log.error("Removing %s from the BLAST list." % gene)
+                    self.gene_list.remove(gene)
+                    self.removed_genes.append(gene)
 
-            else:  # Command failed
-                self.blastn_log.error("FASTA sequence not found in the custom BLAST extraction." % query)
-                self.blastn_log.error("Removing %s from the BLAST list." % gene)
-                self.gene_list.remove(gene)
-                self.removed_genes.append(gene)
-                with contextlib.suppress(ValueError):
-                    self.current_gene_list.remove(gene)
-                continue
+                    with contextlib.suppress(ValueError):
+                        self.current_gene_list.remove(gene)
 
         self.blastn_log.info('Configured gene list: %s' % self.current_gene_list)
-        self.blastn_log.info(sep + 'BLAST CONFIG END' + sep)
+        self.blastn_log.info('Blast configuration has ended.')
         if auto_start is True:
-            # Automatically begin BLASTING after the configuration
-            self.blasting(genes=self.current_gene_list,
-                          query_organism=query_organism,
-                          pre_configured=auto_start)
+            # Automatically run blast after the configuration
+            self.runblast(genes=self.current_gene_list,
+                           query_organism=query_organism,
+                           pre_configured=auto_start)
 
     def blast_xml_parse(self, xml_path, gene, organism):
         """Parse the blast XML record get the best hit accession number.
@@ -163,50 +159,57 @@ class OrthoBlastN(CompGenFiles):
         self.blastn_log.info("Parsing %s to find the best accession number." % curxmlfile)
         maximum = 0
         file_path = str(Path(xml_path))
-        with open(file_path, 'r') as blast_xml:
-            blast_qresult = SearchIO.read(blast_xml, 'blast-xml')
-            mapped_qresult = blast_qresult.hit_map(map_func)  # Map the hits
-            for hit in mapped_qresult:
-                for hsp in hit.hsps:
-                    # Find the highest scoring hit for each gene
-                    if hsp.bitscore_raw > maximum:
-                        # If the gene is a predicted non-coding RefSeq gene then go the the next hit
-                        # https://en.wikipedia.org/wiki/RefSeq
-                        # TODO Add another check here???
-                        if "xr" in str(hit.id.lower()):
-                            self.blastn_log.info("Encountered a predicted(X*_00000) "
-                                                 "non-coding (XR_000000)(ncRNA) RefSeq gene.  Moving to the next hit.")
-                            break
-                        else:
-                            # If the gene is acceptable then add it to the gene list
-                            # Lowercase means LOC1223214 is the name of the gene
-                            # TODO-ROB:  Change this check
-                            maximum = hsp.bitscore_raw
-                            if gene.lower() in hit.description.lower():
-                                accession = hit.id1
-                                gi = hit.id2
-                                raw_bitscore = hsp.bitscore_raw
-                                description = hit.description
+        # Try to parse you xml file. If it is not parsable, catch the error.
+        # The error will likely be the result of an empty file.
+        # In that case, remove the file.
+        try:
+            with open(file_path, 'r') as blast_xml:
+                blast_qresult = SearchIO.read(blast_xml, 'blast-xml')
+                mapped_qresult = blast_qresult.hit_map(map_func)  # Map the hits
+                for hit in mapped_qresult:
+                    for hsp in hit.hsps:
+                        # Find the highest scoring hit for each gene
+                        if hsp.bitscore_raw > maximum:
+                            # If the gene is a predicted non-coding RefSeq gene then go the the next hit
+                            # https://en.wikipedia.org/wiki/RefSeq
+                            # TODO Add another check here???
+                            if "xr" in str(hit.id.lower()):
+                                self.blastn_log.info("Encountered a predicted(X*_00000) "
+                                                     "non-coding (XR_000000)(ncRNA) RefSeq gene.  Moving to the next hit.")
+                                break
                             else:
-                                accession = hit.id1.lower()
-                                gi = hit.id2
-                                raw_bitscore = hsp.bitscore_raw
-                                description = hit.description
-            self.blastn_log.info("Finished parsing the Blast XML file.")
-            self.blastn_log.info("The best accession has been selected.")
-            record_dict['gene'] = gene
-            record_dict['organism'] = organism
-            record_dict['accession'] = accession
-            record_dict['gi'] = gi
-            record_dict['raw bitscore'] = raw_bitscore
-            record_dict['description'] = description
-            self.blastn_log.info("Accession:  %s" % accession)
-            self.blastn_log.info("GI number: {}".format(str(gi)))
-            self.blastn_log.info("Raw bitscore: %s" % raw_bitscore)
-            self.blastn_log.info("Description: %s" % description)
-            self.add_accession(gene, organism, accession)
+                                # If the gene is acceptable then add it to the gene list
+                                # Lowercase means LOC1223214 is the name of the gene
+                                # TODO-ROB:  Change this check
+                                maximum = hsp.bitscore_raw
+                                if gene.lower() in hit.description.lower():
+                                    accession = hit.id1
+                                    gi = hit.id2
+                                    raw_bitscore = hsp.bitscore_raw
+                                    description = hit.description
+                                else:
+                                    accession = hit.id1.lower()
+                                    gi = hit.id2
+                                    raw_bitscore = hsp.bitscore_raw
+                                    description = hit.description
+                self.blastn_log.info("Finished parsing the Blast XML file.")
+                self.blastn_log.info("The best accession has been selected.")
+                record_dict['gene'] = gene
+                record_dict['organism'] = organism
+                record_dict['accession'] = accession
+                record_dict['gi'] = gi
+                record_dict['raw bitscore'] = raw_bitscore
+                record_dict['description'] = description
+                self.blastn_log.info("Accession:  %s" % accession)
+                self.blastn_log.info("GI number: {}".format(str(gi)))
+                self.blastn_log.info("Raw bitscore: %s" % raw_bitscore)
+                self.blastn_log.info("Description: %s" % description)
+                self.add_accession(gene, organism, accession)
+        except ParseError as err:
+            parse_error_msg = 'Parse Error: %s' % err.msg
+            self.blastn_log.error(parse_error_msg)
 
-    def blasting(self, genes=None, query_organism=None, pre_configured=False):
+    def runblast(self, genes=None, query_organism=None, pre_configured=False):
         """Run NCBI's blastn.
 
         This method actually performs NCBI's blastn.
@@ -217,7 +220,6 @@ class OrthoBlastN(CompGenFiles):
         :param pre_configured:  Determines if the blast needs configuring.
         :return:
         """
-        ast = 10 * '*'  # Asterisk separator
         if pre_configured is False:
             query = self.df[query_organism].tolist()
             self.blast_config(query_accessions=query, query_organism=query_organism, auto_start=True)
@@ -225,72 +227,97 @@ class OrthoBlastN(CompGenFiles):
         elif pre_configured is True:
             genes = genes
 
-        self.blastn_log.info('The script began on {}'.format(str(d.now().strftime(self.date_format))))
+        if len(genes) < 1:
+            self.blastn_log.fatal('There are no genes to run with blastn.')
 
-        # TIP Steps to a bulk blast
-        # 1.  Iterate the gene of interest
-        # 2.  Iterate the organisms of interest
-        # 3.  BLAST
-        for gene in genes:
-            for organism in self.org_list:
-                # Skip the query organism
-                if organism == query_organism:
-                    continue
-                # Initialize output variables
-                gene_path = self.raw_data / Path(gene) / Path('BLAST')
-                files = os.listdir(str(gene_path))
-                xml = '%s_%s.xml' % (gene, organism)
-                xml_path = str(gene_path / Path(xml))
+        else:
+            self.blastn_log.info('The blast began on {}'.format(str(d.now().strftime(self.date_format))))
 
-                # Initialize configuration variables
-                taxon_id = self.taxon_dict[organism]
+            # TIP Steps to a run blastn for orthology inference
+            # 1.  Iterate over genes of interest
+            # 2.  Iterate over organisms of interest
+            # 3.  Perform blastn
+            # 4.  Parse blastn output for best hit accession
+            for gene in genes:
+                for organism in self.org_list:
+                    # Skip the query organism
+                    if organism == query_organism:
+                        continue
+                    # Initialize output variables
+                    gene_path = self.raw_data / Path(gene) / Path('BLAST')
+                    files = os.listdir(str(gene_path))
+                    xml = '%s_%s.xml' % (gene, organism)
+                    xml_path = str(gene_path / Path(xml))
+
+                    # Initialize configuration variables
+                    taxon_id = self.taxon_dict[organism]
 
 
-                if xml in files:
-                    self.blast_xml_parse(xml_path, gene, organism)
-                else:
-                    self.blastn_log.warning(ast + "BLAST START" + ast)
-                    start_time = self.get_time()
-                    self.blastn_log.info("The start time is %s" % start_time)
-                    self.blastn_log.info("The current gene is %s (%s)." % (gene, self.tier_dict[gene]))
-                    self.blastn_log.info("The current organisms is %s (%s)." % (organism, taxon_id))
+                    if xml in files:
+                        self.blast_xml_parse(xml_path, gene, organism)
+                    else:
+                        self.blastn_log.warning('Blast has started.' )
+                        start_time = self.get_time()
+                        self.blastn_log.info("The start time is %s" % start_time)
+                        self.blastn_log.info("The current gene is %s (%s)." % (gene, self.tier_dict[gene]))
+                        self.blastn_log.info("The current organisms is %s (%s)." % (organism, taxon_id))
 
-                    with open(xml_path, 'w') as blast_xml:
-                        # Set up blast parameters
-                        query_seq_path = str(gene_path / Path('temp.fasta'))
+                        with open(xml_path, 'w') as blast_xml:
+                            # Set up blast parameters
+                            query_seq_path = str(gene_path / Path('temp.fasta'))
 
-                        # Use Biopython's NCBIBlastnCommandline tool
-                        result_handle = NcbiblastnCommandline(query=query_seq_path,
-                                                              db="refseq_rna",
-                                                              strand="plus",
-                                                              evalue=0.001,
-                                                              outfmt=5,
-                                                              window_masker_taxid=taxon_id,
-                                                              max_target_seqs=10,
-                                                              task="blastn")
+                            # Configure your blastn parameters as a dictionary
+                            blastn_params = {'query': query_seq_path,
+                                            'db': 'refseq_rna',
+                                            'strand': 'plus',
+                                            'evalue': 0.001,
+                                            'outfmt': 5,
+                                            'window_masker_taxid': taxon_id,
+                                            'max_target_seqs': 10,
+                                            'task': 'blastn'}
 
-                        # Capture blast data
-                        stdout_str, stderr_str = result_handle()
-                        self.blastn_log.error(stderr_str)
-                        blast_xml.write(stdout_str)
-                        end_time = self.get_time()
-                        elapsed_time = end_time - start_time
-                        self.blastn_log.info("%s was create." % blast_xml.name)
-                        self.blastn_log.info("The end time is %s." % end_time)
-                        self.blastn_log.info("The BLAST took %s." % elapsed_time)
-                    self.blastn_log.warning(ast + "BLAST END" + ast)
-                    self.add_blast_time(gene, organism, start_time, end_time)
-                    self.blast_xml_parse(xml_path, gene, organism)
+                            # Use Biopython's NCBIBlastnCommandline tool
+                            result_handle = NcbiblastnCommandline(**blastn_params)
 
-                # If the BLAST has gone through all orthologs then create a
-                # master accession file.
-                if gene == genes[-1] and organism == self.org_list[-1]:
-                    shutil.copy(str(self.building_file_path),
-                                str(self.complete_file_path))
-                    shutil.copy(str(self.building_time_file_path),
-                                str(self.complete_time_file_path))
-                    if self.save_data is True:
-                        self.post_blast_analysis(self.project)
-                        self.blastn_log.info("Post blast analysis is complete")
-                    # TODO-ROB Archive function here
-        self.blastn_log.info("BLAST has completed. Check your output data.")
+                            # Capture blast data
+                            try:
+                                stdout_str, _ = result_handle()
+                                blast_xml.write(stdout_str)
+                                end_time = self.get_time()
+                                elapsed_time = end_time - start_time
+                                self.blastn_log.info("%s was create." % blast_xml.name)
+                                self.blastn_log.info("The end time is %s." % end_time)
+                                self.blastn_log.info("The BLAST took %s." % elapsed_time)
+                                self.blastn_log.warning('Blast run has ended.')
+                                self.add_blast_time(gene, organism, start_time, end_time)
+                                self.blast_xml_parse(xml_path, gene, organism)
+
+                            except ApplicationError as err:
+                                self.blastn_log.error(err.stderr)
+                                os.remove(xml_path)
+                                self.blastn_log.info('%s was deleted' % xml)
+
+
+                    # If the BLAST has gone through all orthologs then create a
+                    # master accession file.
+                    if gene == genes[-1] and organism == self.org_list[-1]:
+                        try:
+                            shutil.copyfile(str(self.building_file_path),
+                                            str(self.complete_file_path))
+                            shutil.copyfile(str(self.building_time_file_path),
+                                            str(self.complete_time_file_path))
+                        except FileNotFoundError as fnfe:
+                            msg = 'Your blast did not created any building or building time files not created'
+                            self.blastn_log.error(msg)
+                            raise BlastFailure('Blast has failed to generate data. Check logs for errors.')
+
+                        if self.save_data is True:
+                            self.post_blast_analysis(self.project)
+                            self.blastn_log.info("Post blast analysis is complete")
+
+                        # TODO-ROB Archive function here
+            self.blastn_log.info("BLAST has completed. Check your output data.")
+
+
+class BlastFailure(BaseException):
+    pass
