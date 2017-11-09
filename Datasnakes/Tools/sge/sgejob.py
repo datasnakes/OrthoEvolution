@@ -11,11 +11,10 @@ from Datasnakes.Tools.sge import Qstat
 
 class BaseSGEJob(object):
     """Base class for simple jobs."""
-    def __init__(self, length, base_jobname):
+    def __init__(self, base_jobname):
         """Initialize job attributes."""
         self.default_job_attributes = __DEFAULT__
         self.file2str = file2str
-        _, self.jobname = self._configure(length, base_jobname)
         self.sgejob_log = LogIt().default(logname="SGE JOB", logfile=None)
         self.pbsworkdir = os.getcwd()
 
@@ -27,6 +26,10 @@ class BaseSGEJob(object):
         """Configure job attributes or set it up."""
         baseid, base = basejobids(length, base_jobname)
         return baseid, base
+
+    def debug(self, code):
+        """Debug the SGEJob."""
+        raise NotImplementedError
 
     def _cleanup(self, jobname):
         """Clean up job scripts."""
@@ -40,9 +43,19 @@ class BaseSGEJob(object):
         """Use Qstat to monitor your job."""
         # TODO Allow either slack notifications or email or text.
         qwatch = Qstat().watch(job_id)
-        sleep(30)
         if qwatch == 'Job id not found.':
             self.sgejob_log.info('%s has finished.' % job_id)
+            sleep(30)
+        elif qwatch == 'Waiting for %s to start running.' % job_id:
+            self.sgejob_log.info('%s is queued to run.' % job_id)
+            self.sgejob_log.info('Waiting for %s to start.' % job_id)
+            sleep(30)
+            self.wait_on_job_completion(job_id)
+        elif qwatch == 'Waiting for %s to finish running.' % job_id:
+            self.sgejob_log.info('%s is running.' % job_id)
+            self.sgejob_log.info('Waiting for %s to finish.' % job_id)
+            sleep(30)
+            self.wait_on_job_completion(job_id)
         else:
             self.wait_on_job_completion(job_id)
 
@@ -50,17 +63,18 @@ class BaseSGEJob(object):
 
 class SGEJob(BaseSGEJob):
     """Create a qsub/pbs job & script for the job to execute."""
-    def __init__(self, base_jobname, email_address):
-        super().__init__(length=5, base_jobname=base_jobname)
+    def __init__(self, email_address, base_jobname=None):
+        super().__init__(base_jobname=base_jobname)
         self.email = email_address
-        self.attributes = self._update_default_attributes()
-
-    def debug(self, code):
-        """Debug the SGEJob."""
-        raise NotImplementedError
+        self.attributes = self.default_job_attributes
+        self.jobname = self.default_job_attributes['job_name']
+        if base_jobname is not None:
+            _, self.jobname = self._configure(base_jobname=base_jobname, length=5)
+            self.attributes = self._update_default_attributes()
 
     def _update_default_attributes(self):
         pyfile_path = os.path.join(self.pbsworkdir, self.jobname + '.py')
+        # These attributes are automatically updated if a jobname is given.
         new_attributes = {'email': self.email,
                           'job_name': self.jobname,
                           'outfile': self.jobname + '.o',
