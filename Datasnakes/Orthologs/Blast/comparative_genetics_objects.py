@@ -192,7 +192,7 @@ class CompGenObjects(object):
             self.get_master_lists(self.__data)  # populates our lists
         else:
             self.building_filename = str(self.project + 'building.csv')
-            self.building_time_filename = self.building_filename.replace('building.csv', 'building_time.csv')
+            self.building_time_filename = str(self.project + 'building_time.csv')
 
 
 # //TODO-ROB Add HGNC python module
