@@ -1,7 +1,6 @@
 import os
 import pkg_resources
 import yaml
-import shutil
 from cookiecutter.main import cookiecutter
 from cookiecutter.prompt import prompt_for_config
 from cookiecutter.generate import generate_context
