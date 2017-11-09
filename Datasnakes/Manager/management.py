@@ -1,7 +1,6 @@
 """Directory management tools for the package."""
 import os
 import pkg_resources
-import yaml
 from pathlib import Path
 from Datasnakes import Cookies, Orthologs, Manager, Tools
 from Datasnakes.Cookies import Oven
