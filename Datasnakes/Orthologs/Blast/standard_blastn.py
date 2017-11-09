@@ -21,11 +21,25 @@ class StandardBlastN(CompGenFiles):
         Blast database for specific orthologs of a gene using a query organism
         (usually human).  The best hits from the Blast are filtered for the
         best option in order to get the most accurate accession numbers for
+
         downstream analysis.
 
         :param kwargs:
         """
         super().__init__(project=None, template=template_file, save_data=True, **kwargs)
+
+        # Create a date format
+        self._fmt = '%a %b %d at %I:%M:%S %p %Y'
+        self.date_format = str(d.now().strftime(self._fmt))
+
+        # Ensure paths are set
+        self.environment_vars = dict(os.environ)
+        if 'BLASTDB' not in self.environment_vars.keys():
+            msg = "BLASTDB is not set in your path."
+            raise EnvironmentError(msg)
+        elif 'WINDOW_MASKER_PATH' not in self.environment_vars.keys():
+            msg = "WINDOW_MASKER_PATH is not set in your path."
+            raise EnvironmentError(msg)
 
         # Create a date format
         self._fmt = '%a %b %d at %I:%M:%S %p %Y'

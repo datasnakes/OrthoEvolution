@@ -10,10 +10,11 @@ from Datasnakes import Cookies
 from Datasnakes.Tools import LogIt
 from Datasnakes.Manager import config
 from pkg_resources import resource_filename
+from Datasnakes.Cookies.utils import archive
 
 
 class CookBook(object):
-    _config_file = resource_filename(config.__name__, "cookie_recipes.yml")
+    _config_file = resource_filename(config.yaml.__name__, "cookie_recipes.yml")
 
     def __init__(self, config_file=_config_file, **new_recipes):
         """
@@ -36,6 +37,7 @@ class CookBook(object):
         self.db_cookie = self.CookieJar / Path('new_database')
         self.website_cookie = self.CookieJar / Path('new_website')
 
+        # TODO-ROB:  Make this function better.
         # Load the cookies that are in the cookie_jar config file
         with open(config_file, 'r') as ymlfile:
             configuration = yaml.safe_load(ymlfile)
@@ -58,7 +60,8 @@ class CookBook(object):
 
 class Oven(object):
 
-    def __init__(self, repo=None, user=None, project=None, basic_project=False, databases=None, website=None, output_dir=os.getcwd(), recipes=CookBook()):
+    def __init__(self, repo=None, user=None, project=None, basic_project=False, website=None, db_repo="databases",
+                 output_dir=os.getcwd(), recipes=CookBook()):
         """
         This class uses cookiecutter to deploy custom cookiecutter templates:
 
@@ -72,7 +75,7 @@ class Oven(object):
         :param user (string):  An ingredient representing the user name
         :param project (string):  An ingredient representing the project name.
         :param basic_project (bool):  A secret ingredient ONLY for the basic project cookie.
-        :param databases (list):  An ingredient representing a list of databases.
+        :param db_config_file (list):  An ingredient representing a list of db_config_file.
         :param website (string):  An ingredient representing the website name.
         :param output_dir (path or pathlike):  The cookie jar for storing the cookies.
         :param recipes (pathlike):  An index for the different recipe templates.
@@ -85,15 +88,15 @@ class Oven(object):
         self.user = user
         self.project = project
         self.basic_project = basic_project
-        self.databases = databases
         self.website = website
+        self.db_repo = db_repo
         self.Recipes = recipes
         self.Ingredients = {"repo": self.repo,
                             "user": self.user,
                             "project": self.project,
                             "basic_project": self.basic_project,
-                            "databases": self.databases,
                             "website": self.website,
+                            "db_repo": self.db_repo,
                             "recipes": self.Recipes.__dict__}
 
     def bake_the_repo(self, cookie_jar=None):
@@ -178,31 +181,35 @@ class Oven(object):
             self.cookielog.info('Directories have been created for a standalone project %s. ✔' % project_log_message)
         os.chmod(str(self.cookie_jar / Path(self.project)), mode=0o777)
 
-    def bake_the_db_repo(self, user_db, db_path_dict=None, ncbi_db_repo=None):
-        self.cookielog.warn('Creating directories from the Database Cookie.')
+    def bake_the_db_repo(self, db_config_file, db_path, cookie_jar=None, archive_flag=False, delete=False):
+        # TODO-ROB:  Work work this in with the database management class.
         """
         :return: A new database inside the users database directory
         """
-        # TODO-ROB:  FIx this.  output_dir needs to take self.cookie_jar
-        # TODO-ROB:  There is a better way to accomplish this
-        if db_path_dict:
-            for db, path in db_path_dict.items():
-                e_c = {"db_name": db}
-                cookiecutter(str(self.Recipes.db_cookie), extra_context=e_c, no_input=True, output_dir=str(user_db))
-                os.chmod(str(user_db / Path(db)), mode=0o777)
-                self.cookielog.info('Directories have been created for the database, %s. ✔' % db)
+        if cookie_jar:
+            self.cookie_jar = cookie_jar
 
+        if archive_flag:
+            archive_list = archive(db_path=db_path, arch_path=self.cookie_jar, config_file=db_config_file, delete=delete)
+            for arch in archive_list:
+                self.cookielog.info("An archive has been created at %s." % arch)
         else:
-            db_num = int(input("How many NCBI databases do you need to create?"))
-            for db in range(1, db_num + 1):
-                # Manually set up cookiecutter prompting
-                context_file = str(self.Recipes.db_cookie / Path('cookiecutter.json'))
-                e_c = prompt_for_config(context=generate_context(context_file=context_file))
-                # Create the cookiecutter repo with no input, and add extra content from manual prompts
-                cookiecutter(str(self.Recipes.db_cookie), output_dir=str(ncbi_db_repo), extra_context=e_c, no_input=True)
-                # Use cookiecutter_dict from manual prompts to change the user permissions.
-                os.chmod(str(ncbi_db_repo / Path(e_c['db_name'])), mode=0o777)
-                self.cookielog.info('Directories have been created for the database, %s. ✔' % e_c['db_name'])
+            if self.db_repo:
+                no_input = True
+                e_c = {"db_name": self.db_repo}
+            else:
+                no_input = False
+                e_c = None
+
+            cookiecutter(str(self.Recipes.db_cookie), extra_context=e_c, no_input=no_input, output_dir=str(self.cookie_jar))
+            self.cookielog.info("Directories have been created for a database repository %s." %
+                                str((self.cookie_jar / Path(self.db_repo))))
+            os.chmod(str(self.cookie_jar / Path(self.db_repo)), mode=0o777)
+            #
+            # for db_key, db_value in db_config_dict["Database_Config"].items():
+            #     if db_value:
+            #         pass
+            # TODO-ROB:  Use db_value system with database management configuration.
 
     def bake_the_website(self, host, port, website_path, cookie_jar=None):
         self.cookielog.warn('Creating directories from the Website Cookie template.')

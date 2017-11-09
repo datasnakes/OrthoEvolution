@@ -7,6 +7,7 @@ import yaml
 
 from Datasnakes.Manager import config
 from Datasnakes.Manager import ProjectManagement
+from Datasnakes.Manager import DatabaseManagement
 from Datasnakes.Orthologs.Align import MultipleSequenceAlignment as MSA
 from Datasnakes.Orthologs.Blast.blastn_comparative_genetics import CompGenBLASTn
 from Datasnakes.Orthologs.Blast.comparative_genetics_objects import CompGenObjects
@@ -29,15 +30,16 @@ class DataMana(object):
     def __init__(self, config_file=None, pipeline=None, new=False, start=False, **kwargs):
         """Initialize the attributes that can be used as keys in the config_file."""
         # Full configuration for the pipeline's YAML based variables
-        self.Management_config = self.CompGenAnalysis_config = self.BLASTn_config = self.GenBank_config = self.Alignment_config = None
+        self.Management_config = self.Database_config = self.CompGenAnalysis_config = self.BLASTn_config = \
+            self.GenBank_config = self.Alignment_config = None
         # Alignment configuration
         self.Guidance_config = self.Clustalo_config = self.Pal2Nal_config = None
-        self.pm = self.bl = self.gb = self.al = None
+        self.pm = self.bl = self.gb = self.al = self.db = None
         if pipeline == 'Ortho_CDS_1':
             if new is True:
-                config_file = pkg_resources.resource_filename(config.__name__, 'config_template_new.yml')
+                config_file = pkg_resources.resource_filename(config.yaml.__name__, 'config_template_new.yml')
             else:
-                config_file = pkg_resources.resource_filename(config.__name__, 'config_template_existing.yml')
+                config_file = pkg_resources.resource_filename(config.yaml.__name__, 'config_template_existing.yml')
         if config_file is not None:
             if start is True:
                 self.configure(config_file)
@@ -65,6 +67,11 @@ class DataMana(object):
             else:
                 self.pm = self.Management_config
 
+            if self.Database_config is not None:
+                self.database(self.pm, self.Database_config)
+            else:
+                self.db = self.Database_config
+
                 # CompGenAnalysis and BLASTn Configuration
             if self.BLASTn_config is not None and self.CompGenAnalysis_config is not None:
                 self.BLASTn_config.update(self.CompGenAnalysis_config)
@@ -88,6 +95,24 @@ class DataMana(object):
                 self.align(self.gb)
             else:
                 self.al = self.Alignment_config
+
+    def database(self, proj_mana, database_config):
+        self.db = DatabaseManagement(proj_mana=proj_mana, **database_config)
+        for config_type, database_config_list in self.db.database_dict.items():
+            implementation = database_config_list[0]
+            configuration = database_config_list[1]
+            if isinstance(implementation, dict):
+                for sub_config_type, sub_implementation in implementation.items():
+                    if isinstance(configuration, dict):
+                        sub_implementation(**configuration[sub_config_type])
+                    else:
+                        sub_implementation(**configuration)
+            else:
+                implementation(**configuration)
+
+
+            # TODO-ROB parse the config options
+        pass
 
     def blast(self, proj_mana, blast_config):
         self.bl = CompGenBLASTn(proj_mana=proj_mana, **self.Management_config, **blast_config)
@@ -158,7 +183,7 @@ class ZipUtils(DataMana):
         return comp_path
 
     def add_folder_to_zip(self, zip_handle, folder):
-        """Not meant to be used explicitly.  Use to_zip.
+        """Not meant to be used explicitly.  Use compress.
 
         :param zip_handle: An initialized zipfile.ZipFile handle.
         :param folder: A path that represents an entire folder to be zipped.
