@@ -47,7 +47,6 @@ class ZipUtils:
         zip_handle = zipfile.ZipFile(file=str(file))
         Path(path).mkdir()
         zip_handle.extractall(path=path)
-        pass
 
     def _get_size(self, units="B"):
         total_size = 0
