@@ -1,4 +1,3 @@
-from Datasnakes.Tools.sge import Qstat
 from subprocess import run, CalledProcessError, PIPE
 import os
 from pkg_resources import resource_filename
@@ -8,7 +7,7 @@ from Datasnakes.Tools.logit import LogIt
 from Datasnakes.Tools.sge import basejobids, writecodefile, import_temp, file2str
 from Datasnakes.Tools.sge.sgeconfig import __DEFAULT__
 from Datasnakes.Manager.config import templates
-
+from Datasnakes.Tools.sge import Qstat
 
 class BaseSGEJob(object):
     """Base class for simple jobs."""
@@ -125,4 +124,3 @@ class SGEJob(BaseSGEJob):
 
             else:  # Unsuccessful. Stdout will be '1'
                 self.sgejob_log.error('PBS job not submitted.')
-        # TODO Introduce a wait function w/qstat to check for job completion
