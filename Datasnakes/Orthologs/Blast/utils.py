@@ -162,7 +162,6 @@ def _taxid2gilist(taxonomy_id):
         gilist_log.info('%s already exists' % str(binary))
 
 
-
 def my_gene_info(acc_path, blast_query='Homo_sapiens'):
     """Use Biothings' MyGene api to get information about genes.
     :param acc_path:  An absolute path to the accession file of interest.

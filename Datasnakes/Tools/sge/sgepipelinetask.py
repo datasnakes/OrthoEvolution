@@ -148,7 +148,7 @@ def _build_qsub_command(cmd, job_name, outfile, errfile, select):
     """Submit shell command to SGE queue via `qsub`"""
     # TODO make mem available
     qsub_template = """echo {cmd} | qsub -o {outfile} -e {errfile} -V -r y -l select={select}:ncpus=1:mem=3 -N {job_name}"""
-    return qsub_template.format(cmd=cmd, job_name=job_name, outfile=outfile, 
+    return qsub_template.format(cmd=cmd, job_name=job_name, outfile=outfile,
                                 errfile=errfile, select=select)
 
 # TODO Change ncpu parameter description
@@ -229,7 +229,6 @@ class SGEPipelineTask(luigi.Task):
         return errors
 
     def _init_local(self):
-
         # Set up temp folder in shared directory (trim to max filename length)
         base_tmp_dir = self.shared_tmp_dir
         random_id = '%016x' % random.getrandbits(64)
@@ -341,15 +340,3 @@ class SGEPipelineTask(luigi.Task):
                 logger.info('Job status is UNKNOWN!')
                 logger.info('Status is : %s' % sge_status)
                 raise Exception("job status isn't one of ['r', 'qw', 'E*', 't', 'u']: %s" % sge_status)
-
-
-class LocalSGEPipelineTask(SGEPipelineTask):
-    """A local version of SGEJobTask, for easier debugging.
-
-    This version skips the ``qsub`` steps and simply runs ``work()``
-    on the local node, so you don't need to be on an SGE cluster to
-    use your Task in a test workflow.
-    """
-
-    def run(self):
-        self.work()

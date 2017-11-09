@@ -4,11 +4,12 @@ from Datasnakes.Tools import LogIt
 
 
 def attribute_config(cls, composer, checker, project=None, project_path=None, checker2=None):
-    """
-    Attribute Configuration takes an instance of a class and sets various attributes.
-    The attributes are set by determining the type of configuration.  The class attributes
-    can be composed by another class, they can be set with a dictionary, or they can
-    be set using the basic project template.
+    """Set/configure attributes.
+
+    Attribute Configuration takes an instance of a class and sets various
+    attributes. The attributes are set by determining the type of configuration.
+    The class attributes can be composed by another class, they can be set with
+    a dictionary, or they can be set using the basic project template.
 
     :param cls: An instance of a class that will retain the attributes.
     :param composer: A class that will yield attributes to the cls parameter.
@@ -27,20 +28,20 @@ def attribute_config(cls, composer, checker, project=None, project_path=None, ch
     if issubclass(type(composer), checker) or check2:
         for key, value in composer.__dict__.items():
             setattr(cls, key, value)
-        ac_log.info("The Attribute Configuration was accomplished by composing %s with %s." % (cls.__class__.__name__, composer.__class__.__name__))
+        ac_log.info("The attribute configuration was accomplished by composing %s with %s." % (cls.__class__.__name__, composer.__class__.__name__))
 
     # Attribute configuration using a dictionary.
     elif isinstance(composer, dict):
         for key, value in composer.items():
             setattr(cls, key, value)
-        ac_log.info("The Attribute Configuration of %s was accomplished by using a dictionary." % cls.__class__.__name__)
+        ac_log.info("The attribute configuration of %s was accomplished by using a dictionary." % cls.__class__.__name__)
 
     # Attribute configuration without composer
     elif composer is None:
         if not (project or project_path):
-            raise BrokenPipeError("Without a Project Manager, a project name and project path must be included.")
+            raise BrokenPipeError("Without the Project Management class, a project name and project path must be included.")
         cls = standalone_config(cls, project, project_path)
-        ac_log.info("The Attribute Configuration of %s was accomplished by using a standalone project." % cls.__class__.__name__)
+        ac_log.info("The attribute configuration of %s was accomplished by using a standalone project." % cls.__class__.__name__)
     # Make sure self.project and self.project_path have values
     if not (cls.project or cls.project_path):
         raise BrokenPipeError("The project name and project path attributes have not been set.")
@@ -49,7 +50,8 @@ def attribute_config(cls, composer, checker, project=None, project_path=None, ch
 
 
 def standalone_config(cls, project, project_path, new=False, custom=None):
-    """
+    """Configure a standalone project.
+
     A standalone configuration uses the variables listed.  These variables are
     either mapped to a basic project, used in a custom configuration, or they
     are mapped to some basic project directories with some custom options.

@@ -34,62 +34,15 @@
     <style>
     .fa-stack:hover  .fa.fa-circle-thin { color: black; }
     .fa-stack:hover  .fa.fa-circle { opacity:1.0; color:black;}
-
-    .navbar-custom {
-      background-color: black;
-      border-color: transparent;
+        
+    .sdhcenter{
+        width:275px;
+        margin:0 auto;
+        text-align:left;
     }
-
-    .navbar-custom .navbar-brand {
-      color: #fed136;
-      font-family: "Kaushan Script","Helvetica Neue",Helvetica,Arial,cursive;
+    ul{
+        list-style-type: square;
     }
-
-    .navbar-custom .navbar-brand.active,.navbar-custom .navbar-brand:active,.navbar-custom .navbar-brand:focus,.navbar-custom .navbar-brand:hover {
-      color: #fec503;
-    }
-
-    .navbar-custom .nav li a,.navbar-custom .navbar-toggle {
-      font-family: Montserrat,"Helvetica Neue",Helvetica,Arial,sans-serif;
-      color: #fff;
-      text-transform: uppercase;
-    }
-
-    .navbar-custom .navbar-collapse {
-      border-color: rgba(255,255,255,.02);
-    }
-
-    .navbar-custom .navbar-toggle {
-      background-color: #fed136;
-      border-color: #fed136;
-      font-size: 12px;
-    }
-
-    .navbar-custom .navbar-toggle:focus,.navbar-custom .navbar-toggle:hover {
-      background-color: #fed136;
-    }
-
-    .navbar-custom .nav li a {
-      font-weight: 400;
-      letter-spacing: 1px;
-    }
-
-    .navbar-custom .nav li a:focus,.navbar-custom .nav li a:hover {
-      color: #fed136;
-      outline: 0;
-    }
-
-    .navbar-custom .navbar-nav>.active>a {
-      border-radius: 0;
-      color: #fff;
-      background-color: #fed136;
-    }
-
-    .navbar-custom .navbar-nav>.active>a:focus,.navbar-custom .navbar-nav>.active>a:hover {
-      color: #fff;
-      background-color: #fec503;
-    }
-
     </style>
 
 </head>
@@ -116,10 +69,10 @@
                         <a class="page-scroll" href="#proj">Project Description</a>
                     </li>
                     <li>
-                        <a class="page-scroll" href="#setup">Setup/Install</a>
+                        <a class="page-scroll" href="#setup">Install</a>
                     </li>                    
                     <li>
-                        <a class="page-scroll" href="#usage">Usage</a>
+                        <a class="page-scroll" href="#usage">Examples</a>
                     </li>
                     </ul>
         </div>
@@ -133,7 +86,13 @@
             <div class="row">
                 <div class="col-lg-12 text-center">
                     <h2 class="section-heading">Datasnakes Scripts</h2>
-                    <h3 class="section-subheading text-muted">The Datasnakes-Orthologs package is a collection of the modules which aids in the analysis and visualization of orthologs-related bioinformatics projects.</h3>
+                    <h3 class="section-subheading text-muted">The <a href="https://github.com/datasnakes/Datasnakes-Scripts"> Datasnakes-Scripts</a> python package is an easy to use and comprehensive package which aids in the analysis and visualization of comparative genetics & related bioinformatics projects. 
+                        The current implementation of this package places an emphasis on the inference of orthologs using NCBI's blast, 
+                        various sequence alignment strategies, and phylogenetics analyses including PAML, PhymL, ete3, and more tools.
+
+The goal of this project is to create a pipeline framework for current (inference of orthologs) and future (RNA-seek) projects. 
+                        The Cookies, Manager, Pipeline, and Tools modules act as a framework for our workflow, 
+                        while the Orthologs module provides access to specific functions for our various ortholog inference projects.</h3>
                     <h3 class="section-subheading text-muted">Check out our <a href="https://github.com/datasnakes/Datasnakes-Scripts/wiki">wiki docs</a> and our <a href="http://datasnakes-scripts.readthedocs.io/en/master/">read the docs</a>!</h3>
                 </div>
             </div>
@@ -141,12 +100,12 @@
     </section>
 
 
-    <!-- Setup/Install Section -->
+    <!-- Install Section -->
     <section id="setup" class="bg-light-gray">
         <div class="container">
             <div class="row">
                 <div class="col-lg-12 text-center">
-                    <h2 class="section-heading">Install/Download</h2>
+                    <h2 class="section-heading">Install</h2>
                 </div>
             </div>
             <br/>
@@ -171,7 +130,7 @@
           <!-- Row 1 of Apps -->
             <div class="row">
                 <div class="col-lg-12 text-center">
-                    <h2 class="section-heading">Usage & Examples</h2>
+                    <h2 class="section-heading">Examples</h2>
                     <h3 class="section-subheading text-muted">Insert examples here</h3>
                 </div>
             </div>
@@ -190,12 +149,13 @@
                         <li><a href="https://github.com/datasnakes" onclick="window.open(this.href); return false;"
                         onkeypress="window.open(this.href); return false;"><i class="fa fa-github"></i></a>
                         </li>
+                        <li><a href="https://twitter.com/datasnakes" onclick="window.open(this.href); return false;"
+                        onkeypress="window.open(this.href); return false;"><i class="fa fa-twitter"></i></a>
+                        </li>
                     </ul>
                 </div>
                 <div class="col-md-4">
                     <ul class="list-inline quicklinks">
-                        <li><a href="#">Privacy Policy</a>
-                        </li>
                         <li><a href="https://github.com/datasnakes/Datasnakes-Scripts/blob/master/LICENSE">Project License</a>
                         </li>
                     </ul>

@@ -32,7 +32,7 @@ class BaseFTPClient(object):
     def _login(self):
         """Connect to the FTP server anonymously."""
         with contextlib.suppress(error_perm):
-            ftp = FTP(self._ftpsite, timeout=None)
+            ftp = FTP(self._ftpsite, timeout=600)
             ftp.login(user='anonymous', passwd=self._email)
             ftp.voidcmd('NOOP')
             ftp.set_debuglevel(self._debug_lvl)

@@ -82,4 +82,5 @@ class BaseBash(object):
 
 class PyBasher(BaseBash):
     """Common bash commands."""
-    print("hello.")
+    def __init__(self, cmd):
+        super().__init__(cmd)
