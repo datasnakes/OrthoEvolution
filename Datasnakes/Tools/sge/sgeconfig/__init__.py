@@ -35,24 +35,3 @@ __DEFAULT__ = {
             'cmd': 'python3 ' + os.path.join(os.getcwd(), _jobname + '.py'),
             'email': 'n/a'
              }
-
-
-__CUSTOM__ = {
-            'author': '{author}',
-            'description': '{description}',
-            'date': d.now().strftime(_format1),
-            'PBS_JOBID': '${PBS_JOBID}',
-            'PBS_O_WORKDIR': '${PBS_O_WORKDIR}',
-            'proj_name': '{project}',
-            'select': '{int(select)}',
-            'memgb': '{gigabytes}',
-            'cput': '{cput}',
-            'wt': '{walltime}',
-            'job_name': '{jobname}',
-            'outfile': '{outfile}',
-            'errfile': '{errfile}',
-            'script': '{script_name}',
-            'log_name': '{logname}',
-            'cmd': 'python3 {script_name}.py',
-            'email': '{email}'
-            }
