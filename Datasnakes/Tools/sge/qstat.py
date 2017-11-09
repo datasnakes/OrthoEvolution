@@ -3,13 +3,14 @@ from subprocess import check_output, CalledProcessError
 import getpass
 import re
 
+
 class Qstat(object):
     def __init__(self):
         """Initialize class."""
         _username = getpass.getuser()
         self.username = _username
         self.split_regex = re.compile(r'\s+')
-        
+
     def qstatinfo(self, qstat_path='qstat'):
         """Retrieve qstat output."""
         try:
@@ -22,12 +23,12 @@ class Qstat(object):
             raise FileNotFoundError('qstat is not on your machine.')
 
         jobs = self._output_parser(qstatinfo)
-        
+
         return jobs
 
     def _output_parser(self, output):
         """Parse output from qstat pbs commandline program.
-        
+
         Returns a list of dictionaries for each job.
         """
         lines = output.decode('utf-8').split('\n')
@@ -45,24 +46,24 @@ class Qstat(object):
 
         return jobs
 
-    def job_ids(self):
+    def all_job_ids(self):
         """Retrieve a list of all jobs running or queued."""
         jobs = self.qstatinfo()
         ids = [j['job_id'] for j in jobs]
         return ids
 
-    def running_jobs(self):
+    def all_running_jobs(self):
         """Retrieve a list of running jobs."""
         jobs = self.qstatinfo()
         ids = [j['job_id'] for j in jobs if j['status'] == 'R']
         return ids
-        
-    def queued_jobs(self):
+
+    def all_queued_jobs(self):
         """Retrieve a list of queued jobs."""
         jobs = self.qstatinfo()
         ids = [j['job_id'] for j in jobs if j['status'] == 'Q']
         return ids
-    
+
     def myjobs(self):
         """Retrieve a list of all the current user's jobs."""
         jobs = self.qstatinfo()
@@ -70,18 +71,24 @@ class Qstat(object):
         if len(ids) < 1:
             return 'You have no jobs running or queued.'
         else:
-            return ids
-            
+            rids = [j['job_id'] for j in jobs if j['user'] == self.username
+                    and j['status'] == 'R']
+            qids = [j['job_id'] for j in jobs if j['user'] == self.username
+                    and j['status'] == 'Q']
+            return 'Running jobs: %s\nQueued jobs: %s' % (rids, qids)
+
     def watch(self, job_id):
-        """Wait until a job or list of job finishes and get updates."""
+        """Wait until a job or list of jobs finishes and get updates."""
         jobs = self.qstatinfo()
-        ids = [j['job_id'] for j in jobs if j['user'] == self.username]
-        if job_id in ids:
-            return 'Waiting for %s to finish running' % job_id
+        rids = [j['job_id'] for j in jobs if j['user'] == self.username
+                and j['status'] == 'R']
+        qids = [j['job_id'] for j in jobs if j['user'] == self.username
+                and j['status'] == 'Q']
+        if job_id in qids:
+            return 'Waiting for %s to start running.' % job_id
+            self.watch(job_id)
+        elif job_id in rids:
+            return 'Waiting for %s to finish running.' % job_id
+            self.watch(job_id)
         else:
             return 'Job id not found.'
-        # TODO Create a functions that checks every few minutes until job
-        # finishes.
-        
-        
-        
