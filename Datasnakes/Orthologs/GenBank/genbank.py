@@ -1,10 +1,10 @@
 """Class for managing, downloading and extracting features from genbank files."""
-
 import os
 import shutil
 from pathlib import Path
 from BioSQL import BioSeqDatabase
 from Bio import SeqIO
+
 from Datasnakes.Tools import LogIt
 from Datasnakes.Orthologs.utils import attribute_config
 from Datasnakes.Orthologs.Blast.blastn_comparative_genetics import CompGenBLASTn

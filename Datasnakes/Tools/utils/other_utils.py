@@ -92,6 +92,7 @@ def csvtolist(csvfile, column_header='Organism'):
     file = pd.read_csv(csvfile)
     # Create a list name/variable and use list()
     listfromcolumn = list(file[column_header])
+
     return listfromcolumn
 
 

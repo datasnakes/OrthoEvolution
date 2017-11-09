@@ -13,7 +13,7 @@
 #PBS -o $outfile
 #PBS -e $errfile
 
-cd $PBS_O_WORKDIR
+cd $pbsworkdir
 
 $cmd
 

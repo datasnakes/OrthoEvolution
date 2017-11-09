@@ -1,4 +1,4 @@
-"""Optimized for use with local/standalone NCBI BLAST 2.6.0."""
+"""Optimized for use with local/standalone NCBI BLAST 2.6.0 and higher"""
 import os
 import shutil
 import subprocess
@@ -8,32 +8,38 @@ from pathlib import Path
 from Bio import SearchIO  # Used for parsing and sorting XML files.
 from Bio.Blast.Applications import NcbiblastnCommandline
 
-from Datasnakes.Manager import config
 from Datasnakes.Orthologs.Blast.comparative_genetics_files import CompGenFiles
 from Datasnakes.Orthologs.Blast.utils import gene_list_config, map_func
 
 
-# TODO-ROB: Find packages for script timing and analysis
-# TODO-ROB:  Rework the save_data parameter.
-# TODO-ROB:  Rework the query organism stuff.
-
-class CompGenBLASTn(CompGenFiles):
+class StandardBlastN(CompGenFiles):
     """Combines Project Management features with Blasting."""
-    def __init__(self, project, template=None, save_data=True, **kwargs):
+    def __init__(self, template_file, **kwargs):
         """This class inherits from the CompGenFiles class.
 
         This class utilizes it's parent classes to search a standalone
         Blast database for specific orthologs of a gene using a query organism
         (usually human).  The best hits from the Blast are filtered for the
-        best option in order to get the most accuarate accession numbers for
+        best option in order to get the most accurate accession numbers for
+
         downstream analysis.
 
-        :param project:  The project name.
-        :param template:  The accession file template.
-        :param save_data:  A flag for saving the post_blast data to an excel file.
         :param kwargs:
         """
-        super().__init__(project=project, template=template, save_data=save_data, **kwargs)
+        super().__init__(project=None, template=template_file, save_data=True, **kwargs)
+
+        # Create a date format
+        self._fmt = '%a %b %d at %I:%M:%S %p %Y'
+        self.date_format = str(d.now().strftime(self._fmt))
+
+        # Ensure paths are set
+        self.environment_vars = dict(os.environ)
+        if 'BLASTDB' not in self.environment_vars.keys():
+            msg = "BLASTDB is not set in your path."
+            raise EnvironmentError(msg)
+        elif 'WINDOW_MASKER_PATH' not in self.environment_vars.keys():
+            msg = "WINDOW_MASKER_PATH is not set in your path."
+            raise EnvironmentError(msg)
 
         # Create a date format
         self._fmt = '%a %b %d at %I:%M:%S %p %Y'
@@ -68,12 +74,16 @@ class CompGenBLASTn(CompGenFiles):
     def blast_config(self, query_accessions, query_organism, auto_start=False):
         """This method configures everything for our BLAST workflow.
 
-        It configures the accession file, which works with interrupted Blasts.
-        It configures a gene_list for blasting the right genes.
+        It configures the accession file, which works with
+        interrupted Blasts.  It configures a gene_list for blasting the right
+        genes.
 
-        :param query_accessions:  A list of query accession numbers.  Each gene needs one from the same organism.
-        :param query_organism:  The name of the query organism for post configuration.
-        :param auto_start:  A flag that determines whether the blast starts automatically.
+        :param query_accessions:  A list of query accession numbers.
+                                  Each gene needs one from the same organism.
+        :param query_organism:  The name of the query organism for post
+                                configuration.
+        :param auto_start:  A flag that determines whether the blast
+                            starts automatically.
         :return:
         """
         sep = 20 * '*'
@@ -121,9 +131,6 @@ class CompGenBLASTn(CompGenFiles):
             fasta_setup = "blastdbcmd -entry {query} -db refseq_rna -outfmt %f -out {temp fasta}".format(**fmt)
             fasta_status = subprocess.call([fasta_setup], shell=True)
 
-
-            # TODO-ROB:  Add function to add the gi numbers to the dataframe/csv-file,
-            # TODO-ROB: and add a check function to see if thats already there
             # Check the status of the custom blast data extraction
             if fasta_status != 0:  # Command was successful.
                 self.blastn_log.error("FASTA sequence for %s not found in the BLAST extraction" % query)
@@ -220,8 +227,11 @@ class CompGenBLASTn(CompGenFiles):
         ast = 10 * '*'  # Asterisk separator
         if pre_configured is False:
             query = self.df[query_organism].tolist()
-            self.blast_config(query_accessions=query, query_organism=query_organism, auto_start=True)
-            genes = self.current_gene_list  # Gene list populated by blast_config.
+            self.blast_config(query_accessions=query,
+                              query_organism=query_organism,
+                              auto_start=True)
+            # Gene list populated by blast_config
+            genes = self.current_gene_list
         elif pre_configured is True:
             genes = genes
 
@@ -230,7 +240,7 @@ class CompGenBLASTn(CompGenFiles):
         # TIP Steps to a bulk blast
         # 1.  Iterate the gene of interest
         # 2.  Iterate the organisms of interest
-        # 3.  BLAST
+        # 3.  Perform BlastN
         for gene in genes:
             for organism in self.org_list:
                 # Skip the query organism
@@ -292,5 +302,5 @@ class CompGenBLASTn(CompGenFiles):
                     if self.save_data is True:
                         self.post_blast_analysis(self.project)
                         self.blastn_log.info("Post blast analysis is complete")
-                    # TODO-ROB Archive function here
+
         self.blastn_log.info("BLAST has completed. Check your output data.")
