@@ -1,11 +1,12 @@
-import contextlib
+from Datasnakes.Tools.sge import Qstat
 from subprocess import run, CalledProcessError, PIPE
 import os
 from pkg_resources import resource_filename
+from time import sleep
 
 from Datasnakes.Tools.logit import LogIt
 from Datasnakes.Tools.sge import basejobids, writecodefile, import_temp, file2str
-from Datasnakes.Tools.sge.sgeconfig import __DEFAULT__, __CUSTOM__
+from Datasnakes.Tools.sge.sgeconfig import __DEFAULT__
 from Datasnakes.Manager.config import templates
 
 
@@ -14,9 +15,8 @@ class BaseSGEJob(object):
     def __init__(self, length, base_jobname):
         """Initialize job attributes."""
         self.default_job_attributes = __DEFAULT__
-        self.custom_job_attributes = __CUSTOM__
         self.file2str = file2str
-        self.job_id, self.jobname = self._configure(length, base_jobname)
+        _, self.jobname = self._configure(length, base_jobname)
         self.sgejob_log = LogIt().default(logname="SGE JOB", logfile=None)
         self.pbsworkdir = os.getcwd()
 
@@ -29,47 +29,55 @@ class BaseSGEJob(object):
         baseid, base = basejobids(length, base_jobname)
         return baseid, base
 
-    def _update_default_attributes(self, email, jobname):
-        pyfile_path = os.path.join(self.pbsworkdir, jobname + '.py')
-        new_attributes = {'email': email,
-                          'job_name': jobname,
-                          'outfile': jobname + '.o',
-                          'errfile': jobname + '.e',
-                          'script': jobname,
-                          'log_name': jobname + '.log',
-                          'cmd': 'python3 ' + pyfile_path,
-                            }
-        self.default_job_attributes.update(new_attributes)
-
-        return self.default_job_attributes
-
     def _cleanup(self, jobname):
         """Clean up job scripts."""
+        self.sgejob_log.warning('Your job will now be cleaned up.')
         os.remove(jobname + '.pbs')
-        self.sgejob_log.warning('%s.pbs has been deleted' % jobname)
+        self.sgejob_log.warning('%s.pbs has been deleted.' % jobname)
         os.remove(jobname + '.py')
-        self.sgejob_log.warning('%s.py has been deleted' % jobname)
-    
-    def wait_on_job_completion():
-        pass
+        self.sgejob_log.warning('%s.py has been deleted.' % jobname)
+
+    def wait_on_job_completion(self, job_id):
+        """Use Qstat to monitor your job."""
+        # TODO Allow either slack notifications or email or text.
+        qwatch = Qstat().watch(job_id)
+        sleep(30)
+        if qwatch == 'Job id not found.':
+            self.sgejob_log.info('%s has finished.' % job_id)
+        else:
+            self.wait_on_job_completion(job_id)
+
+
 
 class SGEJob(BaseSGEJob):
     """Create a qsub/pbs job & script for the job to execute."""
     def __init__(self, base_jobname, email_address):
         super().__init__(length=5, base_jobname=base_jobname)
         self.email = email_address
-        
+        self.attributes = self._update_default_attributes()
+
     def debug(self, code):
         """Debug the SGEJob."""
-        self.submit(code, debug=True)
+        raise NotImplementedError
 
-    def submit(self, code, cleanup=False, default=True, debug=False):
+    def _update_default_attributes(self):
+        pyfile_path = os.path.join(self.pbsworkdir, self.jobname + '.py')
+        new_attributes = {'email': self.email,
+                          'job_name': self.jobname,
+                          'outfile': self.jobname + '.o',
+                          'errfile': self.jobname + '.e',
+                          'script': self.jobname,
+                          'log_name': self.jobname + '.log',
+                          'cmd': 'python3 ' + pyfile_path,
+                            }
+        self.default_job_attributes.update(new_attributes)
+
+        return self.default_job_attributes
+
+    def submit(self, code, cleanup=True, default=True):
         """Create and submit a qsub job.
 
         Submit python code."""
-        if debug:
-            self.sgejob_log.info('You decided to debug your SGEJob.')
-
         # TIP If python is in your environment as only 'python' update that.
         # If default, a python file will be created from code that is used.
         # Allow user input to be a python file
@@ -87,11 +95,10 @@ class SGEJob(BaseSGEJob):
 
             # Create the pbs script from the template or dict
             pbstemp = import_temp(self.temp_pbs)
-            
-            attributes = self._update_default_attributes(self.email, self.jobname)
             pbsfilename = self.jobname + '.pbs'
+
             with open(pbsfilename, 'w') as pbsfile:
-                pbsfile.write(pbstemp.substitute(attributes))
+                pbsfile.write(pbstemp.substitute(self.attributes))
                 pbsfile.close()
             self.sgejob_log.info('%s has been created.' % pbsfilename)
         else:
@@ -99,27 +106,23 @@ class SGEJob(BaseSGEJob):
             raise NotImplementedError(msg)
             # TODO Add custom job creation
 
-        if debug:
-            with contextlib.suppress(CalledProcessError):
-                cmd = 'qsub ' + self.jobname + '.pbs'  # this is the command
-                self.sgejob_log.info('`%s` will be run.' % cmd)
-                self.sgejob_log.info('Job submitted.')
+        # Submit the job using qsub
+        try:
+            cmd = ['qsub ' + self.jobname + '.pbs']  # this is the command
+            # Shell MUST be True
+            cmd_status = run(cmd, stdout=PIPE, stderr=PIPE, shell=True, check=True)
+        except CalledProcessError as err:
+            self.sgejob_log.error(err.stderr.decode('utf-8'))
+            if cleanup:
+                self._cleanup(self.jobname)
+        else:
+            if cmd_status.returncode == 0:  # Command was successful.
+                submitted_jobid = cmd_status.stdout.decode('utf-8')
+                self.sgejob_log.info(self.jobname + ' was submitted.' )
+                self.sgejob_log.info('Your job id is: %s' % submitted_jobid)
+                self.wait_on_job_completion(submitted_jobid)
                 self._cleanup(self.jobname)
 
-        else:
-            try:
-                cmd = ['qsub ' + self.jobname + '.pbs']  # this is the command
-                # Shell MUST be True
-                cmd_status = run(cmd, stdout=PIPE, stderr=PIPE, shell=True, check=True)
-            except CalledProcessError as err:
-                self.sgejob_log.error(err.stderr.decode('utf-8'))
-                if cleanup:
-                    self._cleanup(self.jobname)
-            else:
-                if cmd_status.returncode == 0:  # Command was successful.
-                    self.sgejob_log.info('Job submitted.')
-                    # TODO add a check to for job errors or check for error file.
-
-                else:  # Unsuccessful. Stdout will be '1'
-                    self.sgejob_log.error('PBS job not submitted.')
+            else:  # Unsuccessful. Stdout will be '1'
+                self.sgejob_log.error('PBS job not submitted.')
         # TODO Introduce a wait function w/qstat to check for job completion
