@@ -1,26 +1,39 @@
 """Use python's multiprocessing module to create multiple processes and speed
 up the completion of functions/classes."""
-from logzero import logger as log
-from multiprocessing import Pool, cpu_count
+
+from multiprocessing import Pool, cpu_count, get_logger
 from time import time
-import sys
+import logging
+
+import logzero
 
 
 class Multiprocess(object):
-    def __init__(self, n, function, listinput):
-        self.n = n  # Number of processes to run
+    """Use multiple processes with a function."""
+    cpus = cpu_count()
+    num_procs = cpus - 1
 
-        # Force user to use optimal number of processes
-        if int(self.n) > (int(cpu_count) - 1):
-            sys.exit(ValueError)
+    def __init__(self):
+        pass
 
-        self.function = function
-        self.listinput = listinput
+    def _logger(self):
+        """Add the multiprocessing module's logger."""
+        multiprocess_handler = get_logger()
+        multiprocess_handler = logging.StreamHandler()
+        multiprocess_handler.setLevel(logging.ERROR)
+        multiprocess_handler.setFormatter(logzero.LogFormatter(color=True))
 
-    def main(self):
+        # Attach it to the logzero default logger
+        logzero.logger.addHandler(multiprocess_handler)
+        logger = logzero.logger
+        return logger
+
+    def map2function(self, function, iterable):
         """Start a pool to run your function with a list."""
-        ts = time()
-        with Pool(processes=self.n) as p:
-            p.map(self.function, self.listinput)
-            minutes = (time() - ts) / 60
-            log.info("Took {} minutes to complete".format(minutes))
+        log = self._logger()  # Start the logger
+        time_secs = time()
+        with Pool(processes=self.num_procs) as pool:
+            pool.map(function, iterable)
+            minutes = (time() - time_secs) / 60
+        log.info("Took %s minutes to complete.", minutes)
+        logging.shutdown()  # Shutdown the logger

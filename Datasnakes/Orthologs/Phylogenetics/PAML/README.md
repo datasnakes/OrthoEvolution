@@ -2,6 +2,14 @@ PAML Documentation
 =============================
 
 
+
+*Why ETE?*
+<br>
+ETE is python package for building, comparing, annotating, manipulating and visualising
+trees. It provides a comprehensive API and a collection of command line tools,
+ including utilities to work with the NCBI taxonomy tree.
+
+
 Usage
 -----
 

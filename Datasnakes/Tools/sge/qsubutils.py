@@ -11,7 +11,6 @@ from datetime import datetime as d
 import platform
 import getpass
 import os
-#from Datasnakes.Tools.multiprocess import genes2analyze
 
 
 class QsubUtils:
@@ -102,6 +101,7 @@ class QsubUtils:
         with open(base + '.py', 'w') as pyfile:
             pyfile.write(code)
             pyfile.close()
+
         # TIP If python is in your environment as only 'python' update that.
         # TODO-SDH add a default parameter or custom parameter
         # If default, python file will be created from code that is used.
@@ -143,28 +143,3 @@ class MultiJobber(QsubUtils):
     """
     # TODO-SDH This needs testing.
     # TODO-SDH Create a more simplified process/algorithm.
-    def __init__(self, default=True, cleanup=True, prefix=""):
-        super().__init__(self)
-        self.code = super().import_temp('temp.py')
-        create = super().submitpythoncode(self, code=self.code,
-                                          default=True,
-                                          cleanup=True,
-                                          prefix="")
-
-        #self.clustal_chunks, self.paml_chunks = genes2analyze()
-
-        try:
-            for key, value in self.clustal_chunks.items():
-                create
-        except:
-            raise Exception('Error in clustal multijobber.')
-            sys.exit('Will not proceed to paml.')
-        try:
-            for key, value in self.paml_chunks.items():
-                create
-        except:
-            raise Exception('Error in pamlmultijobber.')
-            sys.exit('Will not proceed')
-
-        finally:
-            print('Clustal and Paml multijobber complete.')

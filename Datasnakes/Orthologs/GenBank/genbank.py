@@ -5,6 +5,8 @@ import shutil
 from pathlib import Path
 from BioSQL import BioSeqDatabase
 from Bio import SeqIO
+from Datasnakes.Tools import LogIt
+from Datasnakes.Orthologs.utils import attribute_config
 from Datasnakes.Orthologs.Blast.blastn_comparative_genetics import CompGenBLASTn
 from Datasnakes.Tools.utils.other_utils import makedirectory
 from Datasnakes.Orthologs.Blast.comparative_genetics_objects import CompGenObjects
@@ -16,82 +18,42 @@ class GenBank(object):
     """Class for managing, downloading and extracting features from genbank files."""
 
     def __init__(self, project, project_path=None, solo=False, multi=True, archive=False, min_fasta=True, blast=CompGenBLASTn, **kwargs):
-        """Handle genbank files in various ways for the Orthologs Project.
+        """
+        This class will handle genbank files in various ways for the
+        Orthologs Project.  It allows for .gbff files to be downloaded
+        from NCBI and uploaded to a BioSQL database (biopython).  Single
+        .gbk files can be downloaded from the .gbff, and uploaded to a
+        custom database file for faster acquisition of GenBank data.
 
-        :param ncbi_db_repo: A path to the .db files of interest.  These
-        .db files were created by downloading NCBI's refseq-GenBank
-        flat files, and then uploading these files to a .db file
-        that uses biopython's BioSQL database schema.
-        :param gbk_path: The path used for the custom .db files and
-        the single entry GenBank files.
-        use:
-            Path(gbk_path) / Path(target_gbk_files_path);
-            Path(gbk_path) / Path(db_files)
-
-        :param solo: Boolean for adding single fasta files.
-        :param multi:  Boolean for adding multi-fasta files.
+        :param project:  The name of the project.
+        :param project_path: The relative path to the project.
+        :param solo:  A flag for adding single fasta files.
+        :param multi:  A flag for adding multi-fasta files.
+        :param archive: A flag for archiving current GenBank Data.
+        :param min_fasta: A flag for minimizing FASTA file headers.
+        :param blast:  The blast parameter is used for composing various
+                       Orthologs.Blast classes.  Can be a class, a dict,
+                       or none.
+        :returns:  .gbff files/databases, .gbk files/databases, and FASTA files.
         """
 
         # TODO-ROB: Change the way the file systems work.
         self.project = project
-        print(blast)
-        if blast is not None and not isinstance(blast, dict):
-            print(blast)
-            print(type(blast))
-            if issubclass(type(blast), CompGenObjects) or issubclass(type(blast), CompGenBLASTn):
-                setattr(blast, 'project', project)
-                for key, value in blast.__dict__.items():
-                    setattr(self, key, value)
-                print('project_path=%s' % self.project_path)
-            else:
+        self.genbanklog = LogIt().default(logname="GenBank", logfile=None)
 
-                self.project_path = Path(os.getcwd()) / Path(self.project)
-            makedirectory(self.project_path)
-            print('project_path=%s' % self.project_path)
-            self.removed_bn_config(kwargs)
-        else:
-            setattr(blast, 'project', project)
-            for key, value in blast.__dict__.items():
-                setattr(self, key, value)
-            print('project_path=%s' % self.project_path)
-
-        self.gbk_path = self.raw_data / Path('GENBANK')
-        # TODO deprecate
-        self.target_gbk_files_path = self.gbk_path / Path('gbk')
-        makedirectory(self.target_gbk_files_path)
-
-        # TODO deprecate
-        self.target_fasta_files = self.gbk_path / Path('fasta')
-        makedirectory(self.target_fasta_files)
-
-        if project_path:
-            self.project_path = self.repo_path
-        else:
-            self.project_path = Path(os.getcwd()) / Path(self.project)
-        Path.mkdir(self.project_path, parents=True, exist_ok=True)
-        print('project_path=%s' % self.project_path)
-        self.removed_bn_config(kwargs)
+        # Configuration of class attributes
+        add_self = attribute_config(self, composer=blast, checker=CompGenBLASTn, checker2=CompGenObjects,
+                                    project=project, project_path=project_path)
+        for var, attr in add_self.__dict__.items():
+            setattr(self, var, attr)
 
         # Configuration
-        # TODO Create configuration script.
         self.target_gbk_db_path = self.user_db / Path(self.project)
         # TODO-ROB: Configure GenBank function
-        makedirectory(self.target_gbk_db_path)
+        Path.mkdir(self.target_gbk_db_path, parents=True, exist_ok=True)
         self.solo = solo
         self.multi = multi
         self.min_fasta = min_fasta
-
-    def removed_bn_config(self, kwargs):
-        self.raw_data = self.project_path / Path('raw_data')
-        self.user_db = self.project_path / Path('user_db')
-        self.ncbi_db_repo = self.project_path / Path('ncbi_db_repo')
-
-        for key, value in kwargs.items():
-            setattr(self, key, value)
-
-        makedirectory(self.raw_data)
-        makedirectory(self.user_db)
-        makedirectory(self.ncbi_db_repo)
 
     @staticmethod
     def name_fasta_file(path, gene, org, feat_type, feat_type_rank, extension, mode):
@@ -129,6 +91,10 @@ class GenBank(object):
 
     def blast2_gbk_files(self, org_list, gene_dict):
         """
+        The blast2_gbk_files is only callable if the blast parameter
+        inherits one of the blast classes.  This method also requires
+        the BioSQL databases of NCBI's .gbffs to be set up.
+
         :param org_list:  List of organisms
         :param gene_dict:  A nested dictionary for accessing accession numbers.
         (e.g. gene_dict[GENE][ORGANISM} yields an accession number)
@@ -151,15 +117,15 @@ class GenBank(object):
     def get_gbk_file(self, accession, gene, organism, server_flag=None):
         """
         :param accession: Accession number of interest without the version.
-        :param gene: Target gene of accession number parameter.
-        :param organism: Target organism of accession number parameter.
+        :param gene: Target gene of the accession number parameter.
+        :param organism: Target organism of the accession number parameter.
         :return: This function searches through the given NCBI databases (created by
         uploading NCBI refseq .gbff files to a BioPython BioSQL database) and creates
         single GenBank files.  This function can be used after a blast or on its own.
         If used on it's own then the NCBI .db files must be manually moved to the proper
         directories.
         """
-        # TODO-ROB:  Abstract this from the BLAST class.  Make this more independent
+
         # Make a list of BioSQL database(.db) files that contain GenBank info
         db_files_list = []
         for FILE in os.listdir(str(self.ncbi_db_repo)):
@@ -184,15 +150,16 @@ class GenBank(object):
                     gbk_file_path = gene_path / Path(gbk_file)
                     with open(gbk_file_path, 'w') as GB_file:
                         GB_file.write(record.format('genbank'))
-                        print(GB_file.name, 'created')
+                        self.genbanklog.info(GB_file.name, 'created')
                     server_flag = True
                     break
                 except IndexError:
-                    print('Index Error in %s.  Moving to the next database...' % SUB_DB_NAME)
+                    self.genbanklog.critical('Index Error in %s.  Moving to the next database...' % SUB_DB_NAME)
                     continue
 
     def get_fasta_files(self, acc_dict, db=True):
-        """Create FASTA files for every GenBank record."""
+        """Create FASTA files for every GenBank record in the
+        accession number dictionary."""
 
         # Get FASTA files from the BioSQL GenBank databases.
         if db is True:
@@ -204,6 +171,7 @@ class GenBank(object):
                         for item in db.keys():
                             record = db.lookup(item)
                             self.write_fasta_files(record, acc_dict)
+                            self.genbanklog.info("FASTA files for %s created from BioSQL database." % item)
                 except:
                     raise()
         # Get FASTA files from the GenBank files.
@@ -215,22 +183,22 @@ class GenBank(object):
                     if Path(gbk_file).suffix is '.gbk':
                         record = SeqIO.read(gbk_file, 'genbank')
                         self.write_fasta_files(record, acc_dict)
+                        self.genbanklog.info("FASTA files for %s created." % gbk_file)
 
     def gbk_upload(self):
-        """Upload the BioSQL database with genbank data."""
+        """Upload BioSQL databases with GenBank data (.gbk files)."""
         t_count = 0
-        Path.mkdir(self.target_gbk_db_path)
         for TIER in self.tier_frame_dict.keys():
             db_name = str(TIER) + '.db'
             db_file_path = self.target_gbk_db_path / Path(db_name)
             if os.path.isfile(str(db_file_path)) is False:
-                print('Copying Template BioSQL Database...  This may take a few minutes...')
+                self.genbanklog.warn('Copying Template BioSQL Database...  This may take a few minutes...')
                 # TODO-ROB:  Create a utility function for creating BioSQL databases
                 shutil.copy2('Template_BioSQL_DB.db', str(db_file_path))
             else:
                 # TODO-ROB: This part is broken until the template db creation and management is added
                 os.remove(str(db_file_path))
-                print('Copying Template BioSQL Database...  This may take a few minutes...')
+                self.genbanklog.warn('Copying Template BioSQL Database...  This may take a few minutes...')
                 shutil.copy2('Template_BioSQL_DB.db', str(db_file_path))
 
             server = BioSeqDatabase.open_database(driver='sqlite3', db=str(db_file_path))
@@ -245,11 +213,11 @@ class GenBank(object):
                         db = server[sub_db_name]
                         count = db.load(SeqIO.parse(FILE, 'genbank'))
                         server.commit()
-                        print('Server Commited %s' % sub_db_name)
-                        print('%s database loaded with %s.' % (db.dbid, FILE))
-                        print("That file contains %s genbank records." % str(count))
+                        self.genbanklog.info('Server Commited %s' % sub_db_name)
+                        self.genbanklog.info('%s database loaded with %s.' % (db.dbid, FILE))
+                        self.genbanklog.info("That file contains %s genbank records." % str(count))
                         t_count = t_count + count
-                        print('The total number of files loaded so far is %i.' % t_count)
+                        self.genbanklog.info('The total number of files loaded so far is %i.' % t_count)
                     except BaseException:
                         server.rollback()
                         try:
@@ -357,7 +325,7 @@ class GenBank(object):
             file.close()
 
     def multi_fasta(self, na_entry, aa_entry, fmt):
-        """Write multiple fasta files."""
+        """Write multi-fasta files."""
         mode = 'a'
 
         # Create the desired variables from the formatter dictionary.

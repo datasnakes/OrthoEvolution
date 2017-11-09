@@ -2,39 +2,41 @@ import os
 import pexpect  # I used this to feed input into shell executable
 import sys
 
-# Create a variable for os.rename
-rn = os.rename
-
 
 class Phylip(object):
-    def __init__(inputfile):
+    def __init__(self, inputfile):
         """ The input file should be a phylip formatted multiple sequence
         alignment."""
+
+        self._rename = os.rename
         if sys.platform == 'win32' or 'win64':
             sys.exit("This module is strictly for use on Linux at the moment.")
 
-        # Rename the input file to infile
-        rn(inputfile, "infile")
+        self.inputfile = inputfile
 
-    def dnapars(gene):
+        # Rename the input file to infile
+        self._rename(self.inputfile, "infile")
+        self.inputfile = "infile"
+
+    def dnapars(self, outfile, outtree):
         """ Maximum Parsimony using Phylip executable, dnapars,
         within unix shell."""
         dnapars = pexpect.spawnu("dnapars infile")
         dnapars.sendline("Y\r")
         dnapars.waitnoecho()
-        rn("outfile", gene + "_maxpars")
-        rn("outtree", gene + "_maxparstree")
+        self._rename("outfile", outfile + "_dnapars_output")
+        self._rename("outtree", outtree + "_maxparsimony_tree")
 
-    def dnaml(gene):
-        """Maximum Likelihood using Phylip executable, dnaml, within a unix shell. """
+    def dnaml(self, outfile, outtree):
+        """Maximum Likelihood using dnaml within a unix shell. """
         dnaml = pexpect.spawnu("dnaml infile")
         dnaml.sendline("Y\r")
         dnaml.waitnoecho()
-        rn("outfile", gene + "_maxlike")
-        rn("outtree", gene + "_maxliketree")
+        self._rename("outfile", outfile + "_dnaml_output")
+        self._rename("outtree", outtree + "_maxlikelihood_tree")
 
-    def dnadist(gene):
+    def dnadist(self, dnadist_output):
         dnadist = pexpect.spawnu("dnadist infile")
         dnadist.sendline("Y\r")
         dnadist.waitnoecho()
-        rn("outfile", gene + "_dnadist")
+        self._rename("outfile", dnadist_output + "_dnadist")

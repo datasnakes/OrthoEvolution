@@ -1,7 +1,6 @@
 import os
 import shutil
 from pathlib import Path
-from pprint import pprint as print
 
 # NCBITaxa().update_taxonomy_database()
 import pandas as pd
@@ -11,6 +10,7 @@ from ete3 import NCBITaxa
 from Datasnakes.Manager import config
 # from pandas import ExcelWriter
 from Datasnakes.Manager.management import ProjectManagement
+from Datasnakes.Orthologs.utils import attribute_config
 from Datasnakes.Orthologs.Blast.utils import (my_gene_info, get_dup_acc,
                                               get_miss_acc)
 
@@ -44,52 +44,28 @@ class CompGenObjects(object):
     __data = ''
 
     # TODO-ROB:  CREAT PRE-BLAST and POST-BLAST functions
-    def __init__(self, project=None, project_path=None, acc_file=None, taxon_file=None, go_list=None, pre_blast=False, post_blast=True, hgnc=False,
+    def __init__(self, project=None, project_path=os.getcwd(), acc_file=None, taxon_file=None, pre_blast=False, post_blast=True, hgnc=False,
                  proj_mana=ProjectManagement, **kwargs):
+
         # Private Variables
         self.__pre_blast = pre_blast
         self.__post_blast = post_blast
         self.__taxon_filename = taxon_file
-        # self.__paml_filename = paml_file
         self.acc_filename = acc_file
+
         self.project = project
-        print(proj_mana)
-        # print(proj_mana.__dict__)
-        # Initiate the project management variable
-        if proj_mana is not None and not isinstance(proj_mana, dict):
-            # print(type(proj_mana))
-            print('proj_mana isinstance dict')
-            if not issubclass(type(proj_mana), ProjectManagement):
-                print('proj_mana is not instance ProjectManagement')
-                if project_path:
-                    self.project_path = Path(project_path) / Path(self.project)
-                else:
-                    self.project_path = Path(os.getcwd()) / Path(self.project)
-                Path.mkdir(self.project_path, parents=True, exist_ok=True)
-                print('1project_path=%s' % self.project_path)
-                self.removed_pm_config(kwargs)
-            else:
-                setattr(proj_mana, 'project', project)
-                for key, value in proj_mana.__dict__.items():
-                    setattr(self, key, value)
-                    print('key:' + str(key) + '\nvalue: ' + str(value))
-                if 'project_path' not in proj_mana.__dict__.keys():
-                    if project_path:
-                        self.project_path = self.repo_path
-                    else:
-                        self.project_path = Path(os.getcwd()) / Path(self.project)
-                print('2project_path=%s' % self.project_path)
+        if project_path and project:
+            self.project_path = Path(project_path) / Path(project)
+
+        # Configuration of class attributes.
+        add_self = attribute_config(self, composer=proj_mana, checker=ProjectManagement, project=project, project_path=project_path)
+        for var, attr in add_self.__dict__.items():
+            setattr(self, var, attr)
 
         # Handle the taxon_id file and blast query
         if taxon_file is not None:
             # File init
             self.taxon_path = self.project_index / Path(self.__taxon_filename)
-        # Handle the paml organism file
-        # TODO-ROB Deprecate paml_file
-        # if paml_file is not None:
-        #     # File init
-        #     self.paml_path = self.project_index / Path(self.__paml_filename)
-        #     self.paml_org_list = []
         # Handle the master accession file (could be before or after blast)
         if kwargs['copy_from_package']:
             shutil.copy(pkg_resources.resource_filename(config.__name__, kwargs['MAF']), str(self.project_index))
@@ -98,7 +74,6 @@ class CompGenObjects(object):
         if acc_file is not None:
             # File init
             self.acc_path = self.project_index / Path(self.acc_filename)
-            self.go_list = go_list
             # Handles for organism lists #
             self.org_list = []
             self.ncbi_orgs = []
@@ -180,25 +155,6 @@ class CompGenObjects(object):
         else:
             self.building_filename = str(self.project + 'building.csv')
             self.building_time_filename = self.building_filename.replace('building.csv', 'building_time.csv')
-
-    def removed_pm_config(self, kwargs):
-        self.project_index = self.project_path / Path('index')
-        self.user_db = self.project_path / Path('databases')
-        self.ncbi_db_repo = self.user_db / Path('NCBI')
-        self.project_database = self.user_db / Path(self.project)
-        self.raw_data = self.project_path / Path('raw_data')
-        self.data = self.project_path / Path('data')
-        self.research_path = self.project_path
-
-        for key, value in kwargs.items():
-            setattr(self, key, value)
-
-        Path.mkdir(self.project_index, exist_ok=True)
-        Path.mkdir(self.user_db, exist_ok=True)
-        Path.mkdir(self.ncbi_db_repo, exist_ok=True)
-        Path.mkdir(self.project_database, exist_ok=True)
-        Path.mkdir(self.raw_data, exist_ok=True)
-        Path.mkdir(self.data, exist_ok=True)
 
 
 # //TODO-ROB Add HGNC python module

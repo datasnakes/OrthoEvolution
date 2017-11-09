@@ -1,10 +1,12 @@
 """Other utilities optimized for this package/project."""
-import pandas as pd
 import contextlib
-from pathlib import Path
 import pkg_resources
 from importlib import import_module
 import os
+from threading import Timer
+
+import pandas as pd
+from pathlib import Path
 
 
 def splitlist(listname, basefilename, n):
@@ -52,5 +54,41 @@ class PackageVersion(object):
         version = pkg_resources.get_distribution(self.packagename).version
         print('Version %s of %s is installed.' % (version, self.packagename))
 
+
 def set_paths(parent, **children):
-    print('xyz')
+    raise NotImplementedError("This function is being developed.")
+
+
+class FunctionRepeater(object):
+    """Repeats a function every interval. Ref: https://tinyurl.com/yckgv8m2"""
+    def __init__(self, interval, function, *args, **kwargs):
+        self._timer = None
+        self.function = function
+        self.interval = interval
+        self.args = args
+        self.kwargs = kwargs
+        self.is_running = False
+        self.start()
+
+    def _run(self):
+        self.is_running = False
+        self.start()
+        self.function(*self.args, **self.kwargs)
+
+    def start(self):
+        if not self.is_running:
+            self._timer = Timer(self.interval, self._run)
+            self._timer.start()
+            self.is_running = True
+
+    def stop(self):
+        self._timer.cancel()
+        self.is_running = False
+
+
+def csvtolist(csvfile, column_header='Organism'):
+    """Turn column from csv file into a list."""
+    file = pd.read_csv(csvfile)
+    # Create a list name/variable and use list()
+    listfromcolumn = list(file[column_header])
+    return listfromcolumn

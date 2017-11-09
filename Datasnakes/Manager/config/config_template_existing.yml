@@ -3,6 +3,7 @@ Management_config:
   repo: 'Test-Repository'
   user: 'Test-User'
   project: 'Test-Project'
+  project_path: null
   research: 'Test-Research'
   research_type: 'Test-Research-Type'
   app: 'Test-App'
@@ -26,4 +27,7 @@ GenBank_config:
 
 Alignment_config:
   aln_program: 'GUIDANCE2'
-  project_path: null
+  Guidance_config:
+    seqFile: "C:\\Users\\rgilmore\\PycharmProjects\\Datasnakes-Scripts\\Datasnakes\\Manager\\config\\test.faa"
+    msaProgram: "CLUSTALW"
+    seqType: "nuc"
