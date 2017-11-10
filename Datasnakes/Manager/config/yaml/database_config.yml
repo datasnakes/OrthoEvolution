@@ -1,3 +1,5 @@
+# TODO-ROB:  Create standard name for archive_path, database_path,
+
 Database_config:
   email:  "rgilmore@umc.edu"
   driver: "sqlite3"
@@ -5,7 +7,6 @@ Database_config:
     configure_flag: True
     archive_flag: True
     delete_flag: False
-    project_flag: False
     path: "!!python/object/apply:pathlib.Path ['']"
     Projects:
       Project_Name_1:
