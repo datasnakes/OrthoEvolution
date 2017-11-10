@@ -7,8 +7,7 @@ script for converting docx files to markdown formats, multiprocessing in multipr
 a ftp module that aids in downloading files from NCBI's ftp repository.
 
 
-Examples
----------
+## Examples
 
 ### Download NCBI databases with our NCBI FTP Client
 ``` python

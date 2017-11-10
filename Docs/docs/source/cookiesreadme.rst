@@ -1,5 +1,5 @@
-Cookies
-=======
+Cookies Documentation
+=====================
 
 For this project/package, we recommend using cookiecutter (along with
 Flask) to set up your directory if you intend to create a web

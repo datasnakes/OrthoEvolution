@@ -1,14 +1,13 @@
 Orthologs Documentation
--------------------------
+========================
 This top level module includes submodules such as [Align](https://github.com/datasnakes/Datasnakes-Scripts/blob/master/Datasnakes/Orthologs/Align/README.md) (for aligning multi fasta files),
 [Phylogenetics](https://github.com/datasnakes/Datasnakes-Scripts/blob/master/Datasnakes/Orthologs/Phylogenetics/README.md) (for analyzing multiple sequence alignments), [BioSQL]() (for database creation),
 [Blast](https://github.com/datasnakes/Datasnakes-Scripts/tree/master/Datasnakes/Orthologs/Blast) (includes tools for using NCBI's blastn command line), and [Genbank](https://github.com/datasnakes/Datasnakes-Scripts/blob/master/Datasnakes/Orthologs/Genbank/README.md).
 (for tools to extract features from genbank files).
 
-Usage
------
+## Usage
 These classes are optimized to be used together (very little work to do that),
-but can also be used singularly.
+but can also be used as standalone classes/methods.
 
 
 #### Simple Example
@@ -20,8 +19,7 @@ from Datasnakes.Orthologs import Phylogenetics as Phylo
 
 ```
 
-Software Dependencies
-----------------------
+## Software Dependencies
 Ensure that the following software is installed and in your path:
 1. Clustal omega
 2. NCBI Standalone Blast

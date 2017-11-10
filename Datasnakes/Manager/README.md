@@ -1,10 +1,10 @@
-Manager
-=========
+Manager Documentation
+======================
 The classes and functions in this module have been designed to help manage
 existing and new projects using the Cookies module as well as
 the different utilities found in the Tools module.
 
-### Management, RepoManagement, UserManagement, WebManagement, and Project Management classes
+## Why a manager?
 
 This module is intended to mesh with a Flask user interface.
 * Whenever a new website is made the RepoManagement and WebManagement classes
@@ -19,17 +19,15 @@ webpage.  The full repository can be used for higher level organization,
 or standalone projects can be made using the ProjectManagements
 _basic_project_ flag.
 
-### DataManagement class
-This module helps to tie everything together into a pipeline.
+The `DataManagement` class helps to tie everything together into a pipeline.
 
 
-Examples
---------
+## Examples
 In our [Examples module](https://github.com/datasnakes/Datasnakes-Scripts/tree/cookie_jar_patch/Examples),
 you can see a perfect example of using Manager in **example_manager.py**.
 
 
-:exclamation: Beware that this is under heavy development.
+**Beware that this is under heavy development.**
 
 ```python
 import os

@@ -1,5 +1,5 @@
-Cookies
-==========
+Cookies Documentation
+======================
 For this project/package, we recommend using cookiecutter (along with Flask)
 to set up your directory if you intend to create a web app/interface for your project.
 
@@ -7,8 +7,7 @@ Cookies makes it very easy to do this.
 
 Learn more about [cookicutter](https://github.com/audreyr/cookiecutter).
 
-Examples
---------
+## Examples
 In our [Examples module](https://github.com/datasnakes/Datasnakes-Scripts/tree/cookie_jar_patch/Examples),
 you can see a perfect example of using Cookies in **example_cookies.py**.
 

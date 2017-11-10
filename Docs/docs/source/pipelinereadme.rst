@@ -7,8 +7,9 @@ pipelines that are related to this project's setup.
 Examples
 --------
 
-There are many preconfigured pipelines that you can run if you are using
-a cluster (*specifically one that uses pbspro or sun grid engine*).
+There will be many preconfigured pipelines that you can run if you are
+using a cluster (*specifically one that uses pbspro or sun grid
+engine*).
 
 Pipeline
 ^^^^^^^^

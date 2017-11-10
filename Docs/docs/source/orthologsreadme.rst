@@ -1,5 +1,5 @@
 Orthologs Documentation
------------------------
+=======================
 
 This top level module includes submodules such as
 `Align <https://github.com/datasnakes/Datasnakes-Scripts/blob/master/Datasnakes/Orthologs/Align/README.md>`__
@@ -16,7 +16,7 @@ Usage
 -----
 
 These classes are optimized to be used together (very little work to do
-that), but can also be used singularly.
+that), but can also be used as standalone classes/methods.
 
 Simple Example
 ^^^^^^^^^^^^^^
