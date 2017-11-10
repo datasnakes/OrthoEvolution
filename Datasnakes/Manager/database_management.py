@@ -147,16 +147,17 @@ class DatabaseManagement(BaseDatabaseManagement):
             if db_config_strategy[strategy] == "Full":
                 strategy_dispatcher, strategy_config = self.full(**strategy_kwargs)
             elif strategy == "NCBI":
-                strategy_dispatcher, strategy_config = self.ncbi()
+                strategy_dispatcher, strategy_config = self.ncbi(**strategy_kwargs)
+
 
     def project(self):
         pass
 
     def full(self, NCBI, ITIS, Projects=None):
         # Configure NCBI
-        self.ncbi(**NCBI)
+        ncbi_dispatcher, ncbi_config = self.ncbi(**NCBI)
         # Configure ITIS
-        self.itis(**ITIS)
+        itis_dispatcher, itis_config = self.itis(**ITIS)
         # Configure projects
         if Projects:
             self.projects(**Projects)
@@ -168,7 +169,7 @@ class DatabaseManagement(BaseDatabaseManagement):
         self.ncbi_blast(**NCBI_blast)
         self.ncbi_pub_taxonomy(**NCBI_pub_taxonomy)
         self.ncbi_refseq_release(*NCBI_refseq_release)
-        pass
+        return None, None
 
     def ncbi_blast(self, NCBI_blast_db, NCBI_blast_windowmasker_files):
         self.ncbi_blast_db(**NCBI_blast_db)
@@ -189,7 +190,7 @@ class DatabaseManagement(BaseDatabaseManagement):
 
     def itis(self, taxon_kwargs):
         self.itis_taxonomy(**taxon_kwargs)
-        pass
+        return None, None
 
     def itis_taxonomy(self, kwargs):
         pass
