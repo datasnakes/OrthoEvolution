@@ -48,7 +48,7 @@ class CreateDocs(object):
         tocinfo = "\nContents\n" \
             "--------\n"\
             ".. toctree::\n    " \
-            ":maxdepth: 2\n    " \
+            ":maxdepth: 2\n\n    " \
             "datasnakesreadme\n    cookiesreadme\n    managerreadme\n    " \
             "orthologsreadme\n    toolsreadme\n" \
             "\nIndices and tables\n" \

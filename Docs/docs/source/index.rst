@@ -92,6 +92,7 @@ Contents
 --------
 .. toctree::
     :maxdepth: 2
+
     datasnakesreadme
     cookiesreadme
     managerreadme
