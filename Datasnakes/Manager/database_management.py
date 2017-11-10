@@ -132,35 +132,64 @@ class DatabaseManagement(BaseDatabaseManagement):
             # Get the parameters for the Base class
             for key, value in db_config.items():
                 if isinstance(value, dict):
-                    db_config_strategy[key][value]
+                    db_config_strategy[key] = value
                 else:
                     kw[key] = value
 
         super().__init__(proj_mana=proj_mana, **kw)
+        self.strategy_dispatcher = {}
+        self.strategy_config = {}
 
-    def full(self):
+    def get_strategy_dispatcher(self, db_config_strategy):
+        strategy_dispatcher = {}
+        strategy_config = {}
+        for strategy, strategy_kwargs in db_config_strategy.items():
+            if db_config_strategy[strategy] == "Full":
+                strategy_dispatcher, strategy_config = self.full(**strategy_kwargs)
+            elif strategy == "NCBI":
+                strategy_dispatcher, strategy_config = self.ncbi()
+
+    def project(self):
         pass
 
-    def ncbi(self):
+    def full(self, NCBI, ITIS, Projects=None):
+        # Configure NCBI
+        self.ncbi(**NCBI)
+        # Configure ITIS
+        self.itis(**ITIS)
+        # Configure projects
+        if Projects:
+            self.projects(**Projects)
+        # returns dict of config_dicts, dict of dispatcher_functions
+        return None, None
         pass
 
-    def ncbi_blast(self):
+    def ncbi(self, NCBI_blast, NCBI_pub_taxonomy, NCBI_refseq_release):
+        self.ncbi_blast(**NCBI_blast)
+        self.ncbi_pub_taxonomy(**NCBI_pub_taxonomy)
+        self.ncbi_refseq_release(*NCBI_refseq_release)
         pass
 
-    def ncbi_blast_db(self):
+    def ncbi_blast(self, NCBI_blast_db, NCBI_blast_windowmasker_files):
+        self.ncbi_blast_db(**NCBI_blast_db)
+        self.ncbi_blast_windowmaskerfiles(**NCBI_blast_windowmasker_files)
         pass
 
-    def ncbi_blast_windowmaskerfiles(self):
+    def ncbi_blast_db(self, **kwargs):
         pass
 
-    def ncbi_put_taxonomy(self):
+    def ncbi_blast_windowmaskerfiles(self, **kwargs):
         pass
 
-    def ncbi_refseq_release(self):
+    def ncbi_pub_taxonomy(self, **kwargs):
         pass
 
-    def itis(self):
+    def ncbi_refseq_release(self, **kwargs):
         pass
 
-    def itis_taxonomy(self):
+    def itis(self, taxon_kwargs):
+        self.itis_taxonomy(**taxon_kwargs)
+        pass
+
+    def itis_taxonomy(self, kwargs):
         pass
