@@ -1,0 +1,5 @@
+NCBI_blast_db: False
+NCBI_blast_windowmasker_files: False
+NCBI_pub_taxonomy: False
+NCBI_refseq_release: False
+ITIS_taxonomy: False
