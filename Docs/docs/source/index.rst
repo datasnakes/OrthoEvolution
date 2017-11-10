@@ -1,3 +1,6 @@
+Datasnakes-Scripts
+--------------------
+
 .. image:: https://travis-ci.org/datasnakes/Datasnakes-Scripts.svg?branch=master
     :target: https://travis-ci.org/datasnakes/Datasnakes-Scripts
 .. image:: https://api.codacy.com/project/badge/Grade/9a4ce39423ed4458a0c7fa3610c81ba2
@@ -8,20 +11,22 @@
    :target: https://badge.fury.io/py/Datasnakes-Scripts
 .. image:: https://readthedocs.org/projects/datasnakes-scripts/badge/?version=master
    :target: http://datasnakes-scripts.readthedocs.io/en/master/
-.. image:: https://img.shields.io/badge/under-development-orange.svg
-   :target: https://github.com/datasnakes/Datasnakes-Scripts
 
-Datasnakes-Scripts
---------------------
-An **easy to use** and comprehensive package which aids in the **analysis and visualization of comparative genetics** & related bioinformatics projects.
-The current implementation of this package places an emphasis on the **inference of orthologs** using NCBI's blast, various sequence alignment strategies,
-and phylogenetics analyses including PAML, PhymL, ete3, and more tools.
 
-The goal of this project is to create a pipeline framework for current (inference of orthologs) and future (RNA-seek) projects.  The Cookies, Manager, Pipeline,
-and Tools modules act as a framework for our workflow, while the Orthologs module provides access to specific functions for our various ortholog inference projects.
+An **easy to use** and comprehensive package which aids in the **analysis and
+visualization of comparative evolutionary genetics** related projects specifically the
+**inference of orthologs** using NCBI's blast, various sequence alignment strategies,
+and phylogenetics analyses including PAML, PhyML, ete3, and more tools.
 
-Check out our `wiki docs <https://github.com/datasnakes/Datasnakes-Scripts/wiki>`__ and our `read the docs <http://datasnakes-scripts.readthedocs.io/en/master/>`__!
+The ultimate goal of this project is to create a reusable pipeline for the
+inference of orthologs in order to ensure reproducibility of data as well as improve
+ the management and analysis of these large datasets.  The Cookies, Manager, Pipeline,
+and Tools modules act as a framework for our workflow, while the Orthologs
+module provides access to specific functions for our various ortholog inference projects.
 
+Check out our `read the docs <http://datasnakes-scripts.readthedocs.io/en/master/>`__ and also
+read `this related paper <https://www.frontiersin.org/articles/10.3389/fnhum.2014.00283/full>`__ to gain
+more insight into this project/python package.
 
 Installation
 ------------
