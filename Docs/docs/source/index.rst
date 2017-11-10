@@ -14,11 +14,11 @@ Datasnakes-Scripts
 
 
 An **easy to use** and comprehensive package which aids in the **analysis and
-visualization of comparative evolutionary genetics** related projects specifically the
-**inference of orthologs** using NCBI's blast, various sequence alignment strategies,
+visualization of comparative evolutionary genetics** related projects. More specifically, this
+project is focused on the **inference of orthologs** using NCBI's blast, various sequence alignment strategies,
 and phylogenetics analyses including PAML, PhyML, ete3, and more tools.
 
-The ultimate goal of this project is to create a reusable pipeline for the
+Ultimately, the goal of this project is to create a **reusable pipeline** for the
 inference of orthologs in order to ensure reproducibility of data as well as improve
 the management and analysis of (what can be) large datasets.  The Cookies, Manager, Pipeline,
 and Tools modules act as a framework for our workflow, while the Orthologs
@@ -56,9 +56,12 @@ Examples
 
     import Datasnakes
 
-A short overview of the package can be found in the Datasnakes module.
-For more advanced documentation see the README.md files in each of the sub-modules.  A good place to start would be the
-Orthologs/Blast module for understanding the bioinformatics workflow.
+A `Tutorial <https://github.com/datasnakes/Datasnakes-Scripts/blob/master/Datasnakes/README.md>`__ of the package can be found in the Datasnakes module.
+
+For more advanced documentation see the README.md files in each of the sub-modules.
+
+A good place to start would be the `Blast Readme <https://github.com/datasnakes/Datasnakes-Scripts/blob/master/Datasnakes/Orthologs/Blast/README.md>`__
+module for understanding the bioinformatics workflow.
 
 Tests
 ------

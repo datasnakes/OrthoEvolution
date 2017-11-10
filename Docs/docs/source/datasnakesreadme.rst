@@ -264,4 +264,4 @@ Examples
     slack.send_msg(channel='channelname', message=message_to_channel)
 
 For more information, view the `slackify
-readme <https://github.com/datasnakes/Datasnakes-Scripts/tree/master/Datasnakes/Tools/slackify/README.md>`__
+readme <https://github.com/datasnakes/Datasnakes-Scripts/tree/master/Datasnakes/Tools/slackify/README.md>`__.

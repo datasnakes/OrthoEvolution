@@ -207,4 +207,4 @@ slack = Slackify(slackconfig='path/to/slackconfig.cfg')
 message_to_channel = 'Hey, <@username>. This is an update for the current script.'
 slack.send_msg(channel='channelname', message=message_to_channel)
 ```
-For more information, view the [slackify readme](https://github.com/datasnakes/Datasnakes-Scripts/tree/master/Datasnakes/Tools/slackify/README.md)
+For more information, view the [slackify readme](https://github.com/datasnakes/Datasnakes-Scripts/tree/master/Datasnakes/Tools/slackify/README.md).
