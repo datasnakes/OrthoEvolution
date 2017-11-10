@@ -121,11 +121,10 @@ class OrthoBlastN(CompGenFiles):
             blastdbcmd_query = "blastdbcmd -entry {query} -db refseq_rna -outfmt %f -out {temp fasta}".format(**fmt)
             try:
                 blastdbcmd_status = run([blastdbcmd_query], stdout=PIPE,
-                                        stderr=PIPE,shell=True, check=True)
+                                        stderr=PIPE, shell=True, check=True)
             except CalledProcessError as err:
                 self.blastn_log.error(err.stderr.decode('utf-8'))
-
-            # Check the status of the custom blast data extraction
+            
             else:
                 if blastdbcmd_status.returncode != 0:  # Command was not successful.
                     self.blastn_log.error("FASTA sequence for %s not found in the BLAST extraction" % query)
@@ -265,6 +264,7 @@ class OrthoBlastN(CompGenFiles):
                         with open(xml_path, 'w') as blast_xml:
                             # Set up blast parameters
                             query_seq_path = str(gene_path / Path('temp.fasta'))
+                            # wmaskerpath = os.path.join(str(taxon_id), "wmasker.obinary")
 
                             # Configure your blastn parameters as a dictionary
                             blastn_params = {'query': query_seq_path,
@@ -272,7 +272,7 @@ class OrthoBlastN(CompGenFiles):
                                             'strand': 'plus',
                                             'evalue': 0.001,
                                             'outfmt': 5,
-                                            'window_masker_taxid': taxon_id,
+                                            # 'window_masker_db': wmaskerpath,
                                             'max_target_seqs': 10,
                                             'task': 'blastn'}
 
