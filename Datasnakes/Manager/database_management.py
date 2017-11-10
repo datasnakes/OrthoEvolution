@@ -1,4 +1,5 @@
 from pathlib import Path
+import yaml
 from importlib import import_module
 from Datasnakes.Manager import ProjectManagement
 from Datasnakes.Orthologs.utils import attribute_config
@@ -7,9 +8,9 @@ from Datasnakes.Tools.logit import LogIt
 from Datasnakes.Manager.BioSQL import biosql
 
 
-class DatabaseManagement(object):
+class BaseDatabaseManagement(object):
 
-    def __init__(self, project, email, driver, project_path=None, proj_mana=ProjectManagement, biosql_mana=biosql, **kwargs):
+    def __init__(self, project, email, driver, project_path=None, proj_mana=ProjectManagement, **kwargs):
         self.dbmanalog = LogIt().default(logname="DatabaseManagement", logfile=None)
         self.config_options = {
             "WindowMasker_config": self.download_windowmaskerfiles,
@@ -27,7 +28,7 @@ class DatabaseManagement(object):
         self.database_dict = {}
         self.ncbiftp = NcbiFTPClient(email=self.email)
         # TODO-ROB:  Configure this differently somehow
-        self.biosql = biosql_mana
+        self.biosql = biosql
         self.proj_mana = proj_mana
 
         # Configuration of class attributes for Project Management.
@@ -120,3 +121,46 @@ class DatabaseManagement(object):
         """"""
         print()
 
+
+class DatabaseManagement(BaseDatabaseManagement):
+    # TODO-ROB: Figure this out for the case of a user.  Because there doesn't necessarily have to be a project
+    def __init__(self, config_file, proj_mana=ProjectManagement):
+        kw ={}
+        db_config_strategy = {}
+        with open(config_file) as cf:
+            db_config = yaml.load(cf)
+            # Get the parameters for the Base class
+            for key, value in db_config.items():
+                if isinstance(value, dict):
+                    db_config_strategy[key][value]
+                else:
+                    kw[key] = value
+
+        super().__init__(proj_mana=proj_mana, **kw)
+
+    def full(self):
+        pass
+
+    def ncbi(self):
+        pass
+
+    def ncbi_blast(self):
+        pass
+
+    def ncbi_blast_db(self):
+        pass
+
+    def ncbi_blast_windowmaskerfiles(self):
+        pass
+
+    def ncbi_put_taxonomy(self):
+        pass
+
+    def ncbi_refseq_release(self):
+        pass
+
+    def itis(self):
+        pass
+
+    def itis_taxonomy(self):
+        pass
