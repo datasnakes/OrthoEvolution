@@ -1,7 +1,4 @@
-Datasnakes-Scripts
---------------------
-
-.. image:: https://travis-ci.org/datasnakes/Datasnakes-Scripts.svg?branch=master
+Datasnakes-Scripts .. image:: https://travis-ci.org/datasnakes/Datasnakes-Scripts.svg?branch=master
     :target: https://travis-ci.org/datasnakes/Datasnakes-Scripts
 .. image:: https://api.codacy.com/project/badge/Grade/9a4ce39423ed4458a0c7fa3610c81ba2
    :target: https://www.codacy.com/app/sdhutchins/Datasnakes-Scripts?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=datasnakes/Datasnakes-Scripts&amp;utm_campaign=Badge_Grade
@@ -11,7 +8,7 @@ Datasnakes-Scripts
    :target: https://badge.fury.io/py/Datasnakes-Scripts
 .. image:: https://readthedocs.org/projects/datasnakes-scripts/badge/?version=master
    :target: http://datasnakes-scripts.readthedocs.io/en/master/
-
+--------------------
 
 An **easy to use** and comprehensive package which aids in the **analysis and
 visualization of comparative evolutionary genetics** related projects. More specifically, this
