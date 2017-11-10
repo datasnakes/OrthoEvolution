@@ -47,10 +47,10 @@ class CreateDocs(object):
     def _append_toc_info(self):
         tocinfo = "\nContents\n" \
             "--------\n"\
-            ".. toctree::\n  " \
-            ":maxdepth: 3\n  " \
-            "datasnakesreadme\n  cookiesreadme\n  managerreadme\n  " \
-            "orthologsreadme\n  toolsreadme\n" \
+            ".. toctree::\n    " \
+            ":maxdepth: 3\n    " \
+            "datasnakesreadme\n    cookiesreadme\n    managerreadme\n    " \
+            "orthologsreadme\n    toolsreadme\n" \
             "\nIndices and tables\n" \
             "==================\n" \
             "* :ref:`genindex`\n" \
