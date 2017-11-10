@@ -7,7 +7,7 @@ import yaml
 
 from Datasnakes.Manager import config
 from Datasnakes.Manager import ProjectManagement
-from Datasnakes.Manager import DatabaseManagement
+from Datasnakes.Manager import BaseDatabaseManagement
 from Datasnakes.Orthologs.Align import MultipleSequenceAlignment as MSA
 from Datasnakes.Orthologs.Blast.blastn_comparative_genetics import CompGenBLASTn
 from Datasnakes.Orthologs.Blast.comparative_genetics_objects import CompGenObjects
@@ -97,7 +97,7 @@ class DataMana(object):
                 self.al = self.Alignment_config
 
     def database(self, proj_mana, database_config):
-        self.db = DatabaseManagement(proj_mana=proj_mana, **database_config)
+        self.db = BaseDatabaseManagement(proj_mana=proj_mana, **database_config)
         for config_type, database_config_list in self.db.database_dict.items():
             implementation = database_config_list[0]
             configuration = database_config_list[1]
