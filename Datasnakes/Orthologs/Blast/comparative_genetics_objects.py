@@ -37,17 +37,16 @@ class CompGenObjects(object):
         """This is the base class for the Blast module.
 
         It parses an accession file in order to provide easy handling for data.
+
         The .csv accession file contains the following header info:
             * "Tier" - User defined.
             * "Gene" - HUGO Gene Nomenclature Committee(HGNC) symbol for the genes of interest.
             * Query Organism - A well annotated query organism.
             * Other organisms - The other headers are Genus_species of other taxa.
-
         The organisms are taken from:
         ftp://ftp.ncbi.nlm.nih.gov/genomes/refseq/multiprocessing/
         And the genes are taken from:
         http://www.guidetopharmacology.org/targets.jsp.
-
         The API gives the user access to their data in a higher level for downstream processing or for basic
         observation of the data.
 
@@ -203,9 +202,10 @@ class CompGenObjects(object):
         return file_list
 
     def get_master_lists(self, df, csv_file=None):
-        """
-        This function populates the organism and gene lists with a data frame.  It will also populate pre-blast
-        attributes (mygene) and post-blast attributes (missing and duplicates) under the proper conditions.
+        """Populate the organism and gene lists with a data frame.
+
+        It will also populate pre-blast attributes (mygene) and post-blast
+        attributes (missing and duplicates) under the proper conditions.
 
         :param df:  The preferred way of utilizing the function is with a data-frame.
         :param csv_file:  If a csv_file is given, then a data-frame will be created by reinitializing the object.

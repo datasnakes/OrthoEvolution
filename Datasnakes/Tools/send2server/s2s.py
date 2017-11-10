@@ -70,8 +70,8 @@ class S2S(object):
         return comp_path
 
     def __addfolder2zip(self, zip_handle, folder):
-        """Not meant to be used explicitly.  Use to_zip."""
-        # XXX Use to_zip !!!
+        """Not meant to be used explicitly.  Use compress."""
+        # XXX Use compress !!!
         for file in os.listdir(folder):
             full_path = os.path.join(folder, file)
             rel_path = Path(full_path)

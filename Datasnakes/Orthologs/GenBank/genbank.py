@@ -387,6 +387,7 @@ class GenBank(object):
                 feat_type_rank = feat_type + str(duplicate_num)
             # ############ End ############# #
 
+            # TODO-ROB:  Remove the GI number stuff here or at least prepare for file with no GI.
             # ######### Create a dictionary and format FASTA file entries. ######### #
             fmt = {
                 'na_gi': str(record.annotations['gi']),

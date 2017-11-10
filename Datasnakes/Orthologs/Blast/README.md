@@ -27,7 +27,7 @@ Running blast is the most complex aspect of this package, but we've found a way
 to simplify the automation of blasting.
 
 Before you use this function, you need `NCBI Blast+` must be installed and in your path.
-Download the latest standalone blast executables from 
+Download the latest standalone blast executables from
 [here](ftp://ftp.ncbi.nlm.nih.gov/blast/executables/blast+/LATEST/).
 
 We have perfected the method of using a windowmasker file for each taxonomy id
@@ -103,14 +103,14 @@ import os
 
 # This is more pythonic with YAML loading
 blast_config = {
-  "taxon_file": None,
-  "go_list": None,
-  "post_blast": True,
-  "template": None,
-  "save_data": True,
-  "copy_from_package": True,
-  "MAF": 'MAFV3.2.csv'
-}
+              "taxon_file": None,
+              "go_list": None,
+              "post_blast": True,
+              "template": None,
+              "save_data": True,
+              "copy_from_package": True,
+              "MAF": 'MAFV3.2.csv'
+               }
 
 
 path = os.getcwd()
@@ -128,3 +128,4 @@ from Datasnakes.Orthologs.CompGenetics import CompGenAnalysis
 
 :exclamation: Notes
 -------------------
+

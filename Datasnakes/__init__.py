@@ -23,3 +23,14 @@ class DatasnakesDevelopmentWarning(DatasnakesWarning):
     """
 
     pass
+
+
+class DatasnakesDeprecationWarning(DatasnakesWarning):
+    """This is the Deprecation Warning subclass.
+
+    This warning is for code that is no longer maintained and will be removed
+    from this project at a later date. It may may not be working as intended,
+    and it will not be fixed or edited.
+    """
+
+    pass

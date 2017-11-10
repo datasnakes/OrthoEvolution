@@ -10,7 +10,10 @@ http://python-packaging.readthedocs.io/en/latest/index.html
 from setuptools import setup, find_packages
 from codecs import open  # To use a consistent encoding
 from os import path
+import os
 import sys
+import pkg_resources
+from importlib import import_module
 
 # Save the standard error of the setup file. This can be removed soon.
 sys.stderr = open('err.txt', 'w')
@@ -64,3 +67,11 @@ setup(
     test_suite='nose.collector',
     tests_require=['nose']
 )
+
+# Set up the permissions for the BioSQL Perl scripts
+scripts = import_module("Datasnakes.Manager.BioSQL.biosql_repo.scripts")
+biosql_scripts = pkg_resources.resource_filename(scripts.__name__, "")
+for file in os.listdir(biosql_scripts):
+    if '.pl' in file:
+        script_path = os.path.join(biosql_scripts, file)
+        os.chmod(script_path, mode=755)

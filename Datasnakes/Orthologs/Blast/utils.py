@@ -10,8 +10,10 @@ from multiprocessing.pool import ThreadPool
 from pathlib import Path
 import pandas as pd
 import platform
+from warnings import warn
 
 from Datasnakes.Tools.logit import LogIt
+from Datasnakes import DatasnakesDeprecationWarning
 
 blastutils_log = LogIt().default(logname="blast-utils", logfile=None)
 gilist_log = LogIt().default(logname="gi-lists", logfile=None)
@@ -22,7 +24,6 @@ _date = str(datetime.now().strftime(_datefmt))
 
 def map_func(hit):
     """Use the map function for formatting hit id's.
-
     This will be used later in the script.
     """
     hit.id1 = hit.id.split('|')[3]  # accession number
@@ -47,7 +48,6 @@ def gene_list_config(file, data_path, gene_list, taxon_dict, logger):
     It also helps recognize whether or not a BLAST was terminated in the middle
     of the workflow.  This removes the last line of the accession file if it
     is incomplete.
-
     :param file:  An accession file to analyze.
     :param data_path:  The path of the accession file.
     :param gene_list:  A gene list in the same order as the accession file.
@@ -100,11 +100,10 @@ def gene_list_config(file, data_path, gene_list, taxon_dict, logger):
 
 def gi_list_config(gi_list_path, taxonomy_ids, research_path=None, config=False):
     """Create a gi list based on the refseq_rna database for each taxonomy id.
-
     It will also convert the gi list into a binary file which is more
     efficient to use with NCBI's Standalone Blast tools.
     """
-    raise DeprecationWarning("NCBI has deprecated using GI numbers.")
+    warn("NCBI has deprecated using GI numbers.", DatasnakesDeprecationWarning)
     if config:
         # Directory and file handling
         raw_data_path = research_path / Path('raw_data')
@@ -121,11 +120,10 @@ def gi_list_config(gi_list_path, taxonomy_ids, research_path=None, config=False)
 
 def creategilists(gi_list_path, taxonomy_ids):
     """ This function uses the blastdbcmd tool to get gi lists.
-
     It then uses the blastdb_aliastool to turn the list into a binary file.
     The input (id) for the function is a taxonomy id.
     """
-    raise DeprecationWarning("NCBI has deprecated using GI numbers.")
+    warn("NCBI has deprecated using GI numbers.", DatasnakesDeprecationWarning)
     if os.path.exists(str(gi_list_path)):
         os.chdir(str(gi_list_path))
         # Use the accession #'s and the blastdbcmd tool to generate gi lists
@@ -140,7 +138,7 @@ def creategilists(gi_list_path, taxonomy_ids):
 
 def _taxid2gilist(taxonomy_id):
     """Use a taxonomy id in order to get the list of GI numbers."""
-    raise DeprecationWarning("NCBI has deprecated using GI numbers.")
+    warn("NCBI has deprecated using GI numbers.", DatasnakesDeprecationWarning)
     tid = str(taxonomy_id)
     binary = tid + 'gi'
 
@@ -164,10 +162,8 @@ def _taxid2gilist(taxonomy_id):
         gilist_log.info('%s already exists' % str(binary))
 
 
-
 def my_gene_info(acc_path, blast_query='Homo_sapiens'):
     """Use Biothings' MyGene api to get information about genes.
-
     :param acc_path:  An absolute path to the accession file of interest.
     :param blast_query:  The query organism for used during Blasting.
     :return:  Returns a data-frame with hot data about each gene.
@@ -215,7 +211,6 @@ def get_dup_acc(acc_dict, gene_list, org_list):
     """
     This function is used to analyze an accession file post-BLAST.  It uses the accession dictionary as a base to get
     duplicated accession numbers.
-
     :param acc_dict:  A dictionary with accession numbers as keys, and a gene/organism list as values.
     :param gene_list:  A full list of genes.
     :param org_list:  A full list of organisms.
@@ -322,10 +317,8 @@ def get_dup_acc(acc_dict, gene_list, org_list):
 
 def get_miss_acc(acc_file_path):
     """Analyze an accession file post BLAST.
-
     It generates several files and dictionaries regarding missing accession
     numbers.
-
     :param acc_file_path: An accession file (post BLAST).
     :return: A dictionary with data about the missing accession numbers by Gene
              and by Organism.

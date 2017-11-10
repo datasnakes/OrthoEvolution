@@ -57,7 +57,7 @@ Orthologs/Blast module for understanding the bioinformatics workflow.
 
 Tests
 ------
-To run tests, type ``nosetests Tests/`` in the Datasnakes-Orthologs directory.
+To run tests, type ``nosetests Tests/`` in the Datasnakes-Scripts directory.
 
 Contributors
 ------------
