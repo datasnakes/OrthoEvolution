@@ -9,7 +9,7 @@ Blast_config = {
   "template": None,
   "save_data": True,
   "copy_from_package": True,
-  "MAF": 'MAFV3.2.csv'
+  "MAF": 'test_blast.csv'
 }
 
 
