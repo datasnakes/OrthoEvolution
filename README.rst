@@ -1,5 +1,3 @@
-Datasnakes-Scripts
-
 .. image:: https://travis-ci.org/datasnakes/Datasnakes-Scripts.svg?branch=master
     :target: https://travis-ci.org/datasnakes/Datasnakes-Scripts
 
@@ -14,7 +12,9 @@ Datasnakes-Scripts
 
 .. image:: https://readthedocs.org/projects/datasnakes-scripts/badge/?version=master
    :target: http://datasnakes-scripts.readthedocs.io/en/master/
---------------------
+
+Datasnakes-Scripts
+-------------------
 
 An **easy to use** and comprehensive package which aids in the **analysis and
 visualization of comparative evolutionary genetics** related projects. More specifically, this
