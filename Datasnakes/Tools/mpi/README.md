@@ -1,6 +1,6 @@
-## multiprocessing module
+## mpi module
 
-The multiprocessing module will allow us to make use of the MCSR's PBS script functionality via the ```mpi4py``` package.
+The mpi module will allow us to make use of the MCSR's PBS script functionality via the ```mpi4py``` package.
 ## Description
 
 Originally this was used for the FTP downloads.  It is currently under development for project wide use.

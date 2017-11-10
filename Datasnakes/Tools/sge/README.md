@@ -1,11 +1,13 @@
 sge Documentation
--------------------------
+===================
 Collection of tools for using PBS, a job scheduler for high-performance
 computing environments on SGE. The command is usually `qsub <options>` on most systems.
 
-Usage
------
-The base class under qsub is `QsubUtils`. Some functions are `import_temp`,
+This module also incorporates `qstat <options>`.
+
+Usage & Examples
+------------------
+The main class under sge is `SGEJob`. Some functions are `import_temp`,
 which allows the user to import a preformatted template pbs script or python
 script and use it in the pipeline if needed.
 
@@ -33,9 +35,9 @@ when submitting a job.
 ```
 
 
-:exclamation: Notes
--------------------
-<br>
+:exclamation: Software Dependencies
+--------------------------------------
+Ensure that you have at least pbs version `14.1.0`
 
 Thanks
 -------------------

@@ -1,6 +1,6 @@
-from shutil import copyfile, move
+from shutil import copyfile
 import os
-from os.path import exists, join
+from os.path import join
 import pypandoc
 
 from Datasnakes.Tools.logit import LogIt
@@ -21,22 +21,15 @@ class PandocConverter(object):
         infile = str(self.infile)
         filepath, ext = infile.split('.')
         splitfilepath = filepath.split(os.sep)
-        filename = splitfilepath[-1]
-        outfile = join(self.outfile_path, filename + ".rst")
+        initial_filename = splitfilepath[-1]
+        final_filename = str(splitfilepath[-2] + initial_filename).lower()
+        outfile = join(self.outfile_path, final_filename + ".rst")
         if ext == 'md':
-            print(outfile)
             pypandoc.convert_file(infile, 'rst',  outputfile=outfile)
-            self.pandoc_log.info('%s.md converted to %s.rst.' % (filename, filename))
+            self.pandoc_log.info('%s.md converted to %s.rst.' %
+                                 (infile, final_filename))
         else:
             self.pandoc_log.error('%s not supported by this function.' % ext)
-
-    def archivemdfiles(self):
-        if not exists('archive'):
-            os.mkdir('archive')
-            self.pandoc_log.info("The archive directory was created.")
-
-        move(self.infile, join("archive", self.infile))
-        self.pandoc_log.info("%s was moved to archive directory." % self.infile)
 
 
 class CreateDocs(object):
@@ -49,11 +42,34 @@ class CreateDocs(object):
         self.main_readme = self._pathtomainreadme()
         self.readme2index()
         self.packagename = 'Datasnakes'
+        self.convertfiles()
+
+    def _append_toc_info(self):
+        tocinfo = "\nContents\n" \
+            "--------\n"\
+            ".. toctree::\n  " \
+            ":maxdepth: 3\n  " \
+            "datasnakesreadme\n  cookiesreadme\n  managerreadme\n  " \
+            "orthologsreadme\n  toolsreadme\n" \
+            "\nIndices and tables\n" \
+            "==================\n" \
+            "* :ref:`genindex`\n" \
+            "* :ref:`modindex`\n" \
+            "* :ref:`search`"
+
+        return tocinfo
 
     def readme2index(self):
         """Copy README.rst from the top level of your repo to docs source."""
         indexpath = os.path.join(self.docs_source, 'index.rst')
         copyfile(self.main_readme, indexpath)
+        log_msg = '%s copied to %s.' % (self.main_readme, indexpath)
+        self.createdocs_log.info(log_msg)
+
+        with open(indexpath, 'a') as index:
+            toctree = self._append_toc_info()
+            index.write(toctree)
+            index.close()
 
     def _pathtomainreadme(self):
         os.chdir(self.current_dir)
@@ -71,7 +87,7 @@ class CreateDocs(object):
 
         skip = ['new_basic_project', 'new_repository', 'new_database_repo',
                 'index', 'new_research', 'new_user', 'web', 'data',
-                'new_website', 'config']
+                'new_website', 'config', 'utils']
 
         files2convert = []
         for dirname, subdirlist, filelist in os.walk(datasnakesdir):
@@ -83,11 +99,11 @@ class CreateDocs(object):
 
         return files2convert
 
+    def convertfiles(self):
+        files2convert = self.getfiles2convert()
+        for file2convert in files2convert:
+            PandocConverter(file2convert, self.docs_source)
+
 
 if __name__ == "__main__":
-    createdocs = CreateDocs()
-    files2convert = createdocs.getfiles2convert()
-    createdocs.readme2index()
-
-    for file2convert in files2convert:
-        PandocConverter(file2convert, outfile_path=createdocs.docs_source)
+    CreateDocs()

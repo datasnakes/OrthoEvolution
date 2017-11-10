@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 #
-# Datasnakes-Orthologs documentation build configuration file, created by
+# Datasnakes-Scripts documentation build configuration file, created by
 # sphinx-quickstart on Wed May 24 14:34:01 2017.
 #
 # This file is execfile()d with the current directory set to its
@@ -54,7 +54,7 @@ source_suffix = '.rst'
 master_doc = 'index'
 
 # General information about the project.
-project = 'Datasnakes-Orthologs'
+project = 'Datasnakes-Scripts'
 copyright = '2017, Robert Gilmore and Shaurita Hutchins'
 author = 'Robert Gilmore and Shaurita Hutchins'
 
@@ -121,7 +121,7 @@ html_static_path = ['_static']
 # -- Options for HTMLHelp output ------------------------------------------
 
 # Output file base name for HTML help builder.
-htmlhelp_basename = 'Datasnakes-Orthologs'
+htmlhelp_basename = 'Datasnakes-Scripts'
 
 
 # -- Options for LaTeX output ---------------------------------------------

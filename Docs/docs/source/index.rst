@@ -87,3 +87,19 @@ pmid:19304878*
 License
 ---------
 `MIT <https://github.com/datasnakes/Datasnakes-Scripts/blob/master/LICENSE>`_
+
+Contents
+--------
+.. toctree::
+  :maxdepth: 2
+  datasnakesreadme
+  cookiesreadme
+  managerreadme
+  orthologsreadme
+  toolsreadme
+
+Indices and tables
+==================
+* :ref:`genindex`
+* :ref:`modindex`
+* :ref:`search`

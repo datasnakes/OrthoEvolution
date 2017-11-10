@@ -1,7 +1,8 @@
 Manager
 =========
 The classes and functions in this module have been designed to help manage
-existing and new projects and pipelines using the Cookies module and the different utilities found in the Tools module.
+existing and new projects using the Cookies module as well as
+the different utilities found in the Tools module.
 
 ### Management, RepoManagement, UserManagement, WebManagement, and Project Management classes
 
@@ -19,21 +20,16 @@ or standalone projects can be made using the ProjectManagements
 _basic_project_ flag.
 
 ### DataManagement class
+This module helps to tie everything together into a pipeline.
 
-This module ties everything together into a pipeline.
-
-#### **Cookies Use**
-
-#### **Manager Use**
-
-#### **Orthologs Use**
-
-#### **Tools Use**
 
 Examples
 --------
 In our [Examples module](https://github.com/datasnakes/Datasnakes-Scripts/tree/cookie_jar_patch/Examples),
 you can see a perfect example of using Manager in **example_manager.py**.
+
+
+:exclamation: Beware that this is under heavy development.
 
 ```python
 import os

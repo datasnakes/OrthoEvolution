@@ -1,5 +1,5 @@
-Tools
-========
+Tools Documentation
+=====================
 These tools were created by or modified our team to aid with the Orthologs package.
 
 We've incorporated tools for bash with pybasher, qsub tools for use with pbs, a pandoc
@@ -7,26 +7,22 @@ script for converting docx files to markdown formats, multiprocessing in multipr
 a ftp module that aids in downloading files from NCBI's ftp repository.
 
 
-Usage
------
+Examples
+---------
 
-Import this module if you want to use the tools within it.
+### Download NCBI databases with our NCBI FTP Client
 ``` python
-import Datasnakes.Tools.pybasher
+import Datasnakes.Tools.ftp import NcbiFTPClient
 ```
-or
+
+### Utilize multiprocessing to speed up your code
 ``` python
 import Datasnakes.Tools
 ```
-or
 
+### Integrate logging in a simple and quick way
 ``` python
-from Datasnakes.Tools import qsub
-```
-
-#### Code Examples
-
-``` python
+from Datasnakes.Tools.sge import SGEJob
 ```
 
 
