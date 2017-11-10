@@ -13,8 +13,8 @@ Learn more about
 Examples
 --------
 
-The `Datasnakes/Manager
-module <https://github.com/datasnakes/Datasnakes-Scripts/tree/cookie_jar_patch/Datasnakes/Manager>`__
+The `Manager
+module <https://github.com/datasnakes/Datasnakes-Scripts/tree/master/Datasnakes/Manager>`__
 uses the *CookieRecipes* and *Oven* classes as a primary means of
 functioning.
 

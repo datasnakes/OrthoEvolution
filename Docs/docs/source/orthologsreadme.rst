@@ -12,27 +12,27 @@ database creation),
 `Genbank <https://github.com/datasnakes/Datasnakes-Scripts/blob/master/Datasnakes/Orthologs/Genbank/README.md>`__.
 (for tools to extract features from genbank files).
 
-Usage
------
+Usage & Examples
+----------------
 
 These classes are optimized to be used together (very little work to do
 that), but can also be used as standalone classes/methods.
 
-Simple Example
-^^^^^^^^^^^^^^
-
-This is a simple example of using some of the modules.
+This is a simple example of using all of the ``Orthologs`` submodules
+together.
 
 .. code:: python
 
-    from Datasnakes.Orthologs import Phylogenetics as Phylo
+    from Datasnakes.Orthologs.Blast import OrthoBlastN
+    from Datasnakes.Orthologs.Align import ClustalO
+    from Datasnakes.Orthologs.Phlogenetics import ETE3PAML
 
 Software Dependencies
 ---------------------
 
-Ensure that the following software is installed and in your path: 1.
-Clustal omega 2. NCBI Standalone Blast 3. PAML 4. PhyML 5. Phylip 6.
-IQTREE 7. Mafft 8. Prank 9. Clustalw 10. Guidance2 11. Pal2Nal
+Ensure that the following software is installed and in your path: -
+Clustal omega - NCBI Blast+ 2.6.0 or greater - PAML - PhyML - Phylip -
+IQTREE - Mafft - Prank - Clustalw - Guidance2 - Pal2Nal
 
 If you are a sudo user, you may use the script we've provided,
 `install.sh <https://github.com/datasnakes/Datasnakes-Scripts/blob/master/Datasnakes/Orthologs/install.sh>`__.

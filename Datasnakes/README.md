@@ -1,13 +1,15 @@
-Datasnakes Mini-Tutorial
-========================
-Datasnakes has been built with Python 3.6 as a pipeline framework for current
-(comparative genetics for orthologous genes), and future (RNA-seq) bioinformatic data analysis.
-Currently, this python package is comprised of 4 major modules:
+Tutorial
+=============
+Datasnakes-Scripts has been built with Python 3.5 (and up) as a multi-faceted package and pipeline
+framework for comparative genetics in order to infer orthologous genes.
+
+Currently, this python package is comprised of 5 major modules:
 
 1. [Cookies Module](#using-the-cookies-module) - Project structure creation using cookiecutter.
 2. [Manager Module](#using-the-manager-module) - Configuration management as well project deployment.
 3. [Orthologs Module](#using-the-orthologs-module) - Tools for comparative genetics analysis including alignment analysis and phylogenetics.
-4. [Tools Module](#using-the-tools-module) - Utilities that aid in ftp downloading, server communication, and reusable everyday functions
+4. [Pipeline Module](#using-the-pipeline-module) - Various preconfigured pipelines to be used in orthology inference.
+5. [Tools Module](#using-the-tools-module) - Utilities that aid in ftp downloading, server communication, and reusable everyday functions
 
 When used together, these 4 modules offer a cohesive environment for easily creating,
 managing, and deploying a bioinformatics pipeline for orthologous genes/species.  In the future
@@ -163,6 +165,12 @@ al = MSA(genbank=genbank, **management_cfg, **alignment_cfg)
 al.align(alignment_config['kwargs'])  # Underdeveloped
 
 ```
+## Using the Pipeline module
+The pipeline module integrates the python package [luigi](#) with our package to
+create a pipeline that is accessible via the command-line and can be utilized
+with a qsub/pbs job scheduling system.
+
+### Examples
 
 ## Using the Tools module
 The tools module is a grouping of utilities used by our package.  While they
@@ -199,4 +207,4 @@ slack = Slackify(slackconfig='path/to/slackconfig.cfg')
 message_to_channel = 'Hey, <@username>. This is an update for the current script.'
 slack.send_msg(channel='channelname', message=message_to_channel)
 ```
-For more information, view the [slackify readme](Tools/slackify/README.md)
+For more information, view the [slackify readme](https://github.com/datasnakes/Datasnakes-Scripts/tree/master/Datasnakes/Tools/slackify/README.md)

@@ -25,11 +25,6 @@ pipeline.
 Examples
 --------
 
-In our `Examples
-module <https://github.com/datasnakes/Datasnakes-Scripts/tree/cookie_jar_patch/Examples>`__,
-you can see a perfect example of using Manager in
-**example\_manager.py**.
-
 **Beware that this is under heavy development.** ### Utilizing
 DataManagement to run a pipeline
 
@@ -48,5 +43,7 @@ Utilizing DatabaseManagement to download databases
 Notes
 -----
 
-Please view our `BioSQL documentation <BioSQL/README.md>`__ and view
-some of the static/config related `files <config/>`__.
+Please view our `BioSQL
+documentation <https://github.com/datasnakes/Datasnakes-Scripts/tree/master/Datasnakes/Manager/BioSQL/README.md>`__
+and view some of the static/config related
+`files <https://github.com/datasnakes/Datasnakes-Scripts/tree/master/Datasnakes/Manager/config/>`__.

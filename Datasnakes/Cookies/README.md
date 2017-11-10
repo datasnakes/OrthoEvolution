@@ -8,7 +8,7 @@ Cookies makes it very easy to do this.
 Learn more about [cookicutter](https://github.com/audreyr/cookiecutter).
 
 ## Examples
-The [Datasnakes/Manager module](https://github.com/datasnakes/Datasnakes-Scripts/tree/cookie_jar_patch/Datasnakes/Manager)
+The [Manager module](https://github.com/datasnakes/Datasnakes-Scripts/tree/master/Datasnakes/Manager)
 uses the _CookieRecipes_ and _Oven_ classes as a primary means of functioning.
 
 Here is a basic implementation:

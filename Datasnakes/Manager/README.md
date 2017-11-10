@@ -23,9 +23,6 @@ The `DataManagement` class helps to tie everything together into a pipeline.
 
 
 ## Examples
-In our [Examples module](https://github.com/datasnakes/Datasnakes-Scripts/tree/cookie_jar_patch/Examples),
-you can see a perfect example of using Manager in **example_manager.py**.
-
 
 **Beware that this is under heavy development.**
 ###  Utilizing DataManagement to run a pipeline
@@ -42,5 +39,5 @@ DataManagement(pipeline="Ortho_CDS_1", start=True, new=True)
 
 
 ## Notes
-Please view our [BioSQL documentation](BioSQL/README.md) and view some of the
-static/config related [files](config/).
+Please view our [BioSQL documentation](https://github.com/datasnakes/Datasnakes-Scripts/tree/master/Datasnakes/Manager/BioSQL/README.md) and view some of the
+static/config related [files](https://github.com/datasnakes/Datasnakes-Scripts/tree/master/Datasnakes/Manager/config/).
