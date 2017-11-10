@@ -8,7 +8,7 @@ import pandas as pd
 import pkg_resources
 from ete3 import NCBITaxa
 
-from Datasnakes.Manager import config
+from Datasnakes.Manager.config import test
 # from pandas import ExcelWriter
 from Datasnakes.Manager.management import ProjectManagement
 from Datasnakes.Orthologs.utils import attribute_config
@@ -92,7 +92,7 @@ class CompGenObjects(object):
             self.taxon_path = self.project_index / Path(self.__taxon_filename)
         # Handle the master accession file (could be before or after blast)
         if kwargs['copy_from_package']:
-            shutil.copy(pkg_resources.resource_filename(config.__name__, kwargs['MAF']), str(self.project_index))
+            shutil.copy(pkg_resources.resource_filename(test.__name__, kwargs['MAF']), str(self.project_index))
             acc_file = kwargs['MAF']
             self.acc_filename = acc_file
         if acc_file is not None:
