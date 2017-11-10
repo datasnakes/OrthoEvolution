@@ -177,37 +177,35 @@ Examples
 .. code:: python
 
     from Datasnakes.Manager.management import ProjectManagement
-    from Datasnakes.Orthologs.Blast.blastn_comparative_genetics import CompGenBLASTn
+    from Datasnakes.Orthologs.Blast.blastn_comparative_genetics import OrthoBlastN
     from Datasnakes.Orthologs.GenBank.genbank import GenBank
     from Datasnakes.Orthologs.Align.msa import MultipleSequenceAlignment as MSA
-    from Datasnakes.Orthologs.
+
     # In a real situation a dictionary configuration from YAML files will be used
     # However a dictionary can be manually set up by the user within the script
     # See the config files in Manager/config or use data_management.py as an example
-    Management_config = Blast_config = GenBank_config = Alignment_config = {}
+    management_cfg = mlast_cfg = genbank_cfg = alignment_cfg = {}
 
     # Initialize the Project Manager
-    proj_mana = ProjectManagement(**Management_config)
+    proj_mana = ProjectManagement(**management_cfg)
 
     # Initialize the BLAST tool
     # Compose this class with the Project Manager
-    blast = CompGenBLASTn(proj_mana=proj_mana, **Management_config, **Blast_config)
-    blast.blast_config(blast.blast_human, 'Homo_sapiens', auto_start=True)
+    myblast = OrthoBlastN(proj_mana=proj_mana, **management_cfg, **blast_cfg)
+    myblast.blast_config(myblast.blast_human, 'Homo_sapiens', auto_start=True)
 
     # Initialize the GenBank parser
     # Compose this class with the BLAST tool
     # Implicitly uses the Project Manager as well
-    genbank = GenBank(blast=blast, **Management_config, **GenBank_config)
+    genbank = GenBank(blast=blast, **management_cfg, **genbank_cfg)
     # Use the Blast tool data to get the desired GenBank files
-    genbank.blast2_gbk_files(blast.org_list, blast.gene_dict)
+    genbank.blast2_gbk_files(myblast.org_list, myblast.gene_dict)
 
     # Initialize the Aligner
     # Compose this class with the GenBank parser
     # Implicitly uses the Project Manager and the BLAST tool as well
-    al = MSA(genbank=genbank, **Management_config, **Alignment_config)
-    al.align(Alignment_config['kwargs'])  # Underdeveloped
-
-    # TODO-ROB:  Develop Documentation for Phylogenetics class
+    al = MSA(genbank=genbank, **management_cfg, **alignment_cfg)
+    al.align(alignment_config['kwargs'])  # Underdeveloped
 
 Using the Tools module
 ----------------------
@@ -215,7 +213,26 @@ Using the Tools module
 The tools module is a grouping of utilities used by our package. While
 they could have be stored in each modules util.py file, they were used
 and developed on a global scale, and hence required their own module.
-Below is a list of submodules and a brief description:
+
+Some of the tools/classes in the tools module are:
+
+-  ``NcbiFTPClient`` - provides functions to easily download ncbi
+   databases/files and update them.
+-  ``LogIt`` - A wrapper around logzero for easy logging to the screen
+   or a file.
+-  ``Multiprocess`` - A simple and effective class that allows the input
+   of a function to map to a user's list in order to take advantage of
+   parallel computing.
+-  ``SGEJob`` - A class to aid in submission of a job via ``qsub`` on a
+   cluster.
+-  ``Qstat`` - A class that parses the output of ``qstat`` to return job
+   information. It also waits on job completion.
+-  ``ZipUtils`` -
+-  ``Slackify`` -
+-  ``MyGene`` -
+
+Can I integrate these tools with each other and with orther modules
+including my own? **YES!** We'll provide some examples below!
 
 Examples
 ^^^^^^^^
@@ -223,10 +240,15 @@ Examples
 .. code:: python
 
     # Import a tools module
-    from Datasnakes.Tools.slackify.notify import Slackify
+    from Datasnakes.Tools import Slackify
 
     # Slack takes a config file thats already set up
-    # This tools sends a message to a Slack channel
-    Slackify()
+    slack = Slackify(slackconfig='path/to/slackconfig.cfg')
 
-See the documentation in the various Tools submodules.
+    # Message a channel and link to a user.
+
+    message_to_channel = 'Hey, <@username>. This is an update for the current script.'
+    slack.send_msg(channel='channelname', message=message_to_channel)
+
+For more information, view the `slackify
+readme <Tools/slackify/README.md>`__

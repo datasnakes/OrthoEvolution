@@ -28,10 +28,19 @@ you can see a perfect example of using Manager in **example_manager.py**.
 
 
 **Beware that this is under heavy development.**
-
+###  Utilizing DataManagement to run a pipeline
 ```python
 import os
 from Datasnakes.Manager import DataManagement
 
 DataManagement(pipeline="Ortho_CDS_1", start=True, new=True)
 ```
+
+### Utilizing DatabaseManagement to download databases
+```python
+```
+
+
+## Notes
+Please view our [BioSQL documentation](BioSQL/README.md) and view some of the
+static/config related [files](config/).

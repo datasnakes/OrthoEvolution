@@ -48,9 +48,9 @@ class CreateDocs(object):
         tocinfo = "\nContents\n" \
             "--------\n"\
             ".. toctree::\n    " \
-            ":maxdepth: 2\n\n    " \
+            ":maxdepth: 3\n\n    " \
             "datasnakesreadme\n    cookiesreadme\n    managerreadme\n    " \
-            "orthologsreadme\n    toolsreadme\n" \
+            "orthologsreadme\n    pipelinereadme\n    toolsreadme\n" \
             "\nIndices and tables\n" \
             "==================\n" \
             "* :ref:`genindex`\n" \
@@ -103,6 +103,7 @@ class CreateDocs(object):
         files2convert = self.getfiles2convert()
         for file2convert in files2convert:
             PandocConverter(file2convert, self.docs_source)
+        self.createdocs_log.info('Your docs were converted to .rst format.')
 
 
 if __name__ == "__main__":

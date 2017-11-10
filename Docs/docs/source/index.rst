@@ -91,12 +91,13 @@ License
 Contents
 --------
 .. toctree::
-    :maxdepth: 2
+    :maxdepth: 3
 
     datasnakesreadme
     cookiesreadme
     managerreadme
     orthologsreadme
+    pipelinereadme
     toolsreadme
 
 Indices and tables

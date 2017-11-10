@@ -13,15 +13,12 @@ Learn more about
 Examples
 --------
 
-In our `Examples
-module <https://github.com/datasnakes/Datasnakes-Scripts/tree/cookie_jar_patch/Examples>`__,
-you can see a perfect example of using Cookies in
-**example\_cookies.py**.
-
 The `Datasnakes/Manager
 module <https://github.com/datasnakes/Datasnakes-Scripts/tree/cookie_jar_patch/Datasnakes/Manager>`__
 uses the *CookieRecipes* and *Oven* classes as a primary means of
-functioning. Here is a basic implementation:
+functioning.
+
+Here is a basic implementation:
 
 .. code:: python
 

@@ -126,8 +126,8 @@ Performing Blast & Post-Blast Analysis
     from Datasnakes.Orthologs.Blast import OrthoBlastN
     import os
 
-    # This is more pythonic with YAML loading
-    blast_config = {
+    # Create a blast configuration dictionary
+    blast_cfg = {
                   "taxon_file": None,
                   "go_list": None,
                   "post_blast": True,

@@ -27,11 +27,17 @@ Import the class and set up the slack handler.
 
     slack = Slackify(slackconfig='path/to/slackconfig.cfg')
 
+Your config file should look as such:
+
+.. code:: python
+
+    [APIKEYS]
+    slack = apikeystring
+
 Message a channel and link to a user with ``<@username>`` in your message.
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 .. code:: python
-
 
     message_to_channel = 'Hey, <@username>. This is an update for the current script.'
 

@@ -30,7 +30,8 @@ module <https://github.com/datasnakes/Datasnakes-Scripts/tree/cookie_jar_patch/E
 you can see a perfect example of using Manager in
 **example\_manager.py**.
 
-**Beware that this is under heavy development.**
+**Beware that this is under heavy development.** ### Utilizing
+DataManagement to run a pipeline
 
 .. code:: python
 
@@ -38,3 +39,14 @@ you can see a perfect example of using Manager in
     from Datasnakes.Manager import DataManagement
 
     DataManagement(pipeline="Ortho_CDS_1", start=True, new=True)
+
+Utilizing DatabaseManagement to download databases
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+.. code:: python
+
+Notes
+-----
+
+Please view our `BioSQL documentation <BioSQL/README.md>`__ and view
+some of the static/config related `files <config/>`__.
