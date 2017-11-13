@@ -15,6 +15,6 @@ cluster (**specifically one that uses pbspro or sun grid engine**).
 ``` python
 ```
 
-:exclamation: Software Dependencies
+❗ Software Dependencies
 --------------------------------------
 Ensure that you have at least pbs version `14.1.0`

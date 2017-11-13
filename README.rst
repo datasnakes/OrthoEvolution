@@ -75,10 +75,10 @@ Contributors
 ------------
 
 -  Rob Gilmore \| Github: `@grabear <https://github.com/grabear>`__ \|
-   `:email: <mailto:robgilmore127@gmail.com>`__
+   `✉ <mailto:robgilmore127@gmail.com>`__
 -  Shaurita Hutchins \| Github:
    `@sdhutchins <https://github.com/sdhutchins>`__ \|
-   `:email: <mailto:sdhutchins@outlook.com>`__
+   `✉ <mailto:sdhutchins@outlook.com>`__
 
 If you would like to contribute to this package, install the package in development mode,
 and check out our `contributing guidelines <https://github.com/datasnakes/Datasnakes-Scripts/blob/master/CONTRIBUTING.rst>`__.

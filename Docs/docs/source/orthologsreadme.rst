@@ -27,8 +27,8 @@ together.
     from Datasnakes.Orthologs.Align import ClustalO
     from Datasnakes.Orthologs.Phlogenetics import ETE3PAML
 
-Software Dependencies
----------------------
+❗ Software Dependencies
+-----------------------
 
 Ensure that the following software is installed and in your path: -
 Clustal omega - NCBI Blast+ 2.6.0 or greater - PAML - PhyML - Phylip -
@@ -38,6 +38,7 @@ If you are a sudo user, you may use the script we've provided,
 `install.sh <https://github.com/datasnakes/Datasnakes-Scripts/blob/master/Datasnakes/Orthologs/install.sh>`__.
 
 Using ``install.sh`` on Debian/Ubuntu:
+--------------------------------------
 
 .. code:: bash
 

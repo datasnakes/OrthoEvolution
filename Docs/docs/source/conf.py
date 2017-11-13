@@ -203,5 +203,4 @@ intersphinx_mapping = {'https://docs.python.org/': None}
 
 rst_prolog = """
 .. |exclamation| replace:: ❗
-.. |email| replace:: ✉
 """
