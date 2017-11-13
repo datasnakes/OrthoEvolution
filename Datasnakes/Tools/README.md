@@ -11,7 +11,17 @@ a ftp module that aids in downloading files from NCBI's ftp repository.
 
 ### Download NCBI databases with our NCBI FTP Client
 ``` python
-import Datasnakes.Tools.ftp import NcbiFTPClient
+from Datasnakes.Tools.ftp import NcbiFTPClient
+
+ncbiftp = NcbiFTPClient(email='somebody@gmail.com')
+ncbiftp.getblastdb(database_name='refseq_rna')
+```
+
+#### List all subdirectories in a NCBI FTP Path
+```python
+
+ncbiftp.listdirectories(path='/blast/db/')
+Out[54]: ['FASTA', 'cloud']
 ```
 
 ### Utilize multiprocessing to speed up your code
@@ -19,13 +29,28 @@ import Datasnakes.Tools.ftp import NcbiFTPClient
 import Datasnakes.Tools
 ```
 
+
 ### Integrate logging in a simple and quick way
-``` python
-from Datasnakes.Tools.sge import SGEJob
+```python
+from Datasnakes.Tools import LogIt
+
+# Set up your loggers
+logit = LogIt()
+
+# Log to one file
+logfile = 'test.log'
+
+test1 = logit.default('test1 log', logfile)
+
+# Start logging
+test1.info('hi')
+
+# Shutdown logging without deleting the logfile
+logit.shutdown()
 ```
 
 
-#### More Information
+## Additional Documentation
 
 Check the specific modules for more detailed readmes and examples of using the
 tools with this package.

@@ -30,7 +30,8 @@ def archive(db_path, arch_path, config_file, delete=False):
     """
     Using YAML configuration, archive one or more directories recursively.
 
-    This utility creates a YAML config dictionary that contains path-like objects for archiving.  The original data
+    This utility creates a YAML config dictionary that contains path-like
+    objects for archiving.  The original data
     can be moved to the archive path or deleted all together.
 
     :param db_path:  A path to a folder that consists of the desired data.
@@ -49,14 +50,17 @@ def archive(db_path, arch_path, config_file, delete=False):
 
     # Create a handle for creating separate archive files.
     if db_config_dict["Full"]:
-        # For a full archive, individually archive each folder in the user database directory.
+        # For a full archive, individually archive each folder in the user
+        # database directory.
         full_path = db_path / archive_options["Full"]
         for folder in os.listdir(str(full_path)):
             archive_dict[folder] = db_path / Path(folder)
     else:
-        # For custom archive options, set Full to False and select which data you would like to archive.
+        # For custom archive options, set Full to False and select which data
+        # you would like to archive.
         for archive_key, archive_value in db_config_dict["Archive_Config"].items():
-            # The desired projects for archiving must be explicitly listed in the config file.
+            # The desired projects for archiving must be explicitly listed in
+            # the config file.
             if archive_key == "Projects":
                 if archive_value["flag"]:
                     for proj_key in archive_value.keys():
