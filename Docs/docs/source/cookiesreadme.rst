@@ -7,8 +7,8 @@ app/interface for your project.
 
 Cookies makes it very easy to do this.
 
-Learn more about
-`cookicutter <https://github.com/audreyr/cookiecutter>`__.
+Learn more about the
+`cookiecutter <https://github.com/audreyr/cookiecutter>`__ package.
 
 Examples
 --------
@@ -18,7 +18,7 @@ module <https://github.com/datasnakes/Datasnakes-Scripts/tree/master/Datasnakes/
 uses the *CookieRecipes* and *Oven* classes as a primary means of
 functioning.
 
-Here is a basic implementation:
+Here is a simple implementation:
 
 .. code:: python
 

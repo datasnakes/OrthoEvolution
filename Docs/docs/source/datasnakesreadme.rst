@@ -32,7 +32,7 @@ Using the Cookies module
 ------------------------
 
 Overview
-^^^^^^^^
+~~~~~~~~
 
 The Cookies module acts as a repository for custom
 `cookiecutter <https://github.com/audreyr/cookiecutter>`__ templates.
@@ -100,7 +100,7 @@ Using the Manager module
 ------------------------
 
 Overview
-^^^^^^^^
+~~~~~~~~
 
 The Manager module uses the CookBook class in order to deploy a
 bioinformatics repository with an organized directory structure based on
@@ -108,7 +108,7 @@ specific users and the projects that they create. Pipeline customization
 and configuration will also be possible through YAML files.
 
 Future Direction
-^^^^^^^^^^^^^^^^
+~~~~~~~~~~~~~~~~
 
 First, a database\_management class for dealing with the various
 databases (NCBI, BioSQL, etc.) will be developed. Then the Management
@@ -162,7 +162,7 @@ Using the Orthologs Module
 --------------------------
 
 Overview
-^^^^^^^^
+~~~~~~~~
 
 The Orthologs module is the central data processing unit of our package.
 Any published data will be generated using these submodules.
@@ -175,7 +175,7 @@ phylogenetic trees for each gene, and doing phylogenetic analysis for
 each gene.
 
 Examples
-^^^^^^^^
+~~~~~~~~
 
 .. code:: python
 
@@ -227,6 +227,9 @@ The tools module is a grouping of utilities used by our package. While
 they could have be stored in each modules util.py file, they were used
 and developed on a global scale, and hence required their own module.
 
+Overview
+~~~~~~~~
+
 Some of the tools/classes in the tools module are:
 
 -  ``NcbiFTPClient`` - provides functions to easily download ncbi
@@ -248,7 +251,7 @@ Can I integrate these tools with each other and with orther modules
 including my own? **YES!** We'll provide some examples below!
 
 Examples
-^^^^^^^^
+~~~~~~~~
 
 .. code:: python
 
