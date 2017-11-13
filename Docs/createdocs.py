@@ -10,6 +10,7 @@ class PandocConverter(object):
     """Convert files using the pypandoc wrapper.
 
     :param infile:  path to the input file
+    :param outfile_path:  output path
     """
     def __init__(self, infile, outfile_path):
         self.infile = infile
@@ -34,6 +35,7 @@ class PandocConverter(object):
 
 class CreateDocs(object):
     def __init__(self):
+        """"Initialize this class."""
         self.createdocs_log = LogIt().default('create docs', None)
         self.current_dir = os.path.dirname(os.path.realpath(__file__))
         self._docsdir = os.path.join(self.current_dir, 'docs')
@@ -45,6 +47,7 @@ class CreateDocs(object):
         self.convertfiles()
 
     def _append_toc_info(self):
+        """Write TOC info to the README.rst when copied as index.rst."""
         tocinfo = "\nContents\n" \
             "--------\n"\
             ".. toctree::\n    " \
@@ -70,8 +73,10 @@ class CreateDocs(object):
             toctree = self._append_toc_info()
             index.write(toctree)
             index.close()
+            self.createdocs_log.info('TOC written to index.rst')
 
     def _pathtomainreadme(self):
+        """Return the path to the main README.rst."""
         os.chdir(self.current_dir)
         os.chdir(self.up)
         readmedir = os.getcwd()
@@ -85,11 +90,16 @@ class CreateDocs(object):
         os.chdir(self.up)
         datasnakesdir = os.path.join(os.getcwd(), self.packagename)
 
+        # Skip these folders when looking for README.md
+        # Most of these are folders in the cookiecutter repository
         skip = ['new_basic_project', 'new_repository', 'new_database_repo',
                 'index', 'new_research', 'new_user', 'web', 'data',
                 'new_website', 'config', 'utils']
 
         files2convert = []
+
+        # Use os.walk to walk from the datasnakes/package directory and down
+        # to find README.md files in each main submodule.
         for dirname, subdirlist, filelist in os.walk(datasnakesdir):
             subdirlist[:] = [d for d in subdirlist if d not in skip]
             for filename in filelist:
@@ -100,6 +110,7 @@ class CreateDocs(object):
         return files2convert
 
     def convertfiles(self):
+        """Convert a list of files from .md to .rst."""
         files2convert = self.getfiles2convert()
         for file2convert in files2convert:
             PandocConverter(file2convert, self.docs_source)
