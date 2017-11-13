@@ -202,6 +202,5 @@ intersphinx_mapping = {'https://docs.python.org/': None}
 
 
 rst_epilog = """
-.. ❗ replace:: :exclamation:
-.. ✉️ replace:: :email:
+.. |:exclamation:| replace:: ❗
 """
