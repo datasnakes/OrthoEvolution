@@ -201,6 +201,7 @@ epub_exclude_files = ['search.html']
 intersphinx_mapping = {'https://docs.python.org/': None}
 
 
-rst_epilog = """
-.. |❗| replace:: :exclamation:
+rst_prolog = """
+.. |exclamation| replace:: ❗
+.. |email| replace:: ✉
 """
