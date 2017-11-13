@@ -139,6 +139,10 @@ class DatabaseManagement(BaseDatabaseManagement):
         super().__init__(proj_mana=proj_mana, **kw)
         self.strategy_dispatcher = {}
         self.strategy_config = {}
+        self.configure_flag = None
+        self.archive_flag = None
+        self.delete_flag = None
+        self.config_file = config_file
 
     def get_strategy_dispatcher(self, db_config_strategy):
         strategy_dispatcher = {}
@@ -147,50 +151,142 @@ class DatabaseManagement(BaseDatabaseManagement):
             if db_config_strategy[strategy] == "Full":
                 strategy_dispatcher, strategy_config = self.full(**strategy_kwargs)
             elif strategy == "NCBI":
-                strategy_dispatcher, strategy_config = self.ncbi(**strategy_kwargs)
+                sd, sc = self.ncbi(**strategy_kwargs)
+                strategy_dispatcher.update(sd)
+                strategy_config.update(sc)
+            elif strategy == "NCBI_blast":
+                sd, sc = self.ncbi_blast(**strategy_kwargs)
+                strategy_dispatcher.update(sd)
+                strategy_config.update(sc)
+            elif strategy == "NCBI_blast_db":
+                sd, sc = self.ncbi_blast_db(**strategy_kwargs)
+                strategy_dispatcher.update(sd)
+                strategy_config.update(sc)
+            elif strategy == "NCBI_blast_windowmaskerfiles":
+                sd, sc = self.ncbi_blast_windowmaskerfiles(**strategy_kwargs)
+                strategy_dispatcher.update(sd)
+                strategy_config.update(sc)
+            elif strategy == "NCBI_pub_taxonomy":
+                sd, sc = self.ncbi_pub_taxonomy(**strategy_kwargs)
+                strategy_dispatcher.update(sd)
+                strategy_config.update(sc)
+            elif strategy == "NCBI_refseq_release":
+                sd, sc = self.ncbi_refseq_release(**strategy_kwargs)
+                strategy_dispatcher.update(sd)
+                strategy_config.update(sc)
+            elif strategy == "ITIS":
+                sd, sc = self.itis(**strategy_kwargs)
+                strategy_dispatcher.update(sd)
+                strategy_config.update(sc)
+            elif strategy == "ITIS_taxonomy":
+                sd, sc = self.itis_taxonomy(**strategy_kwargs)
+                strategy_dispatcher.update(sd)
+                strategy_config.update(sc)
 
+        return strategy_dispatcher, strategy_config
 
-    def project(self):
-        pass
+    def projects(self, **kwargs):
+        print(self)
+        return {}, {}
 
-    def full(self, NCBI, ITIS, Projects=None):
+    def full(self, NCBI, ITIS, Projects=None,
+             configure_flag=None, archive_flag=None, delete_flag=None):
+        if configure_flag:
+            NCBI["configure_flag"] = configure_flag
+            ITIS["configure_flag"] = configure_flag
+        if archive_flag:
+            NCBI["archive_flag"] = archive_flag
+            ITIS["archive_flag"] = archive_flag
+        if delete_flag:
+            NCBI["delete_flag"] = delete_flag
+            ITIS["delete_flag"] = delete_flag
+
+        full_dispatcher = {}
+        full_config = {}
         # Configure NCBI
         ncbi_dispatcher, ncbi_config = self.ncbi(**NCBI)
         # Configure ITIS
         itis_dispatcher, itis_config = self.itis(**ITIS)
         # Configure projects
+
+        # Create Full dispatcher
+        full_dispatcher.update(ncbi_dispatcher)
+        full_dispatcher.update(itis_dispatcher)
+        # Create Full config
+        full_config.update(ncbi_config)
+        full_config.update(itis_config)
         if Projects:
-            self.projects(**Projects)
+            projects_dispatcher, projects_config = self.projects(**Projects)
+            full_dispatcher.update(projects_dispatcher)
+            full_config.update(projects_config)
         # returns dict of config_dicts, dict of dispatcher_functions
-        return None, None
-        pass
+        return full_dispatcher, full_config
 
-    def ncbi(self, NCBI_blast, NCBI_pub_taxonomy, NCBI_refseq_release):
-        self.ncbi_blast(**NCBI_blast)
-        self.ncbi_pub_taxonomy(**NCBI_pub_taxonomy)
-        self.ncbi_refseq_release(*NCBI_refseq_release)
-        return None, None
+    def ncbi(self, NCBI_blast, NCBI_pub_taxonomy, NCBI_refseq_release,
+             configure_flag=True, archive_flag=True, delete_flag=False):
+        if configure_flag:
+            NCBI_blast["configure_flag"] = configure_flag
+            NCBI_pub_taxonomy["configure_flag"] = configure_flag
+            NCBI_refseq_release["configure_flag"] = configure_flag
+        if archive_flag:
+            NCBI_blast["archive_flag"] = archive_flag
+            NCBI_pub_taxonomy["archive_flag"] = archive_flag
+            NCBI_refseq_release["archive_flag"] = archive_flag
+        if delete_flag:
+            NCBI_blast["delete_flag"] = delete_flag
+            NCBI_pub_taxonomy["delete_flag"] = delete_flag
+            NCBI_refseq_release["delete_flag"] = delete_flag
+        nb_dispatcher, nb_config = self.ncbi_blast(**NCBI_blast)
+        npt_dispatcher, npt_config = self.ncbi_pub_taxonomy(**NCBI_pub_taxonomy)
+        self.ncbi_refseq_release(**NCBI_refseq_release)
+        return {}, {}
 
-    def ncbi_blast(self, NCBI_blast_db, NCBI_blast_windowmasker_files):
+    def ncbi_blast(self, NCBI_blast_db, NCBI_blast_windowmasker_files,
+                   configure_flag=None, archive_flag=None, delete_flag=None):
+        if configure_flag:
+            NCBI_blast_db["configure_flag"] = configure_flag
+            NCBI_blast_windowmasker_files["configure_flag"] = configure_flag
+        if archive_flag:
+            NCBI_blast_db["archive_flag"] = archive_flag
+            NCBI_blast_windowmasker_files["archive_flag"] = archive_flag
+        if delete_flag:
+            NCBI_blast_db["delete_flag"] = delete_flag
+            NCBI_blast_windowmasker_files["delete_flag"] = delete_flag
         self.ncbi_blast_db(**NCBI_blast_db)
         self.ncbi_blast_windowmaskerfiles(**NCBI_blast_windowmasker_files)
-        pass
+        return {}, {}
 
-    def ncbi_blast_db(self, **kwargs):
-        pass
+    def ncbi_blast_db(self, configure_flag=None, archive_flag=None, delete_flag=None, archive_path=None, database_path=None):
+        if archive_flag:
+            if not archive_path:
+                archive_path = self.user_archive
+            if not database_path:
+                database_path = self.user_db
+            archive_list = archive(db_path=database_path, arch_path=archive_path, config_file=self.config_file,
+                                   delete=self.delete_flag)
+        return {}, {}
 
-    def ncbi_blast_windowmaskerfiles(self, **kwargs):
-        pass
+    def ncbi_blast_windowmaskerfiles(self, configure_flag=None, archive_flag=None, delete_flag=None, **kwargs):
+        return {}, {}
 
-    def ncbi_pub_taxonomy(self, **kwargs):
-        pass
+    def ncbi_pub_taxonomy(self, configure_flag=None, archive_flag=None, delete_flag=None, **kwargs):
+        # TODO-ROB:  Add a ftp download of the correct taxdump file for biosql stuff in the self.dl-tax-db method
+        npt_dispatcher = {"NCBI_pub_taxonomy": self.download_taxonomy_database}
+        npt_config = {"NCBI_pub_taxonomy": kwargs}
+        return {}, {}
 
-    def ncbi_refseq_release(self, **kwargs):
-        pass
+    def ncbi_refseq_release(self, configure_flag=None, archive_flag=None, delete_flag=None, **kwargs):
+        return {}, {}
 
-    def itis(self, taxon_kwargs):
-        self.itis_taxonomy(**taxon_kwargs)
-        return None, None
+    def itis(self, ITIS_taxonomy, configure_flag=None, archive_flag=None, delete_flag=None):
+        if configure_flag:
+            ITIS_taxonomy["configure_flag"] = configure_flag
+        if archive_flag:
+            ITIS_taxonomy["archive_flag"] = archive_flag
+        if delete_flag:
+            ITIS_taxonomy["delete_flag"] = delete_flag
+        self.itis_taxonomy(**ITIS_taxonomy)
+        return {}, {}
 
-    def itis_taxonomy(self, kwargs):
-        pass
+    def itis_taxonomy(self, configure_flag=None, archive_flag=None, delete_flag=None, **kwargs):
+        return {}, {}
