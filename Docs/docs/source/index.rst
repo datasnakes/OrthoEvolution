@@ -28,7 +28,7 @@ the management and analysis of (what can be) large datasets.  The Cookies, Manag
 and Tools modules act as a framework for our workflow, while the Orthologs
 module provides access to specific functions for our various ortholog inference projects.
 
-Check out our `read the docs <http://datasnakes-scripts.readthedocs.io/en/master/>`__ and also
+View our `read the docs <http://datasnakes-scripts.readthedocs.io/en/master/>`__ and feel free to also
 read `this related paper <https://www.frontiersin.org/articles/10.3389/fnhum.2014.00283/full>`__ to gain
 more insight into this project/python package.
 
@@ -55,17 +55,11 @@ Development Code
 
 Examples
 ---------
+Check out this `tutorial <https://github.com/datasnakes/Datasnakes-Scripts/wiki/Tutorial>`__ in our Wiki Docs.
 
 .. code:: python
 
     import Datasnakes
-
-A `Tutorial <https://github.com/datasnakes/Datasnakes-Scripts/blob/master/Datasnakes/README.md>`__ of the package can be found in the Datasnakes module.
-
-For more advanced documentation see the README.md files in each of the sub-modules.
-
-A good place to start would be the `Blast Readme <https://github.com/datasnakes/Datasnakes-Scripts/blob/master/Datasnakes/Orthologs/Blast/README.md>`__
-module for understanding the bioinformatics workflow.
 
 Tests
 ------
