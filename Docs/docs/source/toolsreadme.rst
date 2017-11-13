@@ -23,7 +23,7 @@ Download NCBI databases with our NCBI FTP Client
     ncbiftp.getblastdb(database_name='refseq_rna')
 
 List all subdirectories in a NCBI FTP Path
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 .. code:: python
 
@@ -36,7 +36,18 @@ Utilize multiprocessing to speed up your code
 
 .. code:: python
 
-    import Datasnakes.Tools
+    from Datasnakes.Tools import Multiprocess
+
+
+    def printwords(word):
+        print(word)
+
+
+    words = ['bae', 'luh', 'cuh']
+
+    if __name__ == '__main__':
+        mp = Multiprocess()
+        mp.map2function(printwords, words)
 
 Integrate logging in a simple and quick way
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

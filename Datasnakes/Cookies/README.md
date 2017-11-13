@@ -11,7 +11,7 @@ Learn more about the [cookiecutter](https://github.com/audreyr/cookiecutter) pac
 The [Manager module](https://github.com/datasnakes/Datasnakes-Scripts/tree/master/Datasnakes/Manager)
 uses the _CookieRecipes_ and _Oven_ classes as a primary means of functioning.
 
-Here is a simple implementation:
+### Simple Implementation
 
 ```python
 from Datasnakes.Cookies import Oven

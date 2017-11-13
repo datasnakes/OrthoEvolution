@@ -132,8 +132,8 @@ Examples
     # ...they can be use implicitly through the main pipeline class.
     from Datasnakes.Manager.data_management import DataMana
 
-Explicit Usage:
-^^^^^^^^^^^^^^^
+Explicit Usage
+^^^^^^^^^^^^^^
 
 .. code:: python
 
@@ -146,8 +146,8 @@ Explicit Usage:
     print(pm.research)
     print(pm.Pantry.research_cookie)
 
-Implicit Usage:
-^^^^^^^^^^^^^^^
+Implicit Usage
+^^^^^^^^^^^^^^
 
 .. code:: python
 

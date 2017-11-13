@@ -18,7 +18,8 @@ module <https://github.com/datasnakes/Datasnakes-Scripts/tree/master/Datasnakes/
 uses the *CookieRecipes* and *Oven* classes as a primary means of
 functioning.
 
-Here is a simple implementation:
+Simple Implementation
+~~~~~~~~~~~~~~~~~~~~~
 
 .. code:: python
 

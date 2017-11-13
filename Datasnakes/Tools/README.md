@@ -17,7 +17,7 @@ ncbiftp = NcbiFTPClient(email='somebody@gmail.com')
 ncbiftp.getblastdb(database_name='refseq_rna')
 ```
 
-#### List all subdirectories in a NCBI FTP Path
+### List all subdirectories in a NCBI FTP Path
 ```python
 
 ncbiftp.listdirectories(path='/blast/db/')
@@ -25,9 +25,21 @@ Out[54]: ['FASTA', 'cloud']
 ```
 
 ### Utilize multiprocessing to speed up your code
-``` python
-import Datasnakes.Tools
+```python
+from Datasnakes.Tools import Multiprocess
+
+
+def printwords(word):
+    print(word)
+
+
+words = ['bae', 'luh', 'cuh']
+
+if __name__ == '__main__':
+    mp = Multiprocess()
+    mp.map2function(printwords, words)
 ```
+
 
 
 ### Integrate logging in a simple and quick way

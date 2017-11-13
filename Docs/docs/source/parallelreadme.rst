@@ -21,7 +21,7 @@ Examples
 --------
 
 Random Example
-^^^^^^^^^^^^^^
+~~~~~~~~~~~~~~
 
 .. code:: python
 

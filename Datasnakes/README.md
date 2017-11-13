@@ -102,7 +102,7 @@ from Datasnakes.Manager.management import ProjectManagement
 from Datasnakes.Manager.data_management import DataMana
 ```
 
-#### Explicit Usage:
+#### Explicit Usage
 ```python
 from Datasnakes.Manager.management import ProjectManagement
 # Use the flags to create a new repository/user/project/research directory system
@@ -113,7 +113,7 @@ print(pm.research_path)
 print(pm.research)
 print(pm.Pantry.research_cookie)
 ```
-#### Implicit Usage:
+#### Implicit Usage
 ```python
 from Datasnakes.Manager.data_management import DataMana
 # Use a prebuilt configuration file in Manager/config/
