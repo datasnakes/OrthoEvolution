@@ -17,7 +17,7 @@ Datasnakes-Scripts
    :target: http://datasnakes-scripts.readthedocs.io/en/master/
 
 
-An **easy to use** and comprehensive package which aids in the **analysis and
+An **easy to use** and comprehensive python package which aids in the **analysis and
 visualization of comparative evolutionary genetics** related projects. More specifically, this
 project is focused on the **inference of orthologs** using NCBI's blast, various sequence alignment strategies,
 and phylogenetics analyses including PAML, PhyML, ete3, and more tools.
