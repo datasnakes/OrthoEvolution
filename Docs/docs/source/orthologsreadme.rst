@@ -27,7 +27,6 @@ together.
     from Datasnakes.Orthologs.Align import ClustalO
     from Datasnakes.Orthologs.Phlogenetics import ETE3PAML
 
-
 Software Dependencies
 ---------------------
 

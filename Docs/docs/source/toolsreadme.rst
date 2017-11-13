@@ -17,7 +17,19 @@ Download NCBI databases with our NCBI FTP Client
 
 .. code:: python
 
-    import Datasnakes.Tools.ftp import NcbiFTPClient
+    from Datasnakes.Tools.ftp import NcbiFTPClient
+
+    ncbiftp = NcbiFTPClient(email='somebody@gmail.com')
+    ncbiftp.getblastdb(database_name='refseq_rna')
+
+List all subdirectories in a NCBI FTP Path
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. code:: python
+
+
+    ncbiftp.listdirectories(path='/blast/db/')
+    Out[54]: ['FASTA', 'cloud']
 
 Utilize multiprocessing to speed up your code
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -31,10 +43,24 @@ Integrate logging in a simple and quick way
 
 .. code:: python
 
-    from Datasnakes.Tools.sge import SGEJob
+    from Datasnakes.Tools import LogIt
 
-More Information
-^^^^^^^^^^^^^^^^
+    # Set up your loggers
+    logit = LogIt()
+
+    # Log to one file
+    logfile = 'test.log'
+
+    test1 = logit.default('test1 log', logfile)
+
+    # Start logging
+    test1.info('hi')
+
+    # Shutdown logging without deleting the logfile
+    logit.shutdown()
+
+Additional Documentation
+------------------------
 
 Check the specific modules for more detailed readmes and examples of
 using the tools with this package.

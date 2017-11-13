@@ -2,10 +2,9 @@ LogIt
 =====
 
 Use the LogIt class to make logging very simple. This short and sweet
-class wraps around `logzero <>`__ which allows color coded logging. We
-created our own default logger with a default dateformat, logformat, and
-logging level (default is debug). Setting up a logger is an easy 1
-liner.
+class wraps around `logzero <https://github.com/metachris/logzero>`__
+which allows color coded logging. We created our own default logger with
+a default dateformat, logformat, and logging level (default is debug).
 
 1. Import the LogIt class and create a variable. ex: ``logit = LogIt()``
 2. Create your logger. ex:
@@ -14,7 +13,7 @@ liner.
    ``blastn.error('Your refseq accession was not found')``
 
 Multiple loggers can exist for the same logfile and multiple loggers can
-be set up for one script.
+be set up for one script which is shown in the example below.
 
 Example
 -------
