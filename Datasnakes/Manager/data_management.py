@@ -5,11 +5,11 @@ from pathlib import Path
 import pkg_resources
 import yaml
 
+from Datasnakes.Manager.management import ProjectManagement
 from Datasnakes.Manager import config
-from Datasnakes.Manager import ProjectManagement
-from Datasnakes.Manager import BaseDatabaseManagement
+from Datasnakes.Manager.database_management import BaseDatabaseManagement
 from Datasnakes.Orthologs.Align import MultipleSequenceAlignment as MSA
-from Datasnakes.Orthologs.Blast.blastn_comparative_genetics import CompGenBLASTn
+from Datasnakes.Orthologs.Blast.standard_blastn import StandardBlastN
 from Datasnakes.Orthologs.Blast.comparative_genetics_objects import CompGenObjects
 from Datasnakes.Orthologs.GenBank.genbank import GenBank
 
@@ -115,7 +115,7 @@ class DataMana(object):
         pass
 
     def blast(self, proj_mana, blast_config):
-        self.bl = CompGenBLASTn(proj_mana=proj_mana, **self.Management_config, **blast_config)
+        self.bl = StandardBlastN(proj_mana=proj_mana, **self.Management_config, **blast_config)
         self.bl.blast_config(self.bl.blast_human, 'Homo_sapiens', auto_start=True)
         # TODO-Create directories for the blast data
         # Do the blasting here using CompGenBLASTn
@@ -126,7 +126,7 @@ class DataMana(object):
         else:
             self.gb = GenBank(blast=blast, **self.Management_config, **self.GenBank_config)
         if blast is not None:
-            if issubclass(type(blast), CompGenBLASTn):
+            if issubclass(type(blast), StandardBlastN):
                 self.gb.create_post_blast_gbk_records(blast.org_list, blast.gene_dict)
         else:
             print(proj_mana.__dict__)

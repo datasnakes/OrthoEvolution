@@ -1,5 +1,4 @@
-from .biosql import BaseBioSQL, SQLiteBioSQL
-
-__all__ = ("BaseBioSQL",
-           "SQLiteBioSQL"
-           )
+"""Utilities for creating BioSQL database."""
+__all__ = (
+    "biosql",
+)

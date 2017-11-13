@@ -7,7 +7,7 @@ from cookiecutter.generate import generate_context
 from cookiecutter.hooks import run_script
 from pathlib import Path
 from Datasnakes import Cookies
-from Datasnakes.Tools import LogIt
+from Datasnakes.Tools.logit import LogIt
 from Datasnakes.Manager.config import yml
 from pkg_resources import resource_filename
 from Datasnakes.Cookies.utils import archive
