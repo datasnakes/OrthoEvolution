@@ -1,5 +1,5 @@
 from pathlib import Path
-from Datasnakes.Cookies import Oven
+from Datasnakes.Cookies.cookie_jar import Oven
 from Datasnakes.Tools import LogIt
 
 

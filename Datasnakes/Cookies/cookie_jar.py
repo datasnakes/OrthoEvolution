@@ -8,13 +8,13 @@ from cookiecutter.hooks import run_script
 from pathlib import Path
 from Datasnakes import Cookies
 from Datasnakes.Tools import LogIt
-from Datasnakes.Manager import config
+from Datasnakes.Manager.config import yml
 from pkg_resources import resource_filename
 from Datasnakes.Cookies.utils import archive
 
 
 class CookBook(object):
-    _config_file = resource_filename(config.yaml.__name__, "cookie_recipes.yml")
+    _config_file = resource_filename(yml.__name__, "cookie_recipes.yml")
 
     def __init__(self, config_file=_config_file, **new_recipes):
         """

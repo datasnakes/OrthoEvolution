@@ -1,7 +1,7 @@
 from pathlib import Path
 import yaml
 from importlib import import_module
-from Datasnakes.Manager import ProjectManagement
+from Datasnakes.Manager.management import ProjectManagement
 from Datasnakes.Orthologs.utils import attribute_config
 from Datasnakes.Tools.ftp import NcbiFTPClient
 from Datasnakes.Tools.logit import LogIt

@@ -3,7 +3,7 @@ import os
 import pkg_resources
 from pathlib import Path
 from Datasnakes import Cookies, Orthologs, Manager, Tools
-from Datasnakes.Cookies import Oven
+from Datasnakes.Cookies.cookie_jar import Oven
 from Datasnakes.Tools.zipper.zipper import ZipUtils
 from Datasnakes.Tools.logit import LogIt
 
