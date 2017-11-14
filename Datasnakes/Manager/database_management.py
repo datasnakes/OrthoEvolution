@@ -15,7 +15,7 @@ class BaseDatabaseManagement(object):
     def __init__(self, project, email, driver, project_path=None, proj_mana=ProjectManagement, **kwargs):
         self.dbmanalog = LogIt().default(logname="DatabaseManagement", logfile=None)
         self.config_options = {
-            "WindowMasker_config": self.download_windowmaskerfiles,
+            "WindowMasker_config": self.download_windowmasker_files,
             "Blast_config": self.download_blast_database,
             "Taxonomy_config": self.download_taxonomy_database,
             "GenBank_config": {
@@ -48,14 +48,14 @@ class BaseDatabaseManagement(object):
                 db_configuration = kwargs[config]
                 self.database_dict[db_config_type] = [db_config_method, db_configuration]
 
-    def download_windowmaskerfiles(self, taxonomy_ids, database_path=None):
+    def download_windowmasker_files(self, taxonomy_ids, database_path=None):
         """Download the WindowMasker files."""
         db_path = self.ncbi_db_repo / Path('blast') / Path('windowmasker_files')
         if database_path:
             db_path = Path(database_path)
 
         # XXX This will work when we merge.
-        # self.ncbiftp.getwindowmasker(taxonomy_ids=taxonomy_ids, download_path)
+        self.ncbiftp.getwindowmaskerfiles(taxonomy_ids=taxonomy_ids, download_path=str(db_path))
 
     def download_blast_database(self, database_name="refseq_rna", database_path=None):
         # <path>/<user or basic_project>/databases/NCBI/blast/db/<database_name>
@@ -171,7 +171,7 @@ class DatabaseManagement(BaseDatabaseManagement):
                 strategy_dispatcher.update(sd)
                 strategy_config.update(sc)
             elif strategy == "NCBI_blast_windowmaskerfiles":
-                sd, sc = self.ncbi_blast_windowmaskerfiles(**strategy_kwargs)
+                sd, sc = self.ncbi_blast_windowmasker_files(**strategy_kwargs)
                 strategy_dispatcher.update(sd)
                 strategy_config.update(sc)
             elif strategy == "NCBI_pub_taxonomy":
@@ -230,8 +230,8 @@ class DatabaseManagement(BaseDatabaseManagement):
         # returns dict of config_dicts, dict of dispatcher_functions
         return full_dispatcher, full_config
 
-    def ncbi(self, NCBI_blast, NCBI_pub_taxonomy, NCBI_refseq_release,
-             configure_flag=True, archive_flag=True, delete_flag=False, database_path=None, archive_path=None):
+    def ncbi(self, NCBI_blast, NCBI_pub_taxonomy, NCBI_refseq_release, configure_flag=True, archive_flag=True,
+             delete_flag=False, database_path=None, archive_path=None):
         ncbi_dispatcher = {}
         ncbi_config = {}
         # If the flags are set in a top level part of the hierarchy, then everything below follows
@@ -240,9 +240,12 @@ class DatabaseManagement(BaseDatabaseManagement):
             NCBI_pub_taxonomy["configure_flag"] = configure_flag
             NCBI_refseq_release["configure_flag"] = configure_flag
         if archive_flag:
-            NCBI_blast["archive_flag"] = False
-            NCBI_pub_taxonomy["archive_flag"] = False
-            NCBI_refseq_release["archive_flag"] = False
+            NCBI_blast["delete_flag"] = None
+            NCBI_pub_taxonomy["delete_flag"] = None
+            NCBI_refseq_release["delete_flag"] = None
+            NCBI_blast["archive_flag"] = None
+            NCBI_pub_taxonomy["archive_flag"] = None
+            NCBI_refseq_release["archive_flag"] = None
             ncbi_dispatcher = {"NCBI": []}
             ncbi_dispatcher["NCBI"].append(archive)
             ncbi_config["NCBI"] = {"NCBI": []}
@@ -252,7 +255,7 @@ class DatabaseManagement(BaseDatabaseManagement):
                 "config_file": self.config_file,
                 "delete": self.delete_flag
             })
-        if delete_flag:
+        else:
             NCBI_blast["delete_flag"] = delete_flag
             NCBI_pub_taxonomy["delete_flag"] = delete_flag
             NCBI_refseq_release["delete_flag"] = delete_flag
@@ -276,20 +279,32 @@ class DatabaseManagement(BaseDatabaseManagement):
         return ncbi_dispatcher, ncbi_config
 
     def ncbi_blast(self, NCBI_blast_db, NCBI_blast_windowmasker_files,
-                   configure_flag=None, archive_flag=None, delete_flag=None):
+                   configure_flag=None, archive_flag=None, delete_flag=None, database_path=None, archive_path=None):
+        ncbi_blast_dispatcher = {}
+        ncbi_blast_config = {}
         if configure_flag:
             NCBI_blast_db["configure_flag"] = configure_flag
             NCBI_blast_windowmasker_files["configure_flag"] = configure_flag
         if archive_flag:
-            NCBI_blast_db["archive_flag"] = False
-            NCBI_blast_windowmasker_files["archive_flag"] = False
-        if delete_flag:
+            NCBI_blast_db["delete_flag"] = None
+            NCBI_blast_windowmasker_files["delete_flag"] = None
+            NCBI_blast_db["archive_flag"] = None
+            NCBI_blast_windowmasker_files["archive_flag"] = None
+            ncbi_blast_dispatcher = {"NCBI_blast": []}
+            ncbi_blast_dispatcher["NCBI_blast"].append(archive)
+            ncbi_blast_config["NCBI"] = {"NCBI": []}
+            ncbi_blast_config["NCBI"].append({
+                "db_path": database_path,
+                "arch_path": archive_path,
+                "config_file": self.config_file,
+                "delete": delete_flag
+            })
+        else:
             NCBI_blast_db["delete_flag"] = delete_flag
             NCBI_blast_windowmasker_files["delete_flag"] = delete_flag
-        ncbi_blast_dispatcher = {}
-        ncbi_blast_config = {}
+
         nbd_dispatcher, nbd_config = self.ncbi_blast_db(**NCBI_blast_db)
-        nbw_dispatcher, nbd_config = self.ncbi_blast_windowmaskerfiles(**NCBI_blast_windowmasker_files)
+        nbw_dispatcher, nbd_config = self.ncbi_blast_windowmasker_files(**NCBI_blast_windowmasker_files)
 
         ncbi_blast_dispatcher.update(nbd_dispatcher)
         ncbi_blast_dispatcher.update(nbw_dispatcher)
@@ -314,7 +329,7 @@ class DatabaseManagement(BaseDatabaseManagement):
                 "db_path": database_path,
                 "arch_path": archive_path,
                 "config_file": self.config_file,
-                "delete": self.delete_flag
+                "delete": delete_flag
             })
         # Configure
         if configure_flag:
@@ -325,8 +340,29 @@ class DatabaseManagement(BaseDatabaseManagement):
             })
         return nbd_dispatcher, nbd_config
 
-    def ncbi_blast_windowmaskerfiles(self, configure_flag=None, archive_flag=None, delete_flag=None, **kwargs):
-        return {}, {}
+    def ncbi_blast_windowmasker_files(self, taxonomy_ids, configure_flag=None, archive_flag=None, delete_flag=None,
+                                      archive_path=None, database_path=None):
+        nbw_dispatcher = {"NCBI_blast_windowmasker_files": []}
+        nbw_config = {"NCBI_blast_windowmasker_files": []}
+        if not archive_path:
+            archive_path = str(self.user_archive)
+        if not database_path:
+            database_path = str(self.user_db)
+        if archive_flag:
+            nbw_dispatcher["NCBI_blast_db"].append(archive)
+            nbw_config["NCBI_blast_db"].append({
+                "db_path": database_path,
+                "arch_path": archive_path,
+                "config_file": self.config_file,
+                "delete": delete_flag
+            })
+        if configure_flag:
+            nbw_dispatcher["NCBI_blast_windowmasker_files"].append(self.download_windowmasker_files)
+            nbw_config["NCBI_blast_windowmasker_files"].append({
+                "taxonomy_ids": taxonomy_ids,
+                "database_path": database_path
+            })
+        return nbw_dispatcher, nbw_config
 
     def ncbi_pub_taxonomy(self, configure_flag=None, archive_flag=None, delete_flag=None, archive_path=None, database_path=None):
         # TODO-ROB:  Add a ftp download of the correct taxdump file for biosql stuff in the self.dl-tax-db method
@@ -342,13 +378,13 @@ class DatabaseManagement(BaseDatabaseManagement):
                 "db_path": database_path,
                 "arch_path": archive_path,
                 "config_file": self.config_file,
-                "delete": self.delete_flag
+                "delete": delete_flag
             })
         # Configure
         if configure_flag:
-            # Download blast files
-            nbd_dispatcher["NCBI_blast_db"].append(self.download_blast_database)
-            nbd_config["NCBI_blast_db"].append({
+            # Download pub/taxonomy files
+            npt_dispatcher["NCBI_blast_db"].append(self.download_blast_database)
+            npt_config["NCBI_blast_db"].append({
                 "database_path": database_path
             })
         return npt_dispatcher, npt_config
@@ -356,15 +392,25 @@ class DatabaseManagement(BaseDatabaseManagement):
     def ncbi_refseq_release(self, configure_flag=None, archive_flag=None, delete_flag=None, **kwargs):
         return {}, {}
 
-    def itis(self, ITIS_taxonomy, configure_flag=None, archive_flag=None, delete_flag=None):
+    def itis(self, ITIS_taxonomy, configure_flag=None, archive_flag=None, delete_flag=None, database_path=None, archive_path=None):
+        itis_dispatcher = {}
+        itis_config = {}
         if configure_flag:
             ITIS_taxonomy["configure_flag"] = configure_flag
         if archive_flag:
-            ITIS_taxonomy["archive_flag"] = archive_flag
-        if delete_flag:
+            ITIS_taxonomy["delete_flag"] = None
+            ITIS_taxonomy["archive_flag"] = None
+            itis_dispatcher = {"ITIS": []}
+            itis_dispatcher["ITIS"].append(archive)
+            itis_config = {"ITIS": []}
+            itis_config["ITIS"].append({
+                "db_path": database_path,
+                "arch_path": archive_path,
+                "config_file": self.config_file,
+                "delete": delete_flag
+            })
+        else:
             ITIS_taxonomy["delete_flag"] = delete_flag
-        itis_dispatcher = {}
-        itis_config = {}
         it_dispatcher, it_config = self.itis_taxonomy(**ITIS_taxonomy)
         itis_dispatcher.update(it_dispatcher)
         itis_config.update(it_config)
