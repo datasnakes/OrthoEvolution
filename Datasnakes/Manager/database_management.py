@@ -14,16 +14,16 @@ class BaseDatabaseManagement(object):
 
     def __init__(self, project, email, driver, project_path=None, proj_mana=ProjectManagement, **kwargs):
         self.dbmanalog = LogIt().default(logname="DatabaseManagement", logfile=None)
-        self.config_options = {
-            "WindowMasker_config": self.download_windowmasker_files,
-            "Blast_config": self.download_blast_database,
-            "Taxonomy_config": self.download_taxonomy_database,
-            "GenBank_config": {
-                "download_taxonomy_database": self.download_taxonomy_database,
-                "download_refseq_release_files": self.download_refseq_release_files,
-                "upload_refseq_release_files": self.upload_refseq_release_files
-                               }
-                               }
+        # self.config_options = {
+        #     "WindowMasker_config": self.download_windowmasker_files,
+        #     "Blast_config": self.download_blast_database,
+        #     "Taxonomy_config": self.download_taxonomy_database,
+        #     "GenBank_config": {
+        #         "download_taxonomy_database": self.download_taxonomy_database,
+        #         "download_refseq_release_files": self.download_refseq_release_files,
+        #         "upload_refseq_release_files": self.upload_refseq_release_files
+        #                        }
+        #                        }
         self.project = project
         self.email = email
         self.driver = driver
@@ -38,35 +38,34 @@ class BaseDatabaseManagement(object):
             add_self = attribute_config(self, composer=proj_mana, checker=ProjectManagement, project=project, project_path=project_path)
             for var, attr in add_self.__dict__.items():
                 setattr(self, var, attr)
+            self.database_path = self.user_db
+        else:
+            self.database_path = Path(project_path)
 
-        # Determine which database to update
-        # And then run that script with the configuration.
-        for config in self.config_options.keys():
-            if config in kwargs.keys():
-                db_config_type = config
-                db_config_method = self.config_options[config]
-                db_configuration = kwargs[config]
-                self.database_dict[db_config_type] = [db_config_method, db_configuration]
+        # # Determine which database to update
+        # # And then run that script with the configuration.
+        # for config in self.config_options.keys():
+        #     if config in kwargs.keys():
+        #         db_config_type = config
+        #         db_config_method = self.config_options[config]
+        #         db_configuration = kwargs[config]
+        #         self.database_dict[db_config_type] = [db_config_method, db_configuration]
 
-    def download_windowmasker_files(self, taxonomy_ids, database_path=None):
+    def download_windowmasker_files(self, taxonomy_ids):
         """Download the WindowMasker files."""
-        db_path = self.ncbi_db_repo / Path('blast') / Path('windowmasker_files')
-        if database_path:
-            db_path = Path(database_path)
+        dl_path = Path(self.database_path) / Path("NCBI") / Path('blast') / Path('windowmasker_files')
 
-        # XXX This will work when we merge.
-        self.ncbiftp.getwindowmaskerfiles(taxonomy_ids=taxonomy_ids, download_path=str(db_path))
+        self.ncbiftp.getwindowmaskerfiles(taxonomy_ids=taxonomy_ids, download_path=str(dl_path))
 
-    def download_blast_database(self, database_name="refseq_rna", database_path=None):
+    def download_blast_database(self, database_name="refseq_rna"):
         # <path>/<user or basic_project>/databases/NCBI/blast/db/<database_name>
-        db_path = self.ncbi_db_repo / Path('blast') / Path('db')
-        if database_path:
-            db_path = Path(database_path)
-        self.ncbiftp.getblastdb(database_name=database_name, download_path=self.blast_db)
+        dl_path = Path(self.database_path) / Path("NCBI") / Path("blast") / Path("db")
+
+        self.ncbiftp.getblastdb(database_name=database_name, download_path=str(dl_path))
 
         # TODO-ROB Add email or slack notifications
         self.dbmanalog.critical("Please set the BLAST environment variables in your .bash_profile!!")
-        self.dbmanalog.info("The appropriate environment variable is \'BLASTDB=%s\'." % str(db_path))
+        self.dbmanalog.info("The appropriate environment variable is \'BLASTDB=%s\'." % str(dl_path))
         self.dbmanalog.critical("Please set the BLAST environment variables in your .bash_profile!!")
         # TODO-ROB:  set up environment variables.  Also add CLI setup
 
@@ -103,22 +102,22 @@ class BaseDatabaseManagement(object):
             # Loads data from ITIS via http://www.itis.gov/downloads/
             print('biosql_repo')
 
-    def download_ncbi_taxonomy_dump_files(self, db_path, url="ftp://ftp.ncbi.nlm.nih.gov/pub/taxonomy/taxdump.tar.gz"):
-
-        db_abs_path = Path(db_path) / Path('taxdump.tar.gz')
+    def download_ncbi_taxonomy_dump_files(self, url="ftp://ftp.ncbi.nlm.nih.gov/pub/taxonomy/taxdump.tar.gz"):
+        dl_path = Path(self.database_path) / Path("NCBI") / Path('pub') / Path('taxonomy')
+        dl_abs_path = dl_path / Path('taxdump.tar.gz')
         r = requests.get(url, allow_redirects=True)
-        with open(str(db_abs_path), 'wb') as taxdump:
+        with open(str(dl_abs_path), 'wb') as taxdump:
             taxdump.write(r.content)
 
     # TODO-ROB:  Update ncbiftp class syntax to reflect NCBI's ftp site
     def download_refseq_release_files(self, collection_subset, seqtype, filetype):
         """Download NCBI Refseq Release files."""
-        db_path = self.ncbi_db_repo / Path('refseq') / Path('release') / Path(collection_subset)
+        db_path = self.database_path / Path('NCBI') / Path('refseq') / Path('release') / Path(collection_subset)
         ncbiftp = self.ncbiftp.getrefseqrelease(database_name=collection_subset, seqtype=seqtype, filetype=filetype, download_path=db_path)
         return ncbiftp
 
     def upload_refseq_release_files(self, collection_subset, seqtype, filetype, upload_list, extension=".gbk.db"):
-        db_path = self.ncbi_refseq_release / Path(collection_subset)
+        db_path = self.database_path / Path("NCBI") / Path("refseq") / Path("release") / Path(collection_subset)
         # Get a BioSQL database
         ncbi_db = self.download_taxonomy_database(db_type="biosql", sub_path="/refseq/release/%s" % collection_subset)
         ncbi_db.upload_path = db_path
@@ -141,7 +140,7 @@ class DatabaseManagement(BaseDatabaseManagement):
             # Get the parameters for the Base class
             for key, value in db_config.items():
                 if isinstance(value, dict):
-                    db_config_strategy[key] = value
+                    continue
                 else:
                     kw[key] = value
 
@@ -235,6 +234,10 @@ class DatabaseManagement(BaseDatabaseManagement):
              delete_flag=False, database_path=None, archive_path=None):
         ncbi_dispatcher = {}
         ncbi_config = {}
+        if not archive_path:
+            archive_path = str(self.user_archive)
+        if not database_path:
+            database_path = str(self.user_db)
         # If the flags are set in a top level part of the hierarchy, then everything below follows
         if configure_flag:
             NCBI_blast["configure_flag"] = configure_flag
@@ -283,6 +286,10 @@ class DatabaseManagement(BaseDatabaseManagement):
                    configure_flag=None, archive_flag=None, delete_flag=None, database_path=None, archive_path=None):
         ncbi_blast_dispatcher = {}
         ncbi_blast_config = {}
+        if not archive_path:
+            archive_path = str(self.user_archive)
+        if not database_path:
+            database_path = str(self.user_db)
         if configure_flag:
             NCBI_blast_db["configure_flag"] = configure_flag
             NCBI_blast_windowmasker_files["configure_flag"] = configure_flag
@@ -321,8 +328,6 @@ class DatabaseManagement(BaseDatabaseManagement):
         nbd_config = {"NCBI_blast_db": []}
         if not archive_path:
             archive_path = str(self.user_archive)
-        if not database_path:
-            database_path = str(self.user_db)
         # Archive.  If necessary, then delete.
         if archive_flag:
             nbd_dispatcher["NCBI_blast_db"].append(archive)
@@ -386,7 +391,7 @@ class DatabaseManagement(BaseDatabaseManagement):
             # Download pub/taxonomy files
             npt_dispatcher["NCBI_blast_db"].append(self.download_ncbi_taxonomy_dump_files)
             npt_config["NCBI_blast_db"].append({
-                "db_path": database_path
+                "database_path": database_path
             })
         return npt_dispatcher, npt_config
 
@@ -426,6 +431,10 @@ class DatabaseManagement(BaseDatabaseManagement):
     def itis(self, ITIS_taxonomy, configure_flag=None, archive_flag=None, delete_flag=None, database_path=None, archive_path=None):
         itis_dispatcher = {}
         itis_config = {}
+        if not archive_path:
+            archive_path = str(self.user_archive)
+        if not database_path:
+            database_path = str(self.user_db)
         if configure_flag:
             ITIS_taxonomy["configure_flag"] = configure_flag
         if archive_flag:
