@@ -104,6 +104,7 @@ class BaseDatabaseManagement(object):
             print('biosql_repo')
 
     def download_ncbi_taxonomy_dump_files(self, db_path, url="ftp://ftp.ncbi.nlm.nih.gov/pub/taxonomy/taxdump.tar.gz"):
+
         db_abs_path = Path(db_path) / Path('taxdump.tar.gz')
         r = requests.get(url, allow_redirects=True)
         with open(str(db_abs_path), 'wb') as taxdump:
@@ -250,10 +251,10 @@ class DatabaseManagement(BaseDatabaseManagement):
             ncbi_dispatcher["NCBI"].append(archive)
             ncbi_config["NCBI"] = {"NCBI": []}
             ncbi_config["NCBI"].append({
-                "db_path": database_path,
-                "arch_path": archive_path,
-                "config_file": self.config_file,
-                "delete": self.delete_flag
+                "database_path": database_path,
+                "archive_path": archive_path,
+                "option": "NCBI",
+                "delete_flag": delete_flag
             })
         else:
             NCBI_blast["delete_flag"] = delete_flag
@@ -292,12 +293,12 @@ class DatabaseManagement(BaseDatabaseManagement):
             NCBI_blast_windowmasker_files["archive_flag"] = None
             ncbi_blast_dispatcher = {"NCBI_blast": []}
             ncbi_blast_dispatcher["NCBI_blast"].append(archive)
-            ncbi_blast_config["NCBI"] = {"NCBI": []}
-            ncbi_blast_config["NCBI"].append({
-                "db_path": database_path,
-                "arch_path": archive_path,
-                "config_file": self.config_file,
-                "delete": delete_flag
+            ncbi_blast_config = {"NCBI_blast": []}
+            ncbi_blast_config["NCBI_blast"].append({
+                "database_path": database_path,
+                "archive_path": archive_path,
+                "option": "NCBI_blast",
+                "delete_flag": delete_flag
             })
         else:
             NCBI_blast_db["delete_flag"] = delete_flag
@@ -326,10 +327,10 @@ class DatabaseManagement(BaseDatabaseManagement):
         if archive_flag:
             nbd_dispatcher["NCBI_blast_db"].append(archive)
             nbd_config["NCBI_blast_db"].append({
-                "db_path": database_path,
-                "arch_path": archive_path,
-                "config_file": self.config_file,
-                "delete": delete_flag
+                "database_path": database_path,
+                "archive_path": archive_path,
+                "option": "NCBI_blast",
+                "delete_flag": delete_flag
             })
         # Configure
         if configure_flag:
@@ -349,12 +350,12 @@ class DatabaseManagement(BaseDatabaseManagement):
         if not database_path:
             database_path = str(self.user_db)
         if archive_flag:
-            nbw_dispatcher["NCBI_blast_db"].append(archive)
-            nbw_config["NCBI_blast_db"].append({
-                "db_path": database_path,
-                "arch_path": archive_path,
-                "config_file": self.config_file,
-                "delete": delete_flag
+            nbw_dispatcher["NCBI_blast_windowmasker_files"].append(archive)
+            nbw_config["NCBI_blast_windowmasker_files"].append({
+                "database_path": database_path,
+                "archive_path": archive_path,
+                "option": "NCBI_blast_windowmasker_files",
+                "delete_flag": delete_flag
             })
         if configure_flag:
             nbw_dispatcher["NCBI_blast_windowmasker_files"].append(self.download_windowmasker_files)
@@ -373,24 +374,54 @@ class DatabaseManagement(BaseDatabaseManagement):
         if not database_path:
             database_path = str(self.user_db)
         if archive_flag:
-            npt_dispatcher["NCBI_blast_db"].append(archive)
-            npt_config["NCBI_blast_db"].append({
-                "db_path": database_path,
-                "arch_path": archive_path,
-                "config_file": self.config_file,
-                "delete": delete_flag
+            npt_dispatcher["NCBI_pub_taxonomy"].append(archive)
+            npt_config["NCBI_pub_taxonomy"].append({
+                "database_path": database_path,
+                "archive_path": archive_path,
+                "option": "NCBI_pub_taxonomy",
+                "delete_flag": delete_flag
             })
         # Configure
         if configure_flag:
             # Download pub/taxonomy files
-            npt_dispatcher["NCBI_blast_db"].append(self.download_blast_database)
+            npt_dispatcher["NCBI_blast_db"].append(self.download_ncbi_taxonomy_dump_files)
             npt_config["NCBI_blast_db"].append({
-                "database_path": database_path
+                "db_path": database_path
             })
         return npt_dispatcher, npt_config
 
-    def ncbi_refseq_release(self, configure_flag=None, archive_flag=None, delete_flag=None, **kwargs):
-        return {}, {}
+    def ncbi_refseq_release(self, configure_flag=None, archive_flag=None, delete_flag=None, upload_flag=None, archive_path=None,
+                            database_path=None, collection_subset=None, seqtype=None, filetype=None, upload_list=None):
+        nrr_dispatcher = {"NCBI_refseq_release": []}
+        nrr_config = {"NCBI_refseq_release": []}
+        if not archive_path:
+            archive_path = str(self.user_archive)
+        if not database_path:
+            database_path = str(self.user_db)
+        if archive_flag:
+            nrr_dispatcher["NCBI_refseq_release"].append(archive)
+            nrr_config["NCBI_refseq_release"].append({
+                "database_path": database_path,
+                "archive_path": archive_path,
+                "option": "NCBI_refseq_release",
+                "delete_flag": delete_flag
+            })
+        if configure_flag:
+            nrr_dispatcher["NCBI_refseq_release"].append(self.download_refseq_release_files)
+            nrr_config["NCBI_refseq_release"].append({
+                "collection_subset": collection_subset,
+                "seqtype": seqtype,
+                "filetype": filetype
+            })
+        if upload_flag:
+            nrr_dispatcher["NCBI_refseq_release"].append(self.upload_refseq_release_files)
+            nrr_config["NCBI_refseq_release"].append({
+                "collection_subset": collection_subset,
+                "seqtype": seqtype,
+                "filetype": filetype,
+                "upload_list": upload_list
+            })
+        return nrr_dispatcher, nrr_config
 
     def itis(self, ITIS_taxonomy, configure_flag=None, archive_flag=None, delete_flag=None, database_path=None, archive_path=None):
         itis_dispatcher = {}
@@ -404,10 +435,10 @@ class DatabaseManagement(BaseDatabaseManagement):
             itis_dispatcher["ITIS"].append(archive)
             itis_config = {"ITIS": []}
             itis_config["ITIS"].append({
-                "db_path": database_path,
-                "arch_path": archive_path,
-                "config_file": self.config_file,
-                "delete": delete_flag
+                "database_path": database_path,
+                "archive_path": archive_path,
+                "option": "ITIS",
+                "delete_flag": delete_flag
             })
         else:
             ITIS_taxonomy["delete_flag"] = delete_flag
