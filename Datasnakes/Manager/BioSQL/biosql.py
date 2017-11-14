@@ -9,7 +9,7 @@ from Bio import SeqIO
 from Datasnakes.Tools.logit import LogIt
 from Datasnakes.Manager.BioSQL.biosql_repo import sql
 from Datasnakes.Manager.BioSQL.biosql_repo import scripts as sql_scripts
-from Datasnakes.Manager import ProjectManagement
+from Datasnakes.Manager.management import ProjectManagement
 from Datasnakes.Orthologs.utils import attribute_config
 from Datasnakes.Tools.streamieo import StreamIEO
 
