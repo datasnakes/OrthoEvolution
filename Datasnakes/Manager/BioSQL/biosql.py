@@ -36,24 +36,26 @@ class BaseBioSQL(object):
         self.scripts = pkg_resources.resource_filename(sql_scripts.__name__, "")
         self.ncbi_taxon_script = pkg_resources.resource_filename(sql_scripts.__name__, "load_ncbi_taxonomy.pl")
         self.itis_taxon_script = pkg_resources.resource_filename(sql_scripts.__name__, "load_itis_taxonomy.pl")
+        self.database_name = database_name
 
         # Configuration of class attributes for Project Management.
         if project_path and project:
             self.project_path = Path(project_path) / Path(project)
-            self.template_abs_path = self.project_path / Path("index")
-            self.database_rel_path = self.project_path / Path("database")
 
         if proj_mana:
             add_self = attribute_config(self, composer=proj_mana, checker=ProjectManagement, project=project, project_path=project_path)
             for var, attr in add_self.__dict__.items():
                 setattr(self, var, attr)
-            self.template_abs_path = self.user_index / Path(template_name)
+            self.template_rel_path = self.user_index
+            self.template_abs_path = self.template_rel_path / Path(template_name)
             self.database_rel_path = self.user_db
-
-        # Parameter Attributes
-        self.database_name = database_name
-        # self.database_path = self.user_index
-        # self.db_abs_path = Path(self.database_path) / Path(self.database_name)
+            self.database_abs_path = self.database_rel_path / Path(self.database_name)
+        else:
+            self.project_path = Path(project_path) / Path(project)
+            self.template_rel_path = self.project_path / Path('index')
+            self.template_abs_path = self.template_rel_path / Path(template_name)
+            self.database_rel_path = Path(project_path) / Path('databases')
+            self.database_abs_path = self.database_rel_path / Path(self.database_name)
 
     def configure_new_database(self, cmd, schema_file=None):
         """
@@ -162,24 +164,24 @@ class SQLiteBioSQL(BaseBioSQL):
         if not self.template_abs_path.is_file():
             self.create_template_database()
         # Copy the template into a new folder.
-        dest_abs_path = self.user_db / Path(sub_path)
+        dest_abs_path = self.ncbi_db_repo / Path(sub_path)
         self.biosqllog.warn('Copying Template BioSQL Database...  This may take a few minutes...')
         shutil.copy2(str(self.template_abs_path), str(dest_abs_path))
 
     def upload_files(self, seqtype, filetype, new_db=False):
-        db_path = self.db_abs_path.parent
-        db_name = Path(self.db_abs_path.stem + '_' + seqtype + self.db_abs_path.suffix)
+        db_path = self.database_abs_path.parent
+        db_name = Path(self.database_abs_path.stem + '_' + seqtype + self.database_abs_path.suffix)
         db_abs_path = db_path / db_name
 
         # Make sure a BioSQL-SQLite database exists
-        if self.db_abs_path.is_file():
+        if self.database_abs_path.is_file():
             if not db_abs_path.is_file():
-                self.db_abs_path.rename(target=db_abs_path)
+                self.database_abs_path.rename(target=db_abs_path)
             pass
         elif new_db:
             self.copy_template_database(dest_path=db_path, dest_name=db_name)
         else:
-            raise FileNotFoundError("Database not found: %s\mPlease create a BioSQL-SQLite database." % self.db_abs_path)
+            raise FileNotFoundError("Database not found: %s\mPlease create a BioSQL-SQLite database." % self.database_abs_path)
 
         # Parse the upload list and upload the files to the BioSQL-SQLite database.
         for file in self.upload_list:
@@ -191,7 +193,7 @@ class SQLiteBioSQL(BaseBioSQL):
                 self.biosqllog.info("Server Connected.")
                 pass
             except:
-                self.biosqllog.warn("The Server did not Connect.  Check the to make sure %s exists." % self.db_abs_path)
+                self.biosqllog.warn("The Server did not Connect.  Check the to make sure %s exists." % self.database_abs_path)
                 raise FileNotFoundError
 
             # See if the sub database exists (rna, protein, or genomic)
