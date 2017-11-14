@@ -1,27 +1,35 @@
 .. image:: https://travis-ci.org/datasnakes/Datasnakes-Scripts.svg?branch=master
     :target: https://travis-ci.org/datasnakes/Datasnakes-Scripts
+
 .. image:: https://api.codacy.com/project/badge/Grade/9a4ce39423ed4458a0c7fa3610c81ba2
    :target: https://www.codacy.com/app/sdhutchins/Datasnakes-Scripts?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=datasnakes/Datasnakes-Scripts&amp;utm_campaign=Badge_Grade
+
 .. image:: https://badges.gitter.im/gitterHQ/gitter.png
    :target: https://gitter.im/datasnakes/Lobby
+
 .. image:: https://badge.fury.io/py/Datasnakes-Scripts.svg
    :target: https://badge.fury.io/py/Datasnakes-Scripts
+
 .. image:: https://readthedocs.org/projects/datasnakes-scripts/badge/?version=master
    :target: http://datasnakes-scripts.readthedocs.io/en/master/
-.. image:: https://img.shields.io/badge/under-development-orange.svg
-   :target: https://github.com/datasnakes/Datasnakes-Scripts
 
 Datasnakes-Scripts
---------------------
-An **easy to use** and comprehensive package which aids in the **analysis and visualization of comparative genetics** & related bioinformatics projects.
-The current implementation of this package places an emphasis on the **inference of orthologs** using NCBI's blast, various sequence alignment strategies,
-and phylogenetics analyses including PAML, PhymL, ete3, and more tools.
+-------------------
 
-The goal of this project is to create a pipeline framework for current (inference of orthologs) and future (RNA-seek) projects.  The Cookies, Manager, Pipeline,
-and Tools modules act as a framework for our workflow, while the Orthologs module provides access to specific functions for our various ortholog inference projects.
+An **easy to use** and comprehensive python package which aids in the **analysis and
+visualization of comparative evolutionary genetics** related projects. More specifically, this
+project is focused on the **inference of orthologs** using NCBI's blast, various sequence alignment strategies,
+and phylogenetics analyses including PAML, PhyML, ete3, and more tools.
 
-Check out our `wiki docs <https://github.com/datasnakes/Datasnakes-Scripts/wiki>`__ and our `read the docs <http://datasnakes-scripts.readthedocs.io/en/master/>`__!
+Ultimately, the goal of this project is to create a **reusable pipeline** for the
+inference of orthologs in order to ensure reproducibility of data as well as improve
+the management and analysis of (what can be) large datasets.  The Cookies, Manager, Pipeline,
+and Tools modules act as a framework for our workflow, while the Orthologs
+module provides access to specific functions for our various ortholog inference projects.
 
+View our `read the docs <http://datasnakes-scripts.readthedocs.io/en/master/>`__ and feel free to also
+read `this related paper <https://www.frontiersin.org/articles/10.3389/fnhum.2014.00283/full>`__ to gain
+more insight into this project/python package.
 
 Installation
 ------------
@@ -46,14 +54,11 @@ Development Code
 
 Examples
 ---------
+Check out this `tutorial <https://github.com/datasnakes/Datasnakes-Scripts/wiki/Tutorial>`__ in our Wiki Docs.
 
 .. code:: python
 
     import Datasnakes
-
-A short overview of the package can be found in the Datasnakes module.
-For more advanced documentation see the README.md files in each of the sub-modules.  A good place to start would be the
-Orthologs/Blast module for understanding the bioinformatics workflow.
 
 Tests
 ------
@@ -63,10 +68,10 @@ Contributors
 ------------
 
 -  Rob Gilmore \| Github: `@grabear <https://github.com/grabear>`__ \|
-   `:email: <mailto:robgilmore127@gmail.com>`__
+   `✉ <mailto:robgilmore127@gmail.com>`__
 -  Shaurita Hutchins \| Github:
    `@sdhutchins <https://github.com/sdhutchins>`__ \|
-   `:email: <mailto:sdhutchins@outlook.com>`__
+   `✉ <mailto:sdhutchins@outlook.com>`__
 
 If you would like to contribute to this package, install the package in development mode,
 and check out our `contributing guidelines <https://github.com/datasnakes/Datasnakes-Scripts/blob/master/CONTRIBUTING.rst>`__.

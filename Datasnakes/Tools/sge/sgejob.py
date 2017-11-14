@@ -9,6 +9,7 @@ from Datasnakes.Tools.sge.sgeconfig import __DEFAULT__
 from Datasnakes.Manager.config import templates
 from Datasnakes.Tools.sge import Qstat
 
+
 class BaseSGEJob(object):
     """Base class for simple jobs."""
     def __init__(self, base_jobname):
@@ -60,7 +61,6 @@ class BaseSGEJob(object):
             self.wait_on_job_completion(job_id)
 
 
-
 class SGEJob(BaseSGEJob):
     """Create a qsub/pbs job & script for the job to execute."""
     def __init__(self, email_address, base_jobname=None):
@@ -69,7 +69,8 @@ class SGEJob(BaseSGEJob):
         self.attributes = self.default_job_attributes
         self.jobname = self.default_job_attributes['job_name']
         if base_jobname is not None:
-            _, self.jobname = self._configure(base_jobname=base_jobname, length=5)
+            _, self.jobname = self._configure(base_jobname=base_jobname,
+                                              length=5)
             self.attributes = self._update_default_attributes()
 
     def _update_default_attributes(self):
@@ -82,7 +83,7 @@ class SGEJob(BaseSGEJob):
                           'script': self.jobname,
                           'log_name': self.jobname + '.log',
                           'cmd': 'python3 ' + pyfile_path,
-                            }
+                          }
         self.default_job_attributes.update(new_attributes)
 
         return self.default_job_attributes
@@ -130,6 +131,8 @@ class SGEJob(BaseSGEJob):
                 self._cleanup(self.jobname)
         else:
             if cmd_status.returncode == 0:  # Command was successful.
+                # The cmd_status has stdout that must be decoded.
+                # When a qsub job is submitted, the stdout is the job id.
                 submitted_jobid = cmd_status.stdout.decode('utf-8')
                 self.sgejob_log.info(self.jobname + ' was submitted.' )
                 self.sgejob_log.info('Your job id is: %s' % submitted_jobid)
