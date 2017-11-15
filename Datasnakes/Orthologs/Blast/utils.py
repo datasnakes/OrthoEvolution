@@ -32,8 +32,12 @@ def map_func(hit):
     return hit
 
 
-# XXX PAML no longer needs a format different than `Homo_sapiens`
 def paml_org_formatter(organisms):
+    """Format a list for PAML.
+
+    :param organisms:  Input a list of organisms
+    """
+    # XXX PAML no longer needs a format different than `Homo_sapiens`
     org_list = []
     for organism in organisms:
         genus, sep, species = organism.partition('_')
@@ -48,6 +52,7 @@ def gene_list_config(file, data_path, gene_list, taxon_dict, logger):
     It also helps recognize whether or not a BLAST was terminated in the middle
     of the workflow.  This removes the last line of the accession file if it
     is incomplete.
+
     :param file:  An accession file to analyze.
     :param data_path:  The path of the accession file.
     :param gene_list:  A gene list in the same order as the accession file.
@@ -100,6 +105,7 @@ def gene_list_config(file, data_path, gene_list, taxon_dict, logger):
 
 def gi_list_config(gi_list_path, taxonomy_ids, research_path=None, config=False):
     """Create a gi list based on the refseq_rna database for each taxonomy id.
+
     It will also convert the gi list into a binary file which is more
     efficient to use with NCBI's Standalone Blast tools.
     """
