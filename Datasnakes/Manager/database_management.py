@@ -146,7 +146,7 @@ class BaseDatabaseManagement(object):
         ncbiftp = self.ncbiftp.getrefseqrelease(taxon_group=collection_subset, seqtype=seqtype, seqformat=seqformat, download_path=db_path)
         return ncbiftp
 
-    def upload_refseq_release_files(self, collection_subset, seqtype, seqformat, upload_list=None, extension=".gbk.db"):
+    def upload_refseq_release_files(self, collection_subset, seqtype, seqformat, upload_number=8, upload_list=None, extension=".gbk.db"):
         """
         Upload NCBI's Refseq Release files to a BioSQL database.
 
@@ -163,10 +163,21 @@ class BaseDatabaseManagement(object):
         :return:
         :rtype:
         """
-        db_path = self.database_path / Path("NCBI") / Path("refseq") / Path("release") / Path(collection_subset)
-        # Get a BioSQL database
-        ncbi_db = self.create_biosql_taxonomy_database(destination=db_path)
-        ncbi_db.upload_files(seqtype=seqtype, filetype=seqformat, upload_path=db_path, upload_list=upload_list)
+        if upload_number < 8:
+            raise ValueError("The upload_number must be greater than 8.  The NCBI refseq release files are too bing"
+                             "for anything less than 8 seperate BioSQL databases.")
+        from Datasnakes.Tools.sge import SGEJob
+
+        # TODO-ROB: multiprocessing sge whatever
+        # Create a list of lists with an index corresponding to the upload number
+        sub_upload_size = len(upload_list) / upload_number
+        sub_upload_lists = [upload_list[x:x+100] for x in range(0, len(upload_list), sub_upload_size)]
+        upload_job = SGEJob(email_address=self.email)
+        for sub_list in sub_upload_lists:
+            db_path = self.database_path / Path("NCBI") / Path("refseq") / Path("release") / Path(collection_subset)
+            # Get a BioSQL database
+            ncbi_db = self.create_biosql_taxonomy_database(destination=db_path)
+            ncbi_db.upload_files(seqtype=seqtype, filetype=seqformat, upload_path=db_path, upload_list=upload_list)
 
     def get_project_genbank_database(self):
         """"""
