@@ -105,7 +105,7 @@ class SQLiteBioSQL(BaseBioSQL):
         self.driver = "SQLite"
         self.schema_cmd = "sqlite3 %s -echo"
         self.schema_file = "biosqldb-sqlite.sql"
-        self.taxon_cmd = "%s --dbname %s --driver %s --download true"
+        self.taxon_cmd = "%s --dbname %s --driver %s --download false --directory %s"
 
         self.upload_path = upload_path
         self.upload_list = upload_list
@@ -129,7 +129,8 @@ class SQLiteBioSQL(BaseBioSQL):
         support for the SQLite PhyloDB.
         """
         # Build the command
-        taxon_cmd = self.taxon_cmd % (self.ncbi_taxon_script, str(self.template_abs_path), self.driver)
+        ncbi_taxon_dump_path = self.database_rel_path / Path("NCBI") / Path('pub') / Path('taxonomy')
+        taxon_cmd = self.taxon_cmd % (self.ncbi_taxon_script, str(self.template_abs_path), self.driver, str(ncbi_taxon_dump_path))
         # Run the bash command
         self.configure_new_database(taxon_cmd)
         # TODO-ROB: Parse output and error
@@ -138,8 +139,6 @@ class SQLiteBioSQL(BaseBioSQL):
     def create_template_database(self):
         """
         Creates a template database by uploading SQLite schema and NCBI taxonomy.
-
-        :param db_path:  The relative path of the database.
         :return:
         """
         # Create a template if it doesn't exits.
@@ -151,27 +150,24 @@ class SQLiteBioSQL(BaseBioSQL):
         else:
             self.biosqllog.warning("The template, %s, already exists." % self.template_abs_path)
 
-    def copy_template_database(self, sub_path):
+    def copy_template_database(self, destination):
         """
         This method copies a template sqlite biosql database.
 
-        :param db_path:  The relative path of the template database.
-        :param dest_path:  The path to copy the template into
-        :param dest_name:  The name of the new database file.
+        :param destination:  The path to copy the template into
         :return:  A new copy of the biosql database.
         """
         # If the template doesn't exists, then create it.
         if not self.template_abs_path.is_file():
             self.create_template_database()
         # Copy the template into a new folder.
-        dest_abs_path = self.ncbi_db_repo / Path(sub_path)
+        dest_abs_path = Path(destination)
         self.biosqllog.warn('Copying Template BioSQL Database...  This may take a few minutes...')
         shutil.copy2(str(self.template_abs_path), str(dest_abs_path))
 
     def upload_files(self, seqtype, filetype, new_db=False):
-        db_path = self.database_abs_path.parent
         db_name = Path(self.database_abs_path.stem + '_' + seqtype + self.database_abs_path.suffix)
-        db_abs_path = db_path / db_name
+        db_abs_path = self.database_rel_path / db_name
 
         # Make sure a BioSQL-SQLite database exists
         if self.database_abs_path.is_file():
@@ -179,7 +175,7 @@ class SQLiteBioSQL(BaseBioSQL):
                 self.database_abs_path.rename(target=db_abs_path)
             pass
         elif new_db:
-            self.copy_template_database(dest_path=db_path, dest_name=db_name)
+            self.copy_template_database(dest_path=self.database_rel_path, dest_name=db_name)
         else:
             raise FileNotFoundError("Database not found: %s\mPlease create a BioSQL-SQLite database." % self.database_abs_path)
 
