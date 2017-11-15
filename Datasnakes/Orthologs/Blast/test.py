@@ -1,4 +1,4 @@
-from Datasnakes.Orthologs.Blast import OrthoBlastN
+from Datasnakes.Orthologs.Blast import OrthoBlastN, BaseBlastN
 import os
 
 # This is more pythonic with YAML loading
@@ -14,5 +14,5 @@ Blast_config = {
 
 
 path = os.getcwd()
-myblast = OrthoBlastN(proj_mana=None, project="sdh-test", project_path=path, **Blast_config)
+myblast = BaseBlastN(proj_mana=None, project="sdh-test", project_path=path, **Blast_config)
 myblast.blast_config(myblast.blast_human, 'Homo_sapiens', auto_start=True)
