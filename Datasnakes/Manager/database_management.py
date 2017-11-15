@@ -146,7 +146,7 @@ class BaseDatabaseManagement(object):
         ncbiftp = self.ncbiftp.getrefseqrelease(taxon_group=collection_subset, seqtype=seqtype, seqformat=seqformat, download_path=db_path)
         return ncbiftp
 
-    def upload_refseq_release_files(self, collection_subset, seqtype, seqformat, upload_list, extension=".gbk.db"):
+    def upload_refseq_release_files(self, collection_subset, seqtype, seqformat, upload_list=None, extension=".gbk.db"):
         """
         Upload NCBI's Refseq Release files to a BioSQL database.
 
@@ -166,10 +166,7 @@ class BaseDatabaseManagement(object):
         db_path = self.database_path / Path("NCBI") / Path("refseq") / Path("release") / Path(collection_subset)
         # Get a BioSQL database
         ncbi_db = self.create_biosql_taxonomy_database(destination=db_path)
-        ncbi_db.upload_path = db_path
-        ncbi_db.upload_list = upload_list
-        ncbi_db.upload_files(seqtype=seqtype, filetype=seqformat)
-        pass
+        ncbi_db.upload_files(seqtype=seqtype, filetype=seqformat, upload_path=db_path, upload_list=upload_list)
 
     def get_project_genbank_database(self):
         """"""
@@ -475,7 +472,8 @@ class DatabaseManagement(BaseDatabaseManagement):
         return npt_dispatcher, npt_config
 
     def ncbi_refseq_release(self, configure_flag=None, archive_flag=None, delete_flag=None, upload_flag=None, archive_path=None,
-                            database_path=None, collection_subset=None, seqtype=None, seqformat=None, upload_list=None):
+                            database_path=None, collection_subset=None, seqtype=None, seqformat=None, upload_list=None,
+                            upload_number=8):
         nrr_dispatcher = {"NCBI_refseq_release": []}
         nrr_config = {"NCBI_refseq_release": []}
         if not archive_path:
@@ -498,13 +496,27 @@ class DatabaseManagement(BaseDatabaseManagement):
                 "seqformat": seqformat
             })
         if upload_flag:
-            nrr_dispatcher["NCBI_refseq_release"].append(self.upload_refseq_release_files)
-            nrr_config["NCBI_refseq_release"].append({
-                "collection_subset": collection_subset,
-                "seqtype": seqtype,
-                "filetype": seqformat,
-                "upload_list": upload_list
-            })
+            if upload_number < 8:
+                raise ValueError("The upload_number must be greater than 8.  The NCBI refseq release files are too bing"
+                                 "for anything less than 8 seperate BioSQL databases.")
+            from Datasnakes.Tools.sge import SGEJob
+
+            # TODO-ROB: multiprocessing sge whatever
+            # Create a list of lists with an index corresponding to the upload number
+            sub_upload_size = len(upload_list) / upload_number
+            if (len(upload_list) % upload_number) != 0:
+                upload_number = upload_number + 1
+            sub_upload_lists = [upload_list[x:x+100] for x in range(0, len(upload_list), sub_upload_size)]
+            upload_job = SGEJob(email_address=self.email)
+            for sub_list in sub_upload_lists:
+                self.upload_refseq_release_files(collection_subset=collection_subset, seqtype=seqtype, seqformat=seqformat, upload_list=sub_list)
+                nrr_dispatcher["NCBI_refseq_release"].append(self.upload_refseq_release_files)
+                nrr_config["NCBI_refseq_release"].append({
+                    "collection_subset": collection_subset,
+                    "seqtype": seqtype,
+                    "seqformat": seqformat,
+                    "upload_list": sub_list
+                })
         return nrr_dispatcher, nrr_config
 
     def itis(self, ITIS_taxonomy, configure_flag=None, archive_flag=None, delete_flag=None, database_path=None, archive_path=None):
