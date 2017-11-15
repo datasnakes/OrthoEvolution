@@ -13,24 +13,32 @@ from Datasnakes.Manager.BioSQL import biosql
 
 class BaseDatabaseManagement(object):
 
-    def __init__(self, project, email, driver, project_path=None, proj_mana=ProjectManagement, **kwargs):
-        self.dbmanalog = LogIt().default(logname="DatabaseManagement", logfile=None)
-        # self.config_options = {
-        #     "WindowMasker_config": self.download_windowmasker_files,
-        #     "Blast_config": self.download_blast_database,
-        #     "Taxonomy_config": self.download_taxonomy_database,
-        #     "GenBank_config": {
-        #         "download_taxonomy_database": self.download_taxonomy_database,
-        #         "download_refseq_release_files": self.download_refseq_release_files,
-        #         "upload_refseq_release_files": self.upload_refseq_release_files
-        #                        }
-        #                        }
+    def __init__(self, project, email, driver, project_path=None, proj_mana=ProjectManagement):
+        """
+        This is the base class for managing various databases.  It provides functionality for downloading and creating
+        various databases for your pipeline.  There are functions available for downloading files from NCBI (BLAST,
+        windowmasker, taxonomy, refseq release), downloading ITIS taxonomy tables, creating BioSQL databases, and
+        uploading refseq release files to BioSQL databases.  This class currently REQUIRES an instance of
+        ProjectManagement to be used with the proj_mana parameter.
+
+        :param project: The name of the project.
+        :type project: str.
+        :param email: The email of the user for using during the FTP.
+        :type email: str.
+        :param driver: The driver used for creating the BioSQL databases.
+        :type driver:  str.
+        :param project_path: A path used for standalone/basic project configuration.
+        :type project_path: str.
+        :param proj_mana: A configuration variable for connecting projects.
+        :type proj_mana: ProjectManagement.
+        """
+
+        self.db_mana_log = LogIt().default(logname="DatabaseManagement", logfile=None)
         self.project = project
         self.email = email
         self.driver = driver
         self.database_dict = {}
         self.ncbiftp = NcbiFTPClient(email=self.email)
-        # TODO-ROB:  Configure this differently somehow
         self.biosql = biosql
         self.proj_mana = proj_mana
 
@@ -43,22 +51,29 @@ class BaseDatabaseManagement(object):
         else:
             self.database_path = Path(project_path)
 
-        # # Determine which database to update
-        # # And then run that script with the configuration.
-        # for config in self.config_options.keys():
-        #     if config in kwargs.keys():
-        #         db_config_type = config
-        #         db_config_method = self.config_options[config]
-        #         db_configuration = kwargs[config]
-        #         self.database_dict[db_config_type] = [db_config_method, db_configuration]
-
     def download_windowmasker_files(self, taxonomy_ids):
-        """Download the WindowMasker files."""
-        dl_path = Path(self.database_path) / Path("NCBI") / Path('blast') / Path('windowmasker_files')
+        """
+        Download the WindowMasker files used in the BLAST database.
 
+        :param taxonomy_ids:  Taxonomy ids for the organisms of interest.
+        :type taxonomy_ids:  list.
+        :return:
+        :rtype:
+        """
+        # <path>/<user or basic_project>/databases/NCBI/blast/db/<database_name>
+        dl_path = Path(self.database_path) / Path("NCBI") / Path('blast') / Path('windowmasker_files')
         self.ncbiftp.getwindowmaskerfiles(taxonomy_ids=taxonomy_ids, download_path=str(dl_path))
 
     def download_blast_database(self, database_name="refseq_rna"):
+        """
+        Download the blast database files for using NCBI's BLAST+ command line.  For other types of blast data, please
+        see the NCBIREADME.md file.
+
+        :param database_name:  A string that represents a pattern in the files of interest.
+        :type database_name:  string.
+        :return:
+        :rtype:
+        """
         # <path>/<user or basic_project>/databases/NCBI/blast/db/<database_name>
         dl_path = Path(self.database_path) / Path("NCBI") / Path("blast") / Path("db")
 
@@ -71,20 +86,23 @@ class BaseDatabaseManagement(object):
         # TODO-ROB:  set up environment variables.  Also add CLI setup
 
     def download_ete3_taxonomy_database(self):
+        """Update ETE3's taxonomy database with ETE3's API."""
         # DEFAULT_TAXADB = os.path.join(os.environ.get('HOME', '/'), '.etetoolkit', 'taxa.sqlite')
         ete3 = import_module("ete3")
         ete3.NCBITaxa.update_taxonomy_database()
 
-    def download_biosql_taxonomy_database(self):
+    def create_biosql_taxonomy_database(self, destination):
+        """Create a BioSQL database template loaded with NCBI's taxonomy data."""
         if self.driver.lower() == "sqlite3":
             ncbi_db = self.biosql.SQLiteBioSQL(proj_mana=self.proj_mana)
-            ncbi_db.copy_template_database(destination=self.database_path)
+            ncbi_db.copy_template_database(destination=destination)
             return ncbi_db
 
         elif self.driver.lower() == "mysql":
-            db_path = self.ncbi_db_repo / Path('pub') / Path('taxonomy')
-            ncbi_db = self.biosql.MySQLBioSQL()
-            return ncbi_db
+            # db_path = self.ncbi_db_repo / Path('pub') / Path('taxonomy')
+            # ncbi_db = self.biosql.MySQLBioSQL()
+            # return ncbi_db
+            pass
 
     def download_itis_taxonomy_tables(self):
         # Loads data from ITIS via http://www.itis.gov/downloads/
@@ -92,6 +110,14 @@ class BaseDatabaseManagement(object):
         pass
 
     def download_ncbi_taxonomy_dump_files(self, url="ftp://ftp.ncbi.nlm.nih.gov/pub/taxonomy/taxdump.tar.gz"):
+        """
+        Download and extract the NCBI taxonomy dump files via a GET request.
+
+        :param url: A ftp link to the NCBI taxdump.* file of interest.
+        :type url: str.
+        :return:
+        :rtype:
+        """
         # TODO-ROB:  Maybe add taxdata folder here to reflect BioSQL's load_ncbi_taxonomy.pl script
         dl_path = Path(self.database_path) / Path("NCBI") / Path('pub') / Path('taxonomy')
         dl_abs_path = dl_path / Path('taxdump.tar.gz')
@@ -102,19 +128,47 @@ class BaseDatabaseManagement(object):
             tar.extractall(dl_path)
 
     # TODO-ROB:  Update ncbiftp class syntax to reflect NCBI's ftp site
-    def download_refseq_release_files(self, collection_subset, seqtype, filetype):
-        """Download NCBI Refseq Release files."""
+    def download_refseq_release_files(self, collection_subset, seqtype, seqformat):
+        """
+        Download NCBI Refseq Release files from NCBI.  The collection subtype is a species group
+        (e.g. vertebrate_mammalian) of interest.
+
+        :param collection_subset: The collection subset of interest.
+        :type collection_subset: str.
+        :param seqtype: The type of sequence (RNA, protein, genomic).
+        :type seqtype: str.
+        :param seqformat: The format of the sequence file (usually 'gbff' for GenBank Flat File).
+        :type seqformat: str.
+        :return:
+        :rtype:
+        """
         db_path = self.database_path / Path('NCBI') / Path('refseq') / Path('release') / Path(collection_subset)
-        ncbiftp = self.ncbiftp.getrefseqrelease(database_name=collection_subset, seqtype=seqtype, filetype=filetype, download_path=db_path)
+        ncbiftp = self.ncbiftp.getrefseqrelease(taxon_group=collection_subset, seqtype=seqtype, seqformat=seqformat, download_path=db_path)
         return ncbiftp
 
-    def upload_refseq_release_files(self, collection_subset, seqtype, filetype, upload_list, extension=".gbk.db"):
+    def upload_refseq_release_files(self, collection_subset, seqtype, seqformat, upload_list, extension=".gbk.db"):
+        """
+        Upload NCBI's Refseq Release files to a BioSQL database.
+
+        :param collection_subset: The collection subset of interest.
+        :type collection_subset: str.
+        :param seqtype: The type of sequence (RNA, protein, genomic).
+        :type seqtype: str.
+        :param seqformat: The format of the sequence file (usually 'gbff' for GenBank Flat File).
+        :type seqformat: str.
+        :param upload_list:
+        :type upload_list:
+        :param extension:
+        :type extension:
+        :return:
+        :rtype:
+        """
         db_path = self.database_path / Path("NCBI") / Path("refseq") / Path("release") / Path(collection_subset)
         # Get a BioSQL database
-        ncbi_db = self.download_biosql_taxonomy_database(destination="/refseq/release/%s" % collection_subset)
+        ncbi_db = self.create_biosql_taxonomy_database(destination=db_path)
         ncbi_db.upload_path = db_path
         ncbi_db.upload_list = upload_list
-        ncbi_db.upload_files(seqtype=seqtype, filetype=filetype)
+        ncbi_db.upload_files(seqtype=seqtype, filetype=seqformat)
         pass
 
     def get_project_genbank_database(self):
@@ -421,7 +475,7 @@ class DatabaseManagement(BaseDatabaseManagement):
         return npt_dispatcher, npt_config
 
     def ncbi_refseq_release(self, configure_flag=None, archive_flag=None, delete_flag=None, upload_flag=None, archive_path=None,
-                            database_path=None, collection_subset=None, seqtype=None, filetype=None, upload_list=None):
+                            database_path=None, collection_subset=None, seqtype=None, seqformat=None, upload_list=None):
         nrr_dispatcher = {"NCBI_refseq_release": []}
         nrr_config = {"NCBI_refseq_release": []}
         if not archive_path:
@@ -441,14 +495,14 @@ class DatabaseManagement(BaseDatabaseManagement):
             nrr_config["NCBI_refseq_release"].append({
                 "collection_subset": collection_subset,
                 "seqtype": seqtype,
-                "filetype": filetype
+                "seqformat": seqformat
             })
         if upload_flag:
             nrr_dispatcher["NCBI_refseq_release"].append(self.upload_refseq_release_files)
             nrr_config["NCBI_refseq_release"].append({
                 "collection_subset": collection_subset,
                 "seqtype": seqtype,
-                "filetype": filetype,
+                "filetype": seqformat,
                 "upload_list": upload_list
             })
         return nrr_dispatcher, nrr_config
