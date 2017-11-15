@@ -2,24 +2,25 @@ import os
 import shutil
 import subprocess
 from pathlib import Path
-
 from Bio import SeqIO
 from Bio.Align.Applications import ClustalOmegaCommandline
+
 from Datasnakes.Tools import LogIt
 from Datasnakes.Orthologs.utils import attribute_config
 from Datasnakes.Orthologs.Align.guidance2 import Guidance2Commandline
-
 from Datasnakes.Orthologs.Align.pal2nal import Pal2NalCommandline
+from Datasnakes.Orthologs.Align.orthoclustal import ClustalO
 from Datasnakes.Orthologs.GenBank import GenBank
 from Datasnakes.Orthologs.GenBank import multi_fasta_manipulator
 
 
 class MultipleSequenceAlignment(object):
-
+    """The MultipleSequenceAlignment (MSA) class uses the standard configuration
+    along with function dispatching to give the end-user access to multiple
+    alignment tools.
+    """
     def __init__(self, project=None, project_path=os.getcwd(), genbank=GenBank, **kwargs):
-        """
-        The MultipleSequenceAlignment (MSA) class uses the standard configuration along with function dispatching to
-        give the end-user access to multiple alignment tools.
+        """Initialize the MultipleSequenceAlignment class.
 
         :param project: The project name.
         :param project_path:  The path to the project.
@@ -28,9 +29,18 @@ class MultipleSequenceAlignment(object):
         :returns:  If the kwargs are utilized with YAML or other configurations, then this class returns an alignment
         dictionary, which can be parsed to run specific alignment algorithms.
         """
-        self.dispatcher_options = {"Guidance_config": ["GUIDANCE2", self.guidance2], "Pal2Nal_config": ["PAL2NAL", self.pal2nal],
-                          "ClustalO_config": ["CLUSTALO", self.clustalo]}
-        self.alignmentlog = LogIt().default(logname="Alignment", logfile=None)
+        self.dispatcher_options = {"Guidance_config": ["GUIDANCE2", self.guidance2],
+                                   "Pal2Nal_config": ["PAL2NAL", self.pal2nal],
+                                   "ClustalO_config": ["CLUSTALO", self.clustalo]}
+        # Set up loggers
+        __log = LogIt()
+        __logfile = None
+        self.guidancelog = __log.default('guidance2', __logfile)
+        self.pal2nallog = __log.default('pal2nal', __logfile)
+        self.clustalolog = __log.default('clustalo', __logfile)
+
+        # stop_codons = ['TAG', 'TAA', 'TGA']
+
         self.program = None
         self.alignment_dict = {}
         self.project = project
@@ -52,10 +62,11 @@ class MultipleSequenceAlignment(object):
                 self.alignment_dict[program] = [aligner, aligner_configuration]
 
     def guidance2(self, seqFile, msaProgram, seqType, dataset='MSA', seqFilter=None, columnFilter=None, maskFilter=None, **kwargs):
-        """
-        The guidance2 method runs the GUIDANCE2 command line wrapper from BioPython created by Datasnakes.  The
-        Guidance2 algorithm is used to filter sequence alignments in different ways.  Here we employ a few of our
-        own strategies on top of Guidance2.
+        """Run the GUIDANCE2 command line wrapper from BioPython.
+
+        The Guidance2 algorithm is used to filter sequence alignments in
+        different ways.  Here we employ a few of our own strategies on top of
+        Guidance2.
 
         :param seqFile:  The sequence file required by GUIDANCE2.
         :param msaProgram:  The msa program to be used by GUIDANCE2.  ("CLUSTALW", "PRANK", "MAFFT", or "MUSCLE")
@@ -73,13 +84,13 @@ class MultipleSequenceAlignment(object):
                         controls how seqCutoff and colCutoff change for each iteration.
         :return:  Returns Guidance2 files.
         """
-        self.alignmentlog.info("Guidance2 will be used.")
+        self.guidancelog.info("Guidance2 will be used.")
         # Name and Create the output directory
         self.program = "GUIDANCE2"
         outDir = self.program
         gene = Path(seqFile).stem
         geneDir = self.raw_data / Path(gene)
-        self.alignmentlog.info(geneDir)
+        self.guidancelog.info(geneDir)
         if seqType is 'nuc':
             g2_seqFile = str(geneDir / Path(gene + '_G2.ffn'))  # Need for all iterations
             rem_file = str(geneDir / Path(gene + '_G2_removed.ffn'))   # Need for all iterations
@@ -131,7 +142,7 @@ class MultipleSequenceAlignment(object):
                     # seqFile is the given input
                     G2Cmd = Guidance2Commandline(seqFile=seqFile, msaProgram=msaProgram, seqType=seqType,
                                                  outDir=str(iterDir), **kwargs)
-                    self.alignmentlog.info(G2Cmd)
+                    self.guidancelog.info(G2Cmd)
                     subprocess.check_call([str(G2Cmd)], stderr=subprocess.STDOUT, shell=True)
                     # Copy the Guidance removed seq file and paste it to the home directory
                     # Creates the rem_file
@@ -155,7 +166,7 @@ class MultipleSequenceAlignment(object):
                     # seqFile changes to g2_seqFile and the cutoffs change
                     G2Cmd = Guidance2Commandline(seqFile=g2_seqFile, msaProgram=msaProgram, seqType=seqType,
                                                  outDir=str(iterDir), **kwargs)
-                    self.alignmentlog.info(G2Cmd)
+                    self.guidancelog.info(G2Cmd)
                     subprocess.check_call([str(G2Cmd)], stderr=subprocess.STDOUT, shell=True)
 
                     # Get the removed sequence count
@@ -199,7 +210,7 @@ class MultipleSequenceAlignment(object):
             Path.mkdir(outDir, parents=True, exist_ok=True)
             G2Cmd = Guidance2Commandline(seqFile=seqFile, msaProgram=msaProgram, seqType=seqType,
                                          outDir=str(outDir), **kwargs)
-            self.alignmentlog.info(G2Cmd)
+            self.guidancelog.info(G2Cmd)
             subprocess.check_call([str(G2Cmd)], stderr=subprocess.STDOUT, shell=True)
             col_filt_align = outDir / Path('%s.%s.Without_low_SP_Col.With_Names' % (dataset, msaProgram))
             shutil.copy(str(col_filt_align), g2_colFilter)
@@ -210,7 +221,7 @@ class MultipleSequenceAlignment(object):
             G2Cmd = Guidance2Commandline(seqFile=seqFile, msaProgram=msaProgram, seqType=seqType,
                                          outDir=str(outDir), maskCutoff=maskFilter, maskFile=kwargs['aln2mask'],
                                          rprScores=kwargs['rprScores'], output=kwargs['maskedFile'], **kwargs)
-            self.alignmentlog.info(G2Cmd)
+            self.guidancelog.info(G2Cmd)
             subprocess.check_call([str(G2Cmd)], stderr=subprocess.STDOUT, shell=True)
             multi_fasta_manipulator(kwargs['maskedFile'], str(seqFile), kwargs['maskedFile'], manipulation='sort')
 
@@ -242,12 +253,13 @@ class MultipleSequenceAlignment(object):
         # Create an alignment
         P2Ncmd = Pal2NalCommandline(pepaln=aa_alignment, nucfasta=na_fasta, output_file=output_file, output=output_type,
                                     nogap=nogap, nomismatch=nomismatch)
-        self.alignmentlog.info(P2Ncmd)
+        self.pal2nallog.info(P2Ncmd)
 
         # Use a while loop to catch errors and remove sequences that aren't working with pal2nal
         pal2nal_flag = True
         while pal2nal_flag is True:
-            pal2nal = subprocess.Popen([str(P2Ncmd)], stderr=subprocess.PIPE, stdout=subprocess.PIPE, shell=True,
+            pal2nal = subprocess.Popen([str(P2Ncmd)], stderr=subprocess.PIPE,
+                                       stdout=subprocess.PIPE, shell=True,
                                        encoding='utf-8')
             error = pal2nal.stderr.readlines()
             out = pal2nal.stdout.readlines()
@@ -255,8 +267,8 @@ class MultipleSequenceAlignment(object):
 
             # Catch errors
             if 'ERROR: inconsistency between the following pep and nuc seqs' in error[0]:
-                self.alignmentlog.warning('Caught the pal2nal error!')
-                self.alignmentlog.warning(error[0])
+                self.pal2nallog.warning('Caught the pal2nal error!')
+                self.pal2nallog.warning(error[0])
                 for err in error:
                     if '>' in err:
                         removed.append(err.strip('>' '\n'))
@@ -273,31 +285,13 @@ class MultipleSequenceAlignment(object):
                             p2n_rem.write(name)
                 pal2nal_flag = False
 
-            self.alignmentlog.info('Error: ' + str(error))
-            self.alignmentlog.info('Out: ' + str(out))
+            self.pal2nallog.info('Error: ' + str(error))
+            self.pal2nallog.info('Out: ' + str(out))
 
-    def clustalo(self, infile, outfile, logpath, outfmt="fasta"):
-        """This class aligns amino acids sequences using parameters similar to
+    def clustalo(self, infile, outfile, outfmt="fasta"):
+        """Align protein/amino acid sequences using parameters similar to
         the default parameters.
 
         These parameters include 2 additional iterations for the hmm.
         """
-        clustalo_cline = ClustalOmegaCommandline(infile=infile, cmd="clustalo",
-                                                 outfile=outfile, seqtype="PROTEIN",
-                                                 max_hmm_iterations=2, infmt="fasta",
-                                                 outfmt=outfmt, iterations=3,
-                                                 verbose=True,
-                                                 force=True, log=logpath)
-        stdout, stderr = clustalo_cline()
-
-        # Run the command
-        clustalo_cline()
-        if stderr:
-            self.alignmentlog.info(stderr)
-        if stdout:
-            self.alignmentlog.info(stdout)
-
-
-
-
-
+        pass
