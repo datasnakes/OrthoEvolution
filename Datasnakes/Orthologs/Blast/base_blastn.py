@@ -14,13 +14,9 @@ from Datasnakes.Orthologs.Blast.comparative_genetics import ComparativeGenetics
 from Datasnakes.Orthologs.Blast.utils import gene_list_config, map_func
 
 
-# TODO-ROB: Find packages for script timing and analysis
-# TODO-ROB:  Rework the save_data parameter.
-# TODO-ROB:  Rework the query organism stuff.
-
-class OrthoBlastN(ComparativeGenetics):
+class BaseBlastN(ComparativeGenetics):
     """Combines Project Management features with NCBI's Blast+."""
-    def __init__(self, project, template=None, save_data=True, **kwargs):
+    def __init__(self, project=None, template=None, save_data=True, **kwargs):
         """This class inherits from the CompGenFiles class.
 
         This class utilizes it's parent classes to search a standalone
