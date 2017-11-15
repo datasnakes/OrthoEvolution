@@ -1,5 +1,5 @@
-LogIt
-=====
+LogIt Documentation
+===================
 
 Use the LogIt class to make logging very simple. This short and sweet
 class wraps around `logzero <https://github.com/metachris/logzero>`__
@@ -19,7 +19,7 @@ Example
 -------
 
 Use logging with ETE3PAML
-^^^^^^^^^^^^^^^^^^^^^^^^^
+~~~~~~~~~~~~~~~~~~~~~~~~~
 
 .. code:: python
 
