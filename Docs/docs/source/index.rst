@@ -1,5 +1,5 @@
 Datasnakes-Scripts
--------------------
+====================
 
 .. image:: https://travis-ci.org/datasnakes/Datasnakes-Scripts.svg?branch=master
     :target: https://travis-ci.org/datasnakes/Datasnakes-Scripts
@@ -32,20 +32,20 @@ read `this related paper <https://www.frontiersin.org/articles/10.3389/fnhum.201
 more insight into this project/python package.
 
 Installation
-====================
+------------------------
 
 PyPi
-''''''''''''''''''''''''''''''''''''''
+~~~~~~~~~~~~~~~~
 ``pip install Datasnakes-Scripts``
 
 GitHub
-''''''''''''''''''''''''''''''''''''''
+~~~~~~~~~~~~~~~~
 1. Download the zip file and unzip it or ``git clone https://github.com/datasnakes/Datasnakes-Scripts.git``
 2. ``cd Datasnakes-Scripts``
 3. ``pip install .``
 
 Development Code
-''''''''''''''''''''''''''''''''''''''
+~~~~~~~~~~~~~~~~
 **WARNING** : This code is actively under development and may not be reliable.  Please create an `issue <https://github.com/datasnakes/Datasnakes-Scripts/issues>`_ for questions about development.
 
 1. Download the zip file and unzip it or ``git clone -b dev-master https://github.com/datasnakes/Datasnakes-Scripts.git``
@@ -53,7 +53,7 @@ Development Code
 3. ``pip install .``
 
 Examples
-====================
+------------------------
 Check out this `tutorial <https://github.com/datasnakes/Datasnakes-Scripts/wiki/Tutorial>`__ in our Wiki Docs.
 
 .. code:: python
@@ -61,11 +61,11 @@ Check out this `tutorial <https://github.com/datasnakes/Datasnakes-Scripts/wiki/
     import Datasnakes
 
 Tests
-====================
+-------
 To run tests, type ``nosetests Tests/`` in the Datasnakes-Scripts directory.
 
 Contributors
-====================
+----------------
 
 -  Rob Gilmore \| Github: `@grabear <https://github.com/grabear>`__ \|
    `✉ <mailto:robgilmore127@gmail.com>`__
@@ -78,7 +78,7 @@ and check out our `contributing guidelines <https://github.com/datasnakes/Datasn
 
 
 Citation
-====================
+------------------------
 
 We're so thankful to have a resource such as
 `Biopython <http://biopython.org/wiki/Biopython>`__. They inspired this
@@ -90,7 +90,7 @@ Jun 1; 25(11) 1422-3 http://dx.doi.org/10.1093/bioinformatics/btp163
 pmid:19304878*
 
 License
-====================
+------------------------
 `MIT <https://github.com/datasnakes/Datasnakes-Scripts/blob/master/LICENSE>`_
 
 Contents

@@ -15,7 +15,6 @@ from Datasnakes.Orthologs.Blast.utils import gene_list_config, map_func
 
 
 class BaseBlastN(ComparativeGenetics):
-    """Combines Project Management features with NCBI's Blast+."""
     def __init__(self, project=None, template=None, save_data=True, **kwargs):
         """This class inherits from the CompGenFiles class.
 
