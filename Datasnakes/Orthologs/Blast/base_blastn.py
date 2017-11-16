@@ -25,6 +25,7 @@ class BaseBlastN(ComparativeGenetics):
         downstream analysis.
 
         :param project:  The project name.
+        :param blast_method:  Method used for blasting.
         :param template:  The accession file template.
         :param save_data:  A flag for saving the post_blast data to an excel file.
         :param kwargs:
@@ -60,40 +61,29 @@ class BaseBlastN(ComparativeGenetics):
         self.complete_time_file_path = self.data / Path(self.complete_time_file)
 
 
-        self.blastn_parameters = self.blast_method(method=blast_method)
+        self.blastn_parameters = self.blast_method_selection(method=blast_method)
 
-    def blast_method(self, method):
+    def blast_method_selection(self, method):
         """Select a method for running blastn.
 
         :param method: a blast method - gi or wm
         """
         if method == 'gi':
-            blastn_parameters = {'query': '',
-                                 'db': 'refseq_rna',
-                                 'strand': 'plus',
-                                 'evalue': 0.01,
-                                 'outfmt': 5,
-                                 'gilist': '',
-                                 'max_target_seqs': 10,
+            blastn_parameters = {'query': '', 'db': 'refseq_rna',
+                                 'strand': 'plus', 'evalue': 0.01, 'outfmt': 5,
+                                 'gilist': '', 'max_target_seqs': 10,
                                  'task': 'blastn'}
             return blastn_parameters
         elif method == 'wm':
-            blastn_parameters = {'query': '',
-                                 'db': 'refseq_rna',
-                                 'strand': 'plus',
-                                 'evalue': 0.01,
-                                 'outfmt': 5,
-                                 'window_masker_db': '',
-                                 'max_target_seqs': 10,
-                                 'task': 'blastn'}
+            blastn_parameters = {'query': '', 'db': 'refseq_rna',
+                                 'strand': 'plus', 'evalue': 0.01,
+                                 'outfmt': 5, 'window_masker_db': '',
+                                 'max_target_seqs': 10, 'task': 'blastn'}
             return blastn_parameters
         elif method is None:
-            blastn_parameters = {'query': '',
-                                 'db': 'refseq_rna',
-                                 'strand': 'plus',
-                                 'evalue': 0.01,
-                                 'outfmt': 5,
-                                 'max_target_seqs': 10,
+            blastn_parameters = {'query': '', 'db': 'refseq_rna',
+                                 'strand': 'plus', 'evalue': 0.01,
+                                 'outfmt': 5, 'max_target_seqs': 10,
                                  'task': 'blastn'}
             return blastn_parameters
         else:
@@ -302,12 +292,12 @@ class BaseBlastN(ComparativeGenetics):
                                 # XXX Window masking will be implemented soon
                                 # wmaskerpath = os.path.join(str(taxon_id), "wmasker.obinary")
 
-                                # Configure your blastn parameters
-                                blastn_params = self.blast_method(method='gi')
-                                blastn_params.update({'query': query_seq_path})
+                                # Update your blastn parameters
+                                update_dict = {'query': query_seq_path}
+                                self.blastn_parameters.update(update_dict)
 
                                 # Use Biopython's NCBIBlastnCommandline tool
-                                result_handle = NcbiblastnCommandline(**blastn_params)
+                                result_handle = NcbiblastnCommandline(**self.blastn_parameters)
                                 # Capture the standard output
                                 stdout_str, _ = result_handle()
 
