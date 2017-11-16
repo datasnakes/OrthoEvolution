@@ -25,7 +25,7 @@ class BaseBlastN(ComparativeGenetics):
         downstream analysis.
 
         :param project:  The project name.
-        :param blast_method:  Method used for blasting.
+        :param blast_method:  Method used for blasting. (1, 2, None)
         :param template:  The accession file template.
         :param save_data:  A flag for saving the post_blast data to an excel file.
         :param kwargs:
@@ -68,13 +68,15 @@ class BaseBlastN(ComparativeGenetics):
 
         :param method: a blast method - gi or wm
         """
-        if method == 'gi':
+        if method == '1':
+            # Accessions/Seqids List
             blastn_parameters = {'query': '', 'db': 'refseq_rna',
                                  'strand': 'plus', 'evalue': 0.01, 'outfmt': 5,
-                                 'gilist': '', 'max_target_seqs': 10,
+                                 'seqids': '', 'max_target_seqs': 10,
                                  'task': 'blastn'}
             return blastn_parameters
-        elif method == 'wm':
+        elif method == '2':
+            # Windowmaskerdb
             blastn_parameters = {'query': '', 'db': 'refseq_rna',
                                  'strand': 'plus', 'evalue': 0.01,
                                  'outfmt': 5, 'window_masker_db': '',
