@@ -1,10 +1,6 @@
-Window Masker Setup
-================
+# Window Masker Setup
 
-Creating a masked BLAST database
---------------------------------
-
-Creating a masked BLAST database is a two step process:
+## Creating a masked BLAST database is a two step process
 
 1.  Generate the masking data using a sequence filtering utility like windowmasker or dustmasker
 
