@@ -339,9 +339,11 @@ class BaseComparativeGenetics(object):
     def get_taxon_dict(self):
         """Get the taxonomy information about each organism using ETE3.
 
-        :return:  Returns several dictionaries.  One is a basic organism (key) to taxonomy id (value) dictionary, and
-        the other is a lineage dictionary with the an organism key and a lineage dictionary as the value.  The lineage
-        dictionary keys for each organism are ["class", "family", "genus", "kingdowm", "order", "phylum", "species",
+        :return:  Returns several dictionaries.  One is a basic organism (key)
+        to taxonomy id (value) dictionary, and the other is a lineage
+        dictionary with the an organism key and a lineage dictionary as the
+        value.  The lineage dictionary keys for each organism are
+        ["class", "family", "genus", "kingdowm", "order", "phylum", "species",
         "superkingdom"].
         """
         ncbi = NCBITaxa()
