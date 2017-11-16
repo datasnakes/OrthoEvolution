@@ -1,7 +1,7 @@
 from subprocess import run, CalledProcessError, PIPE
 import os
-from pkg_resources import resource_filename
 from time import sleep
+from pkg_resources import resource_filename
 
 from Datasnakes.Tools.logit import LogIt
 from Datasnakes.Tools.sge import basejobids, writecodefile, import_temp, file2str
@@ -14,6 +14,7 @@ class BaseSGEJob(object):
     """Base class for simple jobs."""
     def __init__(self, base_jobname):
         """Initialize job attributes."""
+        self.base_jobname = base_jobname
         self.default_job_attributes = __DEFAULT__
         self.file2str = file2str
         self.sgejob_log = LogIt().default(logname="SGE JOB", logfile=None)
@@ -36,7 +37,7 @@ class BaseSGEJob(object):
         """Clean up job scripts."""
         self.sgejob_log.warning('Your job will now be cleaned up.')
         os.remove(jobname + '.pbs')
-        self.sgejob_log.warning('%s.pbs has been deleted.' % jobname)
+        self.sgejob_log.warning('%s.pbs has been deleted.', jobname)
         os.remove(jobname + '.py')
         self.sgejob_log.warning('%s.py has been deleted.' % jobname)
 
@@ -83,7 +84,7 @@ class SGEJob(BaseSGEJob):
                           'script': self.jobname,
                           'log_name': self.jobname + '.log',
                           'cmd': 'python3 ' + pyfile_path,
-                          }
+                         }
         self.default_job_attributes.update(new_attributes)
 
         return self.default_job_attributes
@@ -98,7 +99,7 @@ class SGEJob(BaseSGEJob):
         if os.path.isfile(code) and str(code).endswith('.py'):
             code_str = self.file2str(code)
             self.sgejob_log.info('%s converted to string.' % code)
-        elif type(code) == str:
+        elif isinstance(code) == str:
             code_str = code
 
         if default:
@@ -134,7 +135,7 @@ class SGEJob(BaseSGEJob):
                 # The cmd_status has stdout that must be decoded.
                 # When a qsub job is submitted, the stdout is the job id.
                 submitted_jobid = cmd_status.stdout.decode('utf-8')
-                self.sgejob_log.info(self.jobname + ' was submitted.' )
+                self.sgejob_log.info(self.jobname + ' was submitted.')
                 self.sgejob_log.info('Your job id is: %s' % submitted_jobid)
                 self.wait_on_job_completion(submitted_jobid)
                 self._cleanup(self.jobname)
