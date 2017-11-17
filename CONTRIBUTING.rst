@@ -6,13 +6,13 @@ Thanks for your desire to contribute to this project.
 
 Preparing your Fork
 ^^^^^^^^^^^^^^^^^^^
-1. Hit 'fork' on Github, creating e.g. ``yourname/Datasnakes-Scripts``.
-2. Clone your project: ``git clone git@github.com:yourname/Datasnakes-Scripts``.
-3. Create a branch: ``cd Datasnakes-Scripts; git checkout -b foo-the-bars 1.3``.
+1. Hit 'fork' on Github, creating e.g. ``yourname/OrthoEvolution``.
+2. Clone your project: ``git clone git@github.com:yourname/OrthoEvolution``.
+3. Create a branch: ``cd OrthoEvolution; git checkout -b foo-the-bars 1.3``.
 
 Development Mode Installation
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-1. Change to the project repository on your machine: ``cd Datasnakes-Scripts``
+1. Change to the project repository on your machine: ``cd OrthoEvolution``
 2. Install in development mode: ``pip install -e .``
 
 

@@ -1,5 +1,5 @@
 """This standalone script downloads files from NCBI's ftp."""
-from Datasnakes.Tools.ftp import NcbiFTPClient
+from OrthoEvol.Tools.ftp import NcbiFTPClient
 import os
 import fnmatch
 from subprocess import call, CalledProcessError

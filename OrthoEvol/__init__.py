@@ -1,19 +1,19 @@
-class DatasnakesWarning(Warning):
-    """This is the Datasnakes main warning class.
+class OrthoEvolWarning(Warning):
+    """This is the OrthoEvol main warning class.
 
-    The Datasnakes-Scripts package/module will use this warning to alert uses
+    The OrthoEvol-Scripts package/module will use this warning to alert uses
     about potential tricky code or code under development.
 
     >>> import warnings
-    >>> from Datasnakes import DatasnakesWarning
-    >>> warnings.simplefilter('ignore', DatasnakesWarning)
+    >>> from OrthoEvol import OrthoEvolWarning
+    >>> warnings.simplefilter('ignore', OrthoEvolWarning)
     """
 
     pass
 
 
-class DatasnakesDevelopmentWarning(DatasnakesWarning):
-    """This is the Datasnakes developmental code warning subclass.
+class OrthoEvolDevelopmentWarning(OrthoEvolWarning):
+    """This is the OrthoEvol developmental code warning subclass.
 
     This warning is for alpha or beta level code which is released as part of
     the standard releases to mark sub-modules or functions for early adopters
@@ -25,7 +25,7 @@ class DatasnakesDevelopmentWarning(DatasnakesWarning):
     pass
 
 
-class DatasnakesDeprecationWarning(DatasnakesWarning):
+class OrthoEvolDeprecationWarning(OrthoEvolWarning):
     """This is the Deprecation Warning subclass.
 
     This warning is for code that is no longer maintained and will be removed

@@ -3,7 +3,7 @@ import shutil
 import datetime
 import os
 from pathlib import Path
-from Datasnakes.Tools import LogIt
+from OrthoEvol.Tools.logit import LogIt
 
 archive_options = {
     "Full": Path(''),
@@ -73,8 +73,8 @@ def archive(database_path, archive_path, option, delete_flag=False):
         # Delete the files if desired.
         if delete_flag:
             archive_log.critical("The original data will be deleted recursively at %s." % data_path)
-            from Datasnakes import DatasnakesWarning
-            DatasnakesWarning("You're about to delete your database (%s).  Are you sure??" % data_path)
+            from OrthoEvol import OrthoEvolWarning
+            OrthoEvolWarning("You're about to delete your database (%s).  Are you sure??" % data_path)
             shutil.rmtree(path=data_path)
             archive_list.append(str(archive_filename))
         else:

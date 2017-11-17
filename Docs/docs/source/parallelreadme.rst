@@ -16,7 +16,7 @@ This is an optional class in our pipeline, but if you're using AWS or
 Google's supercomputing, then you may find it useful unless you're
 interested in or using clustering or SGE (Sun Grid Engine). We have a
 `sge
-module <https://github.com/datasnakes/Datasnakes-Scripts/tree/master/Datasnakes/Tools/sge>`__
+module <https://github.com/datasnakes/OrthoEvolution/tree/master/OrthoEvol/Tools/sge>`__
 for that.
 
 Examples
@@ -27,7 +27,7 @@ A Random Example
 
 .. code:: python
 
-    from Datasnakes.Tools import Multiprocess
+    from OrthoEvol.Tools import Multiprocess
 
 
     def printwords(word):

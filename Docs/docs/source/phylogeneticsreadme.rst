@@ -1,8 +1,11 @@
 Phylogenetics Documentation
 ===========================
 
-This document will provide information and guidelines about how we use
-the Phylogenetics modules related to this package.
+This documentation will provide information and guidelines about how we
+use the Phylogenetics modules related to this package.
+
+Overview
+--------
 
 Phylogenetics is best defined as the study of evolutionary relationships
 among biological entities. In our case, those entities are species. We
@@ -23,9 +26,12 @@ programs to see which worked well for us.
 In this module, we include classes and ways to use PAML, Phylip, PhyML,
 IQTREE, and Biopython's Bio.Phylo class.
 
+Example using PhyML and RelaxPhylip
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
 .. code:: python
 
-    from Datasnakes.Orthologs import Phylogenetics
+    from OrthoEvol.Orthologs import Phylogenetics
 
     # Find out what subclasses are available for use
     dir(Phylogenetics)
@@ -55,7 +61,7 @@ IQTREE, and Biopython's Bio.Phylo class.
      'warnings']
 
     # Now you can import a class you want to utilize
-    from Datasnakes.Orthologs.Phylogenetics import PhyML, RelaxPhylip
+    from OrthoEvol.Orthologs.Phylogenetics import PhyML, RelaxPhylip
 
     RelaxPhylip("HTR1A_aligned.fasta", "HTR1A_aligned.phy")
 

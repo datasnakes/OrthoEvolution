@@ -28,7 +28,7 @@ The `DataManagement` class helps to tie everything together into a pipeline.
 ###  Utilizing DataManagement to run a pipeline
 ```python
 import os
-from Datasnakes.Manager import DataManagement
+from OrthoEvol.Manager import DataManagement
 
 DataManagement(pipeline="Ortho_CDS_1", start=True, new=True)
 ```
@@ -39,5 +39,5 @@ DataManagement(pipeline="Ortho_CDS_1", start=True, new=True)
 
 
 ## Notes
-Please view our [BioSQL documentation](https://github.com/datasnakes/Datasnakes-Scripts/tree/master/Datasnakes/Manager/BioSQL/README.md) and view some of the
-static/config related [files](https://github.com/datasnakes/Datasnakes-Scripts/tree/master/Datasnakes/Manager/config/).
+Please view our [BioSQL documentation](https://github.com/datasnakes/OrthoEvolution/tree/master/OrthoEvol/Manager/BioSQL/README.md) and view some of the
+static/config related [files](https://github.com/datasnakes/OrthoEvolution/tree/master/OrthoEvol/Manager/config/).

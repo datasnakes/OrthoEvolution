@@ -17,8 +17,8 @@ up for one script which is shown in the example below.
 ### Use logging with ETE3PAML
 
 ```python
-from Datasnakes.Tools import LogIt
-from Datasnakes.Orthologs.Phylogenetics import ETE3PAML
+from OrthoEvol.Tools import LogIt
+from OrthoEvol.Orthologs.Phylogenetics import ETE3PAML
 
 # Set up your loggers
 logit = LogIt()

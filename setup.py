@@ -37,7 +37,7 @@ setup(
     description="This package aids in the analysis of orthologous genes.",
     version='0.1.0a1',
     long_description=readme(),
-    url='https://github.com/datasnakes/Datasnakes-Scripts',
+    url='https://github.com/datasnakes/OrthoEvolution',
     license='MIT',
     keywords='bioinformatics science evolution orthology psychiatry genetics',
     classifiers=[

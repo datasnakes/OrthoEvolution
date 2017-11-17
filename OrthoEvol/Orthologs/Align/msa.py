@@ -5,13 +5,13 @@ from pathlib import Path
 from Bio import SeqIO
 from Bio.Align.Applications import ClustalOmegaCommandline
 
-from Datasnakes.Tools import LogIt
-from Datasnakes.Orthologs.utils import attribute_config
-from Datasnakes.Orthologs.Align.guidance2 import Guidance2Commandline
-from Datasnakes.Orthologs.Align.pal2nal import Pal2NalCommandline
-from Datasnakes.Orthologs.Align.orthoclustal import ClustalO
-from Datasnakes.Orthologs.GenBank import GenBank
-from Datasnakes.Orthologs.GenBank import multi_fasta_manipulator
+from OrthoEvol.Tools import LogIt
+from OrthoEvol.Orthologs.utils import attribute_config
+from OrthoEvol.Orthologs.Align.guidance2 import Guidance2Commandline
+from OrthoEvol.Orthologs.Align.pal2nal import Pal2NalCommandline
+from OrthoEvol.Orthologs.Align.orthoclustal import ClustalO
+from OrthoEvol.Orthologs.GenBank import GenBank
+from OrthoEvol.Orthologs.GenBank import multi_fasta_manipulator
 
 
 class MultipleSequenceAlignment(object):
@@ -76,7 +76,7 @@ class MultipleSequenceAlignment(object):
         :param seqFilter:  The sequence filter parameter is None, "inclusive", or "exclusive".  If inclusive the
                            SeqCutoff decreases for every iteration.  If exclusive the SeqCutoff increases for every
                            iteration, and so the algorithm excludes more genes from the alignment.
-                           (A Datasnakes strategy)
+                           (An OrthoEvol strategy)
         :param columnFilter:  The column filter removes columns from the alignment using GUIDANCE2.
         :param maskFilter:  The mask filter uses GUIDANCE2 maskLowScoresResidue script to mask the low scoring residues.
         :param kwargs:  The kwargs are used to configure GUIDANCE2 with specific parameters including seqCutoff and

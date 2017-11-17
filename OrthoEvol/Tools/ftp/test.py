@@ -1,7 +1,7 @@
-from Datasnakes.Tools.ftp import NcbiFTPClient
-from Datasnakes.Tools.utils import csvtolist
+from OrthoEvol.Tools.ftp import NcbiFTPClient
+from OrthoEvol.Tools.utils import csvtolist
 
-file = '/ddn/home5/r2295/src/datasnakes/Datasnakes/Manager/config/organisms_and_taxonomy_ids.csv'
+file = 'organisms_and_taxonomy_ids.csv'
 ids = csvtolist(file, 'Taxonomy ID')
 
 ncbiftp = NcbiFTPClient(email='shutchins2@umc.edu')

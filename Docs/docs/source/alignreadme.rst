@@ -26,7 +26,7 @@ This is a quick example to use the `ClustalO <>`__ class.
 
 .. code:: python
 
-    from Datasnakes.Orthologs.Align import ClustalO
+    from OrthoEvol.Orthologs.Align import ClustalO
 
     gene_list = ['HTR1A', 'CCR5', 'DRD4']
 

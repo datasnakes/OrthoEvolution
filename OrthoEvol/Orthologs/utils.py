@@ -1,6 +1,6 @@
 from pathlib import Path
-from Datasnakes.Cookies.cookie_jar import Oven
-from Datasnakes.Tools import LogIt
+from OrthoEvol.Cookies.cookie_jar import Oven
+from OrthoEvol.Tools import LogIt
 
 
 def attribute_config(cls, composer, checker, project=None, project_path=None, checker2=None):

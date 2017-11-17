@@ -3,8 +3,8 @@ import logging
 import luigi
 import os
 
-from Datasnakes.Tools.sge import SGEPipelineTask
-from Datasnakes.Orthologs.Blast import OrthoBlastN
+from OrthoEvol.Tools.sge import SGEPipelineTask
+from OrthoEvol.Orthologs.Blast import OrthoBlastN
 
 
 # This is more pythonic with YAML loading

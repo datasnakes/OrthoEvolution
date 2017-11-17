@@ -18,13 +18,13 @@ create a class that allows the conversion of documents.
 
 ### Convert markdown to docx
 ```python
-from pandoc import PandocConverter
+from OrthoEvol.Tools import PandocConverter
 PandocConverter(infile='README.md', outfmt='docx', outfile='README.docx')
 ```
 
 ### Get a list of input formats
 ```python
-from pandoc import PandocConverter
+from OrthoEvol.Tools import PandocConverter
 PandocConverter.input_formats
 
 Out[17]:
@@ -54,7 +54,7 @@ Out[17]:
 
 ### Get a list of output formats
 ```python
-from pandoc import PandocConverter
+from OrthoEvol.Tools import PandocConverter
 PandocConverter.output_formats
 
 Out[18]:

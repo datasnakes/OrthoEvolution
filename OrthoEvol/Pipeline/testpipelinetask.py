@@ -1,7 +1,7 @@
 import logging
 import luigi
 import os
-from Datasnakes.Tools.sge import SGEPipelineTask
+from OrthoEvol.Tools.sge import SGEPipelineTask
 
 # TIP Works on linux
 logger = logging.getLogger('luigi-interface')
