@@ -30,7 +30,6 @@ parts/
 sdist/
 var/
 *.egg-info/
-*err.txt
 .installed.cfg
 *.egg
 
@@ -49,3 +48,4 @@ coverage.xml
 *.mo
 
 err.txt
+.pypiprc

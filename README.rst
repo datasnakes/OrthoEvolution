@@ -40,7 +40,7 @@ View the below methiods for installing this package. Python3.5 and higher is req
 
 PyPi
 ^^^^^^^^^^^^^^
-``pip install ortho-evol``
+``pip install OrthoEvol``
 
 GitHub
 ^^^^^^^^^^^^^^
