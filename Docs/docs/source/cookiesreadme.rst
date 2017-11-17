@@ -14,7 +14,7 @@ Examples
 --------
 
 The `Manager
-module <https://github.com/datasnakes/Datasnakes-Scripts/tree/master/Datasnakes/Manager>`__
+module <https://github.com/datasnakes/OrthoEvolution/tree/master/OrthoEvol/Manager>`__
 uses the *CookieRecipes* and *Oven* classes as a primary means of
 functioning.
 
@@ -23,7 +23,7 @@ Simple Implementation
 
 .. code:: python
 
-    from Datasnakes.Cookies import Oven
+    from OrthoEvol.Cookies import Oven
 
     Kitchen = Oven(repo="repo", user="user", project="project", output_dir="project_path")
     Pantry = Kitchen.Ingredients

@@ -31,7 +31,7 @@ DataManagement to run a pipeline
 .. code:: python
 
     import os
-    from Datasnakes.Manager import DataManagement
+    from OrthoEvol.Manager import DataManagement
 
     DataManagement(pipeline="Ortho_CDS_1", start=True, new=True)
 
@@ -44,6 +44,6 @@ Notes
 -----
 
 Please view our `BioSQL
-documentation <https://github.com/datasnakes/Datasnakes-Scripts/tree/master/Datasnakes/Manager/BioSQL/README.md>`__
+documentation <https://github.com/datasnakes/OrthoEvolution/tree/master/OrthoEvol/Manager/BioSQL/README.md>`__
 and view some of the static/config related
-`files <https://github.com/datasnakes/Datasnakes-Scripts/tree/master/Datasnakes/Manager/config/>`__.
+`files <https://github.com/datasnakes/OrthoEvolution/tree/master/OrthoEvol/Manager/config/>`__.

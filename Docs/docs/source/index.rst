@@ -13,8 +13,9 @@ OrthoEvolution
 .. image:: https://badge.fury.io/py/OrthoEvolution.svg
    :target: https://badge.fury.io/py/OrthoEvolution
 
-.. image:: https://readthedocs.org/projects/orthoevolution/badge/?version=master
-   :target: http://orthoevolution.readthedocs.io/en/master/
+.. image:: https://readthedocs.org/projects/datasnakes-scripts/badge/?version=master
+   :target: http://datasnakes-scripts.readthedocs.io/en/master/
+
 
 An **easy to use** and comprehensive python package which aids in the **analysis and
 visualization of comparative evolutionary genetics** related projects. More specifically, this

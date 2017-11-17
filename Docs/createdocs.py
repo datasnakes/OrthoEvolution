@@ -5,7 +5,8 @@ from os.path import join
 try:
     import pypandoc
 except OSError:
-    pass
+    from pypandoc.pandoc_download import download_pandoc
+    download_pandoc()
 
 from OrthoEvol.Tools.logit import LogIt
 
