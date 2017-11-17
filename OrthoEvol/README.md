@@ -1,6 +1,6 @@
 Tutorial
 =============
-Datasnakes-Scripts has been built with Python 3.5 (and up) as a multi-faceted package and pipeline
+OrthoEvolu has been built with Python 3.5 (and up) as a multi-faceted package and pipeline
 framework for comparative genetics in order to infer orthologous genes.
 
 Currently, this python package is comprised of 5 major modules:
