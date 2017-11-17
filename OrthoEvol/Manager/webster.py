@@ -2,7 +2,7 @@ import re
 import textwrap as twrap
 from pathlib import Path
 
-from Datasnakes.Manager.config import references
+from OrthoEvol.Manager.config import references
 from pkg_resources import resource_filename
 
 

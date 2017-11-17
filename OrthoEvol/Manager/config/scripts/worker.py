@@ -3,8 +3,8 @@ import sys
 from pathlib import Path
 
 from Archive.filter import FilteredAlignment
-from Datasnakes.Orthologs.Phylogenetics.IQTree.best_tree import FilteredTree
-from Datasnakes.Orthologs.Phylogenetics.PAML.codeml import CodemlRun
+from OrthoEvol.Orthologs.Phylogenetics.IQTree.best_tree import FilteredTree
+from OrthoEvol.Orthologs.Phylogenetics.PAML.codeml import CodemlRun
 
 raw_data_path = sys.argv[2]  # path/raw_data/gene/
 os.chdir(raw_data_path)
