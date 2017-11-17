@@ -1,0 +1,49 @@
+Management:
+  new_repo: false
+  new_user: false
+  new_project: false
+  new_database: false
+  new_research: false
+  new_app: false
+  new_website: false
+  database: 'Test-Database'
+  repo: 'Test-Repository'
+  user: 'Test-User'
+  project: 'Test-Project'
+  project_path: null
+  research: 'Test-Research'
+  research_type: 'Test-Research-Type'
+  app: 'Test-App'
+  website: 'Test-Website'
+  host: '0.0.0.0'
+  port: '5252'
+
+DatabaseManagement:
+  proj_mana: "!!python/name:OrthoEvol.Manager.utils.mana.ProjectManagement ''\n"
+
+CompGenObjects:
+  acc_file: null
+  taxon_file: null
+  paml_file: null
+  go_list: null
+  post_blast: true
+  proj_mana: "!!python/name:OrthoEvol.Manager.utils.mana.ProjectManagement ''\n"
+  CompGenFiles:
+    template: null
+    taxon_file: null
+    post_blast: false
+    save_data: true
+    CompGenBLASTn:
+      template: null
+      save_data: true
+
+GenBank:
+  solo: false
+  multi: true
+  min_fasta: true
+  blast: "!!python/name:OrthoEvol.Orthologs.Blast.blastn.CompGenBLASTn ''\n"
+
+MultipleSequenceAlignment:
+  aln_program: 'GUIDANCE2'
+  project_path: null
+  genbank: "!!python/name:OrthoEvol.Orthologs.GenBank.genbank.GenBank ''\n"

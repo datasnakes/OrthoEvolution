@@ -65,3 +65,8 @@ class MG(object):
 
         # Save the merged dataframes to a file
         alldata.to_csv(outfile, index=False)
+
+
+if __name__ == '__main__':
+    # TODO Argparse? hmm
+    mg = MG('mygene.csv', 'out.csv')
