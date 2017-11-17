@@ -6,12 +6,12 @@ import subprocess
 import shutil
 from BioSQL import BioSeqDatabase
 from Bio import SeqIO
-from Datasnakes.Tools.logit import LogIt
-from Datasnakes.Manager.BioSQL.biosql_repo import sql
-from Datasnakes.Manager.BioSQL.biosql_repo import scripts as sql_scripts
-from Datasnakes.Manager.management import ProjectManagement
-from Datasnakes.Orthologs.utils import attribute_config
-from Datasnakes.Tools.streamieo import StreamIEO
+from OrthoEvol.Tools.logit import LogIt
+from OrthoEvol.Manager.BioSQL.biosql_repo import sql
+from OrthoEvol.Manager.BioSQL.biosql_repo import scripts as sql_scripts
+from OrthoEvol.Manager.management import ProjectManagement
+from OrthoEvol.Orthologs.utils import attribute_config
+from OrthoEvol.Tools.streamieo import StreamIEO
 
 
 class BaseBioSQL(object):
