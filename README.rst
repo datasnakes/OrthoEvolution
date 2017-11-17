@@ -10,8 +10,8 @@
 .. image:: https://badge.fury.io/py/OrthoEvolution.svg
    :target: https://badge.fury.io/py/OrthoEvolution
 
-.. image:: https://readthedocs.org/projects/datasnakes-scripts/badge/?version=master
-   :target: http://datasnakes-scripts.readthedocs.io/en/master/
+.. image:: https://readthedocs.org/projects/orthoevolution/badge/?version=latest
+   :target: http://orthoevolution.readthedocs.io/en/latest/?badge=latest
 
 OrthoEvolution
 ====================
@@ -36,7 +36,7 @@ Overview
 
 Installation
 ~~~~~~~~~~~~~~~~
-View the below methiods for installing this package.
+View the below methiods for installing this package. Python3.5 and higher is required.
 
 PyPi
 ^^^^^^^^^^^^^^
