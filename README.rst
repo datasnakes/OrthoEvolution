@@ -13,12 +13,15 @@
 .. image:: https://readthedocs.org/projects/orthoevolution/badge/?version=latest
    :target: http://orthoevolution.readthedocs.io/en/latest/?badge=latest
 
+
 OrthoEvolution
 ====================
+OrthoEvolution is an **easy to use** and comprehensive python package which aids in the **analysis and
+visualization of comparative evolutionary genetics** related projects such as the **inference of orthologs**.
 
-An **easy to use** and comprehensive python package which aids in the **analysis and
-visualization of comparative evolutionary genetics** related projects. More specifically, this
-project is focused on the **inference of orthologs** using NCBI's blast, various sequence alignment strategies,
+Overview
+----------------
+This package focuses on **inferring orthologs** using NCBI's blast, various sequence alignment strategies,
 and phylogenetics analyses including PAML, PhyML, ete3, and more tools.
 
 Ultimately, the goal of this project is to create a **reusable pipeline** for the
@@ -31,8 +34,6 @@ View our `read the docs <http://datasnakes-scripts.readthedocs.io/en/master/>`__
 read `this related paper <https://www.frontiersin.org/articles/10.3389/fnhum.2014.00283/full>`__ to gain
 more insight into this project/python package.
 
-Overview
---------------------
 
 Installation
 ~~~~~~~~~~~~~~~~

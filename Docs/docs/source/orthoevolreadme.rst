@@ -1,7 +1,7 @@
 Tutorial
 ========
 
-Datasnakes-Scripts has been built with Python 3.5 (and up) as a
+OrthoEvolution has been built with Python 3.5 (and up) as a
 multi-faceted package and pipeline framework for comparative genetics in
 order to infer orthologous genes.
 
@@ -66,7 +66,7 @@ Examples
 
 .. code:: python
 
-    from Datasnakes.Cookies import Oven
+    from OrthoEvol.Cookies import Oven
     from pathlib import Path
     import os
 
@@ -123,21 +123,21 @@ Examples
 .. code:: python
 
     # Manager classes can be used explicitly, or...
-    from Datasnakes.Manager.management import Management
-    from Datasnakes.Manager.management import RepoManagement
-    from Datasnakes.Manager.management import UserManagement
-    from Datasnakes.Manager.management import WebsiteManagement
-    from Datasnakes.Manager.management import ProjectManagement
+    from OrthoEvol.Manager.management import Management
+    from OrthoEvol.Manager.management import RepoManagement
+    from OrthoEvol.Manager.management import UserManagement
+    from OrthoEvol.Manager.management import WebsiteManagement
+    from OrthoEvol.Manager.management import ProjectManagement
 
     # ...they can be use implicitly through the main pipeline class.
-    from Datasnakes.Manager.data_management import DataMana
+    from OrthoEvol.Manager.data_management import DataMana
 
 Explicit Usage
 ^^^^^^^^^^^^^^
 
 .. code:: python
 
-    from Datasnakes.Manager.management import ProjectManagement
+    from OrthoEvol.Manager.management import ProjectManagement
     # Use the flags to create a new repository/user/project/research directory system
     pm = ProjectManagement(repo="repository1", user='user1', project='project1', research='research1',
         research_type='comparative_genetics', new_repo=True, new_user=True, new_project=True, new_research=True)
@@ -151,7 +151,7 @@ Implicit Usage
 
 .. code:: python
 
-    from Datasnakes.Manager.data_management import DataMana
+    from OrthoEvol.Manager.data_management import DataMana
     # Use a prebuilt configuration file in Manager/config/
     # *start* a *new* project automatically
     # This builds everything and then starts the pipeline
@@ -179,10 +179,10 @@ Examples
 
 .. code:: python
 
-    from Datasnakes.Manager.management import ProjectManagement
-    from Datasnakes.Orthologs.Blast.blastn_comparative_genetics import OrthoBlastN
-    from Datasnakes.Orthologs.GenBank.genbank import GenBank
-    from Datasnakes.Orthologs.Align.msa import MultipleSequenceAlignment as MSA
+    from OrthoEvol.Manager.management import ProjectManagement
+    from OrthoEvol.Orthologs.Blast.blastn_comparative_genetics import OrthoBlastN
+    from OrthoEvol.Orthologs.GenBank.genbank import GenBank
+    from OrthoEvol.Orthologs.Align.msa import MultipleSequenceAlignment as MSA
 
     # In a real situation a dictionary configuration from YAML files will be used
     # However a dictionary can be manually set up by the user within the script
@@ -256,7 +256,7 @@ Examples
 .. code:: python
 
     # Import a tools module
-    from Datasnakes.Tools import Slackify
+    from OrthoEvol.Tools import Slackify
 
     # Slack takes a config file thats already set up
     slack = Slackify(slackconfig='path/to/slackconfig.cfg')
@@ -267,4 +267,4 @@ Examples
     slack.send_msg(channel='channelname', message=message_to_channel)
 
 For more information, view the `slackify
-readme <https://github.com/datasnakes/Datasnakes-Scripts/tree/master/Datasnakes/Tools/slackify/README.md>`__.
+readme <https://github.com/OrthoEvolution/OrthoEvol-Scripts/tree/master/OrthoEvolution/Tools/slackify/README.md>`__.

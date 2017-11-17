@@ -46,7 +46,7 @@ Cookies can also be used to create standalone projects that don't require an ent
 ### Examples
 
 ```python
-from Datasnakes.Cookies import Oven
+from OrthoEvol.Cookies import Oven
 from pathlib import Path
 import os
 
@@ -92,19 +92,19 @@ The web interface will give each user access to the Tools and Orthologs modules 
 ### Examples
 ```python
 # Manager classes can be used explicitly, or...
-from Datasnakes.Manager.management import Management
-from Datasnakes.Manager.management import RepoManagement
-from Datasnakes.Manager.management import UserManagement
-from Datasnakes.Manager.management import WebsiteManagement
-from Datasnakes.Manager.management import ProjectManagement
+from OrthoEvol.Manager.management import Management
+from OrthoEvol.Manager.management import RepoManagement
+from OrthoEvol.Manager.management import UserManagement
+from OrthoEvol.Manager.management import WebsiteManagement
+from OrthoEvol.Manager.management import ProjectManagement
 
 # ...they can be use implicitly through the main pipeline class.
-from Datasnakes.Manager.data_management import DataMana
+from OrthoEvol.Manager.data_management import DataMana
 ```
 
 #### Explicit Usage
 ```python
-from Datasnakes.Manager.management import ProjectManagement
+from OrthoEvol.Manager.management import ProjectManagement
 # Use the flags to create a new repository/user/project/research directory system
 pm = ProjectManagement(repo="repository1", user='user1', project='project1', research='research1',
     research_type='comparative_genetics', new_repo=True, new_user=True, new_project=True, new_research=True)
@@ -115,7 +115,7 @@ print(pm.Pantry.research_cookie)
 ```
 #### Implicit Usage
 ```python
-from Datasnakes.Manager.data_management import DataMana
+from OrthoEvol.Manager.data_management import DataMana
 # Use a prebuilt configuration file in Manager/config/
 # *start* a *new* project automatically
 # This builds everything and then starts the pipeline
@@ -134,10 +134,10 @@ and doing phylogenetic analysis for each gene.
 
 ### Examples
 ```python
-from Datasnakes.Manager.management import ProjectManagement
-from Datasnakes.Orthologs.Blast.blastn_comparative_genetics import OrthoBlastN
-from Datasnakes.Orthologs.GenBank.genbank import GenBank
-from Datasnakes.Orthologs.Align.msa import MultipleSequenceAlignment as MSA
+from OrthoEvol.Manager.management import ProjectManagement
+from OrthoEvol.Orthologs.Blast.blastn_comparative_genetics import OrthoBlastN
+from OrthoEvol.Orthologs.GenBank.genbank import GenBank
+from OrthoEvol.Orthologs.Align.msa import MultipleSequenceAlignment as MSA
 
 # In a real situation a dictionary configuration from YAML files will be used
 # However a dictionary can be manually set up by the user within the script
@@ -200,7 +200,7 @@ Can I integrate these tools with each other and with orther modules including my
 
 ```python
 # Import a tools module
-from Datasnakes.Tools import Slackify
+from OrthoEvol.Tools import Slackify
 
 # Slack takes a config file thats already set up
 slack = Slackify(slackconfig='path/to/slackconfig.cfg')
@@ -210,4 +210,4 @@ slack = Slackify(slackconfig='path/to/slackconfig.cfg')
 message_to_channel = 'Hey, <@username>. This is an update for the current script.'
 slack.send_msg(channel='channelname', message=message_to_channel)
 ```
-For more information, view the [slackify readme](https://github.com/datasnakes/Datasnakes-Scripts/tree/master/Datasnakes/Tools/slackify/README.md).
+For more information, view the [slackify readme](https://github.com/OrthoEvolution/OrthoEvol-Scripts/tree/master/OrthoEvolution/Tools/slackify/README.md).

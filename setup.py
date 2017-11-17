@@ -63,11 +63,10 @@ setup(
     packages=find_packages(exclude=['Docs', 'Examples', 'Tests']),
     include_package_data=True,
     entry_points={
-        'console_scripts': ['d~s=Orthologs.command_line:main']
+        'console_scripts': [
+                'orthoevol=OrthoEvol.Orthologs.command_line:main'
+        ]
     },
-    zip_safe=False,
-    test_suite='nose.collector',
-    tests_require=['nose']
 )
 
 # Set up the permissions for the BioSQL Perl scripts
