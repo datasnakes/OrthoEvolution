@@ -1,7 +1,7 @@
 from .orthologs_blastn import OrthoBlastN
 from .base_blastn import BaseBlastN
 from .comparative_genetics import BaseComparativeGenetics, ComparativeGenetics
-from Datasnakes.Orthologs import OrthologsWarning
+from OrthoEvol.Orthologs import OrthologsWarning
 import warnings
 
 # Make this explicit, then they show up in the API docs

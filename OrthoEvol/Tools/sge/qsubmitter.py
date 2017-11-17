@@ -1,6 +1,6 @@
 import argparse
 import textwrap
-# from Datasnakes.Tools.sge import SGEJob
+# from OrthoEvol.Tools.sge import SGEJob
 
 __author__ = 'Datasnakes'
 

@@ -5,7 +5,7 @@ from shutil import copy
 import pkg_resources
 from Bio.Phylo.PAML import codeml
 
-from Datasnakes.Manager.config import paml_control_files
+from OrthoEvol.Manager.config import paml_control_files
 
 
 class CodemlRun(object):
@@ -16,7 +16,7 @@ class CodemlRun(object):
         self.paml_path = self.home / Path('PAML')
         self.paml_path.mkdir(exist_ok=True)
 
-        # Set up genes control file name and get the datasnakes control file path
+        # Set up genes control file name and get the OrthoEvol control file path
         self.gene = str(iqtree_newick).replace('_iqtree.nwk', '')
         self.control_file = self.paml_path / Path(self.gene + '.ctl')
         self.control_template = pkg_resources.resource_filename(paml_control_files.__name__, control_file)

@@ -1,20 +1,20 @@
-Datasnakes-Scripts
+OrthoEvolution
 ====================
 
-.. image:: https://travis-ci.org/datasnakes/Datasnakes-Scripts.svg?branch=master
-    :target: https://travis-ci.org/datasnakes/Datasnakes-Scripts
+.. image:: https://travis-ci.org/datasnakes/OrthoEvolution.svg?branch=master
+    :target: https://travis-ci.org/datasnakes/OrthoEvolution
 
 .. image:: https://api.codacy.com/project/badge/Grade/9a4ce39423ed4458a0c7fa3610c81ba2
-   :target: https://www.codacy.com/app/sdhutchins/Datasnakes-Scripts?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=datasnakes/Datasnakes-Scripts&amp;utm_campaign=Badge_Grade
+   :target: https://www.codacy.com/app/sdhutchins/OrthoEvolution?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=datasnakes/OrthoEvolution&amp;utm_campaign=Badge_Grade
 
 .. image:: https://badges.gitter.im/gitterHQ/gitter.png
    :target: https://gitter.im/datasnakes/Lobby
 
-.. image:: https://badge.fury.io/py/Datasnakes-Scripts.svg
-   :target: https://badge.fury.io/py/Datasnakes-Scripts
+.. image:: https://badge.fury.io/py/OrthoEvolution.svg
+   :target: https://badge.fury.io/py/OrthoEvolution
 
-.. image:: https://readthedocs.org/projects/datasnakes-scripts/badge/?version=master
-   :target: http://datasnakes-scripts.readthedocs.io/en/master/
+.. image:: https://readthedocs.org/projects/orthoevolution/badge/?version=master
+   :target: http://orthoevolution.readthedocs.io/en/master/
 
 An **easy to use** and comprehensive python package which aids in the **analysis and
 visualization of comparative evolutionary genetics** related projects. More specifically, this
@@ -40,33 +40,33 @@ View the below methiods for installing this package.
 
 PyPi
 ^^^^^^^^^^^^^^
-``pip install Datasnakes-Scripts``
+``pip install ortho-evol``
 
 GitHub
 ^^^^^^^^^^^^^^
-1. Download the zip file and unzip it or ``git clone https://github.com/datasnakes/Datasnakes-Scripts.git``
-2. ``cd Datasnakes-Scripts``
+1. Download the zip file and unzip it or ``git clone https://github.com/datasnakes/OrthoEvolution.git``
+2. ``cd OrthoEvolution``
 3. ``pip install .``
 
 Development Code
 ^^^^^^^^^^^^^^
-**WARNING** : This code is actively under development and may not be reliable.  Please create an `issue <https://github.com/datasnakes/Datasnakes-Scripts/issues>`_ for questions about development.
+**WARNING** : This code is actively under development and may not be reliable.  Please create an `issue <https://github.com/datasnakes/OrthoEvolution/issues>`_ for questions about development.
 
-1. Download the zip file and unzip it or ``git clone -b dev-master https://github.com/datasnakes/Datasnakes-Scripts.git``
-2. ``cd Datasnakes-Scripts``
+1. Download the zip file and unzip it or ``git clone -b dev-master https://github.com/datasnakes/OrthoEvolution.git``
+2. ``cd OrthoEvolution``
 3. ``pip install .``
 
 Examples
 ~~~~~~~~~~~~~~~~
-Check out this `tutorial <https://github.com/datasnakes/Datasnakes-Scripts/wiki/Tutorial>`__ in our Wiki Docs.
+Check out this `tutorial <https://github.com/datasnakes/OrthoEvolution/wiki/Tutorial>`__ in our Wiki Docs.
 
 .. code:: python
 
-    import Datasnakes
+    import OrthoEvol
 
 Tests
 ~~~~~~~~~~~~~~~~
-To run tests, type ``nosetests Tests/`` in the Datasnakes-Scripts directory.
+To run tests, type ``nosetests Tests/`` in the OrthoEvolution directory.
 
 Contributors
 ~~~~~~~~~~~~~~~~
@@ -79,7 +79,7 @@ This package was created by the Datasnakes.
    `✉ <mailto:sdhutchins@outlook.com>`__
 
 If you would like to contribute to this package, install the package in development mode,
-and check out our `contributing guidelines <https://github.com/datasnakes/Datasnakes-Scripts/blob/master/CONTRIBUTING.rst>`__.
+and check out our `contributing guidelines <https://github.com/datasnakes/OrthoEvolution/blob/master/CONTRIBUTING.rst>`__.
 
 
 Citations
@@ -96,8 +96,7 @@ pmid:19304878*
 
 License
 ~~~~~~~~~~~~~~~~
-`MIT <https://github.com/datasnakes/Datasnakes-Scripts/blob/master/LICENSE>`_
-
+`MIT <https://github.com/datasnakes/OrthoEvolution/blob/master/LICENSE>`_
 Contents
 --------
 .. toctree::

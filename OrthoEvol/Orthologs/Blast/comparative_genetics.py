@@ -8,13 +8,13 @@ import time
 import pkg_resources
 from ete3 import NCBITaxa
 
-from Datasnakes.Manager.config import test
+from OrthoEvol.Manager.config import test
 # from pandas import ExcelWriter
-from Datasnakes.Manager.management import ProjectManagement
-from Datasnakes.Orthologs.utils import attribute_config
-from Datasnakes.Orthologs.Blast.utils import (my_gene_info, get_dup_acc,
+from OrthoEvol.Manager.management import ProjectManagement
+from OrthoEvol.Orthologs.utils import attribute_config
+from OrthoEvol.Orthologs.Blast.utils import (my_gene_info, get_dup_acc,
                                               get_miss_acc)
-from Datasnakes.Tools.logit import LogIt
+from OrthoEvol.Tools.logit import LogIt
 
 
 # TODO-ROB Create function for archiving and multiple runs (this can go

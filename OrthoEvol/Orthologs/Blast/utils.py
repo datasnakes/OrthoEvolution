@@ -12,9 +12,9 @@ import pandas as pd
 import platform
 from warnings import warn
 
-from Datasnakes.Tools.logit import LogIt
-from Datasnakes import DatasnakesDeprecationWarning
-from Datasnakes.Tools.otherutils import runcmd
+from OrthoEvol.Tools.logit import LogIt
+from OrthoEvol import OrthoEvolDeprecationWarning
+from OrthoEvol.Tools.otherutils import runcmd
 
 blastutils_log = LogIt().default(logname="blast-utils", logfile=None)
 seqidlist_log = LogIt().default(logname="gi-lists", logfile=None)
@@ -110,7 +110,7 @@ def seqid_list_config(seqid_list_path, taxonomy_ids, research_path=None, config=
     It will also convert the gi list into a binary file which is more
     efficient to use with NCBI's Standalone Blast tools.
     """
-    warn("NCBI has deprecated using GI numbers.", DatasnakesDeprecationWarning)
+    warn("NCBI has deprecated using GI numbers.", OrthoEvolDeprecationWarning)
     if config:
         # Directory and file handling
         raw_data_path = research_path / Path('raw_data')
@@ -131,7 +131,7 @@ def create_seqid_lists(seqid_list_path, taxonomy_ids):
     It then uses the blastdb_aliastool to turn the list into a binary file.
     The input (id) for the function is a taxonomy id.
     """
-    warn("NCBI has deprecated using GI numbers.", DatasnakesDeprecationWarning)
+    warn("NCBI has deprecated using GI numbers.", OrthoEvolDeprecationWarning)
     if os.path.exists(str(seqid_list_path)):
         os.chdir(str(seqid_list_path))
         # Use the accession #'s and the blastdbcmd tool to generate gi lists
@@ -146,7 +146,7 @@ def create_seqid_lists(seqid_list_path, taxonomy_ids):
 
 def _taxid2seqidlist(taxonomy_id):
     """Use a taxonomy id in order to get the list of GI numbers."""
-    warn("NCBI has deprecated using GI numbers.", DatasnakesDeprecationWarning)
+    warn("NCBI has deprecated using GI numbers.", OrthoEvolDeprecationWarning)
     tid = str(taxonomy_id)
     binary = tid + 'gi'
 

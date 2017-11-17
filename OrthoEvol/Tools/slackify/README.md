@@ -16,7 +16,7 @@ Examples
 #### Import the class and set up the slack handler.
 
 ```python
-from Datasnakes.Tools import Slackify
+from OrthoEvol.Tools import Slackify
 
 slack = Slackify(slackconfig='path/to/slackconfig.cfg')
 ```

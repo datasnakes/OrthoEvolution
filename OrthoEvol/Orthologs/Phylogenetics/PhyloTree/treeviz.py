@@ -3,7 +3,7 @@ import warnings
 
 from Bio import Phylo
 
-from Datasnakes.Orthologs import OrthologsDevelopmentWarning
+from OrthoEvol.Orthologs import OrthologsDevelopmentWarning
 
 # Warn users about this module
 warnings.warn('This module is still under development and '

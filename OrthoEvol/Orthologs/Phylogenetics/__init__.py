@@ -1,17 +1,17 @@
 """Phylogenetic tools part of the Orthologs Package"""
 import warnings
 from Bio import AlignIO
-from Datasnakes.Orthologs import OrthologsWarning
+from OrthoEvol.Orthologs import OrthologsWarning
 
 # Ignore the warning in this init script.
 warnings.simplefilter('ignore', OrthologsWarning)
 
 # Initialize the modules
-from Datasnakes.Orthologs.Phylogenetics.PAML import ETE3PAML
-from Datasnakes.Orthologs.Phylogenetics.PhyloTree import TreeViz
-from Datasnakes.Orthologs.Phylogenetics import PhyML
-from Datasnakes.Orthologs.Phylogenetics import Phylip
-from Datasnakes.Orthologs.Phylogenetics.IQTree import IQTreeCommandline
+from OrthoEvol.Orthologs.Phylogenetics.PAML import ETE3PAML
+from OrthoEvol.Orthologs.Phylogenetics.PhyloTree import TreeViz
+from OrthoEvol.Orthologs.Phylogenetics import PhyML
+from OrthoEvol.Orthologs.Phylogenetics import Phylip
+from OrthoEvol.Orthologs.Phylogenetics.IQTree import IQTreeCommandline
 
 # Ignore the warning in this init script.
 warnings.simplefilter('ignore', OrthologsWarning)

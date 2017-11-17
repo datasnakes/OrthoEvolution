@@ -3,8 +3,8 @@ from shutil import copy
 from subprocess import check_call, STDOUT
 
 from pathlib import Path
-from Datasnakes.Orthologs.Phylogenetics.IQTree.iqtree import IQTreeCommandline
-from Datasnakes.Tools.utils import makedirectory
+from OrthoEvol.Orthologs.Phylogenetics.IQTree.iqtree import IQTreeCommandline
+from OrthoEvol.Tools.utils import makedirectory
 #TODO-ROB Make this inherit FilteredAlignment
 
 

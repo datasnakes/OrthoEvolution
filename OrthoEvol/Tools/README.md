@@ -15,7 +15,7 @@ tools in your project and how we use these tools in our project.
 
 ### Download NCBI databases with our NCBI FTP Client
 ``` python
-from Datasnakes.Tools.ftp import NcbiFTPClient
+from OrthoEvol.Tools.ftp import NcbiFTPClient
 
 ncbiftp = NcbiFTPClient(email='somebody@gmail.com')
 ncbiftp.getblastdb(database_name='refseq_rna')
@@ -30,7 +30,7 @@ Out[54]: ['FASTA', 'cloud']
 
 ### Utilize multiprocessing to speed up your code
 ```python
-from Datasnakes.Tools import Multiprocess
+from OrthoEvol.Tools import Multiprocess
 
 
 def printwords(word):
@@ -46,7 +46,7 @@ if __name__ == '__main__':
 
 ### Integrate logging in a simple and quick way
 ```python
-from Datasnakes.Tools import LogIt
+from OrthoEvol.Tools import LogIt
 
 # Set up your loggers
 logit = LogIt()

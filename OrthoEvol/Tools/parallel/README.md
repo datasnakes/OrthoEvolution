@@ -8,14 +8,14 @@ looked into mpi and multiprocessing. Both were found to be useful.
 
 This is an optional class in our pipeline, but if you're using AWS or Google's
 supercomputing, then you may find it useful unless you're interested in or
-using clustering or SGE (Sun Grid Engine). We have a [sge module](https://github.com/datasnakes/Datasnakes-Scripts/tree/master/Datasnakes/Tools/sge) for that.
+using clustering or SGE (Sun Grid Engine). We have a [sge module](https://github.com/datasnakes/OrthoEvolution/tree/master/OrthoEvol/Tools/sge) for that.
 
 ## Examples
 
 ### A Random Example
 
 ```python
-from Datasnakes.Tools import Multiprocess
+from OrthoEvol.Tools import Multiprocess
 
 
 def printwords(word):

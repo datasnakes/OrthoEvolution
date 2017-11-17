@@ -2,7 +2,7 @@ from subprocess import Popen, PIPE
 from threading import Thread
 from queue import Queue, Empty
 
-from Datasnakes.Tools.logit import LogIt
+from OrthoEvol.Tools.logit import LogIt
 # Implemented from http://www.sharats.me/posts/the-ever-useful-and-neat-subprocess-module/
 # In the "Watching both stdout and stderr" section
 

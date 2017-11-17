@@ -22,7 +22,7 @@ with amino acid sequences.
 This is a quick example to use the [ClustalO]() class.
 
 ``` python
-from Datasnakes.Orthologs.Align import ClustalO
+from OrthoEvol.Orthologs.Align import ClustalO
 
 gene_list = ['HTR1A', 'CCR5', 'DRD4']
 

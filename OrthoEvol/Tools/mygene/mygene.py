@@ -2,7 +2,7 @@
 import mygene
 import pandas as pd
 
-from Datasnakes.Tools import LogIt
+from OrthoEvol.Tools import LogIt
 # TODO add ability for custom fields
 # TODO add ability for custom species.
 

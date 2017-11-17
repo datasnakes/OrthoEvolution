@@ -1,5 +1,5 @@
 # Exclude
-#exclude Datasnakes/Manager/TODO.py
+#exclude OrthoEvol/Manager/TODO.py
 
 # Include the README file
 include README.rst

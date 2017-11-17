@@ -107,7 +107,7 @@ run `OrthoBlastN` without using our database management features,
 ### Performing Blast & Post-Blast Analysis
 
 ``` python
-from Datasnakes.Orthologs.Blast import OrthoBlastN
+from OrthoEvol.Orthologs.Blast import OrthoBlastN
 import os
 
 # Create a blast configuration dictionary
@@ -131,7 +131,7 @@ myblast.blast_config(myblast.blast_human, 'Homo_sapiens', auto_start=True)
 _TODO: This is unfinished._
 
 ``` python
-from Datasnakes.Orthologs.CompGenetics import CompGenAnalysis
+from OrthoEvol.Orthologs.CompGenetics import CompGenAnalysis
 
 ```
 
