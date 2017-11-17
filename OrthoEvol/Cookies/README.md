@@ -14,7 +14,7 @@ uses the _CookieRecipes_ and _Oven_ classes as a primary means of functioning.
 ### Simple Implementation
 
 ```python
-from Datasnakes.Cookies import Oven
+from OrthoEvol.Cookies import Oven
 
 Kitchen = Oven(repo="repo", user="user", project="project", output_dir="project_path")
 Pantry = Kitchen.Ingredients
