@@ -3,7 +3,7 @@ import shutil
 import datetime
 import os
 from pathlib import Path
-from Datasnakes.Tools import LogIt
+from OrthoEvol.Tools.logit import LogIt
 
 archive_options = {
     "Full": Path(''),
