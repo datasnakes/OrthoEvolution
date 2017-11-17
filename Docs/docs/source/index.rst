@@ -1,6 +1,3 @@
-OrthoEvolution
-====================
-
 .. image:: https://travis-ci.org/datasnakes/OrthoEvolution.svg?branch=master
     :target: https://travis-ci.org/datasnakes/OrthoEvolution
 
@@ -16,6 +13,8 @@ OrthoEvolution
 .. image:: https://readthedocs.org/projects/datasnakes-scripts/badge/?version=master
    :target: http://datasnakes-scripts.readthedocs.io/en/master/
 
+OrthoEvolution
+====================
 
 An **easy to use** and comprehensive python package which aids in the **analysis and
 visualization of comparative evolutionary genetics** related projects. More specifically, this
@@ -98,12 +97,13 @@ pmid:19304878*
 License
 ~~~~~~~~~~~~~~~~
 `MIT <https://github.com/datasnakes/OrthoEvolution/blob/master/LICENSE>`_
+
 Contents
 --------
 .. toctree::
     :maxdepth: 3
 
-    datasnakesreadme
+    orthoevolreadme
     cookiesreadme
     managerreadme
     orthologsreadme
