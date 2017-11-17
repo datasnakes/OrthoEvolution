@@ -9,7 +9,7 @@ if "%SPHINXBUILD%" == "" (
 )
 set SOURCEDIR=.
 set BUILDDIR=_build
-set SPHINXPROJ=Datasnakes-Scripts
+set SPHINXPROJ=OrthoEvolution
 
 if "%1" == "" goto help
 

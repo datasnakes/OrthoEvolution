@@ -4,8 +4,8 @@ OrthoEvolution
 .. image:: https://travis-ci.org/datasnakes/OrthoEvolution.svg?branch=master
     :target: https://travis-ci.org/datasnakes/OrthoEvolution
 
-.. image:: https://api.codacy.com/project/badge/Grade/9a4ce39423ed4458a0c7fa3610c81ba2
-   :target: https://www.codacy.com/app/sdhutchins/OrthoEvolution?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=datasnakes/OrthoEvolution&amp;utm_campaign=Badge_Grade
+.. image:: https://api.codacy.com/project/badge/Grade/25062944794a4d14b5cab274a885ac27
+   :target: https://www.codacy.com/app/datasnakes/OrthoEvolution?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=datasnakes/OrthoEvolution&amp;utm_campaign=Badge_Grade
 
 .. image:: https://badges.gitter.im/gitterHQ/gitter.png
    :target: https://gitter.im/datasnakes/Lobby
