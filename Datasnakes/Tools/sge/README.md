@@ -1,5 +1,4 @@
-SGE Documentation
-===================
+# SGE Documentation
 Collection of tools for using PBS, a job scheduler for high-performance
 computing environments on SGE. The command is usually `qsub <options>` on most systems.
 
@@ -13,30 +12,38 @@ command.
 The class currently provides a template, `temp.pbs`, file to be modified and used
 when submitting a job as well as default job attributes.
 
-#### Submit 1 job
+### Using SGEJob with Multiprocess
 
-``` python
+```python
 
 ```
 
-#### Submit multiple jobs
+### Submitting multiple jobs
 
-``` python
+```python
 
 ```
 
 ### Get Job Info
 
-``` python
+```python
 
 ```
 
+### Running a simple job
+```python
+from Datasnakes.Tools.sge import SGEJob
 
-:exclamation: Software Dependencies
---------------------------------------
+myjob = SGEJob(email_address='shutchins2@umc.edu')
+
+code = "test.py"
+myjob.submit_pycode(code)
+```
+
+
+## Software Dependencies
 Ensure that you have at least pbs version `14.1.0`
 
-Thanks
--------------------
+## Thanks
 Thanks to [@jfeala](https://github.com/jfeala) for his work on Luigi's SGEJobTask.
 

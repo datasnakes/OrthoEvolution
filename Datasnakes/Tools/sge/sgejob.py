@@ -61,67 +61,8 @@ class BaseSGEJob(object):
         else:
             self.wait_on_job_completion(job_id)
 
-
-class SGEJob(BaseSGEJob):
-    """Create a qsub/pbs job & script for the job to execute."""
-    def __init__(self, email_address, base_jobname=None):
-        super().__init__(base_jobname=base_jobname)
-        self.email = email_address
-        self.attributes = self.default_job_attributes
-        self.jobname = self.default_job_attributes['job_name']
-        if base_jobname is not None:
-            _, self.jobname = self._configure(base_jobname=base_jobname,
-                                              length=5)
-            self.attributes = self._update_default_attributes()
-
-    def _update_default_attributes(self):
-        pyfile_path = os.path.join(self.pbsworkdir, self.jobname + '.py')
-        # These attributes are automatically updated if a jobname is given.
-        new_attributes = {'email': self.email,
-                          'job_name': self.jobname,
-                          'outfile': self.jobname + '.o',
-                          'errfile': self.jobname + '.e',
-                          'script': self.jobname,
-                          'log_name': self.jobname + '.log',
-                          'cmd': 'python3 ' + pyfile_path,
-                         }
-        self.default_job_attributes.update(new_attributes)
-
-        return self.default_job_attributes
-
-    def submit(self, code, cleanup=True, default=True):
-        """Create and submit a qsub job.
-
-        Submit python code."""
-        # TIP If python is in your environment as only 'python' update that.
-        # If default, a python file will be created from code that is used.
-        # Allow user input to be a python file
-        if os.path.isfile(code) and str(code).endswith('.py'):
-            code_str = self.file2str(code)
-            self.sgejob_log.info('%s converted to string.' % code)
-        elif isinstance(code) == str:
-            code_str = code
-
-        if default:
-            self.sgejob_log.info('You are running a job with default attributes.')
-            writecodefile(filename=self.jobname, code=code_str, language='python')
-            pyfilename = self.jobname + '.py'
-            self.sgejob_log.info('%s python file has been created.' % pyfilename)
-
-            # Create the pbs script from the template or dict
-            pbstemp = import_temp(self.temp_pbs)
-            pbsfilename = self.jobname + '.pbs'
-
-            with open(pbsfilename, 'w') as pbsfile:
-                pbsfile.write(pbstemp.substitute(self.attributes))
-                pbsfile.close()
-            self.sgejob_log.info('%s has been created.' % pbsfilename)
-        else:
-            msg = 'Custom SGEJob creation is not yet implemented.'
-            raise NotImplementedError(msg)
-            # TODO Add custom job creation
-
-        # Submit the job using qsub
+    def submitjob(self, cleanup):
+        """Submit a job using qsub."""
         try:
             cmd = ['qsub ' + self.jobname + '.pbs']  # this is the command
             # Shell MUST be True
@@ -142,3 +83,78 @@ class SGEJob(BaseSGEJob):
 
             else:  # Unsuccessful. Stdout will be '1'
                 self.sgejob_log.error('PBS job not submitted.')
+
+
+class SGEJob(BaseSGEJob):
+    """Create a qsub/pbs job & script to submit python code."""
+    def __init__(self, email_address, base_jobname=None):
+        super().__init__(base_jobname=base_jobname)
+        self.email = email_address
+        self.attributes = self.default_job_attributes
+        self.jobname = self.default_job_attributes['job_name']
+        if base_jobname is not None:
+            _, self.jobname = self._configure(base_jobname=base_jobname,
+                                              length=5)
+            self.attributes = self._update_default_attributes()
+
+    def _update_default_attributes(self):
+        pyfile_path = os.path.join(self.pbsworkdir, self.jobname + '.py')
+        # These attributes are automatically updated if a jobname is given.
+        new_attributes = {'email': self.email,
+                          'job_name': self.jobname,
+                          'outfile': self.jobname + '.o',
+                          'errfile': self.jobname + '.e',
+                          'script': self.jobname,
+                          'log_name': self.jobname + '.log',
+                          'cmd': 'python3 ' + pyfile_path,
+                          }
+        self.default_job_attributes.update(new_attributes)
+
+        return self.default_job_attributes
+
+    def submit_pycode(self, code, cleanup=True, default=True):
+        """Create and submit a qsub job.
+
+        Submit python code."""
+        # TIP If python is in your environment as only 'python' update that.
+        # If default, a python file will be created from code that is used.
+        # Allow user input to be a python file
+        if os.path.isfile(code) and str(code).endswith('.py'):
+            code_str = self.file2str(code)
+            self.sgejob_log.info('%s converted to string.' % code)
+        elif type(code) == str:
+            code_str = code
+
+        if default:
+            self.sgejob_log.info('You are running a job with default attributes.')
+            writecodefile(filename=self.jobname, code=code_str, language='python')
+            pyfilename = self.jobname + '.py'
+            self.sgejob_log.info('%s has been created.' % pyfilename)
+
+            # Create the pbs script from the template or dict
+            pbstemp = import_temp(self.temp_pbs)
+            pbsfilename = self.jobname + '.pbs'
+
+            with open(pbsfilename, 'w') as pbsfile:
+                pbsfile.write(pbstemp.substitute(self.attributes))
+                pbsfile.close()
+            self.sgejob_log.info('%s has been created.' % pbsfilename)
+
+            # Submit the job using qsub
+            self.submitjob(cleanup=cleanup)
+        else:
+            msg = 'Custom SGEJob creation is not yet implemented.'
+            raise NotImplementedError(msg)
+            # TODO Add custom job creation
+
+        # Submit the job using qsub
+        self.submitjob(cleanup=cleanup)
+
+
+class MultiSGEJobs(SGEJob):
+    """Create multiple qsub/pbs jobs."""
+    def __init__(self, email_address):
+        super().__init__(email_address=email_address, base_jobname='multi')
+        _, self.jobname = self._configure(base_jobname=self.base_jobname,
+                                          length=5)
+        self.attributes = self._update_default_attributes()
