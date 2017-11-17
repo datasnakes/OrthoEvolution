@@ -6,11 +6,11 @@ from cookiecutter.prompt import prompt_for_config
 from cookiecutter.generate import generate_context
 from cookiecutter.hooks import run_script
 from pathlib import Path
-from Datasnakes import Cookies
-from Datasnakes.Tools.logit import LogIt
-from Datasnakes.Manager.config import yml
+from OrthoEvol import Cookies
+from OrthoEvol.Tools.logit import LogIt
+from OrthoEvol.Manager.config import yml
 from pkg_resources import resource_filename
-from Datasnakes.Cookies.utils import archive
+from OrthoEvol.Cookies.utils import archive
 
 
 class CookBook(object):
