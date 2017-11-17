@@ -3,12 +3,12 @@ import yaml
 import requests
 import tarfile
 from importlib import import_module
-from Datasnakes.Manager.management import ProjectManagement
-from Datasnakes.Orthologs.utils import attribute_config
-from Datasnakes.Cookies.utils import archive
-from Datasnakes.Tools.ftp import NcbiFTPClient
-from Datasnakes.Tools.logit import LogIt
-from Datasnakes.Manager.BioSQL import biosql
+from OrthoEvol.Manager.management import ProjectManagement
+from OrthoEvol.Orthologs.utils import attribute_config
+from OrthoEvol.Cookies.utils import archive
+from OrthoEvol.Tools.ftp import NcbiFTPClient
+from OrthoEvol.Tools.logit import LogIt
+from OrthoEvol.Manager.BioSQL import biosql
 
 
 class BaseDatabaseManagement(object):
@@ -166,7 +166,7 @@ class BaseDatabaseManagement(object):
         if upload_number < 8:
             raise ValueError("The upload_number must be greater than 8.  The NCBI refseq release files are too bing"
                              "for anything less than 8 seperate BioSQL databases.")
-        from Datasnakes.Tools.sge import SGEJob
+        from OrthoEvol.Tools.sge import SGEJob
 
         # TODO-ROB: multiprocessing sge whatever
         # Create a list of lists with an index corresponding to the upload number
@@ -510,7 +510,7 @@ class DatabaseManagement(BaseDatabaseManagement):
             if upload_number < 8:
                 raise ValueError("The upload_number must be greater than 8.  The NCBI refseq release files are too bing"
                                  "for anything less than 8 seperate BioSQL databases.")
-            from Datasnakes.Tools.sge import SGEJob
+            from OrthoEvol.Tools.sge import SGEJob
 
             # TODO-ROB: multiprocessing sge whatever
             # Create a list of lists with an index corresponding to the upload number
