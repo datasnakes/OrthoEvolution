@@ -19,7 +19,7 @@ Management:
   port: '5252'
 
 DatabaseManagement:
-  proj_mana: "!!python/name:Datasnakes.Manager.utils.mana.ProjectManagement ''\n"
+  proj_mana: "!!python/name:OrthoEvol.Manager.utils.mana.ProjectManagement ''\n"
 
 CompGenObjects:
   acc_file: null
@@ -27,7 +27,7 @@ CompGenObjects:
   paml_file: null
   go_list: null
   post_blast: true
-  proj_mana: "!!python/name:Datasnakes.Manager.utils.mana.ProjectManagement ''\n"
+  proj_mana: "!!python/name:OrthoEvol.Manager.utils.mana.ProjectManagement ''\n"
   CompGenFiles:
     template: null
     taxon_file: null
@@ -41,9 +41,9 @@ GenBank:
   solo: false
   multi: true
   min_fasta: true
-  blast: "!!python/name:Datasnakes.Orthologs.Blast.blastn.CompGenBLASTn ''\n"
+  blast: "!!python/name:OrthoEvol.Orthologs.Blast.blastn.CompGenBLASTn ''\n"
 
 MultipleSequenceAlignment:
   aln_program: 'GUIDANCE2'
   project_path: null
-  genbank: "!!python/name:Datasnakes.Orthologs.GenBank.genbank.GenBank ''\n"
+  genbank: "!!python/name:OrthoEvol.Orthologs.GenBank.genbank.GenBank ''\n"

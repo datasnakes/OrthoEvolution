@@ -28,6 +28,6 @@ GenBank_config:
 Alignment_config:
   aln_program: 'GUIDANCE2'
   Guidance_config:
-    seqFile: "C:\\Users\\rgilmore\\PycharmProjects\\Datasnakes-Scripts\\Datasnakes\\Manager\\config\\test.faa"
+    seqFile: "C:\\Users\\rgilmore\\PycharmProjects\\Datasnakes-Scripts\\OrthoEvol\\Manager\\config\\test.faa"
     msaProgram: "CLUSTALW"
     seqType: "nuc"

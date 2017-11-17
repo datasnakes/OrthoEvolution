@@ -28,7 +28,7 @@ The `DataManagement` class helps to tie everything together into a pipeline.
 ###  Utilizing DataManagement to run a pipeline
 ```python
 import os
-from Datasnakes.Manager import DataManagement
+from OrthoEvol.Manager import DataManagement
 
 DataManagement(pipeline="Ortho_CDS_1", start=True, new=True)
 ```
