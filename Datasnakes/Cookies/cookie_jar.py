@@ -7,14 +7,14 @@ from cookiecutter.generate import generate_context
 from cookiecutter.hooks import run_script
 from pathlib import Path
 from Datasnakes import Cookies
-from Datasnakes.Tools import LogIt
-from Datasnakes.Manager import config
+from Datasnakes.Tools.logit import LogIt
+from Datasnakes.Manager.config import yml
 from pkg_resources import resource_filename
 from Datasnakes.Cookies.utils import archive
 
 
 class CookBook(object):
-    _config_file = resource_filename(config.yaml.__name__, "cookie_recipes.yml")
+    _config_file = resource_filename(yml.__name__, "cookie_recipes.yml")
 
     def __init__(self, config_file=_config_file, **new_recipes):
         """
@@ -188,18 +188,18 @@ class Oven(object):
         """
         if cookie_jar:
             self.cookie_jar = cookie_jar
-
-        if archive_flag:
-            archive_list = archive(db_path=db_path, arch_path=self.cookie_jar, config_file=db_config_file, delete=delete)
-            for arch in archive_list:
-                self.cookielog.info("An archive has been created at %s." % arch)
-        else:
-            if self.db_repo:
-                no_input = True
-                e_c = {"db_name": self.db_repo}
-            else:
-                no_input = False
-                e_c = None
+        # TODO-ROB:  Rework this for new archive function.
+        # if archive_flag:
+        #     archive_list = archive(database_path=db_path, archive_path=self.cookie_jar, config_file=db_config_file, delete_flag=delete)
+        #     for arch in archive_list:
+        #         self.cookielog.info("An archive has been created at %s." % arch)
+        # else:
+        #     if self.db_repo:
+        #         no_input = True
+        #         e_c = {"db_name": self.db_repo}
+        #     else:
+        #         no_input = False
+        #         e_c = None
 
             cookiecutter(str(self.Recipes.db_cookie), extra_context=e_c, no_input=no_input, output_dir=str(self.cookie_jar))
             self.cookielog.info("Directories have been created for a database repository %s." %

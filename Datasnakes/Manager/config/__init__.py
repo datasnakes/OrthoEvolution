@@ -1,10 +1,11 @@
-from . import data, yaml, scripts, test, references, paml_control_files
-
+"""Data storage for the package and package development."""
 __all__ = (
     "data",
-    "yaml",
-    "scripts",
-    "test",
+    "paml_control_files",
     "references",
-    "paml_control_files"
+    "scripts",
+    "templates",
+    "test",
+    "webster",
+    "yml",
 )

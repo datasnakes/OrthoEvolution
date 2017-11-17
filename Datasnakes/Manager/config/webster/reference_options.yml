@@ -5,23 +5,29 @@ GUIDANCE2:
     Research, 2015 Jul 1; 43 (Web Server issue): W7-W14.; doi: 10.1093/nar/gkq443"
     link: "https://www.ncbi.nlm.nih.gov/pubmed/18229673"
     path: '!!python/object/apply:pkg_resources.resource_filename [Datasnakes.Manager.config.references, "GUIDANCE2_Accurate_Detection_of_Unreliable_Alignment_Regions_Accounting_for_the_Uncertainty_of_Multiple_Parameters.pdf"]'
-
-            "reference_2": {
-                "citation": u"""Landan, G., and D. Graur. (2008).  Local Reliability Measures from Sets of Co-optimal
-                Multiple Sequence Alignments.  Pac Symp Biocomput 13:15-24""",
-                "link": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC4489236/",
-                "path": resource_filename(
-                    references.__name__, "Local_Reliability_Measures_from_Sets_of_Co-optimal_Multiple_Sequence_"
-                                         "Alignments.pdf")
-            }
-        },
-        'PAL2NAL': u"""Mikita Suyama, David Torrents, and Peer Bork (2006) PAL2NAL: Robust Conversion of Protein
-        Sequence Alignments Into the Corresponding Codon Alignments.  Nucleic Acids Res. 34, W609-W612.""",
-
-        'IQTREE': u"""LT Nguyen, H.A. Schmidt, A. von Haeseler, and BQ Minh (2015) IQ-TREE: A
-        fast and effective stochastic algorithm for estimating maximum likelihood
-        phylogenies. Mol. Biol. Evol., 32, 268-274.""",
-
-        'CLUSTALO': u""" Sievers F, Wilm A, Dineen D, Gibson TJ, Karplus K, Li W, Lopez R, McWilliam H, Remmert M,
-        Söding J, Thompson JD, Higgins DG.  Fast, Scalable Generation of High-quality Protein Multiple Sequence
-        Alignments Using Clustal Omega.  Mol Syst Biol. 2011 Oct 11;7:539. doi: 10.1038/msb.2011.75.""",
+  reference_2:
+    citation: "Landan, G., and D. Graur. (2008).  Local Reliability Measures from Sets of Co-optimal
+    Multiple Sequence Alignments.  Pac Symp Biocomput 13:15-24"
+    link: "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC4489236/"
+    path: '!!python/object/apply:pkg_resources.resource_filename [Datasnakes.Manager.config.references, "Local_Reliability_Measures_from_Sets_of_Co-optimal_Multiple_Sequence_Alignments.pdf"]'
+PAL2NAL:
+  reference_1:
+    citation: "Mikita Suyama, David Torrents, and Peer Bork (2006) PAL2NAL: Robust Conversion of Protein
+    Sequence Alignments Into the Corresponding Codon Alignments.  Nucleic Acids Res. 34, W609-W612."
+    link: "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC1538804/"
+    path: '!!python/object/apply:pkg_resources.resource_filename [Datasnakes.Manager.config.references, "PAL2NAL_ Robust_Conversion_of_Protein_Sequence_Alignments_into_the_Corresponding_Codon_Alignments.pdf]'
+IQTREE:
+  reference_1:
+    citation: "LT Nguyen, H.A. Schmidt, A. von Haeseler, and BQ Minh (2015) IQ-TREE: A
+    fast and effective stochastic algorithm for estimating maximum likelihood
+    phylogenies. Mol. Biol. Evol., 32, 268-274."
+    link: "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC4271533/"
+    path: '!!python/object/apply:pkg_resources.resource_filename [Datasnakes.Manager.config.references, "IQ-TREE_A_Fast_and_Effective_Stochastic_Algorithm_for_Estimating_Maximum-Likelihood_Phylogenies.pdf"]'
+CLUSTALO:
+  reference_1:
+    citation: "Sievers F, Wilm A, Dineen D, Gibson TJ, Karplus K, Li W, Lopez R, McWilliam H, Remmert M,
+    Söding J, Thompson JD, Higgins DG.  Fast, Scalable Generation of High-quality Protein Multiple Sequence
+    Alignments Using Clustal Omega.  Mol Syst Biol. 2011 Oct 11;7:539. doi: 10.1038/msb.2011.75."
+    link: "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC3261699/"
+    path: '!!python/object/apply:pkg_resources.resource_filename [Datasnakes.Manager.config.references, "Datasnakes/Manager/config/references/Fast_Scalable_Generation_of_High-Quality_Protein_Multiple_Sequence_Alignments_Using_Clustal_Omega.pdf"]'
+    

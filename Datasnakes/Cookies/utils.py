@@ -26,49 +26,36 @@ bytesize_options = {
 }
 
 
-def archive(db_path, arch_path, config_file, delete=False):
+def archive(database_path, archive_path, option, delete_flag=False):
     """
-    Using YAML configuration, archive one or more directories recursively.
+    Archive a database directory from a Cookie templated directory structure.
 
     This utility creates a YAML config dictionary that contains path-like
     objects for archiving.  The original data
     can be moved to the archive path or deleted all together.
 
-    :param db_path:  A path to a folder that consists of the desired data.
-    :param arch_path:  A path to an output folder for archived data.
-    :param config_file:  The "Archive_Config" file.
-    :param delete:  A flag for deleting the original data.  USE WITH CAUTION.
+    :param database_path:  A path to a folder that consists of the desired data.
+    :param archive_path:  A path to an output folder for archived data.
+    :param option:  An option for the archiving strategy.  Will be one of the keys in the archive_options.
+    :param delete_flag:  A flag for deleting the original data.  USE WITH CAUTION.
     :return:  Returns a list of paths to the *.tar.xz archive of the data and/or a path to the original data.
     """
+    archive_dict = {}
     archive_list = []
     archive_log = LogIt().default(logname="Archive", logfile=None)
-    with open(config_file, 'r') as yam:
-        db_config_dict = yaml.safe_load(yam)
 
-    archive_path = arch_path
-    archive_dict = {}
-
-    # Create a handle for creating separate archive files.
-    if db_config_dict["Full"]:
-        # For a full archive, individually archive each folder in the user
-        # database directory.
-        full_path = db_path / archive_options["Full"]
+    if option == "Full":
+        full_path = Path(database_path) / archive_options["Full"]
         for folder in os.listdir(str(full_path)):
-            archive_dict[folder] = db_path / Path(folder)
+            if os.path.isdir(folder):
+                archive_dict[folder] = database_path / Path(folder)
+    elif isinstance(option, list):
+        for opt in option:
+            other_path = Path(database_path) / archive_options[opt]
+            archive_dict[opt] = other_path
     else:
-        # For custom archive options, set Full to False and select which data
-        # you would like to archive.
-        for archive_key, archive_value in db_config_dict["Archive_Config"].items():
-            # The desired projects for archiving must be explicitly listed in
-            # the config file.
-            if archive_key == "Projects":
-                if archive_value["flag"]:
-                    for proj_key in archive_value.keys():
-                        if proj_key != "flag":
-                            if archive_value[proj_key]:
-                                archive_dict[proj_key] = db_path / Path(proj_key)
-            elif archive_value:
-                archive_dict[archive_key] = db_path / archive_options[archive_key]
+        other_path = Path(database_path) / archive_options[option]
+        archive_dict[option] = other_path
 
     for arch_name, data_path in archive_dict.items():
         root_dir = str(data_path.parent)
@@ -84,7 +71,7 @@ def archive(db_path, arch_path, config_file, delete=False):
         archive_log.warning("A %s archive file was created at %s." % (archive_filename, archive_size))
         # TODO-ROB:  Logging.  And log to a README.md file.
         # Delete the files if desired.
-        if delete:
+        if delete_flag:
             archive_log.critical("The original data will be deleted recursively at %s." % data_path)
             from Datasnakes import DatasnakesWarning
             DatasnakesWarning("You're about to delete your database (%s).  Are you sure??" % data_path)
