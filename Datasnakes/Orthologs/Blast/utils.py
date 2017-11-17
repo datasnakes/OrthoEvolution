@@ -14,9 +14,10 @@ from warnings import warn
 
 from Datasnakes.Tools.logit import LogIt
 from Datasnakes import DatasnakesDeprecationWarning
+from Datasnakes.Tools.otherutils import runcmd
 
 blastutils_log = LogIt().default(logname="blast-utils", logfile=None)
-gilist_log = LogIt().default(logname="gi-lists", logfile=None)
+seqidlist_log = LogIt().default(logname="gi-lists", logfile=None)
 
 _datefmt = '%I:%M:%S %p on %m-%d-%Y'
 _date = str(datetime.now().strftime(_datefmt))
@@ -32,8 +33,12 @@ def map_func(hit):
     return hit
 
 
-# XXX PAML no longer needs a format different than `Homo_sapiens`
 def paml_org_formatter(organisms):
+    """Format a list for PAML.
+
+    :param organisms:  Input a list of organisms
+    """
+    # XXX PAML no longer needs a format different than `Homo_sapiens`
     org_list = []
     for organism in organisms:
         genus, sep, species = organism.partition('_')
@@ -48,6 +53,7 @@ def gene_list_config(file, data_path, gene_list, taxon_dict, logger):
     It also helps recognize whether or not a BLAST was terminated in the middle
     of the workflow.  This removes the last line of the accession file if it
     is incomplete.
+
     :param file:  An accession file to analyze.
     :param data_path:  The path of the accession file.
     :param gene_list:  A gene list in the same order as the accession file.
@@ -98,8 +104,9 @@ def gene_list_config(file, data_path, gene_list, taxon_dict, logger):
         return None
 
 
-def gi_list_config(gi_list_path, taxonomy_ids, research_path=None, config=False):
-    """Create a gi list based on the refseq_rna database for each taxonomy id.
+def seqid_list_config(seqid_list_path, taxonomy_ids, research_path=None, config=False):
+    """Create a seqid list based on the refseq_rna database for each taxonomy id.
+
     It will also convert the gi list into a binary file which is more
     efficient to use with NCBI's Standalone Blast tools.
     """
@@ -112,31 +119,32 @@ def gi_list_config(gi_list_path, taxonomy_ids, research_path=None, config=False)
         pd.Series(taxonomy_ids).to_csv(str(taxid_file), index=False)
 
         # TODO Rework this
-        creategilists(gi_list_path=raw_data_path, taxonomy_ids=taxonomy_ids)
+        create_seqid_lists(seqid_list_path=raw_data_path, taxonomy_ids=taxonomy_ids)
 
     else:
-        creategilists(gi_list_path=gi_list_path, taxonomy_ids=taxonomy_ids)
+        create_seqid_lists(seqid_list_path=seqid_list_path, taxonomy_ids=taxonomy_ids)
 
 
-def creategilists(gi_list_path, taxonomy_ids):
-    """ This function uses the blastdbcmd tool to get gi lists.
+def create_seqid_lists(seqid_list_path, taxonomy_ids):
+    """Use the blastdbcmd tool to generate seqid lists.
+
     It then uses the blastdb_aliastool to turn the list into a binary file.
     The input (id) for the function is a taxonomy id.
     """
     warn("NCBI has deprecated using GI numbers.", DatasnakesDeprecationWarning)
-    if os.path.exists(str(gi_list_path)):
-        os.chdir(str(gi_list_path))
+    if os.path.exists(str(seqid_list_path)):
+        os.chdir(str(seqid_list_path))
         # Use the accession #'s and the blastdbcmd tool to generate gi lists
         # based on Organisms/Taxonomy id's.
         # TODO Create blastdbcmd commandline tools
         gi_time_secs = time.time()
         with ThreadPool(3) as gilist_pool:
-            gilist_pool.map(_taxid2gilist, taxonomy_ids)
+            gilist_pool.map(_taxid2seqidlist, taxonomy_ids)
             minutes = (time.time() - gi_time_secs) / 60
-        gilist_log.info("Took %s minutes to create gi binary files." % minutes)
+        seqidlist_log.info("Took %s minutes to create gi binary files." % minutes)
 
 
-def _taxid2gilist(taxonomy_id):
+def _taxid2seqidlist(taxonomy_id):
     """Use a taxonomy id in order to get the list of GI numbers."""
     warn("NCBI has deprecated using GI numbers.", DatasnakesDeprecationWarning)
     tid = str(taxonomy_id)
@@ -146,20 +154,20 @@ def _taxid2gilist(taxonomy_id):
         if platform.system() == 'Linux':
                 # TODO Convert to subprocess
                 # TODO Test this on Linux
-                os.system("blastdbcmd -db refseq_rna -entry all -outfmt '%g %T' | awk ' { if ($2 == " + tid + ") { print $1 } } ' > " + tid + "gi.txt")
-                gilist_log.info(tid + "gi.txt has been created.")
+                runcmd("blastdbcmd -db refseq_rna -entry all -outfmt '%g %a' | awk ' { if ($2 == " + tid + ") { print $1 } } ' > " + tid + "gi.txt")
+                seqidlist_log.info(tid + "gi.txt has been created.")
 
                 # Convert the .txt file to a binary file using the blastdb_aliastool
-                os.system("blastdb_aliastool -gi_file_in " + tid + "gi.txt -gi_file_out " + tid + "gi")
-                gilist_log.info(tid + "gi binary file has been created.")
+                runcmd("blastdb_aliastool -gi_file_in " + tid + "gi.txt -gi_file_out " + tid + "gi")
+                seqidlist_log.info(tid + "gi binary file has been created.")
 
                 # Remove the gi.text file
                 os.remove(tid + "gi.txt")
-                gilist_log.info(tid + "gi.text file has been deleted.")
+                seqidlist_log.info(tid + "gi.text file has been deleted.")
         else:
             raise NotImplementedError(platform.system() + 'is not supported')
     else:
-        gilist_log.info('%s already exists' % str(binary))
+        seqidlist_log.info('%s already exists' % str(binary))
 
 
 def my_gene_info(acc_path, blast_query='Homo_sapiens'):

@@ -9,6 +9,8 @@ Built upon Alex Couper's `bash` package. (https://github.com/alexcouper/bash)
 import platform
 import sys
 
+from Datasnakes.Tools import runcmd
+
 SUBPROCESS_HAS_TIMEOUT = True
 
 if "windows" in platform.system().lower():
@@ -32,12 +34,11 @@ else:
 class BaseBash(object):
     """Utilize bash commands within python."""
     # !!! Only for linux
-    def __init__(self, cmd):
+    def __init__(self):
         """Initialize the call as well as standard error and output."""
         # TODO-SDH Test if this is working.
         self.process = None
         self.stdout = None
-        self._bash(cmd)
 
     def _bash(self, cmd, env=None, stdout=PIPE, stderr=PIPE, timeout=None, _sync=True):
         self.process = Popen(cmd, shell=True, stdout=stdout, stdin=PIPE,
@@ -82,5 +83,9 @@ class BaseBash(object):
 
 class PyBasher(BaseBash):
     """Common bash commands."""
-    def __init__(self, cmd):
-        super().__init__(cmd)
+    def __init__(self):
+        super().__init__()
+
+    def cp(self):
+        cmd = ''
+        self._bash(cmd)

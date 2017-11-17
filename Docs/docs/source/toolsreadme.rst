@@ -1,16 +1,20 @@
 Tools Documentation
 ===================
 
-These tools were created by or modified our team to aid with the
-Orthologs package.
+The Tools module is a collection of often used classes or functions that
+either enhance our other modules and create reusable functions to be
+used in various modules.
 
-We've incorporated tools for bash with pybasher, qsub tools for use with
-pbs, a pandoc script for converting docx files to markdown formats,
-multiprocessing in multiprocess, and a ftp module that aids in
-downloading files from NCBI's ftp repository.
+We've incorporated tools for sge tools for use with pbs, a pandoc script
+and class for converting docx files to markdown formats, multiprocessing
+in multiprocess, and a ftp module that aids in downloading files from
+NCBI's ftp repository.
 
 Examples
 --------
+
+Take a look at the examples below to get an idea of how to incorporate
+these tools in your project and how we use these tools in our project.
 
 Download NCBI databases with our NCBI FTP Client
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

@@ -1,5 +1,5 @@
-LogIt
-=======
+# LogIt Documentation
+
 Use the LogIt class to make logging very simple. This short and sweet class
 wraps around [logzero](https://github.com/metachris/logzero) which allows color coded logging. We created our own
 default logger with a default dateformat, logformat, and logging level (default
@@ -12,10 +12,9 @@ is debug).
 Multiple loggers can exist for the same logfile and multiple loggers can be set
 up for one script which is shown in the example below.
 
-Example
----------
+## Example
 
-#### Use logging with ETE3PAML
+### Use logging with ETE3PAML
 
 ```python
 from Datasnakes.Tools import LogIt

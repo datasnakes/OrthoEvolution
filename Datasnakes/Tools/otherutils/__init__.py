@@ -1,6 +1,6 @@
 """Utilities & Management classes"""
 from .other_utils import (formatlist, splitlist, makedirectory, PackageVersion,
-                          FunctionRepeater, csvtolist)
+                          FunctionRepeater, csvtolist, runcmd)
 
 __all__ = ("formatlist",
            "splitlist",
@@ -8,4 +8,5 @@ __all__ = ("formatlist",
            "PackageVersion",
            "FunctionRepeater",
            "csvtolist",
+           "runcmd",
            )

@@ -1,5 +1,5 @@
 Datasnakes-Scripts
--------------------
+====================
 
 .. image:: https://travis-ci.org/datasnakes/Datasnakes-Scripts.svg?branch=master
     :target: https://travis-ci.org/datasnakes/Datasnakes-Scripts
@@ -16,7 +16,6 @@ Datasnakes-Scripts
 .. image:: https://readthedocs.org/projects/datasnakes-scripts/badge/?version=master
    :target: http://datasnakes-scripts.readthedocs.io/en/master/
 
-
 An **easy to use** and comprehensive python package which aids in the **analysis and
 visualization of comparative evolutionary genetics** related projects. More specifically, this
 project is focused on the **inference of orthologs** using NCBI's blast, various sequence alignment strategies,
@@ -32,21 +31,25 @@ View our `read the docs <http://datasnakes-scripts.readthedocs.io/en/master/>`__
 read `this related paper <https://www.frontiersin.org/articles/10.3389/fnhum.2014.00283/full>`__ to gain
 more insight into this project/python package.
 
+Overview
+--------------------
+
 Installation
-------------
+~~~~~~~~~~~~~~~~
+View the below methiods for installing this package.
 
 PyPi
-====================
+^^^^^^^^^^^^^^
 ``pip install Datasnakes-Scripts``
 
 GitHub
-===========
+^^^^^^^^^^^^^^
 1. Download the zip file and unzip it or ``git clone https://github.com/datasnakes/Datasnakes-Scripts.git``
 2. ``cd Datasnakes-Scripts``
 3. ``pip install .``
 
 Development Code
-==================
+^^^^^^^^^^^^^^
 **WARNING** : This code is actively under development and may not be reliable.  Please create an `issue <https://github.com/datasnakes/Datasnakes-Scripts/issues>`_ for questions about development.
 
 1. Download the zip file and unzip it or ``git clone -b dev-master https://github.com/datasnakes/Datasnakes-Scripts.git``
@@ -54,7 +57,7 @@ Development Code
 3. ``pip install .``
 
 Examples
----------
+~~~~~~~~~~~~~~~~
 Check out this `tutorial <https://github.com/datasnakes/Datasnakes-Scripts/wiki/Tutorial>`__ in our Wiki Docs.
 
 .. code:: python
@@ -62,11 +65,12 @@ Check out this `tutorial <https://github.com/datasnakes/Datasnakes-Scripts/wiki/
     import Datasnakes
 
 Tests
-------
+~~~~~~~~~~~~~~~~
 To run tests, type ``nosetests Tests/`` in the Datasnakes-Scripts directory.
 
 Contributors
-------------
+~~~~~~~~~~~~~~~~
+This package was created by the Datasnakes.
 
 -  Rob Gilmore \| Github: `@grabear <https://github.com/grabear>`__ \|
    `✉ <mailto:robgilmore127@gmail.com>`__
@@ -78,8 +82,8 @@ If you would like to contribute to this package, install the package in developm
 and check out our `contributing guidelines <https://github.com/datasnakes/Datasnakes-Scripts/blob/master/CONTRIBUTING.rst>`__.
 
 
-Citation
-----------
+Citations
+~~~~~~~~~~~~~~~~
 
 We're so thankful to have a resource such as
 `Biopython <http://biopython.org/wiki/Biopython>`__. They inspired this
@@ -91,7 +95,7 @@ Jun 1; 25(11) 1422-3 http://dx.doi.org/10.1093/bioinformatics/btp163
 pmid:19304878*
 
 License
----------
+~~~~~~~~~~~~~~~~
 `MIT <https://github.com/datasnakes/Datasnakes-Scripts/blob/master/LICENSE>`_
 
 Contents

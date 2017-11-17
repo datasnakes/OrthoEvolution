@@ -1,5 +1,5 @@
-parallel
-========
+Parallel Documentation
+======================
 
 The parellel module is home to the ``Multiprocess`` class which uses
 python's native multiprocessing module. Find more information
@@ -15,13 +15,15 @@ useful.
 This is an optional class in our pipeline, but if you're using AWS or
 Google's supercomputing, then you may find it useful unless you're
 interested in or using clustering or SGE (Sun Grid Engine). We have a
-sge module for that.
+`sge
+module <https://github.com/datasnakes/Datasnakes-Scripts/tree/master/Datasnakes/Tools/sge>`__
+for that.
 
 Examples
 --------
 
-Random Example
-~~~~~~~~~~~~~~
+A Random Example
+~~~~~~~~~~~~~~~~
 
 .. code:: python
 

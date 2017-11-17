@@ -14,13 +14,8 @@ from Datasnakes.Orthologs.Blast.comparative_genetics import ComparativeGenetics
 from Datasnakes.Orthologs.Blast.utils import gene_list_config, map_func
 
 
-# TODO-ROB: Find packages for script timing and analysis
-# TODO-ROB:  Rework the save_data parameter.
-# TODO-ROB:  Rework the query organism stuff.
-
-class OrthoBlastN(ComparativeGenetics):
-    """Combines Project Management features with NCBI's Blast+."""
-    def __init__(self, project, template=None, save_data=True, **kwargs):
+class BaseBlastN(ComparativeGenetics):
+    def __init__(self, project, blast_method, template=None, save_data=True, **kwargs):
         """This class inherits from the CompGenFiles class.
 
         This class utilizes it's parent classes to search a standalone
@@ -30,6 +25,7 @@ class OrthoBlastN(ComparativeGenetics):
         downstream analysis.
 
         :param project:  The project name.
+        :param blast_method:  Method used for blasting. (1, 2, None)
         :param template:  The accession file template.
         :param save_data:  A flag for saving the post_blast data to an excel file.
         :param kwargs:
@@ -64,11 +60,42 @@ class OrthoBlastN(ComparativeGenetics):
         self.complete_time_file = self.project + '_TIME.csv'
         self.complete_time_file_path = self.data / Path(self.complete_time_file)
 
+
+        self.blastn_parameters = self.blast_method_selection(method=blast_method)
+
+    def blast_method_selection(self, method):
+        """Select a method for running blastn.
+
+        :param method: a blast method - gi or wm
+        """
+        if method == '1':
+            # Accessions/Seqids List
+            blastn_parameters = {'query': '', 'db': 'refseq_rna',
+                                 'strand': 'plus', 'evalue': 0.01, 'outfmt': 5,
+                                 'seqids': '', 'max_target_seqs': 10,
+                                 'task': 'blastn'}
+            return blastn_parameters
+        elif method == '2':
+            # Windowmaskerdb
+            blastn_parameters = {'query': '', 'db': 'refseq_rna',
+                                 'strand': 'plus', 'evalue': 0.01,
+                                 'outfmt': 5, 'window_masker_db': '',
+                                 'max_target_seqs': 10, 'task': 'blastn'}
+            return blastn_parameters
+        elif method is None:
+            blastn_parameters = {'query': '', 'db': 'refseq_rna',
+                                 'strand': 'plus', 'evalue': 0.01,
+                                 'outfmt': 5, 'max_target_seqs': 10,
+                                 'task': 'blastn'}
+            return blastn_parameters
+        else:
+            raise ValueError('%s is not a blast method.' % method)
+
     def blast_config(self, query_accessions, query_organism, auto_start=False):
         """This method configures everything for our BLAST workflow.
 
-        It configures the accession file, which works with
-        interrupted Blasts.  It configures a gene_list for blasting the right genes.
+        It configures the accession file, which works with interrupted Blasts.
+        It configures a gene_list for blasting the right genes.
 
         :param query_accessions:  A list of query accession numbers.  Each gene needs one from the same organism.
         :param query_organism:  The name of the query organism for post configuration.
@@ -211,7 +238,9 @@ class OrthoBlastN(ComparativeGenetics):
         """
         if pre_configured is False:
             query = self.df[query_organism].tolist()
-            self.blast_config(query_accessions=query, query_organism=query_organism, auto_start=True)
+            self.blast_config(query_accessions=query,
+                              query_organism=query_organism,
+                              auto_start=True)
             genes = self.current_gene_list  # Gene list populated by blast_config.
         elif pre_configured is True:
             genes = genes
@@ -265,19 +294,12 @@ class OrthoBlastN(ComparativeGenetics):
                                 # XXX Window masking will be implemented soon
                                 # wmaskerpath = os.path.join(str(taxon_id), "wmasker.obinary")
 
-                                # Configure your blastn parameters as a dictionary
-                                blastn_params = {'query': query_seq_path,
-                                                'db': 'refseq_rna',
-                                                'strand': 'plus',
-                                                'evalue': 0.01,
-                                                'outfmt': 5,
-                                                # XXX Window masking will be implemented soon
-                                                # 'window_masker_db': wmaskerpath,
-                                                'max_target_seqs': 10,
-                                                'task': 'blastn'}
+                                # Update your blastn parameters
+                                update_dict = {'query': query_seq_path}
+                                self.blastn_parameters.update(update_dict)
 
                                 # Use Biopython's NCBIBlastnCommandline tool
-                                result_handle = NcbiblastnCommandline(**blastn_params)
+                                result_handle = NcbiblastnCommandline(**self.blastn_parameters)
                                 # Capture the standard output
                                 stdout_str, _ = result_handle()
 

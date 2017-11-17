@@ -5,9 +5,10 @@ from importlib import import_module
 import os
 from threading import Timer
 from subprocess import run, CalledProcessError, PIPE
-
 import pandas as pd
 from pathlib import Path
+
+from Datasnakes.Tools import LogIt
 
 
 def splitlist(listname, basefilename, n):
@@ -96,15 +97,23 @@ def csvtolist(csvfile, column_header='Organism'):
     return listfromcolumn
 
 
-def runcmd(cmd):
-    with contextlib.suppress(CalledProcessError):
-        cmd = [cmd]  # this is the command
+def runcmd(command_string):
+    """Run a command string.
+
+    :param command string:
+    """
+    try:
+        cmd = [command_string]  # this is the command
         # Shell MUST be True
-        cmd_status = run(cmd, stdout=PIPE, stderr=PIPE, shell=True)
-
+        cmd_status = run(cmd, stdout=PIPE, stderr=PIPE, shell=True, check=True)
+    except CalledProcessError as err:
+        errmsg = err.stderr.decode('utf-8')
+        return errmsg
+    else:
         if cmd_status.returncode == 0:  # Command was successful.
-            print('Command successful.\n')
-            # TODO add a check to for job errors or check for error file.
-
+            # The cmd_status has stdout that must be decoded.
+            cmd_stdout = cmd_status.stdout.decode('utf-8')
+            return cmd_stdout
         else:  # Unsuccessful. Stdout will be '1'
-            print("Command unsuccessful.")
+            failmsg = '%s failed.' % command_string
+            return failmsg
