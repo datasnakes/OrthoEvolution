@@ -5,13 +5,13 @@ from pathlib import Path
 import pkg_resources
 import yaml
 
-from Datasnakes.Manager.management import ProjectManagement
-from Datasnakes.Manager import config
-from Datasnakes.Manager.database_management import BaseDatabaseManagement
-from Datasnakes.Orthologs.Align import MultipleSequenceAlignment as MSA
-from Datasnakes.Orthologs.Blast.standard_blastn import StandardBlastN
-from Datasnakes.Orthologs.Blast.comparative_genetics_objects import CompGenObjects
-from Datasnakes.Orthologs.GenBank.genbank import GenBank
+from OrthoEvol.Manager.management import ProjectManagement
+from OrthoEvol.Manager import config
+from OrthoEvol.Manager.database_management import BaseDatabaseManagement
+from OrthoEvol.Orthologs.Align import MultipleSequenceAlignment as MSA
+from OrthoEvol.Orthologs.Blast.orthologs_blastn import OrthoBlastN
+from OrthoEvol.Orthologs.Blast.comparative_genetics import BaseComparativeGenetics
+from OrthoEvol.Orthologs.GenBank.genbank import GenBank
 
 
 #import configparser
@@ -115,7 +115,7 @@ class DataMana(object):
         pass
 
     def blast(self, proj_mana, blast_config):
-        self.bl = StandardBlastN(proj_mana=proj_mana, **self.Management_config, **blast_config)
+        self.bl = OrthoBlastN(proj_mana=proj_mana, **self.Management_config, **blast_config)
         self.bl.blast_config(self.bl.blast_human, 'Homo_sapiens', auto_start=True)
         # TODO-Create directories for the blast data
         # Do the blasting here using CompGenBLASTn
@@ -126,11 +126,11 @@ class DataMana(object):
         else:
             self.gb = GenBank(blast=blast, **self.Management_config, **self.GenBank_config)
         if blast is not None:
-            if issubclass(type(blast), StandardBlastN):
+            if issubclass(type(blast), OrthoBlastN):
                 self.gb.create_post_blast_gbk_records(blast.org_list, blast.gene_dict)
         else:
             print(proj_mana.__dict__)
-            cga = CompGenObjects(proj_mana=proj_mana, **self.CompGenAnalysis_config)
+            cga = BaseComparativeGenetics(proj_mana=proj_mana, **self.CompGenAnalysis_config)
 
             # Parse the tier_frame_dict to get the tier
             for G_KEY in cga.tier_frame_dict.keys():
