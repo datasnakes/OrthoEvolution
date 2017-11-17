@@ -30,7 +30,8 @@ def archive(database_path, archive_path, option, delete_flag=False):
     """
     Archive a database directory from a Cookie templated directory structure.
 
-    This utility creates a YAML config dictionary that contains path-like objects for archiving.  The original data
+    This utility creates a YAML config dictionary that contains path-like
+    objects for archiving.  The original data
     can be moved to the archive path or deleted all together.
 
     :param database_path:  A path to a folder that consists of the desired data.

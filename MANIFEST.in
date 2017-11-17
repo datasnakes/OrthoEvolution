@@ -21,8 +21,7 @@ recursive-include Datasnakes/Manager/config *
 include Docs/docs/source/*.rst
 include Docs/docs/source/Makefile
 include Docs/docs/source/conf.py
-include Docs/convertdocs.py
-include Docs/archive/*
+include Docs/createdocs.py
 include Docs/README.md
 
 # Include tests

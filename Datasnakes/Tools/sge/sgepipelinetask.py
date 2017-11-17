@@ -148,8 +148,7 @@ def _build_qsub_command(cmd, job_name, outfile, errfile, select):
     """Submit shell command to SGE queue via `qsub`"""
     # TODO make mem available
     qsub_template = """echo {cmd} | qsub -o {outfile} -e {errfile} -V -r y -l select={select}:ncpus=1:mem=3 -N {job_name}"""
-    return qsub_template.format(cmd=cmd, job_name=job_name, outfile=outfile,
-                                errfile=errfile, select=select)
+    return qsub_template.format(cmd=cmd, job_name=job_name, outfile=outfile, errfile=errfile, select=select)
 
 # TODO Change ncpu parameter description
 class SGEPipelineTask(luigi.Task):
@@ -159,7 +158,7 @@ class SGEPipelineTask(luigi.Task):
 
     Parameters:
 
-    - n_cpu: Number of CPUs (or "slots") to allocate for the Task. This
+    - select: Number of CPUs (or "slots") to allocate for the Task. This
           value is passed as ``qsub -pe {pe} {n_cpu}``
     - parallel_env: SGE parallel environment name. The default is "orte",
           the parallel environment installed with MIT StarCluster. If you
@@ -168,8 +167,7 @@ class SGEPipelineTask(luigi.Task):
           to the qsub command above.
     - shared_tmp_dir: Shared drive accessible from all nodes in the cluster.
           Task classes and dependencies are pickled to a temporary folder on
-          this drive. The default is ``/home``, the NFS share location setup
-          by StarCluster
+          this drive. The default is ``/home``
     - job_name_format: String that can be passed in to customize the job name
         string passed to qsub; e.g. "Task123_{task_family}_{n_cpu}...".
     - job_name: Exact job name to pass to qsub.
@@ -180,19 +178,14 @@ class SGEPipelineTask(luigi.Task):
         useful to reduce I/O requirements when the luigi directory is accessible
         from cluster nodes already.
     """
-
     select = luigi.IntParameter(default=3, significant=False)
     shared_tmp_dir = luigi.Parameter(default='/home', significant=False)
     parallel_env = luigi.Parameter(default='orte', significant=False)
     job_name_format = luigi.Parameter(
         significant=False, default=None, description="A string that can be "
         "formatted with class variables to name the job with qsub.")
-    job_name = luigi.Parameter(
-        significant=False, default=None,
-        description="Explicit job name given via qsub.")
-    run_locally = luigi.BoolParameter(
-        significant=False,
-        description="run locally instead of on the cluster")
+    job_name = luigi.Parameter(significant=False, default=None, description="Explicit job name given via qsub.")
+    run_locally = luigi.BoolParameter(significant=False, description="run locally instead of on the cluster")
     poll_time = luigi.IntParameter(
         significant=False, default=POLL_TIME,
         description="specify the wait time to poll qstat for the job status")
@@ -224,7 +217,8 @@ class SGEPipelineTask(luigi.Task):
             errors = f.readlines()
         if errors == []:
             return errors
-        if errors[0].strip() == 'stdin: is not a tty':  # SGE complains when we submit through a pipe
+        # SGE complains when we submit through a pipe
+        if errors[0].strip() == 'stdin: is not a tty':
             errors.pop(0)
         return errors
 

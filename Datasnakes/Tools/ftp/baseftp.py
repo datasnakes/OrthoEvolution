@@ -3,7 +3,7 @@ from ftplib import FTP, error_perm
 import os
 import contextlib
 
-from Datasnakes.Tools.utils import FunctionRepeater
+from Datasnakes.Tools.otherutils import FunctionRepeater
 
 
 class BaseFTPClient(object):

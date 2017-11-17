@@ -1,0 +1,46 @@
+SGE Documentation
+=================
+
+Collection of tools for using PBS, a job scheduler for high-performance
+computing environments on SGE. The command is usually ``qsub <options>``
+on most systems.
+
+Usage & Examples
+----------------
+
+The main class under sge is ``SGEJob``, which provides functionality to
+use the job sceduling system on a high performance computing (HPC)
+cluster.
+
+The ``Qstat`` class is also available for parsing the output of the
+``qstat`` command.
+
+The class currently provides a template, ``temp.pbs``, file to be
+modified and used when submitting a job as well as default job
+attributes.
+
+Submit 1 job
+^^^^^^^^^^^^
+
+.. code:: python
+
+Submit multiple jobs
+^^^^^^^^^^^^^^^^^^^^
+
+.. code:: python
+
+Get Job Info
+~~~~~~~~~~~~
+
+.. code:: python
+
+:exclamation: Software Dependencies
+-----------------------------------
+
+Ensure that you have at least pbs version ``14.1.0``
+
+Thanks
+------
+
+Thanks to [@jfeala](https://github.com/jfeala) for his work on Luigi's
+SGEJobTask.
