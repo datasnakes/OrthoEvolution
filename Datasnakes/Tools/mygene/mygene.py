@@ -1,42 +1,41 @@
 """Get gene information from the mygene api at http://mygene.info/ """
-import pkg_resources
-from Datasnakes.Manager import config
 import mygene
 import pandas as pd
+
+from Datasnakes.Tools import LogIt
 # TODO add ability for custom fields
 # TODO add ability for custom species.
-# TODO add a template csv file for users using pkg_resources.
 
 
 class MyGene(object):
     """Import a csv of refseq accessions & get gene information from mygene."""
 
-    def __init__(self, infile, outfile, species='human',
-                 fields='symbol,name,entrezgene,summary'):
+    def __init__(self, infile, outfile):
         """Initialize my gene handle and refseq/accessions list.
 
         Get the basic gene information. It's best to use a csv file and title
         the row of the accessions list `Accessions`.
         """
-#        mygene_temp = pkg_resources.resource_filename(config.__name__,
-#                                                      'mygenetemp.csv')
         self.infile = infile
         self.outfile = outfile
+
+        self.mygene_log = LogIt().default('mygene', None)
 
         self.mg = mygene.MyGeneInfo()  # Set up mygene handle
         self.accessions_list = self._import_accfile()  # Create accessions list
 
-        self.fields = fields  # Default fields
-        self.species = species  # Species to use.
+        self.fields = 'symbol,name,entrezgene,summary'  # Default fields
+        self.species = 'human'  # Species to use.
 
     def _import_accfile(self):
-        """Import the accession file and turn it into a list."""
+        """Import the accession file and make Homo_Sapiens column a list."""
         accfile = pd.read_csv(self.infile)
-        acclist = list([accession.upper() for accession in accfile.Accessions])
+        acclist = list([accession.upper() for accession in accfile.Homo_Sapiens])
         return acclist
 
     def query_mygene(self):
         """Query mygene for gene information."""
+        self.mygene_log.info('You are querying: %s' % self.accessions_list)
         basic_info = self.mg.querymany(self.accessions_list, scopes='refseq',
                                        fields=self.fields,
                                        species=self.species, returnall=True,
@@ -82,5 +81,4 @@ class MyGene(object):
 
         # Save the merged dataframes to a file
         alldata.to_csv(self.outfile, index=False)
-        print('%s has been created.' % str(self.outfile))
-
+        self.mygene_log.info('%s has been created.' % str(self.outfile))

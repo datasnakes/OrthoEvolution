@@ -1,9 +1,10 @@
-Manager
-=========
+Manager Documentation
+======================
 The classes and functions in this module have been designed to help manage
-existing and new projects and pipelines using the Cookies module and the different utilities found in the Tools module.
+existing and new projects using the Cookies module as well as
+the different utilities found in the Tools module.
 
-### Management, RepoManagement, UserManagement, WebManagement, and Project Management classes
+## Why a manager?
 
 This module is intended to mesh with a Flask user interface.
 * Whenever a new website is made the RepoManagement and WebManagement classes
@@ -18,26 +19,25 @@ webpage.  The full repository can be used for higher level organization,
 or standalone projects can be made using the ProjectManagements
 _basic_project_ flag.
 
-### DataManagement class
+The `DataManagement` class helps to tie everything together into a pipeline.
 
-This module ties everything together into a pipeline.
 
-#### **Cookies Use**
+## Examples
 
-#### **Manager Use**
-
-#### **Orthologs Use**
-
-#### **Tools Use**
-
-Examples
---------
-In our [Examples module](https://github.com/datasnakes/Datasnakes-Scripts/tree/cookie_jar_patch/Examples),
-you can see a perfect example of using Manager in **example_manager.py**.
-
+**Beware that this is under heavy development.**
+###  Utilizing DataManagement to run a pipeline
 ```python
 import os
 from Datasnakes.Manager import DataManagement
 
 DataManagement(pipeline="Ortho_CDS_1", start=True, new=True)
 ```
+
+### Utilizing DatabaseManagement to download databases
+```python
+```
+
+
+## Notes
+Please view our [BioSQL documentation](https://github.com/datasnakes/Datasnakes-Scripts/tree/master/Datasnakes/Manager/BioSQL/README.md) and view some of the
+static/config related [files](https://github.com/datasnakes/Datasnakes-Scripts/tree/master/Datasnakes/Manager/config/).

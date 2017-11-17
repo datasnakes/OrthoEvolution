@@ -1,7 +1,7 @@
 from subprocess import run, CalledProcessError, PIPE
 import os
-from pkg_resources import resource_filename
 from time import sleep
+from pkg_resources import resource_filename
 
 from Datasnakes.Tools.logit import LogIt
 from Datasnakes.Tools.sge import basejobids, writecodefile, import_temp, file2str
@@ -9,10 +9,12 @@ from Datasnakes.Tools.sge.sgeconfig import __DEFAULT__
 from Datasnakes.Manager.config import templates
 from Datasnakes.Tools.sge import Qstat
 
+
 class BaseSGEJob(object):
     """Base class for simple jobs."""
     def __init__(self, base_jobname):
         """Initialize job attributes."""
+        self.base_jobname = base_jobname
         self.default_job_attributes = __DEFAULT__
         self.file2str = file2str
         self.sgejob_log = LogIt().default(logname="SGE JOB", logfile=None)
@@ -35,7 +37,7 @@ class BaseSGEJob(object):
         """Clean up job scripts."""
         self.sgejob_log.warning('Your job will now be cleaned up.')
         os.remove(jobname + '.pbs')
-        self.sgejob_log.warning('%s.pbs has been deleted.' % jobname)
+        self.sgejob_log.warning('%s.pbs has been deleted.', jobname)
         os.remove(jobname + '.py')
         self.sgejob_log.warning('%s.py has been deleted.' % jobname)
 
@@ -59,17 +61,40 @@ class BaseSGEJob(object):
         else:
             self.wait_on_job_completion(job_id)
 
+    def submitjob(self, cleanup):
+        """Submit a job using qsub."""
+        try:
+            cmd = ['qsub ' + self.jobname + '.pbs']  # this is the command
+            # Shell MUST be True
+            cmd_status = run(cmd, stdout=PIPE, stderr=PIPE, shell=True, check=True)
+        except CalledProcessError as err:
+            self.sgejob_log.error(err.stderr.decode('utf-8'))
+            if cleanup:
+                self._cleanup(self.jobname)
+        else:
+            if cmd_status.returncode == 0:  # Command was successful.
+                # The cmd_status has stdout that must be decoded.
+                # When a qsub job is submitted, the stdout is the job id.
+                submitted_jobid = cmd_status.stdout.decode('utf-8')
+                self.sgejob_log.info(self.jobname + ' was submitted.')
+                self.sgejob_log.info('Your job id is: %s' % submitted_jobid)
+                self.wait_on_job_completion(submitted_jobid)
+                self._cleanup(self.jobname)
+
+            else:  # Unsuccessful. Stdout will be '1'
+                self.sgejob_log.error('PBS job not submitted.')
 
 
 class SGEJob(BaseSGEJob):
-    """Create a qsub/pbs job & script for the job to execute."""
+    """Create a qsub/pbs job & script to submit python code."""
     def __init__(self, email_address, base_jobname=None):
         super().__init__(base_jobname=base_jobname)
         self.email = email_address
         self.attributes = self.default_job_attributes
         self.jobname = self.default_job_attributes['job_name']
         if base_jobname is not None:
-            _, self.jobname = self._configure(base_jobname=base_jobname, length=5)
+            _, self.jobname = self._configure(base_jobname=base_jobname,
+                                              length=5)
             self.attributes = self._update_default_attributes()
 
     def _update_default_attributes(self):
@@ -82,12 +107,12 @@ class SGEJob(BaseSGEJob):
                           'script': self.jobname,
                           'log_name': self.jobname + '.log',
                           'cmd': 'python3 ' + pyfile_path,
-                            }
+                          }
         self.default_job_attributes.update(new_attributes)
 
         return self.default_job_attributes
 
-    def submit(self, code, cleanup=True, default=True):
+    def submit_pycode(self, code, cleanup=True, default=True):
         """Create and submit a qsub job.
 
         Submit python code."""
@@ -104,7 +129,7 @@ class SGEJob(BaseSGEJob):
             self.sgejob_log.info('You are running a job with default attributes.')
             writecodefile(filename=self.jobname, code=code_str, language='python')
             pyfilename = self.jobname + '.py'
-            self.sgejob_log.info('%s python file has been created.' % pyfilename)
+            self.sgejob_log.info('%s has been created.' % pyfilename)
 
             # Create the pbs script from the template or dict
             pbstemp = import_temp(self.temp_pbs)
@@ -114,27 +139,22 @@ class SGEJob(BaseSGEJob):
                 pbsfile.write(pbstemp.substitute(self.attributes))
                 pbsfile.close()
             self.sgejob_log.info('%s has been created.' % pbsfilename)
+
+            # Submit the job using qsub
+            self.submitjob(cleanup=cleanup)
         else:
             msg = 'Custom SGEJob creation is not yet implemented.'
             raise NotImplementedError(msg)
             # TODO Add custom job creation
 
         # Submit the job using qsub
-        try:
-            cmd = ['qsub ' + self.jobname + '.pbs']  # this is the command
-            # Shell MUST be True
-            cmd_status = run(cmd, stdout=PIPE, stderr=PIPE, shell=True, check=True)
-        except CalledProcessError as err:
-            self.sgejob_log.error(err.stderr.decode('utf-8'))
-            if cleanup:
-                self._cleanup(self.jobname)
-        else:
-            if cmd_status.returncode == 0:  # Command was successful.
-                submitted_jobid = cmd_status.stdout.decode('utf-8')
-                self.sgejob_log.info(self.jobname + ' was submitted.' )
-                self.sgejob_log.info('Your job id is: %s' % submitted_jobid)
-                self.wait_on_job_completion(submitted_jobid)
-                self._cleanup(self.jobname)
+        self.submitjob(cleanup=cleanup)
 
-            else:  # Unsuccessful. Stdout will be '1'
-                self.sgejob_log.error('PBS job not submitted.')
+
+class MultiSGEJobs(SGEJob):
+    """Create multiple qsub/pbs jobs."""
+    def __init__(self, email_address):
+        super().__init__(email_address=email_address, base_jobname='multi')
+        _, self.jobname = self._configure(base_jobname=self.base_jobname,
+                                          length=5)
+        self.attributes = self._update_default_attributes()

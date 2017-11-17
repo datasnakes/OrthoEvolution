@@ -20,11 +20,14 @@ from Datasnakes.Tools import Slackify
 
 slack = Slackify(slackconfig='path/to/slackconfig.cfg')
 ```
-
+Your config file should look as such:
+```python
+[APIKEYS]
+slack = apikeystring
+```
 #### Message a channel and link to a user with `<@username>` in your message.
 
 ```python
-
 message_to_channel = 'Hey, <@username>. This is an update for the current script.'
 
 slack.send_msg(channel='channelname', message=message_to_channel)

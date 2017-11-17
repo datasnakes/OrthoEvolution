@@ -12,8 +12,8 @@ PAML in particular is the best software for helping us to understand the potenti
 significant differences in genes across different mammalian species. From there, we can
 decide which genes we will further study in cell culture projects or assays.
 
-Usage
------
+Examples
+---------
 
 In the beginning stages of our project, we tested various phylogenetic programs
 to see which worked well for us.
@@ -21,10 +21,6 @@ to see which worked well for us.
 In this module, we include classes and ways to use PAML, Phylip, PhyML, IQTREE, and
 Biopython's Bio.Phylo class.
 
-
-#### Code Example
-
-This is a quick example to use this class.
 
 ``` python
 from Datasnakes.Orthologs import Phylogenetics

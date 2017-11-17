@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 #
-# Datasnakes-Orthologs documentation build configuration file, created by
+# Datasnakes-Scripts documentation build configuration file, created by
 # sphinx-quickstart on Wed May 24 14:34:01 2017.
 #
 # This file is execfile()d with the current directory set to its
@@ -54,7 +54,7 @@ source_suffix = '.rst'
 master_doc = 'index'
 
 # General information about the project.
-project = 'Datasnakes-Orthologs'
+project = 'Datasnakes-Scripts'
 copyright = '2017, Robert Gilmore and Shaurita Hutchins'
 author = 'Robert Gilmore and Shaurita Hutchins'
 
@@ -121,7 +121,7 @@ html_static_path = ['_static']
 # -- Options for HTMLHelp output ------------------------------------------
 
 # Output file base name for HTML help builder.
-htmlhelp_basename = 'Datasnakes-Orthologs'
+htmlhelp_basename = 'Datasnakes-Scripts'
 
 
 # -- Options for LaTeX output ---------------------------------------------
@@ -148,7 +148,7 @@ latex_elements = {
 # (source start file, target name, title,
 #  author, documentclass [howto, manual, or own class]).
 latex_documents = [
-    (master_doc, 'Datasnakes-Orthologs.tex', 'Datasnakes-Orthologs Documentation',
+    (master_doc, 'Datasnakes-Scripts.tex', 'Datasnakes-Scripts Documentation',
      'Robert Gilmore and Shaurita Hutchins', 'manual'),
 ]
 
@@ -158,7 +158,7 @@ latex_documents = [
 # One entry per manual page. List of tuples
 # (source start file, name, description, authors, manual section).
 man_pages = [
-    (master_doc, 'datasnakes-orthologs', 'Datasnakes-Orthologs Documentation',
+    (master_doc, 'datasnakes-scripts', 'Datasnakes-Scripts Documentation',
      [author], 1)
 ]
 
@@ -169,8 +169,8 @@ man_pages = [
 # (source start file, target name, title, author,
 #  dir menu entry, description, category)
 texinfo_documents = [
-    (master_doc, 'Datasnakes-Orthologs', 'Datasnakes-Orthologs Documentation',
-     author, 'Datasnakes-Orthologs', 'One line description of project.',
+    (master_doc, 'Datasnakes-Scripts', 'Datasnakes-Scripts Documentation',
+     author, 'Datasnakes-Scripts', 'One line description of project.',
      'Miscellaneous'),
 ]
 
@@ -197,6 +197,10 @@ epub_copyright = copyright
 epub_exclude_files = ['search.html']
 
 
-
 # Example configuration for intersphinx: refer to the Python standard library.
 intersphinx_mapping = {'https://docs.python.org/': None}
+
+
+rst_prolog = """
+.. |exclamation| replace:: ❗
+"""

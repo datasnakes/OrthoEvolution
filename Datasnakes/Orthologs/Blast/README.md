@@ -1,11 +1,10 @@
-Blast Documentation
-=====================
+# Blast Documentation
+
 This module uses [NCBI's standalone blast](https://blast.ncbi.nlm.nih.gov/Blast.cgi?PAGE_TYPE=BlastDocs&DOC_TYPE=Download)
 to generate blastn results.  The results are parsed for the best hit,
 which are used to get accession numbers.
 
-What is BLAST?
-----------------
+## What is BLAST?
 Per NCBI, the [Basic Local Alignment Search Tool (BLAST)](https://blast.ncbi.nlm.nih.gov/Blast.cgi) finds regions of local
 similarity between sequences. The program compares nucleotide or protein
 sequences to sequence databases and calculates the statistical significance of
@@ -21,20 +20,31 @@ other organisms from bacteria to chimpanzees — are compared.
 Using this package, we compared these [genes](http://www.guidetopharmacology.org/targets.jsp)
 of interest across a group of [species](ftp://ftp.ncbi.nlm.nih.gov/genomes/refseq/vertebrate_mammalian/).
 
-How do we configure and run blast?
------------------------------------
+### How do we configure and run blast?
 Running blast is the most complex aspect of this package, but we've found a way
-to simplify the automation of blasting.
+to simplify the **automation of blasting** while also **limiting blast searches by organism**.
 
 Before you use this function, you need `NCBI Blast+` must be installed and in your path.
 Download the latest standalone blast executables from
 [here](ftp://ftp.ncbi.nlm.nih.gov/blast/executables/blast+/LATEST/).
 
+
+### The story of 2 blast methods - Seqids vs Windowmasking
+
+#### Seqids
+
+
+
+#### Windowmasking
 We have perfected the method of using a windowmasker file for each taxonomy id
 of the organisms that we are analyzing. The blastn executable can filter a query
 sequence using the windowmasker data files. This option can be used to mask
 interspersed repeats that may lead to spurious matches. The windowmasker data
 files should be downloaded from the NCBI FTP site.
+
+For information on how to set up a window masker database,
+read our [setup tutorial](window_masker_setup.md).
+
 
 On a command line, the windowmasker function would look as such:
 ```bash
@@ -88,21 +98,20 @@ format of "_Genus\_species_".  The query organism also has to have
 accession numbers for each gene.  It is therefore highly important to pick a
 well annotated species for accurate analysis.
 
-Examples
-----------
+## Examples
 
 The main class to use is `OrthoBlastN` in order to run blast. In order to
 run `OrthoBlastN` without using our database management features,
 `BLASTDB` and `WINDOW_MASKER_PATH` paths must be set.
 
-##### Performing Blast & Post-Blast Analysis
+### Performing Blast & Post-Blast Analysis
 
 ``` python
 from Datasnakes.Orthologs.Blast import OrthoBlastN
 import os
 
-# This is more pythonic with YAML loading
-blast_config = {
+# Create a blast configuration dictionary
+blast_cfg = {
               "taxon_file": None,
               "go_list": None,
               "post_blast": True,
@@ -118,14 +127,11 @@ myblast = OrthoBlastN(proj_mana=None, project="blast-test", project_path=path, *
 myblast.blast_config(myblast.blast_human, 'Homo_sapiens', auto_start=True)
 
 ```
-##### Making the API available with Accession data
+### Making the API available with Accession data
 _TODO: This is unfinished._
 
 ``` python
 from Datasnakes.Orthologs.CompGenetics import CompGenAnalysis
 
 ```
-
-:exclamation: Notes
--------------------
 
