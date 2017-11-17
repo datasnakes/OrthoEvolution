@@ -4,7 +4,7 @@ from os.path import join
 
 try:
     import pypandoc
-except OSError:
+except Exception:
     from pypandoc.pandoc_download import download_pandoc
     download_pandoc()
 
