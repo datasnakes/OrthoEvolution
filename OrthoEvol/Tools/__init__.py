@@ -11,4 +11,4 @@ from OrthoEvol.Tools.sge import (BaseSGEJob, SGEJob, Qstat, SGEPipelineTask,
                                   file2str)
 from OrthoEvol.Tools.zipper import ZipUtils
 from OrthoEvol.Tools.send2server import S2S
-from OrthoEvol.Tools.pandoc import PandocConverter
+# from OrthoEvol.Tools.pandoc import PandocConverter
