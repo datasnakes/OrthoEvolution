@@ -3,7 +3,7 @@
 import unittest
 import os
 
-from Datasnakes.Tools import LogIt, Multiprocess, NcbiFTPClient
+from OrthoEvol.Tools import LogIt, Multiprocess, NcbiFTPClient
 
 
 class TestTools(unittest.TestCase):

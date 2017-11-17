@@ -20,7 +20,7 @@ sys.stderr = open('err.txt', 'w')
 
 # Set the home path of the setup script/package
 home = path.abspath(path.dirname(__file__))
-name = 'Datasnakes'
+name = 'OrthoEvol'
 
 
 def readme():
@@ -69,7 +69,7 @@ setup(
 )
 
 # Set up the permissions for the BioSQL Perl scripts
-scripts = import_module("Datasnakes.Manager.BioSQL.biosql_repo.scripts")
+scripts = import_module("OrthoEvol.Manager.BioSQL.biosql_repo.scripts")
 biosql_scripts = pkg_resources.resource_filename(scripts.__name__, "")
 for file in os.listdir(biosql_scripts):
     if '.pl' in file:

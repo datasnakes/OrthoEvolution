@@ -2,7 +2,7 @@
 import unittest
 from shutil import rmtree
 
-from Datasnakes.Manager.management import ProjectManagement
+from OrthoEvol.Manager.management import ProjectManagement
 
 
 class TestManager(unittest.TestCase):
