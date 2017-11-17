@@ -1,5 +1,8 @@
-# -*- coding: utf-8 -*-
-import pypandoc
+try:
+    import pypandoc
+except OSError:
+    pass
+
 
 from OrthoEvol.Tools import LogIt
 

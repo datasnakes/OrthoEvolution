@@ -1,7 +1,11 @@
 from shutil import copyfile
 import os
 from os.path import join
-import pypandoc
+
+try:
+    import pypandoc
+except OSError:
+    pass
 
 from OrthoEvol.Tools.logit import LogIt
 
