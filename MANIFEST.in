@@ -14,8 +14,8 @@ include setup.py
 include LICENSE
 
 # Include Modules
-recursive-include Datasnakes/Cookies *
-recursive-include Datasnakes/Manager/config *
+recursive-include OrthoEvol/Cookies *
+recursive-include OrthoEvol/Manager/config *
 
 # Include docs
 include Docs/docs/source/*.rst
