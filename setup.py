@@ -15,8 +15,8 @@ import sys
 import pkg_resources
 from importlib import import_module
 
-# Save the standard error of the setup file. This can be removed soon.
-sys.stderr = open('err.txt', 'w')
+## Save the standard error of the setup file. This can be removed soon.
+#sys.stderr = open('err.txt', 'w')
 
 # Set the home path of the setup script/package
 home = path.abspath(path.dirname(__file__))
@@ -67,6 +67,9 @@ setup(
                 'orthoevol=OrthoEvol.Orthologs.command_line:main'
         ]
     },
+    zip_safe=False,
+    test_suite='nose.collector',
+    tests_require=['nose']
 )
 
 # Set up the permissions for the BioSQL Perl scripts
