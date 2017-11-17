@@ -1,7 +1,7 @@
-#from Datasnakes.Manager.utils import ProjectManagement
-#from Datasnakes.Orthologs.Blast.blastn import CompGenBLASTn
-#from Datasnakes.Orthologs.GenBank.genbank import GenBank
-#from Datasnakes.Orthologs.Align.msa import MultipleSequenceAlignment
+#from OrthoEvol.Manager.utils import ProjectManagement
+#from OrthoEvol.Orthologs.Blast.blastn import CompGenBLASTn
+#from OrthoEvol.Orthologs.GenBank.genbank import GenBank
+#from OrthoEvol.Orthologs.Align.msa import MultipleSequenceAlignment
 #
 #project='test-project'
 #

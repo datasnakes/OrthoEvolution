@@ -10,8 +10,8 @@ from ftplib import error_perm, all_errors
 # from progress.bar import Bar
 # TODO Create a progress bar; Integrate with Threading/downloading
 
-from Datasnakes.Tools.ftp.baseftp import BaseFTPClient
-from Datasnakes.Tools.logit import LogIt
+from OrthoEvol.Tools.ftp.baseftp import BaseFTPClient
+from OrthoEvol.Tools.logit import LogIt
 
 
 class NcbiFTPClient(BaseFTPClient):

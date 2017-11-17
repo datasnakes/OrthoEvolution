@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 import pypandoc
 
-from Datasnakes.Tools import LogIt
+from OrthoEvol.Tools import LogIt
 
 
 class PandocConverter(object):

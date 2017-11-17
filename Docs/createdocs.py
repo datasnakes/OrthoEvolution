@@ -3,7 +3,7 @@ import os
 from os.path import join
 import pypandoc
 
-from Datasnakes.Tools.logit import LogIt
+from OrthoEvol.Tools.logit import LogIt
 
 
 class PandocConverter(object):
@@ -43,7 +43,7 @@ class CreateDocs(object):
         self.docs_source = os.path.join(self._docsdir, 'source')
         self.main_readme = self._pathtomainreadme()
         self.readme2index()
-        self.packagename = 'Datasnakes'
+        self.packagename = 'OrthoEvol'
         self.convertfiles()
 
     def _append_toc_info(self):

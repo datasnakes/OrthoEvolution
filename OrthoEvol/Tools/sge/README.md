@@ -32,7 +32,7 @@ when submitting a job as well as default job attributes.
 
 ### Running a simple job
 ```python
-from Datasnakes.Tools.sge import SGEJob
+from OrthoEvol.Tools.sge import SGEJob
 
 myjob = SGEJob(email_address='shutchins2@umc.edu')
 

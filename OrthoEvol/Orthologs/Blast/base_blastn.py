@@ -10,8 +10,8 @@ from Bio.Application import ApplicationError
 from Bio import SearchIO  # Used for parsing and sorting XML files.
 from Bio.Blast.Applications import NcbiblastnCommandline
 
-from Datasnakes.Orthologs.Blast.comparative_genetics import ComparativeGenetics
-from Datasnakes.Orthologs.Blast.utils import gene_list_config, map_func
+from OrthoEvol.Orthologs.Blast.comparative_genetics import ComparativeGenetics
+from OrthoEvol.Orthologs.Blast.utils import gene_list_config, map_func
 
 
 class BaseBlastN(ComparativeGenetics):

@@ -10,7 +10,7 @@ Currently, our `MyGene` class does not allow any additional fields or species
 ### Use Blast Master Accession File output with MyGene
 
 ```python
-from Datasnakes.Manager.config import templates
+from OrthoEvol.Manager.config import templates
 
 infile = pkg_resources.resource_filename(templates.__name__, 'test_blast.csv')
 

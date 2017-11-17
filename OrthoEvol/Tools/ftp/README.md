@@ -5,14 +5,14 @@ FTP repository](ftp://ftp.ncbi.nlm.nih.gov).
 
 More specifically, we provide a way to easily find and list directories and their
 respective contents as well as to download blast databases and other databases
-for use with the Orthologs package. We have implemented database downloading 
+for use with the Orthologs package. We have implemented database downloading
 with threading which is the safest way to implement this cross-platform.
 
-We also provide a parallel module which can be used in conjunction with the 
+We also provide a parallel module which can be used in conjunction with the
 `NcbiFTPClient` to download files or databases much quicker if your system can
 handle that.
 
-If you're using Linux or a supercomputer and do not want to use threading to 
+If you're using Linux or a supercomputer and do not want to use threading to
 download ftp databases, you can look at [this standalone script]().
 
 
@@ -25,7 +25,7 @@ Examples
 This is a simple example of using some of the modules.
 
 ``` python
-from Datasnakes.Tools.ftp import NcbiFTPClient
+from OrthoEvol.Tools.ftp import NcbiFTPClient
 
 ncbiftp = NcbiFTPClient(email='somebody@gmail.com')
 ncbiftp.getblastdb(database_name='refseq_rna')
@@ -34,7 +34,7 @@ ncbiftp.getblastdb(database_name='refseq_rna')
 #### Windowmasker files Download Example
 
 ```python
-from Datasnakes.Tools.ftp import NcbiFTPClient
+from OrthoEvol.Tools.ftp import NcbiFTPClient
 import os
 
 ids = ['9544', '9606']
@@ -44,7 +44,7 @@ ncbiftp.getwindowmaskerfiles(taxonomy_ids=ids, download_path=os.getcwd())
 ```
 #### Refseq Release Download Example
 ```python
-from Datasnakes.Tools.ftp import NcbiFTPClient
+from OrthoEvol.Tools.ftp import NcbiFTPClient
 import os
 
 ncbiftp = NcbiFTPClient(email='somebody@gmail.com')
@@ -73,6 +73,6 @@ ncbiftp.listfiles()
 
 :exclamation: Notes
 -------------------
-Check the [NCBI README](NCBIREADME.md) for information about the preformatted 
+Check the [NCBI README](NCBIREADME.md) for information about the preformatted
 blast databases that we use and suggest you use. We also provide an easy way to
  download them which is referenced in the above example.

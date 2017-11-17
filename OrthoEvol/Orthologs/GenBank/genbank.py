@@ -5,15 +5,15 @@ from pathlib import Path
 from BioSQL import BioSeqDatabase
 from Bio import SeqIO
 
-from Datasnakes.Tools import LogIt
-from Datasnakes.Orthologs.utils import attribute_config
-from Datasnakes.Orthologs.Blast.blastn_comparative_genetics import CompGenBLASTn
-from Datasnakes.Tools.utils.other_utils import makedirectory
-from Datasnakes.Orthologs.Blast.comparative_genetics_objects import CompGenObjects
+from OrthoEvol.Tools import LogIt
+from OrthoEvol.Orthologs.utils import attribute_config
+from OrthoEvol.Orthologs.Blast.orthologs_blastn import OrthoBlastN
+from OrthoEvol.Tools.utils.other_utils import makedirectory
+from OrthoEvol.Orthologs.Blast.comparative_genetics import BaseComparativeGenetics
 
 
 class GenBank(object):
-    def __init__(self, project, project_path=None, solo=False, multi=True, archive=False, min_fasta=True, blast=CompGenBLASTn, **kwargs):
+    def __init__(self, project, project_path=None, solo=False, multi=True, archive=False, min_fasta=True, blast=OrthoBlastN, **kwargs):
         """
         This class will handle GenBank files in various ways.  It allows for refseq-release .gbff files to be downloaded
         from NCBI and uploaded to a BioSQL database (biopython).  Single .gbk files can be downloaded from the .gbff,
@@ -39,7 +39,7 @@ class GenBank(object):
         self.genbanklog = LogIt().default(logname="GenBank", logfile=None)
 
         # Configuration of class attributes
-        add_self = attribute_config(self, composer=blast, checker=CompGenBLASTn, checker2=CompGenObjects,
+        add_self = attribute_config(self, composer=blast, checker=OrthoBlastN, checker2=BaseComparativeGenetics,
                                     project=project, project_path=project_path)
         for var, attr in add_self.__dict__.items():
             setattr(self, var, attr)

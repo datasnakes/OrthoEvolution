@@ -11,7 +11,7 @@ class OrthologsWarning(Warning):
     potential tricky code or code under development.
 
     >>> import warnings
-    >>> from Datasnakes.Orthologs import OrthologsWarning
+    >>> from OrthoEvol.Orthologs import OrthologsWarning
     >>> warnings.simplefilter('ignore', OrthologsWarning)
     """
 

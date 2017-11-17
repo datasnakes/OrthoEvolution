@@ -23,8 +23,8 @@ Use logging with ETE3PAML
 
 .. code:: python
 
-    from Datasnakes.Tools import LogIt
-    from Datasnakes.Orthologs.Phylogenetics import ETE3PAML
+    from OrthoEvol.Tools import LogIt
+    from OrthoEvol.Orthologs.Phylogenetics import ETE3PAML
 
     # Set up your loggers
     logit = LogIt()

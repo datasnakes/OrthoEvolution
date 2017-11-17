@@ -29,14 +29,24 @@ across a group of
 `species <ftp://ftp.ncbi.nlm.nih.gov/genomes/refseq/vertebrate_mammalian/>`__.
 
 How do we configure and run blast?
-----------------------------------
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Running blast is the most complex aspect of this package, but we've
-found a way to simplify the automation of blasting.
+found a way to simplify the **automation of blasting** while also
+**limiting blast searches by organism**.
 
 Before you use this function, you need ``NCBI Blast+`` must be installed
 and in your path. Download the latest standalone blast executables from
 `here <ftp://ftp.ncbi.nlm.nih.gov/blast/executables/blast+/LATEST/>`__.
+
+The story of 2 blast methods - Seqids vs Windowmasking
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Seqids
+^^^^^^
+
+Windowmasking
+^^^^^^^^^^^^^
 
 We have perfected the method of using a windowmasker file for each
 taxonomy id of the organisms that we are analyzing. The blastn
@@ -44,6 +54,9 @@ executable can filter a query sequence using the windowmasker data
 files. This option can be used to mask interspersed repeats that may
 lead to spurious matches. The windowmasker data files should be
 downloaded from the NCBI FTP site.
+
+For information on how to set up a window masker database, read our
+`setup tutorial <window_masker_setup.md>`__.
 
 On a command line, the windowmasker function would look as such:
 
@@ -119,11 +132,11 @@ to run ``OrthoBlastN`` without using our database management features,
 ``BLASTDB`` and ``WINDOW_MASKER_PATH`` paths must be set.
 
 Performing Blast & Post-Blast Analysis
-''''''''''''''''''''''''''''''''''''''
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 .. code:: python
 
-    from Datasnakes.Orthologs.Blast import OrthoBlastN
+    from OrthoEvol.Orthologs.Blast import OrthoBlastN
     import os
 
     # Create a blast configuration dictionary
@@ -143,13 +156,11 @@ Performing Blast & Post-Blast Analysis
     myblast.blast_config(myblast.blast_human, 'Homo_sapiens', auto_start=True)
 
 Making the API available with Accession data
-''''''''''''''''''''''''''''''''''''''''''''
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 *TODO: This is unfinished.*
 
 .. code:: python
 
-    from Datasnakes.Orthologs.CompGenetics import CompGenAnalysis
+    from OrthoEvol.Orthologs.CompGenetics import CompGenAnalysis
 
-:exclamation: Notes
--------------------

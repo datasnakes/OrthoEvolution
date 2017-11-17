@@ -1,6 +1,6 @@
 """This is the test suite for Orthologs."""
 
-#from Datasnakes.Orthologs.Blast import CompGenBLASTn
+#from OrthoEvol.Orthologs.Blast import CompGenBLASTn
 #import unittest
 #
 #class TestOrthologs(unittest.TestCase):

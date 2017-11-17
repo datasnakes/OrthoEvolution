@@ -16,6 +16,7 @@ from pathlib import Path
 from Bio.Application import _Option, _Argument, AbstractCommandline
 import os
 
+
 class Guidance2Commandline(AbstractCommandline):
     u""""Command line wrapper for GUIDANCE2.
     http://guidance.tau.ac.il/ver2/

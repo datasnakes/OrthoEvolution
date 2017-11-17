@@ -3,11 +3,11 @@ import os
 from time import sleep
 from pkg_resources import resource_filename
 
-from Datasnakes.Tools.logit import LogIt
-from Datasnakes.Tools.sge import basejobids, writecodefile, import_temp, file2str
-from Datasnakes.Tools.sge.sgeconfig import __DEFAULT__
-from Datasnakes.Manager.config import templates
-from Datasnakes.Tools.sge import Qstat
+from OrthoEvol.Tools.logit import LogIt
+from OrthoEvol.Tools.sge import basejobids, writecodefile, import_temp, file2str
+from OrthoEvol.Tools.sge.sgeconfig import __DEFAULT__
+from OrthoEvol.Manager.config import templates
+from OrthoEvol.Tools.sge import Qstat
 
 
 class BaseSGEJob(object):

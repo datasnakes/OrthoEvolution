@@ -28,7 +28,7 @@ This is a simple example of using some of the modules.
 
 .. code:: python
 
-    from Datasnakes.Tools.ftp import NcbiFTPClient
+    from OrthoEvol.Tools.ftp import NcbiFTPClient
 
     ncbiftp = NcbiFTPClient(email='somebody@gmail.com')
     ncbiftp.getblastdb(database_name='refseq_rna')
@@ -38,7 +38,7 @@ Windowmasker files Download Example
 
 .. code:: python
 
-    from Datasnakes.Tools.ftp import NcbiFTPClient
+    from OrthoEvol.Tools.ftp import NcbiFTPClient
     import os
 
     ids = ['9544', '9606']
@@ -51,7 +51,7 @@ Refseq Release Download Example
 
 .. code:: python
 
-    from Datasnakes.Tools.ftp import NcbiFTPClient
+    from OrthoEvol.Tools.ftp import NcbiFTPClient
     import os
 
     ncbiftp = NcbiFTPClient(email='somebody@gmail.com')
