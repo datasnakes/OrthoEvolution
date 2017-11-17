@@ -34,12 +34,14 @@ def readme():
 setup(
     name=name,
     author='Rob Gilmore & Shaurita Hutchins',
+    author_email='datasnakes@gmail.com',
     description="This package aids in the analysis of orthologous genes.",
-    version='0.1.0a1',
+    version='0.9.0a2',
     long_description=readme(),
     url='https://github.com/datasnakes/OrthoEvolution',
     license='MIT',
     keywords='bioinformatics science evolution orthology psychiatry genetics',
+    download_url='',
     classifiers=[
         'Development Status :: 3 - Alpha',
         'Intended Audience :: Science/Research',
