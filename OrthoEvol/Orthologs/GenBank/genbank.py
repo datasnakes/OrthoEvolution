@@ -108,7 +108,7 @@ class GenBank(object):
         # Find the protein gi number under the features qualifiers.
         for x in feature.qualifiers:
             if 'GI' in x:
-                head, sup, p_gi = x.partition(':')
+                _, sup, p_gi = x.partition(':')
                 return p_gi
 
     def create_post_blast_gbk_records(self, org_list, gene_dict):
@@ -346,7 +346,7 @@ class GenBank(object):
         # TODO-ROB directory looks like /raw_data/Gene_1/GENBANK/*.gbk
         elif db is False:
             # Parse the directory that contain the GenBank records for the project of interest.
-            for root, dirs, gbk_files in os.walk(str(self.target_gbk_files_path)):
+            for _, dirs, gbk_files in os.walk(str(self.target_gbk_files_path)):
                 # For each genbank record write a set of FASTA files.
                 for gbk_file in gbk_files:
                     if Path(gbk_file).suffix is '.gbk':

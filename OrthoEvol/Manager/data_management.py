@@ -112,7 +112,6 @@ class DataMana(object):
 
 
             # TODO-ROB parse the config options
-        pass
 
     def blast(self, proj_mana, blast_config):
         self.bl = OrthoBlastN(proj_mana=proj_mana, **self.Management_config, **blast_config)
