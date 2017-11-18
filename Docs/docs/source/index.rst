@@ -16,6 +16,7 @@ OrthoEvolution
 .. image:: https://readthedocs.org/projects/orthoevolution/badge/?version=latest
    :target: http://orthoevolution.readthedocs.io/en/latest/?badge=latest
 
+
 OrthoEvolution is an **easy to use** and comprehensive python package which aids in the **analysis and
 visualization of comparative evolutionary genetics** related projects such as the **inference of orthologs**.
 
@@ -36,21 +37,21 @@ more insight into this project/python package.
 
 
 Installation
-~~~~~~~~~~~~~~~~
+----------------
 View the below methiods for installing this package. Python3.5 and higher is required.
 
 PyPi
-^^^^^^^^^^^^^^
+~~~~~~~~~~~~~~~~
 ``pip install OrthoEvol``
 
 GitHub
-^^^^^^^^^^^^^^
+~~~~~~~~~~~~~~~~
 1. Download the zip file and unzip it or ``git clone https://github.com/datasnakes/OrthoEvolution.git``
 2. ``cd OrthoEvolution``
 3. ``pip install .``
 
 Development Code
-^^^^^^^^^^^^^^
+~~~~~~~~~~~~~~~~
 **WARNING** : This code is actively under development and may not be reliable.  Please create an `issue <https://github.com/datasnakes/OrthoEvolution/issues>`_ for questions about development.
 
 1. Download the zip file and unzip it or ``git clone -b dev-master https://github.com/datasnakes/OrthoEvolution.git``
@@ -58,7 +59,7 @@ Development Code
 3. ``pip install .``
 
 Examples
-~~~~~~~~~~~~~~~~
+----------------
 Check out this `tutorial <https://github.com/datasnakes/OrthoEvolution/wiki/Tutorial>`__ in our Wiki Docs.
 
 .. code:: python
@@ -66,11 +67,11 @@ Check out this `tutorial <https://github.com/datasnakes/OrthoEvolution/wiki/Tuto
     import OrthoEvol
 
 Tests
-~~~~~~~~~~~~~~~~
+----------------
 To run tests, type ``nosetests Tests/`` in the OrthoEvolution directory.
 
 Contributors
-~~~~~~~~~~~~~~~~
+----------------
 This package was created by the Datasnakes.
 
 -  Rob Gilmore \| Github: `@grabear <https://github.com/grabear>`__ \|
@@ -84,8 +85,7 @@ and check out our `contributing guidelines <https://github.com/datasnakes/OrthoE
 
 
 Citations
-~~~~~~~~~~~~~~~~
-
+----------------
 We're so thankful to have a resource such as
 `Biopython <http://biopython.org/wiki/Biopython>`__. They inspired this
 package.
@@ -96,8 +96,9 @@ Jun 1; 25(11) 1422-3 http://dx.doi.org/10.1093/bioinformatics/btp163
 pmid:19304878*
 
 License
-~~~~~~~~~~~~~~~~
+----------------
 `MIT <https://github.com/datasnakes/OrthoEvolution/blob/master/LICENSE>`_
+
 
 Contents
 --------
