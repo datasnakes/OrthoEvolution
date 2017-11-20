@@ -56,8 +56,9 @@
 #        tocinfo = "\nContents\n" \
 #            "--------\n"\
 #            ".. toctree::\n    " \
+#            ":hidden:\n    " \
 #            ":maxdepth: 3\n\n    " \
-#            "datasnakesreadme\n    cookiesreadme\n    managerreadme\n    " \
+#            "orthoevolreadme\n    cookiesreadme\n    managerreadme\n    " \
 #            "orthologsreadme\n    pipelinereadme\n    toolsreadme\n" \
 #            "\nIndices and tables\n" \
 #            "==================\n" \

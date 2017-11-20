@@ -25,7 +25,7 @@ Examples
 This is a simple example of using some of the modules.
 
 ``` python
-from OrthoEvol.Tools.ftp import NcbiFTPClient
+from OrthoEvol.Tools import NcbiFTPClient
 
 ncbiftp = NcbiFTPClient(email='somebody@gmail.com')
 ncbiftp.getblastdb(database_name='refseq_rna')
@@ -34,7 +34,7 @@ ncbiftp.getblastdb(database_name='refseq_rna')
 #### Windowmasker files Download Example
 
 ```python
-from OrthoEvol.Tools.ftp import NcbiFTPClient
+from OrthoEvol.Tools import NcbiFTPClient
 import os
 
 ids = ['9544', '9606']
@@ -44,7 +44,7 @@ ncbiftp.getwindowmaskerfiles(taxonomy_ids=ids, download_path=os.getcwd())
 ```
 #### Refseq Release Download Example
 ```python
-from OrthoEvol.Tools.ftp import NcbiFTPClient
+from OrthoEvol.Tools import NcbiFTPClient
 import os
 
 ncbiftp = NcbiFTPClient(email='somebody@gmail.com')

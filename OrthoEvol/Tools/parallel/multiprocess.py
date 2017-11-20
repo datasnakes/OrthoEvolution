@@ -16,7 +16,8 @@ class Multiprocess(object):
     def __init__(self):
         pass
 
-    def _logger(self):
+    @staticmethod
+    def _logger():
         """Add the multiprocessing module's logger."""
         multiprocess_handler = get_logger()
         multiprocess_handler = logging.StreamHandler()
