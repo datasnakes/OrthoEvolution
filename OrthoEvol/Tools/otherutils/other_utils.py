@@ -8,7 +8,7 @@ from subprocess import run, CalledProcessError, PIPE
 import pandas as pd
 from pathlib import Path
 
-from OrthoEvol.Tools import LogIt
+from OrthoEvol.Tools.logit import LogIt
 
 
 def splitlist(listname, basefilename, n):
