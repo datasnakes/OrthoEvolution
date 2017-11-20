@@ -8,8 +8,6 @@ from subprocess import run, CalledProcessError, PIPE
 import pandas as pd
 from pathlib import Path
 
-from OrthoEvol.Tools import LogIt
-
 
 def splitlist(listname, basefilename, n):
     """Split a long list into chunks and save chunks as a text file."""
