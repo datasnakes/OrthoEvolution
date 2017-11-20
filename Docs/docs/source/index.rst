@@ -20,7 +20,7 @@ OrthoEvolution
 OrthoEvolution is an **easy to use** and comprehensive python package which aids in the **analysis and
 visualization of comparative evolutionary genetics** related projects such as the **inference of orthologs**.
 
-OrthoEvolution Overview
+Overview
 --------------------------
 This package focuses on **inferring orthologs** using NCBI's blast, various sequence alignment strategies,
 and phylogenetics analyses including PAML, PhyML, ete3, and more tools.
@@ -102,12 +102,10 @@ License
 
 .. toctree::
     :hidden:
-    :maxdepth: 3
+    :maxdepth: 2
 
-    self
+    index
 
-Indices and tables
-==================
 * :ref:`genindex`
 * :ref:`modindex`
 * :ref:`search`
