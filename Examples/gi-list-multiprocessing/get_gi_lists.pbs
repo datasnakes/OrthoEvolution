@@ -1,0 +1,22 @@
+# Author: Datasnakes
+# Date Created: Tue Mar 28 18:29:14 2017
+# Project Name: Orthologs Project
+# This is a simple bash script that gets GI lists for the local blast.
+# TODO: GI deprecation.
+# #PBS -S /bin/bash
+# #PBS -m bea
+# #PBS -M emailaddress
+# #PBS -l select=20:ncpus=1:mem=2gb -l place=free
+# #PBS -l cput=24:00:00
+# #PBS -l walltime=32:00:00
+# #PBS -N getgilists
+# #PBS -o getgilists.o${PBS_JOBID}
+# #PBS -e getgilists.e${PBS_JOBID}
+# #PBS -j oe
+
+# cd ${PBS_O_WORKDIR}
+
+# python3 get_gi_lists.py
+
+# mail -s "get_gi_lists.py script completed" emailaddress < get_gi_lists.log
+

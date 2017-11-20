@@ -2,7 +2,7 @@
 import unittest
 from shutil import rmtree
 
-from Datasnakes.Manager import ProjectManagement
+from OrthoEvol.Manager.management import ProjectManagement
 
 
 class TestManager(unittest.TestCase):
@@ -24,6 +24,7 @@ class TestManager(unittest.TestCase):
         self.assertEqual(str(self.repo), 'test-repo')
         self.delete_repo()
     # TODO add tests for each individual subclass
+
 
 if __name__ == '__main__':
     unittest.main()

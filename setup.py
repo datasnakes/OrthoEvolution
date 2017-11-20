@@ -10,14 +10,17 @@ http://python-packaging.readthedocs.io/en/latest/index.html
 from setuptools import setup, find_packages
 from codecs import open  # To use a consistent encoding
 from os import path
+import os
 import sys
+import pkg_resources
+from importlib import import_module
 
 # Save the standard error of the setup file. This can be removed soon.
 sys.stderr = open('err.txt', 'w')
 
 # Set the home path of the setup script/package
 home = path.abspath(path.dirname(__file__))
-name = 'Datasnakes'
+name = 'OrthoEvol'
 
 
 def readme():
@@ -26,13 +29,15 @@ def readme():
         return f.read()
 
 # Setup the package by adding information to these parameters
+
+
 setup(
     name=name,
     author='Rob Gilmore & Shaurita Hutchins',
-    description="This package helps in the analysis of orthologous genes.",
+    description="This package aids in the analysis of orthologous genes.",
     version='0.1.0a1',
     long_description=readme(),
-    url='https://github.com/datasnakes/Datasnakes-Scripts',
+    url='https://github.com/datasnakes/OrthoEvolution',
     license='MIT',
     keywords='bioinformatics science evolution orthology psychiatry genetics',
     classifiers=[
@@ -46,15 +51,14 @@ setup(
         'Operating System :: Unix',
         'Natural Language :: English',
         'Programming Language :: Python :: 3 :: Only',
-        'Programming Language :: Python :: 3.3',
-        'Programming Language :: Python :: 3.4',
         'Programming Language :: Python :: 3.5',
+        'Programming Language :: Python :: 3.6',
         'Framework :: Flask',
         'Framework :: R-Shiny',
         'Framework :: Cookiecutter'
     ],
     # Packages will be automatically found if not in this list.
-    packages=find_packages(exclude=['Docs', 'Archive', 'Examples']),
+    packages=find_packages(exclude=['Docs', 'Examples']),
     include_package_data=True,
     entry_points={
         'console_scripts': ['d~s=Orthologs.command_line:main']
@@ -64,3 +68,10 @@ setup(
     tests_require=['nose']
 )
 
+# Set up the permissions for the BioSQL Perl scripts
+scripts = import_module("OrthoEvol.Manager.BioSQL.biosql_repo.scripts")
+biosql_scripts = pkg_resources.resource_filename(scripts.__name__, "")
+for file in os.listdir(biosql_scripts):
+    if '.pl' in file:
+        script_path = os.path.join(biosql_scripts, file)
+        os.chmod(script_path, mode=755)

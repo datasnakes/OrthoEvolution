@@ -1,0 +1,22 @@
+Database_Config:
+  NCBI_blast_db: True
+  NCBI_blast_windowmasker_files: True
+  NCBI_pub_taxonomy: True
+  NCBI_refseq_release: True
+  ITIS_taxonomy: True
+
+Archive_Config:
+  Full: True
+  Projects:
+    flag: False
+    Project_Name_1: False
+    Project_Name_2: False
+    Project_Name_3: False
+  NCBI: False
+  ITIS: False
+  NCBI_blast: False
+  NCBI_blast_db: False
+  NCBI_blast_windowmasker_files: False
+  NCBI_pub_taxonomy: False
+  NCBI_refseq_release: False
+  ITIS_taxonomy: False

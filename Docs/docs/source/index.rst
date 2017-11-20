@@ -1,110 +1,89 @@
-.. Datasnakes-Orthologs documentation master file, created by
-   sphinx-quickstart on Wed May 24 14:34:01 2017.
-   You can adapt this file completely to your liking, but it should at least
-   contain the root `toctree` directive.
+.. image:: https://travis-ci.org/datasnakes/OrthoEvolution.svg?branch=master
+    :target: https://travis-ci.org/datasnakes/OrthoEvolution
 
-Welcome to Datasnakes-Orthologs's documentation!
-================================================
+.. image:: https://api.codacy.com/project/badge/Grade/25062944794a4d14b5cab274a885ac27
+   :target: https://www.codacy.com/app/datasnakes/OrthoEvolution?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=datasnakes/OrthoEvolution&amp;utm_campaign=Badge_Grade
 
-.. module:: Datasnakes
-
-.. image:: https://travis-ci.org/datasnakes/Datasnakes-Scripts.svg?branch=release
-   :target: https://travis-ci.org/datasnakes/Datasnakes-Scripts
-.. image:: https://api.codacy.com/project/badge/Grade/9a4ce39423ed4458a0c7fa3610c81ba2
-   :target: https://www.codacy.com/app/sdhutchins/Datasnakes-Scripts?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=datasnakes/Datasnakes-Scripts&amp;utm_campaign=Badge_Grade
 .. image:: https://badges.gitter.im/gitterHQ/gitter.png
    :target: https://gitter.im/datasnakes/Lobby
-.. image:: https://badge.fury.io/py/Datasnakes-Scripts.svg
-   :target: https://badge.fury.io/py/Datasnakes-Scripts
+
+.. image:: https://badge.fury.io/py/OrthoEvolution.svg
+   :target: https://badge.fury.io/py/OrthoEvolution
+
 .. image:: https://readthedocs.org/projects/datasnakes-scripts/badge/?version=master
    :target: http://datasnakes-scripts.readthedocs.io/en/master/
-.. image:: https://img.shields.io/badge/under-development-orange.svg
-   :target: https://github.com/datasnakes/Datasnakes-Scripts
 
-The Datasnakes-Orthologs package is a collection of the modules which aids in
-the analysis and visualization of orthologs-related bioinformatics projects.
+OrthoEvolution
+====================
 
-Check out our `wiki docs <https://github.com/datasnakes/Datasnakes-Scripts/wiki>`__!
+An **easy to use** and comprehensive python package which aids in the **analysis and
+visualization of comparative evolutionary genetics** related projects. More specifically, this
+project is focused on the **inference of orthologs** using NCBI's blast, various sequence alignment strategies,
+and phylogenetics analyses including PAML, PhyML, ete3, and more tools.
+
+Ultimately, the goal of this project is to create a **reusable pipeline** for the
+inference of orthologs in order to ensure reproducibility of data as well as improve
+the management and analysis of (what can be) large datasets.  The Cookies, Manager, Pipeline,
+and Tools modules act as a framework for our workflow, while the Orthologs
+module provides access to specific functions for our various ortholog inference projects.
+
+View our `read the docs <http://datasnakes-scripts.readthedocs.io/en/master/>`__ and feel free to also
+read `this related paper <https://www.frontiersin.org/articles/10.3389/fnhum.2014.00283/full>`__ to gain
+more insight into this project/python package.
+
+Overview
+--------------------
 
 Installation
-------------
-``pip install Datasnakes-Scripts``
-
-Development Mode Installation
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-1. ``git clone http://github.com/datasnakes/Datasnakes-Scripts``
-2. ``cd Datasnakes-Scripts``
-3. ``pip install -e .``
-
-Manual Installation
-~~~~~~~~~~~~~~~~~~~~~
-Alternatively, you can set install the package manually.
-
-1. Download the zip file and unzip it or ``git clone https://github.com/datasnakes/Datasnakes-Scripts.git``
-2. ``cd Datasnakes-Scripts``
-3. ``pip install .``
-
-Dependencies
-~~~~~~~~~~~~~
-
-Currently, this package is optimized for ``python v3.4`` and upward. It's also
-dependent upon ``biopython v1.68``.
-
-If you don't use pip to install the package, ``pip install -r requirements.txt``
-will install dependencies.
-
-Development Mode Installation
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-1. ``git clone http://github.com/datasnakes/Datasnakes-Scripts``
-2. ``cd Datasnakes-Scripts``
-3. ``pip install -e .``
-
-Manual Installation
-~~~~~~~~~~~~~~~~~~~~~
-Alternatively, you can set install the package manually.
-
-1. Download the zip file and unzip it or ``git clone https://github.com/datasnakes/Datasnakes-Scripts.git``
-2. ``cd Datasnakes-Scripts``
-3. ``pip install .``
-
-Project Setup
 ~~~~~~~~~~~~~~~~
-This package is in development but still working. To test you'll want to create a virtual
-environment so that cleanup is easy. Using *virtualenv* with python3
-insures that ``python`` invokes py3.5 and ``python3`` invokes py36. Invoke
-python36.
+View the below methiods for installing this package.
 
-.. code:: bash
+PyPi
+^^^^^^^^^^^^^^
+``pip install ortho-evol``
 
-    $ mkdir dev
-    $ cd dev
-    $ virtualenv PackageTest --python=python3
-    $ source activate PackageTest
-    $ git clone http://github.com/datasnakes/Datasnakes-Scripts
-    $ cd Datasnakes-Scripts
-    $ python3 setup.py install or pip install .
+GitHub
+^^^^^^^^^^^^^^
+1. Download the zip file and unzip it or ``git clone https://github.com/datasnakes/OrthoEvolution.git``
+2. ``cd OrthoEvolution``
+3. ``pip install .``
 
-Usage
------
+Development Code
+^^^^^^^^^^^^^^
+**WARNING** : This code is actively under development and may not be reliable.  Please create an `issue <https://github.com/datasnakes/OrthoEvolution/issues>`_ for questions about development.
 
-After installation, you'll be able to easily import each module via:
+1. Download the zip file and unzip it or ``git clone -b dev-master https://github.com/datasnakes/OrthoEvolution.git``
+2. ``cd OrthoEvolution``
+3. ``pip install .``
+
+Examples
+~~~~~~~~~~~~~~~~
+Check out this `tutorial <https://github.com/datasnakes/OrthoEvolution/wiki/Tutorial>`__ in our Wiki Docs.
 
 .. code:: python
 
-    from Datasnakes.Orthologs import Align, BioSQL, Blast, CompGenetics, Phylogenetics, Genbank
+    import OrthoEvol
+
+Tests
+~~~~~~~~~~~~~~~~
+To run tests, type ``nosetests Tests/`` in the OrthoEvolution directory.
 
 Contributors
-------------
+~~~~~~~~~~~~~~~~
+This package was created by the Datasnakes.
 
 -  Rob Gilmore \| Github: `@grabear <https://github.com/grabear>`__ \|
-   `:email: <mailto:robgilmore127@gmail.com>`__
+   `✉ <mailto:robgilmore127@gmail.com>`__
 -  Shaurita Hutchins \| Github:
-   `@sdhutchins <https://github.com/sdhutchins>`__ \| Twitter:
-   `@MavenNBA <https://twitter.com/MavenNBA/>`__ \|
-   `:email: <mailto:sdhutchins@outlook.com>`__
+   `@sdhutchins <https://github.com/sdhutchins>`__ \|
+   `✉ <mailto:sdhutchins@outlook.com>`__
 
-Citation
-~~~~~~~~
+If you would like to contribute to this package, install the package in development mode,
+and check out our `contributing guidelines <https://github.com/datasnakes/OrthoEvolution/blob/master/CONTRIBUTING.rst>`__.
+
+
+Citations
+~~~~~~~~~~~~~~~~
 
 We're so thankful to have a resource such as
 `Biopython <http://biopython.org/wiki/Biopython>`__. They inspired this
@@ -115,20 +94,24 @@ computational molecular biology and bioinformatics. Bioinformatics 2009
 Jun 1; 25(11) 1422-3 http://dx.doi.org/10.1093/bioinformatics/btp163
 pmid:19304878*
 
+License
+~~~~~~~~~~~~~~~~
+`MIT <https://github.com/datasnakes/OrthoEvolution/blob/master/LICENSE>`_
+
 Contents
 --------
 .. toctree::
-    :maxdepth: 2
+    :maxdepth: 3
 
-    compgenetics
-    clustalomega
-    phylogenetics
-    namingconventions
-
+    orthoevolreadme
+    cookiesreadme
+    managerreadme
+    orthologsreadme
+    pipelinereadme
+    toolsreadme
 
 Indices and tables
 ==================
-
 * :ref:`genindex`
 * :ref:`modindex`
 * :ref:`search`
