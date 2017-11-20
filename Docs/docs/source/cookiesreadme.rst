@@ -15,7 +15,7 @@ Examples
 
 The `Manager
 module <https://github.com/datasnakes/OrthoEvolution/tree/master/OrthoEvol/Manager>`__
-uses the *CookieRecipes* and *Oven* classes as a primary means of
+uses the *CookBook* and *Oven* classes as a primary means of
 functioning.
 
 Simple Implementation
