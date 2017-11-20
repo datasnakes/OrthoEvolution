@@ -92,6 +92,7 @@ html_theme = 'alabaster'
 # documentation.
 #
 html_theme_options = {
+        "description": "An easy to use and comprehensive python package which aids in the analysis and visualization of comparative evolutionary genetics",
         "github_user": "Datasnakes",
         "github_repo": "OrthoEvolution",
         "github_banner": True,
