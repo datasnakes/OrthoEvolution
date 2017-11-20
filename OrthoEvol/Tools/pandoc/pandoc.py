@@ -5,7 +5,7 @@
 #    download_pandoc()
 #
 #
-#from OrthoEvol.Tools import LogIt
+#from OrthoEvol.Tools.logit import LogIt
 #
 #
 #class PandocConverter(object):
