@@ -2,7 +2,7 @@
 import mygene
 import pandas as pd
 
-from OrthoEvol.Tools import LogIt
+from OrthoEvol.Tools.logit import LogIt
 # TODO add ability for custom fields
 # TODO add ability for custom species.
 

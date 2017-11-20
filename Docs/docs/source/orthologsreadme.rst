@@ -27,7 +27,7 @@ together.
     from OrthoEvol.Orthologs.Align import ClustalO
     from OrthoEvol.Orthologs.Phlogenetics import ETE3PAML
 
-❗ Software Dependencies
+Software Dependencies
 -----------------------
 
 Ensure that the following software is installed and in your path: -

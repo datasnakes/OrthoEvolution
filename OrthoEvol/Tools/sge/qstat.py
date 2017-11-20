@@ -85,10 +85,10 @@ class Qstat(object):
         qids = [j['job_id'] for j in jobs if j['user'] == self.username
                 and j['status'] == 'Q']
         if job_id in qids:
-            return 'Waiting for %s to start running.' % job_id
+            yield 'Waiting for %s to start running.' % job_id
             self.watch(job_id)
         elif job_id in rids:
-            return 'Waiting for %s to finish running.' % job_id
+            yield 'Waiting for %s to finish running.' % job_id
             self.watch(job_id)
         else:
             return 'Job id not found.'

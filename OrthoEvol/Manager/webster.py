@@ -33,8 +33,8 @@ class Webster(object):
         'GUIDANCE2': {
 
             "reference_1": {
-                "citation": u"""Sela, I., Ashkenazy, H., Katoh, K. and Pupko, T. (2015) GUIDANCE2: Accurate Detection of 
-                Unreliable Alignment Regions Accounting for the Uncertainty of Multiple Parameters.  Nucleic Acids 
+                "citation": u"""Sela, I., Ashkenazy, H., Katoh, K. and Pupko, T. (2015) GUIDANCE2: Accurate Detection of
+                Unreliable Alignment Regions Accounting for the Uncertainty of Multiple Parameters.  Nucleic Acids
                 Research, 2015 Jul 1; 43 (Web Server issue): W7-W14.; doi: 10.1093/nar/gkq443""",
                 "link": "https://www.ncbi.nlm.nih.gov/pubmed/18229673",
                 "path": resource_filename(
@@ -42,7 +42,7 @@ class Webster(object):
                                          "the_Uncertainty_of_Multiple_Parameters.pdf")
             },
             "reference_2": {
-                "citation": u"""Landan, G., and D. Graur. (2008).  Local Reliability Measures from Sets of Co-optimal 
+                "citation": u"""Landan, G., and D. Graur. (2008).  Local Reliability Measures from Sets of Co-optimal
                 Multiple Sequence Alignments.  Pac Symp Biocomput 13:15-24""",
                 "link": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC4489236/",
                 "path": resource_filename(
@@ -50,15 +50,15 @@ class Webster(object):
                                          "Alignments.pdf")
             }
         },
-        'PAL2NAL': u"""Mikita Suyama, David Torrents, and Peer Bork (2006) PAL2NAL: Robust Conversion of Protein 
+        'PAL2NAL': u"""Mikita Suyama, David Torrents, and Peer Bork (2006) PAL2NAL: Robust Conversion of Protein
         Sequence Alignments Into the Corresponding Codon Alignments.  Nucleic Acids Res. 34, W609-W612.""",
 
         'IQTREE': u"""LT Nguyen, H.A. Schmidt, A. von Haeseler, and BQ Minh (2015) IQ-TREE: A
         fast and effective stochastic algorithm for estimating maximum likelihood
         phylogenies. Mol. Biol. Evol., 32, 268-274.""",
 
-        'CLUSTALO': u""" Sievers F, Wilm A, Dineen D, Gibson TJ, Karplus K, Li W, Lopez R, McWilliam H, Remmert M, 
-        Söding J, Thompson JD, Higgins DG.  Fast, Scalable Generation of High-quality Protein Multiple Sequence 
+        'CLUSTALO': u""" Sievers F, Wilm A, Dineen D, Gibson TJ, Karplus K, Li W, Lopez R, McWilliam H, Remmert M,
+        Söding J, Thompson JD, Higgins DG.  Fast, Scalable Generation of High-quality Protein Multiple Sequence
         Alignments Using Clustal Omega.  Mol Syst Biol. 2011 Oct 11;7:539. doi: 10.1038/msb.2011.75.""",
 
 
