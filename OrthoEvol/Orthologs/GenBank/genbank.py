@@ -8,7 +8,7 @@ from Bio import SeqIO
 from OrthoEvol.Tools import LogIt
 from OrthoEvol.Orthologs.utils import attribute_config
 from OrthoEvol.Orthologs.Blast.orthologs_blastn import OrthoBlastN
-from OrthoEvol.Tools.utils.other_utils import makedirectory
+from OrthoEvol.Tools.otherutils.other_utils import makedirectory
 from OrthoEvol.Orthologs.Blast.comparative_genetics import BaseComparativeGenetics
 
 
