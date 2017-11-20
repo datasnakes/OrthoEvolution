@@ -1,5 +1,5 @@
 from OrthoEvol.Tools.ftp import NcbiFTPClient
-from OrthoEvol.Tools.utils import csvtolist
+from OrthoEvol.Tools.otherutils import csvtolist
 
 file = 'organisms_and_taxonomy_ids.csv'
 ids = csvtolist(file, 'Taxonomy ID')
