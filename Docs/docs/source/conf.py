@@ -32,7 +32,8 @@
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom
 # ones.
 extensions = ['sphinx.ext.viewcode',
-    'sphinx.ext.githubpages']
+              'sphinx.ext.githubpages',
+              'sphinx.ext.intersphinx']
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']
@@ -91,8 +92,8 @@ html_theme = 'alabaster'
 # documentation.
 #
 html_theme_options = {
-        'github_user': 'Datasnakes',
-        'github_repo': 'OrthoEvolution',
+        "github_user": "Datasnakes",
+        "github_repo": "OrthoEvolution",
         "extra_nav_links": {
             "🚀 Github": "https://github.com/datasnakes/OrthoEvolution",
             "💾 Download Releases": "https://github.com/datasnakes/OrthoEvolution/releases",
