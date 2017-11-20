@@ -9,5 +9,5 @@ Ensure that nose is installed.
 
 `pip install nose`
 
-Run our tests from the top directory, `Datasnakes-Scripts`, by typing:
+Run our tests from the top directory, `OrthoEvolution`, by typing:
 `nosetests Tests/`
