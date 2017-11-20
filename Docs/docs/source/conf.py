@@ -94,19 +94,21 @@ html_theme = 'alabaster'
 html_theme_options = {
         "github_user": "Datasnakes",
         "github_repo": "OrthoEvolution",
+        "github_banner": True,
         "extra_nav_links": {
-            "🚀 Github": "https://github.com/datasnakes/OrthoEvolution",
+            "🚀 Source Code": "https://github.com/datasnakes/OrthoEvolution",
             "💾 Download Releases": "https://github.com/datasnakes/OrthoEvolution/releases",
             }
 }
 
 
 html_sidebars = {
+    'index': ['about.html', 'navigation.html', 'sidebarintro.html',
+              'searchbox.html'],
     '**': [
         'about.html',
         'navigation.html',
         'searchbox.html',
-        'donate.html',
     ]
 }
 
@@ -174,9 +176,7 @@ texinfo_documents = [
 ]
 
 
-
 # -- Options for Epub output ----------------------------------------------
-
 # Bibliographic Dublin Core info.
 epub_title = project
 epub_author = author
@@ -193,6 +193,6 @@ epub_copyright = copyright
 # epub_uid = ''
 
 # A list of files that should not be packed into the epub file.
-epub_exclude_files = ['search.html']
-
-
+epub_exclude_files = [
+    ('search.html', 'Search'),
+]

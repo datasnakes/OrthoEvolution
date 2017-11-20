@@ -53,8 +53,7 @@
 #
 #    def _append_toc_info(self):
 #        """Write TOC info to the README.rst when copied as index.rst."""
-#        tocinfo = "\nContents\n" \
-#            "--------\n"\
+#        tocinfo = "--------\n"\
 #            ".. toctree::\n    " \
 #            ":hidden:\n    " \
 #            ":maxdepth: 3\n\n    " \

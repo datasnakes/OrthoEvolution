@@ -31,14 +31,14 @@ the management and analysis of (what can be) large datasets.  The Cookies, Manag
 and Tools modules act as a framework for our workflow, while the Orthologs
 module provides access to specific functions for our various ortholog inference projects.
 
-View our `read the docs <http://datasnakes-scripts.readthedocs.io/en/master/>`__ and feel free to also
+View our `read the docs <http://orthoevolution.readthedocs.io/en/master/>`__ and feel free to also
 read `this related paper <https://www.frontiersin.org/articles/10.3389/fnhum.2014.00283/full>`__ to gain
 more insight into this project/python package.
 
 
 Installation
 ----------------
-View the below methiods for installing this package. **Python3.5 and higher is required.**
+View the below methods for installing this package. **Python3.5 and higher is required.**
 
 PyPi
 ~~~~~~~~~~~~~~~~
@@ -102,9 +102,11 @@ License
 
 .. toctree::
     :hidden:
-    :maxdepth: 2
+    :maxdepth: 3
 
     index
+    tutorial/*
+
 
 * :ref:`genindex`
 * :ref:`modindex`
