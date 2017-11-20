@@ -103,6 +103,7 @@ License
 .. toctree::
     :hidden:
     :maxdepth: 3
+
     self
 
 Indices and tables
