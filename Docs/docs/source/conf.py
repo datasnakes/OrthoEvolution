@@ -91,11 +91,24 @@ html_theme = 'alabaster'
 # documentation.
 #
 html_theme_options = {
+        'github_user': 'Datasnakes',
+        'github_repo': 'OrthoEvolution',
         "extra_nav_links": {
             "🚀 Github": "https://github.com/datasnakes/OrthoEvolution",
             "💾 Download Releases": "https://github.com/datasnakes/OrthoEvolution/releases",
             }
 }
+
+
+html_sidebars = {
+    '**': [
+        'about.html',
+        'navigation.html',
+        'searchbox.html',
+        'donate.html',
+    ]
+}
+
 
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,
