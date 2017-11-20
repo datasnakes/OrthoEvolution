@@ -103,6 +103,7 @@ License
 Contents
 --------
 .. toctree::
+    :hidden:
     :maxdepth: 3
 
     orthoevolreadme
