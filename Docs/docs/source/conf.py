@@ -95,7 +95,6 @@ html_theme_options = {
         "github_user": "Datasnakes",
         "github_repo": "OrthoEvolution",
         "extra_nav_links": {
-            "Tutorial": "tutorial/index.html",
             "🚀 Github": "https://github.com/datasnakes/OrthoEvolution",
             "💾 Download Releases": "https://github.com/datasnakes/OrthoEvolution/releases",
             }
