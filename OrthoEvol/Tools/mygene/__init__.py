@@ -1,1 +1,0 @@
-from .mygene import MyGene
