@@ -100,18 +100,10 @@ License
 `MIT <https://github.com/datasnakes/OrthoEvolution/blob/master/LICENSE>`_
 
 
-Contents
---------
 .. toctree::
     :hidden:
     :maxdepth: 3
-
-    orthoevolreadme
-    cookiesreadme
-    managerreadme
-    orthologsreadme
-    pipelinereadme
-    toolsreadme
+    self
 
 Indices and tables
 ==================
