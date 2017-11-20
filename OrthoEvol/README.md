@@ -189,7 +189,6 @@ to map to a user's list in order to take advantage of parallel computing.
 - `SGEJob` - A class to aid in submission of a job via `qsub` on a cluster.
 - `Qstat` - A class that parses the output of `qstat` to return job information.
 It also waits on job completion.
-- `ZipUtils` -
 - `Slackify` -
 - `MyGene` -
 

@@ -243,7 +243,6 @@ Some of the tools/classes in the tools module are:
    cluster.
 -  ``Qstat`` - A class that parses the output of ``qstat`` to return job
    information. It also waits on job completion.
--  ``ZipUtils`` -
 -  ``Slackify`` -
 -  ``MyGene`` -
 
