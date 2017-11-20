@@ -1,10 +1,10 @@
 """Directory management tools for the package."""
 import os
-import pkg_resources
 from pathlib import Path
+import pkg_resources
+
 from OrthoEvol import Cookies, Orthologs, Manager, Tools
 from OrthoEvol.Cookies import Oven
-from OrthoEvol.Tools.zipper.zipper import ZipUtils
 from OrthoEvol.Tools.logit import LogIt
 
 
