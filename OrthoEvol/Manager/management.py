@@ -1,10 +1,10 @@
 """Directory management tools for the package."""
 import os
-import pkg_resources
 from pathlib import Path
+import pkg_resources
+
 from OrthoEvol import Cookies, Orthologs, Manager, Tools
 from OrthoEvol.Cookies import Oven
-from OrthoEvol.Tools.zipper.zipper import ZipUtils
 from OrthoEvol.Tools.logit import LogIt
 
 
@@ -57,7 +57,6 @@ class Management(object):
         self.sge = self.Tools / Path('sge')
         self.slackify = self.Tools / Path('slackify')
         self.utils = self.Tools / Path('utils')
-        self.zipper = self.Tools / Path('zipper')
 
         if self.repo:
             self.repo_path = self.file_home / Path(self.repo)
@@ -183,11 +182,11 @@ class UserManagement(RepoManagement):
             self.Kitchen.bake_the_db_repo(user_db=self.user_db, db_path_dict=self.db_path_dict, ncbi_db_repo=self.ncbi_db_repo)
             # TODO-ROB:  Determine what type of database as well.
 
-    def zip_mail(self, comp_filename, zip_path, destination=''):
-        Zipper = ZipUtils(comp_filename, zip_path)
-        Zipper_path = Zipper.compress()
-        # TODO-ROB add proper destination syntax.
-        self.managementlog.info('%s is being sent to %s' % (Zipper_path, destination))
+    # def zip_mail(self, comp_filename, zip_path, destination=''):
+    #     Zipper = ZipUtils(comp_filename, zip_path)
+    #     Zipper_path = Zipper.compress()
+    #     # TODO-ROB add proper destination syntax.
+    #     self.managementlog.info('%s is being sent to %s' % (Zipper_path, destination))
 
 
 class WebsiteManagement(RepoManagement):

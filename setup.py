@@ -15,8 +15,8 @@ import sys
 import pkg_resources
 from importlib import import_module
 
-# Save the standard error of the setup file. This can be removed soon.
-sys.stderr = open('err.txt', 'w')
+## Save the standard error of the setup file. This can be removed soon.
+#sys.stderr = open('err.txt', 'w')
 
 # Set the home path of the setup script/package
 home = path.abspath(path.dirname(__file__))
@@ -34,12 +34,14 @@ def readme():
 setup(
     name=name,
     author='Rob Gilmore & Shaurita Hutchins',
+    author_email='datasnakes@gmail.com',
     description="This package aids in the analysis of orthologous genes.",
-    version='0.1.0a1',
+    version='0.9.0a2',
     long_description=readme(),
     url='https://github.com/datasnakes/OrthoEvolution',
     license='MIT',
     keywords='bioinformatics science evolution orthology psychiatry genetics',
+    download_url='',
     classifiers=[
         'Development Status :: 3 - Alpha',
         'Intended Audience :: Science/Research',
@@ -58,10 +60,12 @@ setup(
         'Framework :: Cookiecutter'
     ],
     # Packages will be automatically found if not in this list.
-    packages=find_packages(exclude=['Docs', 'Examples']),
+    packages=find_packages(exclude=['Docs', 'Examples', 'Tests']),
     include_package_data=True,
     entry_points={
-        'console_scripts': ['d~s=Orthologs.command_line:main']
+        'console_scripts': [
+                'orthoevol=OrthoEvol.Orthologs.command_line:main'
+        ]
     },
     zip_safe=False,
     test_suite='nose.collector',

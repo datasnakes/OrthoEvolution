@@ -3,7 +3,9 @@
 import unittest
 import os
 
-from OrthoEvol.Tools import LogIt, Multiprocess, NcbiFTPClient
+from OrthoEvol.Tools.logit import LogIt
+from OrthoEvol.Tools.parallel import Multiprocess
+from OrthoEvol.Tools.ftp import NcbiFTPClient
 
 
 class TestTools(unittest.TestCase):

@@ -10,15 +10,18 @@
 .. image:: https://badge.fury.io/py/OrthoEvolution.svg
    :target: https://badge.fury.io/py/OrthoEvolution
 
-.. image:: https://readthedocs.org/projects/datasnakes-scripts/badge/?version=master
-   :target: http://datasnakes-scripts.readthedocs.io/en/master/
+.. image:: https://readthedocs.org/projects/orthoevolution/badge/?version=latest
+   :target: http://orthoevolution.readthedocs.io/en/latest/?badge=latest
+
 
 OrthoEvolution
 ====================
+OrthoEvolution is an **easy to use** and comprehensive python package which aids in the **analysis and
+visualization of comparative evolutionary genetics** related projects such as the **inference of orthologs**.
 
-An **easy to use** and comprehensive python package which aids in the **analysis and
-visualization of comparative evolutionary genetics** related projects. More specifically, this
-project is focused on the **inference of orthologs** using NCBI's blast, various sequence alignment strategies,
+Overview
+--------------------------
+This package focuses on **inferring orthologs** using NCBI's blast, various sequence alignment strategies,
 and phylogenetics analyses including PAML, PhyML, ete3, and more tools.
 
 Ultimately, the goal of this project is to create a **reusable pipeline** for the
@@ -31,25 +34,23 @@ View our `read the docs <http://datasnakes-scripts.readthedocs.io/en/master/>`__
 read `this related paper <https://www.frontiersin.org/articles/10.3389/fnhum.2014.00283/full>`__ to gain
 more insight into this project/python package.
 
-Overview
---------------------
 
 Installation
-~~~~~~~~~~~~~~~~
-View the below methiods for installing this package.
+----------------
+View the below methiods for installing this package. Python3.5 and higher is required.
 
 PyPi
-^^^^^^^^^^^^^^
-``pip install ortho-evol``
+~~~~~~~~~~~~~~~~
+``pip install OrthoEvol``
 
 GitHub
-^^^^^^^^^^^^^^
+~~~~~~~~~~~~~~~~
 1. Download the zip file and unzip it or ``git clone https://github.com/datasnakes/OrthoEvolution.git``
 2. ``cd OrthoEvolution``
 3. ``pip install .``
 
 Development Code
-^^^^^^^^^^^^^^
+~~~~~~~~~~~~~~~~
 **WARNING** : This code is actively under development and may not be reliable.  Please create an `issue <https://github.com/datasnakes/OrthoEvolution/issues>`_ for questions about development.
 
 1. Download the zip file and unzip it or ``git clone -b dev-master https://github.com/datasnakes/OrthoEvolution.git``
@@ -57,7 +58,7 @@ Development Code
 3. ``pip install .``
 
 Examples
-~~~~~~~~~~~~~~~~
+----------------
 Check out this `tutorial <https://github.com/datasnakes/OrthoEvolution/wiki/Tutorial>`__ in our Wiki Docs.
 
 .. code:: python
@@ -65,11 +66,11 @@ Check out this `tutorial <https://github.com/datasnakes/OrthoEvolution/wiki/Tuto
     import OrthoEvol
 
 Tests
-~~~~~~~~~~~~~~~~
+----------------
 To run tests, type ``nosetests Tests/`` in the OrthoEvolution directory.
 
 Contributors
-~~~~~~~~~~~~~~~~
+----------------
 This package was created by the Datasnakes.
 
 -  Rob Gilmore \| Github: `@grabear <https://github.com/grabear>`__ \|
@@ -83,8 +84,7 @@ and check out our `contributing guidelines <https://github.com/datasnakes/OrthoE
 
 
 Citations
-~~~~~~~~~~~~~~~~
-
+----------------
 We're so thankful to have a resource such as
 `Biopython <http://biopython.org/wiki/Biopython>`__. They inspired this
 package.
@@ -95,5 +95,5 @@ Jun 1; 25(11) 1422-3 http://dx.doi.org/10.1093/bioinformatics/btp163
 pmid:19304878*
 
 License
-~~~~~~~~~~~~~~~~
+----------------
 `MIT <https://github.com/datasnakes/OrthoEvolution/blob/master/LICENSE>`_

@@ -30,7 +30,7 @@ Out[54]: ['FASTA', 'cloud']
 
 ### Utilize multiprocessing to speed up your code
 ```python
-from OrthoEvol.Tools import Multiprocess
+from OrthoEvol.Tools.parallel import Multiprocess
 
 
 def printwords(word):
@@ -46,7 +46,7 @@ if __name__ == '__main__':
 
 ### Integrate logging in a simple and quick way
 ```python
-from OrthoEvol.Tools import LogIt
+from OrthoEvol.Tools.logit import LogIt
 
 # Set up your loggers
 logit = LogIt()
@@ -61,6 +61,24 @@ test1.info('hi')
 
 # Shutdown logging without deleting the logfile
 logit.shutdown()
+```
+
+### Importing all tools modules
+```python
+from OrthoEvol.Tools.ftp import BaseFTPClient, NcbiFTPClient
+from OrthoEvol.Tools.logit import LogIt
+from OrthoEvol.Tools.mygene import MyGene
+from OrthoEvol.Tools.otherutils import (formatlist, splitlist, makedirectory,
+                                        PackageVersion, runcmd)
+from OrthoEvol.Tools.parallel import Multiprocess
+# from OrthoEvol.Tools.pandoc import PandocConverter
+from OrthoEvol.Tools.send2server import S2S
+from OrthoEvol.Tools.sge import (BaseSGEJob, SGEJob, Qstat, SGEPipelineTask,
+                                 randomid, basejobids, import_temp,
+                                 writecodefile,
+                                 file2str)
+from OrthoEvol.Tools.slackify import Slackify
+from OrthoEvol.Tools.streamieo import StreamIEO
 ```
 
 

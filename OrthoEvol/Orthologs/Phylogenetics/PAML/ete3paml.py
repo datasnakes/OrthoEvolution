@@ -1,7 +1,7 @@
 import os
 from ete3 import EvolTree, Tree
 
-from OrthoEvol.Tools.utils import csvtolist
+from OrthoEvol.Tools.otherutils import csvtolist
 
 
 class ETE3PAML(object):

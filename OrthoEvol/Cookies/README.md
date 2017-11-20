@@ -9,7 +9,7 @@ Learn more about the [cookiecutter](https://github.com/audreyr/cookiecutter) pac
 
 ## Examples
 The [Manager module](https://github.com/datasnakes/OrthoEvolution/tree/master/OrthoEvol/Manager)
-uses the _CookieRecipes_ and _Oven_ classes as a primary means of functioning.
+uses the _CookBook_ and _Oven_ classes as a primary means of functioning.
 
 ### Simple Implementation
 
