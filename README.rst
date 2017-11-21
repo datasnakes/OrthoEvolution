@@ -7,8 +7,8 @@
 .. image:: https://badges.gitter.im/gitterHQ/gitter.png
    :target: https://gitter.im/datasnakes/Lobby
 
-.. image:: https://badge.fury.io/py/OrthoEvolution.svg
-   :target: https://badge.fury.io/py/OrthoEvolution
+.. image:: https://badge.fury.io/py/OrthoEvol.svg
+   :target: https://badge.fury.io/py/OrthoEvol
 
 .. image:: https://readthedocs.org/projects/orthoevolution/badge/?version=latest
    :target: http://orthoevolution.readthedocs.io/en/latest/?badge=latest
