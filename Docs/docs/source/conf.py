@@ -19,7 +19,7 @@
 #
 import os
 import sys
-sys.path.insert(0, os.path.abspath('modules' + os.sep))
+sys.path.insert(0, os.path.abspath('modules'))
 
 
 # -- General configuration ------------------------------------------------
