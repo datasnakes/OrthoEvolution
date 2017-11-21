@@ -19,7 +19,7 @@
 #
 import os
 import sys
-sys.path.insert(0, os.path.abspath('../../'))
+sys.path.insert(0, os.path.abspath('../../../'))
 
 
 # -- General configuration ------------------------------------------------
@@ -194,3 +194,6 @@ epub_copyright = copyright
 epub_exclude_files = [
     ('search.html', 'Search'),
 ]
+
+# Example configuration for intersphinx: refer to the Python standard library.
+intersphinx_mapping = {'https://docs.python.org/': None}
