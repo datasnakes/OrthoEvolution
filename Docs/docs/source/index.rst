@@ -105,9 +105,10 @@ License
     :maxdepth: 3
 
     index
-    tutorial/*
 
 
+Indices
+-----------
 * :ref:`genindex`
 * :ref:`modindex`
 * :ref:`search`
