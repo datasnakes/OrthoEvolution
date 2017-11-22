@@ -7,6 +7,7 @@ from OrthoEvol.Manager.management import ProjectManagement
 from OrthoEvol.Orthologs.utils import attribute_config
 from OrthoEvol.Cookies.utils import archive
 from OrthoEvol.Tools.ftp import NcbiFTPClient
+from OrthoEvol.Tools.sge import SGEJob
 from OrthoEvol.Tools.logit import LogIt
 from OrthoEvol.Manager.BioSQL import biosql
 
@@ -91,10 +92,10 @@ class BaseDatabaseManagement(object):
         ete3 = import_module("ete3")
         ete3.NCBITaxa.update_taxonomy_database()
 
-    def create_biosql_taxonomy_database(self, destination):
+    def create_biosql_taxonomy_database(self, destination, database_name):
         """Create a BioSQL database template loaded with NCBI's taxonomy data."""
         if self.driver.lower() == "sqlite3":
-            ncbi_db = self.biosql.SQLiteBioSQL(proj_mana=self.proj_mana)
+            ncbi_db = self.biosql.SQLiteBioSQL(database_name=database_name, proj_mana=self.proj_mana)
             ncbi_db.copy_template_database(destination=destination)
             return ncbi_db
 
@@ -146,7 +147,7 @@ class BaseDatabaseManagement(object):
         ncbiftp = self.ncbiftp.getrefseqrelease(taxon_group=collection_subset, seqtype=seqtype, seqformat=seqformat, download_path=db_path)
         return ncbiftp
 
-    def upload_refseq_release_files(self, collection_subset, seqtype, seqformat, upload_number=8, upload_list=None, extension=".gbk.db"):
+    def upload_refseq_release_files(self, collection_subset, seqtype, seqformat, upload_list=None, database_name=None, add_to_default=None):
         """
         Upload NCBI's Refseq Release files to a BioSQL database.
 
@@ -163,21 +164,17 @@ class BaseDatabaseManagement(object):
         :return:
         :rtype:
         """
-        if upload_number < 8:
-            raise ValueError("The upload_number must be greater than 8.  The NCBI refseq release files are too bing"
-                             "for anything less than 8 seperate BioSQL databases.")
-        from OrthoEvol.Tools.sge import SGEJob
 
-        # TODO-ROB: multiprocessing sge whatever
-        # Create a list of lists with an index corresponding to the upload number
-        sub_upload_size = len(upload_list) / upload_number
-        sub_upload_lists = [upload_list[x:x+100] for x in range(0, len(upload_list), sub_upload_size)]
-        upload_job = SGEJob(email_address=self.email)
-        for sub_list in sub_upload_lists:
-            db_path = self.database_path / Path("NCBI") / Path("refseq") / Path("release") / Path(collection_subset)
-            # Get a BioSQL database
-            ncbi_db = self.create_biosql_taxonomy_database(destination=db_path)
-            ncbi_db.upload_files(seqtype=seqtype, filetype=seqformat, upload_path=db_path, upload_list=upload_list)
+        if database_name:
+            db_name = database_name
+        else:
+            if add_to_default:
+                add_to_default = "_%s" % add_to_default
+            db_name = "{}_{}{}.{}.db".format(collection_subset, seqtype, add_to_default, seqformat)
+        db_path = self.database_path / Path("NCBI") / Path("refseq") / Path("release") / Path(collection_subset)
+        # Get a BioSQL database
+        ncbi_db = self.create_biosql_taxonomy_database(destination=db_path, database_name=db_name)
+        ncbi_db.upload_files(seqtype=seqtype, filetype=seqformat, upload_path=db_path, upload_list=upload_list)
 
     def get_project_genbank_database(self):
         """"""
@@ -219,7 +216,7 @@ class BaseDatabaseManagement(object):
 
 class DatabaseManagement(BaseDatabaseManagement):
     # TODO-ROB: Figure this out for the case of a user.  Because there doesn't necessarily have to be a project
-    def __init__(self, config_file, proj_mana=ProjectManagement):
+    def __init__(self, config_file, proj_mana=ProjectManagement, **kwargs):
         kw ={}
         db_config_strategy = {}
         with open(config_file) as cf:
@@ -227,6 +224,7 @@ class DatabaseManagement(BaseDatabaseManagement):
             # Get the parameters for the Base class
             for key, value in db_config.items():
                 if isinstance(value, dict):
+                    db_config_strategy[key] = value
                     continue
                 else:
                     kw[key] = value
@@ -484,24 +482,24 @@ class DatabaseManagement(BaseDatabaseManagement):
 
     def ncbi_refseq_release(self, configure_flag=None, archive_flag=None, delete_flag=None, upload_flag=None, archive_path=None,
                             database_path=None, collection_subset=None, seqtype=None, seqformat=None, upload_list=None,
-                            upload_number=8):
-        nrr_dispatcher = {"NCBI_refseq_release": []}
-        nrr_config = {"NCBI_refseq_release": []}
+                            upload_number=8, dispatcher_flag=False, add_to_default=None):
+        nrr_dispatcher = {"NCBI_refseq_release": {"arhive": [], "configure": [], "upload": []}}
+        nrr_config = {"NCBI_refseq_release": {"arhive": [], "configure": [], "upload": []}}
         if not archive_path:
             archive_path = str(self.user_archive)
         if not database_path:
             database_path = str(self.user_db)
         if archive_flag:
-            nrr_dispatcher["NCBI_refseq_release"].append(archive)
-            nrr_config["NCBI_refseq_release"].append({
+            nrr_dispatcher["NCBI_refseq_release"]["archive"].append(archive)
+            nrr_config["NCBI_refseq_release"]["archive"].append({
                 "database_path": database_path,
                 "archive_path": archive_path,
                 "option": "NCBI_refseq_release",
                 "delete_flag": delete_flag
             })
         if configure_flag:
-            nrr_dispatcher["NCBI_refseq_release"].append(self.download_refseq_release_files)
-            nrr_config["NCBI_refseq_release"].append({
+            nrr_dispatcher["NCBI_refseq_release"]["configure"].append(self.download_refseq_release_files)
+            nrr_config["NCBI_refseq_release"]["configure"].append({
                 "collection_subset": collection_subset,
                 "seqtype": seqtype,
                 "seqformat": seqformat
@@ -510,23 +508,41 @@ class DatabaseManagement(BaseDatabaseManagement):
             if upload_number < 8:
                 raise ValueError("The upload_number must be greater than 8.  The NCBI refseq release files are too bing"
                                  "for anything less than 8 seperate BioSQL databases.")
-            from OrthoEvol.Tools.sge import SGEJob
-
-            # TODO-ROB: multiprocessing sge whatever
-            # Create a list of lists with an index corresponding to the upload number
-            sub_upload_size = len(upload_list) / upload_number
-            if (len(upload_list) % upload_number) != 0:
-                upload_number = upload_number + 1
-            sub_upload_lists = [upload_list[x:x+100] for x in range(0, len(upload_list), sub_upload_size)]
-            upload_job = SGEJob(email_address=self.email)
-            for sub_list in sub_upload_lists:
-                self.upload_refseq_release_files(collection_subset=collection_subset, seqtype=seqtype, seqformat=seqformat, upload_list=sub_list)
-                nrr_dispatcher["NCBI_refseq_release"].append(self.upload_refseq_release_files)
-                nrr_config["NCBI_refseq_release"].append({
+            if not dispatcher_flag:
+                # TODO-ROB: multiprocessing sge whatever
+                # Create a list of lists with an index corresponding to the upload number
+                sub_upload_size = len(upload_list) // upload_number
+                if (len(upload_list) % upload_number) != 0:
+                    upload_number = upload_number + 1
+                sub_upload_lists = [upload_list[x:x+100] for x in range(0, len(upload_list), sub_upload_size)]
+                add_to_default = 0
+                for sub_list in sub_upload_lists:
+                    add_to_default += 1
+                    job = SGEJob(email_address=self.email, base_jobname="upload_rr_%s" % str(add_to_default))
+                    nrr_dispatcher["NCBI_refseq_release"]["upload"].append(job.submit_pycode)
+                    code_dict_string = str({
+                        "collection_subset": collection_subset,
+                        "seqtype": seqtype,
+                        "seqformat": seqformat,
+                        "add_to_default": str(add_to_default),
+                        "upload_list": sub_list,
+                        "upload_flag": True,
+                        "dispatcher_flag": True
+                    })
+                    sge_code_string = \
+                        "from OrthoEvol.Manager.database_dispatcher import DatabaseDispatcher " \
+                        "R_R = DatabaseDispatcher(config_file=%s, **%s) " \
+                        "R_R.dispatch_the_uploader()" % (self.config_file, code_dict_string)
+                    nrr_config["NCBI_refseq_release"]["upload"].append({
+                        "code": sge_code_string})
+            else:
+                nrr_dispatcher["NCBI_refseq_release"]["upload"].append(self.upload_refseq_release_files)
+                nrr_config["NCBI_refseq_release"]["upload"].append({
                     "collection_subset": collection_subset,
                     "seqtype": seqtype,
                     "seqformat": seqformat,
-                    "upload_list": sub_list
+                    "upload_list": upload_list,
+                    "add_to_default": add_to_default
                 })
         return nrr_dispatcher, nrr_config
 
@@ -561,3 +577,25 @@ class DatabaseManagement(BaseDatabaseManagement):
 
     def itis_taxonomy(self, configure_flag=None, archive_flag=None, delete_flag=None, **kwargs):
         return {}, {}
+
+
+class DatabaseDispatcher(DatabaseManagement):
+
+    def __init__(self, config_file, **kwargs):
+        super().__init__(config_file=config_file)
+        self.dispatcher, self.configuration = self.get_strategy_dispatcher(db_config_strategy=kwargs)
+        if len(self.dispatcher.keys()) == 1:
+            self.strategy = list(self.dispatcher.keys())[0]
+        else:
+            raise ValueError
+
+        self.archive_disp = self.dispatcher[self.strategy]["archive"]
+        self.configure_disp = self.dispatcher[self.strategy]["configure"]
+        self.upload_disp = self.dispatcher[self.strategy]["upload"]
+
+        self.archive_config = self.configuration[self.strategy]["archive"]
+        self.configure_config = self.configuration[self.strategy]["configure"]
+        self.upload_config = self.configuration[self.strategy]["configure"]
+
+    def dispatch_the_uploader(self):
+        self.upload_disp(**self.upload_config)
