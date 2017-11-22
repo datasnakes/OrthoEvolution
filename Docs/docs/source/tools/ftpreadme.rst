@@ -83,10 +83,10 @@ List all files in the current working directory
     # The default path is ftp.pwd() or the current directory
     ncbiftp.listfiles()
 
-:exclamation: Notes
+Notes
 -------------------
 
-Check the `NCBI README <NCBIREADME.md>`__ for information about the
+Check the `NCBI README <ncbireadme.html>`__ for information about the
 preformatted blast databases that we use and suggest you use. We also
 provide an easy way to download them which is referenced in the above
 example.

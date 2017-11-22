@@ -60,7 +60,7 @@ Development Code
 
 Examples
 ----------------
-Check out this `tutorial <https://github.com/datasnakes/OrthoEvolution/wiki/Tutorial>`__ in our Wiki Docs.
+View detailed documentation `here <docscontents.html>`_.
 
 .. code:: python
 
@@ -102,13 +102,14 @@ License
 
 .. toctree::
     :hidden:
-    :maxdepth: 3
+    :glob:
+    :maxdepth: 2
 
     index
 
 
-Indices
------------
+Indices & Tables
+------------------
 * :ref:`genindex`
 * :ref:`modindex`
 * :ref:`search`

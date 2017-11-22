@@ -97,15 +97,18 @@ html_theme_options = {
         "github_user": "Datasnakes",
         "github_repo": "OrthoEvolution",
         "github_banner": True,
+        "extra_nav_links": {"Detailed Documentation": "docscontents.html"}
 }
 
 
 html_sidebars = {
     'index': ['about.html', 'navigation.html', 'sidebarintro.html',
               'searchbox.html'],
+    'docscontents': ['about.html', 'localtoc.html', 'sidebarintro.html',
+                     'searchbox.html'],
     '**': [
         'about.html',
-        'navigation.html',
+        'localtoc.html',
         'searchbox.html',
     ]
 }

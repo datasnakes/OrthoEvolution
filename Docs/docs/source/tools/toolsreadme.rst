@@ -35,6 +35,8 @@ List all subdirectories in a NCBI FTP Path
     ncbiftp.listdirectories(path='/blast/db/')
     Out[54]: ['FASTA', 'cloud']
 
+View detailed `ftp` documentation `here <ftpreadme.html>`_.
+
 Utilize multiprocessing to speed up your code
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -52,6 +54,8 @@ Utilize multiprocessing to speed up your code
     if __name__ == '__main__':
         mp = Multiprocess()
         mp.map2function(printwords, words)
+
+View detailed `parallel` documentation `here <parallelreadme.html>`_.
 
 Integrate logging in a simple and quick way
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -73,6 +77,8 @@ Integrate logging in a simple and quick way
 
     # Shutdown logging without deleting the logfile
     logit.shutdown()
+
+View detailed `LogIt` documentation `here <logitreadme.html>`_.
 
 Additional Documentation
 ------------------------
