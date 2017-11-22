@@ -156,12 +156,12 @@ class SQLiteBioSQL(BaseBioSQL):
         # If the template doesn't exists, then create it.
         if not self.template_abs_path.is_file():
             self.create_template_database()
-        # Copy the template into a new folder.
-        dest_abs_path = Path(destination)
+        # Copy the template into a new folder with a new name.
+        dest_abs_path = Path(destination) / Path(self.database_name)
         self.biosqllog.warn('Copying Template BioSQL Database...  This may take a few minutes...')
         shutil.copy2(str(self.template_abs_path), str(dest_abs_path))
 
-    def upload_files(self, seqtype, filetype, upload_path, upload_list=None, new_db=False):
+    def upload_files(self, seqtype, filetype, upload_path, upload_list=None):
         db_name = Path(self.database_name.stem + '_' + seqtype + self.database_name.suffix)
         db_abs_path = Path(upload_path) / db_name
 
