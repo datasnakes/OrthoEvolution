@@ -13,7 +13,7 @@ We also provide a parallel module which can be used in conjunction with the
 handle that.
 
 If you're using Linux or a supercomputer and do not want to use threading to
-download ftp databases, you can look at [this standalone script]().
+download ftp databases, you can look at [this standalone script](https://github.com/datasnakes/OrthoEvolution/blob/master/Examples/standalone-scripts/ncbi-download.py).
 
 
 

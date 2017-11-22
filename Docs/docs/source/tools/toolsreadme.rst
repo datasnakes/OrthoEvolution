@@ -35,14 +35,12 @@ List all subdirectories in a NCBI FTP Path
     ncbiftp.listdirectories(path='/blast/db/')
     Out[54]: ['FASTA', 'cloud']
 
-View detailed `ftp` documentation `here <ftpreadme.html>`_.
-
 Utilize multiprocessing to speed up your code
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 .. code:: python
 
-    from OrthoEvol.Tools import Multiprocess
+    from OrthoEvol.Tools.parallel import Multiprocess
 
 
     def printwords(word):
@@ -55,14 +53,12 @@ Utilize multiprocessing to speed up your code
         mp = Multiprocess()
         mp.map2function(printwords, words)
 
-View detailed `parallel` documentation `here <parallelreadme.html>`_.
-
 Integrate logging in a simple and quick way
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 .. code:: python
 
-    from OrthoEvol.Tools import LogIt
+    from OrthoEvol.Tools.logit import LogIt
 
     # Set up your loggers
     logit = LogIt()
@@ -78,7 +74,25 @@ Integrate logging in a simple and quick way
     # Shutdown logging without deleting the logfile
     logit.shutdown()
 
-View detailed `LogIt` documentation `here <logitreadme.html>`_.
+Importing all tools modules
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+.. code:: python
+
+    from OrthoEvol.Tools.ftp import BaseFTPClient, NcbiFTPClient
+    from OrthoEvol.Tools.logit import LogIt
+    from OrthoEvol.Tools.mygene import MyGene
+    from OrthoEvol.Tools.otherutils import (formatlist, splitlist, makedirectory,
+                                            PackageVersion, runcmd)
+    from OrthoEvol.Tools.parallel import Multiprocess
+    # from OrthoEvol.Tools.pandoc import PandocConverter
+    from OrthoEvol.Tools.send2server import S2S
+    from OrthoEvol.Tools.sge import (BaseSGEJob, SGEJob, Qstat, SGEPipelineTask,
+                                     randomid, basejobids, import_temp,
+                                     writecodefile,
+                                     file2str)
+    from OrthoEvol.Tools.slackify import Slackify
+    from OrthoEvol.Tools.streamieo import StreamIEO
 
 Additional Documentation
 ------------------------

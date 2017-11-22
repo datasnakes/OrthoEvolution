@@ -60,7 +60,7 @@ Development Code
 
 Examples
 ----------------
-View detailed documentation `here <docscontents.html>`_.
+View `detailed documentation <#detailed-documentation>`__ below.
 
 .. code:: python
 
@@ -102,14 +102,18 @@ License
 
 .. toctree::
     :hidden:
-    :glob:
     :maxdepth: 2
 
     index
 
 
+Detailed Documentation
+=========================
+
+.. include:: docscontents.rst
+
 Indices & Tables
-------------------
+==================
 * :ref:`genindex`
 * :ref:`modindex`
 * :ref:`search`

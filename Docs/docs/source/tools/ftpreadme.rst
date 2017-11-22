@@ -16,7 +16,7 @@ your system can handle that.
 
 If you're using Linux or a supercomputer and do not want to use
 threading to download ftp databases, you can look at `this standalone
-script <>`__.
+script <https://github.com/datasnakes/OrthoEvolution/blob/master/Examples/standalone-scripts/ncbi-download.py>`__.
 
 Examples
 --------
@@ -28,7 +28,7 @@ This is a simple example of using some of the modules.
 
 .. code:: python
 
-    from OrthoEvol.Tools.ftp import NcbiFTPClient
+    from OrthoEvol.Tools import NcbiFTPClient
 
     ncbiftp = NcbiFTPClient(email='somebody@gmail.com')
     ncbiftp.getblastdb(database_name='refseq_rna')
@@ -38,7 +38,7 @@ Windowmasker files Download Example
 
 .. code:: python
 
-    from OrthoEvol.Tools.ftp import NcbiFTPClient
+    from OrthoEvol.Tools import NcbiFTPClient
     import os
 
     ids = ['9544', '9606']
@@ -51,7 +51,7 @@ Refseq Release Download Example
 
 .. code:: python
 
-    from OrthoEvol.Tools.ftp import NcbiFTPClient
+    from OrthoEvol.Tools import NcbiFTPClient
     import os
 
     ncbiftp = NcbiFTPClient(email='somebody@gmail.com')
@@ -83,10 +83,10 @@ List all files in the current working directory
     # The default path is ftp.pwd() or the current directory
     ncbiftp.listfiles()
 
-Notes
+:exclamation: Notes
 -------------------
 
-Check the `NCBI README <ncbireadme.html>`__ for information about the
+Check the `NCBI README <NCBIREADME.md>`__ for information about the
 preformatted blast databases that we use and suggest you use. We also
 provide an easy way to download them which is referenced in the above
 example.

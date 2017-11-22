@@ -96,16 +96,13 @@ html_theme_options = {
         "description": "An easy to use and comprehensive python package which aids in the analysis and visualization of comparative evolutionary genetics",
         "github_user": "Datasnakes",
         "github_repo": "OrthoEvolution",
-        "github_banner": True,
-        "extra_nav_links": {"Detailed Documentation": "docscontents.html"}
+        "github_banner": True
 }
 
 
 html_sidebars = {
-    'index': ['about.html', 'navigation.html', 'sidebarintro.html',
+    'index': ['about.html', 'localtoc.html', 'sidebarintro.html',
               'searchbox.html'],
-    'docscontents': ['about.html', 'localtoc.html', 'sidebarintro.html',
-                     'searchbox.html'],
     '**': [
         'about.html',
         'localtoc.html',
@@ -199,4 +196,4 @@ epub_exclude_files = [
 ]
 
 # Example configuration for intersphinx: refer to the Python standard library.
-intersphinx_mapping = {'https://docs.python.org/': None}
+intersphinx_mapping = {'https://docs.python.org/3': None}

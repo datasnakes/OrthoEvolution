@@ -39,7 +39,7 @@ Running a simple job
 
 .. code:: python
 
-    from OrthoEvol.Tools.sge import SGEJob
+    from OrthoEvol.Tools import SGEJob
 
     myjob = SGEJob(email_address='shutchins2@umc.edu')
 
