@@ -5,7 +5,7 @@ from pathlib import Path
 from BioSQL import BioSeqDatabase
 from Bio import SeqIO
 
-from OrthoEvol.Tools import LogIt
+from OrthoEvol.Tools.logit import LogIt
 from OrthoEvol.Orthologs.utils import attribute_config
 from OrthoEvol.Orthologs.Blast.orthologs_blastn import OrthoBlastN
 from OrthoEvol.Tools.otherutils.other_utils import makedirectory

@@ -1,6 +1,6 @@
 from pathlib import Path
 from OrthoEvol.Cookies.cookie_jar import Oven
-from OrthoEvol.Tools import LogIt
+from OrthoEvol.Tools.logit import LogIt
 
 
 def attribute_config(cls, composer, checker, project=None, project_path=None, checker2=None):
@@ -79,7 +79,7 @@ def standalone_config(cls, project, project_path, new=False, custom=None):
     cls.blast_db = cls.ncbi_db_repo / Path('blast') / Path('db')
     cls.windowmaker_files = cls.ncbi_db_repo / Path('blast') / Path('windowmaker_files')
     cls.ncbi_taxonomy = cls.ncbi_db_repo / Path('pub') / Path('taxonomy')
-    cls.ncbi_refseq_release = cls.ncbi_db_repo / Path('refseq') / Path('release')
+    cls.NCBI_refseq_release = cls.ncbi_db_repo / Path('refseq') / Path('release')
 
     # Use the basic_project cookie to create the directory structure
     if new or (not Path(cls.project_path).is_dir()):
