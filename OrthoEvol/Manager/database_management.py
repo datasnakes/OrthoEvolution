@@ -14,7 +14,7 @@ from OrthoEvol.Manager.BioSQL import biosql
 
 class BaseDatabaseManagement(object):
 
-    def __init__(self, project, email, driver, project_path=None, proj_mana=ProjectManagement):
+    def __init__(self, email, driver, project=None, project_path=None, proj_mana=ProjectManagement):
         """
         This is the base class for managing various databases.  It provides functionality for downloading and creating
         various databases for your pipeline.  There are functions available for downloading files from NCBI (BLAST,
@@ -219,10 +219,10 @@ class DatabaseManagement(BaseDatabaseManagement):
     def __init__(self, config_file, proj_mana=ProjectManagement, **kwargs):
         kw ={}
         db_config_strategy = {}
-        with open(config_file) as cf:
+        with open(config_file, 'r') as cf:
             db_config = yaml.load(cf)
             # Get the parameters for the Base class
-            for key, value in db_config.items():
+            for key, value in db_config["Database_config"].items():
                 if isinstance(value, dict):
                     db_config_strategy[key] = value
                     continue
@@ -236,19 +236,20 @@ class DatabaseManagement(BaseDatabaseManagement):
         self.archive_flag = None
         self.delete_flag = None
         self.config_file = config_file
+        self.db_config_strategy = db_config_strategy
 
     def get_strategy_dispatcher(self, db_config_strategy):
         strategy_dispatcher = {}
         strategy_config = {}
         for strategy, strategy_kwargs in db_config_strategy.items():
-            if db_config_strategy[strategy] == "Full":
+            if strategy == "Full":
                 strategy_dispatcher, strategy_config = self.full(**strategy_kwargs)
             elif strategy == "NCBI":
-                sd, sc = self.ncbi(**strategy_kwargs)
+                sd, sc = self.NCBI(**strategy_kwargs)
                 strategy_dispatcher.update(sd)
                 strategy_config.update(sc)
             elif strategy == "NCBI_blast":
-                sd, sc = self.ncbi_blast(**strategy_kwargs)
+                sd, sc = self.NCBI_blast(**strategy_kwargs)
                 strategy_dispatcher.update(sd)
                 strategy_config.update(sc)
             elif strategy == "NCBI_blast_db":
@@ -260,11 +261,11 @@ class DatabaseManagement(BaseDatabaseManagement):
                 strategy_dispatcher.update(sd)
                 strategy_config.update(sc)
             elif strategy == "NCBI_pub_taxonomy":
-                sd, sc = self.ncbi_pub_taxonomy(**strategy_kwargs)
+                sd, sc = self.NCBI_pub_taxonomy(**strategy_kwargs)
                 strategy_dispatcher.update(sd)
                 strategy_config.update(sc)
             elif strategy == "NCBI_refseq_release":
-                sd, sc = self.ncbi_refseq_release(**strategy_kwargs)
+                sd, sc = self.NCBI_refseq_release(**strategy_kwargs)
                 strategy_dispatcher.update(sd)
                 strategy_config.update(sc)
             elif strategy == "ITIS":
@@ -278,12 +279,12 @@ class DatabaseManagement(BaseDatabaseManagement):
 
         return strategy_dispatcher, strategy_config
 
-    def projects(self, **kwargs):
+    def PROJECTS(self, **kwargs):
         print(self)
         return {}, {}
 
     def full(self, NCBI, ITIS, Projects=None,
-             configure_flag=None, archive_flag=None, delete_flag=None):
+             configure_flag=None, archive_flag=None, delete_flag=None, project_flag=None, _path=None):
         if configure_flag:
             NCBI["configure_flag"] = configure_flag
             ITIS["configure_flag"] = configure_flag
@@ -297,7 +298,7 @@ class DatabaseManagement(BaseDatabaseManagement):
         full_dispatcher = {}
         full_config = {}
         # Configure NCBI
-        ncbi_dispatcher, ncbi_config = self.ncbi(**NCBI)
+        ncbi_dispatcher, ncbi_config = self.NCBI(**NCBI)
         # Configure ITIS
         itis_dispatcher, itis_config = self.itis(**ITIS)
         # Configure projects
@@ -309,16 +310,16 @@ class DatabaseManagement(BaseDatabaseManagement):
         full_config.update(ncbi_config)
         full_config.update(itis_config)
         if Projects:
-            projects_dispatcher, projects_config = self.projects(**Projects)
+            projects_dispatcher, projects_config = self.PROJECTS(**Projects)
             full_dispatcher.update(projects_dispatcher)
             full_config.update(projects_config)
         # returns dict of config_dicts, dict of dispatcher_functions
         return full_dispatcher, full_config
 
-    def ncbi(self, NCBI_blast, NCBI_pub_taxonomy, NCBI_refseq_release, configure_flag=True, archive_flag=True,
-             delete_flag=False, database_path=None, archive_path=None):
-        ncbi_dispatcher = {}
-        ncbi_config = {}
+    def NCBI(self, NCBI_blast, NCBI_pub_taxonomy, NCBI_refseq_release, configure_flag=True, archive_flag=True,
+             delete_flag=False, database_path=None, archive_path=None, _path=None):
+        ncbi_dispatcher = {"NCBI": []}
+        ncbi_config = {"NCBI": []}
         if not archive_path:
             archive_path = str(self.user_archive)
         if not database_path:
@@ -335,9 +336,7 @@ class DatabaseManagement(BaseDatabaseManagement):
             NCBI_blast["archive_flag"] = None
             NCBI_pub_taxonomy["archive_flag"] = None
             NCBI_refseq_release["archive_flag"] = None
-            ncbi_dispatcher = {"NCBI": []}
             ncbi_dispatcher["NCBI"].append(archive)
-            ncbi_config["NCBI"] = {"NCBI": []}
             ncbi_config["NCBI"].append({
                 "database_path": database_path,
                 "archive_path": archive_path,
@@ -350,11 +349,11 @@ class DatabaseManagement(BaseDatabaseManagement):
             NCBI_refseq_release["delete_flag"] = delete_flag
 
         # Configure blast
-        nb_dispatcher, nb_config = self.ncbi_blast(**NCBI_blast)
+        nb_dispatcher, nb_config = self.NCBI_blast(**NCBI_blast)
         # Configure pub/taxonomy
-        npt_dispatcher, npt_config = self.ncbi_pub_taxonomy(**NCBI_pub_taxonomy)
+        npt_dispatcher, npt_config = self.NCBI_pub_taxonomy(**NCBI_pub_taxonomy)
         # Configure refseq/release
-        nrr_dispatcher, nrr_config = self.ncbi_refseq_release(**NCBI_refseq_release)
+        nrr_dispatcher, nrr_config = self.NCBI_refseq_release(**NCBI_refseq_release)
 
         # Create NCBI dispatcher
         ncbi_dispatcher.update(nb_dispatcher)
@@ -367,8 +366,8 @@ class DatabaseManagement(BaseDatabaseManagement):
 
         return ncbi_dispatcher, ncbi_config
 
-    def ncbi_blast(self, NCBI_blast_db, NCBI_blast_windowmasker_files,
-                   configure_flag=None, archive_flag=None, delete_flag=None, database_path=None, archive_path=None):
+    def NCBI_blast(self, NCBI_blast_db, NCBI_blast_windowmasker_files,
+                   configure_flag=None, archive_flag=None, delete_flag=None, database_path=None, archive_path=None, _path=None):
         ncbi_blast_dispatcher = {}
         ncbi_blast_config = {}
         if not archive_path:
@@ -407,7 +406,7 @@ class DatabaseManagement(BaseDatabaseManagement):
 
         return ncbi_blast_dispatcher, ncbi_blast_config
 
-    def ncbi_blast_db(self, configure_flag=None, archive_flag=None, delete_flag=None, archive_path=None, database_path=None):
+    def ncbi_blast_db(self, configure_flag=None, archive_flag=None, delete_flag=None, archive_path=None, database_path=None, _path=None):
         # Set up default parameter values.
         nbd_dispatcher = {"NCBI_blast_db": []}
         nbd_config = {"NCBI_blast_db": []}
@@ -432,7 +431,7 @@ class DatabaseManagement(BaseDatabaseManagement):
         return nbd_dispatcher, nbd_config
 
     def ncbi_blast_windowmasker_files(self, taxonomy_ids, configure_flag=None, archive_flag=None, delete_flag=None,
-                                      archive_path=None, database_path=None):
+                                      archive_path=None, database_path=None, _path=None):
         nbw_dispatcher = {"NCBI_blast_windowmasker_files": []}
         nbw_config = {"NCBI_blast_windowmasker_files": []}
         if not archive_path:
@@ -455,7 +454,7 @@ class DatabaseManagement(BaseDatabaseManagement):
             })
         return nbw_dispatcher, nbw_config
 
-    def ncbi_pub_taxonomy(self, configure_flag=None, archive_flag=None, delete_flag=None, archive_path=None, database_path=None):
+    def NCBI_pub_taxonomy(self, configure_flag=None, archive_flag=None, delete_flag=None, archive_path=None, database_path=None, _path=None):
         # TODO-ROB:  Add a ftp download of the correct taxdump file for biosql stuff in the self.dl-tax-db method
         npt_dispatcher = {"NCBI_pub_taxonomy": []}
         npt_config = {"NCBI_pub_taxonomy": []}
@@ -474,15 +473,15 @@ class DatabaseManagement(BaseDatabaseManagement):
         # Configure
         if configure_flag:
             # Download pub/taxonomy files
-            npt_dispatcher["NCBI_blast_db"].append(self.download_ncbi_taxonomy_dump_files)
-            npt_config["NCBI_blast_db"].append({
+            npt_dispatcher["NCBI_pub_taxonomy"].append(self.download_ncbi_taxonomy_dump_files)
+            npt_config["NCBI_pub_taxonomy"].append({
                 "database_path": database_path
             })
         return npt_dispatcher, npt_config
 
-    def ncbi_refseq_release(self, configure_flag=None, archive_flag=None, delete_flag=None, upload_flag=None, archive_path=None,
+    def NCBI_refseq_release(self, configure_flag=None, archive_flag=None, delete_flag=None, upload_flag=None, archive_path=None,
                             database_path=None, collection_subset=None, seqtype=None, seqformat=None, upload_list=None,
-                            upload_number=8, dispatcher_flag=False, add_to_default=None):
+                            upload_number=8, dispatcher_flag=False, add_to_default=None, _path=None):
         nrr_dispatcher = {"NCBI_refseq_release": {"arhive": [], "configure": [], "upload": []}}
         nrr_config = {"NCBI_refseq_release": {"arhive": [], "configure": [], "upload": []}}
         if not archive_path:
@@ -546,7 +545,7 @@ class DatabaseManagement(BaseDatabaseManagement):
                 })
         return nrr_dispatcher, nrr_config
 
-    def itis(self, ITIS_taxonomy, configure_flag=None, archive_flag=None, delete_flag=None, database_path=None, archive_path=None):
+    def itis(self, ITIS_taxonomy, configure_flag=None, archive_flag=None, delete_flag=None, database_path=None, archive_path=None, _path=None):
         itis_dispatcher = {}
         itis_config = {}
         if not archive_path:
