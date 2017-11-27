@@ -7,11 +7,11 @@ OrthoEvolution
 .. image:: https://api.codacy.com/project/badge/Grade/25062944794a4d14b5cab274a885ac27
    :target: https://www.codacy.com/app/datasnakes/OrthoEvolution?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=datasnakes/OrthoEvolution&amp;utm_campaign=Badge_Grade
 
-.. image:: https://badges.gitter.im/gitterHQ/gitter.png
-   :target: https://gitter.im/datasnakes/Lobby
+.. image:: https://img.shields.io/badge/chat-on%20gitter-753A88.svg
+   :target: https://gitter.im/datasnakes/OrthoEvolution
 
-.. image:: https://badge.fury.io/py/OrthoEvolution.svg
-   :target: https://badge.fury.io/py/OrthoEvolution
+.. image:: https://badge.fury.io/py/OrthoEvol.svg
+   :target: https://badge.fury.io/py/OrthoEvol
 
 .. image:: https://readthedocs.org/projects/orthoevolution/badge/?version=latest
    :target: http://orthoevolution.readthedocs.io/en/latest/?badge=latest
