@@ -267,5 +267,3 @@ Examples
 
 For more information, view the `slackify
 readme <https://github.com/OrthoEvolution/OrthoEvol-Scripts/tree/master/OrthoEvolution/Tools/slackify/README.md>`__.
-
-
