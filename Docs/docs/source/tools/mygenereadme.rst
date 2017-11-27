@@ -23,3 +23,5 @@ Use Blast Master Accession File output with MyGene
 
     MyGene(infile=infile, outfile='mygene_output.csv')
 
+    # Query mygene using your input file
+    MyGene.query_mygene()

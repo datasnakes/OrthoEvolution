@@ -17,7 +17,7 @@ project, the ProjectManagement class is used.
 However, this module does not have to be used to create a Flask webpage.
 The full repository can be used for higher level organization, or
 standalone projects can be made using the ProjectManagements
-*basic\_project* flag.
+``_basic_project_`` flag.
 
 The ``DataManagement`` class helps to tie everything together into a
 pipeline.
@@ -25,8 +25,10 @@ pipeline.
 Examples
 --------
 
-**Beware that this is under heavy development.** ### Utilizing
-DataManagement to run a pipeline
+**Beware that this is under heavy development.**
+
+Utilizing DataManagement to run a pipeline
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 .. code:: python
 
@@ -43,6 +45,7 @@ Utilizing DatabaseManagement to download databases
 Notes
 -----
 
-Please view our `BioSQL documentation <biosqlreadme.rst>`__
+Please view our `BioSQL
+documentation <https://github.com/datasnakes/OrthoEvolution/tree/master/OrthoEvol/Manager/BioSQL/README.md>`__
 and view some of the static/config related
 `files <https://github.com/datasnakes/OrthoEvolution/tree/master/OrthoEvol/Manager/config/>`__.

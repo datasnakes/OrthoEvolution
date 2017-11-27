@@ -13,11 +13,11 @@ Examples
 --------
 
 Running a Blast Pipeline
-^^^^^^^^^^^^^^^^^^^^^^^^
+~~~~~~~~~~~~~~~~~~~~~~~~
 
 .. code:: python
 
-❗ Software Dependencies
------------------------
+Software Dependencies
+---------------------
 
 Ensure that you have at least pbs version ``14.1.0``

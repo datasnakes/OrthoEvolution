@@ -15,7 +15,7 @@ the ``NcbiFTPClient`` to download files or databases much quicker if
 your system can handle that.
 
 If you're using Linux or a supercomputer and do not want to use
-threading to download ftp databases, you can look at `this standalone
+threading to download ftp databases, you can look at `this cli
 script <https://github.com/datasnakes/OrthoEvolution/blob/master/Examples/standalone-scripts/ncbi-download.py>`__.
 
 Examples
@@ -83,8 +83,8 @@ List all files in the current working directory
     # The default path is ftp.pwd() or the current directory
     ncbiftp.listfiles()
 
-:exclamation: Notes
--------------------
+Notes
+-----
 
 Check the `NCBI README <NCBIREADME.md>`__ for information about the
 preformatted blast databases that we use and suggest you use. We also
