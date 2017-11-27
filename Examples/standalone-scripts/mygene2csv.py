@@ -1,72 +1,35 @@
-"""This script is designed to generate some basic gene information from a list
-of refseqrna accession numbers for human genes."""
+#!/usr/bin/env python
+"""This script is designed to generate some basic gene information from a csv
+file of refseqrna accession numbers for human genes."""
 
-import mygene
-import pandas as pd
+import argparse
+import textwrap
+
+from OrthoEvol.Tools.mygene import MyGene
 
 
-class MG(object):
-    """Get gene information from mygene."""
+def main(infile, outfile):
+    """Use MyGene to generate basic gene information.
 
-    def __init__(self, filepath, outfile):
-        """Initialize my gene handle and refseq/accessions list.
-        Get the basic gene information. It's best to use a csv file and title
-        the row of the accessions list `Accessions`.
-        """
-        accfile = pd.read_csv(filepath)
-        self.acclist = list([accession.upper() for accession
-                             in accfile.Accessions])
-
-        # Set up mygene handle
-        self.mg = mygene.MyGeneInfo()
-
-        basic_info = self.mg.querymany(self.acclist, scopes='refseq',
-                                       fields='symbol,name,entrezgene,summary',
-                                       species='human', returnall=True,
-                                       as_dataframe=True, size=1, verbose=True)
-
-        # basic_info['out'] is the output dataframe.
-        # Use basic_info.keys() to find dict keys
-        # Reset the index on the dataframe so that each column is on the same
-        # level
-        basic_info['out'].reset_index(level=0, inplace=True)
-        data = basic_info['out']
-        gene_info = pd.DataFrame(data)
-        gene_info.drop(gene_info.columns[[0, 1, 2]], axis=1, inplace=True)
-        gene_info.rename(columns={'symbol': 'Gene Symbol',
-                                  'entrezgene': 'Entrez ID',
-                                  'name': 'Gene Name',
-                                  'summary': 'Summary'}, inplace=True)
-
-        # Create the NCBI links using a for loop
-        baseurl = 'https://www.ncbi.nlm.nih.gov/gene/'
-
-        # Create an empty list that can be appended
-        urllist = []
-
-        # Create a for loop that creates the url using the Entrez ID
-        # This loop also appends the url to a list and turns it into a link
-        for entrezid in gene_info['Entrez ID']:
-            entrezid = int(entrezid)
-            url = baseurl + str(entrezid)
-            # Important step
-            # Format the url so that it becomes a hyperlink
-            url = '<a href="{0}">{0}</a>'.format(url)
-            urllist.append(url)
-
-        # Turn the ncbiurls list into a dataframe using pandas
-        ncbiurls = pd.DataFrame(urllist, columns=['NCBI Link'], dtype=str)
-
-        # List of dataframes I want to combine
-        frames = [gene_info, ncbiurls]
-
-        # Merge the dataframes into 1 dataframe
-        alldata = pd.concat(frames, axis=1)
-
-        # Save the merged dataframes to a file
-        alldata.to_csv(outfile, index=False)
-
+    :param infile: Path to csv input file.
+    :param outfile: Path to csv output file.
+    """
+    mg = MyGene(infile, outfile)
+    mg.query_mygene()
 
 if __name__ == '__main__':
-    # TODO Argparse? hmm
-    mg = MG('mygene.csv', 'out.csv')
+    parser = argparse.ArgumentParser(formatter_class=argparse.RawDescriptionHelpFormatter,
+                                     description=textwrap.dedent('''\
+                                        This is a command line interface the uses mygene 
+                                        and pandas to convert a csv column of refseqrna 
+                                        accession numbers of human genes to gene information.
+                                        '''))
+    parser.add_argument('-i', '--infile', help='Name and path of your input file.',
+                        required=True)
+    parser.add_argument('-o', '--outfile',
+                        help='Name and path of your output file.',
+                        required=True)
+
+    args = parser.parse_args()
+
+    main(args.infile, args.outfile)
