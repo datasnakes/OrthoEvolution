@@ -15,6 +15,9 @@ class MyGene(object):
 
         Get the basic gene information. It's best to use a csv file and title
         the row of the accessions list `Accessions`.
+
+        :param infile: Input a csv file with a `Homo_sapiens` column
+        :param outfile: Desired path & name of the output file.
         """
         self.infile = infile
         self.outfile = outfile
@@ -28,13 +31,18 @@ class MyGene(object):
         self.species = 'human'  # Species to use.
 
     def _import_accfile(self):
-        """Import the accession file and make Homo_Sapiens column a list."""
+        """Import the accession file and make Homo_Sapiens column a list.
+
+        :return:
+        """
         accfile = pd.read_csv(self.infile)
         acclist = list([accession.upper() for accession in accfile.Homo_Sapiens])
         return acclist
 
     def query_mygene(self):
-        """Query mygene for gene information."""
+        """Query mygene for gene information.
+        :rtype:
+        """
         self.mygene_log.info('You are querying: %s' % self.accessions_list)
         basic_info = self.mg.querymany(self.accessions_list, scopes='refseq',
                                        fields=self.fields,
