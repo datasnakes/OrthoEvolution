@@ -9,6 +9,9 @@ Our readthedocs page is [here](http://orthoevolution.readthedocs.io/en/master/).
 
 You can install it using the `pypandoc` package as well.
 
+
+`pip install pypandoc`
+
 ```python
 # expects an installed pypandoc: pip install pypandoc
 from pypandoc.pandoc_download import download_pandoc
@@ -26,8 +29,11 @@ the documentation files of submodules using `submodule <submodulereadme.rst>`__
 4. Commit the changes and push to the branch.
 
 ### Creating the modules directory for apidocs
-Perform the bash command in the root directory of this package.
+Perform the below command in the root directory of this package. First, remove
+all of the existing files.
 ```bash
+rm -rf Docs/docs/source/modules/*.rst
+
 sphinx-apidoc OrthoEvol/ -o Docs/docs/source/modules
 ```
 
