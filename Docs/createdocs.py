@@ -1,11 +1,9 @@
-#from shutil import copyfile
+#"""Generate Sphinx docs from package READMEs."""
 #import os
 #from os.path import join
 #import configparser
 #
-#config = configparser.ConfigParser()
-#
-#config.read('docs.cfg')
+#from OrthoEvol.Tools.logit import LogIt
 #
 #try:
 #    import pypandoc
@@ -13,22 +11,23 @@
 #    from pypandoc.pandoc_download import download_pandoc
 #    download_pandoc()
 #
-#from OrthoEvol.Tools.logit import LogIt
-#
 #
 #class PandocConverter(object):
-#    """Convert files using the pypandoc wrapper.
+#    """Use the pypandoc wrapper to convert files."""
 #
-#    :param infile:  path to the input file
-#    :param outfile_path:  output path
-#    """
 #    def __init__(self, infile, outfile_path):
+#        """Convert files using the pypandoc wrapper.
+#
+#        :param infile:  path to the input file
+#        :param outfile_path:  output path
+#        """
 #        self.infile = infile
 #        self.outfile_path = outfile_path
 #        self.pandoc_log = LogIt().default('pandoc converter', None)
 #        self.md2rst()
 #
 #    def md2rst(self):
+#        """Use pypandoc to convert md to rst."""
 #        infile = str(self.infile)
 #        filepath, ext = infile.split('.')
 #        splitfilepath = filepath.split(os.sep)
@@ -44,8 +43,10 @@
 #
 #
 #class CreateDocs(object):
+#    """Create documentation files using PandocConverter."""
+#
 #    def __init__(self):
-#        """"Initialize this class."""
+#        """"Convert a list of README files to restructured text format."""
 #        self.createdocs_log = LogIt().default('create docs', None)
 #        self.current_dir = os.path.dirname(os.path.realpath(__file__))
 #        self._docsdir = os.path.join(self.current_dir, 'docs')
@@ -55,6 +56,7 @@
 #        self.convertfiles()
 #
 #    def docscfg2lists(self):
+#        """Use to docs.cfg file to create lists."""
 #        config = configparser.ConfigParser()
 #        os.chdir(self.current_dir)
 #        config.read('docs.cfg')
