@@ -13,7 +13,7 @@ We also provide a parallel module which can be used in conjunction with the
 handle that.
 
 If you're using Linux or a supercomputer and do not want to use threading to
-download ftp databases, you can look at [this standalone script](https://github.com/datasnakes/OrthoEvolution/blob/master/Examples/standalone-scripts/ncbi-download.py).
+download ftp databases, you can look at [this cli script](https://github.com/datasnakes/OrthoEvolution/blob/master/Examples/standalone-scripts/ncbi-download.py).
 
 
 
@@ -71,7 +71,7 @@ ncbiftp.listfiles(path='/blast/db/')
 ncbiftp.listfiles()
 ```
 
-:exclamation: Notes
+Notes
 -------------------
 Check the [NCBI README](NCBIREADME.md) for information about the preformatted
 blast databases that we use and suggest you use. We also provide an easy way to
