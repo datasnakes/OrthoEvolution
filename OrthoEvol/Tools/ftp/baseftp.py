@@ -7,9 +7,21 @@ from OrthoEvol.Tools.otherutils import FunctionRepeater
 
 
 class BaseFTPClient(object):
-    """The BaseFTP class provides basic functions for managing ftp clients."""
+    """The BaseFTP class provides basic functions for managing ftp clients.
+
+    .. seealso:: :class:`NcbiFTPClient`
+    """
+
     def __init__(self, ftpsite, email, keepalive=False, debug_lvl=0):
-        """Sets up the class by using the ftp site and email."""
+        """Connect to a ftp site using an email address.
+
+        :param ftpsite: Address of the ftp site you want to connect to.
+        :param email: Input your email address.
+        :param keepalive: Flag to determine whether to keepalive the connection (Default = False)
+        :type keepalive: bool
+        :param debug_lvl: Verbosity level for debugging ftp connection (Default = 0)
+        :type debug_lvl: int
+        """
         self._ftpsite = ftpsite
         self._email = email
         self._debug_lvl = debug_lvl
@@ -23,6 +35,8 @@ class BaseFTPClient(object):
         """Check to see if the FTP connection still exists using ftp.voidcmd
 
         Also, creates a filetransfer to prevent file transfer timeout.
+
+        .. warning:: :func:`_keepalive` is not well tested. Avoid using it if possible.
         """
         voidcmd = FunctionRepeater(5, self.ftp.voidcmd, 'NOOP')
         filetransfer = FunctionRepeater(5, self._filetransfer, 'README.ftp')
@@ -48,7 +62,10 @@ class BaseFTPClient(object):
             self._filetransfer_repeat.stop()
 
     def _filetransfer(self, filename):
-        """Mimics a file transfer to prevent transfer time out."""
+        """Mimics a file transfer to prevent transfer time out.
+
+        :param filename: Path of file to download.
+        """
         print("WAIT: Keeping connection open by transferring file.")
         current_path = self.ftp.pwd()
         self.ftp.cwd('/')
