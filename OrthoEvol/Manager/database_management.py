@@ -1,3 +1,4 @@
+"""Database management tools for the OrthoEvol package."""
 from pathlib import Path
 import yaml
 import requests
