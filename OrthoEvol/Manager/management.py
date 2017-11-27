@@ -1,27 +1,27 @@
 """Directory management tools for the package."""
 import os
-from pathlib import Path
 import pkg_resources
-
+from pathlib import Path
 from OrthoEvol import Cookies, Orthologs, Manager, Tools
 from OrthoEvol.Cookies import Oven
+from OrthoEvol.Tools.zipper.zipper import ZipUtils
 from OrthoEvol.Tools.logit import LogIt
 
 
 class Management(object):
-
     def __init__(self, repo=None, home=os.getcwd(), new_repo=False, **kwargs):
-        """
-        This is a base class for directory management.
+        """Base class for directory management.
 
-        It maps the directories of the OrthoEvol-Script package using the pathlib module, and turns the names of each
-        important directory into a pathlike object.  The base class gives the option of creating a new repository with
-        cookiecutter.
+        It maps the directories of the OrthoEvol-Script package using the
+        pathlib module, and turns the names of each important directory into
+        a pathlike object.  The base class gives the option of creating a new
+        repository with cookiecutter.
 
         :param repo(string): The name of the new repository to be created.
-        :param home(path or path-like): The home of the file calling this name.  When creating a new
-            repository it is best to explicitly name the home path.
-        :param new_repo(bool): Triggers cookiecutter to create a new repository.
+        :param home(path or path-like): The home of the file calling this name.
+                                        When creating a new repository it is
+                                        best to explicitly name the home path.
+        :param new_repo(bool): Creates a new repository.
         """
 
         self.repo = repo
@@ -57,6 +57,7 @@ class Management(object):
         self.sge = self.Tools / Path('sge')
         self.slackify = self.Tools / Path('slackify')
         self.utils = self.Tools / Path('utils')
+        self.zipper = self.Tools / Path('zipper')
 
         if self.repo:
             self.repo_path = self.file_home / Path(self.repo)
@@ -69,16 +70,17 @@ class Management(object):
 
 
 class RepoManagement(Management):
-
     def __init__(self, repo, user=None, home=os.getcwd(),
                  new_user=False, new_repo=False, **kwargs):
-        """
-        This is the Repository Management class, which inherits the Management base class.  This class has to be paired
-        with a repository name.  It gives the option of creating a filesystem for a new user and a new repository
+        """Manage repositories.
+
+        This class has to be paired with a repository name.  It gives the
+        option of creating a filesystem for a new user and a new repository
         using cookiecutter.
 
-        This class maps the named repository, which includes top level access to front facing web servers, important
-        documents, and the top level users directory.
+        This class maps the named repository, which includes top level access
+        to front facing web servers, important documents, and the top level
+        users directory.
 
         :param repo (string):  The name of the repository.
         :param user (string):  The name of the current user if any.
@@ -122,13 +124,17 @@ class UserManagement(RepoManagement):
 
     def __init__(self, repo, user, project=None, db_config_file=None, home=os.getcwd(),
                  new_user=False, new_project=False, new_db=False, archive=False, **kwargs):
-        """
-        This is the User Management class, which manages the current users directories.  This class has to be paired
-        with a repository and a user.  It gives access to user paths, and provides functionality for creating new
-        projects and new project db_config_file for the current user.  It also give the option of creating a new user.
+        """Manages the current user's directories.
 
-        This class maps a users directory, which gives access to directories for db_config_file (NCBI and proprietary), index
-        files for quickly retrieving project data, project log files, user affiliated journal articles, and projects.
+        This class has to be paired with a repository and a user.  It gives
+        access to user paths, and provides functionality for creating new
+        projects and new project db_config_file for the current user.  It also
+        gives the option of creating a new user.
+
+        This class maps a users directory, which gives access to directories
+        for db_config_file (NCBI and proprietary), index files for quickly
+        retrieving project data, project log files, user affiliated journal
+        articles, and projects.
 
         :param repo (string):  The name of the repository.
         :param user (string):  The name of the current user if any.
@@ -182,20 +188,22 @@ class UserManagement(RepoManagement):
             self.Kitchen.bake_the_db_repo(user_db=self.user_db, db_path_dict=self.db_path_dict, ncbi_db_repo=self.ncbi_db_repo)
             # TODO-ROB:  Determine what type of database as well.
 
-    # def zip_mail(self, comp_filename, zip_path, destination=''):
-    #     Zipper = ZipUtils(comp_filename, zip_path)
-    #     Zipper_path = Zipper.compress()
-    #     # TODO-ROB add proper destination syntax.
-    #     self.managementlog.info('%s is being sent to %s' % (Zipper_path, destination))
+    def zip_mail(self, comp_filename, zip_path, destination=''):
+        Zipper = ZipUtils(comp_filename, zip_path)
+        Zipper_path = Zipper.compress()
+        # TODO-ROB add proper destination syntax.
+        self.managementlog.info('%s is being sent to %s' % (Zipper_path, destination))
 
 
 class WebsiteManagement(RepoManagement):
-
     def __init__(self, repo, website, host='0.0.0.0', port='5252',
                  home=os.getcwd(), new_website=False, create_admin=False, **kwargs):
-        """This is the Website Management class, which installs a template for Flask using cookiecutter.  The
-        official cookiecutter-flask template (https://github.com/sloria/cookiecutter-flask) has been edited for our own
-        purposes.  This app class uses cookiecutter hooks to deploy the flask server.
+        """Install a template for Flask using cookiecutter.
+
+        The official cookiecutter-flask template
+        (https://github.com/sloria/cookiecutter-flask) has been edited for our
+        own purposes.  This app class uses cookiecutter hooks to deploy the
+        flask server.
 
         :param repo (string):  The name of the repository.
         :param website (string):  The name of the website.  Not a url, so
@@ -231,17 +239,19 @@ class WebsiteManagement(RepoManagement):
 
 
 class ProjectManagement(UserManagement):
-
     def __init__(self, repo, user, project, research=None, research_type=None,
                  app=None, home=os.getcwd(), new_project=False, new_research=False,
                  new_app=False, **kwargs):
-        """
-        This is the Project Management class, which manages the directories of the current project.  Each project
-        requires a repository, user, and project name.  It gives the option of starting a new type of research within
-        an existing project.  An application directory for the specific research/dataset can also be generated
+        """Manage the directories of the current project.
+
+        Each project requires a repository, user, and project name.  It gives
+        the option of starting a new type of research within an existing
+        project.  An application directory for the specific research/dataset
+        can also be generated
 
         It gives access to the project directories including index
-        files, the raw data, the processed data, the project db_config_file, and the web files for serving data.
+        files, the raw data, the processed data, the project db_config_file,
+        and the web files for serving data.
 
         :param repo (string):  The name of the repository.
         :param user (string):  The name of the current user if any.
@@ -287,4 +297,3 @@ class ProjectManagement(UserManagement):
                 self.app = app
                 self.app_path = self.project_path / Path(research_type) / Path(research) / Path('web')
                 self.Kitchen.bake_the_app(app=self.app)
-
