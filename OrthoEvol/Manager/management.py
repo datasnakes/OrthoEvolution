@@ -1,4 +1,4 @@
-"""Directory management tools for the package."""
+"""Directory management tools for the OrthoEvol package."""
 import os
 import pkg_resources
 from pathlib import Path
@@ -16,11 +16,11 @@ class Management(object):
         a pathlike object.  The base class gives the option of creating a new
         repository with cookiecutter.
 
-        :param repo(string): The name of the new repository to be created.
-        :param home(path or path-like): The home of the file calling this name.
+        :param repo (string): The name of the new repository to be created.
+        :param home (path or path-like): The home of the file calling this name.
                                         When creating a new repository it is
                                         best to explicitly name the home path.
-        :param new_repo(bool): Creates a new repository.
+        :param new_repo (bool): Creates a new repository.
         """
 
         self.repo = repo
@@ -68,6 +68,7 @@ class Management(object):
 
 
 class RepoManagement(Management):
+    """Repository Management for OrthoEvol."""
     def __init__(self, repo, user=None, home=os.getcwd(),
                  new_user=False, new_repo=False, **kwargs):
         """Manage repositories.
@@ -111,10 +112,13 @@ class RepoManagement(Management):
         if new_user is True:
             self.managementlog.info('The user cookie is being prepared for the Oven.')
             self.Kitchen.bake_the_user()
+
+
 # TODO-ROB:  Edit the setup.py file for cookiecutter.
 
 
 class UserManagement(RepoManagement):
+    """User Management for OrthoEvol."""
     # TODO-ROB CREATE THESE IN A VIRTUAL ENVIRONMENT FOR EACH USER
     # TODO-ROB The virtual environment can be the name of the user
     # TODO-ROB When the user logs in, they will activate the virtual environment
@@ -183,12 +187,15 @@ class UserManagement(RepoManagement):
             self.Kitchen.bake_the_project()
         if new_db is True:
             self.managementlog.info('The database cookie is being prepared for the Oven.')
-            self.Kitchen.bake_the_db_repo(user_db=self.user_db, db_path_dict=self.db_path_dict, ncbi_db_repo=self.ncbi_db_repo)
+            self.Kitchen.bake_the_db_repo(user_db=self.user_db, db_path_dict=self.db_path_dict,
+                                          ncbi_db_repo=self.ncbi_db_repo)
             # TODO-ROB:  Determine what type of database as well.
 
     def zip_mail(self, comp_filename, zip_path, destination=''):
         pass
         # TODO Remodel this.
+
+
 #        Zipper = ZipUtils(comp_filename, zip_path)
 #        Zipper_path = Zipper.compress()
 #        # TODO-ROB add proper destination syntax.
@@ -196,6 +203,7 @@ class UserManagement(RepoManagement):
 
 
 class WebsiteManagement(RepoManagement):
+    """Website Management for OrthoEvol."""
     def __init__(self, repo, website, host='0.0.0.0', port='5252',
                  home=os.getcwd(), new_website=False, create_admin=False, **kwargs):
         """Install a template for Flask using cookiecutter.
@@ -239,6 +247,7 @@ class WebsiteManagement(RepoManagement):
 
 
 class ProjectManagement(UserManagement):
+    """Project Management for OrthoEvol."""
     def __init__(self, repo, user, project, research=None, research_type=None,
                  app=None, home=os.getcwd(), new_project=False, new_research=False,
                  new_app=False, **kwargs):
