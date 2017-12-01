@@ -11,6 +11,12 @@ from OrthoEvol.Tools.utils import makedirectory
 class FilteredTree(object):
     """# TODO Insert Doctring """
     def __init__(self, alignment, dataType='CODON', home=os.getcwd()):
+        """
+
+        :param alignment:
+        :param dataType:
+        :param home:
+        """
         self.home = Path(home)
         self.iqtree_path = self.home / Path('IQTREE')
         self.tree_file = self.iqtree_path / Path(alignment + '.treefile')
@@ -25,8 +31,11 @@ class FilteredTree(object):
         copy(self.tree_file, str(self.home / Path(self.gene + '_iqtree.nwk')))
 
     def iqtree_best_tree(self, alignment, dataType):
-        """Generate and save the best tree from IQTree by importing the filtered
-        alignment.
+        """Generate and save the best tree from IQTree.
+
+        :param alignment:
+        :param dataType:
+        :return:
         """
         iqtree_cline = IQTreeCommandline(alignment=alignment,
                                          dataType=dataType)

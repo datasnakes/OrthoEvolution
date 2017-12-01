@@ -13,11 +13,15 @@ from OrthoEvol.Orthologs.Blast.comparative_genetics import BaseComparativeGeneti
 
 
 class GenBank(object):
+    """This class will handle GenBank files in various ways."""
+
     def __init__(self, project, project_path=None, solo=False, multi=True, archive=False, min_fasta=True, blast=OrthoBlastN, **kwargs):
-        """
-        This class will handle GenBank files in various ways.  It allows for refseq-release .gbff files to be downloaded
-        from NCBI and uploaded to a BioSQL database (biopython).  Single .gbk files can be downloaded from the .gbff,
-        and uploaded to a custom BopSQL database for faster acquisition of GenBank data.
+        """Handle GenBank files in various ways.
+
+        It allows for refseq-release .gbff files to be downloaded from NCBI
+        and uploaded to a BioSQL database (biopython).  Single .gbk files can be
+        downloaded from the .gbff, and uploaded to a custom BopSQL database for
+        faster acquisition of GenBank data.
 
         :param project:  The name of the project.
         :param project_path: The relative path to the project.
@@ -39,7 +43,8 @@ class GenBank(object):
         self.genbanklog = LogIt().default(logname="GenBank", logfile=None)
 
         # Configuration of class attributes
-        add_self = attribute_config(self, composer=blast, checker=OrthoBlastN, checker2=BaseComparativeGenetics,
+        add_self = attribute_config(self, composer=blast, checker=OrthoBlastN,
+                                    checker2=BaseComparativeGenetics,
                                     project=project, project_path=project_path)
         for var, attr in add_self.__dict__.items():
             setattr(self, var, attr)
@@ -56,7 +61,8 @@ class GenBank(object):
 
     @staticmethod
     def name_fasta_file(path, gene, org, feat_type, feat_type_rank, extension, mode):
-        """
+        """Name a fasta file.
+
         Provide a uniquely named FASTA file:
         * Coding sequence:
             * Single - "<path>/<gene>_<organism><feat_type_rank>.<extension>"
@@ -98,8 +104,7 @@ class GenBank(object):
 
     @staticmethod
     def protein_gi_fetch(feature):
-        """
-        Retrieve the protein gi number.
+        """Retrieve the protein gi number.
 
         :param feature:  Search the protein feature for the GI number.
         :return:  The protein GI number as a string.
@@ -112,17 +117,21 @@ class GenBank(object):
                 return p_gi
 
     def create_post_blast_gbk_records(self, org_list, gene_dict):
-        """
-        After a blast has completed and the accession numbers have been compiled into an accession file, this class
-        searches a local NCBI refseq release database composed of GenBank records.  This method will create a single
-        GenBank file (.gbk) for each ortholog with an accession number.  The create_post_blast_gbk_records is only callable if the
-        the instance is composed by one of the Blast classes.  This method also requires an NCBI refseq release
-        database to be set up with the proper GenBank Flat Files (.gbff) files.
+        """Create a single GenBank file for each ortholog.
+
+        After a blast has completed and the accession numbers have been compiled
+        into an accession file, this class searches a local NCBI refseq release
+        database composed of GenBank records.  This method will create a single
+        GenBank file (.gbk) for each ortholog with an accession number.
+        The create_post_blast_gbk_records is only callable if the
+        the instance is composed by one of the Blast classes.  This method also
+        requires an NCBI refseq release database to be set up with the proper
+        GenBank Flat Files (.gbff) files.
 
         :param org_list:  List of organisms
         :param gene_dict:  A nested dictionary for accessing accession numbers.
                            (e.g. gene_dict[GENE][ORGANISM} yields an accession number)
-        :return:  Does not return an object, but it does create all the proper genbank files.
+        :return:  Does not return an object, but creates genbank files.
         """
         # Parse the tier_frame_dict to get the tier
         for G_KEY, _ in self.tier_frame_dict.items():
@@ -140,17 +149,18 @@ class GenBank(object):
                     self.get_gbk_file(accession, GENE, ORGANISM, server_flag=server_flag)
 
     def get_gbk_file(self, accession, gene, organism, server_flag=None):
-        """
-        This method searches a GenBank database for a target accession number.  Generally, there are multiple GenBank
-        database files for one NCBI dataset.
+        """Search a GenBank database for a target accession number.
+
+        This function searches through the given NCBI databases (created by
+        uploading NCBI refseq .gbff files to a BioPython BioSQL database) and
+        creates single GenBank files.  This function can be used after a
+        blast or on its own.  If used on it's own then the NCBI .db files must
+        be manually moved to the proper directories.
 
         :param accession: Accession number of interest without the version.
         :param gene: Target gene of the accession number parameter.
         :param organism: Target organism of the accession number parameter.
-        :return: This function searches through the given NCBI databases (created by uploading NCBI refseq .gbff files
-                 to a BioPython BioSQL database) and creates single GenBank files.  This function can be used after a
-                 blast or on its own.  If used on it's own then the NCBI .db files must be manually moved to the proper
-                 directories.
+        :return:
         """
 
         gene_path = self.raw_data / Path(gene) / Path('GENBANK')
@@ -188,17 +198,17 @@ class GenBank(object):
             raise FileNotFoundError
 
     def gbk_quality_control(self, gbk_file, gene, organism):
-        """
-        This is a quality control method.  It makes sure that the data we're using is correct.  It takes the GenBank
-        record and check to make sure the Gene and Organism from the GenBank record match the Gene and Organism from the
-        accession file.  If not, then the Blast has returned the wrong accession number.
+        """Ensures the quality or validity of the retrieved genbank record.
+
+        It takes the GenBank record and check to make sure the Gene and Organism
+        from the GenBank record match the Gene and Organism from the accession
+        file.  If not, then the Blast has returned the wrong accession number.
 
         :param gbk_file:  The path to a GenBank file.
         :param gene:  A gene name from the Accession file.
         :param organism:  A gene name from the Accession file.
         :return:
         """
-
         # TODO-ROB:  Check the bad data here against the misssing/duplicate files
         record = SeqIO.read(gbk_file, 'genbank')
         gene_flag = False
@@ -215,7 +225,8 @@ class GenBank(object):
             self.genbanklog.critical("Two organisms exist in the GenBank file.  Is this normal?")
             raise BrokenPipeError
 
-        # Check to make sure the organism in the GenBank file matches the organism from the accession file
+        # Check to make sure the organism in the GenBank file matches the
+        # organism from the accession file
         if gbk_organism == organism:
             self.genbanklog.info("The GenBank organism, %s, has been verified for %s." % (organism, gene))
         else:
@@ -223,7 +234,8 @@ class GenBank(object):
 
         # Get the gene from the GenBank files
         gbk_genes = record.features[1].qualifiers["gene"]
-        # Get the synonyms from the GenBank file if they exist and add them to the list.
+        # Get the synonyms from the GenBank file if they exist and add them to
+        # the list.
         if "gene_synonym" in str(record.features[1].qualifiers.keys()):
             base_gene_name = gbk_genes
             gbk_genes.extend(record.features[1].qualifiers["gene_synonym"])
@@ -231,7 +243,8 @@ class GenBank(object):
             self.gbk_gene_synonym[base_gene_name] = []
             self.gbk_gene_synonym[base_gene_name].extend(gbk_genes)
 
-        # Check to make sure the gene in the GenBank file matches the gene from the accession file
+        # Check to make sure the gene in the GenBank file matches the gene from
+        # the accession file
         for gbk_gene in gbk_genes:
             if gbk_gene == gene:
                 gene_flag = False
@@ -260,11 +273,13 @@ class GenBank(object):
         self.duplicated_dict["validated"][accession] = [gene, organism]
 
     def gbk_upload(self):
-        """
-        This method is only usable after creating GenBank records with this class.  It uploads a BioSQL databases with
-        target GenBank data (.gbk files).  This creates a compact set of data for each project.
+        """Upload a BioSQL database with target GenBank data (.gbk files).
 
-        :return:  Does not return an object, but creates a database for each gene-tier in the dataset.
+        This method is only usable after creating GenBank records with this
+        class.  It uploads a BioSQL databases with target GenBank data (.gbk
+        files).  This creates a compact set of data for each project.
+
+        :return:  Does not return an object.
         """
 
         t_count = 0
@@ -317,13 +332,14 @@ class GenBank(object):
                         raise
 
     def get_fasta_files(self, acc_dict, db=True):
-        """
-        This method creates FASTA files for every GenBank record in the accession number dictionary.  It can search
-        through a BioSQL database or it can crawl a directory for .gbk files.
+        """Create FASTA files for each GenBank record in the accession dictionary.
+
+        It can search through a BioSQL database or it can crawl a directory
+        for .gbk files.
 
         :param acc_dict:  An accession dictionary like the one created by CompGenObjects.
         :param db:  A flag that determines whether or not to use the custom BioSQL database or to use .gbk files.
-        :return:  Does not return an object, but it will return a set of FASTA files for each GenBank record.
+        :return:  Returns FASTA files for each GenBank record.
         """
 
         # Get FASTA files from the BioSQL GenBank databases.

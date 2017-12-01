@@ -9,8 +9,16 @@ from OrthoEvol.Manager.config import paml_control_files
 
 
 class CodemlRun(object):
+    """Run codeml."""
 
     def __init__(self, P2N_alignment, iqtree_newick, control_file='codeml-8-11-2017.ctl', home=os.getcwd()):
+        """Run codemly using input from pal2nal and iqtree.
+
+        :param P2N_alignment:
+        :param iqtree_newick:
+        :param control_file:
+        :param home:
+        """
         # Set up paths
         self.home = Path(home)
         self.paml_path = self.home / Path('PAML')

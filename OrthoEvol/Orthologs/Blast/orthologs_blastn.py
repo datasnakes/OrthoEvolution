@@ -20,6 +20,7 @@ from OrthoEvol.Orthologs.Blast.utils import gene_list_config, map_func
 
 class OrthoBlastN(ComparativeGenetics):
     """Combines Project Management features with NCBI's Blast+."""
+
     def __init__(self, project, template=None, save_data=True, **kwargs):
         """This class inherits from the CompGenFiles class.
 
@@ -115,7 +116,8 @@ class OrthoBlastN(ComparativeGenetics):
 
             # Create a temporary fasta file using blastdbcmd
             try:
-                blastdbcmd_query = "blastdbcmd -entry {query} -db refseq_rna -outfmt %f -out {temp fasta}".format(**query_config)
+                blastdbcmd_query = "blastdbcmd -entry {query} -db refseq_rna -outfmt %f -out {temp fasta}".format(
+                    **query_config)
                 blastdbcmd_status = run(blastdbcmd_query, stdout=PIPE, stderr=PIPE, shell=True, check=True)
                 self.blastn_log.info("Extracted query refseq sequence to a temp.fasta file from BLAST database.")
             except CalledProcessError as err:
@@ -135,8 +137,8 @@ class OrthoBlastN(ComparativeGenetics):
         if auto_start is True:
             # Automatically run blast after the configuration
             self.runblast(genes=self.current_gene_list,
-                           query_organism=query_organism,
-                           pre_configured=auto_start)
+                          query_organism=query_organism,
+                          pre_configured=auto_start)
 
     def blast_xml_parse(self, xml_path, gene, organism):
         """Parse the blast XML record get the best hit accession number.
@@ -254,7 +256,7 @@ class OrthoBlastN(ComparativeGenetics):
                             self.blastn_log.info('%s was deleted' % xml)
 
                     else:
-                        self.blastn_log.warning('Blast run has started.' )
+                        self.blastn_log.warning('Blast run has started.')
                         start_time = self.get_time()
                         self.blastn_log.info("Current gene: %s (%s)." % (gene, self.tier_dict[gene]))
                         self.blastn_log.info("Current organism: %s (%s)." % (organism, taxon_id))
@@ -267,14 +269,14 @@ class OrthoBlastN(ComparativeGenetics):
 
                                 # Configure your blastn parameters as a dictionary
                                 blastn_params = {'query': query_seq_path,
-                                                'db': 'refseq_rna',
-                                                'strand': 'plus',
-                                                'evalue': 0.01,
-                                                'outfmt': 5,
-                                                # XXX Window masking will be implemented soon
-                                                # 'window_masker_db': wmaskerpath,
-                                                'max_target_seqs': 10,
-                                                'task': 'blastn'}
+                                                 'db': 'refseq_rna',
+                                                 'strand': 'plus',
+                                                 'evalue': 0.01,
+                                                 'outfmt': 5,
+                                                 # XXX Window masking will be implemented soon
+                                                 # 'window_masker_db': wmaskerpath,
+                                                 'max_target_seqs': 10,
+                                                 'task': 'blastn'}
 
                                 # Use Biopython's NCBIBlastnCommandline tool
                                 result_handle = NcbiblastnCommandline(**blastn_params)
