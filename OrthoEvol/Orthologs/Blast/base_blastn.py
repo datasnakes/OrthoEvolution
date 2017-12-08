@@ -15,6 +15,8 @@ from OrthoEvol.Orthologs.Blast.utils import gene_list_config, map_func
 
 
 class BaseBlastN(ComparativeGenetics):
+    """Base BlastN class."""
+
     def __init__(self, project, blast_method, template=None, save_data=True, **kwargs):
         """This class inherits from the CompGenFiles class.
 
@@ -28,8 +30,8 @@ class BaseBlastN(ComparativeGenetics):
         :param blast_method:  Method used for blasting. (1, 2, None)
         :param template:  The accession file template.
         :param save_data:  A flag for saving the post_blast data to an excel file.
-        :param kwargs:
-        """
+        :param kwargs:"""
+
         super().__init__(project=project, template=template, save_data=save_data, **kwargs)
 
         # Create a date format
@@ -66,8 +68,16 @@ class BaseBlastN(ComparativeGenetics):
     def blast_method_selection(self, method):
         """Select a method for running blastn.
 
-        :param method: a blast method - gi or wm
+:param method: a blast method - gi or wm
+
+
+
+        :param method:
+
+
+
         """
+
         if method == '1':
             # Accessions/Seqids List
             blastn_parameters = {'query': '', 'db': 'refseq_rna',
@@ -94,14 +104,26 @@ class BaseBlastN(ComparativeGenetics):
     def blast_config(self, query_accessions, query_organism, auto_start=False):
         """This method configures everything for our BLAST workflow.
 
-        It configures the accession file, which works with interrupted Blasts.
+It configures the accession file, which works with interrupted Blasts.
         It configures a gene_list for blasting the right genes.
 
         :param query_accessions:  A list of query accession numbers.  Each gene needs one from the same organism.
         :param query_organism:  The name of the query organism for post configuration.
         :param auto_start:  A flag that determines whether the blast starts automatically.
         :return:
+
+
+
+        :param query_accessions:
+
+        :param query_organism:
+
+        :param auto_start:  (Default value = False)
+
+
+
         """
+
         self.blastn_log.info('Blast configuration has begun.')
         self.blastn_log.info('Configuring the accession file.')
 
@@ -168,11 +190,23 @@ class BaseBlastN(ComparativeGenetics):
     def blast_xml_parse(self, xml_path, gene, organism):
         """Parse the blast XML record get the best hit accession number.
 
-        :param xml_path:  Absolute path to the blast record.
+:param xml_path:  Absolute path to the blast record.
         :param gene:  The gene of interest.
         :param organism:  The organism of interest.
         :return:  Returns one accession number in the building accession file.
+
+
+
+        :param xml_path:
+
+        :param gene:
+
+        :param organism:
+
+
+
         """
+
         accession = gi = raw_bitscore = description = None
         record_dict = {}
         xmlsplit = xml_path.split(os.sep)
@@ -228,14 +262,26 @@ class BaseBlastN(ComparativeGenetics):
     def runblast(self, genes=None, query_organism=None, pre_configured=False):
         """Run NCBI's blastn.
 
-        This method actually performs NCBI's blastn.
+This method actually performs NCBI's blastn.
         It requires configuring before it can be utilized.
 
         :param genes:  Gene of interest.
         :param query_organism:  Query organism.
         :param pre_configured:  Determines if the blast needs configuring.
         :return:
+
+
+
+        :param genes:  (Default value = None)
+
+        :param query_organism:  (Default value = None)
+
+        :param pre_configured:  (Default value = False)
+
+
+
         """
+
         if pre_configured is False:
             query = self.df[query_organism].tolist()
             self.blast_config(query_accessions=query,
@@ -344,8 +390,10 @@ class BaseBlastN(ComparativeGenetics):
                             self.blastn_log.info("Post blast analysis is complete")
 
                         # TODO-ROB Archive function here
-            self.blastn_log.info("BLAST has completed. Check your output data.")
+            self.blastn_log.info("BLAST has completed. Check your output.")
 
 
 class BlastFailure(BaseException):
+    """Simple Blast Execption Class."""
+
     pass

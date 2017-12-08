@@ -33,14 +33,15 @@ class MyGene(object):
     def _import_accfile(self):
         """Import the accession file and make Homo_Sapiens column a list.
 
-        :return: Returns a list of accessions.
-        """
+:return: Returns a list of accessions."""
+
         accfile = pd.read_csv(self.infile)
         acclist = list([accession.upper() for accession in accfile.Homo_Sapiens])
         return acclist
 
     def query_mygene(self):
         """Query mygene for gene information."""
+
         self.mygene_log.info('You are querying: %s' % self.accessions_list)
         basic_info = self.mg.querymany(self.accessions_list, scopes='refseq',
                                        fields=self.fields,

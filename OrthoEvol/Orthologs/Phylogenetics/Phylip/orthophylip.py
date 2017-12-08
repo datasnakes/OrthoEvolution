@@ -5,8 +5,8 @@ import sys
 
 class Phylip(object):
     def __init__(self, inputfile):
-        """ The input file should be a phylip formatted multiple sequence
-        alignment."""
+    """The input file should be a phylip formatted multiple sequence
+    alignment."""
 
         self._rename = os.rename
         if sys.platform == 'win32' or 'win64':
@@ -19,8 +19,13 @@ class Phylip(object):
         self.inputfile = "infile"
 
     def dnapars(self, outfile, outtree):
-        """ Maximum Parsimony using Phylip executable, dnapars,
-        within unix shell."""
+        """Maximum Parsimony using Phylip executable, dnapars,
+within unix shell.
+
+        :param outfile: 
+        :param outtree: 
+
+        """
         dnapars = pexpect.spawnu("dnapars infile")
         dnapars.sendline("Y\r")
         dnapars.waitnoecho()
@@ -28,7 +33,12 @@ class Phylip(object):
         self._rename("outtree", outtree + "_maxparsimony_tree")
 
     def dnaml(self, outfile, outtree):
-        """Maximum Likelihood using dnaml within a unix shell. """
+        """Maximum Likelihood using dnaml within a unix shell.
+
+        :param outfile: 
+        :param outtree: 
+
+        """
         dnaml = pexpect.spawnu("dnaml infile")
         dnaml.sendline("Y\r")
         dnaml.waitnoecho()
@@ -36,6 +46,11 @@ class Phylip(object):
         self._rename("outtree", outtree + "_maxlikelihood_tree")
 
     def dnadist(self, dnadist_output):
+        """
+
+        :param dnadist_output: 
+
+        """
         dnadist = pexpect.spawnu("dnadist infile")
         dnadist.sendline("Y\r")
         dnadist.waitnoecho()

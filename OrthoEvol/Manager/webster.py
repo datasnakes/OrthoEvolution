@@ -8,7 +8,7 @@ from pkg_resources import resource_filename
 
 # Based off of https://github.com/etetoolkit/ete/blob/master/ete3/citation.py
 class Webster(object):
-    """Webster is a class of commonly used dictionaries for OrthoEvol."""
+    """Webster is a class of commonly used dictionaries for OrthoEvol."""
 
     archive_options = {
         "Full": Path(''),
@@ -71,12 +71,16 @@ class Webster(object):
     def add(self, ref):
         """Add a reference.
 
-        :param ref: A reference dictionary.
-        :return:
-        """
+:param ref: A reference dictionary.
+        :return:
+
+        :param ref: 
+
+        """
         self.citations.add(self.reference_options[ref])
 
     def show(self):
+        """ """
         wrapper = twrap.TextWrapper(width=75, initial_indent="   ",
                                     subsequent_indent="      ",
                                     replace_whitespace=False)

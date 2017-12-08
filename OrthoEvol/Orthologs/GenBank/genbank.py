@@ -32,7 +32,7 @@ class GenBank(object):
         :param blast:  The blast parameter is used for composing various
                        Orthologs.Blast classes.  Can be a class, a dict,
                        or none.
-        :returns:  .gbff files/databases, .gbk files/databases, and FASTA files.
+        :returns:  .gbff files/databases, .gbk files/databases, & FASTA files.
         """
 
         # TODO-ROB: Change the way the file systems work.
@@ -74,11 +74,15 @@ class GenBank(object):
         :param path:  The path where the file will be made.
         :param gene:  The gene name.
         :param org:  The organism name.
-        :param feat_type:  The type of feature from the GenBank record.  (CDS, UTR, misc_feature, variation, etc.)
-        :param feat_type_rank:  The feature type  + the rank.  (There can be multiple misc_features and variations)
-        :param extension:  The file extension.  (".ffn", ".faa", ".fna", ".fasta")
-        :param mode:  The mode ("w" or "a") for writing the file.  Write to a solo-FASTA file.  Append a multi-FASTA
-                      file.
+        :param feat_type:  The type of feature from the GenBank record.
+                           (CDS, UTR, misc_feature, variation, etc.)
+        :param feat_type_rank:  The feature type  + the rank.
+                                (There can be multiple misc_features and
+                                 variations)
+        :param extension:  The file extension.
+                           (".ffn", ".faa", ".fna", ".fasta")
+        :param mode:  The mode ("w" or "a") for writing the file.  Write to a
+                      solo-FASTA file.  Append a multi-FASTA file.
         :return:  The uniquely named FASTA file.
         """
 
@@ -130,9 +134,11 @@ class GenBank(object):
 
         :param org_list:  List of organisms
         :param gene_dict:  A nested dictionary for accessing accession numbers.
-                           (e.g. gene_dict[GENE][ORGANISM} yields an accession number)
+                           (e.g. gene_dict[GENE][ORGANISM} yields an accession
+                           number)
         :return:  Does not return an object, but creates genbank files.
         """
+
         # Parse the tier_frame_dict to get the tier
         for G_KEY, _ in self.tier_frame_dict.items():
             tier = G_KEY
@@ -160,6 +166,7 @@ class GenBank(object):
         :param accession: Accession number of interest without the version.
         :param gene: Target gene of the accession number parameter.
         :param organism: Target organism of the accession number parameter.
+        :param server_flag:  (Default value = None)
         :return:
         """
 
@@ -172,7 +179,8 @@ class GenBank(object):
             # Stop searching if the GenBank record has been created.
             if server_flag is True:
                 break
-            server = BioSeqDatabase.open_database(driver='sqlite3', db=str(db_file_path))
+            server = BioSeqDatabase.open_database(driver='sqlite3',
+                                                  db=str(db_file_path))
             # Parse the sub-databases
             for SUB_DB_NAME in server.keys():
                 db = server[SUB_DB_NAME]
@@ -200,7 +208,7 @@ class GenBank(object):
     def gbk_quality_control(self, gbk_file, gene, organism):
         """Ensures the quality or validity of the retrieved genbank record.
 
-        It takes the GenBank record and check to make sure the Gene and Organism
+    It takes the GenBank record and check to make sure the Gene and Organism
         from the GenBank record match the Gene and Organism from the accession
         file.  If not, then the Blast has returned the wrong accession number.
 
@@ -209,6 +217,7 @@ class GenBank(object):
         :param organism:  A gene name from the Accession file.
         :return:
         """
+
         # TODO-ROB:  Check the bad data here against the misssing/duplicate files
         record = SeqIO.read(gbk_file, 'genbank')
         gene_flag = False
@@ -275,12 +284,12 @@ class GenBank(object):
     def gbk_upload(self):
         """Upload a BioSQL database with target GenBank data (.gbk files).
 
-        This method is only usable after creating GenBank records with this
+This method is only usable after creating GenBank records with this
         class.  It uploads a BioSQL databases with target GenBank data (.gbk
         files).  This creates a compact set of data for each project.
 
-        :return:  Does not return an object.
-        """
+        :return:  Does not return an object."""
+
 
         t_count = 0
         # Parse the tier dictionary
@@ -337,8 +346,11 @@ class GenBank(object):
         It can search through a BioSQL database or it can crawl a directory
         for .gbk files.
 
-        :param acc_dict:  An accession dictionary like the one created by CompGenObjects.
-        :param db:  A flag that determines whether or not to use the custom BioSQL database or to use .gbk files.
+        :param acc_dict:  An accession dictionary like the one created by
+                          CompGenObjects.
+        :param db:  A flag that determines whether or not to use the custom
+                    BioSQL database or to use .gbk files.
+                    (Default value = True)
         :return:  Returns FASTA files for each GenBank record.
         """
 
@@ -371,18 +383,16 @@ class GenBank(object):
                         self.genbanklog.info("FASTA files for %s created." % gbk_file)
 
     def write_fasta_files(self, record, acc_dict):
-        """
-        This method initializes a FASTA file by creating a dictionary for formatting the FASTA header and the following
-        sequence.
+        """Create a dictionary for formatting the FASTA header & sequence.
 
         :param record:  A GenBank record created by BioPython.
-        :param acc_dict:  The accession dictionary from the CompGenObjects class.
+        :param acc_dict:  Accession dictionary from the CompGenObjects class.
         :return:
         """
 
         feat_type_list = []
         for feature in record.features:
-            # ############ Set up variables to use for dictionary values ############# #
+            # XXX Set up variables to use for dictionary values !!!
             # Basic variables.
             accession = record.id
             gene = acc_dict[accession][0]
@@ -401,10 +411,11 @@ class GenBank(object):
                 feat_type_rank = feat_type
             else:
                 feat_type_rank = feat_type + str(duplicate_num)
-            # ############ End ############# #
+            # XXX END !!!
 
-            # TODO-ROB:  Remove the GI number stuff here or at least prepare for file with no GI.
-            # ######### Create a dictionary and format FASTA file entries. ######### #
+            # TODO-ROB:  Remove the GI number stuff here or at least prepare for
+            # file with no GI.
+            # Create a dictionary and format FASTA file entries.
             fmt = {
                 'na_gi': str(record.annotations['gi']),
                 'aa_gi': str(self.protein_gi_fetch(feature)),
@@ -438,14 +449,14 @@ class GenBank(object):
                 self.multi_fasta(na_entry, aa_entry, fmt)
 
     def solo_fasta(self, na_entry, aa_entry, fmt):
-        """
-        This method writes a sequence of a feature to a uniquely named file using a dictionary for formatting.
+        """This method writes a sequence of a feature to a uniquely named file using a dictionary for formatting.
 
         :param na_entry:  A string representing the Nucleic Acid sequence data in FASTA format.
         :param aa_entry:  A string representing the Amino Acid sequence data in FASTA format.
         :param fmt:  A dictionary for formatting the FASTA entries and the file names.
         :return:  Does not return an object, but creates single entry FASTA files.
         """
+
         mode = 'w'
 
         # Create the desired variables from the formatter dictionary.
@@ -484,15 +495,16 @@ class GenBank(object):
             file.close()
 
     def multi_fasta(self, na_entry, aa_entry, fmt):
-        """
-        This method appends an othologous sequence of a feature to a uniquely named file using a dictionary for
-        formatting.
+        """Append an othologous sequence of a feature to a uniquely named file.
+
+        Usese a dictionary for formatting.
 
         :param na_entry:  A string representing the Nucleic Acid sequence data in FASTA format.
         :param aa_entry:  A string representing the Amino Acid sequence data in FASTA format.
         :param fmt:  A dictionary for formatting the FASTA entries and the file names.
         :return:  Does not return an object, but creates or appends to a multi entry FASTA file.
         """
+
         mode = 'a'
 
         # Create the desired variables from the formatter dictionary.
@@ -505,18 +517,21 @@ class GenBank(object):
         if feat_type == "CDS":
             # Create a MASTER .ffn file (multi-FASTA file for Coding Nucleic Acids)
             extension = '.ffn'
-            file = self.name_fasta_file(path, gene, org, feat_type, feat_type_rank, extension, mode)
+            file = self.name_fasta_file(path, gene, org, feat_type,
+                                        feat_type_rank, extension, mode)
             file.write(na_entry)
             file.close()
             # Create a MASTER .faa file (multi-FASTA file for Amino Acids)
             extension = '.faa'
-            file = self.name_fasta_file(path, gene, org, feat_type, feat_type_rank, extension, mode)
+            file = self.name_fasta_file(path, gene, org, feat_type,
+                                        feat_type_rank, extension, mode)
             file.write(aa_entry)
             file.close()
         elif feat_type == "misc_feature":
             na_entry = ">gi|{na_gi}|ref|{na_acc_n}| {na_description} Feature: {na_misc_feat}\n{na_seq}\n".format(**fmt)
             # Creates .fna files (generic FASTA file for Nucleic Acids)
             extension = '.fna'
-            file = self.name_fasta_file(path, gene, org, feat_type, feat_type_rank, extension, mode)
+            file = self.name_fasta_file(path, gene, org, feat_type,
+                                        feat_type_rank, extension, mode)
             file.write(na_entry)
             file.close()

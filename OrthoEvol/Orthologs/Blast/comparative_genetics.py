@@ -13,7 +13,7 @@ from OrthoEvol.Manager.config import test
 from OrthoEvol.Manager.management import ProjectManagement
 from OrthoEvol.Orthologs.utils import attribute_config
 from OrthoEvol.Orthologs.Blast.utils import (my_gene_info, get_dup_acc,
-                                              get_miss_acc)
+                                             get_miss_acc)
 from OrthoEvol.Tools.logit import LogIt
 
 
@@ -22,6 +22,8 @@ from OrthoEvol.Tools.logit import LogIt
 
 
 class BaseComparativeGenetics(object):
+    """Base class in the Blast module."""
+
     __acc_filename = ''
     __paml_filename = ''
     __acc_path = ''
@@ -197,6 +199,11 @@ class BaseComparativeGenetics(object):
 # //TODO-ROB Add HGNC python module
     @staticmethod
     def get_file_list(file):
+        """Turn csv column to list.
+
+        :param file: Name of csv file.
+        """
+
         data = pd.read_csv(file, header=None)
         file_list = list(data[0])
         return file_list
@@ -207,12 +214,16 @@ class BaseComparativeGenetics(object):
         It will also populate pre-blast attributes (mygene) and post-blast
         attributes (missing and duplicates) under the proper conditions.
 
-        :param df:  The preferred way of utilizing the function is with a data-frame.
-        :param csv_file:  If a csv_file is given, then a data-frame will be created by reinitializing the object.
-        :returns:  An API can be utilized to access a gene list, organism list, taxon-id list,
-                   tier list/dict/data-frame, accession list/data-frame, blast query list, mygene information, and
+        :param df: The preferred way of utilizing the function is with a data-frame.
+        :param csv_file: If a csv_file is given, then a data-frame will be
+                         created by reinitializing the object.
+                         (Default value = None)
+        :returns:  An API can be utilized to access a gene list, organism list,
+                   taxon-id list, tier list/dict/data-frame, accession
+                   list/data-frame, blast query list, mygene information, and
                    missing/duplicate information.
         """
+
         # Usually only a user would manually add a csv file for their own
         # purposes.
         self.blastn_log.info("Getting the master lists.")
@@ -285,6 +296,7 @@ class BaseComparativeGenetics(object):
         :param organism:  An input organism.
         :return:  A single accession number of the target gene/organism.
         """
+
         maf = self.df
         accession = maf.get_value(gene, organism)
         if isinstance(accession, float):
@@ -294,10 +306,13 @@ class BaseComparativeGenetics(object):
     def get_orthologous_gene_sets(self, go_list=None):
         """Access a list of accession numbers.
 
-        :param go_list:  A nested list of gene/organism lists (go_list = [[gene.1, org.1], ... , [gene.n, org.n]]).
-                         This parameter can also be None.
-        :return:  An ordered list of accession numbers (or "missing") that correspond to the go_list index.
+        :param go_list:  A nested list of gene/organism lists
+                         (go_list = [[gene.1, org.1], ... , [gene.n, org.n]]).
+                         (Default value = None)
+        :return:  An ordered list of accession numbers (or "missing") that
+                  correspond to the go_list index.
         """
+
         if go_list is None:
             accessions = self.acc_list
         else:
@@ -314,6 +329,7 @@ class BaseComparativeGenetics(object):
         :return:  A list of accession numbers that correspond to the orthologs
                   of the target gene.
         """
+
         maf = self.df
         accession_alignment = maf.T[gene].tolist()[1:]
         return accession_alignment
@@ -325,8 +341,10 @@ class BaseComparativeGenetics(object):
         associated with that tier.
 
         :param tiers:  A list of tiers in the accession file.
+                       (Default value = None)
         :return:  A nested dictionary for accessing information by tier.
         """
+
         maf = self.df
         tier_frame_dict = {}
         if tiers is None:
@@ -346,6 +364,7 @@ class BaseComparativeGenetics(object):
         ["class", "family", "genus", "kingdowm", "order", "phylum", "species",
         "superkingdom"].
         """
+
         ncbi = NCBITaxa()
         taxa_dict = {}
         for organism in self.org_list:
@@ -364,12 +383,13 @@ class BaseComparativeGenetics(object):
         return taxa_dict
 
     def get_acc_dict(self):
-        # TODO-ROB set up function to accept a parameter for unique values or
-        # potential duplicates
         """Input a list of accession numbers and return a dictionary with corresponding genes/organisms.
 
         :return: An accession dictionary who's values are nest gene/organism lists.
         """
+        # TODO-ROB set up function to accept a parameter for unique values or
+        # potential duplicates
+
         gene_list = self.gene_list
         org_list = self.org_list
         go = {}
@@ -388,6 +408,8 @@ class BaseComparativeGenetics(object):
 
 
 class ComparativeGenetics(BaseComparativeGenetics):
+    """Main Comparative Genetics class."""
+
     def __init__(self, project, template=None, taxon_file=None, post_blast=False, save_data=True, **kwargs):
         """Inherit CompGenObjects to build a file layer to the Blast workflow.
 
@@ -395,13 +417,16 @@ class ComparativeGenetics(BaseComparativeGenetics):
         It also uses a building file to start where a previous blast left off.
 
         :param project:  The name of the project.
-        :param template:  A template accession file in the desired format.  See the Blast README for an example.
+        :param template:  A template accession file in the desired format.
+                          See the Blast README for an example.
         :param taxon_file:  A list of taxon ids in a text file.
         :param post_blast:  A flag that triggers the post blast analysis.
-        :param save_data:  A flag that indicates whether the data should be saved in an excel file or not.
+        :param save_data:  A flag that indicates whether the data should be
+                           saved in an excel file or not.
         :param kwargs:  Mostly used for CompGenObjects
-        :returns:  An API for accessing the various files used before, during, and after Blasting.
-        """
+        :returns:  An API for accessing the various files used before, during,
+                   and after Blasting."""
+
         super().__init__(project=project, acc_file=template, taxon_file=taxon_file, post_blast=post_blast, hgnc=False, **kwargs)
 
         self.postblastlog = LogIt().default(logname="post blast", logfile=None)
@@ -427,7 +452,7 @@ class ComparativeGenetics(BaseComparativeGenetics):
                 'building.csv', 'building_time.csv')
 
     def add_accession(self, gene, organism, accession):
-        """This method builds an accession file after a Blastn run.
+        """Build an accession file after a Blastn run.
 
         It finds whether or not the Blast has been interrupted or not, so that
         the Blast can pick up where it left off.
@@ -437,6 +462,7 @@ class ComparativeGenetics(BaseComparativeGenetics):
         :param accession:  The accession of interest.
         :return:
         """
+
         # TODO-ROB:  Create this in the log file
         if pd.isnull(self.building.get_value(gene, organism)) is False:
             existing = self.building.get_value(gene, organism)
@@ -476,9 +502,6 @@ class ComparativeGenetics(BaseComparativeGenetics):
             temp.to_csv(str(self.building_file_path))
 
     def add_blast_time(self, gene, organism, start, end):
-        # TODO-ROB Add a method that adds the time to the post-blast analysis API.
-        # This will help us see if there is a correlation between gene, organism,
-        # or accession with the length of time.
         """Build a file that stores the amount of time for each gene to blast.
 
         This method is similar to the add_accession() method.
@@ -487,8 +510,12 @@ class ComparativeGenetics(BaseComparativeGenetics):
         :param organism:  The organism of interest.
         :param start:  Starting time.
         :param end:  Ending time.
-        :return:
         """
+
+        # TODO-ROB Add a method that adds the time to the post-blast analysis API.
+        # This will help us see if there is a correlation between gene, organism,
+        # or accession with the length of time.
+
         elapsed_time = end - start
         # Edit the data frame
         self.building_time.set_value(gene, organism, elapsed_time)
@@ -503,8 +530,10 @@ class ComparativeGenetics(BaseComparativeGenetics):
         """Save the post blast data (duplicate/missing/removed) to an excel file.
 
         :param removed_genes:  Genes to exclude from the file.
+                               (Default value = None)
         :return:
         """
+
         # TODO-ROB  Fix the output format of the excel file.  View a sample
         # output in /Orthologs/comp_gen
         pba = '_postblastanalysis'
@@ -514,7 +543,8 @@ class ComparativeGenetics(BaseComparativeGenetics):
         # Removed Genes
         if removed_genes is not None:
             removed_genes_dict = {'Removed Genes': removed_genes}
-            removed_worksheet = pd.DataFrame.from_dict(removed_genes_dict, orient='index')
+            removed_worksheet = pd.DataFrame.from_dict(removed_genes_dict,
+                                                       orient='index')
             removed_worksheet.to_excel(pb_file, sheet_name="Removed Genes")
             msg = "Removed genes were added to your excel file."
             self.postblastlog.info(msg)
@@ -617,8 +647,10 @@ class ComparativeGenetics(BaseComparativeGenetics):
                         gene_org_ms[gene] = value
                     else:
                         gene_org_ms_count[gene] = value
-            gene_ms_count = pd.DataFrame.from_dict(gene_org_ms_count, orient='index')
-            gene_ms_count.to_excel(pb_file, sheet_name="Missing Organisms Count")
+            gene_ms_count = pd.DataFrame.from_dict(gene_org_ms_count,
+                                                   orient='index')
+            gene_ms_count.to_excel(pb_file,
+                                   sheet_name="Missing Organisms Count")
             gene_ms = pd.DataFrame.from_dict(gene_org_ms, orient='index')
             gene_ms.to_excel(pb_file, sheet_name="Missing Organisms by Gene")
             msg = 'Missing Organisms by gene were added to your excel file.'

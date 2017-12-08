@@ -23,6 +23,7 @@ class Multiprocess(object):
 
         :return: Returns a multiprocessing logger.
         """
+
         multiprocess_handler = get_logger()
         multiprocess_handler = logging.StreamHandler()
         multiprocess_handler.setLevel(logging.ERROR)
@@ -39,10 +40,11 @@ class Multiprocess(object):
         :param function: Input a python function.
         :param iterable: Input a list or dictionary to map to the function.
         """
+
         log = self._logger()  # Start the logger
         time_secs = time()
         with Pool(processes=self.num_procs) as pool:
             pool.map(function, iterable)
             minutes = (time() - time_secs) / 60
         log.info("Took %s minutes to complete.", minutes)
-        logging.shutdown()  # Shutdo
+        logging.shutdown()  # Shutdown the logger.

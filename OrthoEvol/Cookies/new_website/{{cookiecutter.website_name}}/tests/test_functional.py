@@ -11,10 +11,15 @@ from .factories import UserFactory
 
 
 class TestLoggingIn:
-    """Login."""
+    """Login."""
 
     def test_can_log_in_returns_200(self, user, testapp):
-        """Login successful."""
+        """Login successful.
+
+        :param user: 
+        :param testapp: 
+
+        """
         # Goes to homepage
         res = testapp.get('/')
         # Fills out login form in navbar
@@ -26,7 +31,12 @@ class TestLoggingIn:
         assert res.status_code == 200
 
     def test_sees_alert_on_log_out(self, user, testapp):
-        """Show alert on logout."""
+        """Show alert on logout.
+
+        :param user: 
+        :param testapp: 
+
+        """
         res = testapp.get('/')
         # Fills out login form in navbar
         form = res.forms['loginForm']
@@ -39,7 +49,12 @@ class TestLoggingIn:
         assert 'You are logged out.' in res
 
     def test_sees_error_message_if_password_is_incorrect(self, user, testapp):
-        """Show error if password is incorrect."""
+        """Show error if password is incorrect.
+
+        :param user: 
+        :param testapp: 
+
+        """
         # Goes to homepage
         res = testapp.get('/')
         # Fills out login form, password incorrect
@@ -52,7 +67,12 @@ class TestLoggingIn:
         assert 'Invalid password' in res
 
     def test_sees_error_message_if_username_doesnt_exist(self, user, testapp):
-        """Show error if username doesn't exist."""
+        """Show error if username doesn't exist.
+
+        :param user: 
+        :param testapp: 
+
+        """
         # Goes to homepage
         res = testapp.get('/')
         # Fills out login form, password incorrect
@@ -66,10 +86,15 @@ class TestLoggingIn:
 
 
 class TestRegistering:
-    """Register a user."""
+    """Register a user."""
 
     def test_can_register(self, user, testapp):
-        """Register a new user."""
+        """Register a new user.
+
+        :param user: 
+        :param testapp: 
+
+        """
         old_count = len(User.query.all())
         # Goes to homepage
         res = testapp.get('/')
@@ -88,7 +113,12 @@ class TestRegistering:
         assert len(User.query.all()) == old_count + 1
 
     def test_sees_error_message_if_passwords_dont_match(self, user, testapp):
-        """Show error if passwords don't match."""
+        """Show error if passwords don't match.
+
+        :param user: 
+        :param testapp: 
+
+        """
         # Goes to registration page
         res = testapp.get(url_for('public.register'))
         # Fills out form, but passwords don't match
@@ -103,7 +133,12 @@ class TestRegistering:
         assert 'Passwords must match' in res
 
     def test_sees_error_message_if_user_already_registered(self, user, testapp):
-        """Show error if user already registered."""
+        """Show error if user already registered.
+
+        :param user: 
+        :param testapp: 
+
+        """
         user = UserFactory(active=True)  # A registered user
         user.save()
         # Goes to registration page

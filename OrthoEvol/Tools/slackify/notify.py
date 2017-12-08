@@ -40,6 +40,7 @@ class Slackify(object):
 
         :param channel: Name of the channel to get an id for.
         """
+
         channel_id = self.slack.channels.get_channel_id(channel)
         return channel_id
 
@@ -49,6 +50,7 @@ class Slackify(object):
         :param file: Path to a file to upload.
         :param channel: Name of the channel to upload the file to.
         """
+
         channel_id = self._get_channel_id(channel)
         self.slack.files.upload(file_=file, channels=channel_id)
 
@@ -60,6 +62,7 @@ class Slackify(object):
         :param channel: Name of the channel to send a message to.
         :param message: Message to send to a channel.
         """
+
         # With as user as True, the predefined bot name is used
         try:
             self.slack.chat.post_message(channel, message, as_user=True)
@@ -71,17 +74,20 @@ class Slackify(object):
 
     def list_users(self):
         """List all users for your slack organization."""
+
         response = self.slack.users.list()
         users = [username['name'] for username in response.body['members']]
         return users
 
     def list_channels(self):
         """List all channels for your slack organization."""
+
         response = self.slack.channels.list()
         channels = [channel['name'] for channel in response.body['channels']]
         return channels
 
     def log2slack(self):
         """Send a formatted text string to slack similar to logging."""
+
         raise NotImplementedError('This function is not yet implemented.')
         # TODO One day...create logging format for logging to slack.

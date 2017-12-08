@@ -28,7 +28,7 @@ from OrthoEvol.Orthologs.GenBank.genbank import GenBank
 class DataMana(object):
 
     def __init__(self, config_file=None, pipeline=None, new=False, start=False, **kwargs):
-        """Initialize the attributes that can be used as keys in the config_file."""
+    """Initialize the attributes that can be used as keys in the config_file."""
         # Full configuration for the pipeline's YAML based variables
         self.Management_config = self.Database_config = self.CompGenAnalysis_config = self.BLASTn_config = \
             self.GenBank_config = self.Alignment_config = None
@@ -45,11 +45,13 @@ class DataMana(object):
                 self.configure(config_file)
 
     def configure(self, config_file):
-        '''
-        This method uses YAML configuration in order to initialize different classes.
+        """This method uses YAML configuration in order to initialize different classes.
         :param config_file: A YAML file that is used to create a dictionary(kwargs) for each class.
-        :return:
-        '''
+        :return:
+
+        :param config_file: 
+
+        """
         with open(config_file, 'r') as ymlfile:
             configuration = yaml.safe_load(ymlfile)
             # TODO-ROB:  Set up configuratioin to parse this full list.  For each sub configuration do something.
@@ -97,6 +99,12 @@ class DataMana(object):
                 self.al = self.Alignment_config
 
     def database(self, proj_mana, database_config):
+        """
+
+        :param proj_mana: 
+        :param database_config: 
+
+        """
         self.db = BaseDatabaseManagement(proj_mana=proj_mana, **database_config)
         for config_type, database_config_list in self.db.database_dict.items():
             implementation = database_config_list[0]
@@ -114,12 +122,24 @@ class DataMana(object):
             # TODO-ROB parse the config options
 
     def blast(self, proj_mana, blast_config):
+        """
+
+        :param proj_mana: 
+        :param blast_config: 
+
+        """
         self.bl = OrthoBlastN(proj_mana=proj_mana, **self.Management_config, **blast_config)
         self.bl.blast_config(self.bl.blast_human, 'Homo_sapiens', auto_start=True)
         # TODO-Create directories for the blast data
         # Do the blasting here using CompGenBLASTn
 
     def genbank(self, proj_mana, blast):
+        """
+
+        :param proj_mana: 
+        :param blast: 
+
+        """
         if blast is not None:
             self.gb = GenBank(blast=blast, **self.Management_config, **self.GenBank_config)
         else:
@@ -146,6 +166,11 @@ class DataMana(object):
                         self.gb.get_gbk_file(accession, GENE, ORGANISM, server_flag=server_flag)
 
     def align(self, genbank):
+        """
+
+        :param genbank: 
+
+        """
         self.al = MSA(genbank=genbank, **self.Management_config, **self.Alignment_config)
         for _program, aligner_config_list in self.al.alignment_dict.items():
             aligner = aligner_config_list[0]

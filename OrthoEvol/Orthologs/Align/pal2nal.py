@@ -19,7 +19,7 @@ from Bio.Application import _Option, _Switch, AbstractCommandline, _Argument
 
 
 class Pal2NalCommandline(AbstractCommandline):
-    u""""Command line wrapper for PAL2NAL.
+    """uCommand line wrapper for PAL2NAL.
     http://www.bork.embl.de/pal2nal/
     Example:
     --------
@@ -29,9 +29,11 @@ class Pal2NalCommandline(AbstractCommandline):
     Citation:
     ---------
     Mikita Suyama, David Torrents, and Peer Bork (2006)
-    PAL2NAL: robust conversion of protein sequence alignments into the corresponding codon alignments.
+    PAL2NAL: robust conversion of protein sequence alignments into the
+             corresponding codon alignments.
     Nucleic Acids Res. 34, W609-W612.
     """
+
     def __init__(self, cmd='pal2nal', **kwargs):
         # order parameters in the same order as invoking guidance on the cmd line (e.g. 'perl guidance.pl')
         self.parameters = \

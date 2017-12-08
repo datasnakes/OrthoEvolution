@@ -21,6 +21,7 @@ from OrthoEvol.Orthologs.Blast.utils import gene_list_config, map_func
 class OrthoBlastN(ComparativeGenetics):
     """Combines Project Management features with NCBI's Blast+."""
 
+
     def __init__(self, project, template=None, save_data=True, **kwargs):
         """This class inherits from the CompGenFiles class.
 
@@ -69,13 +70,18 @@ class OrthoBlastN(ComparativeGenetics):
         """This method configures everything for our BLAST workflow.
 
         It configures the accession file, which works with
-        interrupted Blasts.  It configures a gene_list for blasting the right genes.
+        interrupted Blasts.  It configures a gene_list for blasting the right
+        genes.
 
-        :param query_accessions:  A list of query accession numbers.  Each gene needs one from the same organism.
-        :param query_organism:  The name of the query organism for post configuration.
-        :param auto_start:  A flag that determines whether the blast starts automatically.
+        :param query_accessions:  A list of query accession numbers.  Each
+                                  gene needs one from the same organism.
+        :param query_organism:  The name of the query organism for post
+                                configuration.
+        :param auto_start:  A flag that determines whether the blast starts
+                            automatically. (Default value = False)
         :return:
         """
+
         self.blastn_log.info('Blast configuration has begun.')
         self.blastn_log.info('Configuring the accession file.')
 
@@ -118,7 +124,8 @@ class OrthoBlastN(ComparativeGenetics):
             try:
                 blastdbcmd_query = "blastdbcmd -entry {query} -db refseq_rna -outfmt %f -out {temp fasta}".format(
                     **query_config)
-                blastdbcmd_status = run(blastdbcmd_query, stdout=PIPE, stderr=PIPE, shell=True, check=True)
+                blastdbcmd_status = run(blastdbcmd_query, stdout=PIPE,
+                                        stderr=PIPE, shell=True, check=True)
                 self.blastn_log.info("Extracted query refseq sequence to a temp.fasta file from BLAST database.")
             except CalledProcessError as err:
                 self.blastn_log.error(err.stderr.decode('utf-8'))
@@ -148,6 +155,7 @@ class OrthoBlastN(ComparativeGenetics):
         :param organism:  The organism of interest.
         :return:  Returns one accession number in the building accession file.
         """
+
         accession = gi = raw_bitscore = description = None
         record_dict = {}
         xmlsplit = xml_path.split(os.sep)
@@ -206,14 +214,18 @@ class OrthoBlastN(ComparativeGenetics):
         This method actually performs NCBI's blastn.
         It requires configuring before it can be utilized.
 
-        :param genes:  Gene of interest.
-        :param query_organism:  Query organism.
+        :param genes:  Gene of interest. (Default value = None)
+        :param query_organism:  Query organism. (Default value = None)
         :param pre_configured:  Determines if the blast needs configuring.
+                                (Default value = False)
         :return:
         """
+
         if pre_configured is False:
             query = self.df[query_organism].tolist()
-            self.blast_config(query_accessions=query, query_organism=query_organism, auto_start=True)
+            self.blast_config(query_accessions=query,
+                              query_organism=query_organism,
+                              auto_start=True)
             genes = self.current_gene_list  # Gene list populated by blast_config.
         elif pre_configured is True:
             genes = genes
@@ -328,4 +340,6 @@ class OrthoBlastN(ComparativeGenetics):
 
 
 class BlastFailure(BaseException):
+    """Base Blast Exception."""
+
     pass

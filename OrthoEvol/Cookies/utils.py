@@ -27,8 +27,7 @@ bytesize_options = {
 
 
 def archive(database_path, archive_path, option, delete_flag=False):
-    """
-    Archive a database directory from a Cookie templated directory structure.
+    """Archive a database directory from a Cookie templated directory structure.
 
     This utility creates a YAML config dictionary that contains path-like
     objects for archiving.  The original data
@@ -36,10 +35,14 @@ def archive(database_path, archive_path, option, delete_flag=False):
 
     :param database_path:  A path to a folder that consists of the desired data.
     :param archive_path:  A path to an output folder for archived data.
-    :param option:  An option for the archiving strategy.  Will be one of the keys in the archive_options.
+    :param option:  An option for the archiving strategy.  Will be one of the
+                    keys in the archive_options.
     :param delete_flag:  A flag for deleting the original data.  USE WITH CAUTION.
-    :return:  Returns a list of paths to the *.tar.xz archive of the data and/or a path to the original data.
+    :return:  Returns a list of paths to the *.tar.xz archive of the data
+              and/or a path to the original data.
+
     """
+
     archive_dict = {}
     archive_list = []
     archive_log = LogIt().default(logname="Archive", logfile=None)
@@ -89,17 +92,17 @@ def archive(database_path, archive_path, option, delete_flag=False):
 
 
 def get_size(start_path, units="KB"):
-    """
-    Determine the size of a directory or a file with the desired units.
+    """Determine the size of a directory or a file with the desired units.
 
     :param start_path:  A file or path for sizing up.
-    :param units:  The denomination of bytes to return.
+    :param units:  The denomination of bytes to return. (Default value = "KB")
     :return:  The size as a string.  (e.g. "3.6 KB")
     """
+
     total_size = 0
     if os.path.isfile(start_path):
         size = os.path.getsize(start_path)
-        size =str(size/bytesize_options[units]) + (" %s" % units)
+        size = str(size/bytesize_options[units]) + (" %s" % units)
         return size
 
     for dirpath, dirnames, filenames in os.walk(start_path):

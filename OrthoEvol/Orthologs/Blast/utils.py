@@ -29,6 +29,7 @@ def map_func(hit):
     :param hit: ID of the blast hit.
     :return:
     """
+
     hit.id1 = hit.id.split('|')[3]  # accession number
     hit.id2 = hit.id.split('|')[1]  # gi number
     hit.id = hit.id[:-2]
@@ -40,6 +41,7 @@ def paml_org_formatter(organisms):
 
     :param organisms:  Input a list of organisms
     """
+
     # XXX PAML no longer needs a format different than `Homo_sapiens`
     org_list = []
     for organism in organisms:
@@ -62,7 +64,7 @@ def gene_list_config(file, data_path, gene_list, taxon_dict, logger):
     :param gene_list:  A gene list in the same order as the accession file.
     :param taxon_dict:  A taxon id dictionary for logging purposes.
     :param logger:  A logger.
-    :return:  Returns a continued gene_list to pick up from an interrupted Blast.
+    :return:  Returns a continued gene_list to restart an interrupted Blast.
     """
 
     ending = gene = org = taxid = None
@@ -119,10 +121,10 @@ def seqid_list_config(seqid_list_path, taxonomy_ids, research_path=None, config=
 
     :param seqid_list_path:
     :param taxonomy_ids:
-    :param research_path:
-    :param config:
-    :return:
+    :param research_path:  (Default value = None)
+    :param config:  (Default value = False)
     """
+
     warn("NCBI has deprecated using GI numbers.", OrthoEvolDeprecationWarning)
     if config:
         # Directory and file handling
@@ -145,7 +147,11 @@ def create_seqid_lists(seqid_list_path, taxonomy_ids):
 
     It then uses the blastdb_aliastool to turn the list into a binary file.
     The input (id) for the function is a taxonomy id.
+
+    :param seqid_list_path:
+    :param taxonomy_ids:
     """
+
     warn("NCBI has deprecated using GI numbers.", OrthoEvolDeprecationWarning)
     if os.path.exists(str(seqid_list_path)):
         os.chdir(str(seqid_list_path))
@@ -166,6 +172,7 @@ def _taxid2seqidlist(taxonomy_id):
     :param taxonomy_id:
     :return:
     """
+
     warn("NCBI has deprecated using GI numbers.", OrthoEvolDeprecationWarning)
     tid = str(taxonomy_id)
     binary = tid + 'gi'
@@ -196,8 +203,10 @@ def my_gene_info(acc_path, blast_query='Homo_sapiens'):
 
     :param acc_path:  An absolute path to the accession file of interest.
     :param blast_query:  The query organism for used during Blasting.
+                         (Default value = 'Homo_sapiens')
     :return:  Returns a data-frame with hot data about each gene.
     """
+
     mygene = import_module('mygene')
     blastutils_log.info("Getting Pre-BLAST information about the target genes using MyGene...")
     # Initialize variables and import my-gene search command
@@ -250,6 +259,7 @@ def get_dup_acc(acc_dict, gene_list, org_list):
     :param org_list:  A full list of organisms.
     :return:  A master duplication dictionary used to initialize the duplicate class variables.
     """
+
 
     duplicated_dict = dict()
     duplicated_dict['accessions'] = {}
@@ -371,6 +381,7 @@ def get_miss_acc(acc_file_path):
     :return: A dictionary with data about the missing accession numbers by Gene
              and by Organism.
     """
+
     # TODO-ROB: Add Entrez ID validation;  Get info from xml files???
     missing_dict = dict()
     missing_dict['organisms'] = {}
@@ -425,4 +436,5 @@ def get_miss_acc(acc_file_path):
 
 def get_pseudogenes():
     """Denote which genes are sudogenes."""
+
     raise NotImplementedError

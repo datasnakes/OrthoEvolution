@@ -3,7 +3,7 @@ from ete3 import EvolTree
 
 
 class PamlTest(object):
-    """Test codeml with a default tree and newick file."""
+    """Test codeml with a default tree and newick file."""
 
     def __init__(self, tree="ECP_EDN_15.nw", alignment="ECP_EDN_15.fasta",
                  workdir='', pamlpath=''):
@@ -26,7 +26,7 @@ class PamlTest(object):
         self.workdir = wd
 
     def main(self):
-        """The main function for running the test."""
+        """The main function for running the test."""
 
         print("Running model %s paml on input." % str(self.defaultmodel))
 

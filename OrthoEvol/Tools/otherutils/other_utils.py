@@ -12,11 +12,12 @@ from pathlib import Path
 def splitlist(listname, basefilename, n):
     """Split a long list into chunks and save chunks as a text file.
 
-    :param listname:
-    :param basefilename:
-    :param n:
-    :return:
+    :param listname: The list that needs to be split.
+    :param basefilename: The basefilename of the output text file.
+    :param n: The number of chunks to split the list into.
+    :return: A list of lists.
     """
+
     # Split the list into chunks
     chunks = [listname[x:x + n] for x in range(0, len(listname), n)]
     list_group = []
@@ -34,9 +35,10 @@ def splitlist(listname, basefilename, n):
 def formatlist(input_list):
     """Remove spaces from list items and turn those spaces into underscores.
 
-    :param input_list:
-    :return:
+    :param input_list: A list that needs formatting.
+    :return: A formatted list.
     """
+
     output_list = []
     for item in input_list:
         item = str(item)
@@ -51,6 +53,7 @@ def makedirectory(path):
     :param path:
     :return:
     """
+
     exist_ok = True
     if not exist_ok and os.path.isdir(path):
         with contextlib.suppress(OSError):
@@ -59,6 +62,7 @@ def makedirectory(path):
 
 class PackageVersion(object):
     """Get the version of an installed python package."""
+
     def __init__(self, packagename):
         """Input a package name to return the version.
 
@@ -72,14 +76,21 @@ class PackageVersion(object):
     def _getversion(self):
         """Get the version of a package.
 
-        :return:
+        :return: Package name and version.
         """
+
         import_module(self.packagename)
         version = pkg_resources.get_distribution(self.packagename).version
         return "Version {} of {} is installed.".format(version, self.packagename)
 
 
 def set_paths(parent, **children):
+    """Set paths.
+
+    :param parent:
+    :param **children:
+    """
+
     raise NotImplementedError("This function is being developed.")
 
 
@@ -88,11 +99,12 @@ class FunctionRepeater(object):
 
     .. note: View https://tinyurl.com/yckgv8m2
     """
+
     def __init__(self, interval, function, *args, **kwargs):
         """Repeat a function every interval.
 
-        :param interval:
-        :param function:
+        :param interval: Amount of time for function to repeat.
+        :param function: Function that needs to repeat.
         :param args:
         :param kwargs:
         """
@@ -105,17 +117,23 @@ class FunctionRepeater(object):
         self.start()
 
     def _run(self):
+        """Time the running of the function."""
+
         self.is_running = False
         self.start()
         self.function(*self.args, **self.kwargs)
 
     def start(self):
+        """Start the time."""
+
         if not self.is_running:
             self._timer = Timer(self.interval, self._run)
             self._timer.start()
             self.is_running = True
 
     def stop(self):
+        """Stop the timer."""
+
         self._timer.cancel()
         self.is_running = False
 
@@ -127,6 +145,7 @@ def csvtolist(csvfile, column_header='Organism'):
     :param column_header: Header of the column.
     :return: A list is returned.
     """
+
     file = pd.read_csv(csvfile)
     # Create a list name/variable and use list()
     listfromcolumn = list(file[column_header])
@@ -139,6 +158,7 @@ def runcmd(command_string):
 
     :param command string:
     """
+
     try:
         cmd = [command_string]  # this is the command
         # Shell MUST be True

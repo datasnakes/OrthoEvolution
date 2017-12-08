@@ -8,17 +8,17 @@ from {{cookiecutter.website_name}}.user.models import User
 
 
 class BaseFactory(SQLAlchemyModelFactory):
-    """Base factory."""
+    """Base factory."""
 
     class Meta:
-        """Factory configuration."""
+        """Factory configuration."""
 
         abstract = True
         sqlalchemy_session = db.session
 
 
 class UserFactory(BaseFactory):
-    """User factory."""
+    """User factory."""
 
     username = Sequence(lambda n: 'user{0}'.format(n))
     email = Sequence(lambda n: 'user{0}@example.com'.format(n))
@@ -26,6 +26,6 @@ class UserFactory(BaseFactory):
     active = True
 
     class Meta:
-        """Factory configuration."""
+        """Factory configuration."""
 
         model = User

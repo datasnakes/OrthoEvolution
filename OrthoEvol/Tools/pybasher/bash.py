@@ -43,14 +43,14 @@ class BaseBash(object):
     def _bash(self, cmd, env=None, stdout=PIPE, stderr=PIPE, timeout=None, _sync=True):
         """Use subprocess to run bash commands.
 
-        :param cmd:
-        :param env:
-        :param stdout:
-        :param stderr:
-        :param timeout:
-        :param _sync:
-        :return:
+        :param cmd: The bash command to be run.
+        :param env:  (Default value = None)
+        :param stdout:  (Default value = PIPE)
+        :param stderr:  (Default value = PIPE)
+        :param timeout:  (Default value = None)
+        :param _sync:  (Default value = True)
         """
+
         self.process = Popen(cmd, shell=True, stdout=stdout, stdin=PIPE,
                              stderr=stderr, env=env)
         if _sync:
@@ -58,6 +58,11 @@ class BaseBash(object):
         return self
 
     def _sync(self, timeout=None):
+        """Ensure function is run.
+
+        :param timeout:  (Default value = None)
+        """
+
         kwargs = {'input': self.stdout}
         if timeout:
             kwargs['timeout'] = timeout
@@ -98,5 +103,7 @@ class PyBasher(BaseBash):
         super().__init__()
 
     def cp(self):
+        """Copy file."""
+
         cmd = ''
         self._bash(cmd)

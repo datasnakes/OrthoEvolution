@@ -17,9 +17,11 @@ class BaseFTPClient(object):
 
         :param ftpsite: Address of the ftp site you want to connect to.
         :param email: Input your email address.
-        :param keepalive: Flag to determine whether to keepalive the connection (Default = False)
+        :param keepalive: Flag to determine whether to keepalive the connection
+                          (Default value = False)
         :type keepalive: bool
-        :param debug_lvl: Verbosity level for debugging ftp connection (Default = 0)
+        :param debug_lvl: Verbosity level for debugging ftp connection
+                          (Default value = 0)
         :type debug_lvl: int
         """
         self._ftpsite = ftpsite
@@ -36,8 +38,10 @@ class BaseFTPClient(object):
 
         Also, creates a filetransfer to prevent file transfer timeout.
 
-        .. warning:: :func:`_keepalive` is not well tested. Avoid using it if possible.
+        .. warning:: :func:`_keepalive` is not well tested.
+        Avoid using it if possible.
         """
+
         voidcmd = FunctionRepeater(5, self.ftp.voidcmd, 'NOOP')
         filetransfer = FunctionRepeater(5, self._filetransfer, 'README.ftp')
 
@@ -45,6 +49,7 @@ class BaseFTPClient(object):
 
     def _login(self):
         """Connect to the FTP server anonymously."""
+
         with contextlib.suppress(error_perm):
             ftp = FTP(self._ftpsite, timeout=600)
             ftp.login(user='anonymous', passwd=self._email)
@@ -55,6 +60,7 @@ class BaseFTPClient(object):
 
     def close_connection(self):
         """Close the ftp connection."""
+
         self.ftp.close()
 
         if self.__keepalive:
@@ -66,6 +72,7 @@ class BaseFTPClient(object):
 
         :param filename: Path of file to download.
         """
+
         print("WAIT: Keeping connection open by transferring file.")
         current_path = self.ftp.pwd()
         self.ftp.cwd('/')

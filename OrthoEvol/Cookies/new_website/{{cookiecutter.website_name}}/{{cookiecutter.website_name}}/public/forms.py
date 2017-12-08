@@ -8,7 +8,7 @@ from {{cookiecutter.website_name}}.user.models import User
 
 
 class LoginForm(Form):
-    """Login form."""
+    """Login form."""
 
     username = StringField('Username', validators=[DataRequired()])
     password = PasswordField('Password', validators=[DataRequired()])
@@ -19,7 +19,7 @@ class LoginForm(Form):
         self.user = None
 
     def validate(self):
-        """Validate the form."""
+        """Validate the form."""
         initial_validation = super(LoginForm, self).validate()
         if not initial_validation:
             return False

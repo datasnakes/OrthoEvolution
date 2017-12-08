@@ -6,7 +6,7 @@ from OrthoEvol.Tools.otherutils import csvtolist
 
 
 class ETE3PAML(object):
-    """Use ETE3's M1 model to run PAML's codeml for orthology inference."""
+    """Use ETE3's M1 model to run PAML's codeml for orthology inference."""
 
     def __init__(self, alignmentfile, speciestree, workdir=''):
         """Initialize main variables/files to be used.
@@ -32,7 +32,7 @@ class ETE3PAML(object):
     def prune_tree(self, organisms):
         """Prune branches for species not in the alignment file.
 
-        Keep branches in the species tree for species in the alignment file
+Keep branches in the species tree for species in the alignment file
         Some species may not be present in the alignment file due to lack of
         matching with blast or simply the gene not being in the genome.
 
@@ -40,8 +40,11 @@ class ETE3PAML(object):
         :param organisms_file: If not None, will import an organisms file and
                                 create an organisms list. Assumes that the
                                 column header is 'Organisms'
-        :return:
-        """
+        :return:
+
+        :param organisms: 
+
+        """
 
         if os.path.isfile(organisms):
             organismslist = csvtolist(organisms)
@@ -63,7 +66,7 @@ class ETE3PAML(object):
     def run(self, pamlsrc, output_folder, model='M1'):
         """Run PAML using ETE.
 
-        The default model is M1 as it is best for orthology inference in
+The default model is M1 as it is best for orthology inference in
         our case. You can use models `M2`, `M0`, `M3`.
 
         Ensure that you have the correct path to your codeml binary. It should
@@ -72,8 +75,13 @@ class ETE3PAML(object):
         :param pamlsrc: Path to the codemly binary.
         :param output_folder: The name of the output folder.
         :param model: The model to be used. Default: M1
-        :return:
-        """
+        :return:
+
+        :param pamlsrc: 
+        :param output_folder: 
+        :param model:  (Default value = 'M1')
+
+        """
         # Import the newick tree
         tree = EvolTree('temptree.nw')
 

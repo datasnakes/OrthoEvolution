@@ -9,9 +9,9 @@ from OrthoEvol.Tools.logit import LogIt
 
 class Management(object):
     def __init__(self, repo=None, home=os.getcwd(), new_repo=False, **kwargs):
-        """Base class for directory management.
+    """Base class for directory management.
 
-        It maps the directories of the OrthoEvol-Script package using the
+    It maps the directories of the OrthoEvol-Script package using the
         pathlib module, and turns the names of each important directory into
         a pathlike object.  The base class gives the option of creating a new
         repository with cookiecutter.
@@ -20,8 +20,7 @@ class Management(object):
         :param home (path or path-like): The home of the file calling this name.
                                         When creating a new repository it is
                                         best to explicitly name the home path.
-        :param new_repo (bool): Creates a new repository.
-        """
+        :param new_repo (bool): Creates a new repository."""
 
         self.repo = repo
         self.file_home = Path(home)  # Home of the file calling this class
@@ -68,7 +67,7 @@ class Management(object):
 
 
 class RepoManagement(Management):
-    """Repository Management for OrthoEvol."""
+    """Repository Management for OrthoEvol."""
     def __init__(self, repo, user=None, home=os.getcwd(),
                  new_user=False, new_repo=False, **kwargs):
         """Manage repositories.
@@ -118,7 +117,7 @@ class RepoManagement(Management):
 
 
 class UserManagement(RepoManagement):
-    """User Management for OrthoEvol."""
+    """User Management for OrthoEvol."""
     # TODO-ROB CREATE THESE IN A VIRTUAL ENVIRONMENT FOR EACH USER
     # TODO-ROB The virtual environment can be the name of the user
     # TODO-ROB When the user logs in, they will activate the virtual environment
@@ -192,6 +191,13 @@ class UserManagement(RepoManagement):
             # TODO-ROB:  Determine what type of database as well.
 
     def zip_mail(self, comp_filename, zip_path, destination=''):
+        """
+
+        :param comp_filename: 
+        :param zip_path: 
+        :param destination:  (Default value = '')
+
+        """
         pass
         # TODO Remodel this.
 
@@ -203,7 +209,7 @@ class UserManagement(RepoManagement):
 
 
 class WebsiteManagement(RepoManagement):
-    """Website Management for OrthoEvol."""
+    """Website Management for OrthoEvol."""
     def __init__(self, repo, website, host='0.0.0.0', port='5252',
                  home=os.getcwd(), new_website=False, create_admin=False, **kwargs):
         """Install a template for Flask using cookiecutter.
@@ -242,12 +248,12 @@ class WebsiteManagement(RepoManagement):
             self.Kitchen.bake_the_website(host=self.web_host, port=self.web_port, website_path=self.website_path)
 
     def stop_server(self):
-        """Stop the server running the website."""
+        """Stop the server running the website."""
         # TODO-SDH Add way to stop the server from running.
 
 
 class ProjectManagement(UserManagement):
-    """Project Management for OrthoEvol."""
+    """Project Management for OrthoEvol."""
     def __init__(self, repo, user, project, research=None, research_type=None,
                  app=None, home=os.getcwd(), new_project=False, new_research=False,
                  new_app=False, **kwargs):

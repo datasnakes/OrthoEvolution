@@ -9,7 +9,7 @@ from OrthoEvol.Tools.utils import makedirectory
 
 
 class FilteredTree(object):
-    """# TODO Insert Doctring """
+    """# TODO Insert Doctring"""
     def __init__(self, alignment, dataType='CODON', home=os.getcwd()):
         """
 
@@ -33,10 +33,14 @@ class FilteredTree(object):
     def iqtree_best_tree(self, alignment, dataType):
         """Generate and save the best tree from IQTree.
 
-        :param alignment:
+:param alignment:
         :param dataType:
-        :return:
-        """
+        :return:
+
+        :param alignment: 
+        :param dataType: 
+
+        """
         iqtree_cline = IQTreeCommandline(alignment=alignment,
                                          dataType=dataType)
         print(iqtree_cline)

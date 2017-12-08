@@ -46,8 +46,8 @@ from Bio.Application import _Option, AbstractCommandline
 
 
 class IQTreeCommandline(AbstractCommandline):
-    u""""Command line wrapper for GUIDANCE2.
-    http://guidance.tau.ac.il/ver2/
+    """u""""Command line wrapper for GUIDANCE2.
+http://guidance.tau.ac.il/ver2/
     Example:
     --------
 
@@ -87,8 +87,7 @@ class IQTreeCommandline(AbstractCommandline):
 
         # If you used the IQ-TREE web server please cite:
             J. Trifinopoulos, L.-T. Nguyen, A. von Haeseler, and B.Q. Minh (2016) W-IQ-TREE: a fast online phylogenetic tool
-            for maximum likelihood analysis. Nucleic Acids Res., 44 (W1):W232-W235. DOI: 10.1093/nar/gkw256
-    """
+            for maximum likelihood analysis. Nucleic Acids Res., 44 (W1):W232-W235. DOI: 10.1093/nar/gkw256"""
 
     def __init__(self, cmd="iqtree", **kwargs):
         self.parameters = \

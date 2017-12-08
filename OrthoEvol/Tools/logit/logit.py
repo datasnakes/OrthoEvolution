@@ -25,11 +25,11 @@ class LogIt(object):
     def default(self, logname, logfile):
         """Create a log handler using default formatting.
 
-        :rtype: object
         :param logname: Name of the log.
         :param logfile: Path to the logfile. Can be `None`.
         :return: A default_log object is returned.
         """
+
         default_log = setup_logger(name=logname.upper(), logfile=logfile,
                                    level=logging.DEBUG, formatter=self._formatter)
 
@@ -40,7 +40,6 @@ class LogIt(object):
     def custom(cls, logname, logfile, level, fmt='default'):
         """Create a log handler or logger.
 
-        :rtype: object
         :param logname: Name of the log.
         :param logfile: Path to the logfile. Can be `None`
         :param level: Logging level.
@@ -65,6 +64,7 @@ class LogIt(object):
 
         :param logfile: Name of the logfile to be deleted.
         """
+
         self.shutdown()
         # TODO Use contextlib here; See makedirectory function
         if os.path.isfile(logfile):
@@ -73,8 +73,9 @@ class LogIt(object):
     def shutdown(self):
         """Shutdown the log handlers.
 
-        Windows won't just delete a log (linux distros will). It must be shutdown.
+        Windows won't just delete a log (linux distros will).
+        It must be shutdown.
         """
+
         # HINT https://www.programcreek.com/python/example/3517/logging.shutdown
         self.logging.shutdown()
-

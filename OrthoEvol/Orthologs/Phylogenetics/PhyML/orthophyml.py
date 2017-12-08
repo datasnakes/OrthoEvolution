@@ -3,11 +3,9 @@ import sys
 
 
 class PhyML(object):
-    """
-    The PhyML class uses Biopython's PhyMLCommandline wrapper to generate trees
+    """The PhyML class uses Biopython's PhyMLCommandline wrapper to generate trees
     from the PhyML executable. This class also converts a fasta formatted
-    multiple sequence alignment file into relaxed phylip format.
-    """
+    multiple sequence alignment file into relaxed phylip format."""
 
     def __init__(self, phyml_input, datatype='nt'):
         """Run phyml to generate tree results.
@@ -31,9 +29,8 @@ class PhyML(object):
     def _runphyml(self):
         """"Runs phyml.
 
-        Input a phylip formatted alignment file and describe the datatype
-        ('nt' or 'aa').
-        """
+Input a phylip formatted alignment file and describe the datatype
+        ('nt' or 'aa')."""
         run_phyml = PhymlCommandline(self.phyml_exe,
                                      input=self.phyml_input,
                                      datatype=self.datatype)

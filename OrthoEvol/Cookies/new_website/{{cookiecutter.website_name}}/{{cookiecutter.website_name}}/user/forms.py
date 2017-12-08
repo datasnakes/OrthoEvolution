@@ -8,7 +8,7 @@ from .models import User
 
 
 class RegisterForm(Form):
-    """Register form."""
+    """Register form."""
 
     username = StringField('Username',
                            validators=[DataRequired(), Length(min=3, max=25)])
@@ -25,7 +25,7 @@ class RegisterForm(Form):
         self.user = None
 
     def validate(self):
-        """Validate the form."""
+        """Validate the form."""
         initial_validation = super(RegisterForm, self).validate()
         if not initial_validation:
             return False

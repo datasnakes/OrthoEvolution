@@ -7,18 +7,22 @@ def attribute_config(cls, composer, checker, project=None, project_path=None, ch
     """Set/configure attributes.
 
     Attribute Configuration takes an instance of a class and sets various
-    attributes. The attributes are set by determining the type of configuration.
-    The class attributes can be composed by another class, they can be set with
-    a dictionary, or they can be set using the basic project template.
+    attributes. The attributes are set by determining the type of
+    configuration. The class attributes can be composed by another class,
+    they can be set with  a dictionary, or they can be set using the basic
+    project template.
 
     :param cls: An instance of a class that will retain the attributes.
     :param composer: A class that will yield attributes to the cls parameter.
     :param checker: A checker class used to check the type of the composer.
-            Dictionary composers will be treated differently.
-    :param project:  The name of the project.
+                    Dictionary composers will be treated differently.
+    :param project:  The name of the project. (Default value = None)
     :param project_path:  The relative path of the project.
+                          (Default value = None)
+    :param checker2:  (Default value = None)
     :return:  Returns the instance (cls) with new attributes.
     """
+
     ac_log = LogIt().default(logname="%s" % cls.__class__.__name__, logfile=None)
     if checker2:
         check2 = issubclass(type(composer), checker2)
@@ -59,8 +63,9 @@ def standalone_config(cls, project, project_path, new=False, custom=None):
     :param cls: An instance of a class that will retain the attributes.
     :param project: The name of the project.
     :param project_path: The relative path of a project.
-    :param new: The new project flag.
+    :param new: The new project flag. (Default value = False)
     :param custom: The custom flag which can be None or a dictionary.
+                   (Default value = None)
     :return: Returns the instance (cls) with new attributes.
     """
 

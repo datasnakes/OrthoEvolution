@@ -46,15 +46,21 @@ The following is an example usage (and can also be found in ``sge_tests.py``)
 
 
     class TestJobTask(SGEJobTask):
+        """ """
+
 
         i = luigi.Parameter()
 
         def work(self):
+            """ """
+
             logger.info('Running test job...')
             with open(self.output().path, 'w') as f:
                 f.write('this is a test')
 
         def output(self):
+            """ """
+
             return luigi.LocalTarget(os.path.join('/home', 'testfile_' + str(self.i)))
 
 
@@ -116,7 +122,11 @@ def _parse_qstat_state(qstat_out, job_id):
 
     Returns state for the *first* job matching job_id. Returns 'u' if
     `qstat` output is empty or job_id is not found.
+
+    :param qstat_out: Output of qstat command.
+    :param job_id: Job to be looked for.
     """
+
     if qstat_out.strip() == '':
         return 'u'
     lines = qstat_out.split(b'\n')
@@ -136,16 +146,26 @@ def _parse_qstat_state(qstat_out, job_id):
 def _parse_qsub_job_id(qsub_out):
     """Parse job id from qsub output string.
 
-    Assume format:
-        "<job_id>.<job_scheduler>"
+    Assume format:  "<job_id>.<job_scheduler>"
+
+    :param qsub_out: Output of qsub job submission.
     """
+
     qsub_out = qsub_out.decode('utf-8')
     qsub_out = qsub_out.split('.')[0]
     return int(qsub_out)
 
 
 def _build_qsub_command(cmd, job_name, outfile, errfile, select):
-    """Submit shell command to SGE queue via `qsub`"""
+    """Submit shell command to SGE queue via `qsub`
+
+    :param cmd: The command to be run.
+    :param job_name: The name of the job.
+    :param outfile: The name of the standard ouput file.
+    :param errfile: The name of the standard ouput file.
+    :param select: The number of ppn to select.
+    """
+
     # TODO make mem available
     qsub_template = """echo {cmd} | qsub -o {outfile} -e {errfile} -V -r y -l select={select}:ncpus=1:mem=3 -N {job_name}"""
     return qsub_template.format(cmd=cmd, job_name=job_name, outfile=outfile, errfile=errfile, select=select)
@@ -177,7 +197,9 @@ class SGEPipelineTask(luigi.Task):
     - no_tarball: Don't create a tarball of the luigi project directory.  Can be
         useful to reduce I/O requirements when the luigi directory is accessible
         from cluster nodes already.
-    """
+
+        """
+
     select = luigi.IntParameter(default=3, significant=False)
     shared_tmp_dir = luigi.Parameter(default='/home', significant=False)
     parallel_env = luigi.Parameter(default='orte', significant=False)
@@ -210,6 +232,8 @@ class SGEPipelineTask(luigi.Task):
             self.job_name = self.task_family
 
     def _fetch_task_failures(self):
+        """Get errors of task/job run."""
+
         if not os.path.exists(self.errfile):
             logger.info('No error file')
             return []
@@ -223,6 +247,8 @@ class SGEPipelineTask(luigi.Task):
         return errors
 
     def _init_local(self):
+        """Initialize a local run."""
+
         # Set up temp folder in shared directory (trim to max filename length)
         base_tmp_dir = self.shared_tmp_dir
         random_id = '%016x' % random.getrandbits(64)
@@ -246,6 +272,8 @@ class SGEPipelineTask(luigi.Task):
             create_packages_archive(packages, os.path.join(self.tmp_dir, "packages.tar"))
 
     def run(self):
+        """Run the job."""
+
         if self.run_locally:
             self.work()
         else:
@@ -260,11 +288,16 @@ class SGEPipelineTask(luigi.Task):
             # - Runner function hits the button on the class's work() method
 
     def work(self):
-        """Override this method, rather than ``run()``,  for your actual work."""
+        """Override this method, rather than ``run()``, for your actual work."""
+
         pass
 
     def _dump(self, out_dir=''):
-        """Dump instance to file."""
+        """Dump instance to file.
+
+        :param out_dir:  The ouput directory of the dump. (Default value = '')
+        """
+
         with self.no_unpicklable_properties():
             self.job_file = os.path.join(out_dir, 'job-instance.pickle')
             if self.__module__ == '__main__':
@@ -277,7 +310,8 @@ class SGEPipelineTask(luigi.Task):
                 pickle.dump(self, open(self.job_file, "w"))
 
     def _run_job(self):
-        """Build a qsub argument that will run sge_runner.py on the directory"""
+        """Build a qsub argument that will run sge_runner.py on the directory."""
+
         runner_path = sge_runner.__file__
         if runner_path.endswith("pyc"):
             runner_path = runner_path[:-3] + "py"
@@ -307,6 +341,8 @@ class SGEPipelineTask(luigi.Task):
             subprocess.call(["rm", "-rf", self.tmp_dir])
 
     def _track_job(self):
+        """Track the status of the submitted job."""
+
         while True:
             # Sleep for a little bit
             time.sleep(self.poll_time)

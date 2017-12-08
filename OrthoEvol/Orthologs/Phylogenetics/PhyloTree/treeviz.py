@@ -12,12 +12,16 @@ warnings.warn('This module is still under development and '
 
 
 class TreeViz(object):
-    """Tools that allow visualization of a newick formatted tree."""
+    """Tools that allow visualization of a newick formatted tree."""
     def __init__(self, path2tree):
         """Import the path to the tree."""
         self.path2tree = path2tree
 
     def drawtree(self, treeformat='newick'):
-        """Import a newick formatted tree and visualize it."""
+        """Import a newick formatted tree and visualize it.
+
+        :param treeformat:  (Default value = 'newick')
+
+        """
         tree = Phylo.read(self.path2tree, treeformat)
         Phylo.draw(tree)

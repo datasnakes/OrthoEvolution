@@ -1,4 +1,4 @@
-"""Phylogenetic tools part of the Orthologs Package"""
+"""Phylogenetic tools part of the Orthologs Package."""
 import warnings
 from Bio import AlignIO
 from OrthoEvol.Orthologs import OrthologsWarning
@@ -19,6 +19,7 @@ warnings.simplefilter('ignore', OrthologsWarning)
 
 class RelaxPhylip(object):
     """Convert a multiple sequence alignment file to relaxed-phylip format."""
+
     def __init__(inputfile, outputfile):
         """Fasta to Relaxed Phylip format."""
         AlignIO.convert(inputfile, "fasta",
