@@ -22,8 +22,8 @@ def attribute_config(cls, composer, checker, project=None, project_path=None, ch
     :param checker2:  (Default value = None)
     :return:  Returns the instance (cls) with new attributes.
     """
-
-    ac_log = LogIt().default(logname="%s" % cls.__class__.__name__, logfile=None)
+    clsnm = cls.__class__.__name__
+    ac_log = LogIt().default(logname="%s" % clsnm, logfile=None)
     if checker2:
         check2 = issubclass(type(composer), checker2)
     else:
@@ -32,23 +32,33 @@ def attribute_config(cls, composer, checker, project=None, project_path=None, ch
     if issubclass(type(composer), checker) or check2:
         for key, value in composer.__dict__.items():
             setattr(cls, key, value)
-        ac_log.info("The attribute configuration was accomplished by composing %s with %s." % (cls.__class__.__name__, composer.__class__.__name__))
+        clsnm = cls.__class__.__name__
+        compnm = composer.__class__.__name__
+        msg = "The attribute configuration was accomplished by composing {0} with {1}.".format(clsnm, compnm)
+        ac_log.info(msg)
 
     # Attribute configuration using a dictionary.
     elif isinstance(composer, dict):
         for key, value in composer.items():
             setattr(cls, key, value)
-        ac_log.info("The attribute configuration of %s was accomplished by using a dictionary." % cls.__class__.__name__)
+        clsnm = cls.__class__.__name__
+        msg = "The attribute configuration of {0} was accomplished by using a dictionary.".format(clsnm)
+        ac_log.info(msg)
 
     # Attribute configuration without composer
     elif composer is None:
         if not (project or project_path):
-            raise BrokenPipeError("Without the Project Management class, a project name and project path must be included.")
+            msg = "Without the Project Management class, a project name and "
+            "project path must be included."
+            raise BrokenPipeError(msg)
         cls = standalone_config(cls, project, project_path)
-        ac_log.info("The attribute configuration of %s was accomplished by using a standalone project." % cls.__class__.__name__)
+        clsnm = cls.__class__.__name__
+        msg = "The attribute configuration of {0} was accomplished without a composer.".format(clsnm)
+        ac_log.info(msg)
     # Make sure self.project and self.project_path have values
     if not (cls.project or cls.project_path):
-        raise BrokenPipeError("The project name and project path attributes have not been set.")
+        msg = "The project name and project path attributes have not been set."
+        raise BrokenPipeError(msg)
 
     return cls
 
