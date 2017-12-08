@@ -10,7 +10,7 @@ from Bio import MissingExternalDependencyError
 
 
 class PhymlTest(unittest.TestCase):
-    """Tests for application wrappers."""
+    """Test for application wrapper."""
 
     def __init__(self):
         # Try to avoid problems when the OS is in another language
@@ -41,7 +41,8 @@ class PhymlTest(unittest.TestCase):
         self.EX_PHYLIP = EX_PHYLIP
 
     def test_phyml(self):
-        """Run PhyML using the wrapper."""
+        """Run PhyML using the wrapper."""
+
         cmd = PhymlCommandline(
             self.phyml_exe,
             input=self.EX_PHYLIP,

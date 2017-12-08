@@ -3,15 +3,12 @@ import warnings
 from Bio import AlignIO
 from OrthoEvol.Orthologs import OrthologsWarning
 
-# Ignore the warning in this init script.
-warnings.simplefilter('ignore', OrthologsWarning)
-
-# Initialize the modules
 from OrthoEvol.Orthologs.Phylogenetics.PAML import ETE3PAML
 from OrthoEvol.Orthologs.Phylogenetics.PhyloTree import TreeViz
 from OrthoEvol.Orthologs.Phylogenetics import PhyML
 from OrthoEvol.Orthologs.Phylogenetics import Phylip
 from OrthoEvol.Orthologs.Phylogenetics.IQTree import IQTreeCommandline
+from OrthoEvol.Orthologs.Phylogenetics.IQTree import FilteredTree
 
 # Ignore the warning in this init script.
 warnings.simplefilter('ignore', OrthologsWarning)
@@ -33,4 +30,5 @@ __all__ = ("ETE3PAML",
            "RelaxPhylip",
            "Phylip",
            "IQTreeCommandline",
+           "FilteredTree",
            )

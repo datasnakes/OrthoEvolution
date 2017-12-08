@@ -31,7 +31,8 @@ class LogIt(object):
         """
 
         default_log = setup_logger(name=logname.upper(), logfile=logfile,
-                                   level=logging.DEBUG, formatter=self._formatter)
+                                   level=logging.DEBUG,
+                                   formatter=self._formatter)
 
         assert isinstance(default_log, object)
         return default_log
@@ -77,5 +78,5 @@ class LogIt(object):
         It must be shutdown.
         """
 
-        # HINT https://www.programcreek.com/python/example/3517/logging.shutdown
+        # TIP https://www.programcreek.com/python/example/3517/logging.shutdown
         self.logging.shutdown()

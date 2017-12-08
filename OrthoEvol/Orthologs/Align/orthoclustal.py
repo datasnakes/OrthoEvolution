@@ -5,7 +5,7 @@ three or more sequences.
 from Bio.Align.Applications import ClustalOmegaCommandline
 from Bio.Application import ApplicationError
 
-from OrthoEvol.Tools import LogIt
+from OrthoEvol.Tools.logit import LogIt
 
 stop_codons = ['TAG', 'TAA', 'TGA']
 

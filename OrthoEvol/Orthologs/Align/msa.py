@@ -4,7 +4,7 @@ import subprocess
 from pathlib import Path
 from Bio import SeqIO
 
-from OrthoEvol.Tools import LogIt
+from OrthoEvol.Tools.logit import LogIt
 from OrthoEvol.Orthologs.utils import attribute_config
 from OrthoEvol.Orthologs.Align.guidance2 import Guidance2Commandline
 from OrthoEvol.Orthologs.Align.pal2nal import Pal2NalCommandline
@@ -46,11 +46,13 @@ class MultipleSequenceAlignment(object):
         self.program = None
         self.alignment_dict = {}
         self.project = project
+        self.project_path = project_path
         if project_path and project:
             self.project_path = Path(project_path) / Path(project)
 
         # Configuration of class attributes
-        add_self = attribute_config(self, composer=genbank, checker=GenBank, project=project, project_path=project_path)
+        add_self = attribute_config(self, composer=genbank, checker=GenBank,
+                                    project=project, project_path=project_path)
         for var, attr in add_self.__dict__.items():
             setattr(self, var, attr)
 

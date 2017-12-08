@@ -1,12 +1,17 @@
 import os
 import pexpect  # I used this to feed input into shell executable
 import sys
+# TODO Create better wrappers.
 
 
 class Phylip(object):
+    """A class that serves as a wrapper for the Phylip Excecutable."""
+
     def __init__(self, inputfile):
-    """The input file should be a phylip formatted multiple sequence
-    alignment."""
+        """The input file should be a phylip formatted multiple sequence alignment.
+
+        :param inputfile: Input a phylip formatted multiple sequence alignment.
+        """
 
         self._rename = os.rename
         if sys.platform == 'win32' or 'win64':
@@ -19,13 +24,12 @@ class Phylip(object):
         self.inputfile = "infile"
 
     def dnapars(self, outfile, outtree):
-        """Maximum Parsimony using Phylip executable, dnapars,
-within unix shell.
-
-        :param outfile: 
-        :param outtree: 
-
-        """
+        """Generate a maximum parsimony tree using dnapars.
+
+        :param outfile:  Standard output filename.
+        :param outtree:  Name of maximum parsimony tree.
+        """
+
         dnapars = pexpect.spawnu("dnapars infile")
         dnapars.sendline("Y\r")
         dnapars.waitnoecho()
@@ -33,12 +37,12 @@ within unix shell.
         self._rename("outtree", outtree + "_maxparsimony_tree")
 
     def dnaml(self, outfile, outtree):
-        """Maximum Likelihood using dnaml within a unix shell.
-
-        :param outfile: 
-        :param outtree: 
-
-        """
+        """Generate a maximum likelihoood tree using dnapaml.
+
+        :param outfile:  Standard output filename.
+        :param outtree:  Name of maximum likelihoood tree.
+        """
+
         dnaml = pexpect.spawnu("dnaml infile")
         dnaml.sendline("Y\r")
         dnaml.waitnoecho()
@@ -46,11 +50,11 @@ within unix shell.
         self._rename("outtree", outtree + "_maxlikelihood_tree")
 
     def dnadist(self, dnadist_output):
-        """
-
-        :param dnadist_output: 
-
-        """
+        """Generate a distance matrix using dnadist.
+
+        :param dnadist_output:  Dnadist output filename.
+        """
+
         dnadist = pexpect.spawnu("dnadist infile")
         dnadist.sendline("Y\r")
         dnadist.waitnoecho()

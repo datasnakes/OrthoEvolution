@@ -5,7 +5,7 @@ from pathlib import Path
 from BioSQL import BioSeqDatabase
 from Bio import SeqIO
 
-from OrthoEvol.Tools import LogIt
+from OrthoEvol.Tools.logit import LogIt
 from OrthoEvol.Orthologs.utils import attribute_config
 from OrthoEvol.Orthologs.Blast.orthologs_blastn import OrthoBlastN
 from OrthoEvol.Tools.otherutils.other_utils import makedirectory
@@ -15,7 +15,8 @@ from OrthoEvol.Orthologs.Blast.comparative_genetics import BaseComparativeGeneti
 class GenBank(object):
     """This class will handle GenBank files in various ways."""
 
-    def __init__(self, project, project_path=None, solo=False, multi=True, archive=False, min_fasta=True, blast=OrthoBlastN, **kwargs):
+    def __init__(self, project, project_path=None, solo=False, multi=True,
+                 archive=False, min_fasta=True, blast=OrthoBlastN, **kwargs):
         """Handle GenBank files in various ways.
 
         It allows for refseq-release .gbff files to be downloaded from NCBI
@@ -284,12 +285,12 @@ class GenBank(object):
     def gbk_upload(self):
         """Upload a BioSQL database with target GenBank data (.gbk files).
 
-This method is only usable after creating GenBank records with this
+        This method is only usable after creating GenBank records with this
         class.  It uploads a BioSQL databases with target GenBank data (.gbk
         files).  This creates a compact set of data for each project.
 
-        :return:  Does not return an object."""
-
+        :return:  Does not return an object.
+        """
 
         t_count = 0
         # Parse the tier dictionary

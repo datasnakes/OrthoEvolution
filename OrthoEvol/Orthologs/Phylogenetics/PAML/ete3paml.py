@@ -3,18 +3,21 @@ import os
 from ete3 import EvolTree, Tree
 
 from OrthoEvol.Tools.otherutils import csvtolist
+from OrthoEvol.Tools import LogIt
 
 
 class ETE3PAML(object):
-    """Use ETE3's M1 model to run PAML's codeml for orthology inference."""
+    """Use ETE3's M1 model to run PAML's codeml for orthology inference."""
 
     def __init__(self, alignmentfile, speciestree, workdir=''):
         """Initialize main variables/files to be used.
 
-        :param alignmentfile: Input alignment file in fasta format
-        :param speciestree: A newick formatted species tree.
-        :param workdir: Directory of alignment file and species tree.
+        :param alignmentfile:  Input alignment file in fasta format
+        :param speciestree:  A newick formatted species tree.
+        :param workdir:  Directory of alignment file and species tree.
+                         (Default value = '')
         """
+        self.ete3paml_log = LogIt().default(logname="ete3paml", logfile=None)
         self.alignmentfile = alignmentfile
         self.speciestree = speciestree
         self.workdir = workdir
@@ -32,19 +35,12 @@ class ETE3PAML(object):
     def prune_tree(self, organisms):
         """Prune branches for species not in the alignment file.
 
-Keep branches in the species tree for species in the alignment file
+        Keep branches in the species tree for species in the alignment file
         Some species may not be present in the alignment file due to lack of
         matching with blast or simply the gene not being in the genome.
 
-        :param organismslist: A list of organisms in the alignment file.
-        :param organisms_file: If not None, will import an organisms file and
-                                create an organisms list. Assumes that the
-                                column header is 'Organisms'
-        :return:
-
-        :param organisms: 
-
-        """
+        :param organisms: A list of organisms in the alignment file.
+        """
 
         if os.path.isfile(organisms):
             organismslist = csvtolist(organisms)
@@ -56,17 +52,19 @@ Keep branches in the species tree for species in the alignment file
             if organism in self.aln_str:
                 branches2keep.append(organism)
             else:
-                print('No sequence for %s.' % organism)
+                self.ete3paml_log.warning('No sequence for %s.' % organism)
 
             self._speciestree.prune(branches2keep, preserve_branch_length=True)
 
             # Write the tree to a file
-            self._speciestree.write(outfile=os.path.join(self.workdir, 'temptree.nw'))
+            self._speciestree.write(outfile=os.path.join(self.workdir,
+                                                         'temptree.nw'))
+            self.ete3paml_log.info('temptree.nw was created.')
 
     def run(self, pamlsrc, output_folder, model='M1'):
         """Run PAML using ETE.
 
-The default model is M1 as it is best for orthology inference in
+        The default model is M1 as it is best for orthology inference in
         our case. You can use models `M2`, `M0`, `M3`.
 
         Ensure that you have the correct path to your codeml binary. It should
@@ -74,14 +72,9 @@ The default model is M1 as it is best for orthology inference in
 
         :param pamlsrc: Path to the codemly binary.
         :param output_folder: The name of the output folder.
-        :param model: The model to be used. Default: M1
-        :return:
-
-        :param pamlsrc: 
-        :param output_folder: 
-        :param model:  (Default value = 'M1')
-
-        """
+        :param model: The model to be used. (Default value = 'M1')
+        """
+
         # Import the newick tree
         tree = EvolTree('temptree.nw')
 
@@ -92,5 +85,7 @@ The default model is M1 as it is best for orthology inference in
 
         # Set the binpath of the codeml binary
         tree.execpath = pamlsrc
-
-        tree.run_model(model + '.' + output_folder)  # Run the model M1 M2 M3 M0
+        # Run the model M1, M2, M3, or M0
+        model_path = model + '.' + output_folder
+        tree.run_model(model_path)
+        self.ete3paml_log.info('Codeml is generating data in %s.' % model_path)

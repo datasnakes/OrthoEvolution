@@ -1,6 +1,6 @@
 # PAML Documentation
-PAML (Phylogenetic Analysis by Maximum Likelihood) is a package of 
-programs for phylogenetic analyses of DNA or protein 
+PAML (Phylogenetic Analysis by Maximum Likelihood) is a package of
+programs for phylogenetic analyses of DNA or protein
 sequences using maximum likelihood and is maintained by Ziheng Yang.
 
 
@@ -11,7 +11,7 @@ trees. It provides a comprehensive API and a collection of command line tools,
 
 ### Model Selection and Default Parameters
 It's important to note the default parameters for `ETE3PAML` are as follows:
-`model='M1'`
+`model='M1'`, `workdir=```.
 
 ## Usage & Examples
 
@@ -25,7 +25,7 @@ paml.run(pamlsrc='path/to/codeml/binary', output_folder=None)
 
 ```
 
-### Pruning a tree for use with Paml
+### Pruning a tree for use with ETE3PAML
 
 ```python
 from OrthoEvol.Orthologs.Phylogenetics.PAML import ETE3PAML
@@ -36,6 +36,5 @@ paml = ETE3PAML(alignmentfile='HTR1A.ffn', speciestree='speciestree.nw', workdir
 paml.prune_tree(organisms='organisms.csv')
 
 paml.run(pamlsrc='path/to/codeml/binary', output_folder=None)
-
 
 ```
