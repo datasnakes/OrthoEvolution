@@ -18,12 +18,12 @@ insecure. Keep a local copy of your key.
 Examples
 --------
 
-Import the class and set up the slack handler.
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Import the class and set up the slack handler
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 .. code:: python
 
-    from OrthoEvol.Tools import Slackify
+    from OrthoEvol.Tools.slackify import Slackify
 
     slack = Slackify(slackconfig='path/to/slackconfig.cfg')
 
@@ -34,8 +34,8 @@ Your config file should look as such:
     [APIKEYS]
     slack = apikeystring
 
-Message a channel and link to a user with ``<@username>`` in your message.
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Message a channel and link to a user with ``<@username>`` in your message
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 .. code:: python
 
@@ -43,16 +43,18 @@ Message a channel and link to a user with ``<@username>`` in your message.
 
     slack.send_msg(channel='channelname', message=message_to_channel)
 
-Get all users and channels.
-^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Get all users and channels
+~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 .. code:: python
 
     slack.list_users() # Returns a list of all users.
     slack.list_channels() # Returns a list of channels
 
-Upload a file. The file can be an image, pdf, doc, text, python file, etc.
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Upload a file
+~~~~~~~~~~~~~
+
+The file can be an image, pdf, doc, text, python file, etc
 
 .. code:: python
 

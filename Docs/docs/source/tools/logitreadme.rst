@@ -6,6 +6,8 @@ class wraps around `logzero <https://github.com/metachris/logzero>`__
 which allows color coded logging. We created our own default logger with
 a default dateformat, logformat, and logging level (default is debug).
 
+Note that LogIt automaticall capitalizes the logname.
+
 1. Import the LogIt class and create a variable. ex: ``logit = LogIt()``
 2. Create your logger. ex:
    ``blastn = logit.default('blastn', 'blastn.log')``
@@ -17,6 +19,14 @@ be set up for one script which is shown in the example below.
 
 Example
 -------
+
+Simple logging
+~~~~~~~~~~~~~~
+
+.. code:: python
+
+    from OrthoEvol.Tools import LogIt
+    genbank_log = LogIt().default(logname="genbank", logfile=None)
 
 Use logging with ETE3PAML
 ~~~~~~~~~~~~~~~~~~~~~~~~~

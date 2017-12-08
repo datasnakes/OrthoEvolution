@@ -61,18 +61,29 @@ Integrate logging in a simple and quick way
     from OrthoEvol.Tools.logit import LogIt
 
     # Set up your loggers
-    logit = LogIt()
-
-    # Log to one file
-    logfile = 'test.log'
-
-    test1 = logit.default('test1 log', logfile)
-
-    # Start logging
-    test1.info('hi')
+    logit = LogIt()default(logname='test1 log', logfile='log.txt')
 
     # Shutdown logging without deleting the logfile
     logit.shutdown()
+
+Send a message to a slack channel
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Your config file should look as such:
+
+.. code:: python
+
+    [APIKEYS]
+    slack = apikeystring
+
+.. code:: python
+
+    from OrthoEvol.Tools.slackify import Slackify
+
+    slack = Slackify(slackconfig='path/to/slackconfig.cfg')
+    message_to_channel = 'Hey, <@username>. This is an update for the current script.'
+
+    slack.send_msg(channel='channelname', message=message_to_channel)
 
 Importing all tools modules
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~

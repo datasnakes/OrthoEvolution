@@ -38,6 +38,7 @@ class GenBank(object):
 
         # TODO-ROB: Change the way the file systems work.
         self.project = project
+        self.project_path = project_path
         self.solo = solo
         self.multi = multi
         self.min_fasta = min_fasta
@@ -51,6 +52,7 @@ class GenBank(object):
             setattr(self, var, attr)
 
         # Configuration
+        # FIXME AttributeError: 'GenBank' object has no attribute 'user_db'
         self.target_gbk_db_path = self.user_db / Path(self.project)
         Path.mkdir(self.target_gbk_db_path, parents=True, exist_ok=True)
 

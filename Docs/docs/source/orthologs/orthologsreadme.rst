@@ -27,18 +27,18 @@ together.
     from OrthoEvol.Orthologs.Align import ClustalO
     from OrthoEvol.Orthologs.Phlogenetics import ETE3PAML
 
-❗ Software Dependencies
------------------------
+Software Dependencies
+---------------------
 
-Ensure that the following software is installed and in your path: -
-Clustal omega - NCBI Blast+ 2.6.0 or greater - PAML - PhyML - Phylip -
-IQTREE - Mafft - Prank - Clustalw - Guidance2 - Pal2Nal
+Ensure that the following software is installed and in your path:
+Clustal omega, NCBI Blast+ 2.6.0 or greater, PAML, PhyML, Phylip,
+IQTREE, Mafft, Prank, Clustalw, Guidance2 & Pal2Nal
 
 If you are a sudo user, you may use the script we've provided,
 `install.sh <https://github.com/datasnakes/OrthoEvolution/blob/master/OrthoEvol/Orthologs/install.sh>`__.
 
-Using ``install.sh`` on Debian/Ubuntu:
---------------------------------------
+Using install.sh on Debian/Ubuntu:
+----------------------------------
 
 .. code:: bash
 

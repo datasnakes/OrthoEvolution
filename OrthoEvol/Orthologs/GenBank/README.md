@@ -2,9 +2,12 @@
 Retrieve genbank files and extract specific features sucha as `cds` or `aa`. Also,
 write the features to text files.
 
+If you haven't worked with genbank files before or are unfamiliar with what they
+look like, view a [sample genbank record](https://www.ncbi.nlm.nih.gov/Sitemap/samplerecord.html).
+
 ## Usage
-The main classes are `GenBank` and `GenBankMana`. GenBankMana helps to incorporate
-the ftp class.
+The main class is `GenBank`.
+
 
 ## Examples
 
