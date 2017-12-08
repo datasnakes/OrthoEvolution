@@ -9,9 +9,9 @@ from OrthoEvol.Tools.logit import LogIt
 
 class Management(object):
     def __init__(self, repo=None, home=os.getcwd(), new_repo=False, **kwargs):
-    """Base class for directory management.
+        """Base class for directory management.
 
-    It maps the directories of the OrthoEvol-Script package using the
+        It maps the directories of the OrthoEvol-Script package using the
         pathlib module, and turns the names of each important directory into
         a pathlike object.  The base class gives the option of creating a new
         repository with cookiecutter.
@@ -20,7 +20,8 @@ class Management(object):
         :param home (path or path-like): The home of the file calling this name.
                                         When creating a new repository it is
                                         best to explicitly name the home path.
-        :param new_repo (bool): Creates a new repository."""
+        :param new_repo (bool): Creates a new repository."""
+
 
         self.repo = repo
         self.file_home = Path(home)  # Home of the file calling this class
@@ -67,7 +68,8 @@ class Management(object):
 
 
 class RepoManagement(Management):
-    """Repository Management for OrthoEvol."""
+    """Repository Management for OrthoEvol."""
+
     def __init__(self, repo, user=None, home=os.getcwd(),
                  new_user=False, new_repo=False, **kwargs):
         """Manage repositories.
@@ -117,7 +119,8 @@ class RepoManagement(Management):
 
 
 class UserManagement(RepoManagement):
-    """User Management for OrthoEvol."""
+    """User Management for OrthoEvol."""
+
     # TODO-ROB CREATE THESE IN A VIRTUAL ENVIRONMENT FOR EACH USER
     # TODO-ROB The virtual environment can be the name of the user
     # TODO-ROB When the user logs in, they will activate the virtual environment
@@ -191,13 +194,13 @@ class UserManagement(RepoManagement):
             # TODO-ROB:  Determine what type of database as well.
 
     def zip_mail(self, comp_filename, zip_path, destination=''):
-        """
-
-        :param comp_filename: 
-        :param zip_path: 
-        :param destination:  (Default value = '')
-
-        """
+        """Zip and mail a file or folder.
+
+        :param comp_filename:
+        :param zip_path:
+        :param destination:  (Default value = '')
+        """
+
         pass
         # TODO Remodel this.
 
@@ -209,7 +212,8 @@ class UserManagement(RepoManagement):
 
 
 class WebsiteManagement(RepoManagement):
-    """Website Management for OrthoEvol."""
+    """Website Management for OrthoEvol."""
+
     def __init__(self, repo, website, host='0.0.0.0', port='5252',
                  home=os.getcwd(), new_website=False, create_admin=False, **kwargs):
         """Install a template for Flask using cookiecutter.
@@ -240,20 +244,26 @@ class WebsiteManagement(RepoManagement):
         # Path to Flask's Web-Server Files
         self.website_path = self.flask / Path(self.website)
 
-        self.Kitchen = Oven(repo=self.repo, user=self.user, website=self.website, output_dir=self.flask)
-        self.managementlog.info('The Website Management class variables have been set.')
+        self.Kitchen = Oven(repo=self.repo, user=self.user,
+                            website=self.website, output_dir=self.flask)
+        logmsg = 'The Website Management class variables have been set.'
+        self.managementlog.info(logmsg)
 
         if new_website is True:
-            self.managementlog.info('The website cookie is being prepared for the Oven.')
-            self.Kitchen.bake_the_website(host=self.web_host, port=self.web_port, website_path=self.website_path)
+            logmsg = 'The website cookie is being prepared for the Oven.'
+            self.managementlog.info(logmsg)
+            self.Kitchen.bake_the_website(host=self.web_host,
+                                          port=self.web_port,
+                                          website_path=self.website_path)
 
     def stop_server(self):
-        """Stop the server running the website."""
+        """Stop the server running the website."""
         # TODO-SDH Add way to stop the server from running.
 
 
 class ProjectManagement(UserManagement):
-    """Project Management for OrthoEvol."""
+    """Project Management for OrthoEvol."""
+
     def __init__(self, repo, user, project, research=None, research_type=None,
                  app=None, home=os.getcwd(), new_project=False, new_research=False,
                  new_app=False, **kwargs):
@@ -299,16 +309,21 @@ class ProjectManagement(UserManagement):
             if app:
                 self.app = app
                 self.app_path = self.project_web / Path(app)
-
-        self.managementlog.info('The User Management class variables have been set.')
+        logmsg = 'The User Management class variables have been set.'
+        self.managementlog.info(logmsg)
 
         if new_research is True:
-            self.managementlog.info('The research cookie is being prepared for the Oven.')
+            logmsg = 'The research cookie is being prepared for the Oven.'
+            self.managementlog.info(logmsg)
             self.research_type = research_type
-            self.Kitchen = Oven(repo=self.repo, user=self.user, project=self.project, output_dir=self.project_path)
-            self.Kitchen.bake_the_research(research_type=self.research_type, research=self.research)
+            self.Kitchen = Oven(repo=self.repo, user=self.user,
+                                project=self.project,
+                                output_dir=self.project_path)
+            self.Kitchen.bake_the_research(research_type=self.research_type,
+                                           research=self.research)
             if new_app is True:
-                self.managementlog.info('The app cookie is being prepared for the Oven.')
+                logmsg = 'The app cookie is being prepared for the Oven.'
+                self.managementlog.info(logmsg)
                 self.app = app
                 self.app_path = self.project_path / Path(research_type) / Path(research) / Path('web')
                 self.Kitchen.bake_the_app(app=self.app)

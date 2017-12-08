@@ -13,9 +13,10 @@ from OrthoEvol.Manager.BioSQL import biosql
 
 
 class BaseDatabaseManagement(object):
+    """BaseDatabaseManangement class for managing and creating databases."""
 
     def __init__(self, project, email, driver, project_path=None, proj_mana=ProjectManagement):
-    """This is the base class for managing various databases.  It provides functionality for downloading and creating
+        """This is the base class for managing various databases.  It provides functionality for downloading and creating
         various databases for your pipeline.  There are functions available for downloading files from NCBI (BLAST,
         windowmasker, taxonomy, refseq release), downloading ITIS taxonomy tables, creating BioSQL databases, and
         uploading refseq release files to BioSQL databases.  This class currently REQUIRES an instance of
@@ -30,7 +31,8 @@ class BaseDatabaseManagement(object):
         :param project_path: A path used for standalone/basic project configuration.
         :type project_path: str.
         :param proj_mana: A configuration variable for connecting projects.
-        :type proj_mana: ProjectManagement."""
+        :type proj_mana: ProjectManagement.
+        """
 
         self.db_mana_log = LogIt().default(logname="DatabaseManagement", logfile=None)
         self.project = project
@@ -56,11 +58,9 @@ class BaseDatabaseManagement(object):
         :param taxonomy_ids:  Taxonomy ids for the organisms of interest.
         :type taxonomy_ids:  list.
         :return:
-        :rtype:
-
-        :param taxonomy_ids: 
-
-        """
+        :rtype:
+        """
+
         # <path>/<user or basic_project>/databases/NCBI/blast/db/<database_name>
         dl_path = Path(self.database_path) / Path("NCBI") / Path('blast') / Path('windowmasker_files')
         self.ncbiftp.getwindowmaskerfiles(taxonomy_ids=taxonomy_ids, download_path=str(dl_path))
@@ -69,14 +69,13 @@ class BaseDatabaseManagement(object):
         """Download the blast database files for using NCBI's BLAST+ command line.  For other types of blast data, please
         see the NCBIREADME.md file.
 
-        :param database_name:  A string that represents a pattern in the files of interest.
+        :param database_name:  A string that represents a pattern in the files
+                               of interest. (Default value = "refseq_rna")
         :type database_name:  string.
         :return:
-        :rtype:
-
-        :param database_name:  (Default value = "refseq_rna")
-
-        """
+        :rtype:
+        """
+
         # <path>/<user or basic_project>/databases/NCBI/blast/db/<database_name>
         dl_path = Path(self.database_path) / Path("NCBI") / Path("blast") / Path("db")
 
@@ -89,17 +88,18 @@ class BaseDatabaseManagement(object):
         # TODO-ROB:  set up environment variables.  Also add CLI setup
 
     def download_ete3_taxonomy_database(self):
-        """Update ETE3's taxonomy database with ETE3's API."""
+        """Update ETE3's taxonomy database with ETE3's API."""
+
         # DEFAULT_TAXADB = os.path.join(os.environ.get('HOME', '/'), '.etetoolkit', 'taxa.sqlite')
         ete3 = import_module("ete3")
         ete3.NCBITaxa.update_taxonomy_database()
 
     def create_biosql_taxonomy_database(self, destination):
-        """Create a BioSQL database template loaded with NCBI's taxonomy data.
-
-        :param destination: 
-
-        """
+        """Create a BioSQL database template loaded with NCBI's taxonomy data.
+
+        :param destination:
+        """
+
         if self.driver.lower() == "sqlite3":
             ncbi_db = self.biosql.SQLiteBioSQL(proj_mana=self.proj_mana)
             ncbi_db.copy_template_database(destination=destination)
@@ -112,7 +112,8 @@ class BaseDatabaseManagement(object):
             pass
 
     def download_itis_taxonomy_tables(self):
-        """ """
+        """Download the ITIS tables."""
+
         # Loads data from ITIS via http://www.itis.gov/downloads/
         # Use this along with BioSQL's phyloDB
         pass
@@ -121,13 +122,12 @@ class BaseDatabaseManagement(object):
         """Download and extract the NCBI taxonomy dump files via a GET request.
 
         :param url: A ftp link to the NCBI taxdump.* file of interest.
+                    (Default value = "ftp://ftp.ncbi.nlm.nih.gov/pub/taxonomy/taxdump.tar.gz")
         :type url: str.
         :return:
-        :rtype:
-
-        :param url:  (Default value = "ftp://ftp.ncbi.nlm.nih.gov/pub/taxonomy/taxdump.tar.gz")
-
-        """
+        :rtype:
+        """
+
         # TODO-ROB:  Maybe add taxdata folder here to reflect BioSQL's load_ncbi_taxonomy.pl script
         dl_path = Path(self.database_path) / Path("NCBI") / Path('pub') / Path('taxonomy')
         dl_abs_path = dl_path / Path('taxdump.tar.gz')
@@ -149,13 +149,9 @@ class BaseDatabaseManagement(object):
         :param seqformat: The format of the sequence file (usually 'gbff' for GenBank Flat File).
         :type seqformat: str.
         :return:
-        :rtype:
-
-        :param collection_subset: 
-        :param seqtype: 
-        :param seqformat: 
-
-        """
+        :rtype:
+        """
+
         db_path = self.database_path / Path('NCBI') / Path('refseq') / Path('release') / Path(collection_subset)
         ncbiftp = self.ncbiftp.getrefseqrelease(taxon_group=collection_subset, seqtype=seqtype, seqformat=seqformat, download_path=db_path)
         return ncbiftp
@@ -169,21 +165,15 @@ class BaseDatabaseManagement(object):
         :type seqtype: str.
         :param seqformat: The format of the sequence file (usually 'gbff' for GenBank Flat File).
         :type seqformat: str.
-        :param upload_list:
+        :param upload_number:  (Default value = 8)
+        :param upload_list:  (Default value = None)
         :type upload_list:
-        :param extension:
+        :param extension:  (Default value = ".gbk.db")
         :type extension:
         :return:
-        :rtype:
-
-        :param collection_subset: 
-        :param seqtype: 
-        :param seqformat: 
-        :param upload_number:  (Default value = 8)
-        :param upload_list:  (Default value = None)
-        :param extension:  (Default value = ".gbk.db")
-
-        """
+        :rtype:
+        """
+
         if upload_number < 8:
             raise ValueError("The upload_number must be greater than 8.  The NCBI refseq release files are too bing"
                              "for anything less than 8 seperate BioSQL databases.")
@@ -201,7 +191,8 @@ class BaseDatabaseManagement(object):
             ncbi_db.upload_files(seqtype=seqtype, filetype=seqformat, upload_path=db_path, upload_list=upload_list)
 
     def get_project_genbank_database(self):
-        """ """
+        """Insert description. # TODO-ROB"""
+
         print()
 
     # def download_taxonomy_database(self, db_type, destination):
@@ -239,7 +230,8 @@ class BaseDatabaseManagement(object):
 
 
 class DatabaseManagement(BaseDatabaseManagement):
-    """ """
+    """Main class for managing databases."""
+
     # TODO-ROB: Figure this out for the case of a user.  Because there doesn't necessarily have to be a project
     def __init__(self, config_file, proj_mana=ProjectManagement):
         kw ={}
@@ -262,11 +254,11 @@ class DatabaseManagement(BaseDatabaseManagement):
         self.config_file = config_file
 
     def get_strategy_dispatcher(self, db_config_strategy):
-        """
-
-        :param db_config_strategy: 
-
-        """
+        """Insert description. # TODO-ROB
+
+        :param db_config_strategy:
+        """
+
         strategy_dispatcher = {}
         strategy_config = {}
         for strategy, strategy_kwargs in db_config_strategy.items():
@@ -308,26 +300,26 @@ class DatabaseManagement(BaseDatabaseManagement):
         return strategy_dispatcher, strategy_config
 
     def projects(self, **kwargs):
-        """
-
-        :param **kwargs: 
-
-        """
+        """Insert description. # TODO-ROB
+
+        :param **kwargs:
+        """
+
         print(self)
         return {}, {}
 
     def full(self, NCBI, ITIS, Projects=None,
              configure_flag=None, archive_flag=None, delete_flag=None):
-        """
-
-        :param NCBI: 
-        :param ITIS: 
-        :param Projects:  (Default value = None)
-        :param configure_flag:  (Default value = None)
-        :param archive_flag:  (Default value = None)
-        :param delete_flag:  (Default value = None)
-
-        """
+        """Insert description. # TODO-ROB
+
+        :param NCBI:
+        :param ITIS:
+        :param Projects:  (Default value = None)
+        :param configure_flag:  (Default value = None)
+        :param archive_flag:  (Default value = None)
+        :param delete_flag:  (Default value = None)
+        """
+
         if configure_flag:
             NCBI["configure_flag"] = configure_flag
             ITIS["configure_flag"] = configure_flag
@@ -361,18 +353,18 @@ class DatabaseManagement(BaseDatabaseManagement):
 
     def ncbi(self, NCBI_blast, NCBI_pub_taxonomy, NCBI_refseq_release, configure_flag=True, archive_flag=True,
              delete_flag=False, database_path=None, archive_path=None):
-        """
-
-        :param NCBI_blast: 
-        :param NCBI_pub_taxonomy: 
-        :param NCBI_refseq_release: 
-        :param configure_flag:  (Default value = True)
-        :param archive_flag:  (Default value = True)
-        :param delete_flag:  (Default value = False)
-        :param database_path:  (Default value = None)
-        :param archive_path:  (Default value = None)
-
-        """
+        """Insert description. # TODO-ROB
+
+        :param NCBI_blast:
+        :param NCBI_pub_taxonomy:
+        :param NCBI_refseq_release:
+        :param configure_flag:  (Default value = True)
+        :param archive_flag:  (Default value = True)
+        :param delete_flag:  (Default value = False)
+        :param database_path:  (Default value = None)
+        :param archive_path:  (Default value = None)
+        """
+
         ncbi_dispatcher = {}
         ncbi_config = {}
         if not archive_path:
@@ -425,17 +417,17 @@ class DatabaseManagement(BaseDatabaseManagement):
 
     def ncbi_blast(self, NCBI_blast_db, NCBI_blast_windowmasker_files,
                    configure_flag=None, archive_flag=None, delete_flag=None, database_path=None, archive_path=None):
-        """
-
-        :param NCBI_blast_db: 
-        :param NCBI_blast_windowmasker_files: 
-        :param configure_flag:  (Default value = None)
-        :param archive_flag:  (Default value = None)
-        :param delete_flag:  (Default value = None)
-        :param database_path:  (Default value = None)
-        :param archive_path:  (Default value = None)
-
-        """
+        """Insert description. # TODO-ROB
+
+        :param NCBI_blast_db:
+        :param NCBI_blast_windowmasker_files:
+        :param configure_flag:  (Default value = None)
+        :param archive_flag:  (Default value = None)
+        :param delete_flag:  (Default value = None)
+        :param database_path:  (Default value = None)
+        :param archive_path:  (Default value = None)
+        """
+
         ncbi_blast_dispatcher = {}
         ncbi_blast_config = {}
         if not archive_path:
@@ -475,15 +467,15 @@ class DatabaseManagement(BaseDatabaseManagement):
         return ncbi_blast_dispatcher, ncbi_blast_config
 
     def ncbi_blast_db(self, configure_flag=None, archive_flag=None, delete_flag=None, archive_path=None, database_path=None):
-        """
-
-        :param configure_flag:  (Default value = None)
-        :param archive_flag:  (Default value = None)
-        :param delete_flag:  (Default value = None)
-        :param archive_path:  (Default value = None)
-        :param database_path:  (Default value = None)
-
-        """
+        """Insert description. # TODO-ROB
+
+        :param configure_flag:  (Default value = None)
+        :param archive_flag:  (Default value = None)
+        :param delete_flag:  (Default value = None)
+        :param archive_path:  (Default value = None)
+        :param database_path:  (Default value = None)
+        """
+
         # Set up default parameter values.
         nbd_dispatcher = {"NCBI_blast_db": []}
         nbd_config = {"NCBI_blast_db": []}
@@ -509,16 +501,16 @@ class DatabaseManagement(BaseDatabaseManagement):
 
     def ncbi_blast_windowmasker_files(self, taxonomy_ids, configure_flag=None, archive_flag=None, delete_flag=None,
                                       archive_path=None, database_path=None):
-        """
-
-        :param taxonomy_ids: 
-        :param configure_flag:  (Default value = None)
-        :param archive_flag:  (Default value = None)
-        :param delete_flag:  (Default value = None)
-        :param archive_path:  (Default value = None)
-        :param database_path:  (Default value = None)
-
-        """
+        """Insert description. # TODO-ROB
+
+        :param taxonomy_ids:
+        :param configure_flag:  (Default value = None)
+        :param archive_flag:  (Default value = None)
+        :param delete_flag:  (Default value = None)
+        :param archive_path:  (Default value = None)
+        :param database_path:  (Default value = None)
+        """
+
         nbw_dispatcher = {"NCBI_blast_windowmasker_files": []}
         nbw_config = {"NCBI_blast_windowmasker_files": []}
         if not archive_path:
@@ -542,16 +534,17 @@ class DatabaseManagement(BaseDatabaseManagement):
         return nbw_dispatcher, nbw_config
 
     def ncbi_pub_taxonomy(self, configure_flag=None, archive_flag=None, delete_flag=None, archive_path=None, database_path=None):
-        """
-
-        :param configure_flag:  (Default value = None)
-        :param archive_flag:  (Default value = None)
-        :param delete_flag:  (Default value = None)
-        :param archive_path:  (Default value = None)
-        :param database_path:  (Default value = None)
-
-        """
-        # TODO-ROB:  Add a ftp download of the correct taxdump file for biosql stuff in the self.dl-tax-db method
+        """Insert description. # TODO-ROB
+
+        :param configure_flag:  (Default value = None)
+        :param archive_flag:  (Default value = None)
+        :param delete_flag:  (Default value = None)
+        :param archive_path:  (Default value = None)
+        :param database_path:  (Default value = None)
+        """
+
+        # TODO-ROB:  Add a ftp download of the correct taxdump file for biosql
+        # stuff in the self.dl-tax-db method
         npt_dispatcher = {"NCBI_pub_taxonomy": []}
         npt_config = {"NCBI_pub_taxonomy": []}
         if not archive_path:
@@ -578,21 +571,21 @@ class DatabaseManagement(BaseDatabaseManagement):
     def ncbi_refseq_release(self, configure_flag=None, archive_flag=None, delete_flag=None, upload_flag=None, archive_path=None,
                             database_path=None, collection_subset=None, seqtype=None, seqformat=None, upload_list=None,
                             upload_number=8):
-        """
-
-        :param configure_flag:  (Default value = None)
-        :param archive_flag:  (Default value = None)
-        :param delete_flag:  (Default value = None)
-        :param upload_flag:  (Default value = None)
-        :param archive_path:  (Default value = None)
-        :param database_path:  (Default value = None)
-        :param collection_subset:  (Default value = None)
-        :param seqtype:  (Default value = None)
-        :param seqformat:  (Default value = None)
-        :param upload_list:  (Default value = None)
-        :param upload_number:  (Default value = 8)
-
-        """
+        """Insert description. # TODO-ROB
+
+        :param configure_flag:  (Default value = None)
+        :param archive_flag:  (Default value = None)
+        :param delete_flag:  (Default value = None)
+        :param upload_flag:  (Default value = None)
+        :param archive_path:  (Default value = None)
+        :param database_path:  (Default value = None)
+        :param collection_subset:  (Default value = None)
+        :param seqtype:  (Default value = None)
+        :param seqformat:  (Default value = None)
+        :param upload_list:  (Default value = None)
+        :param upload_number:  (Default value = 8)
+        """
+
         nrr_dispatcher = {"NCBI_refseq_release": []}
         nrr_config = {"NCBI_refseq_release": []}
         if not archive_path:
@@ -639,16 +632,16 @@ class DatabaseManagement(BaseDatabaseManagement):
         return nrr_dispatcher, nrr_config
 
     def itis(self, ITIS_taxonomy, configure_flag=None, archive_flag=None, delete_flag=None, database_path=None, archive_path=None):
-        """
-
-        :param ITIS_taxonomy: 
-        :param configure_flag:  (Default value = None)
-        :param archive_flag:  (Default value = None)
-        :param delete_flag:  (Default value = None)
-        :param database_path:  (Default value = None)
-        :param archive_path:  (Default value = None)
-
-        """
+        """Insert description. # TODO-ROB
+
+        :param ITIS_taxonomy:
+        :param configure_flag:  (Default value = None)
+        :param archive_flag:  (Default value = None)
+        :param delete_flag:  (Default value = None)
+        :param database_path:  (Default value = None)
+        :param archive_path:  (Default value = None)
+        """
+
         itis_dispatcher = {}
         itis_config = {}
         if not archive_path:
@@ -678,12 +671,12 @@ class DatabaseManagement(BaseDatabaseManagement):
         return itis_dispatcher, itis_config
 
     def itis_taxonomy(self, configure_flag=None, archive_flag=None, delete_flag=None, **kwargs):
-        """
-
-        :param configure_flag:  (Default value = None)
-        :param archive_flag:  (Default value = None)
-        :param delete_flag:  (Default value = None)
-        :param **kwargs: 
-
-        """
+        """Insert description. # TODO-ROB
+
+        :param configure_flag:  (Default value = None)
+        :param archive_flag:  (Default value = None)
+        :param delete_flag:  (Default value = None)
+        :param **kwargs:
+        """
+
         return {}, {}
