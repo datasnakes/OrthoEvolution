@@ -2,7 +2,7 @@
     :maxdepth: 2
 
 
-    tutorial/tutorial
+    tutorial/orthoevolreadme
     cookies/cookiesreadme
     manager/managerreadme
     orthologs/orthologsreadme

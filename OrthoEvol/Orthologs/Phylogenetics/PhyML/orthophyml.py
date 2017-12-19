@@ -1,7 +1,7 @@
 from Bio.Phylo.Applications import PhymlCommandline
 import sys
 
-from OrthoEvol.Tools import LogIt
+from OrthoEvol.Tools.logit import LogIt
 
 
 class PhyML(object):

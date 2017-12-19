@@ -3,7 +3,7 @@ import os
 from ete3 import EvolTree, Tree
 
 from OrthoEvol.Tools.otherutils import csvtolist
-from OrthoEvol.Tools import LogIt
+from OrthoEvol.Tools.logit import LogIt
 
 
 class ETE3PAML(object):
