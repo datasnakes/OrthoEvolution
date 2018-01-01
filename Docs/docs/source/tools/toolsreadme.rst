@@ -26,7 +26,7 @@ Download NCBI databases with our NCBI FTP Client
     ncbiftp = NcbiFTPClient(email='somebody@gmail.com')
     ncbiftp.getblastdb(database_name='refseq_rna')
 
-View detailed `ftp <ftpreadme.rst>`__ documentation.
+View detailed :doc:`ftp <tools/ftpreadme>` documentation.
 
 List all subdirectories in a NCBI FTP Path
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
