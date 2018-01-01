@@ -26,7 +26,7 @@ Download NCBI databases with our NCBI FTP Client
     ncbiftp = NcbiFTPClient(email='somebody@gmail.com')
     ncbiftp.getblastdb(database_name='refseq_rna')
 
-View detailed :doc:`ftp <tools/ftpreadme>` documentation.
+View detailed `ftp <ftpreadme>`__` documentation.
 
 List all subdirectories in a NCBI FTP Path
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -55,7 +55,7 @@ Utilize multiprocessing to speed up your code
         mp = Multiprocess()
         mp.map2function(printwords, words)
 
-View detailed `parallel <parallelreadme.rst>`__ documentation.
+View detailed `parallel <parallelreadme>`__ documentation.
 
 Integrate logging in a simple and quick way
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
