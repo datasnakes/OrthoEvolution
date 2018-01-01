@@ -265,5 +265,4 @@ Examples
     message_to_channel = 'Hey, <@username>. This is an update for the current script.'
     slack.send_msg(channel='channelname', message=message_to_channel)
 
-For more information, view the `slackify
-readme <https://github.com/OrthoEvolution/OrthoEvol-Scripts/tree/master/OrthoEvolution/Tools/slackify/README.md>`__.
+For more information, view the :ref:`../tools/toolsreadme` documentation.
