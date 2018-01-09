@@ -1,5 +1,5 @@
-OrthoEvol.Tools.sge.sgeconfig package
-=====================================
+OrthoEvol\.Tools\.sge\.sgeconfig package
+========================================
 
 Module contents
 ---------------

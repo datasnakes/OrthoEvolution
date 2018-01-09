@@ -1,11 +1,11 @@
-OrthoEvol.Tools.mpi package
-===========================
+OrthoEvol\.Tools\.mpi package
+=============================
 
 Submodules
 ----------
 
-OrthoEvol.Tools.mpi.multi_dbupload module
------------------------------------------
+OrthoEvol\.Tools\.mpi\.multi\_dbupload module
+---------------------------------------------
 
 .. automodule:: OrthoEvol.Tools.mpi.multi_dbupload
     :members:

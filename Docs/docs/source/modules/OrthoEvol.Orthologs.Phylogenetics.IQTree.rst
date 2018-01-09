@@ -1,27 +1,27 @@
-OrthoEvol.Orthologs.Phylogenetics.IQTree package
-================================================
+OrthoEvol\.Orthologs\.Phylogenetics\.IQTree package
+===================================================
 
 Submodules
 ----------
 
-OrthoEvol.Orthologs.Phylogenetics.IQTree.best_tree module
----------------------------------------------------------
+OrthoEvol\.Orthologs\.Phylogenetics\.IQTree\.best\_tree module
+--------------------------------------------------------------
 
 .. automodule:: OrthoEvol.Orthologs.Phylogenetics.IQTree.best_tree
     :members:
     :undoc-members:
     :show-inheritance:
 
-OrthoEvol.Orthologs.Phylogenetics.IQTree.consensus module
----------------------------------------------------------
+OrthoEvol\.Orthologs\.Phylogenetics\.IQTree\.consensus module
+-------------------------------------------------------------
 
 .. automodule:: OrthoEvol.Orthologs.Phylogenetics.IQTree.consensus
     :members:
     :undoc-members:
     :show-inheritance:
 
-OrthoEvol.Orthologs.Phylogenetics.IQTree.iqtree module
-------------------------------------------------------
+OrthoEvol\.Orthologs\.Phylogenetics\.IQTree\.iqtree module
+----------------------------------------------------------
 
 .. automodule:: OrthoEvol.Orthologs.Phylogenetics.IQTree.iqtree
     :members:

@@ -1,5 +1,5 @@
-OrthoEvol.Tools package
-=======================
+OrthoEvol\.Tools package
+========================
 
 Subpackages
 -----------

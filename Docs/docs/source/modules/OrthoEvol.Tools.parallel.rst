@@ -1,11 +1,11 @@
-OrthoEvol.Tools.parallel package
-================================
+OrthoEvol\.Tools\.parallel package
+==================================
 
 Submodules
 ----------
 
-OrthoEvol.Tools.parallel.multiprocess module
---------------------------------------------
+OrthoEvol\.Tools\.parallel\.multiprocess module
+-----------------------------------------------
 
 .. automodule:: OrthoEvol.Tools.parallel.multiprocess
     :members:

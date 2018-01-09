@@ -1,13 +1,5 @@
-OrthoEvol.Manager.BioSQL.biosql_repo package
-============================================
-
-Subpackages
------------
-
-.. toctree::
-
-    OrthoEvol.Manager.BioSQL.biosql_repo.scripts
-    OrthoEvol.Manager.BioSQL.biosql_repo.sql
+OrthoEvol\.Manager\.BioSQL\.biosql\_repo package
+================================================
 
 Module contents
 ---------------

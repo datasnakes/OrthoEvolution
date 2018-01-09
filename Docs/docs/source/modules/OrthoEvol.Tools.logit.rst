@@ -1,11 +1,11 @@
-OrthoEvol.Tools.logit package
-=============================
+OrthoEvol\.Tools\.logit package
+===============================
 
 Submodules
 ----------
 
-OrthoEvol.Tools.logit.logit module
-----------------------------------
+OrthoEvol\.Tools\.logit\.logit module
+-------------------------------------
 
 .. automodule:: OrthoEvol.Tools.logit.logit
     :members:

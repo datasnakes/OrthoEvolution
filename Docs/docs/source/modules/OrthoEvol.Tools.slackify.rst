@@ -1,11 +1,11 @@
-OrthoEvol.Tools.slackify package
-================================
+OrthoEvol\.Tools\.slackify package
+==================================
 
 Submodules
 ----------
 
-OrthoEvol.Tools.slackify.notify module
---------------------------------------
+OrthoEvol\.Tools\.slackify\.notify module
+-----------------------------------------
 
 .. automodule:: OrthoEvol.Tools.slackify.notify
     :members:

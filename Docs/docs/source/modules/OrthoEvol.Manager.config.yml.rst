@@ -1,11 +1,11 @@
-OrthoEvol.Manager.config.yml package
-====================================
+OrthoEvol\.Manager\.config\.yml package
+=======================================
 
 Submodules
 ----------
 
-OrthoEvol.Manager.config.yml.db_config_comparison module
---------------------------------------------------------
+OrthoEvol\.Manager\.config\.yml\.db\_config\_comparison module
+--------------------------------------------------------------
 
 .. automodule:: OrthoEvol.Manager.config.yml.db_config_comparison
     :members:

@@ -1,19 +1,19 @@
-OrthoEvol.Orthologs.GenBank package
-===================================
+OrthoEvol\.Orthologs\.GenBank package
+=====================================
 
 Submodules
 ----------
 
-OrthoEvol.Orthologs.GenBank.genbank module
-------------------------------------------
+OrthoEvol\.Orthologs\.GenBank\.genbank module
+---------------------------------------------
 
 .. automodule:: OrthoEvol.Orthologs.GenBank.genbank
     :members:
     :undoc-members:
     :show-inheritance:
 
-OrthoEvol.Orthologs.GenBank.utils module
-----------------------------------------
+OrthoEvol\.Orthologs\.GenBank\.utils module
+-------------------------------------------
 
 .. automodule:: OrthoEvol.Orthologs.GenBank.utils
     :members:

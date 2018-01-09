@@ -1,5 +1,5 @@
-OrthoEvol.Orthologs package
-===========================
+OrthoEvol\.Orthologs package
+============================
 
 Subpackages
 -----------
@@ -14,16 +14,16 @@ Subpackages
 Submodules
 ----------
 
-OrthoEvol.Orthologs.command_line module
----------------------------------------
+OrthoEvol\.Orthologs\.command\_line module
+------------------------------------------
 
 .. automodule:: OrthoEvol.Orthologs.command_line
     :members:
     :undoc-members:
     :show-inheritance:
 
-OrthoEvol.Orthologs.utils module
---------------------------------
+OrthoEvol\.Orthologs\.utils module
+----------------------------------
 
 .. automodule:: OrthoEvol.Orthologs.utils
     :members:

@@ -1,5 +1,5 @@
-OrthoEvol.Manager package
-=========================
+OrthoEvol\.Manager package
+==========================
 
 Subpackages
 -----------
@@ -12,40 +12,40 @@ Subpackages
 Submodules
 ----------
 
-OrthoEvol.Manager.data_management module
-----------------------------------------
+OrthoEvol\.Manager\.data\_management module
+-------------------------------------------
 
 .. automodule:: OrthoEvol.Manager.data_management
     :members:
     :undoc-members:
     :show-inheritance:
 
-OrthoEvol.Manager.database_management module
---------------------------------------------
+OrthoEvol\.Manager\.database\_management module
+-----------------------------------------------
 
 .. automodule:: OrthoEvol.Manager.database_management
     :members:
     :undoc-members:
     :show-inheritance:
 
-OrthoEvol.Manager.management module
------------------------------------
+OrthoEvol\.Manager\.management module
+-------------------------------------
 
 .. automodule:: OrthoEvol.Manager.management
     :members:
     :undoc-members:
     :show-inheritance:
 
-OrthoEvol.Manager.utils module
-------------------------------
+OrthoEvol\.Manager\.utils module
+--------------------------------
 
 .. automodule:: OrthoEvol.Manager.utils
     :members:
     :undoc-members:
     :show-inheritance:
 
-OrthoEvol.Manager.webster module
---------------------------------
+OrthoEvol\.Manager\.webster module
+----------------------------------
 
 .. automodule:: OrthoEvol.Manager.webster
     :members:

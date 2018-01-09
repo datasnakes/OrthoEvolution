@@ -1,11 +1,11 @@
-OrthoEvol.Tools.mygene package
-==============================
+OrthoEvol\.Tools\.mygene package
+================================
 
 Submodules
 ----------
 
-OrthoEvol.Tools.mygene.mygene module
-------------------------------------
+OrthoEvol\.Tools\.mygene\.mygene module
+---------------------------------------
 
 .. automodule:: OrthoEvol.Tools.mygene.mygene
     :members:

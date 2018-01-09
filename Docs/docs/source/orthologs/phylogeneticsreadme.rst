@@ -81,9 +81,6 @@ Using PhyML with RelaxPhylip
     # Generate a maximum likelihood tree from the phylip formatted alignment file.
     PhyML("HTR1A_aligned.phy")
 
-View detailed `PhyML <phymlreadme.rst>`__ documentation.
-
-
 Using ETE3PAML
 ~~~~~~~~~~~~~~
 
@@ -95,8 +92,6 @@ Using ETE3PAML
 
     paml.run(pamlsrc='path/to/codeml/binary', output_folder=None)
 
-View detailed `PAML <pamlreadme.rst>`__ documentation.
-
 Using the FilteredTree implementation of IQTree
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -105,5 +100,3 @@ Using the FilteredTree implementation of IQTree
     from OrthoEvol.Orthologs.Phylogenetics import FilteredTree
 
     FilteredTree(alignment, dataType='CODON', working_dir='path/of/working/directory')
-
-View detailed `IQTree <iqtreereadme.rst>`__ documentation.

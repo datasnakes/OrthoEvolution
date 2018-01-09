@@ -1,11 +1,11 @@
-OrthoEvol.Tools.pybasher package
-================================
+OrthoEvol\.Tools\.pybasher package
+==================================
 
 Submodules
 ----------
 
-OrthoEvol.Tools.pybasher.bash module
-------------------------------------
+OrthoEvol\.Tools\.pybasher\.bash module
+---------------------------------------
 
 .. automodule:: OrthoEvol.Tools.pybasher.bash
     :members:

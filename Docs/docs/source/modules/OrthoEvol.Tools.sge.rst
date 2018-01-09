@@ -1,5 +1,5 @@
-OrthoEvol.Tools.sge package
-===========================
+OrthoEvol\.Tools\.sge package
+=============================
 
 Subpackages
 -----------
@@ -11,48 +11,48 @@ Subpackages
 Submodules
 ----------
 
-OrthoEvol.Tools.sge.qstat module
---------------------------------
+OrthoEvol\.Tools\.sge\.qstat module
+-----------------------------------
 
 .. automodule:: OrthoEvol.Tools.sge.qstat
     :members:
     :undoc-members:
     :show-inheritance:
 
-OrthoEvol.Tools.sge.qsubmitter module
--------------------------------------
+OrthoEvol\.Tools\.sge\.qsubmitter module
+----------------------------------------
 
 .. automodule:: OrthoEvol.Tools.sge.qsubmitter
     :members:
     :undoc-members:
     :show-inheritance:
 
-OrthoEvol.Tools.sge.sge_test module
------------------------------------
+OrthoEvol\.Tools\.sge\.sge\_test module
+---------------------------------------
 
 .. automodule:: OrthoEvol.Tools.sge.sge_test
     :members:
     :undoc-members:
     :show-inheritance:
 
-OrthoEvol.Tools.sge.sgejob module
----------------------------------
+OrthoEvol\.Tools\.sge\.sgejob module
+------------------------------------
 
 .. automodule:: OrthoEvol.Tools.sge.sgejob
     :members:
     :undoc-members:
     :show-inheritance:
 
-OrthoEvol.Tools.sge.sgepipelinetask module
-------------------------------------------
+OrthoEvol\.Tools\.sge\.sgepipelinetask module
+---------------------------------------------
 
 .. automodule:: OrthoEvol.Tools.sge.sgepipelinetask
     :members:
     :undoc-members:
     :show-inheritance:
 
-OrthoEvol.Tools.sge.sgeutils module
------------------------------------
+OrthoEvol\.Tools\.sge\.sgeutils module
+--------------------------------------
 
 .. automodule:: OrthoEvol.Tools.sge.sgeutils
     :members:

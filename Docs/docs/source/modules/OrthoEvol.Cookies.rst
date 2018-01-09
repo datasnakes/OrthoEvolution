@@ -1,19 +1,19 @@
-OrthoEvol.Cookies package
-=========================
+OrthoEvol\.Cookies package
+==========================
 
 Submodules
 ----------
 
-OrthoEvol.Cookies.cookie_jar module
------------------------------------
+OrthoEvol\.Cookies\.cookie\_jar module
+--------------------------------------
 
 .. automodule:: OrthoEvol.Cookies.cookie_jar
     :members:
     :undoc-members:
     :show-inheritance:
 
-OrthoEvol.Cookies.utils module
-------------------------------
+OrthoEvol\.Cookies\.utils module
+--------------------------------
 
 .. automodule:: OrthoEvol.Cookies.utils
     :members:

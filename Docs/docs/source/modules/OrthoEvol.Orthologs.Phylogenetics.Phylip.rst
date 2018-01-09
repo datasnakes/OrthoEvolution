@@ -1,11 +1,11 @@
-OrthoEvol.Orthologs.Phylogenetics.Phylip package
-================================================
+OrthoEvol\.Orthologs\.Phylogenetics\.Phylip package
+===================================================
 
 Submodules
 ----------
 
-OrthoEvol.Orthologs.Phylogenetics.Phylip.orthophylip module
------------------------------------------------------------
+OrthoEvol\.Orthologs\.Phylogenetics\.Phylip\.orthophylip module
+---------------------------------------------------------------
 
 .. automodule:: OrthoEvol.Orthologs.Phylogenetics.Phylip.orthophylip
     :members:

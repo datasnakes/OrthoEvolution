@@ -1,11 +1,11 @@
-OrthoEvol.Tools.streamieo package
-=================================
+OrthoEvol\.Tools\.streamieo package
+===================================
 
 Submodules
 ----------
 
-OrthoEvol.Tools.streamieo.streamieo module
-------------------------------------------
+OrthoEvol\.Tools\.streamieo\.streamieo module
+---------------------------------------------
 
 .. automodule:: OrthoEvol.Tools.streamieo.streamieo
     :members:

@@ -1,11 +1,11 @@
-OrthoEvol.Tools.pandoc package
-==============================
+OrthoEvol\.Tools\.pandoc package
+================================
 
 Submodules
 ----------
 
-OrthoEvol.Tools.pandoc.pandoc module
-------------------------------------
+OrthoEvol\.Tools\.pandoc\.pandoc module
+---------------------------------------
 
 .. automodule:: OrthoEvol.Tools.pandoc.pandoc
     :members:

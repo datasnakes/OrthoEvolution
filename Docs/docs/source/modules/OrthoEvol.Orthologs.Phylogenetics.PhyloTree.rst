@@ -1,11 +1,11 @@
-OrthoEvol.Orthologs.Phylogenetics.PhyloTree package
-===================================================
+OrthoEvol\.Orthologs\.Phylogenetics\.PhyloTree package
+======================================================
 
 Submodules
 ----------
 
-OrthoEvol.Orthologs.Phylogenetics.PhyloTree.treeviz module
-----------------------------------------------------------
+OrthoEvol\.Orthologs\.Phylogenetics\.PhyloTree\.treeviz module
+--------------------------------------------------------------
 
 .. automodule:: OrthoEvol.Orthologs.Phylogenetics.PhyloTree.treeviz
     :members:

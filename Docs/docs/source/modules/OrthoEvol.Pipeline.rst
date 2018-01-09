@@ -1,19 +1,19 @@
-OrthoEvol.Pipeline package
-==========================
+OrthoEvol\.Pipeline package
+===========================
 
 Submodules
 ----------
 
-OrthoEvol.Pipeline.blastpipeline module
----------------------------------------
+OrthoEvol\.Pipeline\.blastpipeline module
+-----------------------------------------
 
 .. automodule:: OrthoEvol.Pipeline.blastpipeline
     :members:
     :undoc-members:
     :show-inheritance:
 
-OrthoEvol.Pipeline.testpipelinetask module
-------------------------------------------
+OrthoEvol\.Pipeline\.testpipelinetask module
+--------------------------------------------
 
 .. automodule:: OrthoEvol.Pipeline.testpipelinetask
     :members:

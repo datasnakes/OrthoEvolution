@@ -153,7 +153,9 @@ Performing Blast & Post-Blast Analysis
 
     path = os.getcwd()
     myblast = OrthoBlastN(proj_mana=None, project="blast-test", project_path=path, **blast_config)
-    myblast.blast_config(myblast.blast_human, 'Homo_sapiens', auto_start=True)
+
+    # If you want to immediately start blasting, set auto_start to True
+    myblast.blast_config(myblast.blast_human, 'Homo_sapiens', auto_start=False)
 
 Making the API available with Accession data
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

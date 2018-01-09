@@ -1,5 +1,5 @@
-OrthoEvol.Orthologs.Phylogenetics package
-=========================================
+OrthoEvol\.Orthologs\.Phylogenetics package
+===========================================
 
 Subpackages
 -----------
