@@ -26,6 +26,9 @@ Download NCBI databases with our NCBI FTP Client
     ncbiftp = NcbiFTPClient(email='somebody@gmail.com')
     ncbiftp.getblastdb(database_name='refseq_rna')
 
+
+View detailed `ftp <ftpreadme.html>`__ documentation.
+
 List all subdirectories in a NCBI FTP Path
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -53,6 +56,8 @@ Utilize multiprocessing to speed up your code
         mp = Multiprocess()
         mp.map2function(printwords, words)
 
+View detailed `parallel <parallelreadme.html>`__ documentation.
+
 Integrate logging in a simple and quick way
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -65,6 +70,8 @@ Integrate logging in a simple and quick way
 
     # Shutdown logging without deleting the logfile
     logit.shutdown()
+
+View detailed `logit <logitreadme.html>`__ documentation.
 
 Send a message to a slack channel
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -84,6 +91,8 @@ Your config file should look as such:
     message_to_channel = 'Hey, <@username>. This is an update for the current script.'
 
     slack.send_msg(channel='channelname', message=message_to_channel)
+
+View detailed `slackify <slackifyreadme.html>`__ documentation.
 
 Importing all tools modules
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
