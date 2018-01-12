@@ -60,13 +60,13 @@ def archive(database_path, archive_path, option, delete_flag=False):
     for arch_name, data_path in archive_dict.items():
         root_dir = str(data_path.parent)
         base_dir = str(data_path.stem)
-        d = datetime.datetime.now().strftime(fmt="%Y-%m-%d_%H%M")
+        d = datetime.datetime.now().strftime(format="%Y-%m-%d_%H%M")
         output_pathname = archive_path / Path(arch_name + "." + d)
         # Archive the desired data.
         data_size = get_size(start_path=str(data_path))
         archive_log.info("Archiving %s of data." % data_size)
         archive_filename = shutil.make_archive(base_name=str(output_pathname), format="xztar", root_dir=root_dir,
-                                               base_dir=base_dir)
+                                               base_dir=base_dir, logger=archive_log)
         archive_size = get_size(archive_filename)
         archive_log.warning("A %s archive file was created at %s." % (archive_filename, archive_size))
         # TODO-ROB:  Logging.  And log to a README.md file.
