@@ -10,6 +10,7 @@ from OrthoEvol.Tools.ftp import NcbiFTPClient
 from OrthoEvol.Tools.sge import SGEJob
 from OrthoEvol.Tools.logit import LogIt
 from OrthoEvol.Manager.BioSQL import biosql
+from OrthoEvol.Manager.utils import parse_db_config_file
 
 
 class BaseDatabaseManagement(object):
@@ -217,18 +218,8 @@ class BaseDatabaseManagement(object):
 class DatabaseManagement(BaseDatabaseManagement):
     # TODO-ROB: Figure this out for the case of a user.  Because there doesn't necessarily have to be a project
     def __init__(self, config_file, proj_mana=ProjectManagement, **kwargs):
-        kw ={}
-        db_config_strategy = {}
-        with open(config_file, 'r') as cf:
-            db_config = yaml.load(cf)
-            # Get the parameters for the Base class
-            for key, value in db_config["Database_config"].items():
-                if isinstance(value, dict):
-                    db_config_strategy[key] = value
-                    continue
-                else:
-                    kw[key] = value
 
+        self.db_config_strategy, kw = parse_db_config_file(config_file)
         super().__init__(proj_mana=proj_mana, **kw)
         self.strategy_dispatcher = {}
         self.strategy_config = {}
@@ -236,7 +227,6 @@ class DatabaseManagement(BaseDatabaseManagement):
         self.archive_flag = None
         self.delete_flag = None
         self.config_file = config_file
-        self.db_config_strategy = db_config_strategy
 
     def get_strategy_dispatcher(self, db_config_strategy):
         strategy_dispatcher = {}
@@ -396,13 +386,13 @@ class DatabaseManagement(BaseDatabaseManagement):
             NCBI_blast_windowmasker_files["delete_flag"] = delete_flag
 
         nbd_dispatcher, nbd_config = self.ncbi_blast_db(**NCBI_blast_db)
-        nbw_dispatcher, nbd_config = self.ncbi_blast_windowmasker_files(**NCBI_blast_windowmasker_files)
+        nbw_dispatcher, nbw_config = self.ncbi_blast_windowmasker_files(**NCBI_blast_windowmasker_files)
 
         ncbi_blast_dispatcher.update(nbd_dispatcher)
         ncbi_blast_dispatcher.update(nbw_dispatcher)
 
         ncbi_blast_config.update(nbd_config)
-        ncbi_blast_config.update(nbw_dispatcher)
+        ncbi_blast_config.update(nbw_config)
 
         return ncbi_blast_dispatcher, ncbi_blast_config
 
@@ -426,7 +416,7 @@ class DatabaseManagement(BaseDatabaseManagement):
             # Download blast files
             nbd_dispatcher["NCBI_blast_db"].append(self.download_blast_database)
             nbd_config["NCBI_blast_db"].append({
-                "database_path": database_path
+                "database_name": 'refseq_rna'
             })
         return nbd_dispatcher, nbd_config
 
@@ -482,8 +472,8 @@ class DatabaseManagement(BaseDatabaseManagement):
     def NCBI_refseq_release(self, configure_flag=None, archive_flag=None, delete_flag=None, upload_flag=None, archive_path=None,
                             database_path=None, collection_subset=None, seqtype=None, seqformat=None, upload_list=None,
                             upload_number=8, dispatcher_flag=False, add_to_default=None, _path=None):
-        nrr_dispatcher = {"NCBI_refseq_release": {"arhive": [], "configure": [], "upload": []}}
-        nrr_config = {"NCBI_refseq_release": {"arhive": [], "configure": [], "upload": []}}
+        nrr_dispatcher = {"NCBI_refseq_release": {"archive": [], "configure": [], "upload": []}}
+        nrr_config = {"NCBI_refseq_release": {"archive": [], "configure": [], "upload": []}}
         if not archive_path:
             archive_path = str(self.user_archive)
         if not database_path:
