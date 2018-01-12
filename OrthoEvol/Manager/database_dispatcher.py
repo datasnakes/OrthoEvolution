@@ -23,15 +23,15 @@ class DatabaseDispatcher(DatabaseManagement):
         # else:
         #     for disp, c in zip(self.dispatcher, self.configuration):
 
-    def dispatch(self, strategy):
-        disp = self.dispatcher[strategy]
-        conf = self.configuration[strategy]
+    def dispatch(self, strategy, dispatcher, configuration):
+        disp = dispatcher[strategy]
+        conf = configuration[strategy]
         if isinstance(disp, list):
             for funk, kw in zip(disp, conf):
                 funk(**kw)
         elif isinstance(disp, dict):
             for action in disp.keys():
-                self.dispatch(action)
+                self.dispatch(action, disp, conf)
 
 
 
