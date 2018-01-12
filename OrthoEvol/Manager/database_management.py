@@ -1,6 +1,6 @@
 from pathlib import Path
-import yaml
-import requests
+import os
+import urllib.request
 import tarfile
 from importlib import import_module
 from OrthoEvol.Manager.management import ProjectManagement
@@ -11,6 +11,7 @@ from OrthoEvol.Tools.sge import SGEJob
 from OrthoEvol.Tools.logit import LogIt
 from OrthoEvol.Manager.BioSQL import biosql
 from OrthoEvol.Manager.utils import parse_db_config_file
+from OrthoEvol.Orthologs.Blast.comparative_genetics import BaseComparativeGenetics
 
 
 class BaseDatabaseManagement(object):
@@ -50,6 +51,7 @@ class BaseDatabaseManagement(object):
             for var, attr in add_self.__dict__.items():
                 setattr(self, var, attr)
             self.database_path = self.user_db
+            self.gene_data = BaseComparativeGenetics(project=self.project, project_path=project_path, proj_mana=proj_mana, copy_from_package=True, MAF='MAFV3.3_short.csv')
         else:
             self.database_path = Path(project_path)
 
@@ -111,7 +113,7 @@ class BaseDatabaseManagement(object):
         # Use this along with BioSQL's phyloDB
         pass
 
-    def download_ncbi_taxonomy_dump_files(self, url="ftp://ftp.ncbi.nlm.nih.gov/pub/taxonomy/taxdump.tar.gz"):
+    def download_ncbi_taxonomy_dump_files(self, url='''ftp://ftp.ncbi.nlm.nih.gov/pub/taxonomy/taxdump.tar.gz'''):
         """
         Download and extract the NCBI taxonomy dump files via a GET request.
 
@@ -123,11 +125,14 @@ class BaseDatabaseManagement(object):
         # TODO-ROB:  Maybe add taxdata folder here to reflect BioSQL's load_ncbi_taxonomy.pl script
         dl_path = Path(self.database_path) / Path("NCBI") / Path('pub') / Path('taxonomy')
         dl_abs_path = dl_path / Path('taxdump.tar.gz')
-        r = requests.get(url, allow_redirects=True)
+        r = urllib.request.urlopen(url)
+        data = r.read()
+        print('taxdump.tar.gz')
         with open(str(dl_abs_path), 'wb') as taxdump:
-            taxdump.write(r.content)
+            taxdump.write(data)
         with tarfile.open(str(dl_abs_path)) as tar:
             tar.extractall(dl_path)
+        os.remove(dl_abs_path)
 
     # TODO-ROB:  Update ncbiftp class syntax to reflect NCBI's ftp site
     def download_refseq_release_files(self, collection_subset, seqtype, seqformat):
@@ -145,6 +150,7 @@ class BaseDatabaseManagement(object):
         :rtype:
         """
         db_path = self.database_path / Path('NCBI') / Path('refseq') / Path('release') / Path(collection_subset)
+        db_path.mkdir(parents=True, exist_ok=True)
         ncbiftp = self.ncbiftp.getrefseqrelease(taxon_group=collection_subset, seqtype=seqtype, seqformat=seqformat, download_path=db_path)
         return ncbiftp
 
@@ -439,8 +445,7 @@ class DatabaseManagement(BaseDatabaseManagement):
         if configure_flag:
             nbw_dispatcher["NCBI_blast_windowmasker_files"].append(self.download_windowmasker_files)
             nbw_config["NCBI_blast_windowmasker_files"].append({
-                "taxonomy_ids": taxonomy_ids,
-                "database_path": database_path
+                "taxonomy_ids": self.gene_data.taxon_ids
             })
         return nbw_dispatcher, nbw_config
 
@@ -464,9 +469,7 @@ class DatabaseManagement(BaseDatabaseManagement):
         if configure_flag:
             # Download pub/taxonomy files
             npt_dispatcher["NCBI_pub_taxonomy"].append(self.download_ncbi_taxonomy_dump_files)
-            npt_config["NCBI_pub_taxonomy"].append({
-                "database_path": database_path
-            })
+            npt_config["NCBI_pub_taxonomy"].append({})
         return npt_dispatcher, npt_config
 
     def NCBI_refseq_release(self, configure_flag=None, archive_flag=None, delete_flag=None, upload_flag=None, archive_path=None,
