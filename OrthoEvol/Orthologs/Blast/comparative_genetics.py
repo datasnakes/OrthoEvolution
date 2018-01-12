@@ -8,7 +8,7 @@ import time
 import pkg_resources
 from ete3 import NCBITaxa
 
-from OrthoEvol.Manager.config import test
+from OrthoEvol.Manager.config import data
 # from pandas import ExcelWriter
 from OrthoEvol.Manager.management import ProjectManagement
 from OrthoEvol.Orthologs.utils import attribute_config
@@ -92,7 +92,7 @@ class BaseComparativeGenetics(object):
             self.taxon_path = self.project_index / Path(self.__taxon_filename)
         # Handle the master accession file (could be before or after blast)
         if kwargs['copy_from_package']:
-            shutil.copy(pkg_resources.resource_filename(test.__name__, kwargs['MAF']), str(self.project_index))
+            shutil.copy(pkg_resources.resource_filename(data.__name__, kwargs['MAF']), str(self.project_index))
             acc_file = kwargs['MAF']
             self.acc_filename = acc_file
         if acc_file is not None:
