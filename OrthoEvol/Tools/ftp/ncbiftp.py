@@ -145,7 +145,7 @@ class NcbiFTPClient(BaseFTPClient):
 
         windowmaskerfiles = []
         for found_taxid in found_species:
-            filepath = str(found_taxid) + '/wmasker.obinary'
+            filepath = '%s.obinary' % str(found_taxid)
             windowmaskerfiles.append(filepath)
 
         self.ncbiftp_log.info('You are about to download theses files: %s' %
