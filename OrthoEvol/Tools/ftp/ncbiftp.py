@@ -80,25 +80,22 @@ class NcbiFTPClient(BaseFTPClient):
             self.ftp.retrbinary('RETR %s' % filename, localfile.write)
             self.ncbiftp_log.info('%s was downloaded.' % str(filename))
 
-    def _download_windowmasker(self, windowmaskerfilepath):
+    def _download_windowmasker(self, windowmaskerfile):
         """Download the window masker files."""
-        wmsplit = windowmaskerfilepath.split(sep='/')
-        wmdir = wmsplit[0]
-        wmfile = wmsplit[1]
-
-        os.makedirs(wmdir, exist_ok=True)
-
-        if not os.path.exists(os.path.join(wmdir, wmfile)):
+        wm = windowmaskerfile.split(sep='.')
+        taxid = wm[0]
+        wm_ext = wm[1]
+        if not os.path.exists(windowmaskerfile):
             try:
-                with open(os.path.join(wmdir, wmfile), 'wb') as localfile:
-                    self.ftp.retrbinary('RETR %s' % windowmaskerfilepath, localfile.write)
-                    self.ncbiftp_log.info('%s was downloaded.' % str(windowmaskerfilepath))
+                with open(windowmaskerfile, 'wb') as localfile:
+                    self.ftp.retrbinary('RETR %s/wmasker.%s' % (taxid, wm_ext), localfile.write)
+                    self.ncbiftp_log.info('%s was downloaded.' % str(windowmaskerfile))
             except all_errors:
-                    os.remove(os.path.join(wmdir, wmfile))
+                    os.remove(windowmaskerfile)
                     err_msg = '%s could not be download and was deleted.'
-                    self.ncbiftp_log.error(err_msg % str(windowmaskerfilepath))
+                    self.ncbiftp_log.error(err_msg % str(windowmaskerfile))
         else:
-            self.ncbiftp_log.info('%s exists.' % str(windowmaskerfilepath))
+            self.ncbiftp_log.info('%s exists.' % str(windowmaskerfile))
 
     @classmethod
     def extract_file(cls, file2extract):
