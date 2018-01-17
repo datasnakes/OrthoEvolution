@@ -15,6 +15,9 @@ class TestTools(unittest.TestCase):
         self.logfile = logfile
         self.filename = filename
 
+    def cleanup(self):
+        os.remove(self.filename)
+
     def test_logit(self):
         """Test the LogIt class."""
         logit = LogIt()
@@ -32,9 +35,7 @@ class TestTools(unittest.TestCase):
         """Simple download."""
         ncbiftp = NcbiFTPClient(self.assertTrue('someone@gmail.com'))
         ncbiftp.download_file(self.filename)
-
-    def cleanUp(self):
-        os.remove(self.filename)
+        self.cleanup()
 
 
 if __name__ == '__main__':
