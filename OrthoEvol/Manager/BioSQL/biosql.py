@@ -1,8 +1,6 @@
 import pkg_resources
 from pathlib import Path
 import os
-import sys
-import subprocess
 import shutil
 from BioSQL import BioSeqDatabase
 from Bio import SeqIO
@@ -41,7 +39,6 @@ class BaseBioSQL(object):
         # Configuration of class attributes for Project Management.
         if project_path and project:
             self.project_path = Path(project_path) / Path(project)
-
         if proj_mana:
             add_self = attribute_config(self, composer=proj_mana, checker=ProjectManagement, project=project, project_path=project_path)
             for var, attr in add_self.__dict__.items():
@@ -55,7 +52,6 @@ class BaseBioSQL(object):
             self.template_abs_path = self.template_rel_path / Path(template_name)
             self.databases_path = Path(project_path) / Path('databases')
 
-
     def configure_new_database(self, cmd, schema_file=None):
         """
         This script is a framework for loading the various schemas, the NCBI taxonomy (biosql-db), and the ITIS
@@ -65,17 +61,14 @@ class BaseBioSQL(object):
         :param schema_file:  The schema file for creating a BioSQL or PhyloDB
         :return:  Returns the Output and the Error messages.
         """
-        # Build the command
-        # To upload a schema, a schema file will be necessary.
+        # Build a command to create a BioSQL database if the schema file is given.
         if schema_file:
-            _ = "Schema"
             cmd = "%s < %s" % (cmd, schema_file)
-        # But not for uploading taxonomy data (NCBI/ITIS)
+        # Otherwise just use the command as it is.  Used for uploading the taxonomy.
         else:
-            _ = "Taxonomy"
             cmd = cmd
 
-        # Run the perl scripts or sql scripts
+        # Run the command for Schema loading or BioSQL Perl scripts for uploading taxonomy.
         self.biosqlstream.streamer(cmd)
 
     def create_executable_scripts(self):
