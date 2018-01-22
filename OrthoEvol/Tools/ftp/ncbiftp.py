@@ -31,6 +31,7 @@ class NcbiFTPClient(BaseFTPClient):
         # TODO Use Turn into a json file, dict, or config
         self.blastdbs = []
         self.blastfastadbs = []
+        self.files2download = []
 
         # TODO Create dictionary of refseqrelease dbs, seqtypes, filetypes
         self.refseqreleasedbs = []
@@ -174,15 +175,15 @@ class NcbiFTPClient(BaseFTPClient):
         curpath = self.ftp.pwd() + '/'
         releasefiles = self.listfiles(curpath)
 
-        files2download = []
+        self.files2download = []
         pattern = re.compile('^' + taxon_group + '[.](.*?)[.]' + seqtype
                              + '[.]' + seqformat + '[.]gz$')
         for releasefile in releasefiles:
             if re.match(pattern, releasefile):
-                files2download.append(releasefile)
+                self.files2download.append(releasefile)
 
         self.ncbiftp_log.info('You are about to download theses files (total = %s): %s' %
-                              (len(files2download), files2download))
+                              (len(self.files2download), self.files2download))
 
         # Move to directory for file downloads
         os.chdir(download_path)
@@ -190,7 +191,7 @@ class NcbiFTPClient(BaseFTPClient):
         # Download the files using multiprocessing
         download_time_secs = time()
         with ThreadPool(1) as download_pool:
-            download_pool.map(self.download_file, files2download)
+            download_pool.map(self.download_file, self.files2download)
             minutes = round(((time() - download_time_secs) / 60), 2)
         self.ncbiftp_log.info("Took %s minutes to download the files." %
                               minutes)
@@ -198,7 +199,7 @@ class NcbiFTPClient(BaseFTPClient):
         if extract:
             extract_time_secs = time()
             with ThreadPool(1) as extract_pool:
-                extract_pool.map(self.extract_file, files2download)
+                extract_pool.map(self.extract_file, self.files2download)
                 minutes = round(((time() - extract_time_secs) / 60), 2)
             self.ncbiftp_log.info("Took %s minutes to extract from all files." %
                                   minutes)
@@ -210,15 +211,15 @@ class NcbiFTPClient(BaseFTPClient):
         self.ftp.cwd(self.blastfasta_path)
         blastfastafiles = self.listfiles(self.blastfasta_path)
 
-        files2download = []
+        self.files2download = []
         for dbfile in blastfastafiles:
             if database_name in str(dbfile):
-                files2download.append(dbfile)
+                self.files2download.append(dbfile)
 
         # Append the taxonomy database
-        files2download.append(self._taxdb)
+        self.files2download.append(self._taxdb)
         self.ncbiftp_log.info('You are about to download theses files (total = %s): %s' %
-                              (len(files2download), files2download))
+                              (len(self.files2download), self.files2download))
 
         # Move to directory for file downloads
         os.chdir(download_path)
@@ -226,7 +227,7 @@ class NcbiFTPClient(BaseFTPClient):
         # Download the files using multiprocessing
         download_time_secs = time()
         with ThreadPool(1) as download_pool:
-            download_pool.map(self.download_file, files2download)
+            download_pool.map(self.download_file, self.files2download)
             minutes = round(((time() - download_time_secs) / 60), 2)
         self.ncbiftp_log.info("Took %s minutes to download the files." %
                               minutes)
@@ -234,7 +235,7 @@ class NcbiFTPClient(BaseFTPClient):
         if extract:
             extract_time_secs = time()
             with ThreadPool(1) as extract_pool:
-                extract_pool.map(self.extract_file, files2download)
+                extract_pool.map(self.extract_file, self.files2download)
                 minutes = round(((time() - extract_time_secs) / 60), 2)
             self.ncbiftp_log.info("Took %s minutes to extract from all files." %
                                   minutes)
@@ -246,13 +247,13 @@ class NcbiFTPClient(BaseFTPClient):
         self.ftp.cwd(self.blastdb_path)
         blastdbfiles = self.listfiles(self.blastdb_path)
 
-        files2download = []
+        self.files2download = []
         for dbfile in blastdbfiles:
             if database_name in str(dbfile):
-                files2download.append(dbfile)
+                self.files2download.append(dbfile)
 
         # Append the taxonomy database
-        files2download.append(self._taxdb)
+        self.files2download.append(self._taxdb)
 
         # Move to directory for file downloads
         os.chdir(download_path)
@@ -260,7 +261,7 @@ class NcbiFTPClient(BaseFTPClient):
         absentfiles = []
 
         # Ensure that files aren't already downloaded
-        for file2download in files2download:
+        for file2download in self.files2download:
             if not os.path.exists(os.path.join(download_path, file2download)):
                 absentfiles.append(file2download)
 
@@ -270,7 +271,7 @@ class NcbiFTPClient(BaseFTPClient):
             # Download the files using multiprocessing
             download_time_secs = time()
             with ThreadPool(1) as download_pool:
-                download_pool.map(self.download_file, files2download)
+                download_pool.map(self.download_file, self.files2download)
                 minutes = round(((time() - download_time_secs) / 60), 2)
             self.ncbiftp_log.info("Took %s minutes to download the files.\n" %
                                   minutes)
@@ -279,7 +280,7 @@ class NcbiFTPClient(BaseFTPClient):
             self.ncbiftp_log.info('Now it\'s time to extract files.')
             extract_time_secs = time()
             with ThreadPool(3) as extract_pool:
-                extract_pool.map(self.extract_file, files2download)
+                extract_pool.map(self.extract_file, self.files2download)
                 minutes = round(((time() - extract_time_secs) / 60), 2)
             self.ncbiftp_log.info("Took %s minutes to extract from all files.\n" %
                                   minutes)
