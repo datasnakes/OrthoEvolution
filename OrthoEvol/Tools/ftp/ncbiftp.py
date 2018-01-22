@@ -145,8 +145,8 @@ class NcbiFTPClient(BaseFTPClient):
             filepath = '%s.obinary' % str(found_taxid)
             windowmaskerfiles.append(filepath)
 
-        self.ncbiftp_log.info('You are about to download theses files: %s' %
-                              windowmaskerfiles)
+        self.ncbiftp_log.info('You are about to download theses files (total = %s): %s' %
+                              (len(windowmaskerfiles), windowmaskerfiles))
 
         # Move to directory for file downloads
         os.chdir(download_path)
@@ -181,8 +181,8 @@ class NcbiFTPClient(BaseFTPClient):
             if re.match(pattern, releasefile):
                 files2download.append(releasefile)
 
-        self.ncbiftp_log.info('You are about to download theses files: %s' %
-                              files2download)
+        self.ncbiftp_log.info('You are about to download theses files (total = %s): %s' %
+                              (len(files2download), files2download))
 
         # Move to directory for file downloads
         os.chdir(download_path)
@@ -217,8 +217,8 @@ class NcbiFTPClient(BaseFTPClient):
 
         # Append the taxonomy database
         files2download.append(self._taxdb)
-        self.ncbiftp_log.info('You are about to download theses files: %s' %
-                              files2download)
+        self.ncbiftp_log.info('You are about to download theses files (total = %s): %s' %
+                              (len(files2download), files2download))
 
         # Move to directory for file downloads
         os.chdir(download_path)
@@ -265,8 +265,8 @@ class NcbiFTPClient(BaseFTPClient):
                 absentfiles.append(file2download)
 
         if len(absentfiles) > 0:
-            self.ncbiftp_log.info('You are about to download these files: %s\n' %
-                                  absentfiles)
+            self.ncbiftp_log.info('You are about to download these files (total = %s): %s\n' %
+                                  (len(absentfiles), absentfiles))
             # Download the files using multiprocessing
             download_time_secs = time()
             with ThreadPool(1) as download_pool:
