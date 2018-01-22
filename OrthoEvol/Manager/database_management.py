@@ -152,7 +152,7 @@ class BaseDatabaseManagement(object):
         db_path = self.database_path / Path('NCBI') / Path('refseq') / Path('release') / Path(collection_subset)
         db_path.mkdir(parents=True, exist_ok=True)
         ncbiftp = self.ncbiftp.getrefseqrelease(taxon_group=collection_subset, seqtype=seqtype, seqformat=seqformat, download_path=db_path)
-        return ncbiftp
+        return self.ncbiftp.files2download
 
     def upload_refseq_release_files(self, collection_subset, seqtype, seqformat, upload_list=None, database_name=None, add_to_default=None):
         """
@@ -473,7 +473,7 @@ class DatabaseManagement(BaseDatabaseManagement):
         return npt_dispatcher, npt_config
 
     def NCBI_refseq_release(self, configure_flag=None, archive_flag=None, delete_flag=None, upload_flag=None, archive_path=None,
-                            database_path=None, collection_subset=None, seqtype=None, seqformat=None, upload_list=None,
+                            database_path=None, collection_subset=None, seqtype=None, seqformat=None, file_list=None,
                             upload_number=8, dispatcher_flag=False, add_to_default=None, _path=None):
         nrr_dispatcher = {"NCBI_refseq_release": {"archive": [], "configure": [], "upload": []}}
         nrr_config = {"NCBI_refseq_release": {"archive": [], "configure": [], "upload": []}}
@@ -503,10 +503,10 @@ class DatabaseManagement(BaseDatabaseManagement):
             if not dispatcher_flag:
                 # TODO-ROB: multiprocessing sge whatever
                 # Create a list of lists with an index corresponding to the upload number
-                sub_upload_size = len(upload_list) // upload_number
-                if (len(upload_list) % upload_number) != 0:
+                sub_upload_size = len(file_list) // upload_number
+                if (len(file_list) % upload_number) != 0:
                     upload_number = upload_number + 1
-                sub_upload_lists = [upload_list[x:x+100] for x in range(0, len(upload_list), sub_upload_size)]
+                sub_upload_lists = [file_list[x:x + 100] for x in range(0, len(file_list), sub_upload_size)]
                 add_to_default = 0
                 for sub_list in sub_upload_lists:
                     add_to_default += 1
@@ -522,9 +522,9 @@ class DatabaseManagement(BaseDatabaseManagement):
                         "dispatcher_flag": True
                     })
                     sge_code_string = \
-                        "from OrthoEvol.Manager.database_dispatcher import DatabaseDispatcher " \
-                        "R_R = DatabaseDispatcher(config_file=%s, **%s) " \
-                        "R_R.dispatch_the_uploader()" % (self.config_file, code_dict_string)
+                        "from OrthoEvol.Manager.database_dispatcher import DatabaseDispatcher\n" \
+                        "R_R = DatabaseDispatcher(config_file=%s, **%s)\n" \
+                        "R_R.dispatch_the_uploader()\n" % (self.config_file, code_dict_string)
                     nrr_config["NCBI_refseq_release"]["upload"].append({
                         "code": sge_code_string})
             else:
@@ -533,7 +533,7 @@ class DatabaseManagement(BaseDatabaseManagement):
                     "collection_subset": collection_subset,
                     "seqtype": seqtype,
                     "seqformat": seqformat,
-                    "upload_list": upload_list,
+                    "upload_list": file_list,
                     "add_to_default": add_to_default
                 })
         return nrr_dispatcher, nrr_config
