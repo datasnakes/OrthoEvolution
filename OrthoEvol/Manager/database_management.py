@@ -16,7 +16,7 @@ from OrthoEvol.Orthologs.Blast.comparative_genetics import BaseComparativeGeneti
 
 class BaseDatabaseManagement(object):
 
-    def __init__(self, email, driver, project=None, project_path=None, proj_mana=ProjectManagement):
+    def __init__(self, email, driver, project=None, project_path=None, proj_mana=ProjectManagement, ftp_flag=True):
         """
         This is the base class for managing various databases.  It provides functionality for downloading and creating
         various databases for your pipeline.  There are functions available for downloading files from NCBI (BLAST,
@@ -41,7 +41,8 @@ class BaseDatabaseManagement(object):
         self.email = email
         self.driver = driver
         self.database_dict = {}
-        self.ncbiftp = NcbiFTPClient(email=self.email)
+        if ftp_flag == True:
+            self.ncbiftp = NcbiFTPClient(email=self.email)
         self.biosql = biosql
         self.proj_mana = proj_mana
 
