@@ -522,9 +522,27 @@ class DatabaseManagement(BaseDatabaseManagement):
                         "upload_list": sub_list,
                         "add_to_default": add_to_default
                     })
+                    '''from OrthoEvol.Manager.management import ProjectManagement
+                    from OrthoEvol.Manager.database_dispatcher import DatabaseDispatcher
+                    from OrthoEvol.Manager.config import yml
+                    from pkg_resources import resource_filename
+                    import yaml
+                    pm_config_file = resource_filename(yml.__name__, "config_template_existing.yml")
+                    with open(pm_config_file, 'r') as f:
+                        pm_config = yaml.safe_load(f)
+                    pm = ProjectManagement(**pm_config["Management_config"])'''
                     sge_code_string = \
-                        "from OrthoEvol.Manager.database_dispatcher import DatabaseDispatcher\n" \
-                        "R_R = DatabaseDispatcher(config_file=%s, proj_mana=%s, upload_refseq_release=True, **%s)" % (self.config_file, self.proj_mana, code_dict_string)
+                        '''from OrthoEvol.Manager.management import ProjectManagement
+                    from OrthoEvol.Manager.database_dispatcher import DatabaseDispatcher
+                    from OrthoEvol.Manager.config import yml
+                    from pkg_resources import resource_filename
+                    import yaml
+                    pm_config_file = resource_filename(yml.__name__, "config_template_existing.yml")
+                    with open(pm_config_file, 'r') as f:
+                        pm_config = yaml.safe_load(f)
+                    pm = ProjectManagement(**pm_config["Management_config"])
+                    R_R = DatabaseDispatcher(config_file=\"%s\", proj_mana=pm, upload_refseq_release=True, **%s)''' % \
+                        (self.config_file, code_dict_string)
                     nrr_config["NCBI_refseq_release"]["upload"].append({
                         "code": sge_code_string,
                         "base_jobname": "upload_rr_%s",
