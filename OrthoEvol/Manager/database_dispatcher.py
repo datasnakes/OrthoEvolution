@@ -37,6 +37,6 @@ class DatabaseDispatcher(DatabaseManagement):
                 self.dispatch(action, disp, conf)
 
     def refseq_release_dispatcher(self, **kwargs):
-        self.upload_refseq_release_files(kwargs)
+        self.upload_refseq_release_files(**kwargs)
 
 
