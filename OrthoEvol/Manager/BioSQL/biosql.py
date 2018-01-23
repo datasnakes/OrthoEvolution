@@ -160,10 +160,10 @@ class SQLiteBioSQL(BaseBioSQL):
 
         # Make sure a BioSQL-SQLite database exists
         # TODO-ROB:  Rework this part
-        # if db_abs_path.is_file():
-        #     raise FileExistsError
-        # elif new_db:
-        #     self.copy_template_database(destination=db_abs_path)
+        if db_abs_path.is_file():
+            raise FileExistsError
+        else:
+            self.copy_template_database(destination=db_abs_path)
         # else:
         #     raise FileNotFoundError("Database not found: %s\mPlease create a BioSQL-SQLite database." % self.database_abs_path)
 
@@ -179,7 +179,7 @@ class SQLiteBioSQL(BaseBioSQL):
                 self.biosqllog.info("Server Connected.")
                 pass
             except:
-                self.biosqllog.warn("The Server did not Connect.  Check the to make sure %s exists." % self.database_abs_path)
+                self.biosqllog.warn("The Server did not Connect.  Check the to make sure %s exists." % db_abs_path)
                 raise FileNotFoundError
 
             # See if the sub database exists (rna, protein, or genomic)
