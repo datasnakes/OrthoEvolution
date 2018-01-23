@@ -61,7 +61,7 @@ class BaseSGEJob(object):
         else:
             self.wait_on_job_completion(job_id)
 
-    def submitjob(self, cleanup):
+    def submitjob(self, cleanup, wait=True):
         """Submit a job using qsub."""
         try:
             cmd = ['qsub ' + self.jobname + '.pbs']  # this is the command
@@ -78,7 +78,8 @@ class BaseSGEJob(object):
                 submitted_jobid = cmd_status.stdout.decode('utf-8')
                 self.sgejob_log.info(self.jobname + ' was submitted.')
                 self.sgejob_log.info('Your job id is: %s' % submitted_jobid)
-                self.wait_on_job_completion(submitted_jobid)
+                if wait is True:
+                    self.wait_on_job_completion(submitted_jobid)
                 self._cleanup(self.jobname)
 
             else:  # Unsuccessful. Stdout will be '1'
