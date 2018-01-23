@@ -534,7 +534,7 @@ class DatabaseManagement(BaseDatabaseManagement):
                     "with open(pm_config_file, \'r\') as f:\n" \
                     "   pm_config = yaml.safe_load(f)\n" \
                     "pm = ProjectManagement(**pm_config[\"Management_config\"])\n" \
-                    "R_R = DatabaseDispatcher(config_file=\"%s\", proj_mana=pm, upload_refseq_release=True, **%s)\n" % \
+                    "R_R = DatabaseDispatcher(config_file=\"%s\", proj_mana=pm, upload_refseq_release=True, kwargs=%s)\n" % \
                         (self.config_file, code_dict_string)
                     nrr_config["NCBI_refseq_release"]["upload"].append({
                         "code": sge_code_string,
