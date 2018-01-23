@@ -519,15 +519,12 @@ class DatabaseManagement(BaseDatabaseManagement):
                         "collection_subset": collection_subset,
                         "seqtype": seqtype,
                         "seqformat": seqformat,
-                        "add_to_default": str(add_to_default),
                         "upload_list": sub_list,
-                        "upload_flag": True,
-                        "dispatcher_flag": True
+                        "add_to_default": add_to_default
                     })
                     sge_code_string = \
                         "from OrthoEvol.Manager.database_dispatcher import DatabaseDispatcher\n" \
-                        "R_R = DatabaseDispatcher(config_file=%s, **%s)\n" \
-                        "R_R.dispatch_the_uploader()\n" % (self.config_file, code_dict_string)
+                        "R_R = DatabaseDispatcher(config_file=%s, proj_mana=%s, upload_refseq_release=True, **%s)\n"  % (self.config_file, self.proj_mana, code_dict_string)
                     nrr_config["NCBI_refseq_release"]["upload"].append({
                         "code": sge_code_string,
                         "base_jobname": "upload_rr_%s",

@@ -3,7 +3,7 @@ from OrthoEvol.Manager.database_management import DatabaseManagement
 
 class DatabaseDispatcher(DatabaseManagement):
 
-    def __init__(self, config_file, proj_mana, **kwargs):
+    def __init__(self, config_file, proj_mana, upload_refseq_release=False, **kwargs):
         super().__init__(config_file=config_file, proj_mana=proj_mana)
         self.dispatcher, self.configuration = self.get_strategy_dispatcher(db_config_strategy=self.db_config_strategy)
         self.strategies = list(self.dispatcher.keys())
@@ -23,6 +23,9 @@ class DatabaseDispatcher(DatabaseManagement):
         # else:
         #     for disp, c in zip(self.dispatcher, self.configuration):
 
+        if upload_refseq_release == True:
+            self.refseq_release_dispatcher(**kwargs)
+
     def dispatch(self, strategy, dispatcher, configuration):
         disp = dispatcher[strategy]
         conf = configuration[strategy]
@@ -33,6 +36,7 @@ class DatabaseDispatcher(DatabaseManagement):
             for action in disp.keys():
                 self.dispatch(action, disp, conf)
 
-
+    def refseq_release_dispatcher(self, **kwargs):
+        self.upload_refseq_release_files(kwargs)
 
 
