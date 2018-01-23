@@ -113,7 +113,7 @@ class SGEJob(BaseSGEJob):
 
         return self.default_job_attributes
 
-    def submit_pycode(self, code, cleanup=True, default=True):
+    def submit_pycode(self, code, wait=True, cleanup=True, default=True):
         """Create and submit a qsub job.
 
         Submit python code."""
@@ -142,14 +142,14 @@ class SGEJob(BaseSGEJob):
             self.sgejob_log.info('%s has been created.' % pbsfilename)
 
             # Submit the job using qsub
-            self.submitjob(cleanup=cleanup)
+            self.submitjob(cleanup=cleanup, wait=wait)
         else:
             msg = 'Custom SGEJob creation is not yet implemented.'
             raise NotImplementedError(msg)
             # TODO Add custom job creation
 
         # Submit the job using qsub
-        self.submitjob(cleanup=cleanup)
+        self.submitjob(cleanup=cleanup, wait=wait)
 
 
 class MultiSGEJobs(SGEJob):
