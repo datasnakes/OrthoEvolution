@@ -107,6 +107,13 @@ class NcbiFTPClient(BaseFTPClient):
             tar.close()
             log_msg = 'Files were successfully extracted from %s'
             cls.ncbiftp_log.info(log_msg % file2extract)
+        elif str(file2extract).endswith('.gz'):
+            import gzip
+            gz = tarfile.open(file2extract,mode='r:gz')
+            gz.extractall()
+            gz.close()
+            log_msg = 'Files were successfully extracted from %s'
+            cls.ncbiftp_log.info(log_msg % file2extract)
 
     def listfiles(self, path='cwd'):
         """List all files in a path."""
