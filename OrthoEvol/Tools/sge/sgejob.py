@@ -106,7 +106,7 @@ class SGEJob(BaseSGEJob):
                           'errfile': self.jobname + '.e',
                           'script': self.jobname,
                           'log_name': self.jobname + '.log',
-                          'cmd': 'python3 ' + pyfile_path,
+                          'cmd': 'python3.6 ' + pyfile_path,
                           }
         self.default_job_attributes.update(new_attributes)
 
