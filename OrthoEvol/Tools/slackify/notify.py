@@ -7,7 +7,6 @@ import slacker
 
 class Slackify(object):
     """Send messages or milestones to a slack channel."""
-
     def __init__(self, slackconfig='slackconfig.cfg', cfg=True):
         """Configure Slackify.
 
