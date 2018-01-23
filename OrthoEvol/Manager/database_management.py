@@ -524,7 +524,7 @@ class DatabaseManagement(BaseDatabaseManagement):
                     })
                     sge_code_string = \
                         "from OrthoEvol.Manager.database_dispatcher import DatabaseDispatcher\n" \
-                        "R_R = DatabaseDispatcher(config_file=%s, proj_mana=%s, upload_refseq_release=True, **%s)\n"  % (self.config_file, self.proj_mana, code_dict_string)
+                        "R_R = DatabaseDispatcher(config_file=%s, proj_mana=%s, upload_refseq_release=True, **%s)" % (self.config_file, self.proj_mana, code_dict_string)
                     nrr_config["NCBI_refseq_release"]["upload"].append({
                         "code": sge_code_string,
                         "base_jobname": "upload_rr_%s",
