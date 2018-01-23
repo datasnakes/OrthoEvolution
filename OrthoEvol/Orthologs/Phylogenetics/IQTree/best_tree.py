@@ -3,7 +3,7 @@ from shutil import copy
 from subprocess import check_call, STDOUT
 from pathlib import Path
 
-from OrthoEvol.Tools import LogIt
+from OrthoEvol.Tools.logit import LogIt
 from OrthoEvol.Orthologs.Phylogenetics.IQTree.iqtree import IQTreeCommandline
 from OrthoEvol.Tools.otherutils import makedirectory
 # TODO-ROB Make this inherit FilteredAlignment

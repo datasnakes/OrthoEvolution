@@ -9,7 +9,7 @@ Built upon Alex Couper's `bash` package. (https://github.com/alexcouper/bash)
 import platform
 import sys
 
-from OrthoEvol.Tools import runcmd
+from OrthoEvol.Tools.otherutils import runcmd
 
 SUBPROCESS_HAS_TIMEOUT = True
 
