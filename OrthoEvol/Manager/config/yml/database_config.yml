@@ -1,6 +1,7 @@
 Database_config:
   email:  "rgilmore@umc.edu"
   driver: "sqlite3"
+  ftp_flag: False
   Full:
     configure_flag: False
     archive_flag: False
@@ -9,17 +10,17 @@ Database_config:
     _path: "!!python/object/apply:pathlib.Path ['']"
     Projects:
       Project_Name_1:
-        configure_flag: True
+        configure_flag: False
         archive_flag: False
         delete_flag: False
         _path: "!!python/object/apply:pathlib.Path ['Project_Name_1']"
       Project_Name_2:
-        configure_flag: True
+        configure_flag: False
         archive_flag: False
         delete_flag: False
         _path: "!!python/object/apply:pathlib.Path ['Project_Name_2']"
       Project_Name_3:
-        configure_flag: True
+        configure_flag: False
         archive_flag: False
         delete_flag: False
         _path: "!!python/object/apply:pathlib.Path ['Project_Name_3']"
@@ -45,7 +46,7 @@ Database_config:
           _path: "!!python/object/apply:pathlib.Path ['NCBI', 'blast', 'windowmasker_files']"
           taxonomy_ids: ""
       NCBI_pub_taxonomy:
-        configure_flag: True
+        configure_flag: False
         archive_flag: False
         delete_flag: False
         _path: "!!python/object/apply:pathlib.Path ['NCBI', 'pub', taxonomy']"
@@ -56,7 +57,7 @@ Database_config:
         configure_flag: False
         archive_flag: False
         delete_flag: False
-        upload_flag: False
+        upload_flag: True
         _path: "!!python/object/apply:pathlib.Path ['NCBI', 'refseq', 'release']"
         upload_list: [1,2,3,4,5,6,7,8,9,10]
     ITIS:
