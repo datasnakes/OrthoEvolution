@@ -1,5 +1,5 @@
 import yaml
-
+from OrthoEvol.Tools.sge import SGEJob
 
 def parse_db_config_file(config_file):
     kw ={}
@@ -15,3 +15,8 @@ def parse_db_config_file(config_file):
             else:
                 kw[key] = value
     return db_config_strategy, kw
+
+
+def jobber(email_address, base_jobname, id, code):
+    job = SGEJob(email_address=email_address, base_jobname=base_jobname % str(id))
+    job.submit_pycode(code=code, cleanup=False)

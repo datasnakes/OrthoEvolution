@@ -10,7 +10,7 @@ from OrthoEvol.Tools.ftp import NcbiFTPClient
 from OrthoEvol.Tools.sge import SGEJob
 from OrthoEvol.Tools.logit import LogIt
 from OrthoEvol.Manager.BioSQL import biosql
-from OrthoEvol.Manager.utils import parse_db_config_file
+from OrthoEvol.Manager.utils import parse_db_config_file, jobber
 from OrthoEvol.Orthologs.Blast.comparative_genetics import BaseComparativeGenetics
 
 
@@ -514,8 +514,7 @@ class DatabaseManagement(BaseDatabaseManagement):
                 add_to_default = 0
                 for sub_list in sub_upload_lists:
                     add_to_default += 1
-                    job = SGEJob(email_address=self.email, base_jobname="upload_rr_%s" % str(add_to_default))
-                    nrr_dispatcher["NCBI_refseq_release"]["upload"].append(job.submit_pycode)
+                    nrr_dispatcher["NCBI_refseq_release"]["upload"].append(jobber)
                     code_dict_string = str({
                         "collection_subset": collection_subset,
                         "seqtype": seqtype,
@@ -530,7 +529,10 @@ class DatabaseManagement(BaseDatabaseManagement):
                         "R_R = DatabaseDispatcher(config_file=%s, **%s)\n" \
                         "R_R.dispatch_the_uploader()\n" % (self.config_file, code_dict_string)
                     nrr_config["NCBI_refseq_release"]["upload"].append({
-                        "code": sge_code_string})
+                        "code": sge_code_string,
+                        "base_jobname": "upload_rr_%s",
+                        "email_address": self.email,
+                        "id": add_to_default})
             else:
                 nrr_dispatcher["NCBI_refseq_release"]["upload"].append(self.upload_refseq_release_files)
                 nrr_config["NCBI_refseq_release"]["upload"].append({
