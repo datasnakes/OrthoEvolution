@@ -32,6 +32,6 @@ __DEFAULT__ = {
             'script': _jobname,
             'log_name': _jobname,
             'pbsworkdir': os.getcwd(),
-            'cmd': 'python3 ' + os.path.join(os.getcwd(), _jobname + '.py'),
+            'cmd': 'python3.6 ' + os.path.join(os.getcwd(), _jobname + '.py'),
             'email': 'n/a'
              }
