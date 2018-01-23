@@ -10,7 +10,7 @@ from OrthoEvol.Tools.ftp import NcbiFTPClient
 from OrthoEvol.Tools.sge import SGEJob
 from OrthoEvol.Tools.logit import LogIt
 from OrthoEvol.Manager.BioSQL import biosql
-from OrthoEvol.Manager.utils import parse_db_config_file, jobber
+from OrthoEvol.Manager.utils import parse_db_config_file, refseq_jobber
 from OrthoEvol.Orthologs.Blast.comparative_genetics import BaseComparativeGenetics
 
 
@@ -515,7 +515,7 @@ class DatabaseManagement(BaseDatabaseManagement):
                 add_to_default = 0
                 for sub_list in sub_upload_lists:
                     add_to_default += 1
-                    nrr_dispatcher["NCBI_refseq_release"]["upload"].append(jobber)
+                    nrr_dispatcher["NCBI_refseq_release"]["upload"].append(refseq_jobber)
                     code_dict_string = str({
                         "collection_subset": collection_subset,
                         "seqtype": seqtype,

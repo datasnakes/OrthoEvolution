@@ -17,6 +17,6 @@ def parse_db_config_file(config_file):
     return db_config_strategy, kw
 
 
-def jobber(email_address, base_jobname, id, code):
+def refseq_jobber(email_address, base_jobname, id, code):
     job = SGEJob(email_address=email_address, base_jobname=base_jobname % str(id))
-    job.submit_pycode(code=code, cleanup=False)
+    job.submit_pycode(code=code, wait=False, cleanup=False)
