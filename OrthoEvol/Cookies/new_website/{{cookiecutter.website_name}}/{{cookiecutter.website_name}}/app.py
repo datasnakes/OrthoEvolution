@@ -11,8 +11,11 @@ from {{cookiecutter.website_name}}.settings import ProdConfig
 def create_app(config_object=ProdConfig):
     """An application factory, as explained here: http://flask.pocoo.org/docs/patterns/appfactories/.
 
-    :param config_object: The configuration object to use.
-    """
+:param config_object: The configuration object to use.
+
+    :param config_object:  (Default value = ProdConfig)
+
+    """
     app = Flask(__name__.split('.')[0])
     app.config.from_object(config_object)
     register_extensions(app)
@@ -24,7 +27,11 @@ def create_app(config_object=ProdConfig):
 
 
 def register_extensions(app):
-    """Register Flask extensions."""
+    """Register Flask extensions.
+
+    :param app: 
+
+    """
     assets.init_app(app)
     bcrypt.init_app(app)
     cache.init_app(app)
@@ -37,16 +44,28 @@ def register_extensions(app):
 
 
 def register_blueprints(app):
-    """Register Flask blueprints."""
+    """Register Flask blueprints.
+
+    :param app: 
+
+    """
     app.register_blueprint(public.views.blueprint)
     app.register_blueprint(user.views.blueprint)
     return None
 
 
 def register_errorhandlers(app):
-    """Register error handlers."""
+    """Register error handlers.
+
+    :param app: 
+
+    """
     def render_error(error):
-        """Render error template."""
+        """Render error template.
+
+        :param error: 
+
+        """
         # If a HTTPException, pull the `code` attribute; default to 500
         error_code = getattr(error, 'code', 500)
         return render_template('{0}.html'.format(error_code)), error_code
@@ -56,9 +75,13 @@ def register_errorhandlers(app):
 
 
 def register_shellcontext(app):
-    """Register shell context objects."""
+    """Register shell context objects.
+
+    :param app: 
+
+    """
     def shell_context():
-        """Shell context objects."""
+        """Shell context objects."""
         return {
             'db': db,
             'User': user.models.User}
@@ -67,7 +90,11 @@ def register_shellcontext(app):
 
 
 def register_commands(app):
-    """Register Click commands."""
+    """Register Click commands.
+
+    :param app: 
+
+    """
     app.cli.add_command(commands.test)
     app.cli.add_command(commands.lint)
     app.cli.add_command(commands.clean)

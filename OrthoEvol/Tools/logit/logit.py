@@ -6,6 +6,7 @@ from logzero import setup_logger, LogFormatter, logging
 
 class LogIt(object):
     """LogIt makes logging easier by creating easy loggers."""
+
     def __init__(self):
         """Initialize the logger format based on system platform."""
         # Set the different formats based on user's platform
@@ -22,14 +23,31 @@ class LogIt(object):
         self.logging = logging
 
     def default(self, logname, logfile):
-        """Create a log handler using default formatting."""
+        """Create a log handler using default formatting.
+
+        :param logname: Name of the log.
+        :param logfile: Path to the logfile. Can be `None`.
+        :return: A default_log object is returned.
+        """
+
         default_log = setup_logger(name=logname.upper(), logfile=logfile,
-                                   level=logging.DEBUG, formatter=self._formatter)
+                                   level=logging.DEBUG,
+                                   formatter=self._formatter)
+
+        assert isinstance(default_log, object)
         return default_log
 
     @classmethod
     def custom(cls, logname, logfile, level, fmt='default'):
-        """Create a log handler or logger."""
+        """Create a log handler or logger.
+
+        :param logname: Name of the log.
+        :param logfile: Path to the logfile. Can be `None`
+        :param level: Logging level.
+        :param fmt: Logging format (fmt is default).
+        :return: A custom_log object is returned.
+        """
+
         if fmt is 'default':
             fmt = '[%(levelname)-2s - %(name)s]: %(message)s'
         elif fmt is 'custom':
@@ -43,15 +61,22 @@ class LogIt(object):
         return custom_log
 
     def deletelog(self, logfile):
-        """Delete the log file."""
+        """Delete the log file.
+
+        :param logfile: Name of the logfile to be deleted.
+        """
+
         self.shutdown()
         # TODO Use contextlib here; See makedirectory function
         if os.path.isfile(logfile):
             os.remove(logfile)
 
     def shutdown(self):
-        """Shutdown the log handlers."""
-        # HINT https://www.programcreek.com/python/example/3517/logging.shutdown
+        """Shutdown the log handlers.
+
+        Windows won't just delete a log (linux distros will).
+        It must be shutdown.
+        """
+
+        # TIP https://www.programcreek.com/python/example/3517/logging.shutdown
         self.logging.shutdown()
-        # Windows won't just delete a log (linux distros will).
-        # It must be shutdown.

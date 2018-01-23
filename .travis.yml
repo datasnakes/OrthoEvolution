@@ -5,7 +5,7 @@ python:
   - "3.5"
   - "3.6"
 notifications:
-  email: false
+  email: l0p2k8x1d2n0s8t0@vallendergenetics.slack.com
 # command to install dependencies
 install:
   - "pip install --upgrade pip setuptools wheel"

@@ -16,6 +16,7 @@ from OrthoEvol.Tools.logit import LogIt
 
 class NcbiFTPClient(BaseFTPClient):
     """Access NCBI's FTP servers with ease."""
+
     def __init__(self, email):
         _ncbi = 'ftp.ncbi.nlm.nih.gov'
         super().__init__(_ncbi, email, keepalive=False, debug_lvl=0)
@@ -42,14 +43,26 @@ class NcbiFTPClient(BaseFTPClient):
 
     @classmethod
     def _pathformat(cls, path):
-        """Ensure proper formatting of the path."""
+        """Ensure proper formatting of the path.
+
+        :param path: FTP path.
+        :type path: str
+        """
+
         pattern = re.compile('^/(.*?)/$')
         if not re.match(pattern, path):
             raise ValueError('Your path is not in a proper format.')
 
     @classmethod
     def _archive(cls, archive_name, folder2archive, archive_type='gztar'):
-        """Archive all the files in the folder and compress the archive."""
+        """Archive all the files in the folder and compress the archive.
+
+        :param archive_name:  Output name of archive.
+        :param folder2archive:  Name of the folder to archive.
+        :param archive_type: (Default value = 'gztar')
+        :return:
+        """
+
         os.chdir(folder2archive)  # Enter the full path
         os.chdir('..')
         archive_location = os.path.join(os.getcwd(), archive_name)
@@ -57,7 +70,11 @@ class NcbiFTPClient(BaseFTPClient):
         make_archive(archive_location, folder2archive, archive_type)
 
     def walk(self, path):
-        """Walk the ftp server and get files and directories."""
+        """Walk the ftp server and get files and directories.
+
+        :param path: FTP path to be walked.
+        """
+
         file_list, dirs, nondirs = [], [], []
         try:
             self.ftp.cwd(path)
@@ -75,13 +92,22 @@ class NcbiFTPClient(BaseFTPClient):
             return dirs, nondirs
 
     def download_file(self, filename):
-        """Download the files one by one."""
+        """Download the files one by one.
+
+        :param filename:  Name of the file to download.
+        :return:
+        """
+
         with open(filename, 'wb') as localfile:
             self.ftp.retrbinary('RETR %s' % filename, localfile.write)
             self.ncbiftp_log.info('%s was downloaded.' % str(filename))
 
     def _download_windowmasker(self, windowmaskerfilepath):
-        """Download the window masker files."""
+        """Download the window masker files.
+
+        :param windowmaskerfilepath:  FTP path to windowmasker files.
+        """
+
         wmsplit = windowmaskerfilepath.split(sep='/')
         wmdir = wmsplit[0]
         wmfile = wmsplit[1]
@@ -94,15 +120,19 @@ class NcbiFTPClient(BaseFTPClient):
                     self.ftp.retrbinary('RETR %s' % windowmaskerfilepath, localfile.write)
                     self.ncbiftp_log.info('%s was downloaded.' % str(windowmaskerfilepath))
             except all_errors:
-                    os.remove(os.path.join(wmdir, wmfile))
-                    err_msg = '%s could not be download and was deleted.'
-                    self.ncbiftp_log.error(err_msg % str(windowmaskerfilepath))
+                os.remove(os.path.join(wmdir, wmfile))
+                err_msg = '%s could not be download and was deleted.'
+                self.ncbiftp_log.error(err_msg % str(windowmaskerfilepath))
         else:
             self.ncbiftp_log.info('%s exists.' % str(windowmaskerfilepath))
 
     @classmethod
     def extract_file(cls, file2extract):
-        """Extract a tar.gz file."""
+        """Extract a tar.gz file.
+
+        :param file2extract: Path to the tar.gz file to extract.
+        """
+
         if str(file2extract).endswith('tar.gz'):
             tar = tarfile.open(file2extract)
             tar.extractall()
@@ -111,7 +141,12 @@ class NcbiFTPClient(BaseFTPClient):
             cls.ncbiftp_log.info(log_msg % file2extract)
 
     def listfiles(self, path='cwd'):
-        """List all files in a path."""
+        """List all files in a path.
+
+        :param path: Directory path. (Default value = 'cwd')
+        :return: A list of files in a directory.
+        """
+
         if path == 'cwd':
             path = self.ftp.pwd()
         path = path
@@ -120,7 +155,12 @@ class NcbiFTPClient(BaseFTPClient):
         return files
 
     def listdirectories(self, path='cwd'):
-        """List all directories in a path."""
+        """List all directories in a path.
+
+        :param path: Directory path. (Default value = 'cwd')
+        :return: A list of subdirectories.
+        """
+
         if path == 'cwd':
             path = self.ftp.pwd()
         path = path
@@ -129,7 +169,13 @@ class NcbiFTPClient(BaseFTPClient):
         return directories
 
     def getwindowmaskerfiles(self, taxonomy_ids, download_path):
-        """Download NCBI's window masker binary files for each taxonomy id."""
+        """Download NCBI's window masker binary files for each taxonomy id.
+
+        :param taxonomy_ids:  Input list of taxonomy ids.
+        :param download_path:  Path to download files to.
+        :return:
+        """
+
         self.ftp.cwd(self.windowmasker_path)
         taxonomy_dirs = self.listdirectories(self.windowmasker_path)
 
@@ -165,7 +211,16 @@ class NcbiFTPClient(BaseFTPClient):
 
     def getrefseqrelease(self, taxon_group, seqtype, seqformat, download_path,
                          extract=True):
-        """Download the refseq release database."""
+        """Download the refseq release database.
+
+        :param taxon_group:
+        :param seqtype:
+        :param seqformat:
+        :param download_path:
+        :param extract:  (Default value = True)
+        :return:
+        """
+
         self.ftp.cwd(self.refseqrelease_path)
         taxon_dirs = self.listdirectories(self.refseqrelease_path)
 
@@ -207,7 +262,13 @@ class NcbiFTPClient(BaseFTPClient):
                                   minutes)
 
     def getblastfasta(self, database_name, download_path, extract=True):
-        """Download the fasta sequence database (not formatted)."""
+        """Download the fasta sequence database (not formatted).
+
+        :param database_name:
+        :param download_path:
+        :param extract:  (Default value = True)
+        """
+
         if str(database_name).startswith('est'):
             raise NotImplementedError('Est dbs cannot be downloaded yet.')
         self.ftp.cwd(self.blastfasta_path)
@@ -243,7 +304,24 @@ class NcbiFTPClient(BaseFTPClient):
                                   minutes)
 
     def getblastdb(self, database_name, download_path, extract=True):
-        """Download the formatted blast database."""
+        """Download the formatted blast database.
+
+:param database_name: Name of preformatted blastdb to download.
+        :param download_path: Directory path/location to download blastdb.
+        :param extract (bool): True or False for extract tar.gz db files.
+
+
+
+        :param database_name:
+
+        :param download_path:
+
+        :param extract:  (Default value = True)
+
+
+
+        """
+
         if str(database_name).startswith('est'):
             raise NotImplementedError('Est dbs cannot be downloaded yet.')
         self.ftp.cwd(self.blastdb_path)
@@ -296,8 +374,15 @@ class NcbiFTPClient(BaseFTPClient):
     def updatedb(self, database_path=os.getcwd(), update_days=7):
         """Check for when the database was last updated.
 
-        Refseq/release databases should only be updated every few months.
+        .. note:  Refseq release databases should only be updated every few
+                  months.
+
+        :param database_path: Directory path of existing database.
+                              (Default value = os.getcwd()
+        :param update_days (int): Number of days to update.
+        :return:
         """
+
         # TODO Prevent users from updated refseq if certain days
         # Get a list of the files in the path
         filesinpath = os.listdir(database_path)

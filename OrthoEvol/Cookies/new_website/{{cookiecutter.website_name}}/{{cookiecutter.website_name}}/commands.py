@@ -16,7 +16,7 @@ TEST_PATH = os.path.join(PROJECT_ROOT, 'tests')
 
 @click.command()
 def test():
-    """Run the tests."""
+    """Run the tests."""
     import pytest
     rv = pytest.main([TEST_PATH, '--verbose'])
     exit(rv)
@@ -26,7 +26,11 @@ def test():
 @click.option('-f', '--fix-imports', default=False, is_flag=True,
               help='Fix imports using isort, before linting')
 def lint(fix_imports):
-    """Lint and check code style with flake8 and isort."""
+    """Lint and check code style with flake8 and isort.
+
+    :param fix_imports: 
+
+    """
     skip = ['requirements']
     root_files = glob('*.py')
     root_directories = [
@@ -35,7 +39,12 @@ def lint(fix_imports):
         arg for arg in root_files + root_directories if arg not in skip]
 
     def execute_tool(description, *args):
-        """Execute a checking tool with its arguments."""
+        """Execute a checking tool with its arguments.
+
+        :param description: 
+        :param *args: 
+
+        """
         command_line = list(args) + files_and_directories
         click.echo('{}: {}'.format(description, ' '.join(command_line)))
         rv = call(command_line)
@@ -51,8 +60,7 @@ def lint(fix_imports):
 def clean():
     """Remove *.pyc and *.pyo files recursively starting at current directory.
 
-    Borrowed from Flask-Script, converted to use Click.
-    """
+Borrowed from Flask-Script, converted to use Click."""
     for dirpath, dirnames, filenames in os.walk('.'):
         for filename in filenames:
             if filename.endswith('.pyc') or filename.endswith('.pyo'):
@@ -70,8 +78,12 @@ def clean():
 def urls(url, order):
     """Display all of the url matching routes for the project.
 
-    Borrowed from Flask-Script, converted to use Click.
-    """
+Borrowed from Flask-Script, converted to use Click.
+
+    :param url: 
+    :param order: 
+
+    """
     rows = []
     column_length = 0
     column_headers = ('Rule', 'Endpoint', 'Arguments')

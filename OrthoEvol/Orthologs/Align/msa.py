@@ -3,9 +3,8 @@ import shutil
 import subprocess
 from pathlib import Path
 from Bio import SeqIO
-from Bio.Align.Applications import ClustalOmegaCommandline
 
-from OrthoEvol.Tools import LogIt
+from OrthoEvol.Tools.logit import LogIt
 from OrthoEvol.Orthologs.utils import attribute_config
 from OrthoEvol.Orthologs.Align.guidance2 import Guidance2Commandline
 from OrthoEvol.Orthologs.Align.pal2nal import Pal2NalCommandline
@@ -17,16 +16,19 @@ from OrthoEvol.Orthologs.GenBank import multi_fasta_manipulator
 class MultipleSequenceAlignment(object):
     """The MultipleSequenceAlignment (MSA) class uses the standard configuration
     along with function dispatching to give the end-user access to multiple
-    alignment tools.
-    """
+    alignment tools."""
+
     def __init__(self, project=None, project_path=os.getcwd(), genbank=GenBank, **kwargs):
         """Initialize the MultipleSequenceAlignment class.
 
         :param project: The project name.
         :param project_path:  The path to the project.
-        :param genbank:  The composer parameter which is used to configure the GenBank class with the MSA class.
-        :param kwargs:  The kwargs are used with the dispatcher as a way to control the alignment pipeline.
-        :returns:  If the kwargs are utilized with YAML or other configurations, then this class returns an alignment
+        :param genbank: The composer parameter which is used to configure the
+                        GenBank class with the MSA class.
+        :param kwargs:  The kwargs are used with the dispatcher as a way to
+                        control the alignment pipeline.
+        :returns: If the kwargs are utilized with YAML or other
+                  configurations, then this class returns an alignment
         dictionary, which can be parsed to run specific alignment algorithms.
         """
         self.dispatcher_options = {"Guidance_config": ["GUIDANCE2", self.guidance2],
@@ -44,11 +46,13 @@ class MultipleSequenceAlignment(object):
         self.program = None
         self.alignment_dict = {}
         self.project = project
+        self.project_path = project_path
         if project_path and project:
             self.project_path = Path(project_path) / Path(project)
 
         # Configuration of class attributes
-        add_self = attribute_config(self, composer=genbank, checker=GenBank, project=project, project_path=project_path)
+        add_self = attribute_config(self, composer=genbank, checker=GenBank,
+                                    project=project, project_path=project_path)
         for var, attr in add_self.__dict__.items():
             setattr(self, var, attr)
 
@@ -69,21 +73,30 @@ class MultipleSequenceAlignment(object):
         Guidance2.
 
         :param seqFile:  The sequence file required by GUIDANCE2.
-        :param msaProgram:  The msa program to be used by GUIDANCE2.  ("CLUSTALW", "PRANK", "MAFFT", or "MUSCLE")
-        :param seqType:  The type of sequences to be aligned in GUIDANCE2.  ("aa", "nuc", or "codon")
-        :param dataset:  The name of the dataset, which is used for file naming convention among other things in
-                         GUIDANCE2.
-        :param seqFilter:  The sequence filter parameter is None, "inclusive", or "exclusive".  If inclusive the
-                           SeqCutoff decreases for every iteration.  If exclusive the SeqCutoff increases for every
-                           iteration, and so the algorithm excludes more genes from the alignment.
-                           (An OrthoEvol strategy)
-        :param columnFilter:  The column filter removes columns from the alignment using GUIDANCE2.
-        :param maskFilter:  The mask filter uses GUIDANCE2 maskLowScoresResidue script to mask the low scoring residues.
-        :param kwargs:  The kwargs are used to configure GUIDANCE2 with specific parameters including seqCutoff and
-                        colCutoff.  It can also be used to set the number of iterations and the increment number, which
-                        controls how seqCutoff and colCutoff change for each iteration.
+        :param msaProgram:  The msa program to be used by GUIDANCE2.
+                            ("CLUSTALW", "PRANK", "MAFFT", or "MUSCLE")
+        :param seqType: The type of sequences to be aligned in GUIDANCE2.
+                        ("aa", "nuc", or "codon")
+        :param dataset: The name of the dataset, which is used for file
+                        naming convention among other things in GUIDANCE2.
+        :param seqFilter: The sequence filter parameter is None, "inclusive",
+                          or "exclusive".  If inclusive the SeqCutoff
+                          decreases for every iteration.  If exclusive the
+                          SeqCutoff increases for every iteration, and so the
+                          algorithm excludes more genes from the alignment.
+                          (An OrthoEvol strategy)
+        :param columnFilter: The column filter removes columns from the
+                             alignment using GUIDANCE2.
+        :param maskFilter: The mask filter uses GUIDANCE2 maskLowScoresResidue
+                           script to mask the low scoring residues.
+        :param kwargs: The kwargs are used to configure GUIDANCE2 with
+                       specific parameters including seqCutoff and colCutoff.
+                       It can also be used to set the number of iterations and
+                       the increment number, which controls how seqCutoff and
+                       colCutoff change for each iteration.
         :return:  Returns Guidance2 files.
         """
+
         self.guidancelog.info("Guidance2 will be used.")
         # Name and Create the output directory
         self.program = "GUIDANCE2"
@@ -226,19 +239,28 @@ class MultipleSequenceAlignment(object):
             multi_fasta_manipulator(kwargs['maskedFile'], str(seqFile), kwargs['maskedFile'], manipulation='sort')
 
     def pal2nal(self, aa_alignment, na_fasta, output_type='paml', nogap=True, nomismatch=True, downstream='paml'):
-        """
-        This Pal2Nal method works with the Pal2Nal command line wrapper.  It uses a protein alignment to generate a
-        codon alignment from the corresponding nucleic acid sequences.  This is useful for downstream PAML analysis.
-        This function also catches and removes taxa that are inconsistent with Pal2Nal's algorithm.
+        """This Pal2Nal method works with the Pal2Nal command line wrapper.
 
-        :param aa_alignment:  An amino acid alignment that is used as a guide for a nucleic acid alignment.
-        :param na_fasta:  The FASTA file that contains matching/ordered sequences corresponding to the aa_alignment.
-        :param output_type:  The format of the resulting alignment.  ("clustal", "paml", "fasta", "codon")
-        :param nogap:  Removes the gaps and in-frame stop codons from the alignment to work better with PAML.
-        :param nomismatch:  Removes mismatched codons between protein and DNA sequences.
-        :param downstream:  Used as a naming convention for a better and more obvious pipeline.
-        :return:  A codon alignment.
+        It uses a protein alignment to generate a codon alignment from the
+        corresponding nucleic acid sequences.  This is useful for downstream
+        PAML analysis. This function also catches and removes taxa that are
+        inconsistent with Pal2Nal's algorithm.
+
+        :param aa_alignment: An amino acid alignment that is used as a guide
+                             for a nucleic acid alignment.
+        :param na_fasta: The FASTA file that contains matching/ordered
+                         sequences corresponding to the aa_alignment.
+        :param output_type: The format of the resulting alignment.
+                            ("clustal", "paml", "fasta", "codon")
+        :param nogap: Removes the gaps and in-frame stop codons from the
+                      alignment to work better with PAML.
+        :param nomismatch: Removes mismatched codons between protein and DNA
+                           sequences.
+        :param downstream: Used as a naming convention for a better and more
+                           obvious pipeline.
+        :return: A codon alignment.
         """
+
         removed = []
         # Create output directory for PAL2NAL
         outDir = 'PAL2NAL'
@@ -289,9 +311,14 @@ class MultipleSequenceAlignment(object):
             self.pal2nallog.info('Out: ' + str(out))
 
     def clustalo(self, infile, outfile, outfmt="fasta"):
-        """Align protein/amino acid sequences using parameters similar to
-        the default parameters.
+        """Align protein/amino acid sequences using Clustal Omega.
 
-        These parameters include 2 additional iterations for the hmm.
+        :param infile: Input a multifasta protein file.
+        :param outfile: Output an aligned multifasta file.
+        :param outfmt:  (Default value = "fasta")
         """
-        pass
+        try:
+            clustalo = ClustalO(infile=infile, outfile=outfile, outfmt=outfmt)
+            clustalo.runclustalomega()
+        except Exception:
+            pass

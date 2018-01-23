@@ -7,6 +7,7 @@ from pathlib import Path
 
 
 class OrthologPipeline(object):
+    """ """
 
     def __init__(self, genes, qsub_template, worker_template, home=os.getcwd()):
         self.index = Path(home)  # index directory
@@ -17,6 +18,7 @@ class OrthologPipeline(object):
         self.genes = genes
 
     def iterate(self):
+        """ """
         with open(self.genes, 'r') as gl:
             gene_list = csv.reader(gl)
             for gene in gene_list:
@@ -28,6 +30,17 @@ class OrthologPipeline(object):
 
     @staticmethod
     def batch_script_setup(qsub_file, python_file, raw_data_path, author, email, memory, gene):
+        """
+
+        :param qsub_file: 
+        :param python_file: 
+        :param raw_data_path: 
+        :param author: 
+        :param email: 
+        :param memory: 
+        :param gene: 
+
+        """
         date_time = time.strftime("%H:%M:%S-on-%d/%m/%Y")
         qsub_command = "qsub -v PYTHONFILE=%s,RAWDATA=%s,AUTHOR=%s,EMAIL=%s,GBS=/%s,GENE=%s,DATE=%s %s" % \
                        (python_file, raw_data_path, author, email, memory, gene, date_time, qsub_file)
@@ -36,4 +49,9 @@ class OrthologPipeline(object):
 
     @staticmethod
     def submit(qsub_command):
+        """
+
+        :param qsub_command: 
+
+        """
         subprocess.check_call([qsub_command], stderr=subprocess.STDOUT, shell=True)

@@ -16,5 +16,7 @@ infile = pkg_resources.resource_filename(templates.__name__, 'test_blast.csv')
 
 MyGene(infile=infile, outfile='mygene_output.csv')
 
+# Query mygene using your input file
+MyGene.query_mygene()
 ```
 

@@ -1,25 +1,29 @@
 from pathlib import Path
 from OrthoEvol.Cookies.cookie_jar import Oven
-from OrthoEvol.Tools import LogIt
+from OrthoEvol.Tools.logit import LogIt
 
 
 def attribute_config(cls, composer, checker, project=None, project_path=None, checker2=None):
     """Set/configure attributes.
 
     Attribute Configuration takes an instance of a class and sets various
-    attributes. The attributes are set by determining the type of configuration.
-    The class attributes can be composed by another class, they can be set with
-    a dictionary, or they can be set using the basic project template.
+    attributes. The attributes are set by determining the type of
+    configuration. The class attributes can be composed by another class,
+    they can be set with  a dictionary, or they can be set using the basic
+    project template.
 
     :param cls: An instance of a class that will retain the attributes.
     :param composer: A class that will yield attributes to the cls parameter.
     :param checker: A checker class used to check the type of the composer.
-            Dictionary composers will be treated differently.
-    :param project:  The name of the project.
+                    Dictionary composers will be treated differently.
+    :param project:  The name of the project. (Default value = None)
     :param project_path:  The relative path of the project.
+                          (Default value = None)
+    :param checker2:  (Default value = None)
     :return:  Returns the instance (cls) with new attributes.
     """
-    ac_log = LogIt().default(logname="%s" % cls.__class__.__name__, logfile=None)
+    clsnm = cls.__class__.__name__
+    ac_log = LogIt().default(logname="%s" % clsnm, logfile=None)
     if checker2:
         check2 = issubclass(type(composer), checker2)
     else:
@@ -28,23 +32,33 @@ def attribute_config(cls, composer, checker, project=None, project_path=None, ch
     if issubclass(type(composer), checker) or check2:
         for key, value in composer.__dict__.items():
             setattr(cls, key, value)
-        ac_log.info("The attribute configuration was accomplished by composing %s with %s." % (cls.__class__.__name__, composer.__class__.__name__))
+        clsnm = cls.__class__.__name__
+        compnm = composer.__class__.__name__
+        msg = "The attribute configuration was accomplished by composing {0} with {1}.".format(clsnm, compnm)
+        ac_log.info(msg)
 
     # Attribute configuration using a dictionary.
     elif isinstance(composer, dict):
         for key, value in composer.items():
             setattr(cls, key, value)
-        ac_log.info("The attribute configuration of %s was accomplished by using a dictionary." % cls.__class__.__name__)
+        clsnm = cls.__class__.__name__
+        msg = "The attribute configuration of {0} was accomplished by using a dictionary.".format(clsnm)
+        ac_log.info(msg)
 
     # Attribute configuration without composer
     elif composer is None:
         if not (project or project_path):
-            raise BrokenPipeError("Without the Project Management class, a project name and project path must be included.")
+            msg = "Without the Project Management class, a project name and "
+            "project path must be included."
+            raise BrokenPipeError(msg)
         cls = standalone_config(cls, project, project_path)
-        ac_log.info("The attribute configuration of %s was accomplished by using a standalone project." % cls.__class__.__name__)
+        clsnm = cls.__class__.__name__
+        msg = "The attribute configuration of {0} was accomplished without a composer.".format(clsnm)
+        ac_log.info(msg)
     # Make sure self.project and self.project_path have values
     if not (cls.project or cls.project_path):
-        raise BrokenPipeError("The project name and project path attributes have not been set.")
+        msg = "The project name and project path attributes have not been set."
+        raise BrokenPipeError(msg)
 
     return cls
 
@@ -59,8 +73,9 @@ def standalone_config(cls, project, project_path, new=False, custom=None):
     :param cls: An instance of a class that will retain the attributes.
     :param project: The name of the project.
     :param project_path: The relative path of a project.
-    :param new: The new project flag.
+    :param new: The new project flag. (Default value = False)
     :param custom: The custom flag which can be None or a dictionary.
+                   (Default value = None)
     :return: Returns the instance (cls) with new attributes.
     """
 

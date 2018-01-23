@@ -17,9 +17,9 @@
 # add these directories to sys.path here. If the directory is relative to the
 # documentation root, use os.path.abspath to make it absolute, like shown here.
 #
-# import os
-# import sys
-# sys.path.insert(0, os.path.abspath('.'))
+import os
+import sys
+sys.path.insert(0, os.path.abspath('../../../'))
 
 
 # -- General configuration ------------------------------------------------
@@ -32,6 +32,7 @@
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom
 # ones.
 extensions = ['sphinx.ext.viewcode',
+#              'sphinx.ext.autodoc',
               'sphinx.ext.githubpages',
               'sphinx.ext.intersphinx']
 
@@ -42,7 +43,7 @@ templates_path = ['_templates']
 # You can specify multiple suffix as a list of string:
 #
 # source_suffix = ['.rst', '.md']
-source_suffix = '.rst'
+source_suffix = ['.rst']
 
 # The master toctree document.
 master_doc = 'index'
@@ -92,21 +93,20 @@ html_theme = 'alabaster'
 # documentation.
 #
 html_theme_options = {
+        "description": "An easy to use and comprehensive python package which aids in the analysis and visualization of comparative evolutionary genetics",
         "github_user": "Datasnakes",
         "github_repo": "OrthoEvolution",
-        "extra_nav_links": {
-            "🚀 Github": "https://github.com/datasnakes/OrthoEvolution",
-            "💾 Download Releases": "https://github.com/datasnakes/OrthoEvolution/releases",
-            }
+        "github_banner": True
 }
 
 
 html_sidebars = {
+    'index': ['about.html', 'localtoc.html', 'sidebarintro.html',
+              'searchbox.html'],
     '**': [
         'about.html',
-        'navigation.html',
+        'localtoc.html',
         'searchbox.html',
-        'donate.html',
     ]
 }
 
@@ -174,9 +174,7 @@ texinfo_documents = [
 ]
 
 
-
 # -- Options for Epub output ----------------------------------------------
-
 # Bibliographic Dublin Core info.
 epub_title = project
 epub_author = author
@@ -193,6 +191,9 @@ epub_copyright = copyright
 # epub_uid = ''
 
 # A list of files that should not be packed into the epub file.
-epub_exclude_files = ['search.html']
+epub_exclude_files = [
+    ('search.html', 'Search'),
+]
 
-
+# Example configuration for intersphinx: refer to the Python standard library.
+intersphinx_mapping = {'https://docs.python.org/3': None}

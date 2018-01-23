@@ -4,11 +4,11 @@
 .. image:: https://api.codacy.com/project/badge/Grade/25062944794a4d14b5cab274a885ac27
    :target: https://www.codacy.com/app/datasnakes/OrthoEvolution?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=datasnakes/OrthoEvolution&amp;utm_campaign=Badge_Grade
 
-.. image:: https://badges.gitter.im/gitterHQ/gitter.png
-   :target: https://gitter.im/datasnakes/Lobby
+.. image:: https://img.shields.io/badge/chat-on%20gitter-753A88.svg
+   :target: https://gitter.im/datasnakes/OrthoEvolution
 
-.. image:: https://badge.fury.io/py/OrthoEvolution.svg
-   :target: https://badge.fury.io/py/OrthoEvolution
+.. image:: https://badge.fury.io/py/OrthoEvol.svg
+   :target: https://badge.fury.io/py/OrthoEvol
 
 .. image:: https://readthedocs.org/projects/orthoevolution/badge/?version=latest
    :target: http://orthoevolution.readthedocs.io/en/latest/?badge=latest
@@ -30,14 +30,14 @@ the management and analysis of (what can be) large datasets.  The Cookies, Manag
 and Tools modules act as a framework for our workflow, while the Orthologs
 module provides access to specific functions for our various ortholog inference projects.
 
-View our `read the docs <http://datasnakes-scripts.readthedocs.io/en/master/>`__ and feel free to also
+View our `read the docs <http://orthoevolution.readthedocs.io/en/master/>`__ and feel free to also
 read `this related paper <https://www.frontiersin.org/articles/10.3389/fnhum.2014.00283/full>`__ to gain
 more insight into this project/python package.
 
 
 Installation
 ----------------
-View the below methiods for installing this package. Python3.5 and higher is required.
+View the below methods for installing this package. Python3.5 and higher is required.
 
 PyPi
 ~~~~~~~~~~~~~~~~

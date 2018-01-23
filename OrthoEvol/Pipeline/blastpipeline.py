@@ -28,7 +28,9 @@ logger = logging.getLogger('luigi-interface')
 SGEPipelineTask.shared_tmp_dir = os.getcwd()
 SGEPipelineTask.parallel_env = None
 
+
 class BlastPipelineTask(SGEPipelineTask):
+    """Task for running a Blast pipeline."""
 
     path = luigi.Parameter()
     accessions = luigi.Parameter()
@@ -37,6 +39,8 @@ class BlastPipelineTask(SGEPipelineTask):
         myblast.blast_config(myblast.blast_human, 'Homo_sapiens', auto_start=True)
 
     def output(self):
+        """ """
+
         return luigi.LocalTarget(path=os.path.join(self.path, myblast.project_path.as_posix()))
 
 
@@ -48,4 +52,3 @@ if __name__ == '__main__':
                                accessions=str(accessions),
                                select=num_accs+1) for num_accs in range(num_accs)]
     luigi.build(tasks, local_scheduler=True, workers=num_accs)
-

@@ -1,5 +1,4 @@
-Pipeline Documentation
-==========================
+# Pipeline Documentation
 The Pipeline module is designed to provide the user with easily callable and
 command line usable pipelines that allow orthology inference to be completed
 in a parallel fashion.
@@ -10,11 +9,10 @@ cluster (**specifically one that uses pbspro or sun grid engine**).
 ## Examples
 
 
-#### Running a Blast Pipeline
+### Running a Blast Pipeline
 
 ``` python
 ```
 
-❗ Software Dependencies
---------------------------------------
+## Software Dependencies
 Ensure that you have at least pbs version `14.1.0`

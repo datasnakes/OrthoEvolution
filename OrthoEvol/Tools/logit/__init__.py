@@ -1,2 +1,2 @@
-"""Initialize LogIt class"""
+"""Initialize LogIt class."""
 from .logit import LogIt

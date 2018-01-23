@@ -5,16 +5,23 @@ import re
 
 
 class Qstat(object):
+    """Access and parse information from qstat commands."""
+
     def __init__(self):
-        """Initialize class."""
+        """Get user name."""
+
         _username = getpass.getuser()
         self.username = _username
         self.split_regex = re.compile(r'\s+')
 
-    def qstatinfo(self, qstat_path='qstat'):
-        """Retrieve qstat output."""
+    def qstatinfo(self, qstat_cmd='qstat'):
+        """Retrieve qstat output.
+
+        :param qstat_cmd: Qstat command to run.  (Default value = 'qstat')
+        """
+
         try:
-            qstatinfo = check_output([qstat_path])
+            qstatinfo = check_output([qstat_cmd])
         except CalledProcessError as cpe:
             return_code = 'qstat returncode: %s' % cpe.returncode
             std_error = 'qstat standard output: %s' % cpe.stderr
@@ -29,8 +36,10 @@ class Qstat(object):
     def _output_parser(self, output):
         """Parse output from qstat pbs commandline program.
 
-        Returns a list of dictionaries for each job.
+        :param output: Input the output of the qstat command.
+        :return: A list of dictionaries for each job.
         """
+
         lines = output.decode('utf-8').split('\n')
         del lines[:5]
         jobs = []
@@ -48,24 +57,28 @@ class Qstat(object):
 
     def all_job_ids(self):
         """Retrieve a list of all jobs running or queued."""
+
         jobs = self.qstatinfo()
         ids = [j['job_id'] for j in jobs]
         return ids
 
     def all_running_jobs(self):
         """Retrieve a list of running jobs."""
+
         jobs = self.qstatinfo()
         ids = [j['job_id'] for j in jobs if j['status'] == 'R']
         return ids
 
     def all_queued_jobs(self):
         """Retrieve a list of queued jobs."""
+
         jobs = self.qstatinfo()
         ids = [j['job_id'] for j in jobs if j['status'] == 'Q']
         return ids
 
     def myjobs(self):
         """Retrieve a list of all the current user's jobs."""
+
         jobs = self.qstatinfo()
         ids = [j['job_id'] for j in jobs if j['user'] == self.username]
         if len(ids) < 1:
@@ -78,7 +91,12 @@ class Qstat(object):
             return 'Running jobs: %s\nQueued jobs: %s' % (rids, qids)
 
     def watch(self, job_id):
-        """Wait until a job or list of jobs finishes and get updates."""
+        """Wait until a job or list of jobs finishes and get updates.
+
+        :param job_id: Input a job id to be monitored.
+        :return: Status of job id.
+        """
+
         jobs = self.qstatinfo()
         rids = [j['job_id'] for j in jobs if j['user'] == self.username
                 and j['status'] == 'R']

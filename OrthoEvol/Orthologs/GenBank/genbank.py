@@ -5,7 +5,7 @@ from pathlib import Path
 from BioSQL import BioSeqDatabase
 from Bio import SeqIO
 
-from OrthoEvol.Tools import LogIt
+from OrthoEvol.Tools.logit import LogIt
 from OrthoEvol.Orthologs.utils import attribute_config
 from OrthoEvol.Orthologs.Blast.orthologs_blastn import OrthoBlastN
 from OrthoEvol.Tools.otherutils.other_utils import makedirectory
@@ -13,11 +13,16 @@ from OrthoEvol.Orthologs.Blast.comparative_genetics import BaseComparativeGeneti
 
 
 class GenBank(object):
-    def __init__(self, project, project_path=None, solo=False, multi=True, archive=False, min_fasta=True, blast=OrthoBlastN, **kwargs):
-        """
-        This class will handle GenBank files in various ways.  It allows for refseq-release .gbff files to be downloaded
-        from NCBI and uploaded to a BioSQL database (biopython).  Single .gbk files can be downloaded from the .gbff,
-        and uploaded to a custom BopSQL database for faster acquisition of GenBank data.
+    """This class will handle GenBank files in various ways."""
+
+    def __init__(self, project, project_path=None, solo=False, multi=True,
+                 archive=False, min_fasta=True, blast=OrthoBlastN, **kwargs):
+        """Handle GenBank files in various ways.
+
+        It allows for refseq-release .gbff files to be downloaded from NCBI
+        and uploaded to a BioSQL database (biopython).  Single .gbk files can be
+        downloaded from the .gbff, and uploaded to a custom BopSQL database for
+        faster acquisition of GenBank data.
 
         :param project:  The name of the project.
         :param project_path: The relative path to the project.
@@ -28,23 +33,26 @@ class GenBank(object):
         :param blast:  The blast parameter is used for composing various
                        Orthologs.Blast classes.  Can be a class, a dict,
                        or none.
-        :returns:  .gbff files/databases, .gbk files/databases, and FASTA files.
+        :returns:  .gbff files/databases, .gbk files/databases, & FASTA files.
         """
 
         # TODO-ROB: Change the way the file systems work.
         self.project = project
+        self.project_path = project_path
         self.solo = solo
         self.multi = multi
         self.min_fasta = min_fasta
         self.genbanklog = LogIt().default(logname="GenBank", logfile=None)
 
         # Configuration of class attributes
-        add_self = attribute_config(self, composer=blast, checker=OrthoBlastN, checker2=BaseComparativeGenetics,
+        add_self = attribute_config(self, composer=blast, checker=OrthoBlastN,
+                                    checker2=BaseComparativeGenetics,
                                     project=project, project_path=project_path)
         for var, attr in add_self.__dict__.items():
             setattr(self, var, attr)
 
         # Configuration
+        # FIXME AttributeError: 'GenBank' object has no attribute 'user_db'
         self.target_gbk_db_path = self.user_db / Path(self.project)
         Path.mkdir(self.target_gbk_db_path, parents=True, exist_ok=True)
 
@@ -56,7 +64,8 @@ class GenBank(object):
 
     @staticmethod
     def name_fasta_file(path, gene, org, feat_type, feat_type_rank, extension, mode):
-        """
+        """Name a fasta file.
+
         Provide a uniquely named FASTA file:
         * Coding sequence:
             * Single - "<path>/<gene>_<organism><feat_type_rank>.<extension>"
@@ -68,11 +77,15 @@ class GenBank(object):
         :param path:  The path where the file will be made.
         :param gene:  The gene name.
         :param org:  The organism name.
-        :param feat_type:  The type of feature from the GenBank record.  (CDS, UTR, misc_feature, variation, etc.)
-        :param feat_type_rank:  The feature type  + the rank.  (There can be multiple misc_features and variations)
-        :param extension:  The file extension.  (".ffn", ".faa", ".fna", ".fasta")
-        :param mode:  The mode ("w" or "a") for writing the file.  Write to a solo-FASTA file.  Append a multi-FASTA
-                      file.
+        :param feat_type:  The type of feature from the GenBank record.
+                           (CDS, UTR, misc_feature, variation, etc.)
+        :param feat_type_rank:  The feature type  + the rank.
+                                (There can be multiple misc_features and
+                                 variations)
+        :param extension:  The file extension.
+                           (".ffn", ".faa", ".fna", ".fasta")
+        :param mode:  The mode ("w" or "a") for writing the file.  Write to a
+                      solo-FASTA file.  Append a multi-FASTA file.
         :return:  The uniquely named FASTA file.
         """
 
@@ -98,8 +111,7 @@ class GenBank(object):
 
     @staticmethod
     def protein_gi_fetch(feature):
-        """
-        Retrieve the protein gi number.
+        """Retrieve the protein gi number.
 
         :param feature:  Search the protein feature for the GI number.
         :return:  The protein GI number as a string.
@@ -112,18 +124,24 @@ class GenBank(object):
                 return p_gi
 
     def create_post_blast_gbk_records(self, org_list, gene_dict):
-        """
-        After a blast has completed and the accession numbers have been compiled into an accession file, this class
-        searches a local NCBI refseq release database composed of GenBank records.  This method will create a single
-        GenBank file (.gbk) for each ortholog with an accession number.  The create_post_blast_gbk_records is only callable if the
-        the instance is composed by one of the Blast classes.  This method also requires an NCBI refseq release
-        database to be set up with the proper GenBank Flat Files (.gbff) files.
+        """Create a single GenBank file for each ortholog.
+
+        After a blast has completed and the accession numbers have been compiled
+        into an accession file, this class searches a local NCBI refseq release
+        database composed of GenBank records.  This method will create a single
+        GenBank file (.gbk) for each ortholog with an accession number.
+        The create_post_blast_gbk_records is only callable if the
+        the instance is composed by one of the Blast classes.  This method also
+        requires an NCBI refseq release database to be set up with the proper
+        GenBank Flat Files (.gbff) files.
 
         :param org_list:  List of organisms
         :param gene_dict:  A nested dictionary for accessing accession numbers.
-                           (e.g. gene_dict[GENE][ORGANISM} yields an accession number)
-        :return:  Does not return an object, but it does create all the proper genbank files.
+                           (e.g. gene_dict[GENE][ORGANISM} yields an accession
+                           number)
+        :return:  Does not return an object, but creates genbank files.
         """
+
         # Parse the tier_frame_dict to get the tier
         for G_KEY, _ in self.tier_frame_dict.items():
             tier = G_KEY
@@ -140,17 +158,19 @@ class GenBank(object):
                     self.get_gbk_file(accession, GENE, ORGANISM, server_flag=server_flag)
 
     def get_gbk_file(self, accession, gene, organism, server_flag=None):
-        """
-        This method searches a GenBank database for a target accession number.  Generally, there are multiple GenBank
-        database files for one NCBI dataset.
+        """Search a GenBank database for a target accession number.
+
+        This function searches through the given NCBI databases (created by
+        uploading NCBI refseq .gbff files to a BioPython BioSQL database) and
+        creates single GenBank files.  This function can be used after a
+        blast or on its own.  If used on it's own then the NCBI .db files must
+        be manually moved to the proper directories.
 
         :param accession: Accession number of interest without the version.
         :param gene: Target gene of the accession number parameter.
         :param organism: Target organism of the accession number parameter.
-        :return: This function searches through the given NCBI databases (created by uploading NCBI refseq .gbff files
-                 to a BioPython BioSQL database) and creates single GenBank files.  This function can be used after a
-                 blast or on its own.  If used on it's own then the NCBI .db files must be manually moved to the proper
-                 directories.
+        :param server_flag:  (Default value = None)
+        :return:
         """
 
         gene_path = self.raw_data / Path(gene) / Path('GENBANK')
@@ -162,7 +182,8 @@ class GenBank(object):
             # Stop searching if the GenBank record has been created.
             if server_flag is True:
                 break
-            server = BioSeqDatabase.open_database(driver='sqlite3', db=str(db_file_path))
+            server = BioSeqDatabase.open_database(driver='sqlite3',
+                                                  db=str(db_file_path))
             # Parse the sub-databases
             for SUB_DB_NAME in server.keys():
                 db = server[SUB_DB_NAME]
@@ -188,10 +209,11 @@ class GenBank(object):
             raise FileNotFoundError
 
     def gbk_quality_control(self, gbk_file, gene, organism):
-        """
-        This is a quality control method.  It makes sure that the data we're using is correct.  It takes the GenBank
-        record and check to make sure the Gene and Organism from the GenBank record match the Gene and Organism from the
-        accession file.  If not, then the Blast has returned the wrong accession number.
+        """Ensures the quality or validity of the retrieved genbank record.
+
+    It takes the GenBank record and check to make sure the Gene and Organism
+        from the GenBank record match the Gene and Organism from the accession
+        file.  If not, then the Blast has returned the wrong accession number.
 
         :param gbk_file:  The path to a GenBank file.
         :param gene:  A gene name from the Accession file.
@@ -215,7 +237,8 @@ class GenBank(object):
             self.genbanklog.critical("Two organisms exist in the GenBank file.  Is this normal?")
             raise BrokenPipeError
 
-        # Check to make sure the organism in the GenBank file matches the organism from the accession file
+        # Check to make sure the organism in the GenBank file matches the
+        # organism from the accession file
         if gbk_organism == organism:
             self.genbanklog.info("The GenBank organism, %s, has been verified for %s." % (organism, gene))
         else:
@@ -223,7 +246,8 @@ class GenBank(object):
 
         # Get the gene from the GenBank files
         gbk_genes = record.features[1].qualifiers["gene"]
-        # Get the synonyms from the GenBank file if they exist and add them to the list.
+        # Get the synonyms from the GenBank file if they exist and add them to
+        # the list.
         if "gene_synonym" in str(record.features[1].qualifiers.keys()):
             base_gene_name = gbk_genes
             gbk_genes.extend(record.features[1].qualifiers["gene_synonym"])
@@ -231,7 +255,8 @@ class GenBank(object):
             self.gbk_gene_synonym[base_gene_name] = []
             self.gbk_gene_synonym[base_gene_name].extend(gbk_genes)
 
-        # Check to make sure the gene in the GenBank file matches the gene from the accession file
+        # Check to make sure the gene in the GenBank file matches the gene from
+        # the accession file
         for gbk_gene in gbk_genes:
             if gbk_gene == gene:
                 gene_flag = False
@@ -260,11 +285,13 @@ class GenBank(object):
         self.duplicated_dict["validated"][accession] = [gene, organism]
 
     def gbk_upload(self):
-        """
-        This method is only usable after creating GenBank records with this class.  It uploads a BioSQL databases with
-        target GenBank data (.gbk files).  This creates a compact set of data for each project.
+        """Upload a BioSQL database with target GenBank data (.gbk files).
 
-        :return:  Does not return an object, but creates a database for each gene-tier in the dataset.
+        This method is only usable after creating GenBank records with this
+        class.  It uploads a BioSQL databases with target GenBank data (.gbk
+        files).  This creates a compact set of data for each project.
+
+        :return:  Does not return an object.
         """
 
         t_count = 0
@@ -317,13 +344,17 @@ class GenBank(object):
                         raise
 
     def get_fasta_files(self, acc_dict, db=True):
-        """
-        This method creates FASTA files for every GenBank record in the accession number dictionary.  It can search
-        through a BioSQL database or it can crawl a directory for .gbk files.
+        """Create FASTA files for each GenBank record in the accession dictionary.
 
-        :param acc_dict:  An accession dictionary like the one created by CompGenObjects.
-        :param db:  A flag that determines whether or not to use the custom BioSQL database or to use .gbk files.
-        :return:  Does not return an object, but it will return a set of FASTA files for each GenBank record.
+        It can search through a BioSQL database or it can crawl a directory
+        for .gbk files.
+
+        :param acc_dict:  An accession dictionary like the one created by
+                          CompGenObjects.
+        :param db:  A flag that determines whether or not to use the custom
+                    BioSQL database or to use .gbk files.
+                    (Default value = True)
+        :return:  Returns FASTA files for each GenBank record.
         """
 
         # Get FASTA files from the BioSQL GenBank databases.
@@ -355,18 +386,16 @@ class GenBank(object):
                         self.genbanklog.info("FASTA files for %s created." % gbk_file)
 
     def write_fasta_files(self, record, acc_dict):
-        """
-        This method initializes a FASTA file by creating a dictionary for formatting the FASTA header and the following
-        sequence.
+        """Create a dictionary for formatting the FASTA header & sequence.
 
         :param record:  A GenBank record created by BioPython.
-        :param acc_dict:  The accession dictionary from the CompGenObjects class.
+        :param acc_dict:  Accession dictionary from the CompGenObjects class.
         :return:
         """
 
         feat_type_list = []
         for feature in record.features:
-            # ############ Set up variables to use for dictionary values ############# #
+            # XXX Set up variables to use for dictionary values !!!
             # Basic variables.
             accession = record.id
             gene = acc_dict[accession][0]
@@ -385,10 +414,11 @@ class GenBank(object):
                 feat_type_rank = feat_type
             else:
                 feat_type_rank = feat_type + str(duplicate_num)
-            # ############ End ############# #
+            # XXX END !!!
 
-            # TODO-ROB:  Remove the GI number stuff here or at least prepare for file with no GI.
-            # ######### Create a dictionary and format FASTA file entries. ######### #
+            # TODO-ROB:  Remove the GI number stuff here or at least prepare for
+            # file with no GI.
+            # Create a dictionary and format FASTA file entries.
             fmt = {
                 'na_gi': str(record.annotations['gi']),
                 'aa_gi': str(self.protein_gi_fetch(feature)),
@@ -422,14 +452,14 @@ class GenBank(object):
                 self.multi_fasta(na_entry, aa_entry, fmt)
 
     def solo_fasta(self, na_entry, aa_entry, fmt):
-        """
-        This method writes a sequence of a feature to a uniquely named file using a dictionary for formatting.
+        """This method writes a sequence of a feature to a uniquely named file using a dictionary for formatting.
 
         :param na_entry:  A string representing the Nucleic Acid sequence data in FASTA format.
         :param aa_entry:  A string representing the Amino Acid sequence data in FASTA format.
         :param fmt:  A dictionary for formatting the FASTA entries and the file names.
         :return:  Does not return an object, but creates single entry FASTA files.
         """
+
         mode = 'w'
 
         # Create the desired variables from the formatter dictionary.
@@ -468,15 +498,16 @@ class GenBank(object):
             file.close()
 
     def multi_fasta(self, na_entry, aa_entry, fmt):
-        """
-        This method appends an othologous sequence of a feature to a uniquely named file using a dictionary for
-        formatting.
+        """Append an othologous sequence of a feature to a uniquely named file.
+
+        Usese a dictionary for formatting.
 
         :param na_entry:  A string representing the Nucleic Acid sequence data in FASTA format.
         :param aa_entry:  A string representing the Amino Acid sequence data in FASTA format.
         :param fmt:  A dictionary for formatting the FASTA entries and the file names.
         :return:  Does not return an object, but creates or appends to a multi entry FASTA file.
         """
+
         mode = 'a'
 
         # Create the desired variables from the formatter dictionary.
@@ -489,18 +520,21 @@ class GenBank(object):
         if feat_type == "CDS":
             # Create a MASTER .ffn file (multi-FASTA file for Coding Nucleic Acids)
             extension = '.ffn'
-            file = self.name_fasta_file(path, gene, org, feat_type, feat_type_rank, extension, mode)
+            file = self.name_fasta_file(path, gene, org, feat_type,
+                                        feat_type_rank, extension, mode)
             file.write(na_entry)
             file.close()
             # Create a MASTER .faa file (multi-FASTA file for Amino Acids)
             extension = '.faa'
-            file = self.name_fasta_file(path, gene, org, feat_type, feat_type_rank, extension, mode)
+            file = self.name_fasta_file(path, gene, org, feat_type,
+                                        feat_type_rank, extension, mode)
             file.write(aa_entry)
             file.close()
         elif feat_type == "misc_feature":
             na_entry = ">gi|{na_gi}|ref|{na_acc_n}| {na_description} Feature: {na_misc_feat}\n{na_seq}\n".format(**fmt)
             # Creates .fna files (generic FASTA file for Nucleic Acids)
             extension = '.fna'
-            file = self.name_fasta_file(path, gene, org, feat_type, feat_type_rank, extension, mode)
+            file = self.name_fasta_file(path, gene, org, feat_type,
+                                        feat_type_rank, extension, mode)
             file.write(na_entry)
             file.close()

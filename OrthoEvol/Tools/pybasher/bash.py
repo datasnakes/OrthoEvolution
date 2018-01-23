@@ -9,7 +9,7 @@ Built upon Alex Couper's `bash` package. (https://github.com/alexcouper/bash)
 import platform
 import sys
 
-from OrthoEvol.Tools import runcmd
+from OrthoEvol.Tools.otherutils import runcmd
 
 SUBPROCESS_HAS_TIMEOUT = True
 
@@ -33,7 +33,7 @@ else:
 
 class BaseBash(object):
     """Utilize bash commands within python."""
-    # !!! Only for linux
+
     def __init__(self):
         """Initialize the call as well as standard error and output."""
         # TODO-SDH Test if this is working.
@@ -41,6 +41,16 @@ class BaseBash(object):
         self.stdout = None
 
     def _bash(self, cmd, env=None, stdout=PIPE, stderr=PIPE, timeout=None, _sync=True):
+        """Use subprocess to run bash commands.
+
+        :param cmd: The bash command to be run.
+        :param env:  (Default value = None)
+        :param stdout:  (Default value = PIPE)
+        :param stderr:  (Default value = PIPE)
+        :param timeout:  (Default value = None)
+        :param _sync:  (Default value = True)
+        """
+
         self.process = Popen(cmd, shell=True, stdout=stdout, stdin=PIPE,
                              stderr=stderr, env=env)
         if _sync:
@@ -48,6 +58,11 @@ class BaseBash(object):
         return self
 
     def _sync(self, timeout=None):
+        """Ensure function is run.
+
+        :param timeout:  (Default value = None)
+        """
+
         kwargs = {'input': self.stdout}
         if timeout:
             kwargs['timeout'] = timeout
@@ -83,9 +98,12 @@ class BaseBash(object):
 
 class PyBasher(BaseBash):
     """Common bash commands."""
+
     def __init__(self):
         super().__init__()
 
     def cp(self):
+        """Copy file."""
+
         cmd = ''
         self._bash(cmd)

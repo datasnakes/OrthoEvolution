@@ -4,7 +4,8 @@ from time import sleep
 from pkg_resources import resource_filename
 
 from OrthoEvol.Tools.logit import LogIt
-from OrthoEvol.Tools.sge import basejobids, writecodefile, import_temp, file2str
+from OrthoEvol.Tools.sge import (basejobids, writecodefile, import_temp,
+                                 file2str)
 from OrthoEvol.Tools.sge.sgeconfig import __DEFAULT__
 from OrthoEvol.Manager.config import templates
 from OrthoEvol.Tools.sge import Qstat
@@ -12,6 +13,7 @@ from OrthoEvol.Tools.sge import Qstat
 
 class BaseSGEJob(object):
     """Base class for simple jobs."""
+
     def __init__(self, base_jobname):
         """Initialize job attributes."""
         self.base_jobname = base_jobname
@@ -25,16 +27,29 @@ class BaseSGEJob(object):
 
     @classmethod
     def _configure(cls, length, base_jobname):
-        """Configure job attributes or set it up."""
+        """Configure job attributes or set it up.
+
+        :param length:
+        :param base_jobname:
+        """
+
         baseid, base = basejobids(length, base_jobname)
         return baseid, base
 
     def debug(self, code):
-        """Debug the SGEJob."""
+        """Debug the SGEJob.
+
+        :param code:
+        """
+
         raise NotImplementedError
 
     def _cleanup(self, jobname):
-        """Clean up job scripts."""
+        """Clean up job scripts.
+
+        :param jobname: The name of the job being run or to be run.
+        """
+
         self.sgejob_log.warning('Your job will now be cleaned up.')
         os.remove(jobname + '.pbs')
         self.sgejob_log.warning('%s.pbs has been deleted.', jobname)
@@ -42,7 +57,11 @@ class BaseSGEJob(object):
         self.sgejob_log.warning('%s.py has been deleted.' % jobname)
 
     def wait_on_job_completion(self, job_id):
-        """Use Qstat to monitor your job."""
+        """Use Qstat to monitor your job.
+
+        :param job_id: The job id to be monitored.
+        """
+
         # TODO Allow either slack notifications or email or text.
         qwatch = Qstat().watch(job_id)
         if qwatch == 'Job id not found.':
@@ -61,8 +80,12 @@ class BaseSGEJob(object):
         else:
             self.wait_on_job_completion(job_id)
 
-    def submitjob(self, cleanup):
-        """Submit a job using qsub."""
+    def submitjob(self, cleanup=False):
+        """Submit a job using qsub.
+
+        :param cleanup: (Default value = False)
+        """
+
         try:
             cmd = ['qsub ' + self.jobname + '.pbs']  # this is the command
             # Shell MUST be True
@@ -87,7 +110,13 @@ class BaseSGEJob(object):
 
 class SGEJob(BaseSGEJob):
     """Create a qsub/pbs job & script to submit python code."""
+
     def __init__(self, email_address, base_jobname=None):
+        """Set up the SGEJob by entering email and base_jobname if required.
+
+        :param email_address: User's email address.
+        :param base_jobname:  Base jobname. (Default value = None)
+        """
         super().__init__(base_jobname=base_jobname)
         self.email = email_address
         self.attributes = self.default_job_attributes
@@ -98,6 +127,8 @@ class SGEJob(BaseSGEJob):
             self.attributes = self._update_default_attributes()
 
     def _update_default_attributes(self):
+        """Update the default job attributes."""
+
         pyfile_path = os.path.join(self.pbsworkdir, self.jobname + '.py')
         # These attributes are automatically updated if a jobname is given.
         new_attributes = {'email': self.email,
@@ -115,7 +146,13 @@ class SGEJob(BaseSGEJob):
     def submit_pycode(self, code, cleanup=True, default=True):
         """Create and submit a qsub job.
 
-        Submit python code."""
+        Submit python code.
+
+        :param code: The python code to be run.
+        :param cleanup:  Cleanup your job. (Default value = True)
+        :param default:  Default or custom job. (Default value = True)
+        """
+
         # TIP If python is in your environment as only 'python' update that.
         # If default, a python file will be created from code that is used.
         # Allow user input to be a python file
@@ -153,6 +190,7 @@ class SGEJob(BaseSGEJob):
 
 class MultiSGEJobs(SGEJob):
     """Create multiple qsub/pbs jobs."""
+
     def __init__(self, email_address):
         super().__init__(email_address=email_address, base_jobname='multi')
         _, self.jobname = self._configure(base_jobname=self.base_jobname,
