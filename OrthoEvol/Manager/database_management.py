@@ -151,7 +151,7 @@ class BaseDatabaseManagement(object):
         """
         db_path = self.database_path / Path('NCBI') / Path('refseq') / Path('release') / Path(collection_subset)
         db_path.mkdir(parents=True, exist_ok=True)
-        ncbiftp = self.ncbiftp.getrefseqrelease(taxon_group=collection_subset, seqtype=seqtype, seqformat=seqformat, download_path=db_path)
+        ncbiftp = self.ncbiftp.getrefseqrelease(collection_subset=collection_subset, seqtype=seqtype, seqformat=seqformat, download_path=db_path)
         return self.ncbiftp.files2download
 
     def upload_refseq_release_files(self, collection_subset, seqtype, seqformat, upload_list=None, database_name=None, add_to_default=None):
@@ -503,6 +503,10 @@ class DatabaseManagement(BaseDatabaseManagement):
             if not dispatcher_flag:
                 # TODO-ROB: multiprocessing sge whatever
                 # Create a list of lists with an index corresponding to the upload number
+                if file_list is None:
+                    db_path = self.database_path / Path('NCBI') / Path('refseq') / Path('release') / Path(collection_subset)
+                    file_list = os.listdir(str(db_path))
+                    file_list = [x for x in file_list if x.endswith(str(seqformat))]
                 sub_upload_size = len(file_list) // upload_number
                 if (len(file_list) % upload_number) != 0:
                     upload_number = upload_number + 1
