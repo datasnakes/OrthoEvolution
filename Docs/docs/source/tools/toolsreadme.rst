@@ -1,5 +1,5 @@
 Tools Documentation
-===================
+=====================
 
 The Tools module is a collection of often used classes or functions that
 either enhance our other modules and create reusable functions to be

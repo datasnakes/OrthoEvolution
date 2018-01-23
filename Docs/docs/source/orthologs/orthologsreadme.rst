@@ -47,3 +47,9 @@ Using install.sh on Debian/Ubuntu:
     chmod +x install.sh
     ./sudo-install.sh
 
+View Readmes for Orthologs Modules
+------------------------------------
+- `OrthoEvol.Orthologs.Align` - `Align <alignreadme.html>`__ documentation.
+- `OrthoEvol.Orthologs.GenBank` - `GenBank <genbankreadme.html>`__ documentation.
+- `OrthoEvol.Orthologs.Blast` - `Blast <blastreadme.html>`__ documentation.
+- `OrthoEvol.Orthologs.Phylogenetics` - `Phylogenetics <phylogeneticsreadme.html>`__ documentation.

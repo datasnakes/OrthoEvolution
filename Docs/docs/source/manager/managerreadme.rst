@@ -45,7 +45,6 @@ Utilizing DatabaseManagement to download databases
 Notes
 -----
 
-Please view our `BioSQL
-documentation <https://github.com/datasnakes/OrthoEvolution/tree/master/OrthoEvol/Manager/BioSQL/README.md>`__
-and view some of the static/config related
+Please view our detailed `BioSQL <biosqlreadme.html>`__ documentation and view
+some of the static/config related
 `files <https://github.com/datasnakes/OrthoEvolution/tree/master/OrthoEvol/Manager/config/>`__.
