@@ -161,22 +161,22 @@ class NcbiFTPClient(BaseFTPClient):
                               minutes)
         return unfound_species
 
-    def getrefseqrelease(self, taxon_group, seqtype, seqformat, download_path,
+    def getrefseqrelease(self, collection_subset, seqtype, seqformat, download_path,
                          extract=True):
         """Download the refseq release database."""
         self.ftp.cwd(self.refseqrelease_path)
         taxon_dirs = self.listdirectories(self.refseqrelease_path)
 
         # Change to directory input
-        if taxon_group not in taxon_dirs:
-            raise FileNotFoundError('%s does not exist.' % taxon_group)
+        if collection_subset not in taxon_dirs:
+            raise FileNotFoundError('%s does not exist.' % collection_subset)
 
-        self.ftp.cwd(taxon_group)
+        self.ftp.cwd(collection_subset)
         curpath = self.ftp.pwd() + '/'
         releasefiles = self.listfiles(curpath)
 
         self.files2download = []
-        pattern = re.compile('^' + taxon_group + '[.](.*?)[.]' + seqtype
+        pattern = re.compile('^' + collection_subset + '[.](.*?)[.]' + seqtype
                              + '[.]' + seqformat + '[.]gz$')
         for releasefile in releasefiles:
             if re.match(pattern, releasefile):
