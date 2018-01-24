@@ -80,7 +80,7 @@ class BaseSGEJob(object):
                 self.sgejob_log.info('Your job id is: %s' % submitted_jobid)
                 if wait is True:
                     self.wait_on_job_completion(submitted_jobid)
-                self._cleanup(self.jobname)
+                    self._cleanup(self.jobname)
 
             else:  # Unsuccessful. Stdout will be '1'
                 self.sgejob_log.error('PBS job not submitted.')
@@ -148,8 +148,8 @@ class SGEJob(BaseSGEJob):
             raise NotImplementedError(msg)
             # TODO Add custom job creation
 
-        # Submit the job using qsub
-        self.submitjob(cleanup=cleanup, wait=wait)
+            # Submit the job using qsub
+            self.submitjob(cleanup=cleanup, wait=wait)
 
 
 class MultiSGEJobs(SGEJob):
