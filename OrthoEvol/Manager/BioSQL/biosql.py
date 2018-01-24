@@ -94,7 +94,7 @@ class SQLiteBioSQL(BaseBioSQL):
         :param database_name:  The name of the database.
         """
         super().__init__(template_name=template_name, database_name=database_name, proj_mana=proj_mana, **kwargs)
-        self.driver = "SQLite"
+        self.driver = "sqlite3"
         self.schema_cmd = "sqlite3 %s -echo"
         self.schema_file = "biosqldb-sqlite.sql"
         self.taxon_cmd = "%s --dbname %s --driver %s --download false --directory %s"
@@ -152,7 +152,7 @@ class SQLiteBioSQL(BaseBioSQL):
         # Copy the template into a new folder with a new name.
         dest_abs_path = Path(destination) / Path(self.database_name)
         self.biosqllog.warn('Copying Template BioSQL Database...  This may take a few minutes...')
-        copy_handle = subprocess.check_output(['cp', str(self.template_abs_path), str(dest_abs_path)], shell=True)
+        copy_handle = subprocess.Popen(['cp', str(self.template_abs_path), str(dest_abs_path)], shell=True)
         self.biosqllog.info("Template copying status: %s" % copy_handle.decode('utf-8'))
 
     def upload_files(self, seqtype, filetype, upload_path, upload_list=None):
