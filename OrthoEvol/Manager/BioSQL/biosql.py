@@ -168,6 +168,7 @@ class SQLiteBioSQL(BaseBioSQL):
         if not upload_list:
             upload_list = os.listdir(upload_path)
         # Parse the upload list and upload the files to the BioSQL-SQLite database.
+        t_count = 0
         for file in upload_list:
             abs_upload_path = Path(str(upload_path)) / Path(file)
 
