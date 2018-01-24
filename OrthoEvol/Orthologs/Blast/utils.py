@@ -170,9 +170,9 @@ def _taxid2seqidlist(taxonomy_id):
         seqidlist_log.info('%s already exists' % str(binary))
 
 
-def my_gene_info(acc_path, blast_query='Homo_sapiens'):
+def my_gene_info(acc_dataframe, blast_query='Homo_sapiens'):
     """Use Biothings' MyGene api to get information about genes.
-    :param acc_path:  An absolute path to the accession file of interest.
+    :param acc_dataframe:  A pandas dataframe containing the accession csv file data.
     :param blast_query:  The query organism for used during Blasting.
     :return:  Returns a data-frame with hot data about each gene.
     """
@@ -180,7 +180,7 @@ def my_gene_info(acc_path, blast_query='Homo_sapiens'):
     blastutils_log.info("Getting Pre-BLAST information about the target genes using MyGene...")
     # Initialize variables and import my-gene search command
     urls = []
-    df = pd.read_csv(str(acc_path), dtype=str)
+    df = acc_dataframe
     df_gene = df.set_index('Gene')
     blast_query_list = df_gene[blast_query].tolist()
     mg = mygene.MyGeneInfo()
@@ -323,11 +323,11 @@ def get_dup_acc(acc_dict, gene_list, org_list):
     return duplicated_dict
 
 
-def get_miss_acc(acc_file_path):
+def get_miss_acc(acc_dataframe):
     """Analyze an accession file post BLAST.
     It generates several files and dictionaries regarding missing accession
     numbers.
-    :param acc_file_path: An accession file (post BLAST).
+    :param acc_dataframe: A pandas dataframe containing the accession csv file data(post BLAST).
     :return: A dictionary with data about the missing accession numbers by Gene
              and by Organism.
     """
@@ -337,7 +337,7 @@ def get_miss_acc(acc_file_path):
     missing_dict['genes'] = {}
 
     # Initialize the Data Frames
-    data = pd.read_csv(str(acc_file_path), dtype=str)
+    data = acc_dataframe
     df = data.set_index('Gene')
     miss_gene_df = df.isnull()
     miss_org_df = df.T.isnull()

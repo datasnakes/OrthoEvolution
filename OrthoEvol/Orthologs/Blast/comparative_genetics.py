@@ -4,6 +4,7 @@ from pathlib import Path
 import pandas as pd
 import shutil
 import time
+import copy
 # NCBITaxa().update_taxonomy_database()
 import pkg_resources
 from ete3 import NCBITaxa
@@ -15,6 +16,7 @@ from OrthoEvol.Orthologs.utils import attribute_config
 from OrthoEvol.Orthologs.Blast.utils import (my_gene_info, get_dup_acc,
                                               get_miss_acc)
 from OrthoEvol.Tools.logit import LogIt
+from OrthoEvol.Tools.otherutils.other_utils import safe_open
 
 
 # TODO-ROB Create function for archiving and multiple runs (this can go
@@ -126,7 +128,8 @@ class BaseComparativeGenetics(object):
             self.blast_rhesus = []
 
             # Handles for different dataframe initializations
-            self.raw_acc_data = pd.read_csv(str(self.acc_path), dtype=str)
+            with safe_open(self.acc_path, mode='r', iterations=10) as af:
+                self.raw_acc_data = pd.read_csv(str(af), dtype=str)
 
             # Master accession file for the blast
             self.building_filename = str(acc_file[:-4] + 'building.csv')
@@ -138,7 +141,7 @@ class BaseComparativeGenetics(object):
             self.header = self.raw_acc_data.axes[1].tolist()
 
             # Blast accession numbers
-            self.building = pd.read_csv(str(self.acc_path), dtype=str)
+            self.building = copy.deepcopy(self.raw_acc_data)
             del self.building['Tier']
             del self.building['Homo_sapiens']
             self.building = self.building.set_index('Gene')  # Object for good user output
@@ -147,7 +150,7 @@ class BaseComparativeGenetics(object):
             # Blast time points
             self.building_time_filename = self.building_filename.replace(
                 'building.csv', 'building_time.csv')  # Master time file for the blast
-            self.building_time = pd.read_csv(str(self.acc_path), dtype=str)
+            self.building_time = copy.deepcopy(self.raw_acc_data)
             del self.building_time['Tier']
             del self.building_time['Homo_sapiens']
             self.building_time = self.building_time.set_index('Gene')
@@ -179,7 +182,7 @@ class BaseComparativeGenetics(object):
             self.df = self.__data
             # Format the main pivot table #### #
             self.pt = pd.pivot_table(
-                pd.read_csv(self.acc_path),
+                copy.deepcopy(self.raw_acc_data),
                 index=['Tier','Gene'],
                 aggfunc='first')
             array = self.pt.axes[1].tolist()  # Organism list
@@ -254,14 +257,14 @@ class BaseComparativeGenetics(object):
 
         # Pre-Blast gene analysis
         if self.__pre_blast is True:
-            self.mygene_df = my_gene_info(self.acc_path)
+            self.mygene_df = my_gene_info(acc_dataframe=copy.deepcopy(self.raw_acc_data))
             self.mygene_df.to_csv(self.mygene_path, index=False)
 
         # Post-Blast accession analysis
         if self.__post_blast:
 
             # Missing
-            self.missing_dict = get_miss_acc(self.acc_path)
+            self.missing_dict = get_miss_acc(acc_dataframe=copy.deepcopy(self.raw_acc_data))
             self.missing_genes = self.missing_dict['genes']
             self.missing_gene_count = self.missing_genes['count']
             del self.missing_genes['count']
