@@ -61,7 +61,7 @@ class BaseSGEJob(object):
         else:
             self.wait_on_job_completion(job_id)
 
-    def submitjob(self, cleanup):
+    def submitjob(self, cleanup, wait=True):
         """Submit a job using qsub."""
         try:
             cmd = ['qsub ' + self.jobname + '.pbs']  # this is the command
@@ -78,8 +78,9 @@ class BaseSGEJob(object):
                 submitted_jobid = cmd_status.stdout.decode('utf-8')
                 self.sgejob_log.info(self.jobname + ' was submitted.')
                 self.sgejob_log.info('Your job id is: %s' % submitted_jobid)
-                #self.wait_on_job_completion(submitted_jobid)
-                #self._cleanup(self.jobname)
+                if wait is True:
+                    self.wait_on_job_completion(submitted_jobid)
+                self._cleanup(self.jobname)
 
             else:  # Unsuccessful. Stdout will be '1'
                 self.sgejob_log.error('PBS job not submitted.')
@@ -112,7 +113,7 @@ class SGEJob(BaseSGEJob):
 
         return self.default_job_attributes
 
-    def submit_pycode(self, code, cleanup=True, default=True):
+    def submit_pycode(self, code, wait=True, cleanup=True, default=True):
         """Create and submit a qsub job.
 
         Submit python code."""
@@ -141,14 +142,14 @@ class SGEJob(BaseSGEJob):
             self.sgejob_log.info('%s has been created.' % pbsfilename)
 
             # Submit the job using qsub
-            self.submitjob(cleanup=cleanup)
+            self.submitjob(cleanup=cleanup, wait=wait)
         else:
             msg = 'Custom SGEJob creation is not yet implemented.'
             raise NotImplementedError(msg)
             # TODO Add custom job creation
 
         # Submit the job using qsub
-        self.submitjob(cleanup=cleanup)
+        self.submitjob(cleanup=cleanup, wait=wait)
 
 
 class MultiSGEJobs(SGEJob):
