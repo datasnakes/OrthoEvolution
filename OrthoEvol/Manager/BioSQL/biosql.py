@@ -194,7 +194,7 @@ class SQLiteBioSQL(BaseBioSQL):
                 server.commit()
                 self.biosqllog.warn("Server committed.")
                 t_count = t_count + count
-                self.biosqllog.info("The server has not loaded a total of %s files." % t_count)
+                self.biosqllog.info("The server has loaded a total of %s files." % t_count)
                 # TODO-ROB:  Add something to do with time here.
             except:
                 self.biosqllog.critical("Unable to load the database...")
