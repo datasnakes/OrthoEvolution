@@ -188,8 +188,8 @@ class SQLiteBioSQL(BaseBioSQL):
                 # Connect to the sub database
                 sub_db = server[seqtype]
 
-                count = sub_db.load(SeqIO.parse(abs_upload_path, filetype))
-                self.biosqllog.info("%s loaded with %s %s files" % (db_name, count, filetype))
+                count = sub_db.load(SeqIO.parse(str(abs_upload_path), filetype))
+                self.biosqllog.info("%s loaded with %s %s files" % (self.database_name, count, filetype))
                 server.commit()
                 self.biosqllog.warn("Server committed.")
                 t_count = t_count + count
