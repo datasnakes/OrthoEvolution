@@ -501,56 +501,45 @@ class DatabaseManagement(BaseDatabaseManagement):
             if upload_number < 8:
                 raise ValueError("The upload_number must be greater than 8.  The NCBI refseq release files are too bing"
                                  "for anything less than 8 seperate BioSQL databases.")
-            if not dispatcher_flag:
-                # TODO-ROB: multiprocessing sge whatever
-                # Create a list of lists with an index corresponding to the upload number
-                if file_list is None:
-                    db_path = self.database_path / Path('NCBI') / Path('refseq') / Path('release') / Path(collection_subset)
-                    file_list = os.listdir(str(db_path))
-                    file_list = [x for x in file_list if x.endswith(str(seqformat))]
-                sub_upload_size = len(file_list) // upload_number
-                if (len(file_list) % upload_number) != 0:
-                    upload_number = upload_number + 1
-                sub_upload_lists = [file_list[x:x + 100] for x in range(0, len(file_list), sub_upload_size)]
-                add_to_default = 0
-                for sub_list in sub_upload_lists:
-                    add_to_default += 1
-                    nrr_dispatcher["NCBI_refseq_release"]["upload"].append(refseq_jobber)
-                    code_dict_string = str({
-                        "collection_subset": collection_subset,
-                        "seqtype": seqtype,
-                        "seqformat": seqformat,
-                        "upload_list": sub_list,
-                        "add_to_default": add_to_default
-                    })
 
-                    sge_code_string = \
-                    "from OrthoEvol.Manager.management import ProjectManagement\n" \
-                    "from OrthoEvol.Manager.database_dispatcher import DatabaseDispatcher\n" \
-                    "from OrthoEvol.Manager.config import yml\n" \
-                    "from pkg_resources import resource_filename\n" \
-                    "import yaml\n" \
-                    "pm_config_file = resource_filename(yml.__name__, \"config_template_existing.yml\")\n" \
-                    "with open(pm_config_file, \'r\') as f:\n" \
-                    "   pm_config = yaml.safe_load(f)\n" \
-                    "pm = ProjectManagement(**pm_config[\"Management_config\"])\n" \
-                    "code_dict_string = %s\n" \
-                    "R_R = DatabaseDispatcher(config_file=\"%s\", proj_mana=pm, upload_refseq_release=True, **code_dict_string)\n" % \
-                        (code_dict_string, self.config_file)
-                    nrr_config["NCBI_refseq_release"]["upload"].append({
-                        "code": sge_code_string,
-                        "base_jobname": "upload_rr_%s",
-                        "email_address": self.email,
-                        "id": add_to_default})
-            else:
-                nrr_dispatcher["NCBI_refseq_release"]["upload"].append(self.upload_refseq_release_files)
-                nrr_config["NCBI_refseq_release"]["upload"].append({
+            # Create a list of lists with an index corresponding to the upload number
+            if file_list is None:
+                db_path = self.database_path / Path('NCBI') / Path('refseq') / Path('release') / Path(collection_subset)
+                file_list = os.listdir(str(db_path))
+                file_list = [x for x in file_list if x.endswith(str(seqformat))]
+            sub_upload_size = len(file_list) // upload_number
+            sub_upload_lists = [file_list[x:x + 100] for x in range(0, len(file_list), sub_upload_size)]
+            add_to_default = 0
+            for sub_list in sub_upload_lists:
+                add_to_default += 1
+                nrr_dispatcher["NCBI_refseq_release"]["upload"].append(refseq_jobber)
+                code_dict_string = str({
                     "collection_subset": collection_subset,
                     "seqtype": seqtype,
                     "seqformat": seqformat,
-                    "upload_list": file_list,
+                    "upload_list": sub_list,
                     "add_to_default": add_to_default
                 })
+                # Create a Python script for this in the package
+                sge_code_string = \
+                "from OrthoEvol.Manager.management import ProjectManagement\n" \
+                "from OrthoEvol.Manager.database_dispatcher import DatabaseDispatcher\n" \
+                "from OrthoEvol.Manager.config import yml\n" \
+                "from pkg_resources import resource_filename\n" \
+                "import yaml\n" \
+                "pm_config_file = resource_filename(yml.__name__, \"config_template_existing.yml\")\n" \
+                "with open(pm_config_file, \'r\') as f:\n" \
+                "   pm_config = yaml.safe_load(f)\n" \
+                "pm = ProjectManagement(**pm_config[\"Management_config\"])\n" \
+                "code_dict_string = %s\n" \
+                "R_R = DatabaseDispatcher(config_file=\"%s\", proj_mana=pm, upload_refseq_release=True, **code_dict_string)\n" % \
+                    (code_dict_string, self.config_file)
+                nrr_config["NCBI_refseq_release"]["upload"].append({
+                    "code": sge_code_string,
+                    "base_jobname": "upload_rr_%s",
+                    "email_address": self.email,
+                    "id": add_to_default})
+
         return nrr_dispatcher, nrr_config
 
     def itis(self, ITIS_taxonomy, configure_flag=None, archive_flag=None, delete_flag=None, database_path=None, archive_path=None, _path=None):
