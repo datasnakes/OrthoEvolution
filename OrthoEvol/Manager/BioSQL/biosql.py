@@ -1,7 +1,7 @@
 import pkg_resources
 from pathlib import Path
 import os
-import shutil
+import subprocess
 from BioSQL import BioSeqDatabase
 from Bio import SeqIO
 from OrthoEvol.Tools.logit import LogIt
@@ -152,7 +152,8 @@ class SQLiteBioSQL(BaseBioSQL):
         # Copy the template into a new folder with a new name.
         dest_abs_path = Path(destination) / Path(self.database_name)
         self.biosqllog.warn('Copying Template BioSQL Database...  This may take a few minutes...')
-        shutil.copy2(str(self.template_abs_path), str(dest_abs_path))
+        copy_handle = subprocess.check_output(['cp', str(self.template_abs_path), str(dest_abs_path)], shell=True)
+        self.biosqllog.info("Template copying status: %s" % copy_handle.decode('utf-8'))
 
     def upload_files(self, seqtype, filetype, upload_path, upload_list=None):
         db_abs_path = Path(upload_path) / self.database_name
