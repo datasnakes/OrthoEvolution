@@ -155,8 +155,7 @@ class SQLiteBioSQL(BaseBioSQL):
         shutil.copy2(str(self.template_abs_path), str(dest_abs_path))
 
     def upload_files(self, seqtype, filetype, upload_path, upload_list=None):
-        db_name = Path(self.database_name.stem + '_' + seqtype + self.database_name.suffix)
-        db_abs_path = Path(upload_path) / db_name
+        db_abs_path = Path(upload_path) / self.database_name
 
         # Make sure a BioSQL-SQLite database exists
         # TODO-ROB:  Rework this part

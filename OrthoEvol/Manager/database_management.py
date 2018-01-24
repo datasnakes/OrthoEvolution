@@ -475,7 +475,7 @@ class DatabaseManagement(BaseDatabaseManagement):
 
     def NCBI_refseq_release(self, configure_flag=None, archive_flag=None, delete_flag=None, upload_flag=None, archive_path=None,
                             database_path=None, collection_subset=None, seqtype=None, seqformat=None, file_list=None,
-                            upload_number=8, dispatcher_flag=False, add_to_default=None, _path=None):
+                            upload_number=8, _path=None):
         nrr_dispatcher = {"NCBI_refseq_release": {"archive": [], "configure": [], "upload": []}}
         nrr_config = {"NCBI_refseq_release": {"archive": [], "configure": [], "upload": []}}
         if not archive_path:
@@ -509,6 +509,8 @@ class DatabaseManagement(BaseDatabaseManagement):
                 file_list = [x for x in file_list if x.endswith(str(seqformat))]
             sub_upload_size = len(file_list) // upload_number
             sub_upload_lists = [file_list[x:x + 100] for x in range(0, len(file_list), sub_upload_size)]
+            if (len(file_list) % upload_number) != 0:
+                upload_number = upload_number + 1
             add_to_default = 0
             for sub_list in sub_upload_lists:
                 add_to_default += 1

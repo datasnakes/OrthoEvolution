@@ -20,3 +20,8 @@ def parse_db_config_file(config_file):
 def refseq_jobber(email_address, base_jobname, id, code):
     job = SGEJob(email_address=email_address, base_jobname=base_jobname % str(id))
     job.submit_pycode(code=code, wait=False, cleanup=False)
+
+
+# def template_jobber(email_address, base_jobname, id, code):
+#     job = SGEJob(email_address=email_address, base_jobname=base_jobname)
+#     job.submit_pycode(code=code, wait=True, cleanup=True)
