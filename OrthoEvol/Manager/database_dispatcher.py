@@ -29,12 +29,9 @@ class DatabaseDispatcher(DatabaseManagement):
     def dispatch(self, strategy, dispatcher, configuration):
         disp = dispatcher[strategy]
         conf = configuration[strategy]
-        file_list = None
         if isinstance(disp, list):
             for funk, kw in zip(disp, conf):
-                files = funk(file_list, **kw)
-                if isinstance(files, list):
-                    file_list = files
+                funk(**kw)
         elif isinstance(disp, dict):
             for action in disp.keys():
                 self.dispatch(action, disp, conf)
