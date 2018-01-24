@@ -159,9 +159,7 @@ class SQLiteBioSQL(BaseBioSQL):
 
         # Make sure a BioSQL-SQLite database exists
         # TODO-ROB:  Rework this part
-        if db_abs_path.is_file():
-            raise FileExistsError
-        else:
+        if not db_abs_path.is_file():
             self.copy_template_database(destination=db_abs_path)
         # else:
         #     raise FileNotFoundError("Database not found: %s\mPlease create a BioSQL-SQLite database." % self.database_abs_path)
