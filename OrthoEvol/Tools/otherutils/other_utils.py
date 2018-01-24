@@ -3,6 +3,7 @@ import contextlib
 import pkg_resources
 from importlib import import_module
 import os
+import psutil
 from threading import Timer
 from subprocess import run, CalledProcessError, PIPE
 import pandas as pd
@@ -115,3 +116,29 @@ def runcmd(command_string):
         else:  # Unsuccessful. Stdout will be '1'
             failmsg = '%s failed.' % command_string
             return failmsg
+
+
+# Determine if there are processes with this file opened (Linux)
+def has_handle(fpath):
+    for proc in psutil.process_iter():
+        try:
+            for item in proc.open_files():
+                if fpath == item.path:
+                    return True
+        except Exception:
+            pass
+    return False
+
+
+# Safely open a file thats being accessed by multiple processes
+def safe_open(fpath, mode, iterations, cnt=0):
+    if cnt == iterations:
+        raise IOError
+    unsafe = has_handle(fpath)
+    if unsafe is True:
+        cnt = cnt + 1
+        safe_open(fpath=fpath, mode=mode, iterations=iterations, cnt=cnt)
+    else:
+        return open(file=fpath, mode=mode)
+
+
