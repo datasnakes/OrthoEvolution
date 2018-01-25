@@ -14,7 +14,7 @@ from OrthoEvol.Manager.config import data
 from OrthoEvol.Manager.management import ProjectManagement
 from OrthoEvol.Orthologs.utils import attribute_config
 from OrthoEvol.Orthologs.Blast.utils import (my_gene_info, get_dup_acc,
-                                              get_miss_acc)
+                                              get_miss_acc, accession_sqlite2pandas)
 from OrthoEvol.Tools.logit import LogIt
 from OrthoEvol.Tools.otherutils.other_utils import safe_open
 
@@ -73,7 +73,9 @@ class BaseComparativeGenetics(object):
         self.__pre_blast = pre_blast
         self.__post_blast = post_blast
         self.__taxon_filename = taxon_file
-        self.acc_filename = acc_file
+        self.acc_csv_filename = acc_file
+        self.acc_sqlite_filename = Path(acc_file).stem + '.sqlite'
+        self.acc_sqlite_tablename = Path(acc_file).stem.replace('.', '_')
         self.project = project
 
         # Initialize Logging
@@ -96,11 +98,12 @@ class BaseComparativeGenetics(object):
         if kwargs['copy_from_package']:
             shutil.copy(pkg_resources.resource_filename(data.__name__, kwargs['MAF']), str(self.project_index))
             acc_file = kwargs['MAF']
-            self.acc_filename = acc_file
+            self.acc_csv_filename = acc_file
         if acc_file is not None:
 
             # File init
-            self.acc_path = self.project_index / Path(self.acc_filename)
+            self.acc_csv_path = self.project_index / Path(self.acc_csv_filename)
+            self.acc_sqlite_path = self.project_index / Path(self.acc_sqlite_filename)
 
             # Handles for organism lists
             self.org_list = []
@@ -128,8 +131,9 @@ class BaseComparativeGenetics(object):
             self.blast_rhesus = []
 
             # Handles for different dataframe initializations
-            with safe_open(self.acc_path, mode='r', iterations=10) as af:
-                self.raw_acc_data = pd.read_csv(af, dtype=str)
+            self.raw_acc_data = accession_sqlite2pandas(self.acc_sqlite_tablename, self.acc_sqlite_filename,
+                                                        path=self.project_index, exists=False,
+                                                        acc_file=self.acc_csv_filename)
 
             # Master accession file for the blast
             self.building_filename = str(acc_file[:-4] + 'building.csv')
