@@ -34,8 +34,8 @@ class DatabaseDispatcher(DatabaseManagement):
                 for funk, kw in zip(disp, conf):
                     funk(**kw)
             elif isinstance(disp, dict):
-                for action in disp.keys():
-                    self.dispatch(action, disp, conf)
+                strats = list(disp.keys())
+                self.dispatch(strats, disp, conf)
 
     def uploading_dispatch(self, strategies):
         dispatcher = {}
