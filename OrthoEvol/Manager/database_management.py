@@ -497,7 +497,7 @@ class DatabaseManagement(BaseDatabaseManagement):
                 "seqtype": seqtype,
                 "seqformat": seqformat
             })
-        if upload_flag:
+        elif upload_flag:
             if upload_number < 8:
                 raise ValueError("The upload_number must be greater than 8.  The NCBI refseq release files are too bing"
                                  "for anything less than 8 seperate BioSQL databases.")
