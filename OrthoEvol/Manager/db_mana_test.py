@@ -12,6 +12,5 @@ pm = ProjectManagement(**pm_config["Management_config"])
 
 dd = DatabaseDispatcher(db_config_file, pm)
 
-for strategy in dd.strategies:
-    print(strategy)
-    dd.dispatch(strategy, dd.dispatcher, dd.configuration)
+dd.dispatch(dd.strategies, dd.dispatcher, dd.configuration)
+dd.uploading_dispatch(["NCBI_refseq_release"])
