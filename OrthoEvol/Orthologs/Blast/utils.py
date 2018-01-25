@@ -401,7 +401,6 @@ def accession_csv2sqlite(acc_file, table_name, db_name, path):
     :param path: The relative path of the csv file and the database.
     :type path: str
     """
-    import subprocess
     acc_path = Path(path) / Path(acc_file)
     db_path = Path(path) / Path(db_name)
     engine = create_engine('sqlite:////%s' % db_path)
