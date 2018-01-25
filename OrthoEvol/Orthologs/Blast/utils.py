@@ -11,6 +11,7 @@ from pathlib import Path
 import pandas as pd
 import platform
 from warnings import warn
+import sqlite3
 
 from OrthoEvol.Tools.logit import LogIt
 from OrthoEvol import OrthoEvolDeprecationWarning
@@ -382,3 +383,49 @@ def get_miss_acc(acc_dataframe):
 def get_pseudogenes():
     """Denote which genes are sudogenes."""
     raise NotImplementedError
+
+
+def accession_csv2sqlite(acc_file, db_name, path):
+    """
+    Convert a OrthoEvolution accession file in csv format
+    to an sqlite3 database.
+
+    :param acc_file:  The name of the accession file.  The file name is used to create a table in the
+    sqlite3 database.  Any periods will be replaced with underscores.
+    :type acc_file: str
+    :param db_name: The name of the new database.
+    :type db_name: str
+    :param path: The relative path of the csv file and the database.
+    :type path: str
+    """
+    import subprocess
+    acc_path = Path(path) / Path(acc_file)
+    db_path = Path(path) / Path(db_name)
+    copy_handle = subprocess.Popen(['sqlitebiter', "file", str(acc_path), "-o", str(db_path)])
+    copy_handle.wait()
+
+
+def accession_sqlite2pandas(table_name, db_name, path, exists=True, acc_file=None):
+    """
+    Convert a sqlite3 database with an OrthoEvolution accession table to a pandas dataframe.
+    :param table_name: Name of the table in the database.
+    :type table_name: str
+    :param db_name: The name of the new database.
+    :type db_name: str
+    :param path: The relative path of the csv file and the database.
+    :type path: str
+    :param exists: A flag used to create a database if needed.
+    :type exists: bool
+    :param acc_file:  The name of the accession file.  The file name is used to create a table in the
+    sqlite3 database.  Any periods will be replaced with underscores.
+    :type acc_file: str
+    :return:
+    :rtype:
+    """
+
+    if not exists:
+        accession_csv2sqlite(acc_file=acc_file, db_name=db_name, path=path)
+    db_path = Path(path), Path(db_name)
+    conn = sqlite3.connect(str(db_path))
+    df = pd.read_sql_query("SELECT * FROM %s" % table_name, conn)
+    return df
