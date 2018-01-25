@@ -26,15 +26,31 @@ class DatabaseDispatcher(DatabaseManagement):
         if upload_refseq_release == True:
             self.refseq_release_dispatcher(**kwargs)
 
-    def dispatch(self, strategy, dispatcher, configuration):
-        disp = dispatcher[strategy]
-        conf = configuration[strategy]
-        if isinstance(disp, list):
-            for funk, kw in zip(disp, conf):
-                funk(**kw)
-        elif isinstance(disp, dict):
-            for action in disp.keys():
-                self.dispatch(action, disp, conf)
+    def dispatch(self, strategies, dispatcher, configuration):
+        for strategy in strategies:
+            disp = dispatcher[strategy]
+            conf = configuration[strategy]
+            if isinstance(disp, list):
+                for funk, kw in zip(disp, conf):
+                    funk(**kw)
+            elif isinstance(disp, dict):
+                for action in disp.keys():
+                    self.dispatch(action, disp, conf)
+
+    def uploading_dispatch(self, strategies):
+        dispatcher = {}
+        configuration = {}
+        for strategy in strategies:
+            dispatcher[strategy] = []
+            configuration[strategy] = []
+            if strategy == "NCBI_refseq_release":
+                self.configuration[strategy]['configure_flag'] = False
+                self.configuration[strategy]['upload_flag'] = True
+                disp, conf = self.NCBI_refseq_release(**self.configuration[strategy])
+                dispatcher[strategy].append(disp)
+                configuration[strategy].append(conf)
+
+        self.dispatch(strategies, dispatcher, configuration)
 
     def refseq_release_dispatcher(self, **kwargs):
         self.upload_refseq_release_files(**kwargs)
