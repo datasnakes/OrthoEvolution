@@ -74,8 +74,6 @@ class BaseComparativeGenetics(object):
         self.__post_blast = post_blast
         self.__taxon_filename = taxon_file
         self.acc_csv_filename = acc_file
-        self.acc_sqlite_filename = Path(acc_file).stem + '.sqlite'
-        self.acc_sqlite_tablename = Path(acc_file).stem.replace('.', '_')
         self.project = project
 
         # Initialize Logging
@@ -100,8 +98,9 @@ class BaseComparativeGenetics(object):
             acc_file = kwargs['MAF']
             self.acc_csv_filename = acc_file
         if acc_file is not None:
-
             # File init
+            self.acc_sqlite_filename = Path(acc_file).stem + '.sqlite'
+            self.acc_sqlite_tablename = Path(acc_file).stem.replace('.', '_')
             self.acc_csv_path = self.project_index / Path(self.acc_csv_filename)
             self.acc_sqlite_path = self.project_index / Path(self.acc_sqlite_filename)
 
@@ -339,8 +338,7 @@ class BaseComparativeGenetics(object):
         if tiers is None:
             tiers = maf.groupby('Tier').groups.keys()
         for tier in tiers:
-            tier = str(tier)
-            tier_frame_dict[tier] = maf.groupby('Tier').get_group(tier)
+            tier_frame_dict[str(tier)] = maf.groupby('Tier').get_group(tier)
         return tier_frame_dict
 
     def get_taxon_dict(self):
