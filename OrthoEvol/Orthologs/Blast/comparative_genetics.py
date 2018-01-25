@@ -129,7 +129,8 @@ class BaseComparativeGenetics(object):
 
             # Handles for different dataframe initializations
             with safe_open(self.acc_path, mode='r', iterations=10) as af:
-                self.raw_acc_data = pd.read_csv(str(af), dtype=str)
+                self.raw_acc_data = pd.read_csv(af, dtype=str)
+                pd.read_csv()
 
             # Master accession file for the blast
             self.building_filename = str(acc_file[:-4] + 'building.csv')
