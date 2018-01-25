@@ -12,6 +12,7 @@ import pandas as pd
 import platform
 from warnings import warn
 import sqlite3
+from sqlalchemy import create_engine
 
 from OrthoEvol.Tools.logit import LogIt
 from OrthoEvol import OrthoEvolDeprecationWarning
@@ -385,7 +386,7 @@ def get_pseudogenes():
     raise NotImplementedError
 
 
-def accession_csv2sqlite(acc_file, db_name, path):
+def accession_csv2sqlite(acc_file, table_name, db_name, path):
     """
     Convert a OrthoEvolution accession file in csv format
     to an sqlite3 database.
@@ -393,6 +394,8 @@ def accession_csv2sqlite(acc_file, db_name, path):
     :param acc_file:  The name of the accession file.  The file name is used to create a table in the
     sqlite3 database.  Any periods will be replaced with underscores.
     :type acc_file: str
+    :param table_name: The name of the table in the database.
+    :type table_name: str
     :param db_name: The name of the new database.
     :type db_name: str
     :param path: The relative path of the csv file and the database.
@@ -401,8 +404,9 @@ def accession_csv2sqlite(acc_file, db_name, path):
     import subprocess
     acc_path = Path(path) / Path(acc_file)
     db_path = Path(path) / Path(db_name)
-    copy_handle = subprocess.Popen(['sqlitebiter', "file", str(acc_path), "-o", str(db_path)])
-    copy_handle.wait()
+    engine = create_engine('sqlite:////%s' % db_path)
+    df = pd.read_csv(acc_path, dtype=str())
+    df.to_sql(name=table_name, con=engine, if_exists='append', index=False)
 
 
 def accession_sqlite2pandas(table_name, db_name, path, exists=True, acc_file=None):
@@ -424,7 +428,7 @@ def accession_sqlite2pandas(table_name, db_name, path, exists=True, acc_file=Non
     """
 
     if not exists:
-        accession_csv2sqlite(acc_file=acc_file, db_name=db_name, path=path)
+        accession_csv2sqlite(acc_file=acc_file, table_name=table_name, db_name=db_name, path=path)
     db_path = Path(path) / Path(db_name)
     conn = sqlite3.connect(str(db_path))
     df = pd.read_sql_query("SELECT * FROM %s" % table_name, conn)
