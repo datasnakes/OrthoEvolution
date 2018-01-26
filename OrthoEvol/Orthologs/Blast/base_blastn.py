@@ -314,10 +314,10 @@ class BaseBlastN(ComparativeGenetics):
                                 # wmaskerpath = os.path.join(str(taxon_id), "wmasker.obinary")
 
                                 # Update your blastn parameters
-                                if self.blast_method == '1':
+                                if self.blast_method == 1:
                                     update_dict = {'query': query_seq_path,
                                                    'seqidlist': ''}
-                                elif self.blast_method == '3':
+                                elif self.blast_method == 3:
                                     update_dict = {'query': query_seq_path,
                                                    'entrez_query': organism}
                                 self.blastn_parameters.update(update_dict)
@@ -337,7 +337,7 @@ class BaseBlastN(ComparativeGenetics):
                                 self.add_blast_time(gene, organism, start_time, end_time)
                                 blast_xml.close()
                                 self.blast_xml_parse(xml_path, gene, organism)
-                                if self.blast_method == '3':
+                                if self.blast_method == 3:
                                     slpmsg = "10s sleep to abide by NCBI."
                                     self.blastn_log.info(slpmsg)
                                     # XXX 1 request per 3 seconds
