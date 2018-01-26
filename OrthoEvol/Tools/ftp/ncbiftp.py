@@ -101,21 +101,20 @@ class NcbiFTPClient(BaseFTPClient):
         else:
             self.ncbiftp_log.info('%s exists.' % str(windowmaskerfile))
 
-    @classmethod
-    def extract_file(cls, file2extract):
+    def extract_file(self, file2extract):
         """Extract a tar.gz file."""
         if str(file2extract).endswith('tar.gz'):
             tar = tarfile.open(file2extract)
             tar.extractall()
             tar.close()
             log_msg = 'Files were successfully extracted from %s'
-            cls.ncbiftp_log.info(log_msg % file2extract)
+            self.ncbiftp_log.info(log_msg % file2extract)
         elif str(file2extract).endswith('.gz'):
             with gzip.open(file2extract, 'rb') as comp:
                 with open(str(Path(file2extract).stem), 'wb') as decomp:
                     shutil.copyfileobj(comp, decomp)
             log_msg = 'Files were successfully extracted from %s'
-            cls.ncbiftp_log.info(log_msg % file2extract)
+            self.ncbiftp_log.info(log_msg % file2extract)
 
     def listfiles(self, path='cwd'):
         """List all files in a path."""
