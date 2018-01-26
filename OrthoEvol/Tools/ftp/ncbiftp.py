@@ -163,8 +163,9 @@ class NcbiFTPClient(BaseFTPClient):
         # Download the files using multiprocessing
         download_time_secs = time()
         with ThreadPool(1) as download_pool:
-            for _ in tqdm(download_pool.map(self._download_windowmasker, windowmaskerfiles), total=len(windowmaskerfiles)):
-                pass
+            with tqdm(total=len(self.files2download)) as pbar:
+                for i, _ in tqdm(enumerate(download_pool.map(self._download_windowmasker, windowmaskerfiles))):
+                    pbar.update()
             minutes = round(((time() - download_time_secs) / 60), 2)
         self.ncbiftp_log.info("Took %s minutes to download the files." %
                               minutes)
@@ -200,8 +201,9 @@ class NcbiFTPClient(BaseFTPClient):
         # Download the files using multiprocessing
         download_time_secs = time()
         with ThreadPool(1) as download_pool:
-            for _ in tqdm(download_pool.map(self.download_file, self.files2download), total=len(self.files2download)):
-                pass
+            with tqdm(total=len(self.files2download)) as pbar:
+                for i, _ in tqdm(enumerate(download_pool.map(self.download_file, self.files2download))):
+                    pbar.update()
             minutes = round(((time() - download_time_secs) / 60), 2)
         self.ncbiftp_log.info("Took %s minutes to download the files." %
                               minutes)
@@ -209,8 +211,9 @@ class NcbiFTPClient(BaseFTPClient):
         if extract:
             extract_time_secs = time()
             with ThreadPool(1) as extract_pool:
-                for _ in tqdm(extract_pool.map(self.extract_file, self.files2download), total=len(self.files2download)):
-                    pass
+                with tqdm(total=len(self.files2download)) as pbar:
+                    for i, _ in tqdm(enumerate(extract_pool.map(self.extract_file, self.files2download))):
+                        pbar.update()
                 minutes = round(((time() - extract_time_secs) / 60), 2)
             self.ncbiftp_log.info("Took %s minutes to extract from all files." %
                                   minutes)
@@ -238,8 +241,9 @@ class NcbiFTPClient(BaseFTPClient):
         # Download the files using multiprocessing
         download_time_secs = time()
         with ThreadPool(1) as download_pool:
-            for _ in tqdm(download_pool.map(self.download_file, self.files2download), total=len(self.files2download)):
-                pass
+            with tqdm(total=len(self.files2download)) as pbar:
+                for i, _ in tqdm(enumerate(download_pool.map(self.download_file, self.files2download))):
+                    pbar.update()
             minutes = round(((time() - download_time_secs) / 60), 2)
         self.ncbiftp_log.info("Took %s minutes to download the files." %
                               minutes)
@@ -247,8 +251,9 @@ class NcbiFTPClient(BaseFTPClient):
         if extract:
             extract_time_secs = time()
             with ThreadPool(1) as extract_pool:
-                for _ in tqdm(extract_pool.map(self.extract_file, self.files2download), total=len(self.files2download)):
-                    pass
+                with tqdm(total=len(self.files2download)) as pbar:
+                    for i, _ in tqdm(enumerate(extract_pool.map(self.extract_file, self.files2download))):
+                        pbar.update()
                 minutes = round(((time() - extract_time_secs) / 60), 2)
             self.ncbiftp_log.info("Took %s minutes to extract from all files." %
                                   minutes)
@@ -284,8 +289,9 @@ class NcbiFTPClient(BaseFTPClient):
             # Download the files using multiprocessing
             download_time_secs = time()
             with ThreadPool(1) as download_pool:
-                for _ in tqdm(download_pool.map(self.download_file, self.files2download), total=len(self.files2download)):
-                    pass
+                with tqdm(total=len(self.files2download)) as pbar:
+                    for i, _ in tqdm(enumerate(download_pool.map(self.download_file, self.files2download))):
+                        pbar.update()
                 minutes = round(((time() - download_time_secs) / 60), 2)
             self.ncbiftp_log.info("Took %s minutes to download the files.\n" %
                                   minutes)
@@ -294,8 +300,9 @@ class NcbiFTPClient(BaseFTPClient):
             self.ncbiftp_log.info('Now it\'s time to extract files.')
             extract_time_secs = time()
             with ThreadPool(3) as extract_pool:
-                for _ in tqdm(extract_pool.map(self.extract_file, self.files2download), total=len(self.files2download)):
-                    pass
+                with tqdm(total=len(self.files2download)) as pbar:
+                    for _ in tqdm(enumerate(extract_pool.map(self.extract_file, self.files2download))):
+                        pbar.update()
                 minutes = round(((time() - extract_time_secs) / 60), 2)
             self.ncbiftp_log.info("Took %s minutes to extract from all files.\n" %
                                   minutes)
