@@ -5,6 +5,7 @@ from time import time
 from datetime import datetime
 from multiprocessing.pool import ThreadPool
 import os
+from pathlib import Path
 from shutil import make_archive
 from ftplib import error_perm, all_errors
 # from progress.bar import Bar
@@ -12,6 +13,7 @@ from ftplib import error_perm, all_errors
 
 from OrthoEvol.Tools.ftp.baseftp import BaseFTPClient
 from OrthoEvol.Tools.logit import LogIt
+from tqdm import tqdm
 
 
 class NcbiFTPClient(BaseFTPClient):
@@ -76,10 +78,10 @@ class NcbiFTPClient(BaseFTPClient):
             return dirs, nondirs
 
     def download_file(self, filename):
-        """Download the files one by one."""
-        with open(filename, 'wb') as localfile:
-            self.ftp.retrbinary('RETR %s' % filename, localfile.write)
-            self.ncbiftp_log.info('%s was downloaded.' % str(filename))
+        if not Path(filename).is_file():
+            with open(filename, 'wb') as localfile:
+                self.ftp.retrbinary('RETR %s' % filename, localfile.write)
+                self.ncbiftp_log.info('%s was downloaded.' % str(filename))
 
     def _download_windowmasker(self, windowmaskerfile):
         """Download the window masker files."""
@@ -198,7 +200,8 @@ class NcbiFTPClient(BaseFTPClient):
         # Download the files using multiprocessing
         download_time_secs = time()
         with ThreadPool(1) as download_pool:
-            download_pool.map(self.download_file, self.files2download)
+            for _ in tqdm(download_pool.map(self.download_file, self.files2download), total=len(self.files2download)):
+                pass
             minutes = round(((time() - download_time_secs) / 60), 2)
         self.ncbiftp_log.info("Took %s minutes to download the files." %
                               minutes)
