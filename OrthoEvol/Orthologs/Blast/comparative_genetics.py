@@ -131,8 +131,7 @@ class BaseComparativeGenetics(object):
 
             # Handles for different dataframe initializations
             self.raw_acc_data = accession_sqlite2pandas(self.acc_sqlite_tablename, self.acc_sqlite_filename,
-                                                        path=self.project_index, exists=False,
-                                                        acc_file=self.acc_csv_filename)
+                                                        path=self.project_index, acc_file=self.acc_csv_filename)
 
             # Master accession file for the blast
             self.building_filename = str(acc_file[:-4] + 'building.csv')
