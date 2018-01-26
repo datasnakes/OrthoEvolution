@@ -404,7 +404,7 @@ def accession_csv2sqlite(acc_file, table_name, db_name, path):
     acc_path = Path(path) / Path(acc_file)
     db_path = Path(path) / Path(db_name)
     engine = create_engine('sqlite:////%s' % db_path)
-    df = pd.read_csv(acc_path, dtype=str())
+    df = pd.read_csv(acc_path, dtype=str)
     df.to_sql(name=table_name, con=engine, if_exists='append', index=False)
 
 
