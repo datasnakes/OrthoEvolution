@@ -39,11 +39,8 @@ class BaseBlastN(ComparativeGenetics):
         self._fmt = '%a %b %d at %I:%M:%S %p %Y'
         self.date_format = str(d.now().strftime(self._fmt))
 
-        # Ensure BLASTDB path is set
+        # Retrieve a dictionary of environment variables
         self.environment_vars = dict(os.environ)
-        if 'BLASTDB' not in self.environment_vars.keys():
-            msg = "BLASTDB is not set in your path."
-            raise EnvironmentError(msg)
 
         # Manage Directories
         self.home = Path(os.getcwd())
@@ -60,15 +57,19 @@ class BaseBlastN(ComparativeGenetics):
         self.complete_time_file = self.project + '_TIME.csv'
         self.complete_time_file_path = self.data / Path(self.complete_time_file)
 
+        self.blastn_parameters = self.select_blast_method(method=blast_method)
 
-        self.blastn_parameters = self.blast_method_selection(method=blast_method)
-
-    def blast_method_selection(self, method):
+    def select_blast_method(self, method):
         """Select a method for running blastn.
 
-        :param method: a blast method - seq or wm
+        :param method: Select one of the 3 blast methods. 1, 2, or 3.
         """
+
         if method == '1':
+            # Ensure BLASTDB path is set
+            if 'BLASTDB' not in self.environment_vars.keys():
+                msg = "BLASTDB is not set in your path."
+                raise EnvironmentError(msg)
             # Accessions/Seqids List
             blastn_parameters = {'query': '', 'db': 'refseq_rna',
                                  'strand': 'plus', 'evalue': 0.01, 'outfmt': 5,
@@ -86,7 +87,9 @@ class BaseBlastN(ComparativeGenetics):
                                  'outfmt': 5, 'window_masker_db': '',
                                  'max_target_seqs': 10, 'task': 'blastn'}
             return blastn_parameters
-        elif method is None:
+        elif method == '3':
+            # Server blast
+            # TODO Update parameters for this method
             blastn_parameters = {'query': '', 'db': 'refseq_rna',
                                  'strand': 'plus', 'evalue': 0.01,
                                  'outfmt': 5, 'max_target_seqs': 10,

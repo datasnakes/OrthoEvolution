@@ -341,5 +341,4 @@ class OrthoBlastN(ComparativeGenetics):
 
 class BlastFailure(BaseException):
     """Base Blast Exception."""
-
     pass
