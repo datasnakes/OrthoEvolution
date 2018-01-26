@@ -30,7 +30,8 @@ class BaseBlastN(ComparativeGenetics):
         :param blast_method:  Method used for blasting. (1, 2, None)
         :param template:  The accession file template.
         :param save_data:  A flag for saving the post_blast data to an excel file.
-        :param kwargs:"""
+        :param kwargs:
+        """
 
         super().__init__(project=project, template=template, save_data=save_data, **kwargs)
 
@@ -38,13 +39,10 @@ class BaseBlastN(ComparativeGenetics):
         self._fmt = '%a %b %d at %I:%M:%S %p %Y'
         self.date_format = str(d.now().strftime(self._fmt))
 
-        # Ensure paths are set
+        # Ensure BLASTDB path is set
         self.environment_vars = dict(os.environ)
         if 'BLASTDB' not in self.environment_vars.keys():
             msg = "BLASTDB is not set in your path."
-            raise EnvironmentError(msg)
-        elif 'WINDOW_MASKER_PATH' not in self.environment_vars.keys():
-            msg = "WINDOW_MASKER_PATH is not set in your path."
             raise EnvironmentError(msg)
 
         # Manage Directories
@@ -68,16 +66,8 @@ class BaseBlastN(ComparativeGenetics):
     def blast_method_selection(self, method):
         """Select a method for running blastn.
 
-:param method: a blast method - gi or wm
-
-
-
-        :param method:
-
-
-
+        :param method: a blast method - seq or wm
         """
-
         if method == '1':
             # Accessions/Seqids List
             blastn_parameters = {'query': '', 'db': 'refseq_rna',
@@ -87,6 +77,10 @@ class BaseBlastN(ComparativeGenetics):
             return blastn_parameters
         elif method == '2':
             # Windowmaskerdb
+            if 'WINDOW_MASKER_PATH' not in self.environment_vars.keys():
+                msg = "WINDOW_MASKER_PATH is not set in your path."
+                raise EnvironmentError(msg)
+
             blastn_parameters = {'query': '', 'db': 'refseq_rna',
                                  'strand': 'plus', 'evalue': 0.01,
                                  'outfmt': 5, 'window_masker_db': '',
@@ -104,26 +98,16 @@ class BaseBlastN(ComparativeGenetics):
     def blast_config(self, query_accessions, query_organism, auto_start=False):
         """This method configures everything for our BLAST workflow.
 
-It configures the accession file, which works with interrupted Blasts.
+        It configures the accession file, which works with interrupted Blasts.
         It configures a gene_list for blasting the right genes.
 
-        :param query_accessions:  A list of query accession numbers.  Each gene needs one from the same organism.
+        :param query_accessions:  A list of query accession numbers.  Each gene
+                                  needs one from the same organism.
         :param query_organism:  The name of the query organism for post configuration.
-        :param auto_start:  A flag that determines whether the blast starts automatically.
+        :param auto_start:  A flag that determines whether the blast starts
+                            automatically. (Default value = False)
         :return:
-
-
-
-        :param query_accessions:
-
-        :param query_organism:
-
-        :param auto_start:  (Default value = False)
-
-
-
         """
-
         self.blastn_log.info('Blast configuration has begun.')
         self.blastn_log.info('Configuring the accession file.')
 
@@ -190,21 +174,10 @@ It configures the accession file, which works with interrupted Blasts.
     def blast_xml_parse(self, xml_path, gene, organism):
         """Parse the blast XML record get the best hit accession number.
 
-:param xml_path:  Absolute path to the blast record.
+        :param xml_path:  Absolute path to the blast record.
         :param gene:  The gene of interest.
         :param organism:  The organism of interest.
         :return:  Returns one accession number in the building accession file.
-
-
-
-        :param xml_path:
-
-        :param gene:
-
-        :param organism:
-
-
-
         """
 
         accession = gi = raw_bitscore = description = None
@@ -262,24 +235,13 @@ It configures the accession file, which works with interrupted Blasts.
     def runblast(self, genes=None, query_organism=None, pre_configured=False):
         """Run NCBI's blastn.
 
-This method actually performs NCBI's blastn.
+        This method actually performs NCBI's blastn.
         It requires configuring before it can be utilized.
 
-        :param genes:  Gene of interest.
-        :param query_organism:  Query organism.
+        :param genes:  Gene of interest. (Default value = None)
+        :param query_organism:  Query organism. (Default value = None)
         :param pre_configured:  Determines if the blast needs configuring.
         :return:
-
-
-
-        :param genes:  (Default value = None)
-
-        :param query_organism:  (Default value = None)
-
-        :param pre_configured:  (Default value = False)
-
-
-
         """
 
         if pre_configured is False:
@@ -395,5 +357,4 @@ This method actually performs NCBI's blastn.
 
 class BlastFailure(BaseException):
     """Simple Blast Execption Class."""
-
     pass
