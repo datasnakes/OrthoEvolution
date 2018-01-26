@@ -10,10 +10,8 @@ from multiprocessing.pool import ThreadPool
 from pathlib import Path
 import pandas as pd
 import platform
-from warnings import warn
 
 from OrthoEvol.Tools.logit import LogIt
-from OrthoEvol import OrthoEvolDeprecationWarning
 from OrthoEvol.Tools.otherutils import runcmd
 
 blastutils_log = LogIt().default(logname="blast-utils", logfile=None)
@@ -113,10 +111,10 @@ def gene_list_config(file, data_path, gene_list, taxon_dict, logger):
         return None
 
 
-def seqid_list_config(seqid_list_path, taxonomy_ids, research_path=None, config=False):
+def seqid_list_config(seqid_lists_path, taxonomy_ids, research_path=None, config=False):
     """Create a seqid list based on the refseq_rna database for each taxonomy id.
 
-    It will also convert the gi list into a binary file which is more
+    It will also convert the seqid list into a binary file which is more
     efficient to use with NCBI's Standalone Blast tools.
 
     :param seqid_list_path:
@@ -124,8 +122,6 @@ def seqid_list_config(seqid_list_path, taxonomy_ids, research_path=None, config=
     :param research_path:  (Default value = None)
     :param config:  (Default value = False)
     """
-
-    warn("NCBI has deprecated using GI numbers.", OrthoEvolDeprecationWarning)
     if config:
         # Directory and file handling
         raw_data_path = research_path / Path('raw_data')
@@ -134,15 +130,15 @@ def seqid_list_config(seqid_list_path, taxonomy_ids, research_path=None, config=
         pd.Series(taxonomy_ids).to_csv(str(taxid_file), index=False)
 
         # TODO Rework this
-        create_seqid_lists(seqid_list_path=raw_data_path,
+        create_seqid_lists(seqid_lists_path=raw_data_path,
                            taxonomy_ids=taxonomy_ids)
 
     else:
-        create_seqid_lists(seqid_list_path=seqid_list_path,
+        create_seqid_lists(seqid_lists_path=seqid_lists_path,
                            taxonomy_ids=taxonomy_ids)
 
 
-def create_seqid_lists(seqid_list_path, taxonomy_ids):
+def create_seqid_lists(seqid_lists_path, taxonomy_ids):
     """Use the blastdbcmd tool to generate seqid lists.
 
     It then uses the blastdb_aliastool to turn the list into a binary file.
@@ -152,18 +148,17 @@ def create_seqid_lists(seqid_list_path, taxonomy_ids):
     :param taxonomy_ids:
     """
 
-    warn("NCBI has deprecated using GI numbers.", OrthoEvolDeprecationWarning)
-    if os.path.exists(str(seqid_list_path)):
-        os.chdir(str(seqid_list_path))
-        # Use the accession #'s and the blastdbcmd tool to generate gi lists
-        # based on Organisms/Taxonomy id's.
-        # TODO Create blastdbcmd commandline tools
+    if os.path.exists(str(seqid_lists_path)):
+        os.chdir(str(seqid_lists_path))
+        # Use the accession #'s and the blastdbcmd tool to generate seqid lists
+        # based on Organisms' Taxonomy id's.
+        # TODO Create blastdbcmd commandline tool
         gi_time_secs = time.time()
         with ThreadPool(3) as gilist_pool:
             gilist_pool.map(_taxid2seqidlist, taxonomy_ids)
             minutes = (time.time() - gi_time_secs) / 60
-        seqidlist_log.info(
-            "Took %s minutes to create gi binary files." % minutes)
+        seqidlist_log.info("Took %s minutes to create gi binary files."
+                           % minutes)
 
 
 def _taxid2seqidlist(taxonomy_id):
@@ -173,26 +168,25 @@ def _taxid2seqidlist(taxonomy_id):
     :return:
     """
 
-    warn("NCBI has deprecated using GI numbers.", OrthoEvolDeprecationWarning)
     tid = str(taxonomy_id)
-    binary = tid + 'gi'
+    binary = tid + 'seqids'
 
     if binary not in os.listdir():
         if platform.system() == 'Linux':
             # TODO Convert to subprocess
             # TODO Test this on Linux
-            runcmd(
-                "blastdbcmd -db refseq_rna -entry all -outfmt '%g %a' | awk ' { if ($2 == " + tid + ") { print $1 } } ' > " + tid + "gi.txt")
+            runcmd("blastdbcmd -db refseq_rna -entry all -outfmt '%T %a' | awk ' { if ($2 == " + tid + ") { print $1 } } ' > " + tid + "seqids.txt")
             seqidlist_log.info(tid + "gi.txt has been created.")
 
             # Convert the .txt file to a binary file using the blastdb_aliastool
-            runcmd("blastdb_aliastool -gi_file_in " + tid + "gi.txt -gi_file_out " + tid + "gi")
+            runcmd("blastdb_aliastool -gi_file_in " + tid + "seqids.txt -gi_file_out " + binary)
             seqidlist_log.info(tid + "gi binary file has been created.")
 
             # Remove the gi.text file
-            os.remove(tid + "gi.txt")
-            seqidlist_log.info(tid + "gi.text file has been deleted.")
+            os.remove(tid + "seqids.txt")
+            seqidlist_log.info(tid + "seqids.txt file has been deleted.")
         else:
+            # TODO Implement for Windows
             raise NotImplementedError(platform.system() + 'is not supported')
     else:
         seqidlist_log.info('%s already exists' % str(binary))
@@ -259,7 +253,6 @@ def get_dup_acc(acc_dict, gene_list, org_list):
     :param org_list:  A full list of organisms.
     :return:  A master duplication dictionary used to initialize the duplicate class variables.
     """
-
 
     duplicated_dict = dict()
     duplicated_dict['accessions'] = {}
@@ -436,5 +429,4 @@ def get_miss_acc(acc_file_path):
 
 def get_pseudogenes():
     """Denote which genes are sudogenes."""
-
     raise NotImplementedError
