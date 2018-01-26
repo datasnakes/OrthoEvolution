@@ -404,9 +404,9 @@ def accession_csv2sqlite(acc_file, table_name, db_name, path):
     acc_path = Path(path) / Path(acc_file)
     db_path = Path(path) / Path(db_name)
     engine = create_engine('sqlite:////%s' % db_path)
-    df = pd.read_csv(acc_path, dtype=str)
-    df.to_sql(name=table_name, con=engine, if_exists='append', index=False)
-
+    with engine.connect() as conn, conn.begin():
+        df = pd.read_csv(acc_path, dtype=str)
+        df.to_sql(name=table_name, con=conn, if_exists='append', index=False)
 
 def accession_sqlite2pandas(table_name, db_name, path, exists=True, acc_file=None):
     """
@@ -426,9 +426,8 @@ def accession_sqlite2pandas(table_name, db_name, path, exists=True, acc_file=Non
     :rtype:
     """
 
-    if not exists:
+    if not exists or :
         accession_csv2sqlite(acc_file=acc_file, table_name=table_name, db_name=db_name, path=path)
-    db_path = Path(path) / Path(db_name)
     conn = sqlite3.connect(str(db_path))
     df = pd.read_sql_query("SELECT * FROM %s" % table_name, conn)
     conn.close()
