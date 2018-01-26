@@ -69,7 +69,7 @@ class BaseBlastN(ComparativeGenetics):
         :param method: Select one of the 3 blast methods. 1, 2, or 3.
         """
 
-        if method == '1':
+        if method == 1:
             # Ensure BLASTDB path is set
             if 'BLASTDB' not in self.environment_vars.keys():
                 msg = "BLASTDB is not set in your path."
@@ -83,7 +83,7 @@ class BaseBlastN(ComparativeGenetics):
                                  'seqidlist': '', 'max_target_seqs': 10,
                                  'task': 'blastn'}
             return blastn_parameters
-        elif method == '2':
+        elif method == 2:
             # Windowmaskerdb
             if 'WINDOW_MASKER_PATH' not in self.environment_vars.keys():
                 msg = "WINDOW_MASKER_PATH is not set in your path."
@@ -94,7 +94,7 @@ class BaseBlastN(ComparativeGenetics):
                                  'outfmt': 5, 'window_masker_db': '',
                                  'max_target_seqs': 10, 'task': 'blastn'}
             return blastn_parameters
-        elif method == '3':
+        elif method == 3:
             # Remote blast
             # TODO Update parameters for this method
             blastn_parameters = {'query': '', 'db': 'refseq_rna',
