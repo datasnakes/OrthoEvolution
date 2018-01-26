@@ -431,4 +431,5 @@ def accession_sqlite2pandas(table_name, db_name, path, exists=True, acc_file=Non
     db_path = Path(path) / Path(db_name)
     conn = sqlite3.connect(str(db_path))
     df = pd.read_sql_query("SELECT * FROM %s" % table_name, conn)
+    conn.close()
     return df
