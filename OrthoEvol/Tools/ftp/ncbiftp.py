@@ -6,7 +6,8 @@ from datetime import datetime
 from multiprocessing.pool import ThreadPool
 import os
 from pathlib import Path
-from shutil import make_archive
+import shutil
+import gzip
 from ftplib import error_perm, all_errors
 # from progress.bar import Bar
 # TODO Create a progress bar; Integrate with Threading/downloading
@@ -57,7 +58,7 @@ class NcbiFTPClient(BaseFTPClient):
         os.chdir('..')
         archive_location = os.path.join(os.getcwd(), archive_name)
         os.chdir(folder2archive)
-        make_archive(archive_location, folder2archive, archive_type)
+        shutil.make_archive(archive_location, folder2archive, archive_type)
 
     def walk(self, path):
         """Walk the ftp server and get files and directories."""
@@ -110,10 +111,9 @@ class NcbiFTPClient(BaseFTPClient):
             log_msg = 'Files were successfully extracted from %s'
             cls.ncbiftp_log.info(log_msg % file2extract)
         elif str(file2extract).endswith('.gz'):
-            import gzip
-            gz = tarfile.open(file2extract,mode='r:gz')
-            gz.extractall()
-            gz.close()
+            with gzip.open(file2extract, 'rb') as comp:
+                with open(str(Path(file2extract).stem), 'rb') as decomp:
+                    shutil.copyfileobj(comp, decomp)
             log_msg = 'Files were successfully extracted from %s'
             cls.ncbiftp_log.info(log_msg % file2extract)
 
@@ -164,7 +164,8 @@ class NcbiFTPClient(BaseFTPClient):
         # Download the files using multiprocessing
         download_time_secs = time()
         with ThreadPool(1) as download_pool:
-            download_pool.map(self._download_windowmasker, windowmaskerfiles)
+            for _ in tqdm(download_pool.map(self._download_windowmasker, windowmaskerfiles), total=len(windowmaskerfiles)):
+                pass
             minutes = round(((time() - download_time_secs) / 60), 2)
         self.ncbiftp_log.info("Took %s minutes to download the files." %
                               minutes)
