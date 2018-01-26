@@ -408,6 +408,7 @@ def accession_csv2sqlite(acc_file, table_name, db_name, path):
         df = pd.read_csv(acc_path, dtype=str)
         df.to_sql(name=table_name, con=conn, if_exists='append', index=False)
 
+
 def accession_sqlite2pandas(table_name, db_name, path, exists=True, acc_file=None):
     """
     Convert a sqlite3 database with an OrthoEvolution accession table to a pandas dataframe.
@@ -425,8 +426,8 @@ def accession_sqlite2pandas(table_name, db_name, path, exists=True, acc_file=Non
     :return:
     :rtype:
     """
-
-    if not exists or :
+    db_path = Path(path) / Path(db_name)
+    if not exists or not db_path.is_file():
         accession_csv2sqlite(acc_file=acc_file, table_name=table_name, db_name=db_name, path=path)
     conn = sqlite3.connect(str(db_path))
     df = pd.read_sql_query("SELECT * FROM %s" % table_name, conn)
