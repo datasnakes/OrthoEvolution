@@ -118,7 +118,7 @@ def seqid_list_config(seqid_lists_path, taxonomy_ids, research_path=None, config
     efficient to use with NCBI's Standalone Blast tools.
 
     :param seqid_list_path:
-    :param taxonomy_ids:
+    :param taxonomy_ids: A list of taxonomy ids.
     :param research_path:  (Default value = None)
     :param config:  (Default value = False)
     """
@@ -144,8 +144,8 @@ def create_seqid_lists(seqid_lists_path, taxonomy_ids):
     It then uses the blastdb_aliastool to turn the list into a binary file.
     The input (id) for the function is a taxonomy id.
 
-    :param seqid_list_path:
-    :param taxonomy_ids:
+    :param seqid_list_path: Path to all lists of seqids
+    :param taxonomy_ids: A list of taxonomy ids.
     """
 
     if os.path.exists(str(seqid_lists_path)):
@@ -173,18 +173,9 @@ def _taxid2seqidlist(taxonomy_id):
 
     if binary not in os.listdir():
         if platform.system() == 'Linux':
-            # TODO Convert to subprocess
             # TODO Test this on Linux
             runcmd("blastdbcmd -db refseq_rna -entry all -outfmt '%T %a' | awk ' { if ($2 == " + tid + ") { print $1 } } ' > " + tid + "seqids.txt")
-            seqidlist_log.info(tid + "gi.txt has been created.")
-
-            # Convert the .txt file to a binary file using the blastdb_aliastool
-            runcmd("blastdb_aliastool -gi_file_in " + tid + "seqids.txt -gi_file_out " + binary)
-            seqidlist_log.info(tid + "gi binary file has been created.")
-
-            # Remove the gi.text file
-            os.remove(tid + "seqids.txt")
-            seqidlist_log.info(tid + "seqids.txt file has been deleted.")
+            seqidlist_log.info(tid + "seqids.txt has been created.")
         else:
             # TODO Implement for Windows
             raise NotImplementedError(platform.system() + 'is not supported')
