@@ -82,9 +82,14 @@ class BaseComparativeGenetics(object):
 
         if project_path and project:
             self.project_path = Path(project_path) / Path(project)
+        elif project:
+            project_path = os.getcwd()
+            self.project_path = Path(project_path) / Path(project)
 
         # Configuration of class attributes.
-        add_self = attribute_config(self, composer=proj_mana, checker=ProjectManagement, project=project, project_path=project_path)
+        add_self = attribute_config(self, composer=proj_mana,
+                                    checker=ProjectManagement, project=project,
+                                    project_path=project_path)
         for variable, attribute in add_self.__dict__.items():
             setattr(self, variable, attribute)
 

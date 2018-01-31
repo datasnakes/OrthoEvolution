@@ -76,7 +76,8 @@ class BaseBlastN(ComparativeGenetics):
                 raise EnvironmentError(msg)
 
             # Run seqid list configuration
-            seqid_list_config()
+            seqid_list_config(seqid_lists_path='',
+                              taxonomy_ids='')
             # Accessions/Seqids List
             blastn_parameters = {'query': '', 'db': 'refseq_rna',
                                  'strand': 'plus', 'evalue': 0.01, 'outfmt': 5,
