@@ -339,8 +339,8 @@ class BaseBlastN(ComparativeGenetics):
                                 blast_xml.close()
                                 self.blast_xml_parse(xml_path, gene, organism)
                                 if self.blast_method == 3:
-                                    slpmsg = "15s sleep to abide by NCBI."
-                                    self.blastn_log.info(slpmsg)
+                                    slpmsg = "15s required timeout for NCBI."
+                                    self.blastn_log.warning(slpmsg)
                                     # XXX 1 request per 10 seconds
                                     sleep(15)
 
