@@ -107,14 +107,15 @@ class NcbiFTPClient(BaseFTPClient):
             tar = tarfile.open(file2extract)
             tar.extractall()
             tar.close()
-            log_msg = 'Files were successfully extracted from %s'
+            log_msg = '%s was deleted after successful extraction.'
             self.ncbiftp_log.info(log_msg % file2extract)
         elif str(file2extract).endswith('.gz'):
             with gzip.open(file2extract, 'rb') as comp:
                 with open(str(Path(file2extract).stem), 'wb') as decomp:
                     shutil.copyfileobj(comp, decomp)
-            log_msg = 'Files were successfully extracted from %s'
+            log_msg = '%s was deleted after successful extraction.'
             self.ncbiftp_log.info(log_msg % file2extract)
+            os.remove(file2extract)
 
     def listfiles(self, path='cwd'):
         """List all files in a path."""
