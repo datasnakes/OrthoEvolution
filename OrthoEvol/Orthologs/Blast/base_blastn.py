@@ -85,7 +85,7 @@ class BaseBlastN(ComparativeGenetics):
                                  'task': 'blastn'}
             return blastn_parameters
         elif method == 2:
-            # Windowmaskerdb
+            # Windowmasker database
             if 'WINDOW_MASKER_PATH' not in self.environment_vars.keys():
                 msg = "WINDOW_MASKER_PATH is not set in your path."
                 raise EnvironmentError(msg)
@@ -339,10 +339,10 @@ class BaseBlastN(ComparativeGenetics):
                                 blast_xml.close()
                                 self.blast_xml_parse(xml_path, gene, organism)
                                 if self.blast_method == 3:
-                                    slpmsg = "10s sleep to abide by NCBI."
-                                    self.blastn_log.info(slpmsg)
-                                    # XXX 1 request per 3 seconds
-                                    sleep(10)
+                                    slpmsg = "15s required timeout for NCBI."
+                                    self.blastn_log.warning(slpmsg)
+                                    # XXX 1 request per 10 seconds
+                                    sleep(15)
 
                         # Catch either ApplicationError or ParseError
                         except (ApplicationError, ParseError) as err:
