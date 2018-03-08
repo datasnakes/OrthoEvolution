@@ -1,5 +1,4 @@
 from OrthoEvol.Orthologs.Blast import OrthoBlastN, BaseBlastN
-import os
 
 # This is more pythonic with YAML loading
 blastconfig = {
