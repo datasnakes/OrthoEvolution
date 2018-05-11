@@ -1,34 +1,48 @@
 import os
 from shutil import copy
 from subprocess import check_call, STDOUT
-
 from pathlib import Path
+
+from OrthoEvol.Tools.logit import LogIt
 from OrthoEvol.Orthologs.Phylogenetics.IQTree.iqtree import IQTreeCommandline
-from OrthoEvol.Tools.utils import makedirectory
-#TODO-ROB Make this inherit FilteredAlignment
+from OrthoEvol.Tools.otherutils import makedirectory
+# TODO-ROB Make this inherit FilteredAlignment
 
 
 class FilteredTree(object):
-    """# TODO Insert Doctring """
-    def __init__(self, alignment, dataType='CODON', home=os.getcwd()):
-        self.home = Path(home)
-        self.iqtree_path = self.home / Path('IQTREE')
+    """This is a  wrapper around the IQTree wrapper to get the best tree."""
+
+    def __init__(self, alignment, dataType='CODON', working_dir=''):
+        """Run IQTree to generate a "filtered" tree or best tree.
+
+        :param alignment: Path to multiple sequence alignment file.
+        :param dataType:  Input datatype. (Default value = 'CODON')
+        :param working_dir: Path of working directory.  (Default value = '')
+        """
+        self.iqtree_log = LogIt().default(logname="iqtree", logfile=None)
+        self.working_dir = Path(working_dir)
+        self.iqtree_path = self.working_dir / Path('IQTREE')
         self.tree_file = self.iqtree_path / Path(alignment + '.treefile')
         self.gene = alignment.replace('_P2N_na.iqtree.aln', '')
 
-        self.aln_File = str(self.home / Path(alignment))
-        outDir = self.home / Path('IQTREE')
+        self.aln_File = str(self.working_dir / Path(alignment))
+        outDir = self.working_dir / Path('IQTREE')
         makedirectory(outDir)
         copy(self.aln_File, str(outDir))
         os.chdir(str(outDir))
         self.iqtree_best_tree(alignment, dataType)
-        copy(self.tree_file, str(self.home / Path(self.gene + '_iqtree.nwk')))
+        treepath = str(self.working_dir / Path(self.gene + '_iqtree.nwk'))
+        copy(self.tree_file, treepath)
 
     def iqtree_best_tree(self, alignment, dataType):
-        """Generate and save the best tree from IQTree by importing the filtered
-        alignment.
+        """Generate and save the best tree from IQTree.
+
+        :param alignment:  Path to multiple sequence alignment file.
+        :param dataType:
+        :return:
         """
+
         iqtree_cline = IQTreeCommandline(alignment=alignment,
                                          dataType=dataType)
-        print(iqtree_cline)
+        self.iqtree_log.info(iqtree_cline)
         check_call([str(iqtree_cline)], stderr=STDOUT, shell=True)

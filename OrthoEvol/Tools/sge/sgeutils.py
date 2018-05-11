@@ -8,7 +8,12 @@ from string import Template
 
 
 def basejobids(length, name='submit'):
-    """"Create base job id and name."""
+    """"Create base job id and name.
+
+    :param length: Length of the id.
+    :param name:  (Default value = 'submit')
+    """
+
     base_id = randomid(length=length)
     base = name + "_{0}".format(base_id)
 
@@ -16,9 +21,11 @@ def basejobids(length, name='submit'):
 
 
 def import_temp(filepath):
-    """Import the script or file that you need a template of and that has
-    temp strings.
+    """Import the script or file that you need a template of and that has temp strings.
+
+    :param filepath: The path/name of the template file.
     """
+
     file_temp = open(filepath, 'r')
     file_str = file_temp.read()
     file_temp.close()
@@ -28,19 +35,33 @@ def import_temp(filepath):
 
 
 def file2str(filepath):
-    """Turn the contents of a file (python file) into a string."""
+    """Turn the contents of a file (python file) into a string.
+
+    :param filepath: Path of the input file.
+    """
+
     file_temp = open(filepath, 'r')
     file_str = file_temp.read()
     return file_str
 
 
 def randomid(length=5):
-    """Generate a random ID of 5 characters to append to qsub job name."""
+    """Generate a random ID of 5 characters to append to qsub job name.
+
+    :param length: Length of the id. (Default value = 5)
+    """
+
     return ''.join(random.sample(string.ascii_letters + string.digits, length))
 
 
 def writecodefile(filename, code, language):
-    """Create a python file and write the code to it."""
+    """Create a python file and write the code to it.
+
+    :param filename: Name of the output file.
+    :param code: Code file or string.
+    :param language: Language of the code.
+    """
+
     if language == 'python':
         with open(filename + '.py', 'w') as pyfile:
             pyfile.write(code)

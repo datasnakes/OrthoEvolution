@@ -9,7 +9,9 @@ logger = logging.getLogger('luigi-interface')
 SGEPipelineTask.shared_tmp_dir = os.getcwd()
 SGEPipelineTask.parallel_env = None
 
+
 class TestPipelineTask(SGEPipelineTask):
+    """Example pipeline task."""
 
     i = luigi.Parameter()
 

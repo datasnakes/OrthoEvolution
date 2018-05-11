@@ -46,7 +46,7 @@ from Bio.Application import _Option, AbstractCommandline
 
 
 class IQTreeCommandline(AbstractCommandline):
-    u""""Command line wrapper for GUIDANCE2.
+    u"""Command line wrapper for GUIDANCE2.
     http://guidance.tau.ac.il/ver2/
     Example:
     --------
@@ -57,8 +57,9 @@ class IQTreeCommandline(AbstractCommandline):
         the Python subprocess module, as described in the Biopython tutorial.
     Citation:
     ---------
-        To maintain IQ-TREE, support users and secure fundings, it is important for us that you cite the following papers,
-        whenever the corresponding features were applied for your analysis.
+        To maintain IQ-TREE, support users and secure fundings, it is important
+        for us that you cite the following papers, whenever the corresponding
+        features were applied for your analysis.
 
         Example 1: We obtained branch supports with the ultrafast bootstrap (Minh et al., 2013) implemented in the
                     IQ-TREE software (Nguyen et al., 2015).
@@ -87,8 +88,8 @@ class IQTreeCommandline(AbstractCommandline):
 
         # If you used the IQ-TREE web server please cite:
             J. Trifinopoulos, L.-T. Nguyen, A. von Haeseler, and B.Q. Minh (2016) W-IQ-TREE: a fast online phylogenetic tool
-            for maximum likelihood analysis. Nucleic Acids Res., 44 (W1):W232-W235. DOI: 10.1093/nar/gkw256
-    """
+            for maximum likelihood analysis. Nucleic Acids Res., 44 (W1):W232-W235. DOI: 10.1093/nar/gkw256"""
+
 
     def __init__(self, cmd="iqtree", **kwargs):
         self.parameters = \
@@ -101,10 +102,13 @@ class IQTreeCommandline(AbstractCommandline):
                 _Option(['-st', 'dataType'],
                         "BIN, DNA, AA, NT2AA, CODON, MORPH (default: auto-detect)",
                         equate=False,
-                        checker_function=lambda x: x in ['BIN', 'DNA', 'AA', 'NT2AA', 'CODON', 'MORPH', 'auto-detect']),
+                        checker_function=lambda x: x in ['BIN', 'DNA', 'AA',
+                                                         'NT2AA', 'CODON',
+                                                         'MORPH', 'auto-detect']),
                 _Option(['', 'opts'],
                         "A placeholder to set additional parameters."
-                        "e.g.  -m <model-name> -o <outgroup_taxon> -quiet -safe -mem RAM",
+                        "e.g.  -m <model-name> -o <outgroup_taxon> -quiet"
+                        "-safe -mem RAM",
                         equate=False)
             ]
 

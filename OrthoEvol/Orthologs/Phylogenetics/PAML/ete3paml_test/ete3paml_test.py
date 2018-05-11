@@ -3,14 +3,17 @@ from ete3 import EvolTree
 
 
 class PamlTest(object):
-    """The path to the codeml binary should be used as the pamlpath.
+    """Test codeml with a default tree and newick file."""
 
-    If the codeml binary is in your $PATH as 'codeml', the pamlpath should be
-    the same as the default parameters.
-    """
     def __init__(self, tree="ECP_EDN_15.nw", alignment="ECP_EDN_15.fasta",
-                 workdir='',
-                 pamlpath=''):
+                 workdir="", pamlpath=""):
+        """Test that paml is in your path and working properly.
+
+        :param tree: (Default value = "ECP_EDN_15.nw")
+        :param alignment:  (Default value = "ECP_EDN_15.fasta")
+        :param workdir:  (Default value = "")
+        :param pamlpath:  (Default value = "")
+        """
 
         self.tree = tree
         self.alignment = alignment

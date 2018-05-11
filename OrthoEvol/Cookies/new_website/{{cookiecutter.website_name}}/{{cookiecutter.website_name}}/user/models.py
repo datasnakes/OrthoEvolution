@@ -9,7 +9,7 @@ from {{cookiecutter.website_name}}.extensions import bcrypt
 
 
 class Role(SurrogatePK, Model):
-    """A role for a user."""
+    """A role for a user."""
 
     __tablename__ = 'roles'
     name = Column(db.String(80), unique=True, nullable=False)
@@ -26,7 +26,7 @@ class Role(SurrogatePK, Model):
 
 
 class User(UserMixin, SurrogatePK, Model):
-    """A user of the app."""
+    """A user of the app."""
 
     __tablename__ = 'users'
     username = Column(db.String(80), unique=True, nullable=False)
@@ -48,16 +48,24 @@ class User(UserMixin, SurrogatePK, Model):
             self.password = None
 
     def set_password(self, password):
-        """Set password."""
+        """Set password.
+
+        :param password: 
+
+        """
         self.password = bcrypt.generate_password_hash(password)
 
     def check_password(self, value):
-        """Check password."""
+        """Check password.
+
+        :param value: 
+
+        """
         return bcrypt.check_password_hash(self.password, value)
 
     @property
     def full_name(self):
-        """Full user name."""
+        """Full user name."""
         return '{0} {1}'.format(self.first_name, self.last_name)
 
     def __repr__(self):

@@ -15,24 +15,24 @@ when submitting a job as well as default job attributes.
 ### Using SGEJob with Multiprocess
 
 ```python
-
+from OrthoEvol.Tools.sge import SGEJob
 ```
 
 ### Submitting multiple jobs
 
 ```python
-
+from OrthoEvol.Tools.sge import SGEJob
 ```
 
 ### Get Job Info
 
 ```python
-
+from OrthoEvol.Tools.sge import SGEJob
 ```
 
 ### Running a simple job
 ```python
-from OrthoEvol.Tools import SGEJob
+from OrthoEvol.Tools.sge import SGEJob
 
 myjob = SGEJob(email_address='shutchins2@umc.edu')
 

@@ -1,6 +1,9 @@
-#from shutil import copyfile
+#"""Generate Sphinx docs from package READMEs."""
 #import os
 #from os.path import join
+#import configparser
+#
+#from OrthoEvol.Tools.logit import LogIt
 #
 #try:
 #    import pypandoc
@@ -8,22 +11,23 @@
 #    from pypandoc.pandoc_download import download_pandoc
 #    download_pandoc()
 #
-#from OrthoEvol.Tools.logit import LogIt
-#
 #
 #class PandocConverter(object):
-#    """Convert files using the pypandoc wrapper.
+#    """Use the pypandoc wrapper to convert files."""
 #
-#    :param infile:  path to the input file
-#    :param outfile_path:  output path
-#    """
 #    def __init__(self, infile, outfile_path):
+#        """Convert files using the pypandoc wrapper.
+#
+#        :param infile:  path to the input file
+#        :param outfile_path:  output path
+#        """
 #        self.infile = infile
 #        self.outfile_path = outfile_path
 #        self.pandoc_log = LogIt().default('pandoc converter', None)
 #        self.md2rst()
 #
 #    def md2rst(self):
+#        """Use pypandoc to convert md to rst."""
 #        infile = str(self.infile)
 #        filepath, ext = infile.split('.')
 #        splitfilepath = filepath.split(os.sep)
@@ -39,56 +43,43 @@
 #
 #
 #class CreateDocs(object):
+#    """Create documentation files using PandocConverter."""
+#
 #    def __init__(self):
-#        """"Initialize this class."""
+#        """"Convert a list of README files to restructured text format."""
 #        self.createdocs_log = LogIt().default('create docs', None)
 #        self.current_dir = os.path.dirname(os.path.realpath(__file__))
 #        self._docsdir = os.path.join(self.current_dir, 'docs')
 #        self.up = '..'
 #        self.docs_source = os.path.join(self._docsdir, 'source')
-#        self.main_readme = self._pathtomainreadme()
-#        self.readme2index()
 #        self.packagename = 'OrthoEvol'
 #        self.convertfiles()
 #
-#    def _append_toc_info(self):
-#        """Write TOC info to the README.rst when copied as index.rst."""
-#        tocinfo = "\nContents\n" \
-#            "--------\n"\
-#            ".. toctree::\n    " \
-#            ":hidden:\n    " \
-#            ":maxdepth: 3\n\n    " \
-#            "orthoevolreadme\n    cookiesreadme\n    managerreadme\n    " \
-#            "orthologsreadme\n    pipelinereadme\n    toolsreadme\n" \
-#            "\nIndices and tables\n" \
-#            "==================\n" \
-#            "* :ref:`genindex`\n" \
-#            "* :ref:`modindex`\n" \
-#            "* :ref:`search`"
-#
-#        return tocinfo
-#
-#    def readme2index(self):
-#        """Copy README.rst from the top level of your repo to docs source."""
-#        indexpath = os.path.join(self.docs_source, 'index.rst')
-#        copyfile(self.main_readme, indexpath)
-#        log_msg = '%s copied to %s.' % (self.main_readme, indexpath)
-#        self.createdocs_log.info(log_msg)
-#
-#        with open(indexpath, 'a') as index:
-#            toctree = self._append_toc_info()
-#            index.write(toctree)
-#            index.close()
-#            self.createdocs_log.info('TOC written to index.rst')
-#
-#    def _pathtomainreadme(self):
-#        """Return the path to the main README.rst."""
+#    def docscfg2lists(self):
+#        """Use to docs.cfg file to create lists."""
+#        config = configparser.ConfigParser()
 #        os.chdir(self.current_dir)
-#        os.chdir(self.up)
-#        readmedir = os.getcwd()
-#        main_readme = os.path.join(readmedir, 'README.rst')
-#        os.chdir(self.current_dir)
-#        return main_readme
+#        config.read('docs.cfg')
+#        sections = config.sections()
+#        cookiesfiles = []
+#        managerfiles = []
+#        orthologsfiles = []
+#        pipelinefiles = []
+#        toolsfiles = []
+#        for section in sections:
+#            for key in config[section]:
+#                if section == 'cookies':
+#                    cookiesfiles.append(config[section][key])
+#                elif section == 'manager':
+#                    managerfiles.append(config[section][key])
+#                elif section == 'orthologs':
+#                    orthologsfiles.append(config[section][key])
+#                elif section == 'pipeline':
+#                    pipelinefiles.append(config[section][key])
+#                elif section == 'tools':
+#                    toolsfiles.append(config[section][key])
+#        return (cookiesfiles, managerfiles, orthologsfiles, pipelinefiles,
+#                toolsfiles)
 #
 #    def getfiles2convert(self):
 #        """Get a list of files to convert."""
@@ -118,8 +109,30 @@
 #    def convertfiles(self):
 #        """Convert a list of files from .md to .rst."""
 #        files2convert = self.getfiles2convert()
+#        cookiesfiles, managerfiles, orthologsfiles, pipelinefiles, toolsfiles = self.docscfg2lists()
 #        for file2convert in files2convert:
-#            PandocConverter(file2convert, self.docs_source)
+#            splitfilepath = str(file2convert).split(os.sep)
+#            filename = str(splitfilepath[-2]).lower() + 'readme.rst'
+#            if filename in cookiesfiles:
+#                outpath = join(self.docs_source, 'cookies')
+#                PandocConverter(file2convert, outpath)
+#            elif filename in managerfiles:
+#                outpath = join(self.docs_source, 'manager')
+#                PandocConverter(file2convert, outpath)
+#            elif filename in orthologsfiles:
+#                outpath = join(self.docs_source, 'orthologs')
+#                PandocConverter(file2convert, outpath)
+#            elif filename in pipelinefiles:
+#                outpath = join(self.docs_source, 'pipeline')
+#                PandocConverter(file2convert, outpath)
+#            elif filename in toolsfiles:
+#                outpath = join(self.docs_source, 'tools')
+#                PandocConverter(file2convert, outpath)
+#            elif filename == 'orthoevolreadme.rst':
+#                outpath = join(self.docs_source, 'tutorial')
+#                PandocConverter(file2convert, outpath)
+#            else:
+#                pass
 #        self.createdocs_log.info('Your docs were converted to .rst format.')
 #
 #

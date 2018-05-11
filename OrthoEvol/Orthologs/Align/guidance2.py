@@ -9,6 +9,7 @@
 # license.  Please see the LICENSE file that should have been included
 # as part of this package.
 """Command line wrapper for GUIDANCE2
+
 It weights, filters or masks unreliably aligned positions in multiple sequence alignments."""
 
 from __future__ import print_function
@@ -18,7 +19,7 @@ import os
 
 
 class Guidance2Commandline(AbstractCommandline):
-    u""""Command line wrapper for GUIDANCE2.
+    """uCommand line wrapper for GUIDANCE2.
     http://guidance.tau.ac.il/ver2/
     Example:
     --------
@@ -36,7 +37,8 @@ class Guidance2Commandline(AbstractCommandline):
         Landan, G., and D. Graur. (2008).
         Local reliability measures from sets of co-optimal multiple sequence alignments.
         Pac Symp Biocomput 13:15-24
-    """
+        """
+
 
     def __init__(self, cmd="guidance", align=True, **kwargs):
         # order parameters in the same order as invoking guidance on the cmd line (e.g. 'perl guidance.pl')

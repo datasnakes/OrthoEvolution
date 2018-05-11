@@ -7,6 +7,7 @@ import subprocess
 
 class S2S(object):
     """S2S (Send 2 Server) is designed for use with a public ssh key."""
+
     # TIP Create a public key to use this class. It's easy!
     # TIP Go here if Linux >>> http://tinyurl.com/pccz3pj
 
@@ -41,7 +42,11 @@ class S2S(object):
                     self.cpto(self.comp_filename)
 
     def scpto(self, file):
-        """Send the file."""
+        """Send the file safely.
+
+        :param file:
+        """
+
         cmd = self.send_cmd
         status = subprocess.call([cmd], shell=True)
         if status == 0:  # Command was successful.
@@ -50,6 +55,11 @@ class S2S(object):
             print("%s file not sent." % file)
 
     def cpto(self, file):
+        """Send a file.
+
+        :param file:
+        """
+
         cmd = self.copy_cmd
         status = subprocess.call([cmd], shell=True)
         if status == 0:
@@ -58,6 +68,8 @@ class S2S(object):
             print("%s file not sent." % file)
 
     def to_zip(self):
+        """Zip a folder."""
+
         # XXX Inspired by http://tinyurl.com/y7uxn2dk
         comp_path = os.path.join(self.zip_path, self.comp_filename)
         zip_handle = zipfile.ZipFile(comp_path, 'w', zipfile.ZIP_DEFLATED)

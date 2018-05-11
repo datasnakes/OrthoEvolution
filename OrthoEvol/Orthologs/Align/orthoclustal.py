@@ -5,7 +5,7 @@ three or more sequences.
 from Bio.Align.Applications import ClustalOmegaCommandline
 from Bio.Application import ApplicationError
 
-from OrthoEvol.Tools import LogIt
+from OrthoEvol.Tools.logit import LogIt
 
 stop_codons = ['TAG', 'TAA', 'TGA']
 
@@ -15,10 +15,10 @@ class ClustalO(object):
 
     This class is a further wrapper around Biopython's ClustalOmegaCommandline.
 
-    :param infile:
-    :param outfile:
-    :param logpath:
-    :param outfmt:
+    :param infile: Path/Name of multiple fasta file.
+    :param outfile: Path/Name of multiple alignment file.
+    :param logpath: Path to logfile. (Default = None)
+    :param outfmt: Format of the output multiple alignment file.
     """
 
     def __init__(self, infile, outfile, logpath=None, outfmt="fasta"):
@@ -31,6 +31,7 @@ class ClustalO(object):
 
     def runclustalomega(self):
         """Run clustalomega."""
+
         try:
             # Run clustal omega using the multifasta file
             clustalo_cline = ClustalOmegaCommandline(infile=self.infile,

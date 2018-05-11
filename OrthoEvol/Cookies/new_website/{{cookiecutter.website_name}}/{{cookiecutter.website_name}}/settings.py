@@ -4,7 +4,7 @@ import os
 
 
 class Config(object):
-    """Base configuration."""
+    """Base configuration."""
 
     SECRET_KEY = os.environ.get('{{cookiecutter.website_name | upper}}_SECRET', 'secret-key')  # TODO: Change me
     APP_DIR = os.path.abspath(os.path.dirname(__file__))  # This directory
@@ -18,7 +18,7 @@ class Config(object):
 
 
 class ProdConfig(Config):
-    """Production configuration."""
+    """Production configuration."""
 
     ENV = 'prod'
     DEBUG = False
@@ -27,7 +27,7 @@ class ProdConfig(Config):
 
 
 class DevConfig(Config):
-    """Development configuration."""
+    """Development configuration."""
 
     ENV = 'dev'
     DEBUG = True
@@ -41,7 +41,7 @@ class DevConfig(Config):
 
 
 class TestConfig(Config):
-    """Test configuration."""
+    """Test configuration."""
 
     TESTING = True
     DEBUG = True

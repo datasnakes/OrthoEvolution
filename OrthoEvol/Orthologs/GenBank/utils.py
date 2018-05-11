@@ -5,25 +5,33 @@ import os
 from pathlib import Path
 from tempfile import TemporaryFile
 import itertools
+# TODO Incorporate logging
 
 
 def multi_fasta_manipulator(target_file, reference, output, manipulation='remove'):
-    # Inspired by the BioPython Tutorial and Cookbook ("20.1.1 Filtering a sequence file")
-    """
-    This method manipulated selected sequences in a multi-FASTA files.  The original
-    purpose was to filter files created by the GUIDANCE2 alignment program, but
-    the function has been made in order to accommodate other situations as well.
+    """Manipulate a multifasta file.
+
+    This method manipulated selected sequences in a multi-FASTA files.  The
+    original purpose was to filter files created by the GUIDANCE2 alignment
+    program, but the function has been made in order to accommodate other
+    situations as well.
 
     :param target_file:  Target multi-FASTA file.
     :param reference:  Selected sequences for removal in a multi-FASTA file.
-    :param manipulation:  Type of manipulation.  (remove, add, tbd..)
+    :param manipulation:  Type of manipulation. (Default value = 'remove')
     :param added_name:  The output file uses this parameter to name itself.
     :return:  A multi-FASTA file with filter sequences.
+
+    .. note: Inspired by the BioPython Tutorial and Cookbook ("20.1.1
+             Filtering a sequence file")
+
     """
+
     # Create path variables
     file_name = output
     new_file = Path(target_file).parent / Path(file_name)
-    # Create a new multi-fasta record object using the target_file, reference, and output
+    # Create a new multi-fasta record object using the target_file, reference,
+    # and output
     # Remove specific sequences from a fasta file
     if manipulation is 'remove':
         multi_fasta_remove(target_file, reference, new_file)
@@ -62,6 +70,13 @@ def multi_fasta_manipulator(target_file, reference, output, manipulation='remove
 
 
 def multi_fasta_remove(target_file, reference, new_file):
+    """Remove a sequence from a multifasta file.
+
+    :param target_file:  Target multi-FASTA file.
+    :param reference: Selected sequences for removal in a multi-FASTA file.
+    :param new_file:  Name of the resulting file.
+    """
+
     rem_file = new_file.stem + '_removed' + new_file.suffix
     rem_file = new_file.parent / Path(rem_file)
     # Turn the reference_file into set of ids
@@ -79,6 +94,13 @@ def multi_fasta_remove(target_file, reference, new_file):
 
 
 def muli_fasta_add(target_file, reference, new_file):
+    """Add a sequence/record to a multifasta file.
+
+    :param target_file:  Target multi-FASTA file.
+    :param reference:  Selected sequence to add to a multi-FASTA file.
+    :param new_file:  Name of the resulting file.
+    """
+
     # TODO-ROB:  Check for duplicates.
     # Concatenate the multifasta files together by chaining the SeqIO.parse generators
     # Allows one to overwrite a file by using temporary files for storage
@@ -96,6 +118,13 @@ def muli_fasta_add(target_file, reference, new_file):
 
 
 def multi_fasta_sort(target_file, reference, new_file):
+    """Sort a multifasta file.
+
+    :param target_file:  Target multi-FASTA file.
+    :param reference:
+    :param new_file:  Name of the resulting file.
+    """
+
     # TODO-ROB:  Check for duplicates.
     with TemporaryFile('r+', dir=str(Path(target_file).parent)) as tmp_file:
         aln = MultipleSeqAlignment([])
@@ -124,4 +153,3 @@ def multi_fasta_sort(target_file, reference, new_file):
     print('temp file count: ' + str(count))
     AlignIO.write(AlignIO.read(tmp_file, 'fasta'), str(new_file), 'fasta')
     print('Alignment has been sorted.')
-

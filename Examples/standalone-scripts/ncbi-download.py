@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 """This standalone script downloads files from NCBI's ftp."""
 from OrthoEvol.Tools.ftp import NcbiFTPClient
 import os

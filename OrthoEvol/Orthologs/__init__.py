@@ -1,6 +1,7 @@
 """This collection of modules is ideal for dealing with orthologous genes in
-Python. It has been built upon BioPython and ETE3 and provides a great blueprint
-for utilizing BioPython and ETE3 to achieve analysis of biological data.
+Python. It has been built upon BioPython and ETE3 and provides a great
+blueprint for utilizing BioPython and ETE3 to achieve analysis of biological
+data.
 """
 
 

@@ -8,18 +8,29 @@ from OrthoEvol.Tools.logit import LogIt
 
 
 class StreamIEO(object):
+    """Stream stdout or stderr of a command to the shell."""
 
     def __init__(self, logname):
+        """A class that individually threads the capture of the stdout stream and
+        the stderr stream of a system command.
+
+        The stdout/stderr are queued in the order they occur.  As the queue
+        populates another thread, parse the que and prints to the screen using
+        the LogIT class.
+
+        :param logname: The name of your log.
         """
-        A class that individually threads the capture of the stdout stream and the stderr stream of a system command.
-        The stdout/stderr are queued in the order they occur.  As the que populates another thread, parse the que and
-        prints to the screen using the LogIT class.
-        """
+
         self.io_q = Queue()
         self.process = None
         self.streamieolog = LogIt().default(logname="%s - streamieo" % logname, logfile=None)
 
     def streamer(self, cmd):
+        """Input a cmd to be streamed.
+
+        :param cmd:
+        """
+
         self.process = Popen(cmd, stdout=PIPE, stderr=PIPE, shell=True, encoding='utf-8')
         # Add the command line to the que
         self.io_q.put(("STDIN", cmd))
@@ -31,6 +42,12 @@ class StreamIEO(object):
         Thread(target=self._printer, name='_printer').start()
 
     def _stream_watcher(self, identifier, stream):
+        """Watch the stream of the command.
+
+        :param identifier:
+        :param stream:
+        """
+
         # Watch the stream and add to the que dynamically
         # This runs in tandem with the printer.  So as the stdout/stderr streams are queued here,
         # the que is parsed and printed in the printer function.
@@ -40,6 +57,8 @@ class StreamIEO(object):
             stream.close()
 
     def _printer(self):
+        """Print the standard err/out/in."""
+
         # Prints the que as it is populated with stdout/stderr dynamically.
         while True:
             try:

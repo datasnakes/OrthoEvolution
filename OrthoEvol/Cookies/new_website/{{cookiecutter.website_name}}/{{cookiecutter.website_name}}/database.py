@@ -9,35 +9,52 @@ relationship = db.relationship
 
 
 class CRUDMixin(object):
-    """Mixin that adds convenience methods for CRUD (create, read, update, delete) operations."""
+    """Mixin that adds convenience methods for CRUD (create, read, update, delete) operations."""
 
     @classmethod
     def create(cls, **kwargs):
-        """Create a new record and save it the database."""
+        """Create a new record and save it the database.
+
+        :param **kwargs: 
+
+        """
         instance = cls(**kwargs)
         return instance.save()
 
     def update(self, commit=True, **kwargs):
-        """Update specific fields of a record."""
+        """Update specific fields of a record.
+
+        :param commit:  (Default value = True)
+        :param **kwargs: 
+
+        """
         for attr, value in kwargs.items():
             setattr(self, attr, value)
         return commit and self.save() or self
 
     def save(self, commit=True):
-        """Save the record."""
+        """Save the record.
+
+        :param commit:  (Default value = True)
+
+        """
         db.session.add(self)
         if commit:
             db.session.commit()
         return self
 
     def delete(self, commit=True):
-        """Remove the record from the database."""
+        """Remove the record from the database.
+
+        :param commit:  (Default value = True)
+
+        """
         db.session.delete(self)
         return commit and db.session.commit()
 
 
 class Model(CRUDMixin, db.Model):
-    """Base model class that includes CRUD convenience methods."""
+    """Base model class that includes CRUD convenience methods."""
 
     __abstract__ = True
 
@@ -45,7 +62,7 @@ class Model(CRUDMixin, db.Model):
 # From Mike Bayer's "Building the app" talk
 # https://speakerdeck.com/zzzeek/building-the-app
 class SurrogatePK(object):
-    """A mixin that adds a surrogate integer 'primary key' column named ``id`` to any declarative-mapped class."""
+    """A mixin that adds a surrogate integer 'primary key' column named ``id`` to any declarative-mapped class."""
 
     __table_args__ = {'extend_existing': True}
 
@@ -53,7 +70,11 @@ class SurrogatePK(object):
 
     @classmethod
     def get_by_id(cls, record_id):
-        """Get record by ID."""
+        """Get record by ID.
+
+        :param record_id: 
+
+        """
         if any(
                 (isinstance(record_id, basestring) and record_id.isdigit(),
                  isinstance(record_id, (int, float))),
@@ -65,11 +86,17 @@ class SurrogatePK(object):
 def reference_col(tablename, nullable=False, pk_name='id', **kwargs):
     """Column that adds primary key foreign key reference.
 
-    Usage: ::
+Usage: ::
 
         category_id = reference_col('category')
-        category = relationship('Category', backref='categories')
-    """
+        category = relationship('Category', backref='categories')
+
+    :param tablename: 
+    :param nullable:  (Default value = False)
+    :param pk_name:  (Default value = 'id')
+    :param **kwargs: 
+
+    """
     return db.Column(
         db.ForeignKey('{0}.{1}'.format(tablename, pk_name)),
         nullable=nullable, **kwargs)
