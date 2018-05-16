@@ -1,52 +1,56 @@
 # -*- coding: utf-8 -*-
-# Copyright 2017 by Rob Gilmore and Shaurita Hutchins. All rights reserved.
+# Copyright 2018 by Rob Gilmore and Shaurita Hutchins. All rights reserved.
 # Based on ClustalOmega wrapper copyright 2011 by Andreas Wilm.
 #
-# Wrapper for Guidance2 by Rob Gilmore (2017).  http://guidance.tau.ac.il/ver2/
+# Wrapper for PAL2NAL by Rob Gilmore (2018).  http://www.bork.embl.de/pal2nal/
 # Used _ClustalOmega.py as template.
 #
 # This code is part of the Biopython distribution and governed by its
 # license.  Please see the LICENSE file that should have been included
 # as part of this package.
+
 """Command line wrapper for PAL2NAL.
 It converts a multiple sequence alignment of proteins and
-the corresponding DNA (or mRNA) sequences into a codon alignment."""
+the corresponding DNA (or mRNA) sequences into a codon alignment.
+"""
 
 
 from __future__ import print_function
-from pathlib import Path
+
+import os
 from Bio.Application import _Option, _Switch, AbstractCommandline, _Argument
 
 
-class Pal2NalCommandline(AbstractCommandline):
-    """uCommand line wrapper for PAL2NAL.
+class PAL2NALCommandline(AbstractCommandline):
+    """Command line wrapper for PAL2NAL.
     http://www.bork.embl.de/pal2nal/
-    Example:
-    --------
-    \>>> from Bio.Align.Applications import Pal2NalCommandline
-    You would typically run the command line with clustalomega_cline() or via
-        the Python subprocess module, as described in the Biopython tutorial.
-    Citation:
-    ---------
+    Notes
+    -----
+    Last checked against version: v14
+    References
+    ----------
     Mikita Suyama, David Torrents, and Peer Bork (2006)
     PAL2NAL: robust conversion of protein sequence alignments into the
-             corresponding codon alignments.
-    Nucleic Acids Res. 34, W609-W612.
+    corresponding codon alignments.
+    Nucleic Acids Research, 1 July 2006; 34: W609–W612;
+    https://doi.org/10.1093/nar/gkl315
+    Examples
+    --------
+    >>> from Bio.Align.Applications import PAL2NALCommandline
     """
 
     def __init__(self, cmd='pal2nal', **kwargs):
-        # order parameters in the same order as invoking guidance on the cmd line (e.g. 'perl guidance.pl')
         self.parameters = \
             [
                 # Required Parameters
                 _Argument(['pepaln'],
                           'protein alignment either in CLUSTAL or FASTA format',
                           filename=True, is_required=True,
-                          checker_function=lambda x: Path(x).is_file()),
+                          checker_function=lambda x: os.path.isfile(x)),
                 _Argument(['nucfasta'],
                           'DNA sequences (single multi-fasta or separated files)',
                           filename=True, is_required=True,
-                          checker_function=lambda x: Path(x).is_file()),
+                          checker_function=lambda x: os.path.isfile(x)),
                 _Switch(['-h', 'help'],
                         'Show help'),
                 _Option(['-output', 'output'],
