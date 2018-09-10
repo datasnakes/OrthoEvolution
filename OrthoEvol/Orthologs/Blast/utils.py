@@ -12,7 +12,6 @@ import pandas as pd
 import platform
 from warnings import warn
 import sqlite3
-from sqlalchemy import create_engine
 
 from OrthoEvol.Tools.logit import LogIt
 from OrthoEvol import OrthoEvolDeprecationWarning
@@ -403,8 +402,9 @@ def accession_csv2sqlite(acc_file, table_name, db_name, path):
     """
     acc_path = Path(path) / Path(acc_file)
     db_path = Path(path) / Path(db_name)
-    engine = create_engine('sqlite:////%s' % db_path)
-    with engine.connect() as conn, conn.begin():
+    with sqlite3.connect(str(db_path)) as conn:
+        print(acc_path)
+        print(db_path)
         df = pd.read_csv(acc_path, dtype=str)
         df.to_sql(name=table_name, con=conn, if_exists='replace', index=False)
 
