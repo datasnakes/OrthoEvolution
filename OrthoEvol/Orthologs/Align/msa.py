@@ -1,17 +1,18 @@
+# Standard Library
 import os
 import shutil
 import subprocess
 from pathlib import Path
+# BioPython
 from Bio import SeqIO
 from Bio.Align.Applications import ClustalOmegaCommandline
-
-from OrthoEvol.Tools import LogIt
-from OrthoEvol.Orthologs.utils import attribute_config
-from OrthoEvol.Orthologs.Align.guidance2 import Guidance2Commandline
-from OrthoEvol.Orthologs.Align.pal2nal import Pal2NalCommandline
-from OrthoEvol.Orthologs.Align.orthoclustal import ClustalO
+# OrthoEvol
+from OrthoEvol.Tools.logit import LogIt
+from OrthoEvol.utilities import FullUtilities
 from OrthoEvol.Orthologs.GenBank import GenBank
-from OrthoEvol.Orthologs.GenBank import multi_fasta_manipulator
+from OrthoEvol.Orthologs.Align.pal2nal import Pal2NalCommandline
+from OrthoEvol.Orthologs.Align.guidance2 import Guidance2Commandline
+from OrthoEvol.Orthologs.Align.orthoclustal import ClustalO
 
 
 class MultipleSequenceAlignment(object):
