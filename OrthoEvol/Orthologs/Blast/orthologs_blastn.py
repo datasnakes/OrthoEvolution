@@ -1,18 +1,19 @@
 """Optimized for use with local/standalone NCBI BLAST 2.6.0."""
+# Standard Library
 import os
-from xml.etree.ElementTree import ParseError
 import shutil
-from subprocess import run, PIPE, CalledProcessError
 import contextlib
-from datetime import datetime as d
 from pathlib import Path
+from datetime import datetime as d
+from subprocess import run, PIPE, CalledProcessError
+# BioPython
 from Bio.Application import ApplicationError
 from Bio import SearchIO  # Used for parsing and sorting XML files.
 from Bio.Blast.Applications import NcbiblastnCommandline
-
+# OrthoEvol
 from OrthoEvol.Orthologs.Blast.comparative_genetics import ComparativeGenetics
-from OrthoEvol.Orthologs.Blast.utils import gene_list_config, map_func
-
+# Other
+from xml.etree.ElementTree import ParseError
 
 # TODO-ROB: Find packages for script timing and analysis
 # TODO-ROB:  Rework the save_data parameter.

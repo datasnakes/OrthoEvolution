@@ -1,21 +1,23 @@
 """Helpful utilities for performing Blastn."""
+# Standard Library
 import os
 import csv
 import time
+import platform
+import sqlite3
 from datetime import datetime
+from warnings import warn
 # import shutil
 # import pkg_resources
 from importlib import import_module
 from multiprocessing.pool import ThreadPool
 from pathlib import Path
-import pandas as pd
-import platform
-from warnings import warn
-import sqlite3
-
+# OrthoEvol
 from OrthoEvol.Tools.logit import LogIt
 from OrthoEvol import OrthoEvolDeprecationWarning
-from OrthoEvol.Tools.otherutils import runcmd
+from OrthoEvol.Tools.otherutils import OtherUtils
+# Other
+import pandas as pd
 
 
 # Set up logging

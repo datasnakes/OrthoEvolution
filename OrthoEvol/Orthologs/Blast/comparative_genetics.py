@@ -1,23 +1,21 @@
 """Comparative Genetics Files"""
+# Standard Library
 import os
-from pathlib import Path
-import pandas as pd
 import shutil
 import time
 import copy
-# NCBITaxa().update_taxonomy_database()
 import pkg_resources
-from ete3 import NCBITaxa
-
+from pathlib import Path
+# OrthoEvol
 from OrthoEvol.Manager.config import data
-# from pandas import ExcelWriter
 from OrthoEvol.Manager.management import ProjectManagement
-from OrthoEvol.Orthologs.utils import attribute_config
-from OrthoEvol.Orthologs.Blast.utils import (my_gene_info, get_dup_acc,
-                                              get_miss_acc, accession_sqlite2pandas)
+from OrthoEvol.utilities import FullUtilities
 from OrthoEvol.Tools.logit import LogIt
-from OrthoEvol.Tools.otherutils.other_utils import safe_open
-
+# Other
+import pandas as pd
+from ete3 import NCBITaxa
+# from pandas import ExcelWriter
+# NCBITaxa().update_taxonomy_database()
 
 # TODO-ROB Create function for archiving and multiple runs (this can go
 # into the Management class)
