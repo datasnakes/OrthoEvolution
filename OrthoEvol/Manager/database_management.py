@@ -36,6 +36,8 @@ class BaseDatabaseManagement(object):
         :type proj_mana: ProjectManagement.
         """
 
+        # Initialize Utilities
+        self.db_mana_utils = FullUtilities()
         self.db_mana_log = LogIt().default(logname="DatabaseManagement", logfile=None)
         self.project = project
         self.email = email
@@ -48,7 +50,7 @@ class BaseDatabaseManagement(object):
 
         # Configuration of class attributes for Project Management.
         if proj_mana:
-            add_self = attribute_config(self, composer=proj_mana, checker=ProjectManagement, project=project, project_path=project_path)
+            add_self = self.db_mana_utils.attribute_config(self, composer=proj_mana, checker=ProjectManagement, project=project, project_path=project_path)
             for var, attr in add_self.__dict__.items():
                 setattr(self, var, attr)
             self.database_path = self.user_db
@@ -226,7 +228,7 @@ class DatabaseManagement(BaseDatabaseManagement):
     # TODO-ROB: Figure this out for the case of a user.  Because there doesn't necessarily have to be a project
     def __init__(self, config_file, proj_mana=ProjectManagement, **kwargs):
 
-        self.db_config_strategy, kw = parse_db_config_file(config_file)
+        self.db_config_strategy, kw = self.db_mana_utils.parse_db_config_file(config_file)
         super().__init__(proj_mana=proj_mana, **kw)
         self.strategy_dispatcher = {}
         self.strategy_config = {}
@@ -333,7 +335,7 @@ class DatabaseManagement(BaseDatabaseManagement):
             NCBI_blast["archive_flag"] = None
             NCBI_pub_taxonomy["archive_flag"] = None
             NCBI_refseq_release["archive_flag"] = None
-            ncbi_dispatcher["NCBI"].append(archive)
+            ncbi_dispatcher["NCBI"].append(self.db_mana_utils.archive)
             ncbi_config["NCBI"].append({
                 "database_path": database_path,
                 "archive_path": archive_path,
@@ -380,7 +382,7 @@ class DatabaseManagement(BaseDatabaseManagement):
             NCBI_blast_db["archive_flag"] = None
             NCBI_blast_windowmasker_files["archive_flag"] = None
             ncbi_blast_dispatcher = {"NCBI_blast": []}
-            ncbi_blast_dispatcher["NCBI_blast"].append(archive)
+            ncbi_blast_dispatcher["NCBI_blast"].append(self.db_mana_utils.archive)
             ncbi_blast_config = {"NCBI_blast": []}
             ncbi_blast_config["NCBI_blast"].append({
                 "database_path": database_path,
@@ -411,7 +413,7 @@ class DatabaseManagement(BaseDatabaseManagement):
             archive_path = str(self.user_archive)
         # Archive.  If necessary, then delete.
         if archive_flag:
-            nbd_dispatcher["NCBI_blast_db"].append(archive)
+            nbd_dispatcher["NCBI_blast_db"].append(self.db_mana_utils.archive)
             nbd_config["NCBI_blast_db"].append({
                 "database_path": database_path,
                 "archive_path": archive_path,
@@ -436,7 +438,7 @@ class DatabaseManagement(BaseDatabaseManagement):
         if not database_path:
             database_path = str(self.user_db)
         if archive_flag:
-            nbw_dispatcher["NCBI_blast_windowmasker_files"].append(archive)
+            nbw_dispatcher["NCBI_blast_windowmasker_files"].append(self.db_mana_utils.archive)
             nbw_config["NCBI_blast_windowmasker_files"].append({
                 "database_path": database_path,
                 "archive_path": archive_path,
@@ -459,7 +461,7 @@ class DatabaseManagement(BaseDatabaseManagement):
         if not database_path:
             database_path = str(self.user_db)
         if archive_flag:
-            npt_dispatcher["NCBI_pub_taxonomy"].append(archive)
+            npt_dispatcher["NCBI_pub_taxonomy"].append(self.db_mana_utils.archive)
             npt_config["NCBI_pub_taxonomy"].append({
                 "database_path": database_path,
                 "archive_path": archive_path,
@@ -483,7 +485,7 @@ class DatabaseManagement(BaseDatabaseManagement):
         if not database_path:
             database_path = str(self.user_db)
         if archive_flag:
-            nrr_dispatcher["NCBI_refseq_release"]["archive"].append(archive)
+            nrr_dispatcher["NCBI_refseq_release"]["archive"].append(self.db_mana_utils.archive)
             nrr_config["NCBI_refseq_release"]["archive"].append({
                 "database_path": database_path,
                 "archive_path": archive_path,
@@ -514,7 +516,7 @@ class DatabaseManagement(BaseDatabaseManagement):
             add_to_default = 0
             for sub_list in sub_upload_lists:
                 add_to_default += 1
-                nrr_dispatcher["NCBI_refseq_release"]["upload"].append(refseq_jobber)
+                nrr_dispatcher["NCBI_refseq_release"]["upload"].append(self.db_mana_utils.refseq_jobber)
                 code_dict_string = str({
                     "collection_subset": collection_subset,
                     "seqtype": seqtype,
@@ -557,7 +559,7 @@ class DatabaseManagement(BaseDatabaseManagement):
             ITIS_taxonomy["delete_flag"] = None
             ITIS_taxonomy["archive_flag"] = None
             itis_dispatcher = {"ITIS": []}
-            itis_dispatcher["ITIS"].append(archive)
+            itis_dispatcher["ITIS"].append(self.db_mana_utils.archive)
             itis_config = {"ITIS": []}
             itis_config["ITIS"].append({
                 "database_path": database_path,
