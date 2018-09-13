@@ -80,7 +80,7 @@ class OrthoBlastN(ComparativeGenetics):
 
         # CONFIGURE and UPDATE the gene_list based on the existence of an
         # incomplete blast file
-        gene_list = gene_list_config(self.building_file_path, self.data,
+        gene_list = self.blast_utils.gene_list_config(self.building_file_path, self.data,
                                      self.gene_list, self.taxon_dict,
                                      self.blastn_log)
         if gene_list is not None:
@@ -156,7 +156,7 @@ class OrthoBlastN(ComparativeGenetics):
 
         with open(file_path, 'r') as blast_xml:
             blast_qresult = SearchIO.read(blast_xml, 'blast-xml')
-            mapped_qresult = blast_qresult.hit_map(map_func)  # Map the hits
+            mapped_qresult = blast_qresult.hit_map(self.blast_utils.map_func)  # Map the hits
 
             for hit in mapped_qresult:
                 for hsp in hit.hsps:
