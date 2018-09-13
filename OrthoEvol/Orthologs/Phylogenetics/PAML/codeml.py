@@ -1,10 +1,11 @@
+# Standard Library
 import os
 from pathlib import Path
 from shutil import copy
-
 import pkg_resources
+# BioPython
 from Bio.Phylo.PAML import codeml
-
+# OrthoEvol
 from OrthoEvol.Manager.config import paml_control_files
 
 

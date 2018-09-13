@@ -1,12 +1,15 @@
+# Standard Library
 import os
 from shutil import copy
 from subprocess import check_call, STDOUT
-
 from pathlib import Path
+# OrthoEvol
 from OrthoEvol.Orthologs.Phylogenetics.IQTree.iqtree import IQTreeCommandline
-from OrthoEvol.Tools.utils import makedirectory
+from OrthoEvol.utilities import FullUtilities
 #TODO-ROB Make this inherit FilteredAlignment
 
+# Set up make directory function
+makedirectory = FullUtilities().makedirectory
 
 class FilteredTree(object):
     """# TODO Insert Doctring """
