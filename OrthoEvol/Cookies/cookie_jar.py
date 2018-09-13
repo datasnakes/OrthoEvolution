@@ -1,16 +1,16 @@
+# Standard Library
 import os
-import pkg_resources
-import yaml
-from cookiecutter.main import cookiecutter
-from cookiecutter.prompt import prompt_for_config
-from cookiecutter.generate import generate_context
-from cookiecutter.hooks import run_script
 from pathlib import Path
+from pkg_resources import resource_filename
+# OrthoEvol
 from OrthoEvol import Cookies
 from OrthoEvol.Tools.logit import LogIt
 from OrthoEvol.Manager.config import yml
-from pkg_resources import resource_filename
-from OrthoEvol.Cookies.utils import archive
+# from OrthoEvol.Cookies.utils import archive
+# Other
+import yaml
+from cookiecutter.main import cookiecutter
+from cookiecutter.hooks import run_script
 
 
 class CookBook(object):
@@ -27,7 +27,7 @@ class CookBook(object):
 
         New Recipes can also be added...
         """
-        self.CookieJar = Path(pkg_resources.resource_filename(Cookies.__name__, ''))
+        self.CookieJar = Path(resource_filename(Cookies.__name__, ''))
         self.repo_cookie = self.CookieJar / Path('new_repository')
         self.user_cookie = self.CookieJar / Path('new_user')
         self.project_cookie = self.CookieJar / Path('new_project')
