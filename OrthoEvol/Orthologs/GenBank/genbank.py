@@ -32,6 +32,7 @@ class GenBank(object):
         """
 
         # TODO-ROB: Change the way the file systems work.
+        self.genbank_utils = FullUtilities()
         self.project = project
         self.solo = solo
         self.multi = multi
@@ -39,7 +40,7 @@ class GenBank(object):
         self.genbanklog = LogIt().default(logname="GenBank", logfile=None)
 
         # Configuration of class attributes
-        add_self = attribute_config(self, composer=blast, checker=OrthoBlastN, checker2=BaseComparativeGenetics,
+        add_self = self.genbank_utils.attribute_config(self, composer=blast, checker=OrthoBlastN, checker2=BaseComparativeGenetics,
                                     project=project, project_path=project_path)
         for var, attr in add_self.__dict__.items():
             setattr(self, var, attr)
@@ -55,7 +56,7 @@ class GenBank(object):
                 self.db_files_list.append(str(FILE))
 
     @staticmethod
-    def name_fasta_file(path, gene, org, feat_type, feat_type_rank, extension, mode):
+    def name_fasta_file(self, path, gene, org, feat_type, feat_type_rank, extension, mode):
         """
         Provide a uniquely named FASTA file:
         * Coding sequence:
@@ -92,7 +93,7 @@ class GenBank(object):
             file_path = feat_path / Path(multi % (gene, feat_type_rank, extension))
 
         # Make the base directory and return an open file.
-        makedirectory(feat_path)
+        self.genbank_utils.makedirectory(feat_path)
         file = open(file_path, mode)
         return file
 
