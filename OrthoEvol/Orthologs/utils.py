@@ -1,6 +1,11 @@
+# Standard Library
 from pathlib import Path
+# OrthoEvol
 from OrthoEvol.Cookies.cookie_jar import Oven
 from OrthoEvol.Tools.logit import LogIt
+from .GenBank.utils import GenbankUtils
+from .Blast.utils import BlastUtils
+
 
 class OrthologUtils(BlastUtils, GenbankUtils):
 
