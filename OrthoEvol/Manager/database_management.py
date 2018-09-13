@@ -1,17 +1,17 @@
-from pathlib import Path
+# Standard Library
 import os
 import urllib.request
 import tarfile
 from importlib import import_module
-from OrthoEvol.Manager.management import ProjectManagement
-from OrthoEvol.Orthologs.utils import attribute_config
-from OrthoEvol.Cookies.utils import archive
-from OrthoEvol.Tools.ftp import NcbiFTPClient
-from OrthoEvol.Tools.sge import SGEJob
+from pathlib import Path
+# OrthoEvol
 from OrthoEvol.Tools.logit import LogIt
+from OrthoEvol.Tools.ftp import NcbiFTPClient
+from OrthoEvol.utilities import FullUtilities
 from OrthoEvol.Manager.BioSQL import biosql
-from OrthoEvol.Manager.utils import parse_db_config_file, refseq_jobber
+from OrthoEvol.Manager.management import ProjectManagement
 from OrthoEvol.Orthologs.Blast.comparative_genetics import BaseComparativeGenetics
+from OrthoEvol.Tools.sge import SGEJob
 
 
 class BaseDatabaseManagement(object):

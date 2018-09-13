@@ -1,9 +1,11 @@
+# Standard Library
 import re
 import textwrap as twrap
 from pathlib import Path
-
-from OrthoEvol.Manager.config import references
 from pkg_resources import resource_filename
+# OrthoEvol
+from OrthoEvol.Manager.config import references
+
 
 
 # Based off of https://github.com/etetoolkit/ete/blob/master/ete3/citation.py

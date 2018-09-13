@@ -1,17 +1,18 @@
-import pkg_resources
-from pathlib import Path
+# Standard Library
 import os
 import subprocess
+import pkg_resources
+from pathlib import Path
+# BioPython
 from BioSQL import BioSeqDatabase
 from Bio import SeqIO
 # OrthoEvol
 from OrthoEvol.utilities import FullUtilities
 from OrthoEvol.Tools.logit import LogIt
+from OrthoEvol.Tools.streamieo import StreamIEO
+from OrthoEvol.Manager.management import ProjectManagement
 from OrthoEvol.Manager.BioSQL.biosql_repo import sql
 from OrthoEvol.Manager.BioSQL.biosql_repo import scripts as sql_scripts
-from OrthoEvol.Manager.management import ProjectManagement
-from OrthoEvol.Orthologs.utils import attribute_config
-from OrthoEvol.Tools.streamieo import StreamIEO
 
 
 class BaseBioSQL(object):
