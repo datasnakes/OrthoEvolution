@@ -9,7 +9,9 @@ Built upon Alex Couper's `bash` package. (https://github.com/alexcouper/bash)
 import platform
 import sys
 
-from OrthoEvol.Tools import runcmd
+from OrthoEvol.utilities import FullUtilities
+# Set up run cmd function
+runcmd = FullUtilities().runcmd
 
 SUBPROCESS_HAS_TIMEOUT = True
 

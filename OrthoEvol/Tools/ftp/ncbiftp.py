@@ -1,13 +1,18 @@
 """Class to access NCBI's ftp server and easily download databases."""
-import tarfile
-import re
-from time import time
-from datetime import datetime
-from multiprocessing.pool import ThreadPool
+# Standard Library
 import os
-from pathlib import Path
+import re
 import shutil
 import gzip
+import tarfile
+from time import time
+from pathlib import Path
+from datetime import datetime
+from multiprocessing.pool import ThreadPool
+# OrthoEvol
+from OrthoEvol.Tools.ftp.baseftp import BaseFTPClient
+from OrthoEvol.Tools.logit import LogIt
+# Other
 from ftplib import error_perm, all_errors
 # from progress.bar import Bar
 # TODO Create a progress bar; Integrate with Threading/downloading
