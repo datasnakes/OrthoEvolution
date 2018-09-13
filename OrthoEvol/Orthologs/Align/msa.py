@@ -39,6 +39,9 @@ class MultipleSequenceAlignment(object):
         self.pal2nallog = __log.default('pal2nal', __logfile)
         self.clustalolog = __log.default('clustalo', __logfile)
 
+        # Initialize Utilities
+        self.msa_utils = FullUtilities()
+
         # stop_codons = ['TAG', 'TAA', 'TGA']
 
         self.program = None
@@ -48,7 +51,7 @@ class MultipleSequenceAlignment(object):
             self.project_path = Path(project_path) / Path(project)
 
         # Configuration of class attributes
-        add_self = attribute_config(self, composer=genbank, checker=GenBank, project=project, project_path=project_path)
+        add_self = self.msa_utils.attribute_config(self, composer=genbank, checker=GenBank, project=project, project_path=project_path)
         for var, attr in add_self.__dict__.items():
             setattr(self, var, attr)
 
@@ -153,7 +156,7 @@ class MultipleSequenceAlignment(object):
 
                     # Filter the input NA fasta file using Guidance output
                     # Creates the g2_seqFile
-                    multi_fasta_manipulator(seqFile, g2_rem_file, g2_seqFile, manipulation='remove')  # Do after copying (iter_1) or adding (iter_n)
+                    self.msa_utils.multi_fasta_manipulator(seqFile, g2_rem_file, g2_seqFile, manipulation='remove')  # Do after copying (iter_1) or adding (iter_n)
                     iterFlag = True
 
                 elif set_iter >= iteration > 1:
@@ -181,15 +184,15 @@ class MultipleSequenceAlignment(object):
                     # If sequences are removed, then iterate again on the "good" sequences
                     if rem_count > 0:
                         # Add new sequences to the rem_file
-                        multi_fasta_manipulator(rem_file, g2_rem_file, rem_file, manipulation='add')
+                        self.msa_utils.multi_fasta_manipulator(rem_file, g2_rem_file, rem_file, manipulation='add')
                         # Filter the input fasta file using the updated rem_file
-                        multi_fasta_manipulator(seqFile, rem_file, g2_seqFile, manipulation='remove')
+                        self.msa_utils.multi_fasta_manipulator(seqFile, rem_file, g2_seqFile, manipulation='remove')
                         iterFlag = True
                     # If sequences aren't removed, then stop iterating
                     if rem_count < 0 or set_iter == iteration:
                         filtered_alignment = Path(iterDir) / Path('%s.%s.aln.Sorted.With_Names' % (dataset, msaProgram))
                         renamed_alignment = shutil.copy(str(filtered_alignment), g2_alnFile)
-                        multi_fasta_manipulator(str(renamed_alignment), str(seqFile), str(renamed_alignment), manipulation='sort')
+                        self.msa_utils.multi_fasta_manipulator(str(renamed_alignment), str(seqFile), str(renamed_alignment), manipulation='sort')
                         iterFlag = False
 
             if columnFilter is not None:
@@ -202,7 +205,7 @@ class MultipleSequenceAlignment(object):
                                              rprScores=g2_rprScores, output=g2_maskedFile, **kwargs)
                 self.alignmentlog.info(G2Cmd)
                 subprocess.check_call([str(G2Cmd)], stderr=subprocess.STDOUT, shell=True)
-                multi_fasta_manipulator(g2_maskedFile, str(seqFile), g2_maskedFile, manipulation='sort')
+                self.msa_utils.multi_fasta_manipulator(g2_maskedFile, str(seqFile), g2_maskedFile, manipulation='sort')
 
         # Only COLUMN FILTER the bad columns
         elif columnFilter is not None:
@@ -223,7 +226,7 @@ class MultipleSequenceAlignment(object):
                                          rprScores=kwargs['rprScores'], output=kwargs['maskedFile'], **kwargs)
             self.guidancelog.info(G2Cmd)
             subprocess.check_call([str(G2Cmd)], stderr=subprocess.STDOUT, shell=True)
-            multi_fasta_manipulator(kwargs['maskedFile'], str(seqFile), kwargs['maskedFile'], manipulation='sort')
+            self.msa_utils.multi_fasta_manipulator(kwargs['maskedFile'], str(seqFile), kwargs['maskedFile'], manipulation='sort')
 
     def pal2nal(self, aa_alignment, na_fasta, output_type='paml', nogap=True, nomismatch=True, downstream='paml'):
         """
@@ -272,8 +275,8 @@ class MultipleSequenceAlignment(object):
                 for err in error:
                     if '>' in err:
                         removed.append(err.strip('>' '\n'))
-                multi_fasta_manipulator(na_fasta, removed, na_fasta)
-                multi_fasta_manipulator(aa_alignment, removed, aa_alignment)
+                self.msa_utils.multi_fasta_manipulator(na_fasta, removed, na_fasta)
+                self.msa_utils.multi_fasta_manipulator(aa_alignment, removed, aa_alignment)
 
             # If no errors then break the while loop
             else:
