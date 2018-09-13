@@ -1,15 +1,16 @@
 """Class for managing, downloading and extracting features from genbank files."""
+# Standard Library
 import os
 import shutil
 from pathlib import Path
+# BioPython
 from BioSQL import BioSeqDatabase
 from Bio import SeqIO
-
+# OrthoEvol
 from OrthoEvol.Tools.logit import LogIt
-from OrthoEvol.Orthologs.utils import attribute_config
 from OrthoEvol.Orthologs.Blast.orthologs_blastn import OrthoBlastN
-from OrthoEvol.Tools.otherutils.other_utils import makedirectory
 from OrthoEvol.Orthologs.Blast.comparative_genetics import BaseComparativeGenetics
+from OrthoEvol.utilities import FullUtilities
 
 
 class GenBank(object):

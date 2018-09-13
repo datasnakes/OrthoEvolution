@@ -1,10 +1,13 @@
-from Bio import SeqIO
-from Bio import AlignIO
-from Bio.Align import MultipleSeqAlignment
+# Standard Library
 import os
 from pathlib import Path
 from tempfile import TemporaryFile
 import itertools
+# BioPython
+from Bio import SeqIO
+from Bio import AlignIO
+from Bio.Align import MultipleSeqAlignment
+
 
 class GenbankUtils(object):
 
