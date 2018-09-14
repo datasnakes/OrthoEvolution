@@ -1,4 +1,4 @@
-from OrthoEvol.Orthologs.Blast import OrthoBlastN, BaseBlastN
+from OrthoEvol.Orthologs.Blast import BaseBlastN
 
 # This is more pythonic with YAML loading
 blastconfig = {
@@ -16,5 +16,5 @@ blastconfig = {
 }
 
 
-myblast = BaseBlastN(**blastconfig)
-myblast.blast_config(myblast.blast_human, 'Homo_sapiens', auto_start=True)
+test_blast = BaseBlastN(**blastconfig)
+test_blast.blast_config(test_blast.blast_human, 'Homo_sapiens', auto_start=True)
