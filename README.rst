@@ -94,8 +94,3 @@ computational molecular biology and bioinformatics. Bioinformatics 2009
 Jun 1; 25(11) 1422-3 http://dx.doi.org/10.1093/bioinformatics/btp163
 pmid:19304878*
 
-<!--
-License
-----------------
-`MIT <https://github.com/datasnakes/OrthoEvolution/blob/master/LICENSE>`_
--->
