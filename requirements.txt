@@ -20,4 +20,4 @@ sciluigi==0.9.5b6
 logzero>=1.2.1
 xmltodict>=0.11.0
 pyyaml>=3.12
-tdqm>=4.19.5
+tdqm>=4.26.0
