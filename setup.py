@@ -41,7 +41,6 @@ setup(
     url='https://github.com/datasnakes/OrthoEvolution',
     license='MIT',
     keywords='bioinformatics science evolution orthology psychiatry genetics',
-    download_url='',
     classifiers=[
         'Development Status :: 3 - Alpha',
         'Intended Audience :: Science/Research',
@@ -56,7 +55,6 @@ setup(
         'Programming Language :: Python :: 3.5',
         'Programming Language :: Python :: 3.6',
         'Framework :: Flask',
-        'Framework :: R-Shiny',
         'Framework :: Cookiecutter'
     ],
     # Packages will be automatically found if not in this list.
@@ -67,6 +65,11 @@ setup(
                 'orthoevol=OrthoEvol.Orthologs.command_line:main'
         ]
     },
+    project_urls={
+            'Documentation': 'https://orthoevolution.readthedocs.io/',
+            'Releases': 'https://github.com/datasnakes/OrthoEvolution/releases',
+            'Issues': 'https://github.com/datasnakes/OrthoEvolution/issues',
+            },
     zip_safe=False,
     test_suite='nose.collector',
     tests_require=['nose']
