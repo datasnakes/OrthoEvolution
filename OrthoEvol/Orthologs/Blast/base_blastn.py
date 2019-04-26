@@ -1,17 +1,19 @@
 """Optimized for use with local/standalone NCBI BLAST 2.6.0."""
+# Standard Library
 import os
-from xml.etree.ElementTree import ParseError
 import shutil
-from subprocess import run, PIPE, CalledProcessError
 import contextlib
+from subprocess import run, PIPE, CalledProcessError
 from datetime import datetime as d
 from pathlib import Path
+# BioPython
 from Bio.Application import ApplicationError
 from Bio import SearchIO  # Used for parsing and sorting XML files.
 from Bio.Blast.Applications import NcbiblastnCommandline
-
+# OrthoEvol
 from OrthoEvol.Orthologs.Blast.comparative_genetics import ComparativeGenetics
-from OrthoEvol.Orthologs.Blast.utils import gene_list_config, map_func
+# Other
+from xml.etree.ElementTree import ParseError
 
 
 class BaseBlastN(ComparativeGenetics):
@@ -60,7 +62,6 @@ class BaseBlastN(ComparativeGenetics):
         self.complete_time_file = self.project + '_TIME.csv'
         self.complete_time_file_path = self.data / Path(self.complete_time_file)
 
-
         self.blastn_parameters = self.blast_method_selection(method=blast_method)
 
     def blast_method_selection(self, method):
@@ -107,7 +108,7 @@ class BaseBlastN(ComparativeGenetics):
 
         # CONFIGURE and UPDATE the gene_list based on the existence of an
         # incomplete blast file
-        gene_list = gene_list_config(self.building_file_path, self.data,
+        gene_list = self.blast_utils.gene_list_config(self.building_file_path, self.data,
                                      self.gene_list, self.taxon_dict,
                                      self.blastn_log)
         if gene_list is not None:
@@ -183,7 +184,7 @@ class BaseBlastN(ComparativeGenetics):
 
         with open(file_path, 'r') as blast_xml:
             blast_qresult = SearchIO.read(blast_xml, 'blast-xml')
-            mapped_qresult = blast_qresult.hit_map(map_func)  # Map the hits
+            mapped_qresult = blast_qresult.hit_map(self.blast_utils.map_func)  # Map the hits
 
             for hit in mapped_qresult:
                 for hsp in hit.hsps:

@@ -1,15 +1,18 @@
-import pkg_resources
-from pathlib import Path
+# Standard Library
 import os
 import subprocess
+import pkg_resources
+from pathlib import Path
+# BioPython
 from BioSQL import BioSeqDatabase
 from Bio import SeqIO
+# OrthoEvol
+from OrthoEvol.utilities import FullUtilities
 from OrthoEvol.Tools.logit import LogIt
+from OrthoEvol.Tools.streamieo import StreamIEO
+from OrthoEvol.Manager.management import ProjectManagement
 from OrthoEvol.Manager.BioSQL.biosql_repo import sql
 from OrthoEvol.Manager.BioSQL.biosql_repo import scripts as sql_scripts
-from OrthoEvol.Manager.management import ProjectManagement
-from OrthoEvol.Orthologs.utils import attribute_config
-from OrthoEvol.Tools.streamieo import StreamIEO
 
 
 class BaseBioSQL(object):
@@ -30,6 +33,9 @@ class BaseBioSQL(object):
         self.biosqllog = LogIt().default(logname="BioSQL", logfile=None)
         self.biosqlstream = StreamIEO(logname="BioSQL")
 
+        # Initialize utilities
+        self.biosql_utils = FullUtilities()
+
         # Load relative and absolute paths to scripts in the BioSQL module
         self.scripts = pkg_resources.resource_filename(sql_scripts.__name__, "")
         self.ncbi_taxon_script = pkg_resources.resource_filename(sql_scripts.__name__, "load_ncbi_taxonomy.pl")
@@ -40,7 +46,7 @@ class BaseBioSQL(object):
         if project_path and project:
             self.project_path = Path(project_path) / Path(project)
         if proj_mana:
-            add_self = attribute_config(self, composer=proj_mana, checker=ProjectManagement, project=project, project_path=project_path)
+            add_self = self.biosql_utils.attribute_config(self, composer=proj_mana, checker=ProjectManagement, project=project, project_path=project_path)
             for var, attr in add_self.__dict__.items():
                 setattr(self, var, attr)
             self.template_rel_path = self.user_index

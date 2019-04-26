@@ -1,23 +1,21 @@
 """Comparative Genetics Files"""
+# Standard Library
 import os
-from pathlib import Path
-import pandas as pd
 import shutil
 import time
 import copy
-# NCBITaxa().update_taxonomy_database()
 import pkg_resources
-from ete3 import NCBITaxa
-
+from pathlib import Path
+# OrthoEvol
 from OrthoEvol.Manager.config import data
-# from pandas import ExcelWriter
 from OrthoEvol.Manager.management import ProjectManagement
-from OrthoEvol.Orthologs.utils import attribute_config
-from OrthoEvol.Orthologs.Blast.utils import (my_gene_info, get_dup_acc,
-                                              get_miss_acc, accession_sqlite2pandas)
+from OrthoEvol.utilities import FullUtilities
 from OrthoEvol.Tools.logit import LogIt
-from OrthoEvol.Tools.otherutils.other_utils import safe_open
-
+# Other
+import pandas as pd
+from ete3 import NCBITaxa
+# from pandas import ExcelWriter
+# NCBITaxa().update_taxonomy_database()
 
 # TODO-ROB Create function for archiving and multiple runs (this can go
 # into the Management class)
@@ -80,11 +78,14 @@ class BaseComparativeGenetics(object):
         self.get_time = time.time
         self.sep = 50*'*'
 
+        # Initialize Utilities
+        self.blast_utils = FullUtilities()
+
         if project_path and project:
             self.project_path = Path(project_path) / Path(project)
 
         # Configuration of class attributes.
-        add_self = attribute_config(self, composer=proj_mana, checker=ProjectManagement, project=project, project_path=project_path)
+        add_self = self.blast_utils.attribute_config(self, composer=proj_mana, checker=ProjectManagement, project=project, project_path=project_path)
         for variable, attribute in add_self.__dict__.items():
             setattr(self, variable, attribute)
 
@@ -130,7 +131,7 @@ class BaseComparativeGenetics(object):
             self.blast_rhesus = []
 
             # Handles for different dataframe initializations
-            self.raw_acc_data = accession_sqlite2pandas(self.acc_sqlite_tablename, self.acc_sqlite_filename,
+            self.raw_acc_data = self.blast_utils.accession_sqlite2pandas(self.acc_sqlite_tablename, self.acc_sqlite_filename,
                                                         path=self.project_index, acc_file=self.acc_csv_filename)
 
             # Master accession file for the blast
@@ -259,14 +260,14 @@ class BaseComparativeGenetics(object):
 
         # Pre-Blast gene analysis
         if self.__pre_blast is True:
-            self.mygene_df = my_gene_info(acc_dataframe=copy.deepcopy(self.raw_acc_data))
+            self.mygene_df = self.blast_utils.my_gene_info(acc_dataframe=copy.deepcopy(self.raw_acc_data))
             self.mygene_df.to_csv(self.mygene_path, index=False)
 
         # Post-Blast accession analysis
         if self.__post_blast:
 
             # Missing
-            self.missing_dict = get_miss_acc(acc_dataframe=copy.deepcopy(self.raw_acc_data))
+            self.missing_dict = self.blast_utils.get_miss_acc(acc_dataframe=copy.deepcopy(self.raw_acc_data))
             self.missing_genes = self.missing_dict['genes']
             self.missing_gene_count = self.missing_genes['count']
             del self.missing_genes['count']
@@ -275,7 +276,7 @@ class BaseComparativeGenetics(object):
             del self.missing_organsims['count']
 
             # Duplicates
-            self.duplicated_dict = get_dup_acc(self.acc_dict, self.gene_list,
+            self.duplicated_dict = self.blast_utils.get_dup_acc(self.acc_dict, self.gene_list,
                                                self.org_list)
             self.duplicated_accessions = self.duplicated_dict['accessions']
             self.duplicated_organisms = self.duplicated_dict['organisms']

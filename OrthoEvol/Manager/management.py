@@ -1,8 +1,9 @@
 """Directory management tools for the package."""
+# Standard Library
 import os
 from pathlib import Path
 import pkg_resources
-
+# OrthoEvol
 from OrthoEvol import Cookies, Orthologs, Manager, Tools
 from OrthoEvol.Cookies import Oven
 from OrthoEvol.Tools.logit import LogIt

@@ -1,8 +1,10 @@
 import os
 from ete3 import EvolTree, Tree
 
-from OrthoEvol.Tools.otherutils import csvtolist
+from OrthoEvol.utilities import FullUtilities
 
+# Set up csv to list function
+csvtolist = FullUtilities().csvtolist
 
 class ETE3PAML(object):
     """Integration of ETE3 for using PAML's codeml.
