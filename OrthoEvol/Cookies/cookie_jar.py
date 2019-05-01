@@ -1,16 +1,18 @@
 # Standard Library
 import os
 from pathlib import Path
-from pkg_resources import resource_filename
-# OrthoEvol
-from OrthoEvol import Cookies
-from OrthoEvol.Tools.logit import LogIt
-from OrthoEvol.Manager.config import yml
+
 # from OrthoEvol.Cookies.utils import archive
 # Other
 import yaml
-from cookiecutter.main import cookiecutter
 from cookiecutter.hooks import run_script
+from cookiecutter.main import cookiecutter
+from pkg_resources import resource_filename
+
+# OrthoEvol
+from OrthoEvol import Cookies
+from OrthoEvol.Manager.config import yml
+from OrthoEvol.Tools.logit import LogIt
 
 
 class CookBook(object):
