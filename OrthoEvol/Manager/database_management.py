@@ -227,7 +227,7 @@ class BaseDatabaseManagement(object):
 class DatabaseManagement(BaseDatabaseManagement):
     # TODO-ROB: Figure this out for the case of a user.  Because there doesn't necessarily have to be a project
     def __init__(self, config_file, proj_mana=ProjectManagement, **kwargs):
-
+        self.db_mana_utils = FullUtilities()
         self.db_config_strategy, kw = self.db_mana_utils.parse_db_config_file(config_file)
         super().__init__(proj_mana=proj_mana, **kw)
         self.strategy_dispatcher = {}
