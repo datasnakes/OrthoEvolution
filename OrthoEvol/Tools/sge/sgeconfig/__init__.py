@@ -22,7 +22,7 @@ __DEFAULT__ = {
             'description': 'This is a default pbs job.',
             'date': d.now().strftime(_format1),
             'proj_name': 'OrthoEvol',
-            'select': '3',
+            'select': '1',
             'memgb': '6gb',
             'cput': '72:00:00',
             'wt': '48:00:00',
