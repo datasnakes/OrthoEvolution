@@ -8,8 +8,8 @@ from BioSQL import BioSeqDatabase
 from Bio import SeqIO
 # OrthoEvol
 from OrthoEvol.Tools.logit import LogIt
-from OrthoEvol.Orthologs.Blast.orthologs_blastn import OrthoBlastN
-from OrthoEvol.Orthologs.Blast.comparative_genetics import BaseComparativeGenetics
+from OrthoEvol.Orthologs.Blast import OrthoBlastN
+from OrthoEvol.Orthologs.Blast import BaseComparativeGenetics
 from OrthoEvol.utilities import FullUtilities
 
 
