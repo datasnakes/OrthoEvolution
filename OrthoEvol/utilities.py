@@ -8,13 +8,15 @@ import platform
 import shutil
 import sqlite3
 import time
+import subprocess as sp
+import sys
 from datetime import datetime
 from importlib import import_module
 from multiprocessing.pool import ThreadPool
 from pathlib import Path
+from subprocess import TimeoutExpired
 from tempfile import TemporaryFile
 from warnings import warn
-import yaml
 # BioPython
 from Bio import AlignIO
 from Bio import SeqIO
@@ -27,6 +29,7 @@ from OrthoEvol.Tools.otherutils import OtherUtils
 from OrthoEvol.Tools.sge import SGEJob
 # Other
 import pandas as pd
+import yaml
 
 # Set up logging
 blastutils_log = LogIt().default(logname="blast-utils", logfile=None)
@@ -802,3 +805,24 @@ class FullUtilities(CookieUtils, ManagerUtils, OrthologUtils, OtherUtils):
         ManagerUtils.__init__(self)
         OrthologUtils.__init__(self)
         OtherUtils.__init__(self)
+
+    def system_cmd(cmd, timeout=None, **kwargs):
+        """
+        A function for making system calls, while preforming proper exception handling.
+        :param cmd:  A list that contains the arguments for Popen.
+        :param timeout:  A timeout variable.
+        :param kwargs:  Any other keyword arguments for Popen.
+        :return:  Returns the stdout and stderr as a tuple.
+        """
+        proc = sp.Popen(cmd, **kwargs, encoding="utf-8")
+        ret_val = []
+        for line in iter(proc.stdout.readline, ""):
+            print(line, end="")
+            ret_val.append(line)
+            sys.stdout.flush()
+        try:
+            proc.communicate(timeout=timeout)
+        except TimeoutExpired:
+            proc.kill()
+            ret_val = proc.communicate()
+        return ret_val
