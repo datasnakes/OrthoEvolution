@@ -681,8 +681,8 @@ class ManagerUtils(object):
                     kw[key] = value
         return db_config_strategy, kw
 
-    def refseq_jobber(self, email_address, base_jobname, id, code):
-        job = SGEJob(email_address=email_address, base_jobname=base_jobname % str(id))
+    def refseq_jobber(self, email_address, base_jobname, id, code, activate):
+        job = SGEJob(email_address=email_address, base_jobname=base_jobname % str(id), activate=activate)
         job.submit_pycode(code=code, wait=False, cleanup=False)
 
     # def template_jobber(email_address, base_jobname, id, code):

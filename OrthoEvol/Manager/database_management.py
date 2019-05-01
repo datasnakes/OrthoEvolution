@@ -477,7 +477,7 @@ class DatabaseManagement(BaseDatabaseManagement):
 
     def NCBI_refseq_release(self, configure_flag=None, archive_flag=None, delete_flag=None, upload_flag=None, archive_path=None,
                             database_path=None, collection_subset=None, seqtype=None, seqformat=None, file_list=None,
-                            upload_number=8, _path=None):
+                            upload_number=8, _path=None, activate=None):
         nrr_dispatcher = {"NCBI_refseq_release": {"archive": [], "configure": [], "upload": []}}
         nrr_config = {"NCBI_refseq_release": {"archive": [], "configure": [], "upload": []}}
         if not archive_path:
@@ -499,7 +499,7 @@ class DatabaseManagement(BaseDatabaseManagement):
                 "seqtype": seqtype,
                 "seqformat": seqformat
             })
-        elif upload_flag:
+        if upload_flag:
             if upload_number < 8:
                 raise ValueError("The upload_number must be greater than 8.  The NCBI refseq release files are too bing"
                                  "for anything less than 8 seperate BioSQL databases.")
@@ -542,7 +542,8 @@ class DatabaseManagement(BaseDatabaseManagement):
                     "code": sge_code_string,
                     "base_jobname": "upload_rr_%s",
                     "email_address": self.email,
-                    "id": add_to_default})
+                    "id": add_to_default,
+                    "activate": activate})
 
         return nrr_dispatcher, nrr_config
 

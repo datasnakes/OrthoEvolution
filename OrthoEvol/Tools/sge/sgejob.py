@@ -88,11 +88,12 @@ class BaseSGEJob(object):
 
 class SGEJob(BaseSGEJob):
     """Create a qsub/pbs job & script to submit python code."""
-    def __init__(self, email_address, base_jobname=None):
+    def __init__(self, email_address, base_jobname=None, activate=None):
         super().__init__(base_jobname=base_jobname)
         self.email = email_address
         self.attributes = self.default_job_attributes
         self.jobname = self.default_job_attributes['job_name']
+        self.activate = activate
         if base_jobname is not None:
             _, self.jobname = self._configure(base_jobname=base_jobname,
                                               length=5)
@@ -101,13 +102,17 @@ class SGEJob(BaseSGEJob):
     def _update_default_attributes(self):
         pyfile_path = os.path.join(self.pbsworkdir, self.jobname + '.py')
         # These attributes are automatically updated if a jobname is given.
+        if self.activate:
+           cmd = "source %s; python %s" % (self.activate, pyfile_path)
+        else:
+            cmd = "python3.6 " + pyfile_path
         new_attributes = {'email': self.email,
                           'job_name': self.jobname,
                           'outfile': self.jobname + '.o',
                           'errfile': self.jobname + '.e',
                           'script': self.jobname,
                           'log_name': self.jobname + '.log',
-                          'cmd': 'python3.6 ' + pyfile_path,
+                          'cmd': cmd,
                           }
         self.default_job_attributes.update(new_attributes)
 
