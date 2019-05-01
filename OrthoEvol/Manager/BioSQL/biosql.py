@@ -41,7 +41,8 @@ class BaseBioSQL(object):
         self.scripts = pkg_resources.resource_filename(sql_scripts.__name__, "")
         self.ncbi_taxon_script = pkg_resources.resource_filename(sql_scripts.__name__, "load_ncbi_taxonomy.pl")
         self.itis_taxon_script = pkg_resources.resource_filename(sql_scripts.__name__, "load_itis_taxonomy.pl")
-        self.database_name = Path(database_name)
+        if database_name:
+            self.database_name = Path(database_name)
 
         # Configuration of class attributes for Project Management.
         if project_path and project:
