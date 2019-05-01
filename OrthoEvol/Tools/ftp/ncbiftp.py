@@ -123,7 +123,6 @@ class NcbiFTPClient(BaseFTPClient):
             log_msg = '%s was deleted after successful extraction.'
             self.ncbiftp_log.info(log_msg % file2extract)
 
-
     def listfiles(self, path='cwd'):
         """List all files in a path."""
         if path == 'cwd':
@@ -182,6 +181,7 @@ class NcbiFTPClient(BaseFTPClient):
     def getrefseqrelease(self, collection_subset, seqtype, seqformat, download_path,
                          extract=True):
         """Download the refseq release database."""
+        self.ftp = self._login()
         self.ftp.cwd(self.refseqrelease_path)
         taxon_dirs = self.listdirectories(self.refseqrelease_path)
 
