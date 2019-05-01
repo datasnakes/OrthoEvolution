@@ -7,66 +7,66 @@ Database_config:
     archive_flag: False
     delete_flag: False
     project_flag: False
-    _path: "!!python/object/apply:pathlib.Path ['']"
+    _path: !!python/object/apply:pathlib.Path ['']
     Projects:
       Project_Name_1:
         configure_flag: False
         archive_flag: False
         delete_flag: False
-        _path: "!!python/object/apply:pathlib.Path ['Project_Name_1']"
+        _path: !!python/object/apply:pathlib.Path ['Project_Name_1']
       Project_Name_2:
         configure_flag: False
         archive_flag: False
         delete_flag: False
-        _path: "!!python/object/apply:pathlib.Path ['Project_Name_2']"
+        _path: !!python/object/apply:pathlib.Path ['Project_Name_2']
       Project_Name_3:
         configure_flag: False
         archive_flag: False
         delete_flag: False
-        _path: "!!python/object/apply:pathlib.Path ['Project_Name_3']"
+        _path: !!python/object/apply:pathlib.Path ['Project_Name_3']
     NCBI:
       configure_flag: False
       archive_flag: False
       delete_flag: False
-      _path: "!!python/object/apply:pathlib.Path ['NCBI']"
+      _path: !!python/object/apply:pathlib.Path ['NCBI']
       NCBI_blast:
         configure_flag: False
         archive_flag: False
         delete_flag: False
-        _path: "!!python/object/apply:pathlib.Path ['NCBI', 'blast']"
+        _path: !!python/object/apply:pathlib.Path ['NCBI', 'blast']
         NCBI_blast_db:
           configure_flag: False
           archive_flag:  False
           delete_flag: False
-          _path: "!!python/object/apply:pathlib.Path ['NCBI', 'blast', 'db']"
+          _path: !!python/object/apply:pathlib.Path ['NCBI', 'blast', 'db']
         NCBI_blast_windowmasker_files:
           configure_flag: False
           archive_flag: False
           delete_flag: False
-          _path: "!!python/object/apply:pathlib.Path ['NCBI', 'blast', 'windowmasker_files']"
+          _path: !!python/object/apply:pathlib.Path ['NCBI', 'blast', 'windowmasker_files']
           taxonomy_ids: ""
       NCBI_pub_taxonomy:
         configure_flag: False
         archive_flag: False
         delete_flag: False
-        _path: "!!python/object/apply:pathlib.Path ['NCBI', 'pub', taxonomy']"
+        _path: !!python/object/apply:pathlib.Path ['NCBI', 'pub', taxonomy']
       NCBI_refseq_release:
         seqtype: "rna" # Other seqtypes are protein and genomic
         seqformat: "gbff"
         collection_subset: "vertebrate_mammalian"
-        activate: "!!python/object/apply:pathlib.Path ['~', '.venv', 'OrthoEvol', 'bin', 'activate']"
+        activate: !!python/object/apply:pathlib.Path ['~', '.venv', 'OrthoEvol', 'bin', 'activate']
         configure_flag: True
         archive_flag: False
         delete_flag: False
         upload_flag: True
-        _path: "!!python/object/apply:pathlib.Path ['NCBI', 'refseq', 'release']"
+        _path: !!python/object/apply:pathlib.Path ['NCBI', 'refseq', 'release']
     ITIS:
       configure_flag: True
       archive_flag: False
       delete_flag: False
-      _path: "!!python/object/apply:pathlib.Path ['ITIS']"
+      _path: !!python/object/apply:pathlib.Path ['ITIS']
       ITIS_taxonomy:
         configure_flag: True
         archive_flag: False
         delete_flag: False
-        _path: "!!python/object/apply:pathlib.Path ['ITIS', 'taxonomy']"
+        _path: !!python/object/apply:pathlib.Path ['ITIS', 'taxonomy']
