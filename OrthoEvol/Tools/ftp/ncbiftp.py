@@ -113,15 +113,11 @@ class NcbiFTPClient(BaseFTPClient):
             tar.extractall()
             tar.close()
             os.remove(file2extract)
-            log_msg = '%s was deleted after successful extraction.'
-            self.ncbiftp_log.info(log_msg % file2extract)
         elif str(file2extract).endswith('.gz'):
             with gzip.open(file2extract, 'rb') as comp:
                 with open(str(Path(file2extract).stem), 'wb') as decomp:
                     shutil.copyfileobj(comp, decomp)
             os.remove(file2extract)
-            log_msg = '%s was deleted after successful extraction.'
-            self.ncbiftp_log.info(log_msg % file2extract)
 
     def listfiles(self, path='cwd'):
         """List all files in a path."""
@@ -171,7 +167,7 @@ class NcbiFTPClient(BaseFTPClient):
         download_time_secs = time()
         with ThreadPool(1) as download_pool:
             with tqdm(total=len(self.files2download)) as pbar:
-                for i, _ in tqdm(enumerate(download_pool.map(self._download_windowmasker, windowmaskerfiles))):
+                for i, _ in tqdm(enumerate(download_pool.imap(self._download_windowmasker, windowmaskerfiles))):
                     pbar.update()
             minutes = round(((time() - download_time_secs) / 60), 2)
         self.ncbiftp_log.info("Took %s minutes to download the files." %
@@ -210,7 +206,7 @@ class NcbiFTPClient(BaseFTPClient):
         download_time_secs = time()
         with ThreadPool(1) as download_pool:
             with tqdm(total=len(self.files2download)) as pbar:
-                for i, _ in tqdm(enumerate(download_pool.map(self.download_file, self.files2download))):
+                for i, _ in tqdm(enumerate(download_pool.imap(self.download_file, self.files2download))):
                     pbar.update()
             minutes = round(((time() - download_time_secs) / 60), 2)
         self.ncbiftp_log.info("Took %s minutes to download the files." %
@@ -250,7 +246,7 @@ class NcbiFTPClient(BaseFTPClient):
         download_time_secs = time()
         with ThreadPool(1) as download_pool:
             with tqdm(total=len(self.files2download)) as pbar:
-                for i, _ in tqdm(enumerate(download_pool.map(self.download_file, self.files2download))):
+                for i, _ in tqdm(enumerate(download_pool.imap(self.download_file, self.files2download))):
                     pbar.update()
             minutes = round(((time() - download_time_secs) / 60), 2)
         self.ncbiftp_log.info("Took %s minutes to download the files." %
@@ -260,7 +256,7 @@ class NcbiFTPClient(BaseFTPClient):
             extract_time_secs = time()
             with ThreadPool(1) as extract_pool:
                 with tqdm(total=len(self.files2download)) as pbar:
-                    for i, _ in tqdm(enumerate(extract_pool.map(self.extract_file, self.files2download))):
+                    for i, _ in tqdm(enumerate(extract_pool.imap(self.extract_file, self.files2download))):
                         pbar.update()
                 minutes = round(((time() - extract_time_secs) / 60), 2)
             self.ncbiftp_log.info("Took %s minutes to extract from all files." %
@@ -298,7 +294,7 @@ class NcbiFTPClient(BaseFTPClient):
             download_time_secs = time()
             with ThreadPool(1) as download_pool:
                 with tqdm(total=len(self.files2download)) as pbar:
-                    for i, _ in tqdm(enumerate(download_pool.map(self.download_file, self.files2download))):
+                    for i, _ in tqdm(enumerate(download_pool.imap(self.download_file, self.files2download))):
                         pbar.update()
                 minutes = round(((time() - download_time_secs) / 60), 2)
             self.ncbiftp_log.info("Took %s minutes to download the files.\n" %
@@ -309,7 +305,7 @@ class NcbiFTPClient(BaseFTPClient):
             extract_time_secs = time()
             with ThreadPool(3) as extract_pool:
                 with tqdm(total=len(self.files2download)) as pbar:
-                    for _ in tqdm(enumerate(extract_pool.map(self.extract_file, self.files2download))):
+                    for _ in tqdm(enumerate(extract_pool.imap(self.extract_file, self.files2download))):
                         pbar.update()
                 minutes = round(((time() - extract_time_secs) / 60), 2)
             self.ncbiftp_log.info("Took %s minutes to extract from all files.\n" %
