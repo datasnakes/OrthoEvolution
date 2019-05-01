@@ -1,6 +1,6 @@
 # Standard Library
 import os
-import subprocess
+import subprocess as sp
 import pkg_resources
 from pathlib import Path
 # BioPython
@@ -31,10 +31,11 @@ class BaseBioSQL(object):
         """
         # Logging setup
         self.biosqllog = LogIt().default(logname="BioSQL", logfile=None)
-        self.biosqlstream = StreamIEO(logname="BioSQL")
 
         # Initialize utilities
         self.biosql_utils = FullUtilities()
+
+        self.biosql_proc = self.biosql_utils.system_cmd
 
         # Load relative and absolute paths to scripts in the BioSQL module
         self.scripts = pkg_resources.resource_filename(sql_scripts.__name__, "")
@@ -75,7 +76,7 @@ class BaseBioSQL(object):
             cmd = cmd
 
         # Run the command for Schema loading or BioSQL Perl scripts for uploading taxonomy.
-        self.biosqlstream.streamer(cmd)
+        self.biosql_proc(cmd=cmd, stdout=sp.PIPE, stderr=sp.STDOUT, shell=True)
 
     def create_executable_scripts(self):
         """
@@ -158,7 +159,7 @@ class SQLiteBioSQL(BaseBioSQL):
         # Copy the template into a new folder with a new name.
         dest_abs_path = Path(destination) / Path(self.database_name)
         self.biosqllog.warn('Copying Template BioSQL Database...  This may take a few minutes...')
-        copy_handle = subprocess.Popen(['cp', str(self.template_abs_path), str(dest_abs_path)])
+        copy_handle = sp.Popen(['cp', str(self.template_abs_path), str(dest_abs_path)])
         copy_handle.wait()
 
     def upload_files(self, seqtype, filetype, upload_path, upload_list=None):
