@@ -111,6 +111,12 @@ class BaseDatabaseManagement(object):
             # return ncbi_db
             pass
 
+    def create_biosql_taxonomy_template(self):
+        if self.driver.lower() == "sqlite3":
+            ncbi_db = self.biosql.SQLiteBioSQL(proj_mana=self.proj_mana)
+            ncbi_db.create_template_database()
+        return ncbi_db
+
     def download_itis_taxonomy_tables(self):
         # Loads data from ITIS via http://www.itis.gov/downloads/
         # Use this along with BioSQL's phyloDB
@@ -477,7 +483,7 @@ class DatabaseManagement(BaseDatabaseManagement):
 
     def NCBI_refseq_release(self, configure_flag=None, archive_flag=None, delete_flag=None, upload_flag=None, archive_path=None,
                             database_path=None, collection_subset=None, seqtype=None, seqformat=None, file_list=None,
-                            upload_number=8, _path=None, activate=None):
+                            upload_number=8, _path=None, activate=None, configure_template=None):
         nrr_dispatcher = {"NCBI_refseq_release": {"archive": [], "configure": [], "upload": []}}
         nrr_config = {"NCBI_refseq_release": {"archive": [], "configure": [], "upload": []}}
         if not archive_path:
@@ -499,6 +505,9 @@ class DatabaseManagement(BaseDatabaseManagement):
                 "seqtype": seqtype,
                 "seqformat": seqformat
             })
+        if configure_template:
+            nrr_dispatcher["NCBI_refseq_release"]["configure"].append(self.create_biosql_taxonomy_template)
+            nrr_config["NCBI_refseq_release"]["configure"].append({})
         if upload_flag:
             if upload_number < 8:
                 raise ValueError("The upload_number must be greater than 8.  The NCBI refseq release files are too bing"

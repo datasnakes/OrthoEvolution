@@ -55,7 +55,8 @@ Database_config:
         seqformat: "gbff"
         collection_subset: "vertebrate_mammalian"
         activate: !!python/object/apply:pathlib.Path ['~', '.venv', 'OrthoEvol', 'bin', 'activate']
-        configure_flag: True
+        configure_flag: False
+        configure_template: True
         archive_flag: False
         delete_flag: False
         upload_flag: True
