@@ -806,7 +806,7 @@ class FullUtilities(CookieUtils, ManagerUtils, OrthologUtils, OtherUtils):
         OrthologUtils.__init__(self)
         OtherUtils.__init__(self)
 
-    def system_cmd(cmd, timeout=None, **kwargs):
+    def system_cmd(self, cmd, timeout=None, **kwargs):
         """
         A function for making system calls, while preforming proper exception handling.
         :param cmd:  A list that contains the arguments for Popen.
