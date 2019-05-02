@@ -127,7 +127,7 @@ class SQLiteBioSQL(BaseBioSQL):
         """
         # Build the command
         ncbi_taxon_dump_path = self.databases_path / Path("NCBI") / Path('pub') / Path('taxonomy')
-        taxon_cmd = self.taxon_cmd % (self.ncbi_taxon_script, str(self.template_abs_path), self.driver, str(ncbi_taxon_dump_path))
+        taxon_cmd = self.taxon_cmd % (self.ncbi_taxon_script, str(self.template_abs_path), "SQLite", str(ncbi_taxon_dump_path))
         # Run the bash command
         self.configure_new_database(taxon_cmd)
         # TODO-ROB: Parse output and error
