@@ -1,3 +1,22 @@
+Management_config:
+  new_repo: true
+  new_user: true
+  new_project: true
+  new_database: true
+  new_research: true
+  new_app: false
+  new_website: false
+  database: 'Test-Database'
+  repo: 'Test-Repository'
+  user: 'Test-User'
+  project: 'Test-Project'
+  research: 'Test-Research'
+  research_type: 'Test-Research-Type'
+  app: 'Test-App'
+  website: 'Test-Website'
+  host: '0.0.0.0'
+  port: '5252'
+
 Database_config:
   email:  "rgilmore@umc.edu"
   driver: "sqlite3"
