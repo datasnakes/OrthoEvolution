@@ -530,11 +530,13 @@ class DatabaseManagement(BaseDatabaseManagement):
             with open(str(script_dir / 'master_upload_rr_pbs.py'), 'w') as mus:
                 mus.write(script_string)
 
-            orig_dir = os.getcwd()
-            os.chdir(str(script_dir))
-            self.db_mana_utils.system_cmd(cmd='./master_upload_rr_pbs.py', stdout=sp.PIPE, stderr=sp.STDOUT, shell=True)
-            os.chdir(orig_dir)
-
+            def _run_upload_script():
+                orig_dir = os.getcwd()
+                os.chdir(str(script_dir))
+                self.db_mana_utils.system_cmd(cmd='./master_upload_rr_pbs.py', stdout=sp.PIPE, stderr=sp.STDOUT, shell=True)
+                os.chdir(orig_dir)
+            nrr_dispatcher["NCBI_refseq_release"]['upload'].append(_run_upload_script)
+            nrr_config["NCBI_refseq_release"]['upload'].append({})
 
             # if file_list is None:
             #     db_path = self.database_path / Path('NCBI') / Path('refseq') / Path('release') / Path(collection_subset)
