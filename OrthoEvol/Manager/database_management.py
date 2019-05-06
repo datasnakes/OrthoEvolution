@@ -525,7 +525,7 @@ class DatabaseManagement(BaseDatabaseManagement):
             with open(upload_script, 'r') as u_s:
                 temp_script = u_s.read()
             script_string = temp_script % (py_shebang, file_list, db_path, upload_number, self.email, self.config_file)
-            script_dir = Path(self.user_log / 'upload_rr' + ''.join(random.sample(string.ascii_letters + string.digits, 5)))
+            script_dir = Path(self.user_log, ('upload_rr' + ''.join(random.sample(string.ascii_letters + string.digits, 5))))
             script_dir.mkdir()
             with open(str(script_dir / 'master_upload_rr_pbs.py'), 'w') as mus:
                 mus.write(script_string)
