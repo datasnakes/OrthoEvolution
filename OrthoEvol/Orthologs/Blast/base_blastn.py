@@ -5,11 +5,12 @@ import shutil
 from subprocess import run, PIPE, CalledProcessError
 import contextlib
 from datetime import datetime as d
+import time
 from pathlib import Path
 from Bio.Application import ApplicationError
 from Bio import SearchIO  # Used for parsing and sorting XML files.
-from Bio.Blast.Applications import NcbiblastnCommandline
 
+from OrthoEvol.Orthologs.Blast.blastn_wrapper import NcbiblastnCommandline
 from OrthoEvol.Orthologs.Blast.comparative_genetics import ComparativeGenetics
 from OrthoEvol.Orthologs.Blast.utils import gene_list_config, map_func
 
@@ -31,7 +32,9 @@ class BaseBlastN(ComparativeGenetics):
         :param kwargs:"""
 
         super().__init__(project=project, template=template, save_data=save_data, **kwargs)
-
+        
+        # Method variable
+        self.blast_method = blast_method
         # Create a date format
         self._fmt = '%a %b %d at %I:%M:%S %p %Y'
         self.date_format = str(d.now().strftime(self._fmt))
@@ -57,23 +60,31 @@ class BaseBlastN(ComparativeGenetics):
         self.complete_time_file = self.project + '_TIME.csv'
         self.complete_time_file_path = self.data / Path(self.complete_time_file)
 
-
-        self.blastn_parameters = self.blast_method_selection(method=blast_method)
+        self.blastn_parameters = self.blast_method_selection(method=self.blast_method)
 
     def blast_method_selection(self, method):
         """Select a method for running blastn.
-        :param method: a blast method - 1 or None
+        :param method: a blast method - 1, 2, or None
         """
         # TODO: Revamp methods based on blast version. If version is 2.8.0 or
         # higher then require use of taxids. If not, allow seqids or other.
-        if method == '1':
+        if method == 1:
             # Accessions/Seqids List
             blastn_parameters = {'query': '', 'db': 'refseq_rna',
                                  'strand': 'plus', 'evalue': 0.01, 'outfmt': 5,
-                                 'seqids': '', 'max_target_seqs': 10,
+                                 'seqidlist': '', 'max_target_seqs': 10,
                                  'task': 'blastn'}
             return blastn_parameters
-        elif method is None:
+        # Server blast
+        elif method == 2:
+            blastn_parameters = {'query': '', 'entrez_query': '',
+                                 'db': 'refseq_rna',
+                                 'strand': 'plus', 'evalue': 0.01,
+                                 'outfmt': 5, 'max_target_seqs': 10,
+                                 'task': 'blastn', 'remote': 'True'}
+            return blastn_parameters        
+        # Default blast
+        elif method is None or method == "":
             blastn_parameters = {'query': '', 'db': 'refseq_rna',
                                  'strand': 'plus', 'evalue': 0.01,
                                  'outfmt': 5, 'max_target_seqs': 10,
@@ -86,9 +97,13 @@ class BaseBlastN(ComparativeGenetics):
         """This method configures everything for our BLAST workflow.
         It configures the accession file, which works with interrupted Blasts.
         It configures a gene_list for blasting the right genes.
-        :param query_accessions:  A list of query accession numbers.  Each gene needs one from the same organism.
-        :param query_organism:  The name of the query organism for post configuration.
-        :param auto_start:  A flag that determines whether the blast starts automatically. (Default value = False)
+
+        :param query_accessions:  A list of query accession numbers.  Each gene
+                                  needs one from the same organism.
+        :param query_organism:  The name of the query organism for post
+                                configuration.
+        :param auto_start:  A flag that determines whether the blast starts
+                            automatically. (Default value = False)
         :return:
         """
 
@@ -112,18 +127,17 @@ class BaseBlastN(ComparativeGenetics):
         else:
             self.current_gene_list = self.gene_list
 
-        # Iterate the query accessions numbers
+        # Iterate through the query accessions numbers
         for query in query_accessions:
             gene = self.acc_dict[query][0][0]
             gene_path = self.raw_data / Path(gene) / Path('BLAST')
 
             # Create the directories for each gene
-            self.blastn_log.info("Creating directories for each gene.")
             try:
                 Path.mkdir(gene_path, exist_ok=True, parents=True)
-                self.blastn_log.info("Directory created: %s" % gene)
+                self.blastn_log.info("Directory created for %s" % gene)
             except FileExistsError:
-                self.blastn_log.info("Directory exists: %s" % gene)
+                self.blastn_log.info("Directory exists for %s" % gene)
 
             # Save sequence data in FASTA file format and print the gi number
             # to stdout with a custom BLAST extraction
@@ -284,7 +298,11 @@ class BaseBlastN(ComparativeGenetics):
                                 # wmaskerpath = os.path.join(str(taxon_id), "wmasker.obinary")
 
                                 # Update your blastn parameters
-                                update_dict = {'query': query_seq_path}
+                                if self.blast_method == 2:
+                                    update_dict = {'query': query_seq_path, 
+                                                   'entrez_query': organism}
+                                else:
+                                    update_dict = {'query': query_seq_path}
                                 self.blastn_parameters.update(update_dict)
 
                                 # Use Biopython's NCBIBlastnCommandline tool
@@ -301,8 +319,11 @@ class BaseBlastN(ComparativeGenetics):
                                 self.blastn_log.warning('Blast run has ended.')
                                 self.add_blast_time(gene, organism, start_time, end_time)
                                 blast_xml.close()
-                                print(xml_path)
                                 self.blast_xml_parse(xml_path, gene, organism)
+                                
+                                # Make blast sleep if server blast
+                                if self.blast_method == 2:
+                                    time.sleep(30) # Prevents server overload
 
                         # Catch either ApplicationError or ParseError
                         except (ApplicationError, ParseError) as err:
@@ -323,19 +344,19 @@ class BaseBlastN(ComparativeGenetics):
                             shutil.copyfile(str(self.building_time_file_path),
                                             str(self.complete_time_file_path))
                         except FileNotFoundError as fnfe:
-                            msg = 'Your blast did not created any building or building time files not created'
+                            msg = 'Your blast did not create any building time files.'
                             self.blastn_log.error(fnfe)
                             self.blastn_log.error(msg)
                             raise BlastFailure('Blast has failed to generate data. Check logs for errors.')
 
                         if self.save_data is True:
                             self.post_blast_analysis(self.project)
-                            self.blastn_log.info("Post blast analysis is complete")
+                            self.blastn_log.info("Post-blast analysis is complete")
 
                         # TODO-ROB Archive function here
             self.blastn_log.info("BLAST has completed. Check your output.")
 
 
 class BlastFailure(BaseException):
-    """Simple Blast Execption Class."""
+    """Simple Blast Exception Class."""
     pass
