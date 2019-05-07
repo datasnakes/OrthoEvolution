@@ -132,8 +132,14 @@ class BaseDatabaseManagement(object):
         ncbi = ete3.NCBITaxa(dbfile=str(ncbi_taxon_dump_path / 'ete3_taxa.sqlite'))
         ncbi.update_taxonomy_database()
 
-    def create_biosql_taxonomy_database(self, destination, database_name):
-        """Create a BioSQL database template loaded with NCBI's taxonomy data."""
+    def copy_biosql_taxonomy_template(self, destination, database_name):
+        """
+        Copy a BioSQL template database loaded with NCBI's taxonomy data.
+        :param destination:  Where the template will be copied to.
+        :type destination:  str.
+        :param database_name:  The name of the copied database.
+        :type database_name:  str.
+        """
         if self.driver.lower() == "sqlite3":
             ncbi_db = self.biosql.SQLiteBioSQL(database_name=database_name, proj_mana=self.proj_mana)
             ncbi_db.copy_template_database(destination=destination)
@@ -223,7 +229,7 @@ class BaseDatabaseManagement(object):
             db_name = "{}_{}{}.{}.db".format(collection_subset, seqtype, add_to_default, seqformat)
         db_path = self.database_path / Path("NCBI") / Path("refseq") / Path("release") / Path(collection_subset)
         # Get a BioSQL database
-        ncbi_db = self.create_biosql_taxonomy_database(destination=db_path, database_name=db_name)
+        ncbi_db = self.copy_biosql_taxonomy_template(destination=db_path, database_name=db_name)
         ncbi_db.upload_files(seqtype=seqtype, filetype='genbank', upload_path=db_path, upload_list=upload_list)
 
     def get_project_genbank_database(self):
