@@ -19,7 +19,6 @@ from OrthoEvol.Orthologs.Blast.comparative_genetics import BaseComparativeGeneti
 from OrthoEvol.Manager.config import templates
 
 
-
 class BaseDatabaseManagement(object):
 
     def __init__(self, email, driver, project=None, project_path=None, proj_mana=ProjectManagement, ftp_flag=True):
@@ -40,6 +39,8 @@ class BaseDatabaseManagement(object):
         :type project_path: str.
         :param proj_mana: A configuration variable for connecting projects.
         :type proj_mana: ProjectManagement.
+        :param ftp_flag: A flag used if FTP connection is available or not.
+        :type ftp_flag:  bool.
         """
 
         # Initialize Utilities
@@ -65,16 +66,14 @@ class BaseDatabaseManagement(object):
             self.database_path = Path(project_path)
 
     def download_windowmasker_files(self, taxonomy_ids):
-        OrthoEvolDeprecationWarning("Windowmasker files are no longer used by the most current blastx command line "
-                                    "utilities.  You can now use taxon ids directly.")
         """
         Download the WindowMasker files used in the BLAST database.
 
         :param taxonomy_ids:  Taxonomy ids for the organisms of interest.
         :type taxonomy_ids:  list.
-        :return:
-        :rtype:
         """
+        OrthoEvolDeprecationWarning("Windowmasker files are no longer used by the most current blastx command line "
+                                    "utilities.  You can now use taxon ids directly.")
         # <path>/<user or basic_project>/databases/NCBI/blast/db/<database_name>
         dl_path = Path(self.database_path) / Path("NCBI") / Path('blast') / Path('windowmasker_files')
         self.ncbiftp.getwindowmaskerfiles(taxonomy_ids=taxonomy_ids, download_path=str(dl_path))
@@ -86,15 +85,14 @@ class BaseDatabaseManagement(object):
 
         :param database_name:  A string that represents a pattern in the files of interest.
         :type database_name:  string.
-        :return:
-        :rtype:
+        :param set_blastdb:  A flag that determines whether the BLASTDB environment variable is automatically set.
+        :type set_blastdb:  bool.
         """
         # <path>/<user or basic_project>/databases/NCBI/blast/db/<database_name>
         dl_path = Path(self.database_path) / Path("NCBI") / Path("blast") / Path("db")
 
         self.ncbiftp.getblastdb(database_name=database_name, download_path=str(dl_path))
 
-        # TODO-ROB Add email or slack notifications
         env_vars = dict(os.environ).keys()
         if set_blastdb or ("BLASTDB" not in env_vars):
             # See if .bash_profile or .profile exists
@@ -119,10 +117,9 @@ class BaseDatabaseManagement(object):
                     cmd = ["source %s" % str(set_prof)]
                     stdout = self.db_mana_utils.system_cmd(cmd=cmd, stdout=sp.PIPE, stderr=sp.STDOUT, shell=True)
         else:
-            self.dbmanalog.critical("Please set the BLAST environment variables in your .bash_profile!!")
-            self.dbmanalog.info("The appropriate environment variable is \'BLASTDB=%s\'." % str(dl_path))
-            self.dbmanalog.critical("Please set the BLAST environment variables in your .bash_profile!!")
-        # TODO-ROB:  set up environment variables.  Also add CLI setup
+            self.db_mana_log.critical("Please set the BLAST environment variables in your .bash_profile!!")
+            self.db_mana_log.info("The appropriate environment variable is \'BLASTDB=%s\'." % str(dl_path))
+            self.db_mana_log.critical("Please set the BLAST environment variables in your .bash_profile!!")
 
     def download_ete3_taxonomy_database(self):
         """Update ETE3's taxonomy database with ETE3's API."""
@@ -152,6 +149,7 @@ class BaseDatabaseManagement(object):
             pass
 
     def create_biosql_taxonomy_template(self):
+        """Creates a template database by uploading SQLite schema and NCBI taxonomy."""
         if self.driver.lower() == "sqlite3":
             ncbi_db = self.biosql.SQLiteBioSQL(proj_mana=self.proj_mana)
             ncbi_db.create_template_database()
@@ -166,12 +164,9 @@ class BaseDatabaseManagement(object):
         """
         Download and extract the NCBI taxonomy dump files via a GET request.
 
-        :param url: A ftp link to the NCBI taxdump.* file of interest.
+        :param url: A ftp link to the NCBI taxdump*.tar.gz file of interest.
         :type url: str.
-        :return:
-        :rtype:
         """
-        # TODO-ROB:  Maybe add taxdata folder here to reflect BioSQL's load_ncbi_taxonomy.pl script
         dl_path = Path(self.database_path) / Path("NCBI") / Path('pub') / Path('taxonomy')
         dl_abs_path = dl_path / Path('taxdump.tar.gz')
         r = urllib.request.urlopen(url)
@@ -183,7 +178,6 @@ class BaseDatabaseManagement(object):
             tar.extractall(dl_path)
         os.remove(dl_abs_path)
 
-    # TODO-ROB:  Update ncbiftp class syntax to reflect NCBI's ftp site
     def download_refseq_release_files(self, collection_subset, seqtype, seqformat):
         """
         Download NCBI Refseq Release files from NCBI.  The collection subtype is a species group
@@ -195,8 +189,8 @@ class BaseDatabaseManagement(object):
         :type seqtype: str.
         :param seqformat: The format of the sequence file (usually 'gbff' for GenBank Flat File).
         :type seqformat: str.
-        :return:
-        :rtype:
+        :return: A list of files to download from NCBI via FTP.
+        :rtype:  list.
         """
         db_path = self.database_path / Path('NCBI') / Path('refseq') / Path('release') / Path(collection_subset)
         db_path.mkdir(parents=True, exist_ok=True)
@@ -213,12 +207,12 @@ class BaseDatabaseManagement(object):
         :type seqtype: str.
         :param seqformat: The format of the sequence file (usually 'gbff' for GenBank Flat File).
         :type seqformat: str.
-        :param upload_list:
-        :type upload_list:
-        :param extension:
-        :type extension:
-        :return:
-        :rtype:
+        :param upload_list:  A list of files to upload.
+        :type upload_list:  list.
+        :param database_name:  The name of the database to create.  The default name is usually best.
+        :type database_name:  str.
+        :param add_to_default:  A string to add to the default name.
+        :type add_to_default:  str.
         """
 
         if database_name:
@@ -226,6 +220,8 @@ class BaseDatabaseManagement(object):
         else:
             if add_to_default:
                 add_to_default = "_%s" % add_to_default
+            else:
+                add_to_default = ""
             db_name = "{}_{}{}.{}.db".format(collection_subset, seqtype, add_to_default, seqformat)
         db_path = self.database_path / Path("NCBI") / Path("refseq") / Path("release") / Path(collection_subset)
         # Get a BioSQL database
@@ -235,39 +231,6 @@ class BaseDatabaseManagement(object):
     def get_project_genbank_database(self):
         """"""
         print()
-
-    # def download_taxonomy_database(self, db_type, destination):
-    #     """
-    #     This method gets the remote data and updates the local databases for ETE3, BioSQL, and PhyloDB taxonomy
-    #     databases.  Most significant is the "biosql" and "phylodb" types.  The biosql databases use NCBI's taxonomy
-    #     database along with the biosql schema.  And the phylodb databases use ITIS's taxonomy database along with the
-    #     biosql schema.
-    #
-    #     :param db_type:  The type of database.  ("ete3", "biosql", or "phylodb")
-    #     :param dest_name:  The name of the new database.
-    #     :param dest_path:  The location where the new database should go.
-    #     :return:  An updated taxonomy database.
-    #     """
-        # db_type = str(db_type).lower()
-        # if db_type == 'ete3':
-        #     # DEFAULT_TAXADB = os.path.join(os.environ.get('HOME', '/'), '.etetoolkit', 'taxa.sqlite')
-        #     ete3 = import_module("ete3")
-        #     ete3.NCBITaxa.update_taxonomy_database()
-        # elif db_type == 'biosql':
-        #     # Loads data from NCBI via ftp://ftp.ncbi.nlm.nih.gov/pub/taxonomy
-        #     if self.driver.lower() == "sqlite3":
-        #         ncbi_db = self.biosql.SQLiteBioSQL(proj_mana=self.proj_mana)
-        #         ncbi_db.copy_template_database(destination=destination)
-        #         return ncbi_db
-        #
-        #     elif self.driver.lower() == "mysql":
-        #         db_path = self.ncbi_db_repo / Path('pub') / Path('taxonomy')
-        #         ncbi_db = self.biosql.MySQLBioSQL()
-        #         return ncbi_db
-
-        # elif db_type == 'phylodb':
-        #     # Loads data from ITIS via http://www.itis.gov/downloads/
-        #     print('biosql_repo')
 
 
 class DatabaseManagement(BaseDatabaseManagement):
