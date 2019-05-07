@@ -11,4 +11,5 @@ __all__ = ("BaseComparativeGenetics",
            "BaseBlastN"
            )
 
-warnings.warn('Ensure that `BLASTDB` and `WINDOW_MASKER_PATH` are set as environment variables.',OrthologsWarning)
+warnings.warn('Ensure `BLASTDB` is set in your environment.',
+              OrthologsWarning)
