@@ -76,7 +76,7 @@ class BaseDatabaseManagement(object):
         dl_path = Path(self.database_path) / Path("NCBI") / Path('blast') / Path('windowmasker_files')
         self.ncbiftp.getwindowmaskerfiles(taxonomy_ids=taxonomy_ids, download_path=str(dl_path))
 
-    def download_blast_database(self, database_name="refseq_rna"):
+    def download_blast_database(self, database_name="refseq_rna", set_blastdb=True):
         """
         Download the blast database files for using NCBI's BLAST+ command line.  For other types of blast data, please
         see the NCBIREADME.md file.
@@ -92,9 +92,33 @@ class BaseDatabaseManagement(object):
         self.ncbiftp.getblastdb(database_name=database_name, download_path=str(dl_path))
 
         # TODO-ROB Add email or slack notifications
-        self.dbmanalog.critical("Please set the BLAST environment variables in your .bash_profile!!")
-        self.dbmanalog.info("The appropriate environment variable is \'BLASTDB=%s\'." % str(dl_path))
-        self.dbmanalog.critical("Please set the BLAST environment variables in your .bash_profile!!")
+        env_vars = dict(os.environ).keys()
+        if set_blastdb or ("BLASTDB" not in env_vars):
+            # See if .bash_profile or .profile exists
+            bash_prof = Path("~/.bash_profile").expanduser().absolute()
+            sh_prof = Path("~/.profile").expanduser().absolute()
+            if not bash_prof.exists():
+                if not sh_prof.exists():
+                    bash_prof.touch(mode=0o700)
+                    set_prof = bash_prof
+                else:
+                    set_prof = sh_prof
+            else:
+                set_prof = bash_prof
+            self.db_mana_log.warning("Setting the PATH in %s" % str(set_prof))
+            # Use the set .*profile to append to PATH
+            with open(str(set_prof), 'r') as prof:
+                _ = prof.read()
+                bas_prof_export = "export PATH=\"%s:$PATH\"" % str(dl_path)
+                if bas_prof_export not in _:
+                    with open(str(set_prof), "a+") as b_prof:
+                        b_prof.write("export PATH=\"%s:$PATH\"" % str(dl_path))
+                    cmd = ["source %s" % str(set_prof)]
+                    stdout = self.db_mana_utils.system_cmd(cmd=cmd, stdout=sp.PIPE, stderr=sp.STDOUT, shell=True)
+        else:
+            self.dbmanalog.critical("Please set the BLAST environment variables in your .bash_profile!!")
+            self.dbmanalog.info("The appropriate environment variable is \'BLASTDB=%s\'." % str(dl_path))
+            self.dbmanalog.critical("Please set the BLAST environment variables in your .bash_profile!!")
         # TODO-ROB:  set up environment variables.  Also add CLI setup
 
     def download_ete3_taxonomy_database(self):
