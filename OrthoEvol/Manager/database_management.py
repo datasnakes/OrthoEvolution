@@ -234,8 +234,22 @@ class BaseDatabaseManagement(object):
 
 
 class DatabaseManagement(BaseDatabaseManagement):
-    # TODO-ROB: Figure this out for the case of a user.  Because there doesn't necessarily have to be a project
+
     def __init__(self, config_file, proj_mana=ProjectManagement, **kwargs):
+        """
+        This class creates higher level functionality for configuring various databases.  It uses a YAML configuration
+        file to parse various database setup "strategies" and dispatches or serializes the setup functions in the
+        proper order.  The strategies range from very general ("Full", "NCBI", etc.) to very specific ("NCBI_blast_db",
+        "NCBI_refseq_release", etc.).  Each strategy has 3 separate flags (configure, archive, and delete).  Specific
+        strategies may also have other flags or parameters that control their behavior.
+        :param config_file:  The path to a YAML configuration file.  See database_config.yml in the package config
+        folder.
+        :type config_file:  str.
+        :param proj_mana:  A instance of the ProjectManagement class.
+        :type proj_mana:  object.
+        :param kwargs:  Key-word arguments.
+        :type kwargs:  dict.
+        """
         self.db_mana_utils = FullUtilities()
         self.db_config_strategy, kw = self.db_mana_utils.parse_db_config_file(config_file)
         super().__init__(proj_mana=proj_mana, **kw)
@@ -247,6 +261,17 @@ class DatabaseManagement(BaseDatabaseManagement):
         self.config_file = config_file
 
     def get_strategy_dispatcher(self, db_config_strategy):
+        """
+        Loop through a dictionary of strategies with nested configurations, and return a list of functions, and a
+        list of matching key-word arguments (dictionaries).  The functions can then be dispatched using the kwargs.
+        Higher level more generalized workflows will have lists nested within dictionaries.
+
+        :param db_config_strategy:  A dictionary usually generated from a YAML configuration file.
+        :type db_config_strategy:  dict.
+        :return:  A tuple containing 2 objects:  a list of functions, and a list of dictionaries containing kwargs for
+        each function.
+        :rtype:  tuple.
+        """
         strategy_dispatcher = {}
         strategy_config = {}
         for strategy, strategy_kwargs in db_config_strategy.items():
@@ -293,6 +318,30 @@ class DatabaseManagement(BaseDatabaseManagement):
 
     def full(self, NCBI, ITIS, Projects=None,
              configure_flag=None, archive_flag=None, delete_flag=None, project_flag=None, _path=None):
+        """
+        The most generalized strategy available.  This configures everything.  The 3 primary flags (configure, archive,
+        and delete) will be passed down to the more specific strategies, which will inherit these values unless
+        expressly overridden.
+
+        :param NCBI:  Keyword arguments for the generalized NCBI strategy.
+        :type NCBI:  dict.
+        :param ITIS:  Keyword arguments for the generalized ITIS strategy.
+        :type ITIS:  dict.
+        :param configure_flag:  A generalized flag that is passed to all of the strategies in order to implement their
+        configuration process.
+        :type configure_flag:  bool.
+        :param archive_flag:  A generalized flag that is passed to all of the strategies in order to implement their
+        archiving process.
+        :type archive_flag:  bool.
+        :param delete_flag:  A generalized flag that is passed to all of the strategies in order to implement their
+        deletion process.
+        :type delete_flag:  bool.
+        :param _path:
+        :type _path:
+        :return:  A tuple containing 2 objects:  a list of function (NCBI and ITIS), and a list of dictionaries
+        containing kwargs for each function.  In the future Projects will also be  returned.
+        :rtype:  tuple.
+        """
         if configure_flag:
             NCBI["configure_flag"] = configure_flag
             ITIS["configure_flag"] = configure_flag
@@ -326,6 +375,32 @@ class DatabaseManagement(BaseDatabaseManagement):
 
     def NCBI(self, NCBI_blast, NCBI_pub_taxonomy, NCBI_refseq_release, configure_flag=True, archive_flag=True,
              delete_flag=False, database_path=None, archive_path=None, _path=None):
+        """
+        A strategy that implements all of the databases relevant to NCBI.
+
+        :param NCBI_blast:  Keyword arguments for the generalized NCBI_blast strategy.
+        :type NCBI_blast:  dict.
+        :param NCBI_pub_taxonomy:  Keyword arguments for the specific NCBI_pub_taxonomy strategy.
+        :type NCBI_pub_taxonomy:  dict.
+        :param NCBI_refseq_release:  Keyword arguments for the specific NCBI_refseq_release strategy.
+        :type NCBI_refseq_release:  dict.
+        :param configure_flag:  A generalized flag that is passed to the NCBI strategies in order to implement their
+        configuration process.
+        :type configure_flag:  bool.
+        :param archive_flag:  A generalized flag that is passed to to the NCBI strategies in order to implement their
+        archiving process.
+        :type archive_flag:  bool.
+        :param delete_flag:  A generalized flag that is passed to the NCBI strategies in order to implement their
+        deletion process.
+        :type delete_flag:  bool.
+        :param database_path:  User supplied relative path to the databases.
+        :type database_path:   str.
+        :param archive_path:  User supplied relative path to the archived databases.
+        :type archive_path:   str.
+        :return:  A tuple containing 2 objects:  a list of function (NCBI_blast, NCBI_pub_taxonomy, and
+        NCBI_refseq_release), and a list of dictionaries containing kwargs for each function.
+        :rtype:  tuple.
+        """
         ncbi_dispatcher = {"NCBI": []}
         ncbi_config = {"NCBI": []}
         if not archive_path:
@@ -376,6 +451,31 @@ class DatabaseManagement(BaseDatabaseManagement):
 
     def NCBI_blast(self, NCBI_blast_db, NCBI_blast_windowmasker_files,
                    configure_flag=None, archive_flag=None, delete_flag=None, database_path=None, archive_path=None, _path=None):
+        """
+        A strategy that implements all of the data relevant to NCBI's blast databases.
+
+        :param NCBI_blast_db:  Keyword arguments for the generalized NCBI_blast_db strategy.
+        :type NCBI_blast_db:   dict.
+        :param NCBI_blast_windowmasker_files:  Keyword arguments for the generalized NCBI_blast_windowmasker_files
+         strategy.
+        :type NCBI_blast_windowmasker_files:  dict.
+        :param configure_flag:  A flag that is passed to the NCBI strategies in order to implement their
+        configuration process.
+        :type configure_flag:  bool.
+        :param archive_flag:  A flag that is passed to to the NCBI strategies in order to implement their
+        archiving process.
+        :type archive_flag:  bool.
+        :param delete_flag:  A flag that is passed to the NCBI strategies in order to implement their
+        deletion process.
+        :type delete_flag:  bool.
+        :param database_path:  User supplied relative path to the databases.
+        :type database_path:   str.
+        :param archive_path:  User supplied relative path to the archived databases.
+        :type archive_path:   str.
+        :return:  A tuple containing 2 objects:  a list of function (NCBI_blast_db, and NCBI_blast_windowmasker_files),
+        and a list of dictionaries containing kwargs for each function.
+        :rtype:  tuple.
+        """
         ncbi_blast_dispatcher = {}
         ncbi_blast_config = {}
         if not archive_path:
@@ -415,6 +515,23 @@ class DatabaseManagement(BaseDatabaseManagement):
         return ncbi_blast_dispatcher, ncbi_blast_config
 
     def ncbi_blast_db(self, configure_flag=None, archive_flag=None, delete_flag=None, archive_path=None, database_path=None, _path=None):
+        """
+        A strategy that implements NCBI's blast database that's used with the blast+ command line utilities.
+
+        :param configure_flag:  A flag for configuring the blast database for NCBI's blast+ tool.
+        :type configure_flag:  bool.
+        :param archive_flag:  A flag for archiving the blast database for NCBI's blast+ tool.
+        :type archive_flag:  bool.
+        :param delete_flag:  A flag for deleting the blast database for NCBI's blast+ tool.
+        :type delete_flag:  bool.
+        :param database_path:  User supplied relative path to the databases.
+        :type database_path:   str.
+        :param archive_path:  User supplied relative path to the archived databases.
+        :type archive_path:   str.
+        :return:  A tuple containing 2 objects:  a list of functions for dealing with NCBI's blast database,
+        and a list of dictionaries containing kwargs for each function.
+        :rtype:  tuple.
+        """
         # Set up default parameter values.
         nbd_dispatcher = {"NCBI_blast_db": []}
         nbd_config = {"NCBI_blast_db": []}
@@ -440,6 +557,23 @@ class DatabaseManagement(BaseDatabaseManagement):
 
     def ncbi_blast_windowmasker_files(self, taxonomy_ids, configure_flag=None, archive_flag=None, delete_flag=None,
                                       archive_path=None, database_path=None, _path=None):
+        """
+        A strategy that sets up windowmasker files used with the blast+ command line utilities.
+
+        :param configure_flag:  A flag for configuring the windowmasker files for blast+.
+        :type configure_flag:  bool.
+        :param archive_flag:  A flag for archiving the windowmasker files for blast+.
+        :type archive_flag:  bool.
+        :param delete_flag:  A flag for deleting the windowmasker files for blast+.
+        :type delete_flag:  bool.
+        :param database_path:  User supplied relative path to the databases.
+        :type database_path:   str.
+        :param archive_path:  User supplied relative path to the archived databases.
+        :type archive_path:   str.
+        :return:  A tuple containing 2 objects:  a list of functions for dealing with windowmasker files,
+        and a list of dictionaries containing kwargs for each function.
+        :rtype:  tuple.
+        """
         nbw_dispatcher = {"NCBI_blast_windowmasker_files": []}
         nbw_config = {"NCBI_blast_windowmasker_files": []}
         if not archive_path:
@@ -462,7 +596,23 @@ class DatabaseManagement(BaseDatabaseManagement):
         return nbw_dispatcher, nbw_config
 
     def NCBI_pub_taxonomy(self, configure_flag=None, archive_flag=None, delete_flag=None, archive_path=None, database_path=None, _path=None):
-        # TODO-ROB:  Add a ftp download of the correct taxdump file for biosql stuff in the self.dl-tax-db method
+        """
+        A strategy that sets up windowmasker files used with the blast+ command line utilities.
+
+        :param configure_flag:  A flag that updates NCBI's taxonomy dump files.
+        :type configure_flag:  bool.
+        :param archive_flag:  A flag that archives NCBI's taxonomy dump files.
+        :type archive_flag:  bool.
+        :param delete_flag:  A flag that deletes NCBI's taxonomy dump files.
+        :type delete_flag:  bool.
+        :param database_path:  User supplied relative path to the databases.
+        :type database_path:   str.
+        :param archive_path:  User supplied relative path to the archived databases.
+        :type archive_path:   str.
+        :return:  A tuple containing 2 objects:  a list of functions for downloading NCBI's taxdum.tar.gz,
+        and a list of dictionaries containing kwargs for each function.
+        :rtype:  tuple.
+        """
         npt_dispatcher = {"NCBI_pub_taxonomy": []}
         npt_config = {"NCBI_pub_taxonomy": []}
         if not archive_path:
@@ -487,6 +637,43 @@ class DatabaseManagement(BaseDatabaseManagement):
     def NCBI_refseq_release(self, configure_flag=None, archive_flag=None, delete_flag=None, upload_flag=None, archive_path=None,
                             database_path=None, collection_subset=None, seqtype=None, seqformat=None, file_list=None,
                             upload_number=8, _path=None, activate=None, configure_template=None):
+        """
+        This is the most complicated specific strategy.  It downloads the refseq release files of choice (gbff),
+        extracts the data, splits a list of files into {upload_number} lists, and uploads those file lists to
+        {upload_number} BioSQL databases.  The resulting databases can be used to access sequence data with accession
+        numbers.  Due to the long upload time (>24 hours) this class currently only uses PBS to break the uploading up
+        into {upload_number} processes.
+
+        :param configure_flag:  A flag that downloads refseq release files from NCBI.
+        :type configure_flag:  bool.
+        :param archive_flag:  A flag that archives refseq release files from NCBI.
+        :type archive_flag:  bool.
+        :param delete_flag:  A flag that deletes refseq release files from NCBI.
+        :type delete_flag:  bool.
+        :param upload_flag:  A flag that uploads refseq release files to BioSQL database(s).
+        :type upload_flag:  bool.
+        :param database_path:  User supplied relative path to the databases.
+        :type database_path:   str.
+        :param archive_path:  User supplied relative path to the archived databases.
+        :type archive_path:   str.
+        :param collection_subset: The collection subset of interest.
+        :type collection_subset: str.
+        :param seqtype: The type of sequence (RNA, protein, genomic).
+        :type seqtype: str.
+        :param seqformat: The format of the sequence file (usually 'gbff' for GenBank Flat File).
+        :type seqformat: str.
+        :param file_list:  A list of files to upload.
+        :type file_list:  list.
+        :param upload_number:  The number of databases to upload (defautls to 8)
+        :type upload_number:  int.
+        :param activate:  Absolute path to a virtual environments activate script.  This is used for PBS scripts.
+        :type activate:  str.
+        :param configure_template:  A flag that loads a BioSQL database with NCBI taxonomy data.  This takes a very long time.
+        :type configure_template:  bool.
+        :return:  A tuple containing 2 objects:  a list of functions for managing a BioSQL database with NCBI refseq
+        data, and a list of dictionaries containing kwargs for each function.
+        :rtype:  tuple.
+        """
         nrr_dispatcher = {"NCBI_refseq_release": {"archive": [], "configure": [], "upload": []}}
         nrr_config = {"NCBI_refseq_release": {"archive": [], "configure": [], "upload": []}}
         if not archive_path:
@@ -535,46 +722,6 @@ class DatabaseManagement(BaseDatabaseManagement):
                 os.chdir(orig_dir)
             nrr_dispatcher["NCBI_refseq_release"]['upload'].append(_run_upload_script)
             nrr_config["NCBI_refseq_release"]['upload'].append({})
-
-            # if file_list is None:
-            #     db_path = self.database_path / Path('NCBI') / Path('refseq') / Path('release') / Path(collection_subset)
-            #     file_list = os.listdir(str(db_path))
-            #     file_list = [x for x in file_list if x.endswith(str(seqformat))]
-            # sub_upload_size = len(file_list) // upload_number
-            # sub_upload_lists = [file_list[x:x + 100] for x in range(0, len(file_list), sub_upload_size)]
-            # if (len(file_list) % upload_number) != 0:
-            #     upload_number = upload_number + 1
-            # add_to_default = 0
-            # for sub_list in sub_upload_lists:
-            #     add_to_default += 1
-            #     nrr_dispatcher["NCBI_refseq_release"]["upload"].append(self.db_mana_utils.refseq_jobber)
-            #     code_dict_string = str({
-            #         "collection_subset": collection_subset,
-            #         "seqtype": seqtype,
-            #         "seqformat": seqformat,
-            #         "upload_list": sub_list,
-            #         "add_to_default": add_to_default
-            #     })
-            #     # Create a Python script for this in the package
-            #     sge_code_string = \
-            #     "from OrthoEvol.Manager.management import ProjectManagement\n" \
-            #     "from OrthoEvol.Manager.database_dispatcher import DatabaseDispatcher\n" \
-            #     "from OrthoEvol.Manager.config import yml\n" \
-            #     "from pkg_resources import resource_filename\n" \
-            #     "import yaml\n" \
-            #     "pm_config_file = resource_filename(yml.__name__, \"config_template_existing.yml\")\n" \
-            #     "with open(pm_config_file, \'r\') as f:\n" \
-            #     "   pm_config = yaml.safe_load(f)\n" \
-            #     "pm = ProjectManagement(**pm_config[\"Management_config\"])\n" \
-            #     "code_dict_string = %s\n" \
-            #     "R_R = DatabaseDispatcher(config_file=\"%s\", proj_mana=pm, upload_refseq_release=True, **code_dict_string)\n" % \
-            #         (code_dict_string, self.config_file)
-            #     nrr_config["NCBI_refseq_release"]["upload"].append({
-            #         "code": sge_code_string,
-            #         "base_jobname": "upload_rr_%s",
-            #         "email_address": self.email,
-            #         "id": add_to_default,
-            #         "activate": activate})
 
         return nrr_dispatcher, nrr_config
 
