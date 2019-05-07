@@ -9,6 +9,7 @@ from pathlib import Path
 from pkg_resources import resource_filename
 import subprocess as sp
 # OrthoEvol
+from OrthoEvol import OrthoEvolDeprecationWarning
 from OrthoEvol.Tools.logit import LogIt
 from OrthoEvol.Tools.ftp import NcbiFTPClient
 from OrthoEvol.utilities import FullUtilities
@@ -64,6 +65,8 @@ class BaseDatabaseManagement(object):
             self.database_path = Path(project_path)
 
     def download_windowmasker_files(self, taxonomy_ids):
+        OrthoEvolDeprecationWarning("Windowmasker files are no longer used by the most current blastx command line "
+                                    "utilities.  You can now use taxon ids directly.")
         """
         Download the WindowMasker files used in the BLAST database.
 
