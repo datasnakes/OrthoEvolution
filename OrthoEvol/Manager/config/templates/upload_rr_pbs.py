@@ -3,8 +3,6 @@
 from OrthoEvol.Manager.management import ProjectManagement
 from OrthoEvol.Manager.database_dispatcher import DatabaseDispatcher
 from OrthoEvol.utilities import FullUtilities
-from OrthoEvol.Manager.config import yml
-from pkg_resources import resource_filename
 import yaml
 import os
 
@@ -15,9 +13,9 @@ def _dispatch_config(config_file):
    nrr_config = {"NCBI_refseq_release": {"upload": []}}
    # Templated variables
    file_list = %s
-   database_path = %s
+   database_path = "%s"
    upload_number = %s
-   email = %s
+   email = "%s"
    # Config file variables
    with open(config_file, 'r') as cf:
       cd = yaml.load(cf)
@@ -72,9 +70,9 @@ def _dispatch_config(config_file):
       return nrr_dispatcher, nrr_config
 
 # Setup project management and function dispatcher
-config_file = resource_filename(yml.__name__, %s)
+config_file = "%s"
 with open(config_file, 'r') as f:
-   pm_config = yaml.safe_load(f)
+   pm_config = yaml.load(f)
 pm = ProjectManagement(**pm_config["Management_config"])
 dd = DatabaseDispatcher(config_file, pm)
 
