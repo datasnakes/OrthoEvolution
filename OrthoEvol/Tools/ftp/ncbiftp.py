@@ -87,7 +87,6 @@ class NcbiFTPClient(BaseFTPClient):
         if not Path(filename).is_file():
             with open(filename, 'wb') as localfile:
                 self.ftp.retrbinary('RETR %s' % filename, localfile.write)
-                self.ncbiftp_log.info('%s was downloaded.' % str(filename))
 
     def _download_windowmasker(self, windowmaskerfile):
         """Download the window masker files."""
@@ -213,6 +212,7 @@ class NcbiFTPClient(BaseFTPClient):
                               minutes)
 
         if extract:
+            self.ncbiftp_log.info('The compressed files are about to be extracted.')
             extract_time_secs = time()
             with ThreadPool(1) as extract_pool:
                 with tqdm(total=len(self.files2download)) as pbar:
