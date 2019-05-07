@@ -128,7 +128,9 @@ class BaseDatabaseManagement(object):
         """Update ETE3's taxonomy database with ETE3's API."""
         # DEFAULT_TAXADB = os.path.join(os.environ.get('HOME', '/'), '.etetoolkit', 'taxa.sqlite')
         ete3 = import_module("ete3")
-        ete3.NCBITaxa.update_taxonomy_database()
+        ncbi_taxon_dump_path = self.database_path / Path("NCBI") / Path('pub') / Path('taxonomy')
+        ncbi = ete3.NCBITaxa(dbfile=str(ncbi_taxon_dump_path / 'ete3_taxa.sqlite'))
+        ncbi.update_taxonomy_database()
 
     def create_biosql_taxonomy_database(self, destination, database_name):
         """Create a BioSQL database template loaded with NCBI's taxonomy data."""
