@@ -145,7 +145,10 @@ class SQLiteBioSQL(BaseBioSQL):
             # TODO-ROB:  Download the file manually and then use qsub job
             self.load_sqlite_taxonomy()
         else:
-            self.biosqllog.warning("The template, %s, already exists." % self.template_abs_path)
+            try:
+                self.load_sqlite_taxonomy()
+            except:
+                self.biosqllog.warning("The template, %s, already exists." % self.template_abs_path)
 
     def copy_template_database(self, destination):
         """
