@@ -15,9 +15,6 @@ class TestTools(unittest.TestCase):
         self.logfile = logfile
         self.filename = filename
 
-    def cleanup(self):
-        os.remove(self.filename)
-
     def test_logit(self):
         """Test the LogIt class."""
         logit = LogIt()
@@ -28,14 +25,15 @@ class TestTools(unittest.TestCase):
         logit.deletelog(self.logfile)
 
     def test_multiprocess(self):
+        """Test the Multiprocess class."""
         mp = Multiprocess()
         self.assertIsNotNone(mp.cpus)
 
     def test_ncbiftpclient(self):
-        """Simple download."""
+        """Test the NcbiFTPClient."""
         ncbiftp = NcbiFTPClient(self.assertTrue('someone@gmail.com'))
-        ncbiftp.download_file(self.filename)
-        self.cleanup()
+        self.assertIsNotNone(ncbiftp.ftp.welcome)
+        ncbiftp.close_connection()
 
 
 if __name__ == '__main__':
