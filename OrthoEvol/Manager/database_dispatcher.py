@@ -23,9 +23,6 @@ class DatabaseDispatcher(DatabaseManagement):
         self.strategies = list(self.dispatcher.keys())
         self.actions = ["archive", "upload", "configure", "delete"]
 
-        if upload_refseq_release == True:
-            self.refseq_release_dispatcher(**kwargs)
-
     def dispatch(self, strategies, dispatcher, configuration):
         """
         The dispatch method takes a list of strategies and dispatches the functions using a configuration.  A nested
@@ -50,22 +47,6 @@ class DatabaseDispatcher(DatabaseManagement):
                 strats = list(disp.keys())
                 self.dispatch(strats, disp, conf)
 
-    def uploading_dispatch(self, strategies):
-        dispatcher = {}
-        configuration = {}
-        for strategy in strategies:
-            dispatcher[strategy] = []
-            configuration[strategy] = []
-            if strategy == "NCBI_refseq_release":
-                self.configuration[strategy]['configure_flag'] = False
-                self.configuration[strategy]['upload_flag'] = True
-                disp, conf = self.NCBI_refseq_release(**self.configuration[strategy])
-                dispatcher[strategy].append(disp)
-                configuration[strategy].append(conf)
 
-        self.dispatch(strategies, dispatcher, configuration)
-
-    def refseq_release_dispatcher(self, **kwargs):
-        self.upload_refseq_release_files(**kwargs)
 
 
