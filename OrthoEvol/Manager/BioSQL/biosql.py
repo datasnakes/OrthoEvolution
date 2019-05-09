@@ -9,25 +9,33 @@ from Bio import SeqIO
 # OrthoEvol
 from OrthoEvol.utilities import FullUtilities
 from OrthoEvol.Tools.logit import LogIt
-from OrthoEvol.Tools.streamieo import StreamIEO
 from OrthoEvol.Manager.management import ProjectManagement
 from OrthoEvol.Manager.BioSQL.biosql_repo import sql
 from OrthoEvol.Manager.BioSQL.biosql_repo import scripts as sql_scripts
 
 
 class BaseBioSQL(object):
-    # TODO-ROB:  Organize the BioSQL files by driver/RDBMS
-    # TODO-ROB:  Add functionality for database_type="biosqldb"
+
     def __init__(self, database_name, template_name="", project=None, project_path=None, proj_mana=ProjectManagement, **kwargs):
         """
-        This is the base BioSQL class.  It provides a framework for uploading schemas, loading taxonomy data from NCBI
-        and ITIS using the BioSQL perl scripts and .sql schema files provided by the BioPython package.  We have created
-        a modified version of the BioSQL scripts in our package, which can be found on GitHub.  Taxonomy data can be
+        This is the base BioSQL class.  It provides a general framework for managing the BioSQL workflow.  Higher level
+        classes provide more specific functionality related to the various BioSQL supported database types.  Taxonomy data can be
         found at:
             NCBI:  ftp://ftp.ncbi.nlm.nih.gov/pub/taxonomy
             ITIS:  http://www.itis.gov/downloads/
 
         :param database_name:  The name of the database.
+        :type database_name:  str.
+        :param template_name:  The name of the NCBI taxonomy database that will be copied for use.
+        :type template_name:  str.
+        :param project:  The name of the project, if Project Management isn't utilized.
+        :type project:  str.
+        :param project_path:  Where the project is located if Project Management isn't utilized.
+        :type project_path:  str.
+        :param proj_mana: A configuration variable for connecting projects.
+        :type proj_mana: ProjectManagement.
+        :param kwargs:  Key-word arguments.
+        :type kwargs:  dict.
         """
         # Logging setup
         self.biosqllog = LogIt().default(logname="BioSQL", logfile=None)
@@ -66,8 +74,11 @@ class BaseBioSQL(object):
         taxonomy (phylo-db) into a database.
 
         :param cmd:  The bash command to use.
+        :type cmd:  str.
         :param schema_file:  The schema file for creating a BioSQL or PhyloDB
+        :type schema_file:  str.
         :return:  Returns the Output and the Error messages.
+        :rtype:  str.
         """
         # Build a command to create a BioSQL database if the schema file is given.
         if schema_file:
@@ -96,10 +107,17 @@ class BaseBioSQL(object):
 class SQLiteBioSQL(BaseBioSQL):
     def __init__(self, database_name=None, proj_mana=ProjectManagement, template_name="Template-BioSQL-SQLite.db", **kwargs):
         """
-        This class inherits the BaseBioSQL class.  It uses the base methods to load schema, load taxonomy (NCBI),
+                This class inherits the BaseBioSQL class.  It uses the base methods to load schema, load taxonomy (NCBI),
         and create/copy template SQLite databases loaded with biosql schema and/or taxonomy data.
 
         :param database_name:  The name of the database.
+        :type database_name:  str.
+        :param proj_mana: A configuration variable for connecting projects.
+        :type proj_mana: ProjectManagement.
+        :param template_name:  The name of the template.
+        :type template_name:  str.
+        :param kwargs:  Key-word arguments.
+        :type kwargs:  dict.
         """
         super().__init__(template_name=template_name, database_name=database_name, proj_mana=proj_mana, **kwargs)
         self.driver = "sqlite3"
@@ -112,13 +130,11 @@ class SQLiteBioSQL(BaseBioSQL):
         Loads an SQLite biosql schema into a database file.
         """
         # Build the command
-        schema_file = pkg_resources.resource_filename(sql.__name__, self.schema_file)
-        schema_cmd = self.schema_cmd % str(self.template_abs_path)
-        # Run the bash command
-        self.configure_new_database(schema_cmd, schema_file)
-
-        # TODO-ROB: Parse output and error
-        # TODO-ROB:  Make sure the .db file doesn't already exist
+        if not self.template_abs_path.is_file():
+            schema_file = pkg_resources.resource_filename(sql.__name__, self.schema_file)
+            schema_cmd = self.schema_cmd % str(self.template_abs_path)
+            # Run the bash command
+            self.configure_new_database(schema_cmd, schema_file)
 
     def load_sqlite_taxonomy(self):
         """
@@ -126,23 +142,20 @@ class SQLiteBioSQL(BaseBioSQL):
         support for the SQLite PhyloDB.
         """
         # Build the command
-        ncbi_taxon_dump_path = self.databases_path / Path("NCBI") / Path('pub') / Path('taxonomy')
-        taxon_cmd = self.taxon_cmd % (self.ncbi_taxon_script, str(self.template_abs_path), "SQLite", str(ncbi_taxon_dump_path))
-        # Run the bash command
-        self.configure_new_database(taxon_cmd)
-        # TODO-ROB: Parse output and error
-        # TODO-ROB:  Make sure the .db file doesn't already exist
+        if not self.template_abs_path.is_file():
+            ncbi_taxon_dump_path = self.databases_path / Path("NCBI") / Path('pub') / Path('taxonomy')
+            taxon_cmd = self.taxon_cmd % (self.ncbi_taxon_script, str(self.template_abs_path), "SQLite", str(ncbi_taxon_dump_path))
+            # Run the bash command
+            self.configure_new_database(taxon_cmd)
 
     def create_template_database(self):
         """
         Creates a template database by uploading SQLite schema and NCBI taxonomy.
-        :return:
         """
         # Create a template if it doesn't exits.
         if not self.template_abs_path.is_file():
             self.load_sqlite_schema()
             self.create_executable_scripts()
-            # TODO-ROB:  Download the file manually and then use qsub job
             self.load_sqlite_taxonomy()
         else:
             try:
@@ -152,10 +165,10 @@ class SQLiteBioSQL(BaseBioSQL):
 
     def copy_template_database(self, destination):
         """
-        This method copies a template sqlite biosql database.
+        This method copies a template sqlite biosql database into the destination folder.
 
-        :param destination:  The path to copy the template into
-        :return:  A new copy of the biosql database.
+        :param destination:  The path to copy the template into.
+        :type destination:  str.
         """
         # If the template doesn't exists, then create it.
         if not self.template_abs_path.is_file():
@@ -167,6 +180,18 @@ class SQLiteBioSQL(BaseBioSQL):
         copy_handle.wait()
 
     def upload_files(self, seqtype, filetype, upload_path, upload_list=None):
+        """
+        Uploads files into a BioSQL database.
+
+        :param seqtype: The type of sequence (rna, protein, genomic).
+        :type seqtype: str.
+        :param filetype:  The type of file used to load into the BioSQL database (usually genbannk).
+        :type filetype:  str.
+        :param upload_path:  The relative path to the database to be uploaded to.
+        :type upload_path:  str.
+        :param upload_list:  A list of files to upload.
+        :type upload_list:  list.
+        """
         db_abs_path = Path(upload_path) / self.database_name
 
         # Make sure a BioSQL-SQLite database exists
@@ -206,7 +231,6 @@ class SQLiteBioSQL(BaseBioSQL):
                 self.biosqllog.warn("Server committed.")
                 t_count = t_count + count
                 self.biosqllog.info("The server has loaded a total of %s files." % t_count)
-                # TODO-ROB:  Add something to do with time here.
             except:
                 self.biosqllog.critical("Unable to load the database...")
                 server.rollback()
@@ -230,7 +254,9 @@ class MySQLBioSQL(BaseBioSQL):
         as well as the standard BioSQL schema and scripts.
 
         :param database_path:  The relative path to the database.
+        :type database_path:  str.
         :param database_name:  The name of the database.
+        :type database_name:  str.
         """
         super().__init__(database_name=database_name, database_path=database_path, driver="MySQL")
         self.schema_cmd = "sqlite3 %s -echo"
