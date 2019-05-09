@@ -4,6 +4,7 @@ import random
 import string
 import urllib.request
 import tarfile
+from collections import OrderedDict
 from importlib import import_module
 from pathlib import Path
 from pkg_resources import resource_filename
@@ -245,16 +246,16 @@ class DatabaseManagement(BaseDatabaseManagement):
         :param config_file:  The path to a YAML configuration file.  See database_config.yml in the package config
         folder.
         :type config_file:  str.
-        :param proj_mana:  A instance of the ProjectManagement class.
-        :type proj_mana:  object.
+        :param proj_mana: A configuration variable for connecting projects.
+        :type proj_mana: ProjectManagement.
         :param kwargs:  Key-word arguments.
         :type kwargs:  dict.
         """
         self.db_mana_utils = FullUtilities()
         self.db_config_strategy, kw = self.db_mana_utils.parse_db_config_file(config_file)
         super().__init__(proj_mana=proj_mana, **kw)
-        self.strategy_dispatcher = {}
-        self.strategy_config = {}
+        self.strategy_dispatcher = OrderedDict()
+        self.strategy_config = OrderedDict()
         self.configure_flag = None
         self.archive_flag = None
         self.delete_flag = None
@@ -272,8 +273,8 @@ class DatabaseManagement(BaseDatabaseManagement):
         each function.
         :rtype:  tuple.
         """
-        strategy_dispatcher = {}
-        strategy_config = {}
+        strategy_dispatcher = OrderedDict()
+        strategy_config = OrderedDict()
         for strategy, strategy_kwargs in db_config_strategy.items():
             if strategy == "Full":
                 strategy_dispatcher, strategy_config = self.full(**strategy_kwargs)
@@ -352,8 +353,8 @@ class DatabaseManagement(BaseDatabaseManagement):
             NCBI["delete_flag"] = delete_flag
             ITIS["delete_flag"] = delete_flag
 
-        full_dispatcher = {}
-        full_config = {}
+        full_dispatcher = OrderedDict()
+        full_config = OrderedDict()
         # Configure NCBI
         ncbi_dispatcher, ncbi_config = self.NCBI(**NCBI)
         # Configure ITIS
@@ -401,8 +402,8 @@ class DatabaseManagement(BaseDatabaseManagement):
         NCBI_refseq_release), and a list of dictionaries containing kwargs for each function.
         :rtype:  tuple.
         """
-        ncbi_dispatcher = {"NCBI": []}
-        ncbi_config = {"NCBI": []}
+        ncbi_dispatcher = OrderedDict({"NCBI": []})
+        ncbi_config = OrderedDict({"NCBI": []})
         if not archive_path:
             archive_path = str(self.user_archive)
         if not database_path:
@@ -476,8 +477,8 @@ class DatabaseManagement(BaseDatabaseManagement):
         and a list of dictionaries containing kwargs for each function.
         :rtype:  tuple.
         """
-        ncbi_blast_dispatcher = {}
-        ncbi_blast_config = {}
+        ncbi_blast_dispatcher = OrderedDict()
+        ncbi_blast_config = OrderedDict()
         if not archive_path:
             archive_path = str(self.user_archive)
         if not database_path:
@@ -533,8 +534,8 @@ class DatabaseManagement(BaseDatabaseManagement):
         :rtype:  tuple.
         """
         # Set up default parameter values.
-        nbd_dispatcher = {"NCBI_blast_db": []}
-        nbd_config = {"NCBI_blast_db": []}
+        nbd_dispatcher = OrderedDict({"NCBI_blast_db": []})
+        nbd_config = OrderedDict({"NCBI_blast_db": []})
         if not archive_path:
             archive_path = str(self.user_archive)
         # Archive.  If necessary, then delete.
@@ -574,8 +575,8 @@ class DatabaseManagement(BaseDatabaseManagement):
         and a list of dictionaries containing kwargs for each function.
         :rtype:  tuple.
         """
-        nbw_dispatcher = {"NCBI_blast_windowmasker_files": []}
-        nbw_config = {"NCBI_blast_windowmasker_files": []}
+        nbw_dispatcher = OrderedDict({"NCBI_blast_windowmasker_files": []})
+        nbw_config = OrderedDict({"NCBI_blast_windowmasker_files": []})
         if not archive_path:
             archive_path = str(self.user_archive)
         if not database_path:
@@ -613,8 +614,8 @@ class DatabaseManagement(BaseDatabaseManagement):
         and a list of dictionaries containing kwargs for each function.
         :rtype:  tuple.
         """
-        npt_dispatcher = {"NCBI_pub_taxonomy": []}
-        npt_config = {"NCBI_pub_taxonomy": []}
+        npt_dispatcher = OrderedDict({"NCBI_pub_taxonomy": []})
+        npt_config = OrderedDict({"NCBI_pub_taxonomy": []})
         if not archive_path:
             archive_path = str(self.user_archive)
         if not database_path:
@@ -674,8 +675,8 @@ class DatabaseManagement(BaseDatabaseManagement):
         data, and a list of dictionaries containing kwargs for each function.
         :rtype:  tuple.
         """
-        nrr_dispatcher = {"NCBI_refseq_release": {"archive": [], "configure": [], "upload": []}}
-        nrr_config = {"NCBI_refseq_release": {"archive": [], "configure": [], "upload": []}}
+        nrr_dispatcher = OrderedDict({"NCBI_refseq_release": {"archive": [], "configure": [], "upload": []}})
+        nrr_config = OrderedDict({"NCBI_refseq_release": {"archive": [], "configure": [], "upload": []}})
         if not archive_path:
             archive_path = str(self.user_archive)
         if not database_path:
@@ -726,8 +727,8 @@ class DatabaseManagement(BaseDatabaseManagement):
         return nrr_dispatcher, nrr_config
 
     def itis(self, ITIS_taxonomy, configure_flag=None, archive_flag=None, delete_flag=None, database_path=None, archive_path=None, _path=None):
-        itis_dispatcher = {}
-        itis_config = {}
+        itis_dispatcher = OrderedDict()
+        itis_config = OrderedDict()
         if not archive_path:
             archive_path = str(self.user_archive)
         if not database_path:
