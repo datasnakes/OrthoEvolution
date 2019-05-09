@@ -75,15 +75,21 @@ class BaseBlastN(ComparativeGenetics):
                                  'seqidlist': '', 'max_target_seqs': 10,
                                  'task': 'blastn'}
             return blastn_parameters
-        # Server blast
+        # Remote blast with entrez_query
         elif method == 2:
             blastn_parameters = {'query': '', 'entrez_query': '',
                                  'db': 'refseq_rna',
                                  'strand': 'plus', 'evalue': 0.01,
                                  'outfmt': 5, 'max_target_seqs': 10,
                                  'task': 'blastn', 'remote': 'True'}
-            return blastn_parameters        
-        # Default blast
+            return blastn_parameters
+        # Local blast using taxonomy ids
+        elif method == 3:
+            blastn_parameters = {'query': '', 'db': 'refseq_rna_v5', 'taxids': '',
+                                 'strand': 'plus', 'evalue': 0.01, 'outfmt': 5,
+                                 'max_target_seqs': 10, 'task': 'blastn'}
+            return blastn_parameters
+        # Default local blast
         elif method is None or method == "":
             blastn_parameters = {'query': '', 'db': 'refseq_rna',
                                  'strand': 'plus', 'evalue': 0.01,
@@ -146,7 +152,10 @@ class BaseBlastN(ComparativeGenetics):
 
             # Create a temporary fasta file using blastdbcmd
             try:
-                blastdbcmd_query = "blastdbcmd -entry {query} -db refseq_rna -outfmt %f -out {temp fasta}".format(**query_config)
+                if self.blast_method == 3:
+                    blastdbcmd_query = "blastdbcmd -entry {query} -db refseq_rna_v5 -outfmt %f -out {temp fasta}".format(**query_config)
+                else:
+                    blastdbcmd_query = "blastdbcmd -entry {query} -db refseq_rna -outfmt %f -out {temp fasta}".format(**query_config)
                 blastdbcmd_status = run(blastdbcmd_query, stdout=PIPE, stderr=PIPE, shell=True, check=True)
                 self.blastn_log.info("Extracted query refseq sequence to a temp.fasta file from BLAST database.")
             except CalledProcessError as err:
@@ -294,13 +303,14 @@ class BaseBlastN(ComparativeGenetics):
                             with open(xml_path, 'w') as blast_xml:
                                 # Set up blast parameters
                                 query_seq_path = str(gene_path / Path('temp.fasta'))
-                                # XXX Window masking will be implemented soon
-                                # wmaskerpath = os.path.join(str(taxon_id), "wmasker.obinary")
 
                                 # Update your blastn parameters
                                 if self.blast_method == 2:
                                     update_dict = {'query': query_seq_path, 
                                                    'entrez_query': organism}
+                                elif self.blast_method == 3:
+                                    update_dict = {'query': query_seq_path,
+                                                   'taxids': taxon_id}
                                 else:
                                     update_dict = {'query': query_seq_path}
                                 self.blastn_parameters.update(update_dict)
