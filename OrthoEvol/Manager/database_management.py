@@ -658,7 +658,7 @@ class DatabaseManagement(BaseDatabaseManagement):
         :type archive_path:   str.
         :param collection_subset: The collection subset of interest.
         :type collection_subset: str.
-        :param seqtype: The type of sequence (RNA, protein, genomic).
+        :param seqtype: The type of sequence (rna, protein, genomic).
         :type seqtype: str.
         :param seqformat: The format of the sequence file (usually 'gbff' for GenBank Flat File).
         :type seqformat: str.
