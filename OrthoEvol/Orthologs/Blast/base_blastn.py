@@ -18,15 +18,16 @@ from OrthoEvol.Orthologs.Blast.utils import gene_list_config, map_func
 class BaseBlastN(ComparativeGenetics):
     """Base BlastN class."""
 
-    def __init__(self, project, blast_method, template=None, save_data=True, **kwargs):
+    def __init__(self, project, method, template=None, save_data=True, **kwargs):
         """This class inherits from the CompGenFiles class.
         This class utilizes it's parent classes to search a standalone
         Blast database for specific orthologs of a gene using a query organism
         (usually human).  The best hits from the Blast are filtered for the
         best option in order to get the most accuarate accession numbers for
         downstream analysis.
+
         :param project:  The project name.
-        :param blast_method:  Method used for blasting. (1, 2, None)
+        :param method:  Method used for blasting. (1, 2, 3, or None)
         :param template:  The accession file template.
         :param save_data:  A flag for saving the post_blast data to an excel file.
         :param kwargs:"""
@@ -34,7 +35,7 @@ class BaseBlastN(ComparativeGenetics):
         super().__init__(project=project, template=template, save_data=save_data, **kwargs)
         
         # Method variable
-        self.blast_method = blast_method
+        self.method = method
         # Create a date format
         self._fmt = '%a %b %d at %I:%M:%S %p %Y'
         self.date_format = str(d.now().strftime(self._fmt))
@@ -60,21 +61,23 @@ class BaseBlastN(ComparativeGenetics):
         self.complete_time_file = self.project + '_TIME.csv'
         self.complete_time_file_path = self.data / Path(self.complete_time_file)
 
-        self.blastn_parameters = self.blast_method_selection(method=self.blast_method)
+        self.blastn_parameters, self.query_config = self.select_method(method=self.method)
 
-    def blast_method_selection(self, method):
+    def select_method(self, method):
         """Select a method for running blastn.
-        :param method: a blast method - 1, 2, or None
+        
+        :param method: a blast method - 1, 2, 3, or None
         """
-        # TODO: Revamp methods based on blast version. If version is 2.8.0 or
-        # higher then require use of taxids. If not, allow seqids or other.
+        # Local blast using seqidlist
         if method == 1:
-            # Accessions/Seqids List
             blastn_parameters = {'query': '', 'db': 'refseq_rna',
                                  'strand': 'plus', 'evalue': 0.01, 'outfmt': 5,
                                  'seqidlist': '', 'max_target_seqs': 10,
                                  'task': 'blastn'}
-            return blastn_parameters
+            query_config = {'query': '',
+                            'db': 'refseq_rna',
+                            'temp fasta': ''}
+            return (blastn_parameters, query_config)
         # Remote blast with entrez_query
         elif method == 2:
             blastn_parameters = {'query': '', 'entrez_query': '',
@@ -82,24 +85,33 @@ class BaseBlastN(ComparativeGenetics):
                                  'strand': 'plus', 'evalue': 0.01,
                                  'outfmt': 5, 'max_target_seqs': 10,
                                  'task': 'blastn', 'remote': 'True'}
-            return blastn_parameters
+            query_config = {'query': '',
+                            'db': 'refseq_rna',
+                            'temp fasta': ''}
+            return (blastn_parameters, query_config)
         # Local blast using taxonomy ids
         elif method == 3:
             blastn_parameters = {'query': '', 'db': 'refseq_rna_v5', 'taxids': '',
                                  'strand': 'plus', 'evalue': 0.01, 'outfmt': 5,
                                  'max_target_seqs': 10, 'task': 'blastn'}
-            return blastn_parameters
+            query_config = {'query': '',
+                            'db': 'refseq_rna_v5',
+                            'temp fasta': ''}
+            return (blastn_parameters, query_config)
         # Default local blast
         elif method is None or method == "":
             blastn_parameters = {'query': '', 'db': 'refseq_rna',
                                  'strand': 'plus', 'evalue': 0.01,
                                  'outfmt': 5, 'max_target_seqs': 10,
                                  'task': 'blastn'}
-            return blastn_parameters
+            query_config = {'query': '',
+                            'db': 'refseq_rna',
+                            'temp fasta': ''}
+            return (blastn_parameters, query_config)
         else:
             raise ValueError('%s is not a blast method.' % method)
 
-    def blast_config(self, query_accessions, query_organism, auto_start=False):
+    def configure(self, query_accessions, query_organism, auto_start=False):
         """This method configures everything for our BLAST workflow.
         It configures the accession file, which works with interrupted Blasts.
         It configures a gene_list for blasting the right genes.
@@ -148,14 +160,12 @@ class BaseBlastN(ComparativeGenetics):
             # Save sequence data in FASTA file format and print the gi number
             # to stdout with a custom BLAST extraction
             # https://www.ncbi.nlm.nih.gov/books/NBK279689/#_cookbook_Custom_data_extraction_and_form_
-            query_config = {'query': query, 'temp fasta': str(gene_path / Path('temp.fasta'))}
+            self.query_config.update({'query': query,
+                                      'temp fasta': str(gene_path / Path('temp.fasta'))})
 
             # Create a temporary fasta file using blastdbcmd
             try:
-                if self.blast_method == 3:
-                    blastdbcmd_query = "blastdbcmd -entry {query} -db refseq_rna_v5 -outfmt %f -out {temp fasta}".format(**query_config)
-                else:
-                    blastdbcmd_query = "blastdbcmd -entry {query} -db refseq_rna -outfmt %f -out {temp fasta}".format(**query_config)
+                blastdbcmd_query = "blastdbcmd -entry {query} -db {db} -outfmt %f -out {temp fasta}".format(**self.query_config)
                 blastdbcmd_status = run(blastdbcmd_query, stdout=PIPE, stderr=PIPE, shell=True, check=True)
                 self.blastn_log.info("Extracted query refseq sequence to a temp.fasta file from BLAST database.")
             except CalledProcessError as err:
@@ -178,8 +188,9 @@ class BaseBlastN(ComparativeGenetics):
                            query_organism=query_organism,
                            pre_configured=auto_start)
 
-    def blast_xml_parse(self, xml_path, gene, organism):
+    def parse_xml(self, xml_path, gene, organism):
         """Parse the blast XML record get the best hit accession number.
+        
         :param xml_path:  Absolute path to the blast record.
         :param gene:  The gene of interest.
         :param organism:  The organism of interest.
@@ -242,6 +253,7 @@ class BaseBlastN(ComparativeGenetics):
         """Run NCBI's blastn.
         This method actually performs NCBI's blastn.
         It requires configuring before it can be utilized.
+        
         :param genes:  Gene of interest. (Default value = None)
         :param query_organism:  Query organism. (Default value = None)
         :param pre_configured:  Determines if the blast needs configuring. (Default value = False)
@@ -286,7 +298,7 @@ class BaseBlastN(ComparativeGenetics):
                         # Try to parse your xml file. If it is not parsable,
                         # catch the error.
                         try:
-                            self.blast_xml_parse(xml_path, gene, organism)
+                            self.parse_xml(xml_path, gene, organism)
                         # The error will likely be the result of an empty file.
                         except ParseError as err:
                             parse_error_msg = 'Parse Error - %s' % err.msg
@@ -305,10 +317,10 @@ class BaseBlastN(ComparativeGenetics):
                                 query_seq_path = str(gene_path / Path('temp.fasta'))
 
                                 # Update your blastn parameters
-                                if self.blast_method == 2:
+                                if self.method == 2:
                                     update_dict = {'query': query_seq_path, 
                                                    'entrez_query': organism}
-                                elif self.blast_method == 3:
+                                elif self.method == 3:
                                     update_dict = {'query': query_seq_path,
                                                    'taxids': taxon_id}
                                 else:
@@ -329,10 +341,10 @@ class BaseBlastN(ComparativeGenetics):
                                 self.blastn_log.warning('Blast run has ended.')
                                 self.add_blast_time(gene, organism, start_time, end_time)
                                 blast_xml.close()
-                                self.blast_xml_parse(xml_path, gene, organism)
+                                self.parse_xml(xml_path, gene, organism)
                                 
                                 # Make blast sleep if server blast
-                                if self.blast_method == 2:
+                                if self.method == 2:
                                     time.sleep(30) # Prevents server overload
 
                         # Catch either ApplicationError or ParseError
