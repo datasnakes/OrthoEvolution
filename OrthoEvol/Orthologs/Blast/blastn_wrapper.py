@@ -11,6 +11,7 @@ from __future__ import print_function
 from Bio.Application import _Option, _Switch
 from Bio.Blast.Applications import _NcbiblastMain2SeqCommandline
 
+
 class NcbiblastnCommandline(_NcbiblastMain2SeqCommandline):
     """Wrapper for the NCBI BLAST+ program blastn (for nucleotides).
     With the release of BLAST+ (BLAST rewritten in C++ instead of C), the NCBI
@@ -83,6 +84,15 @@ class NcbiblastnCommandline(_NcbiblastMain2SeqCommandline):
             # Restrict search or results:
             _Option(["-perc_identity", "perc_identity"],
                     "Percent identity (real, 0 to 100 inclusive).",
+                    equate=False),
+            _Option(["-taxids", "taxids"],
+                    """Restrict search of database to include only the specified taxonomy IDs (string).
+                    """,
+                    equate=False),
+            _Option(["-taxidlist", "taxidlist"],
+                    """Restrict search of database to include only the specified taxonomy IDs (string).
+                    """,
+                    filename=True,
                     equate=False),
             # Discontiguous MegaBLAST options
             _Option(["-template_type", "template_type"],
