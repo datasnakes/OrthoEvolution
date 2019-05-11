@@ -182,8 +182,7 @@ class BaseBlastN(ComparativeGenetics):
 
         self.blastn_log.info('Configured gene list: %s' % self.current_gene_list)
         self.blastn_log.info('Blast configuration has ended.')
-        if auto_start is True:
-            # Automatically run blast after the configuration
+        if auto_start:  # Automatically run blast after the configuration
             self.runblast(genes=self.current_gene_list,
                            query_organism=query_organism,
                            pre_configured=auto_start)
@@ -208,7 +207,7 @@ class BaseBlastN(ComparativeGenetics):
         with open(file_path, 'r') as blast_xml:
             blast_qresult = SearchIO.read(blast_xml, 'blast-xml')
             mapped_qresult = blast_qresult.hit_map(map_func)  # Map the hits
-
+            # Extract hit information from xml file.
             for hit in mapped_qresult:
                 for hsp in hit.hsps:
                     # Find the highest scoring hit for each gene
@@ -259,23 +258,23 @@ class BaseBlastN(ComparativeGenetics):
         :param pre_configured:  Determines if the blast needs configuring. (Default value = False)
         :return:
         """
-
-        if pre_configured is False:
+        if not pre_configured:
             query = self.df[query_organism].tolist()
             self.blast_config(query_accessions=query,
                               query_organism=query_organism,
                               auto_start=True)
-            genes = self.current_gene_list  # Gene list populated by blast_config.
-        elif pre_configured is True:
+            genes = self.current_gene_list  # Gene list created by blast_config.
+        elif pre_configured:
             genes = genes
 
         if len(genes) < 1:
             self.blastn_log.fatal('There are no genes to run with blastn.')
 
         else:
-            self.blastn_log.info('The blast began on {}'.format(str(d.now().strftime(self.date_format))))
+            datefmt = str(d.now().strftime(self.date_format))
+            self.blastn_log.info('The blast began on {}'.format(datefmt))
 
-            # TIP Steps to a run blastn for orthology inference
+            # TIP Steps to run blastn for orthology inference
             # 1.  Iterate over genes of interest
             # 2.  Iterate over organisms of interest
             # 3.  Perform blastn
@@ -356,7 +355,13 @@ class BaseBlastN(ComparativeGenetics):
                             self.blastn_log.error(errmsg)
                             os.remove(xml_path)
                             self.blastn_log.info('%s was deleted.' % xml)
-
+                        except (KeyboardInterrupt, SystemExit) as err:
+                            msg = "Keyboard interrupt or System Exit."
+                            self.blastn_log.error(msg)
+                            os.remove(xml_path)
+                            self.blastn_log.info('%s was deleted.' % xml)
+                            raise                            
+                            
                     # If the BLAST has gone through all orthologs then create a
                     # master accession file.
                     if gene == genes[-1] and organism == self.org_list[-1]:
