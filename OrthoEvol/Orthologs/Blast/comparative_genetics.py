@@ -4,6 +4,7 @@ from pathlib import Path
 import pandas as pd
 import shutil
 import time
+import random
 # NCBITaxa().update_taxonomy_database()
 import pkg_resources
 from ete3 import NCBITaxa
@@ -74,22 +75,35 @@ class BaseComparativeGenetics(object):
         self.__post_blast = post_blast
         self.__taxon_filename = taxon_file
         self.acc_filename = acc_file
+        self.project_path = project_path
         self.project = project
 
         # Initialize Logging
         self.get_time = time.time
         self.sep = 50*'*'
 
-        if project_path and project:
-            self.project_path = Path(project_path) / Path(project)
-        elif project:
-            project_path = os.getcwd()
-            self.project_path = Path(project_path) / Path(project)
-
+        if self.project_path and self.project:
+            self.project_path = Path(self.project_path) / Path(self.project)
+        elif self.project:
+            self.project_path = os.getcwd()
+        # If user does not want to use a project name, create one anyway.
+        elif not self.project and not self.project_path:
+            five_ints = random.sample(range(1, 9), 5)  # 5 random integers
+            five_ints_str = ''.join(str(e) for e in five_ints)
+            self.project = "project" + five_ints_str  # New project name
+            self.project_path = os.getcwd()
+        # TODO: Add ability to use an existing project or project path.
+        elif self.project_path and not self.project:
+            raise NotImplementedError
+            
+        self.blastn_log.debug('Project name: %s' % self.project)
+        self.blastn_log.debug('Project path: %s' % self.project_path)
+            
         # Configuration of class attributes.
         add_self = attribute_config(self, composer=proj_mana,
-                                    checker=ProjectManagement, project=project,
-                                    project_path=project_path)
+                                    checker=ProjectManagement,
+                                    project=self.project,
+                                    project_path=self.project_path)
         for variable, attribute in add_self.__dict__.items():
             setattr(self, variable, attribute)
 
@@ -103,7 +117,6 @@ class BaseComparativeGenetics(object):
             acc_file = kwargs['MAF']
             self.acc_filename = acc_file
         if acc_file is not None:
-
             # File init
             self.acc_path = self.project_index / Path(self.acc_filename)
 
