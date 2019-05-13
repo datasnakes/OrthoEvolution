@@ -15,12 +15,12 @@ pm = ProjectManagement(**pm_config["Management_config"])
 db_config_file = resource_filename(yml.__name__, "databases.yml")
 with open(db_config_file, 'r') as f:
     db_config = yaml.load(f)
-config = db_config.update(pm_config)
+db_config.update(pm_config)
 
 # Generate main config file for this job
 config_file = pm.user_log / Path("upload_config.yml")
 with open(str(config_file), 'w') as cf:
-    yaml.dump(config, cf, default_flow_style=False)
+    yaml.dump(db_config, cf, default_flow_style=False)
 
 # Set up database dispatcher and dispatch the functions
 dd = DatabaseDispatcher(config_file, pm)
