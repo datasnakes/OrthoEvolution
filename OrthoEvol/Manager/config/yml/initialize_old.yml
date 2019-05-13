@@ -1,0 +1,7 @@
+# This is a configuration file to initialize an old repository with the ProjectManagement class.
+Management_config:
+  repo: 'Test-Repository'
+  user: 'Test-User'
+  project: 'Test-Project'
+  research: 'Test-Research'
+  research_type: 'Test-Research-Type'
