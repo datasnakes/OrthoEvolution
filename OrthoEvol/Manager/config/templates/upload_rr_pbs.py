@@ -54,7 +54,7 @@ def _dispatch_config(config_file):
          "from OrthoEvol.Manager.config import yml\n" \
          "from pkg_resources import resource_filename\n" \
          "import yaml\n" \
-         "pm_config_file = resource_filename(yml.__name__, \"config_template_existing.yml\")\n" \
+         "pm_config_file = resource_filename(yml.__name__, \"initialize_old.yml\")\n" \
          "with open(pm_config_file, \'r\') as f:\n" \
          "   pm_config = yaml.safe_load(f)\n" \
          "pm = ProjectManagement(**pm_config[\"Management_config\"])\n" \
@@ -67,7 +67,7 @@ def _dispatch_config(config_file):
          "email_address": email,
          "id": add_to_default,
          "activate": activate})
-      return nrr_dispatcher, nrr_config
+   return nrr_dispatcher, nrr_config
 
 # Setup project management and function dispatcher
 config_file = "%s"
