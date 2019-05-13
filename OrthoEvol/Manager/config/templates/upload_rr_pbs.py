@@ -1,4 +1,4 @@
-#!%s python
+#!%s/python
 
 from OrthoEvol.Manager.management import ProjectManagement
 from OrthoEvol.Manager.database_dispatcher import DatabaseDispatcher
