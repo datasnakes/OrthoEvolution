@@ -375,8 +375,8 @@ class DatabaseManagement(BaseDatabaseManagement):
         # returns dict of config_dicts, dict of dispatcher_functions
         return full_dispatcher, full_config
 
-    def NCBI(self, NCBI_blast, NCBI_pub_taxonomy, NCBI_refseq_release, configure_flag=True, archive_flag=True,
-             delete_flag=False, database_path=None, archive_path=None, _path=None):
+    def NCBI(self, NCBI_blast, NCBI_pub_taxonomy, NCBI_refseq_release, configure_flag=None, archive_flag=None,
+             delete_flag=None, database_path=None, archive_path=None, _path=None):
         """
         A strategy that implements all of the databases relevant to NCBI.
 
