@@ -243,7 +243,7 @@ class DatabaseManagement(BaseDatabaseManagement):
         proper order.  The strategies range from very general ("Full", "NCBI", etc.) to very specific ("NCBI_blast_db",
         "NCBI_refseq_release", etc.).  Each strategy has 3 separate flags (configure, archive, and delete).  Specific
         strategies may also have other flags or parameters that control their behavior.
-        :param config_file:  The path to a YAML configuration file.  See database_config.yml in the package config
+        :param config_file:  The path to a YAML configuration file.  See databases.yml in the package config
         folder.
         :type config_file:  str.
         :param proj_mana: A configuration variable for connecting projects.
