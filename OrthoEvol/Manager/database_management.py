@@ -676,8 +676,8 @@ class DatabaseManagement(BaseDatabaseManagement):
         data, and a list of dictionaries containing kwargs for each function.
         :rtype:  tuple.
         """
-        nrr_dispatcher = OrderedDict({"NCBI_refseq_release": {"archive": [], "configure": [], "upload": []}})
-        nrr_config = OrderedDict({"NCBI_refseq_release": {"archive": [], "configure": [], "upload": []}})
+        nrr_dispatcher = OrderedDict({"NCBI_refseq_release": OrderedDict({"archive": [], "configure": [], "upload": []})})
+        nrr_config = OrderedDict({"NCBI_refseq_release": OrderedDict({"archive": [], "configure": [], "upload": []})})
         if not archive_path:
             archive_path = str(self.user_archive)
         if not database_path:
