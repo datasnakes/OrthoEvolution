@@ -4,6 +4,7 @@ import random
 import string
 import urllib.request
 import tarfile
+import yaml
 from collections import OrderedDict
 from importlib import import_module
 from pathlib import Path
@@ -711,10 +712,15 @@ class DatabaseManagement(BaseDatabaseManagement):
             with open(upload_script, 'r') as u_s:
                 temp_script = u_s.read()
             script_string = temp_script % (py_shebang, file_list, db_path, upload_number, self.email, self.config_file)
-            script_dir = Path(self.user_log, ('upload_rr' + ''.join(random.sample(string.ascii_letters + string.digits, 5))))
+            rand_str = random.sample(string.ascii_letters + string.digits, 5)
+            script_dir = Path(self.user_log, ('upload_rr' + ''.join(rand_str)))
             script_dir.mkdir()
             with open(str(script_dir / 'master_upload_rr_pbs.py'), 'w') as mus:
                 mus.write(script_string)
+            with open(str(self.config_file), 'r') as cf:
+                conf_data = yaml.load(cf)
+            with open(str(script_dir / 'upload_config.yml'), 'w') as ucy:
+                yaml.dump(conf_data, ucy, default_flow_style=False)
 
             def _run_upload_script():
                 orig_dir = os.getcwd()
