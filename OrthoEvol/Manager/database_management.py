@@ -706,7 +706,7 @@ class DatabaseManagement(BaseDatabaseManagement):
                                  "for anything less than 8 seperate BioSQL databases.")
 
             # Get template script variables
-            py_shebang = activate.parent
+            py_shebang = Path(activate.parent).expanduser()
             db_path = self.database_path / Path('NCBI') / Path('refseq') / Path('release') / Path(collection_subset)
             upload_script = resource_filename(templates.__name__, 'upload_rr_pbs.py')
             with open(upload_script, 'r') as u_s:
