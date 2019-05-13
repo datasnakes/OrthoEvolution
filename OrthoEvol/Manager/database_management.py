@@ -717,11 +717,13 @@ class DatabaseManagement(BaseDatabaseManagement):
             script_dir.mkdir()
             with open(str(script_dir / 'master_upload_rr_pbs.py'), 'w') as mus:
                 mus.write(script_string)
+            os.chmod(str(script_dir / 'master_upload_rr_pbs.py'), mode=0o755)
             with open(str(self.config_file), 'r') as cf:
                 conf_data = yaml.load(cf)
             with open(str(script_dir / 'upload_config.yml'), 'w') as ucy:
                 conf_data['Database_config']['ftp_flag'] = False
                 yaml.dump(conf_data, ucy, default_flow_style=False)
+            os.chmod(str(script_dir / 'upload_config.yml'), mode=0o755)
 
             def _run_upload_script():
                 orig_dir = os.getcwd()
