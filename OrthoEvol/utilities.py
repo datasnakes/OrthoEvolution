@@ -749,7 +749,7 @@ class CookieUtils(object):
         for arch_name, data_path in archive_dict.items():
             root_dir = str(data_path.parent)
             base_dir = str(data_path.stem)
-            d = datetime.datetime.now().strftime(format="%Y-%m-%d_%H%M")
+            d = datetime.now().strftime(format="%Y-%m-%d_%H%M")
             output_pathname = archive_path / Path(arch_name + "." + d)
             # Archive the desired data.
             data_size = self.get_size(start_path=str(data_path))
