@@ -143,7 +143,7 @@ class SQLiteBioSQL(BaseBioSQL):
         """
         # Build the command
         if self.template_abs_path.is_file():
-            if self.template_abs_path.stat().st_size < 200000000:
+            if self.template_abs_path.stat().st_size < 150000:
                 ncbi_taxon_dump_path = self.databases_path / Path("NCBI") / Path('pub') / Path('taxonomy')
                 taxon_cmd = self.taxon_cmd % (self.ncbi_taxon_script, str(self.template_abs_path), "SQLite", str(ncbi_taxon_dump_path))
                 # Run the bash command
