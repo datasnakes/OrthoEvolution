@@ -142,11 +142,15 @@ class SQLiteBioSQL(BaseBioSQL):
         support for the SQLite PhyloDB.
         """
         # Build the command
-        if not self.template_abs_path.is_file():
-            ncbi_taxon_dump_path = self.databases_path / Path("NCBI") / Path('pub') / Path('taxonomy')
-            taxon_cmd = self.taxon_cmd % (self.ncbi_taxon_script, str(self.template_abs_path), "SQLite", str(ncbi_taxon_dump_path))
-            # Run the bash command
-            self.configure_new_database(taxon_cmd)
+        if self.template_abs_path.is_file():
+            if self.template_abs_path.stat().st_size > 300000000:
+                ncbi_taxon_dump_path = self.databases_path / Path("NCBI") / Path('pub') / Path('taxonomy')
+                taxon_cmd = self.taxon_cmd % (self.ncbi_taxon_script, str(self.template_abs_path), "SQLite", str(ncbi_taxon_dump_path))
+                # Run the bash command
+                self.configure_new_database(taxon_cmd)
+            else:
+                self.biosqllog.warning("The template, %s, already exists." % self.template_abs_path)
+                self.biosqllog.warning("You can still UPDATE the database." % self.template_abs_path)
 
     def create_template_database(self):
         """
