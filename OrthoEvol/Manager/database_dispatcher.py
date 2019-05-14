@@ -23,7 +23,7 @@ class DatabaseDispatcher(DatabaseManagement):
         self.strategies = list(self.dispatcher.keys())
         self.actions = ["archive", "upload", "configure", "delete"]
 
-    def dispatch(self, strategies, dispatcher, configuration):
+    def dispatch(self, strategies=None, dispatcher=None, configuration=None):
         """
         The dispatch method takes a list of strategies and dispatches the functions using a configuration.  A nested
         dispatcher triggers the recursiveness of the dispatch function.  Dispatching means that the functions are
@@ -37,6 +37,13 @@ class DatabaseDispatcher(DatabaseManagement):
         :param configuration:  A dictionary of kwargs (keyword arguments) used to configure the dispatched functions.
         :type configuration:  dict.
         """
+        if not strategies:
+            strategies = self.strategies
+        if not dispatcher:
+            dispatcher = self.dispatcher
+        if not configuration:
+            configuration = self.configuration
+
         for strategy in strategies:
             disp = dispatcher[strategy]
             conf = configuration[strategy]
