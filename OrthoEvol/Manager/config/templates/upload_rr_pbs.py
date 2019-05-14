@@ -56,7 +56,7 @@ def _dispatch_config(config_file):
          "import yaml\n" \
          "pm_config_file = \"upload_config.yml\"\n" \
          "with open(pm_config_file, \'r\') as f:\n" \
-         "   pm_config = yaml.safe_load(f)\n" \
+         "   pm_config = yaml.load(f)\n" \
          "pm = ProjectManagement(**pm_config[\"Management_config\"])\n" \
          "code_dict_string = %%s\n" \
          "R_R = DatabaseDispatcher(config_file=\"%%s\", proj_mana=pm, **code_dict_string)\n" %% \
