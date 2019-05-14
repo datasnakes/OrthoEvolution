@@ -52,7 +52,7 @@ class BaseDatabaseManagement(object):
         self.email = email
         self.driver = driver
         self.database_dict = {}
-        if ftp_flag == True:
+        if ftp_flag:
             self.ncbiftp = NcbiFTPClient(email=self.email)
         self.biosql = biosql
         self.proj_mana = proj_mana
@@ -711,10 +711,10 @@ class DatabaseManagement(BaseDatabaseManagement):
             upload_script = resource_filename(templates.__name__, 'upload_rr_pbs.py')
             with open(upload_script, 'r') as u_s:
                 temp_script = u_s.read()
-            script_string = temp_script % (py_shebang, file_list, db_path, upload_number, self.email, self.config_file)
             rand_str = random.sample(string.ascii_letters + string.digits, 5)
             script_dir = Path(self.user_log, ('upload_rr' + ''.join(rand_str)))
             script_dir.mkdir()
+            script_string = temp_script % (py_shebang, file_list, db_path, upload_number, self.email, str(script_dir / 'upload_config.yml'))
             with open(str(script_dir / 'master_upload_rr_pbs.py'), 'w') as mus:
                 mus.write(script_string)
             os.chmod(str(script_dir / 'master_upload_rr_pbs.py'), mode=0o755)
