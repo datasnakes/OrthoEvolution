@@ -60,8 +60,8 @@ def _dispatch_config(config_file):
          "pm = ProjectManagement(**pm_config[\"Management_config\"])\n" \
          "code_dict_string = %%s\n" \
          "R_R = DatabaseDispatcher(config_file=\"%%s\", proj_mana=pm, **code_dict_string)\n" \
-         "R_R.dispatch()" %% \
-         (code_dict_string, config_file)
+         "R_R.upload_refseq_release_files(collection_subset=%%s, seqtype=%%s, seqformat=%%s, upload_list=%%s, add_to_default=%%s)\n" %% \
+         (code_dict_string, config_file, collection_subset, seqtype, seqformat, sub_list, add_to_default)
       nrr_config["NCBI_refseq_release"]["upload"].append({
          "code": sge_code_string,
          "base_jobname": "upload_rr_%%s",
