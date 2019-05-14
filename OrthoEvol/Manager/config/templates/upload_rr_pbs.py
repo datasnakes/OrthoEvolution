@@ -59,7 +59,8 @@ def _dispatch_config(config_file):
          "   pm_config = yaml.load(f)\n" \
          "pm = ProjectManagement(**pm_config[\"Management_config\"])\n" \
          "code_dict_string = %%s\n" \
-         "R_R = DatabaseDispatcher(config_file=\"%%s\", proj_mana=pm, **code_dict_string)\n" %% \
+         "R_R = DatabaseDispatcher(config_file=\"%%s\", proj_mana=pm, **code_dict_string)\n" \
+         "R_R.dispatch()" %% \
          (code_dict_string, config_file)
       nrr_config["NCBI_refseq_release"]["upload"].append({
          "code": sge_code_string,
