@@ -723,6 +723,7 @@ class DatabaseManagement(BaseDatabaseManagement):
                 conf_data = yaml.load(cf)
             with open(str(script_dir / 'upload_config.yml'), 'w') as ucy:
                 conf_data['Database_config']['ftp_flag'] = False
+                conf_data['Database_config']['Full']['NCBI']['NCBI_refseq_release']['upload_flag'] = False
                 yaml.dump(conf_data, ucy, default_flow_style=False)
             os.chmod(str(script_dir / 'upload_config.yml'), mode=0o755)
 
