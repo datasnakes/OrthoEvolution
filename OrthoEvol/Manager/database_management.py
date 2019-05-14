@@ -23,7 +23,7 @@ from OrthoEvol.Manager.config import templates
 
 class BaseDatabaseManagement(object):
 
-    def __init__(self, email, driver, project=None, project_path=None, proj_mana=ProjectManagement, ftp_flag=True):
+    def __init__(self, email, driver, project=None, project_path=None, proj_mana=ProjectManagement, blast=False, ftp_flag=True):
         """
         This is the base class for managing various databases.  It provides functionality for downloading and creating
         various databases for your pipeline.  There are functions available for downloading files from NCBI (BLAST,
@@ -63,7 +63,8 @@ class BaseDatabaseManagement(object):
             for var, attr in add_self.__dict__.items():
                 setattr(self, var, attr)
             self.database_path = self.user_db
-            self.gene_data = BaseComparativeGenetics(project=self.project, project_path=project_path, proj_mana=proj_mana, copy_from_package=True, MAF='MAFV3.3_short.csv')
+            if blast:
+                self.gene_data = BaseComparativeGenetics(project=self.project, project_path=project_path, proj_mana=proj_mana, copy_from_package=True, MAF='MAFV3.3_short.csv')
         else:
             self.database_path = Path(project_path)
 
