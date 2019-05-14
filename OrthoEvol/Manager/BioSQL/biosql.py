@@ -143,29 +143,24 @@ class SQLiteBioSQL(BaseBioSQL):
         """
         # Build the command
         if self.template_abs_path.is_file():
-            if self.template_abs_path.stat().st_size < 150000:
+            if (self.template_abs_path.stat().st_size < 150000) and (self.template_abs_path.stat().st_size > 100000):
                 ncbi_taxon_dump_path = self.databases_path / Path("NCBI") / Path('pub') / Path('taxonomy')
                 taxon_cmd = self.taxon_cmd % (self.ncbi_taxon_script, str(self.template_abs_path), "SQLite", str(ncbi_taxon_dump_path))
                 # Run the bash command
                 self.configure_new_database(taxon_cmd)
             else:
                 self.biosqllog.warning("The template, %s, already exists." % self.template_abs_path)
-                self.biosqllog.warning("You can still UPDATE the database.")
+        else:
+            self.biosqllog.error("The template, %s, does not exist." % self.template_abs_path)
 
     def create_template_database(self):
         """
         Creates a template database by uploading SQLite schema and NCBI taxonomy.
         """
         # Create a template if it doesn't exits.
-        if not self.template_abs_path.is_file():
-            self.load_sqlite_schema()
-            self.create_executable_scripts()
-            self.load_sqlite_taxonomy()
-        else:
-            try:
-                self.load_sqlite_taxonomy()
-            except:
-                self.biosqllog.warning("The template, %s, already exists." % self.template_abs_path)
+        self.load_sqlite_schema()
+        self.create_executable_scripts()
+        self.load_sqlite_taxonomy()
 
     def copy_template_database(self, destination):
         """
