@@ -5,6 +5,10 @@ from OrthoEvol.Manager.database_dispatcher import DatabaseDispatcher
 from OrthoEvol.utilities import FullUtilities
 import yaml
 import os
+from time import sleep
+
+def sleeper(secs):
+   sleep(secs)
 
 def _dispatch_config(config_file):
    # Initialize variables
@@ -40,6 +44,7 @@ def _dispatch_config(config_file):
    for sub_list in sub_upload_lists:
       add_to_default += 1
       nrr_dispatcher["NCBI_refseq_release"]["upload"].append(utils.refseq_jobber)
+      nrr_dispatcher["NCBI_refseq_release"]["upload"].append(sleeper)
       code_dict_string = str({
          "collection_subset": collection_subset,
          "seqtype": seqtype,
@@ -68,6 +73,7 @@ def _dispatch_config(config_file):
          "email_address": email,
          "id": add_to_default,
          "activate": activate})
+      nrr_config["NCBI_refseq_release"]["upload"].append({'secs':15})
    return nrr_dispatcher, nrr_config
 
 # Setup project management and function dispatcher
