@@ -153,6 +153,16 @@ class SQLiteBioSQL(BaseBioSQL):
         else:
             self.biosqllog.error("The template, %s, does not exist." % self.template_abs_path)
 
+    def update_sqlite_taxonomy(self):
+        """
+        Update an SQLite biosql database with taxonomy information.
+        """
+        if self.template_abs_path.is_file():
+            ncbi_taxon_dump_path = self.databases_path / Path("NCBI") / Path('pub') / Path('taxonomy')
+            taxon_cmd = self.taxon_cmd % (self.ncbi_taxon_script, str(self.template_abs_path), "SQLite", str(ncbi_taxon_dump_path))
+            # Run the bash command
+            self.configure_new_database(taxon_cmd)
+
     def create_template_database(self):
         """
         Creates a template database by uploading SQLite schema and NCBI taxonomy.
