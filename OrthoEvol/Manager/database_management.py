@@ -710,21 +710,25 @@ class DatabaseManagement(BaseDatabaseManagement):
             py_shebang = Path(activate.parent).expanduser()
             db_path = self.database_path / Path('NCBI') / Path('refseq') / Path('release') / Path(collection_subset)
             upload_script = resource_filename(templates.__name__, 'upload_rr_pbs.py')
-            with open(upload_script, 'r') as u_s:
-                temp_script = u_s.read()
+            
+            # Read the upload script
+            with open(upload_script, 'r') as upload_script:
+                temp_script = upload_script.read()
             rand_str = random.sample(string.ascii_letters + string.digits, 5)
             script_dir = Path(self.user_log, ('upload_rr' + ''.join(rand_str)))
             script_dir.mkdir()
             script_string = temp_script % (py_shebang, file_list, db_path, upload_number, self.email, str(script_dir / 'upload_config.yml'))
-            with open(str(script_dir / 'master_upload_rr_pbs.py'), 'w') as mus:
-                mus.write(script_string)
+            
+            with open(str(script_dir / 'master_upload_rr_pbs.py'), 'w') as master_upload:
+                master_upload.write(script_string)
             os.chmod(str(script_dir / 'master_upload_rr_pbs.py'), mode=0o755)
+            
             with open(str(self.config_file), 'r') as cf:
-                conf_data = yaml.load(cf)
-            with open(str(script_dir / 'upload_config.yml'), 'w') as ucy:
-                conf_data['Database_config']['ftp_flag'] = False
-                conf_data['Database_config']['Full']['NCBI']['NCBI_refseq_release']['upload_flag'] = False
-                yaml.dump(conf_data, ucy, default_flow_style=False)
+                cfg_data = yaml.load(cf)
+            with open(str(script_dir / 'upload_config.yml'), 'w') as upload_cfg:
+                cfg_data['Database_config']['ftp_flag'] = False
+                cfg_data['Database_config']['Full']['NCBI']['NCBI_refseq_release']['upload_flag'] = False
+                yaml.dump(cfg_data, upload_cfg, default_flow_style=False)
             os.chmod(str(script_dir / 'upload_config.yml'), mode=0o755)
 
             def _run_upload_script():
