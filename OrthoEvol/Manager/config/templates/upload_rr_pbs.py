@@ -54,7 +54,7 @@ def _dispatch_config(config_file):
          "from OrthoEvol.Manager.config import yml\n" \
          "from pkg_resources import resource_filename\n" \
          "import yaml\n" \
-         "pm_config_file = resource_filename(yml.__name__, \"initialize_old.yml\")\n" \
+         "pm_config_file = \"upload_config.yml\"\n" \
          "with open(pm_config_file, \'r\') as f:\n" \
          "   pm_config = yaml.safe_load(f)\n" \
          "pm = ProjectManagement(**pm_config[\"Management_config\"])\n" \
