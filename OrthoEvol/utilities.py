@@ -826,3 +826,50 @@ class FullUtilities(CookieUtils, ManagerUtils, OrthologUtils, OtherUtils):
             proc.kill()
             ret_val = proc.communicate()
         return ret_val
+
+    def group_files_by_size(self, file_dict, _path=None, groups=8):
+        """
+        Create a list of dictionaries that contain the specified number of groups of files.  Each group of files has a
+        total size that are close to each other.
+        :param file_dict:  The file names are keys, and file sizes are the values.
+        :type file_dict:  dict.
+        :param _path:  If the file_dict isn't given, then a path can be given for generating the file_dict.
+        :type _path:  str.
+        :param groups:  The number of groups to split the files into.
+        :type groups:  int.
+        :return:  A list with {groups} number of dictionaries.
+        :rtype:  list.
+        """
+        # Generate a file dict from the path if file_dict isn't given.
+        if not file_dict:
+            file_dict1 = {}
+            for file in os.listdir(_path):
+                if '.db' in file:
+                    continue
+                file_dict1[file] = Path(file).stat().st_size
+        # Initialize variables
+        group_max_size = sum(list(file_dict.values())) / groups
+        total_files = len(list(file_dict.values()))
+        group_list = []
+        file_count = 0
+        # Begin parsing the dictionary
+        for group in range(0, groups):
+            group_dict = {}
+            group_size = 0
+            for file in dict(file_dict).keys():
+                # Don't add files to the group if it's over the max size.
+                if group_size < group_max_size:
+                    file_count = file_count + 1
+                    group_size = group_size + file_dict[file]
+                    group_dict[file] = file_dict.pop(file)
+                # Append to the group list.
+                else:
+                    group_list.append(group_dict)
+                    break
+            # Append the last group to the list.  It gets skipped above.
+            if group == (groups - 1):
+                group_list.append(group_dict)
+        # If there are extra files for some reason add them to one of the groups.
+        if file_count != total_files:
+            group_list[1].update(file_dict)
+        return group_list
