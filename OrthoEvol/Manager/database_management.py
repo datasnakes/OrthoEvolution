@@ -726,7 +726,8 @@ class DatabaseManagement(BaseDatabaseManagement):
             os.chmod(str(script_dir / 'upload_config.yml'), mode=0o755)
 
             def _run_upload_script():
-                self.db_mana_utils.system_cmd(cmd='%s/master_upload_rr_pbs.py' % str(script_dir), stdout=sp.PIPE, stderr=sp.STDOUT, shell=True)
+                self.db_mana_utils.system_cmd(cmd='%s/master_upload_rr_pbs.py' % str(script_dir), cwd=str(script_dir),
+                                              stdout=sp.PIPE, stderr=sp.STDOUT, shell=True)
 
             nrr_dispatcher["NCBI_refseq_release"]['upload'].append(_run_upload_script)
             nrr_config["NCBI_refseq_release"]['upload'].append({})
