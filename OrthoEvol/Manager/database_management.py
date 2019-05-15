@@ -680,6 +680,8 @@ class DatabaseManagement(BaseDatabaseManagement):
         :type activate:  str.
         :param template_flag:  A flag that loads a BioSQL database with NCBI taxonomy data.  This takes a very long time.
         :type template_flag:  bool.
+        :param download_flag:  A flag that downloads the proper refseq release files from NCBI's ftp site.
+        :type download_flag:  bool.
         :return:  A tuple containing 2 objects:  a list of functions for managing a BioSQL database with NCBI refseq
         data, and a list of dictionaries containing kwargs for each function.
         :rtype:  tuple.
