@@ -52,8 +52,15 @@ class BaseDatabaseManagement(object):
         self.email = email
         self.driver = driver
         self.database_dict = {}
+        self.ftp_flag = ftp_flag
+
         if ftp_flag:
-            self.ncbiftp = NcbiFTPClient(email=self.email)
+            try:
+                self.ncbiftp = NcbiFTPClient(email=self.email)
+            except:
+                self.ftp_flag = False
+                self.db_mana_log.warning("This system doesn't allow FTP usage.")
+
         self.biosql = biosql
         self.proj_mana = proj_mana
 
@@ -679,6 +686,7 @@ class DatabaseManagement(BaseDatabaseManagement):
         """
         nrr_dispatcher = OrderedDict({"NCBI_refseq_release": OrderedDict({"archive": [], "configure": [], "upload": []})})
         nrr_config = OrderedDict({"NCBI_refseq_release": OrderedDict({"archive": [], "configure": [], "upload": []})})
+        _biosql = self.biosql.BaseBioSQL(proj_mana=self.proj_mana)
         if not archive_path:
             archive_path = str(self.user_archive)
         if not database_path:
