@@ -646,7 +646,7 @@ class DatabaseManagement(BaseDatabaseManagement):
 
     def NCBI_refseq_release(self, configure_flag=None, archive_flag=None, delete_flag=None, upload_flag=None, archive_path=None,
                             database_path=None, collection_subset=None, seqtype=None, seqformat=None, file_list=None,
-                            upload_number=8, _path=None, activate=None, configure_template=None, download_flag=None):
+                            upload_number=8, _path=None, activate=None, template_flag=None, download_flag=None):
         """
         This is the most complicated specific strategy.  It downloads the refseq release files of choice (gbff),
         extracts the data, splits a list of files into {upload_number} lists, and uploads those file lists to
@@ -678,8 +678,8 @@ class DatabaseManagement(BaseDatabaseManagement):
         :type upload_number:  int.
         :param activate:  Absolute path to a virtual environments activate script.  This is used for PBS scripts.
         :type activate:  str.
-        :param configure_template:  A flag that loads a BioSQL database with NCBI taxonomy data.  This takes a very long time.
-        :type configure_template:  bool.
+        :param template_flag:  A flag that loads a BioSQL database with NCBI taxonomy data.  This takes a very long time.
+        :type template_flag:  bool.
         :return:  A tuple containing 2 objects:  a list of functions for managing a BioSQL database with NCBI refseq
         data, and a list of dictionaries containing kwargs for each function.
         :rtype:  tuple.
@@ -687,6 +687,8 @@ class DatabaseManagement(BaseDatabaseManagement):
         nrr_dispatcher = OrderedDict({"NCBI_refseq_release": OrderedDict({"archive": [], "configure": [], "upload": []})})
         nrr_config = OrderedDict({"NCBI_refseq_release": OrderedDict({"archive": [], "configure": [], "upload": []})})
         _biosql = self.biosql.BaseBioSQL(proj_mana=self.proj_mana)
+        dl_path = Path(self.database_path) / Path("NCBI") / Path('pub') / Path('taxonomy')
+        dmp_file = dl_path / "nodes.dmp"
         if not archive_path:
             archive_path = str(self.user_archive)
         if not database_path:
@@ -700,21 +702,25 @@ class DatabaseManagement(BaseDatabaseManagement):
                 "delete_flag": delete_flag
             })
         if configure_flag:
-            if download_flag:
+            if download_flag and self.ftp_flag:
                 nrr_dispatcher["NCBI_refseq_release"]["configure"].append(self.download_refseq_release_files)
                 nrr_config["NCBI_refseq_release"]["configure"].append({
                     "collection_subset": collection_subset,
                     "seqtype": seqtype,
                     "seqformat": seqformat
                 })
-            if configure_template:
+            if template_flag and (self.ftp_flag or dmp_file.exists()):
                 nrr_dispatcher["NCBI_refseq_release"]["configure"].append(self.create_biosql_taxonomy_template)
                 nrr_config["NCBI_refseq_release"]["configure"].append({})
 
         if upload_flag:
-            if not _biosql.template_abs_path.is_file():
+            if not _biosql.template_abs_path.is_file() and (self.ftp_flag or dmp_file.exists()):
                 nrr_dispatcher["NCBI_refseq_release"]["configure"].append(self.create_biosql_taxonomy_template)
                 nrr_config["NCBI_refseq_release"]["configure"].append({})
+            else:
+                self.db_mana_log.error("The BioSQL template doesn't exist and the system does not allow FTP for "
+                                       "downloading the taxonomic dump files.  The dump files are also not already"
+                                       "available.")
 
             if upload_number < 8:
                 raise ValueError("The upload_number must be greater than 8.  The NCBI refseq release files are too bing"
