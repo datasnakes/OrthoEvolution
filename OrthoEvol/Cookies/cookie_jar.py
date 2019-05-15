@@ -7,6 +7,7 @@ from pathlib import Path
 import yaml
 from cookiecutter.hooks import run_script
 from cookiecutter.main import cookiecutter
+from cookiecutter.exceptions import OutputDirExistsException
 from pkg_resources import resource_filename
 
 # OrthoEvol
@@ -38,6 +39,7 @@ class CookBook(object):
         self.app_cookie = self.CookieJar / Path('new_app')
         self.db_cookie = self.CookieJar / Path('new_database')
         self.website_cookie = self.CookieJar / Path('new_website')
+        
 
         # TODO-ROB:  Make this function better.
         # Load the cookies that are in the cookie_jar config file
@@ -100,12 +102,14 @@ class Oven(object):
                             "website": self.website,
                             "db_repo": self.db_repo,
                             "recipes": self.Recipes.__dict__}
+        # Create simple function to check for existing directories
+        self.exists = os.path.exists
 
     def bake_the_repo(self, cookie_jar=None):
             self.cookielog.warn('Creating directories from the Repository Cookie template.')
             """
             This function creates a new repository.  If a repository name
-            is given to the class then it is given a name.  If not, cookiecutters
+            is given to the class, then it is given a name.  If not, cookiecutter
             takes input from the user.
     
             The base class will be the only class that allows cookiecutters parameter
@@ -122,13 +126,21 @@ class Oven(object):
                 no_input = False
                 e_c = None
                 # TODO-ROB change cookiecutter so that it can take pathlike objects
-            cookiecutter(str(self.Recipes.repo_cookie), no_input=no_input,
-                         extra_context=e_c, output_dir=str(self.cookie_jar))
-            os.chmod(str(self.cookie_jar / Path(self.repo)), mode=0o777)
-            self.cookielog.info('Repository directories have been created. ✔')
+            
+            if self.exists(self.cookie_jar):
+                if self.exists(str(self.cookie_jar / Path(self.repo))):
+                    os.chmod(str(self.cookie_jar / Path(self.repo)), mode=0o777)
+                    self.cookielog.warning('Repository directories already exist. ✔')
+            
+            else:
+                cookiecutter(str(self.Recipes.repo_cookie), no_input=no_input,
+                             extra_context=e_c, output_dir=str(self.cookie_jar))
+                
+                os.chmod(str(self.cookie_jar / Path(self.repo)), mode=0o777)
+                self.cookielog.info('Repository directories have been created. ✔')
 
+                
     def bake_the_user(self, cookie_jar=None):
-        self.cookielog.warn('Creating directories from the User Cookie template.')
         """
         This function uses the username given by our FLASK framework
         and creates a new directory system for the active user using
@@ -139,15 +151,20 @@ class Oven(object):
 
         # This is used ONLY when the user registers in flask
         # TODO-ROB:  Create the cookiecutter.json file
-
-        # extra_context overrides user and default configs
-        cookiecutter(str(self.Recipes.user_cookie), no_input=True, extra_context={
-            "user_name": self.user}, output_dir=str(self.cookie_jar))
-
-        # Change user permissions with flask later (this is for testing
-        # purposes
-        os.chmod(str(self.cookie_jar / Path(self.user)), mode=0o777)
-        self.cookielog.info('Directories have been created for the user, %s. ✔' % self.user)
+        if self.exists(self.cookie_jar):
+            if self.exists(str(self.cookie_jar / Path(self.user))):
+                os.chmod(str(self.cookie_jar / Path(self.user)), mode=0o777)
+                self.cookielog.info('Directories exist for the user. ✔')
+        else:
+            # extra_context overrides user and default configs
+            self.cookielog.warn('Creating directories from the User Cookie template.')
+            cookiecutter(str(self.Recipes.user_cookie), no_input=True, extra_context={
+                "user_name": self.user}, output_dir=str(self.cookie_jar))
+    
+            # Change user permissions with flask later (this is for testing
+            # purposes
+            os.chmod(str(self.cookie_jar / Path(self.user)), mode=0o777)
+            self.cookielog.info('Directories have been created for the user, %s. ✔' % self.user)
 
     def bake_the_project(self, cookie_jar=None):
         self.cookielog.warn('Creating directories from the Project Cookie template.')
@@ -166,21 +183,27 @@ class Oven(object):
             no_input = False
             e_c = None
             project_log_message = "that has been named with user input"
-
+                
         if not self.basic_project:
-            self.cookielog.warn('A project linked to a user/repository is being created.')
-            cookiecutter(str(self.Recipes.project_cookie), extra_context=e_c, no_input=no_input,
-                         output_dir=str(self.cookie_jar))
-            # Logging
-            if self.user:
-                self.cookielog.info('Directories have been created for %s\'s project %s. ✔' % (self.user, project_log_message))
+            if self.exists(str(self.cookie_jar / Path(self.project))):
+                self.cookielog.info('Project exists. ✔')
             else:
-                self.cookielog.info('Directories have been created for %s.' % project_log_message)
+                self.cookielog.warn('A project linked to a user/repository is being created.')
+                cookiecutter(str(self.Recipes.project_cookie), extra_context=e_c, no_input=no_input,
+                             output_dir=str(self.cookie_jar))
+                # Logging
+                if self.user:
+                    self.cookielog.info('Directories have been created for %s\'s project %s. ✔' % (self.user, project_log_message))
+                else:
+                    self.cookielog.info('Directories have been created for %s.' % project_log_message)
         else:
-            self.cookielog.warn('A basic standalone project is being created.')
-            cookiecutter(str(self.Recipes.basic_project_cookie), extra_context=e_c, no_input=no_input,
-                         output_dir=str(self.cookie_jar))
-            self.cookielog.info('Directories have been created for a standalone project %s. ✔' % project_log_message)
+            if self.exists(str(self.cookie_jar / Path(self.project))):
+                self.cookielog.info('Project exists. ✔')
+            else:
+                self.cookielog.warn('A basic standalone project is being created.')
+                cookiecutter(str(self.Recipes.basic_project_cookie), extra_context=e_c, no_input=no_input,
+                             output_dir=str(self.cookie_jar))
+                self.cookielog.info('Directories have been created for a standalone project %s. ✔' % project_log_message)
         os.chmod(str(self.cookie_jar / Path(self.project)), mode=0o777)
 
     def bake_the_db_repo(self, db_config_file, db_path, cookie_jar=None, archive_flag=False, delete=False):
@@ -202,8 +225,14 @@ class Oven(object):
         #     else:
         #         no_input = False
         #         e_c = None
-
-            cookiecutter(str(self.Recipes.db_cookie), extra_context=e_c, no_input=no_input, output_dir=str(self.cookie_jar))
+        
+        if self.exists(self.cookie_jar):
+             if self.exists(str(self.cookie_jar / Path(self.db_repo))):
+                 os.chmod(str(self.cookie_jar / Path(self.db_repo)), mode=0o777)
+            
+        else:
+            cookiecutter(str(self.Recipes.db_cookie), extra_context=e_c, 
+                         no_input=no_input, output_dir=str(self.cookie_jar))
             self.cookielog.info("Directories have been created for a database repository %s." %
                                 str((self.cookie_jar / Path(self.db_repo))))
             os.chmod(str(self.cookie_jar / Path(self.db_repo)), mode=0o777)
@@ -258,12 +287,17 @@ class Oven(object):
 
         e_c = {"research_type": research_type,
                "research_name": research}
-        cookiecutter(str(self.Recipes.research_cookie), no_input=True,
-                     extra_context=e_c, output_dir=str(self.cookie_jar))
-        os.chmod(str(self.cookie_jar / Path(research_type)), mode=0o777)
-        # script_path = self.project_cookie / Path('hooks') / Path('post_gen_project.py')
-        # run_script(script_path, )
-        self.cookielog.info('Directories have been created for the %s research project, %s. ✔' % (research_type, research))
+        
+        if self.exists(self.cookie_jar):
+            if self.exists(str(self.cookie_jar / Path(research_type))):
+                self.cookielog.warning('Research directory exists.')            
+        else:
+            cookiecutter(str(self.Recipes.research_cookie), no_input=True,
+                         extra_context=e_c, output_dir=str(self.cookie_jar))
+            os.chmod(str(self.cookie_jar / Path(research_type)), mode=0o777)
+            # script_path = self.project_cookie / Path('hooks') / Path('post_gen_project.py')
+            # run_script(script_path, )
+            self.cookielog.info('Directories have been created for the %s research project, %s. ✔' % (research_type, research))
 
     def bake_the_app(self, app, cookie_jar=None):
         self.cookielog.warn('Creating directories from the App Cookie template.')
