@@ -1,0 +1,45 @@
+====================================
+BioSQL
+====================================
+
+This is the BioSQL distribution. BioSQL is a generic unifying schema
+for storing sequences from different sources, for instance Genbank or
+Swissprot.
+
+BioSQL is meant to be a common data storage layer supported by all the
+different Bio* projects, Bioperl, Biojava, Biopython, and Bioruby.
+Entries stored through an application written in, say, Bioperl could
+be retrieved by another written in Biojava.
+
+There are currently four different RDBMSs supported: MySQL,
+PostgreSQL, Oracle, and most recently SQLite. The MySQL schema
+DDL is in sql/biosqldb-mysql.sql, the PostgreSQL schema is in
+sql/biosqldb-pg.sql, and the Oracle schema is in multiple files
+in the directory sql/biosql-ora, and the SQLite schema is in
+sql/biosqldb-sqlite.sql. In order to instantiate the schema, feed
+the respective file or files to your SQL shell (e.g. mysql for
+MySQL, and psql for PostgreSQL).
+
+Note the SQLite schema is new, and is not yet supported by all the
+Bio* projects (at the time of writing, just Biopython supports this).
+
+======================================================================
+INSTALLATION NOTES
+
+Generally, the support for each RDBMS is maintained individually,
+as there are too many differences between the RDBMSs for automatic
+generation from a single DDL. Please see the INSTALL for details.
+
+======================================================================
+POST v1.0 TODO
+======================================================================
+
+The following changes are scheduled for the next release of
+BioSQL. These changes incur incompatibilities with the 1.0 version and
+will require a database migration.
+
+  - Rename comment table to anncomment and rename term_synonym.synonym
+  to term_synonym.name in mysql and pg schemas. This will make the
+  names consistent with the Oracle schema, avoiding Oracle reserved
+  words.
+
