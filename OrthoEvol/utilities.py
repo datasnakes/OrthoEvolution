@@ -670,10 +670,10 @@ class ManagerUtils(object):
         pass
 
     def parse_db_config_file(self, config_file):
-        kw ={}
+        kw = {}
         db_config_strategy = {}
         with open(config_file, 'r') as cf:
-            db_config = yaml.load(cf)
+            db_config = yaml.load(cf, Loader=yaml.FullLoader)
             # Get the configuration for the desired strategy
             for key, value in db_config["Database_config"].items():
                 if isinstance(value, dict):
@@ -685,7 +685,8 @@ class ManagerUtils(object):
         return db_config_strategy, kw
 
     def refseq_jobber(self, email_address, base_jobname, id, code, activate):
-        job = SGEJob(email_address=email_address, base_jobname=base_jobname % str(id), activate=activate)
+        job = SGEJob(email_address=email_address,
+                     base_jobname=base_jobname % str(id), activate=activate)
         job.submit_pycode(code=code, wait=False, cleanup=False)
 
     # def template_jobber(email_address, base_jobname, id, code):
