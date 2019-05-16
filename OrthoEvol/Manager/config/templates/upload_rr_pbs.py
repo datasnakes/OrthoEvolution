@@ -11,11 +11,13 @@ def _dispatch_config(config_file):
    utils = FullUtilities()
    nrr_dispatcher = {"NCBI_refseq_release": {"upload": []}}
    nrr_config = {"NCBI_refseq_release": {"upload": []}}
+   
    # Templated variables
    file_list = %s
    database_path = "%s"
    upload_number = %s
    email = "%s"
+   
    # Config file variables
    with open(config_file, 'r') as cf:
       cd = yaml.load(cf)
