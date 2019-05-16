@@ -15,7 +15,7 @@ from OrthoEvol import OrthoEvolDeprecationWarning
 from OrthoEvol.Tools.logit import LogIt
 from OrthoEvol.Tools.ftp import NcbiFTPClient
 from OrthoEvol.utilities import FullUtilities
-from OrthoEvol.Manager.BioSQL import biosql
+from OrthoEvol.Manager.biosql import biosql
 from OrthoEvol.Manager.management import ProjectManagement
 from OrthoEvol.Orthologs.Blast.comparative_genetics import BaseComparativeGenetics
 from OrthoEvol.Manager.config import templates
@@ -47,7 +47,7 @@ class BaseDatabaseManagement(object):
 
         # Initialize Utilities
         self.db_mana_utils = FullUtilities()
-        self.db_mana_log = LogIt().default(logname="DatabaseManagement", logfile=None)
+        self.db_mana_log = LogIt().default(logname="Database-Management", logfile=None)
         self.project = project
         self.email = email
         self.driver = driver
@@ -141,7 +141,8 @@ class BaseDatabaseManagement(object):
         :type database_name:  str.
         """
         if self.driver.lower() == "sqlite3":
-            ncbi_db = self.biosql.SQLiteBioSQL(database_name=database_name, proj_mana=self.proj_mana)
+            ncbi_db = self.biosql.SQLiteBioSQL(database_name=database_name,
+                                               proj_mana=self.proj_mana)
             ncbi_db.copy_template_database(destination=destination)
             return ncbi_db
 
@@ -164,12 +165,12 @@ class BaseDatabaseManagement(object):
         pass
 
     def download_ncbi_taxonomy_dump_files(self, url='''ftp://ftp.ncbi.nlm.nih.gov/pub/taxonomy/taxdump.tar.gz'''):
-        """
-        Download and extract the NCBI taxonomy dump files via a GET request.
+        """Download and extract the NCBI taxonomy dump files via a GET request.
 
         :param url: A ftp link to the NCBI taxdump*.tar.gz file of interest.
         :type url: str.
         """
+        # TODO: Add this to NCBI FTP client
         dl_path = Path(self.database_path) / Path("NCBI") / Path('pub') / Path('taxonomy')
         dl_abs_path = dl_path / Path('taxdump.tar.gz')
         r = urllib.request.urlopen(url)
@@ -197,6 +198,7 @@ class BaseDatabaseManagement(object):
         """
         db_path = self.database_path / Path('NCBI') / Path('refseq') / Path('release') / Path(collection_subset)
         db_path.mkdir(parents=True, exist_ok=True)
+        # TODO: If database exists and is same size, use the existing database.
         ncbiftp = self.ncbiftp.getrefseqrelease(collection_subset=collection_subset, 
                                                 seqtype=seqtype, seqformat=seqformat, 
                                                 download_path=db_path)
