@@ -10,6 +10,11 @@ import sqlite3
 import time
 import subprocess as sp
 import sys
+import contextlib
+import pkg_resources
+import psutil
+from threading import Timer
+from subprocess import run, CalledProcessError, PIPE
 from datetime import datetime
 from importlib import import_module
 from multiprocessing.pool import ThreadPool
@@ -43,11 +48,13 @@ runcmd = OtherUtils().runcmd
 class BlastUtils(object):
 
     def __init__(self):
+        """
+        Various utilities to help with blast specific functionality.
+        """
         pass
 
     def map_func(self, hit):
-        """Use the map function for formatting hit id's.
-        This will be used later in the script.
+        """Format/parse hit ids generated from blast xml results.
         """
         hit.id1 = hit.id.split('|')[3]  # accession number
         hit.id2 = hit.id.split('|')[1]  # gi number
@@ -55,9 +62,11 @@ class BlastUtils(object):
         return hit
 
     def paml_org_formatter(self, organisms):
-        """Format a list for PAML.
+        """Take a list of organisms and format each organism name for PAML, which can only take names that
+        are less than a certain length (36 characters?).
 
-        :param organisms:  Input a list of organisms
+        :param organisms:  A list of organisms
+        :type organisms:  list.
         """
         # XXX PAML no longer needs a format different than `Homo_sapiens`
         org_list = []
@@ -75,10 +84,15 @@ class BlastUtils(object):
         is incomplete.
 
         :param file:  An accession file to analyze.
+        :type file:  str.
         :param data_path:  The path of the accession file.
+        :type data_path:  str.
         :param gene_list:  A gene list in the same order as the accession file.
+        :type gene_list:  list.
         :param taxon_dict:  A taxon id dictionary for logging purposes.
-        :param logger:  A logger.
+        :type taxon_dict:  dict.
+        :param logger:  A LogIt logger for logging.
+        :type logger:  LogIt.
         :return:  Returns a continued gene_list to pick up from an interrupted Blast.
         """
 
@@ -188,10 +202,15 @@ class BlastUtils(object):
 
     def my_gene_info(self, acc_dataframe, blast_query='Homo_sapiens'):
         """Use Biothings' MyGene api to get information about genes.
+
         :param acc_dataframe:  A pandas dataframe containing the accession csv file data.
+        :type acc_dataframe:  pd.DataFrame.
         :param blast_query:  The query organism for used during Blasting.
+        :type blast_query:  str.
         :return:  Returns a data-frame with hot data about each gene.
+        :rtype:  pd.DataFrame.
         """
+
         mygene = import_module('mygene')
         blastutils_log.info("Getting Pre-BLAST information about the target genes using MyGene...")
         # Initialize variables and import my-gene search command
@@ -234,10 +253,15 @@ class BlastUtils(object):
         """
         This function is used to analyze an accession file post-BLAST.  It uses the accession dictionary as a base to get
         duplicated accession numbers.
+
         :param acc_dict:  A dictionary with accession numbers as keys, and a gene/organism list as values.
+        :type acc_dict:  dict.
         :param gene_list:  A full list of genes.
+        :type gene_list:  list.
         :param org_list:  A full list of organisms.
+        :type org_list:  list.
         :return:  A master duplication dictionary used to initialize the duplicate class variables.
+        :rtype:  dict.
         """
 
         duplicated_dict = dict()
@@ -338,12 +362,13 @@ class BlastUtils(object):
         return duplicated_dict
 
     def get_miss_acc(self, acc_dataframe):
-        """Analyze an accession file post BLAST.
-        It generates several files and dictionaries regarding missing accession
-        numbers.
-        :param acc_dataframe: A pandas dataframe containing the accession csv file data(post BLAST).
-        :return: A dictionary with data about the missing accession numbers by Gene
-                 and by Organism.
+        """This function is used to analyze an accession file post-BLAST.  It generates several files and dictionaries
+         regarding missing accession numbers.
+
+        :param acc_dataframe:  A pandas dataframe containing the accession csv file data(post BLAST).
+        :type acc_dataframe:  pd.DataFrame
+        :return:  A dictionary with data about the missing accession numbers by Gene and by Organism.
+        :rtype:  dict.
         """
         # TODO-ROB: Add Entrez ID validation;  Get info from xml files???
         missing_dict = dict()
@@ -393,13 +418,12 @@ class BlastUtils(object):
         return missing_dict
 
     # def get_pseudogenes(self):
-    #     """Denote which genes are sudogenes."""
+    #     """Denote which genes are pseudogenes."""
     #     raise NotImplementedError
 
     def accession_csv2sqlite(self, acc_file, table_name, db_name, path):
         """
-        Convert a OrthoEvolution accession file in csv format
-        to an sqlite3 database.
+        Convert a OrthoEvolution accession file in csv format to an sqlite3 database.
 
         :param acc_file:  The name of the accession file.  The file name is used to create a table in the
         sqlite3 database.  Any periods will be replaced with underscores.
@@ -448,20 +472,28 @@ class BlastUtils(object):
 class GenbankUtils(object):
 
     def __init__(self):
+        """
+        Various utilities to help with genbank specific functionality.
+        """
         pass
 
     def multi_fasta_manipulator(self, target_file, reference, output, manipulation='remove'):
         # Inspired by the BioPython Tutorial and Cookbook ("20.1.1 Filtering a sequence file")
         """
-        This method manipulated selected sequences in a multi-FASTA files.  The original
+        This method manipulates reference sequences in a multi-FASTA files.  The original
         purpose was to filter files created by the GUIDANCE2 alignment program, but
         the function has been made in order to accommodate other situations as well.
 
         :param target_file:  Target multi-FASTA file.
-        :param reference:  Selected sequences for removal in a multi-FASTA file.
-        :param manipulation:  Type of manipulation.  (remove, add, tbd..)
-        :param added_name:  The output file uses this parameter to name itself.
-        :return:  A multi-FASTA file with filter sequences.
+        :type target_file:  str.
+        :param man_file:  Sequences in a multi-FASTA file used for manipulation.
+        :type man_file:  str.
+        :param manipulation:  The type of manipulation.  (remove, add, sort, tbd..)
+        :type manipulation:  str.
+        :param output_file:  The name of the output multi-FASTA file.
+        :type output_file:  str.
+        :return:  A multi-FASTA file that has been manipulated accordingly.
+        :rtype:  str.
         """
         # Create path variables
         file_name = output
@@ -480,7 +512,6 @@ class GenbankUtils(object):
 
         print('A new fasta file has been created.')
         return new_file
-
 
     # def dir_config(path, tier_frame_dict):
     #     """
@@ -503,9 +534,17 @@ class GenbankUtils(object):
     #             gene_path = tier_path / Path(GENE)
     #             Path.mkdir(gene_path)
 
-    def multi_fasta_remove(target_file, reference, new_file):
-        rem_file = new_file.stem + '_removed' + new_file.suffix
-        rem_file = new_file.parent / Path(rem_file)
+        :param target_file:  Target multi-FASTA file.
+        :type target_file:  str.
+        :param man_file:  A multi-FASTA file with sequences used for removal from the the target file.
+        :type man_file:  str.
+        :param output_file:  The name of the output multi-FASTA file.
+        :type output_file:  str.
+        :return:  A multi-FASTA file with removed sequences.
+        :rtype:  str.
+        """
+        rem_file = output_file.stem + '_removed' + output_file.suffix
+        rem_file = output_file.parent / Path(rem_file)
         # Turn the reference_file into set of ids
         if os.path.isfile(reference):
             ids = set(record.id for record in SeqIO.parse(reference, 'fasta'))
@@ -519,7 +558,19 @@ class GenbankUtils(object):
         SeqIO.write(new_records, str(new_file), 'fasta')
         SeqIO.write(old_records, str(rem_file), 'fasta')
 
-    def muli_fasta_add(self, target_file, reference, new_file):
+    def muli_fasta_add(self, target_file, man_file, output_file):
+        """
+        This method adds selected reference sequences in a multi-FASTA files.
+
+        :param target_file:  Target multi-FASTA file.
+        :type target_file:  str.
+        :param man_file:  A multi-FASTA file with sequences used for appending to the target file.
+        :type man_file:  str.
+        :param output_file:  The name of the output multi-FASTA file.
+        :type output_file:  str.
+        :return:  A multi-FASTA file with added sequences.
+        :rtype:  str.
+        """
         # TODO-ROB:  Check for duplicates.
         # Concatenate the multifasta files together by chaining the SeqIO.parse generators
         # Allows one to overwrite a file by using temporary files for storage
@@ -535,7 +586,19 @@ class GenbankUtils(object):
         else:
             print('You can only add files together.  Not python objects.')
 
-    def multi_fasta_sort(self, target_file, reference, new_file):
+    def multi_fasta_sort(self, target_file, man_file, output_file):
+        """
+        This method sorts selected reference sequences in a multi-FASTA files.
+
+        :param target_file:  Target multi-FASTA file.
+        :type target_file:  str.
+        :param man_file:  A multi-FASTA file with sequences used for sorting the target file.
+        :type man_file:  str.
+        :param output_file:  The name of the output multi-FASTA file.
+        :type output_file:  str.
+        :return:  A multi-FASTA file with sorted sequences.
+        :rtype:  str.
+        """
         # TODO-ROB:  Check for duplicates.
         with TemporaryFile('r+', dir=str(Path(target_file).parent)) as tmp_file:
             aln = MultipleSeqAlignment([])
@@ -569,6 +632,9 @@ class GenbankUtils(object):
 class OrthologUtils(BlastUtils, GenbankUtils):
 
     def __init__(self):
+        """
+        Various utilities to help with ortholog specific functionality.
+        """
         BlastUtils.__init__(self)
         GenbankUtils.__init__(self)
 
@@ -581,12 +647,19 @@ class OrthologUtils(BlastUtils, GenbankUtils):
         a dictionary, or they can be set using the basic project template.
 
         :param cls: An instance of a class that will retain the attributes.
+        :type cls:  object.
         :param composer: A class that will yield attributes to the cls parameter.
+        :type composer:  object.
         :param checker: A checker class used to check the type of the composer.
                 Dictionary composers will be treated differently.
+        :type checker:  object.
+        :type checker:  dict.
         :param project:  The name of the project.
+        :type project:  str.
         :param project_path:  The relative path of the project.
+        :type project_path:  str.
         :return:  Returns the instance (cls) with new attributes.
+        :rtype:  object.
         """
         ac_log = LogIt().default(logname="%s" % cls.__class__.__name__, logfile=None)
         if checker2:
@@ -625,11 +698,17 @@ class OrthologUtils(BlastUtils, GenbankUtils):
         are mapped to some basic project directories with some custom options.
 
         :param cls: An instance of a class that will retain the attributes.
+        :type cls:  object.
         :param project: The name of the project.
+        :type project:  str.
         :param project_path: The relative path of a project.
+        :type project_path:  str.
         :param new: The new project flag.
+        :type new:  bool.
         :param custom: The custom flag which can be None or a dictionary.
+        :type custom:  dict.
         :return: Returns the instance (cls) with new attributes.
+        :rtype:  object.
         """
 
         cls.project = project
@@ -667,9 +746,20 @@ class OrthologUtils(BlastUtils, GenbankUtils):
 
 class ManagerUtils(object):
     def __init__(self):
+        """
+        Various utilities to help with management specific functionality.
+        """
         pass
 
     def parse_db_config_file(self, config_file):
+        """
+        Take a YAML config file and return the config strategies and keyword arguments.
+
+        :param config_file:  A YAML config file for database management.
+        :type config_file:   str.
+        :return:  The database config strategies, and the key word arguments for database management.
+        :rtype:  tuble.
+        """
         kw ={}
         db_config_strategy = {}
         with open(config_file, 'r') as cf:
@@ -685,6 +775,20 @@ class ManagerUtils(object):
         return db_config_strategy, kw
 
     def refseq_jobber(self, email_address, base_jobname, id, code, activate):
+        """
+        A function for submitting python code as a string.
+
+        :param email_address:  The email address for PBS job notification.
+        :type email_address:  str.
+        :param base_jobname:  The base job name used for the PBS job.  Contains a %s for string formatting.
+        :type base_jobname:  str.
+        :param id:  An id used to format the base_jobname.
+        :type id:  int.
+        :param code:  Python code as a string.
+        :type code:  str.
+        :param activate:  The path to the activate script for the virtual environment being used in the PBS job.
+        :type activate:  str.
+        """
         job = SGEJob(email_address=email_address, base_jobname=base_jobname % str(id), activate=activate)
         job.submit_pycode(code=code, wait=False, cleanup=False)
 
@@ -695,6 +799,9 @@ class ManagerUtils(object):
 
 class CookieUtils(object):
     def __init__(self):
+        """
+        Various utilities to help with cookie specific functionality.
+        """
         self.archive_options = {
             "Full": Path(''),
             "NCBI": Path('NCBI'),
@@ -724,10 +831,15 @@ class CookieUtils(object):
         can be moved to the archive path or deleted all together.
 
         :param database_path:  A path to a folder that consists of the desired data.
+        :type database_path:  str.
         :param archive_path:  A path to an output folder for archived data.
+        :type archive_path:  str.
         :param option:  An option for the archiving strategy.  Will be one of the keys in the archive_options.
+        :type option:  str.
         :param delete_flag:  A flag for deleting the original data.  USE WITH CAUTION.
+        :type delete_flag:  bool.
         :return:  Returns a list of paths to the *.tar.xz archive of the data and/or a path to the original data.
+        :rtype:  list.
         """
         archive_dict = {}
         archive_list = []
@@ -781,8 +893,11 @@ class CookieUtils(object):
         Determine the size of a directory or a file with the desired units.
 
         :param start_path:  A file or path for sizing up.
+        :type start_path:  str.
         :param units:  The denomination of bytes to return.
+        :type units:  str.
         :return:  The size as a string.  (e.g. "3.6 KB")
+        :rtype:  str.
         """
         total_size = 0
         if os.path.isfile(start_path):
