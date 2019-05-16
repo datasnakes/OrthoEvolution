@@ -78,7 +78,6 @@ from OrthoEvol.Tools.sge import (BaseSGEJob, SGEJob, Qstat, SGEPipelineTask,
                                  writecodefile,
                                  file2str)
 from OrthoEvol.Tools.slackify import Slackify
-from OrthoEvol.Tools.streamieo import StreamIEO
 ```
 
 
