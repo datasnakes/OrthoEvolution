@@ -68,8 +68,6 @@ logit.shutdown()
 from OrthoEvol.Tools.ftp import BaseFTPClient, NcbiFTPClient
 from OrthoEvol.Tools.logit import LogIt
 from OrthoEvol.Tools.mygene import MyGene
-from OrthoEvol.Tools.otherutils import (formatlist, splitlist, makedirectory,
-                                        PackageVersion, runcmd)
 from OrthoEvol.Tools.parallel import Multiprocess
 # from OrthoEvol.Tools.pandoc import PandocConverter
 from OrthoEvol.Tools.send2server import S2S

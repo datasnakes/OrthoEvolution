@@ -5,11 +5,10 @@ from subprocess import check_call, STDOUT
 from pathlib import Path
 # OrthoEvol
 from OrthoEvol.Orthologs.Phylogenetics.IQTree.iqtree import IQTreeCommandline
-from OrthoEvol.utilities import FullUtilities
 #TODO-ROB Make this inherit FilteredAlignment
 
 # Set up make directory function
-makedirectory = FullUtilities().makedirectory
+
 
 class FilteredTree(object):
     """# TODO Insert Doctring """
@@ -21,7 +20,7 @@ class FilteredTree(object):
 
         self.aln_File = str(self.home / Path(alignment))
         outDir = self.home / Path('IQTREE')
-        makedirectory(outDir)
+        os.makedirs(str(outDir), exist_ok=True)
         copy(self.aln_File, str(outDir))
         os.chdir(str(outDir))
         self.iqtree_best_tree(alignment, dataType)

@@ -11,7 +11,7 @@ import sys
 
 from OrthoEvol.utilities import FullUtilities
 # Set up run cmd function
-runcmd = FullUtilities().runcmd
+runcmd = FullUtilities().system_cmd
 
 SUBPROCESS_HAS_TIMEOUT = True
 
