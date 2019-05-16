@@ -53,7 +53,3 @@ class DatabaseDispatcher(DatabaseManagement):
             elif isinstance(disp, dict):
                 strats = list(disp.keys())
                 self.dispatch(strats, disp, conf)
-
-
-
-
