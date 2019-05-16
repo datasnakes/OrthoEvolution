@@ -1,7 +1,6 @@
 Database_config:
   email:  "rgilmore@umc.edu"
   driver: "sqlite3"
-  ftp_flag: True
   Full:
     configure_flag: False
     archive_flag: False
@@ -28,7 +27,8 @@ Database_config:
         collection_subset: "vertebrate_mammalian"
         activate: !!python/object/apply:pathlib.Path ['~', '.venv', 'OrthoEvol', 'bin', 'activate']
         configure_flag: True
-        configure_template: True
+        download_flag: True
+        template_flag: True
         archive_flag: False
         delete_flag: False
         upload_flag: True

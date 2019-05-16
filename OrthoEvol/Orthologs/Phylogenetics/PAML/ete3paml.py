@@ -1,4 +1,5 @@
 import os
+import pandas as pd
 from ete3 import EvolTree, Tree
 
 from OrthoEvol.utilities import FullUtilities
@@ -28,7 +29,7 @@ class ETE3PAML(object):
         self.aln_str = alignment_str
         alignment_file.close()
 
-    def prune_tree(self, organismslist, organisms_file=None):
+    def prune_tree(self, organismslist, organisms_file=None, column_header="Organisms"):
         """Prune branches for species not in the alignment file.
 
         Keep branches in the species tree for species in the alignment file
@@ -37,7 +38,8 @@ class ETE3PAML(object):
         """
 
         if organisms_file:
-            organismslist = csvtolist(organisms_file)
+            og_df = pd.read_csv(organisms_file)
+            organismslist = list(og_df[column_header])
 
         branches2keep = []
         for organism in organismslist:

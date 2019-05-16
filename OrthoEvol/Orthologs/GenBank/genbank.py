@@ -94,7 +94,7 @@ class GenBank(object):
             file_path = feat_path / Path(multi % (gene, feat_type_rank, extension))
 
         # Make the base directory and return an open file.
-        self.genbank_utils.makedirectory(feat_path)
+        os.makedirs(str(feat_path), exist_ok=True)
         file = open(file_path, mode)
         return file
 

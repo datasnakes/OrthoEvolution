@@ -52,8 +52,15 @@ class BaseDatabaseManagement(object):
         self.email = email
         self.driver = driver
         self.database_dict = {}
+        self.ftp_flag = ftp_flag
+
         if ftp_flag:
-            self.ncbiftp = NcbiFTPClient(email=self.email)
+            try:
+                self.ncbiftp = NcbiFTPClient(email=self.email)
+            except:
+                self.ftp_flag = False
+                self.db_mana_log.warning("This system doesn't allow FTP usage.")
+
         self.biosql = biosql
         self.proj_mana = proj_mana
 
@@ -643,7 +650,7 @@ class DatabaseManagement(BaseDatabaseManagement):
 
     def NCBI_refseq_release(self, configure_flag=None, archive_flag=None, delete_flag=None, upload_flag=None, archive_path=None,
                             database_path=None, collection_subset=None, seqtype=None, seqformat=None, file_list=None,
-                            upload_number=8, _path=None, activate=None, configure_template=None):
+                            upload_number=8, _path=None, activate=None, template_flag=None, download_flag=None):
         """
         This is the most complicated specific strategy.  It downloads the refseq release files of choice (gbff),
         extracts the data, splits a list of files into {upload_number} lists, and uploads those file lists to
@@ -675,14 +682,19 @@ class DatabaseManagement(BaseDatabaseManagement):
         :type upload_number:  int.
         :param activate:  Absolute path to a virtual environments activate script.  This is used for PBS scripts.
         :type activate:  str.
-        :param configure_template:  A flag that loads a BioSQL database with NCBI taxonomy data.  This takes a very long time.
-        :type configure_template:  bool.
+        :param template_flag:  A flag that loads a BioSQL database with NCBI taxonomy data.  This takes a very long time.
+        :type template_flag:  bool.
+        :param download_flag:  A flag that downloads the proper refseq release files from NCBI's ftp site.
+        :type download_flag:  bool.
         :return:  A tuple containing 2 objects:  a list of functions for managing a BioSQL database with NCBI refseq
         data, and a list of dictionaries containing kwargs for each function.
         :rtype:  tuple.
         """
         nrr_dispatcher = OrderedDict({"NCBI_refseq_release": OrderedDict({"archive": [], "configure": [], "upload": []})})
         nrr_config = OrderedDict({"NCBI_refseq_release": OrderedDict({"archive": [], "configure": [], "upload": []})})
+        _biosql = self.biosql.BaseBioSQL(proj_mana=self.proj_mana)
+        dl_path = Path(self.database_path) / Path("NCBI") / Path('pub') / Path('taxonomy')
+        dmp_file = dl_path / "nodes.dmp"
         if not archive_path:
             archive_path = str(self.user_archive)
         if not database_path:
@@ -696,57 +708,67 @@ class DatabaseManagement(BaseDatabaseManagement):
                 "delete_flag": delete_flag
             })
         if configure_flag:
-            nrr_dispatcher["NCBI_refseq_release"]["configure"].append(self.download_refseq_release_files)
-            nrr_config["NCBI_refseq_release"]["configure"].append({
-                "collection_subset": collection_subset,
-                "seqtype": seqtype,
-                "seqformat": seqformat
-            })
-            if configure_template:
+            if download_flag and self.ftp_flag:
+                nrr_dispatcher["NCBI_refseq_release"]["configure"].append(self.download_refseq_release_files)
+                nrr_config["NCBI_refseq_release"]["configure"].append({
+                    "collection_subset": collection_subset,
+                    "seqtype": seqtype,
+                    "seqformat": seqformat
+                })
+            if template_flag and (self.ftp_flag or dmp_file.exists()):
                 nrr_dispatcher["NCBI_refseq_release"]["configure"].append(self.create_biosql_taxonomy_template)
                 nrr_config["NCBI_refseq_release"]["configure"].append({})
-            if upload_flag:
-                if upload_number < 8:
-                    raise ValueError("The upload_number must be greater than 8.  The NCBI refseq release files are too big"
-                                     "for anything less than 8 separate BioSQL databases.")
-    
-                # Get template script variables
-                py_shebang = Path(activate.parent).expanduser()
-                db_path = self.database_path / Path('NCBI') / Path('refseq') / Path('release') / Path(collection_subset)
-                upload_script = resource_filename(templates.__name__, 'upload_rr_pbs.py')
-                
-                # Read the upload script
-                with open(upload_script, 'r') as upload_script:
-                    temp_script = upload_script.read()
-                rand_str = random.sample(string.ascii_letters + string.digits, 5)
-                script_dir = Path(self.user_log, ('upload_rr' + ''.join(rand_str)))
-                script_dir.mkdir()
-                script_string = temp_script % (py_shebang, file_list, db_path, upload_number, self.email, str(script_dir / 'upload_config.yml'))
-                
-                # Create the master upload script
-                with open(str(script_dir / 'master_upload_rr_pbs.py'), 'w') as master_upload:
-                    master_upload.write(script_string)
-                os.chmod(str(script_dir / 'master_upload_rr_pbs.py'), mode=0o755)
-                
-                # Load the configuration file
-                with open(str(self.config_file), 'r') as cf:
-                    cfg_data = yaml.load(cf, Loader=yaml.FullLoader)
-                    
-                # Write to the upload config file
-                with open(str(script_dir / 'upload_config.yml'), 'w') as upload_cfg:
-                    cfg_data['Database_config']['ftp_flag'] = False
-                    cfg_data['Database_config']['Full']['NCBI']['NCBI_refseq_release']['upload_flag'] = False
-                    yaml.dump(cfg_data, upload_cfg, default_flow_style=False)
-                os.chmod(str(script_dir / 'upload_config.yml'), mode=0o755)
-    
-                def _run_upload_script():
-                    self.db_mana_utils.system_cmd(cmd='%s/master_upload_rr_pbs.py' % str(script_dir), cwd=str(script_dir),
-                                                  stdout=sp.PIPE, stderr=sp.STDOUT, shell=True)
-    
-                nrr_dispatcher["NCBI_refseq_release"]['upload'].append(_run_upload_script)
-                nrr_config["NCBI_refseq_release"]['upload'].append({})
-    
-            return nrr_dispatcher, nrr_config
+
+        if upload_flag:
+            if not _biosql.template_abs_path.is_file() and (self.ftp_flag or dmp_file.exists()):
+                nrr_dispatcher["NCBI_refseq_release"]["configure"].append(self.create_biosql_taxonomy_template)
+                nrr_config["NCBI_refseq_release"]["configure"].append({})
+            else:
+                self.db_mana_log.error("The BioSQL template doesn't exist and the system does not allow FTP for "
+                                       "downloading the taxonomic dump files.  The dump files are also not already"
+                                       "available.")
+
+            if upload_number < 8:
+                raise ValueError("The upload_number must be greater than 8.  The NCBI refseq release files are too bing"
+                                 "for anything less than 8 seperate BioSQL databases.")
+
+            # Get template script variables
+            py_shebang = Path(activate.parent).expanduser()
+            db_path = self.database_path / Path('NCBI') / Path('refseq') / Path('release') / Path(collection_subset)
+            
+            # Read the upload script
+            upload_script = resource_filename(templates.__name__, 'upload_rr_pbs.py')
+            with open(upload_script, 'r') as upload_script:
+                temp_script = upload_script.read()
+            rand_str = random.sample(string.ascii_letters + string.digits, 5)
+            script_dir = Path(self.user_log, ('upload_rr' + ''.join(rand_str)))
+            script_dir.mkdir()
+            script_string = temp_script % (py_shebang, file_list, db_path, upload_number, self.email, str(script_dir / 'upload_config.yml'))
+            
+            # Create the master upload script
+            with open(str(script_dir / 'master_upload_rr_pbs.py'), 'w') as master_upload:
+                master_upload.write(script_string)
+            os.chmod(str(script_dir / 'master_upload_rr_pbs.py'), mode=0o755)
+            
+            # Load the configuration file
+            with open(str(self.config_file), 'r') as cfg:
+                conf_data = yaml.load(cfg, Loader=yaml.FullLoader)
+            
+            # Write to the upload config file
+            with open(str(script_dir / 'upload_config.yml'), 'w') as upload_cfg:
+                conf_data['Database_config']['ftp_flag'] = False
+                conf_data['Database_config']['Full']['NCBI']['NCBI_refseq_release']['upload_flag'] = False
+                yaml.dump(conf_data, upload_cfg, default_flow_style=False)
+            os.chmod(str(script_dir / 'upload_config.yml'), mode=0o755)
+
+            def _run_upload_script():
+                self.db_mana_utils.system_cmd(cmd='%s/master_upload_rr_pbs.py' % str(script_dir), cwd=str(script_dir),
+                                              stdout=sp.PIPE, stderr=sp.STDOUT, shell=True)
+
+            nrr_dispatcher["NCBI_refseq_release"]['upload'].append(_run_upload_script)
+            nrr_config["NCBI_refseq_release"]['upload'].append({})
+
+        return nrr_dispatcher, nrr_config
 
     def itis(self, ITIS_taxonomy, configure_flag=None, archive_flag=None, delete_flag=None, database_path=None, archive_path=None, _path=None):
         itis_dispatcher = OrderedDict()

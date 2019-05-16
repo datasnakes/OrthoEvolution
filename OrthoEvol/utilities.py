@@ -4,28 +4,24 @@ import csv
 import datetime
 import itertools
 import os
-import platform
 import shutil
 import sqlite3
-import time
 import subprocess as sp
 import sys
+import pkg_resources
+from threading import Timer
 from datetime import datetime
 from importlib import import_module
-from multiprocessing.pool import ThreadPool
 from pathlib import Path
 from subprocess import TimeoutExpired
 from tempfile import TemporaryFile
-from warnings import warn
 # BioPython
 from Bio import AlignIO
 from Bio import SeqIO
 from Bio.Align import MultipleSeqAlignment
 # OrthoEvol
-from OrthoEvol import OrthoEvolDeprecationWarning
 from OrthoEvol.Cookies.cookie_jar import Oven
 from OrthoEvol.Tools.logit import LogIt
-from OrthoEvol.Tools.otherutils import OtherUtils
 from OrthoEvol.Tools.sge import SGEJob
 # Other
 import pandas as pd
@@ -43,11 +39,13 @@ runcmd = OtherUtils().runcmd
 class BlastUtils(object):
 
     def __init__(self):
+        """
+        Various utilities to help with blast specific functionality.
+        """
         pass
 
     def map_func(self, hit):
-        """Use the map function for formatting hit id's.
-        This will be used later in the script.
+        """Format/parse hit ids generated from blast xml results.
         """
         hit.id1 = hit.id.split('|')[3]  # accession number
         hit.id2 = hit.id.split('|')[1]  # gi number
@@ -55,9 +53,11 @@ class BlastUtils(object):
         return hit
 
     def paml_org_formatter(self, organisms):
-        """Format a list for PAML.
+        """Take a list of organisms and format each organism name for PAML, which can only take names that
+        are less than a certain length (36 characters?).
 
-        :param organisms:  Input a list of organisms
+        :param organisms:  A list of organisms
+        :type organisms:  list.
         """
         # XXX PAML no longer needs a format different than `Homo_sapiens`
         org_list = []
@@ -75,10 +75,15 @@ class BlastUtils(object):
         is incomplete.
 
         :param file:  An accession file to analyze.
+        :type file:  str.
         :param data_path:  The path of the accession file.
+        :type data_path:  str.
         :param gene_list:  A gene list in the same order as the accession file.
+        :type gene_list:  list.
         :param taxon_dict:  A taxon id dictionary for logging purposes.
-        :param logger:  A logger.
+        :type taxon_dict:  dict.
+        :param logger:  A LogIt logger for logging.
+        :type logger:  LogIt.
         :return:  Returns a continued gene_list to pick up from an interrupted Blast.
         """
 
@@ -123,75 +128,17 @@ class BlastUtils(object):
             logger.info("A new BLAST started at %s" % _date)
             return None
 
-    def seqid_list_config(self, seqid_list_path, taxonomy_ids, research_path=None, config=False):
-        """Create a seqid list based on the refseq_rna database for each taxonomy id.
-
-        It will also convert the gi list into a binary file which is more
-        efficient to use with NCBI's Standalone Blast tools.
-        """
-        warn("NCBI has deprecated using GI numbers.", OrthoEvolDeprecationWarning)
-        if config:
-            # Directory and file handling
-            raw_data_path = research_path / Path('raw_data')
-            index_path = research_path / Path('index')
-            taxid_file = index_path / Path('taxids.csv')
-            pd.Series(taxonomy_ids).to_csv(str(taxid_file), index=False)
-
-            # TODO Rework this
-            self.create_seqid_lists(seqid_list_path=raw_data_path, taxonomy_ids=taxonomy_ids)
-
-        else:
-            self.create_seqid_lists(seqid_list_path=seqid_list_path, taxonomy_ids=taxonomy_ids)
-
-    def create_seqid_lists(self, seqid_list_path, taxonomy_ids):
-        """Use the blastdbcmd tool to generate seqid lists.
-
-        It then uses the blastdb_aliastool to turn the list into a binary file.
-        The input (id) for the function is a taxonomy id.
-        """
-        warn("NCBI has deprecated using GI numbers.", OrthoEvolDeprecationWarning)
-        if os.path.exists(str(seqid_list_path)):
-            os.chdir(str(seqid_list_path))
-            # Use the accession #'s and the blastdbcmd tool to generate gi lists
-            # based on Organisms/Taxonomy id's.
-            # TODO Create blastdbcmd commandline tools
-            gi_time_secs = time.time()
-            with ThreadPool(3) as gilist_pool:
-                gilist_pool.map(self._taxid2seqidlist, taxonomy_ids)
-                minutes = (time.time() - gi_time_secs) / 60
-            seqidlist_log.info("Took %s minutes to create gi binary files." % minutes)
-
-    def _taxid2seqidlist(self, taxonomy_id):
-        """Use a taxonomy id in order to get the list of GI numbers."""
-        warn("NCBI has deprecated using GI numbers.", OrthoEvolDeprecationWarning)
-        tid = str(taxonomy_id)
-        binary = tid + 'gi'
-
-        if binary not in os.listdir():
-            if platform.system() == 'Linux':
-                    # TODO Convert to subprocess
-                    # TODO Test this on Linux
-                    runcmd("blastdbcmd -db refseq_rna -entry all -outfmt '%g %a' | awk ' { if ($2 == " + tid + ") { print $1 } } ' > " + tid + "gi.txt")
-                    seqidlist_log.info(tid + "gi.txt has been created.")
-
-                    # Convert the .txt file to a binary file using the blastdb_aliastool
-                    runcmd("blastdb_aliastool -gi_file_in " + tid + "gi.txt -gi_file_out " + tid + "gi")
-                    seqidlist_log.info(tid + "gi binary file has been created.")
-
-                    # Remove the gi.text file
-                    os.remove(tid + "gi.txt")
-                    seqidlist_log.info(tid + "gi.text file has been deleted.")
-            else:
-                raise NotImplementedError(platform.system() + 'is not supported')
-        else:
-            seqidlist_log.info('%s already exists' % str(binary))
-
     def my_gene_info(self, acc_dataframe, blast_query='Homo_sapiens'):
         """Use Biothings' MyGene api to get information about genes.
+
         :param acc_dataframe:  A pandas dataframe containing the accession csv file data.
+        :type acc_dataframe:  pd.DataFrame.
         :param blast_query:  The query organism for used during Blasting.
+        :type blast_query:  str.
         :return:  Returns a data-frame with hot data about each gene.
+        :rtype:  pd.DataFrame.
         """
+
         mygene = import_module('mygene')
         blastutils_log.info("Getting Pre-BLAST information about the target genes using MyGene...")
         # Initialize variables and import my-gene search command
@@ -234,10 +181,15 @@ class BlastUtils(object):
         """
         This function is used to analyze an accession file post-BLAST.  It uses the accession dictionary as a base to get
         duplicated accession numbers.
+
         :param acc_dict:  A dictionary with accession numbers as keys, and a gene/organism list as values.
+        :type acc_dict:  dict.
         :param gene_list:  A full list of genes.
+        :type gene_list:  list.
         :param org_list:  A full list of organisms.
+        :type org_list:  list.
         :return:  A master duplication dictionary used to initialize the duplicate class variables.
+        :rtype:  dict.
         """
 
         duplicated_dict = dict()
@@ -338,12 +290,13 @@ class BlastUtils(object):
         return duplicated_dict
 
     def get_miss_acc(self, acc_dataframe):
-        """Analyze an accession file post BLAST.
-        It generates several files and dictionaries regarding missing accession
-        numbers.
-        :param acc_dataframe: A pandas dataframe containing the accession csv file data(post BLAST).
-        :return: A dictionary with data about the missing accession numbers by Gene
-                 and by Organism.
+        """This function is used to analyze an accession file post-BLAST.  It generates several files and dictionaries
+         regarding missing accession numbers.
+
+        :param acc_dataframe:  A pandas dataframe containing the accession csv file data(post BLAST).
+        :type acc_dataframe:  pd.DataFrame
+        :return:  A dictionary with data about the missing accession numbers by Gene and by Organism.
+        :rtype:  dict.
         """
         # TODO-ROB: Add Entrez ID validation;  Get info from xml files???
         missing_dict = dict()
@@ -393,13 +346,12 @@ class BlastUtils(object):
         return missing_dict
 
     # def get_pseudogenes(self):
-    #     """Denote which genes are sudogenes."""
+    #     """Denote which genes are pseudogenes."""
     #     raise NotImplementedError
 
     def accession_csv2sqlite(self, acc_file, table_name, db_name, path):
         """
-        Convert a OrthoEvolution accession file in csv format
-        to an sqlite3 database.
+        Convert a OrthoEvolution accession file in csv format to an sqlite3 database.
 
         :param acc_file:  The name of the accession file.  The file name is used to create a table in the
         sqlite3 database.  Any periods will be replaced with underscores.
@@ -448,39 +400,45 @@ class BlastUtils(object):
 class GenbankUtils(object):
 
     def __init__(self):
+        """
+        Various utilities to help with genbank specific functionality.
+        """
         pass
 
-    def multi_fasta_manipulator(self, target_file, reference, output, manipulation='remove'):
+    def multi_fasta_manipulator(self, target_file, man_file, output_file, manipulation='remove'):
         # Inspired by the BioPython Tutorial and Cookbook ("20.1.1 Filtering a sequence file")
         """
-        This method manipulated selected sequences in a multi-FASTA files.  The original
+        This method manipulates reference sequences in a multi-FASTA files.  The original
         purpose was to filter files created by the GUIDANCE2 alignment program, but
         the function has been made in order to accommodate other situations as well.
 
         :param target_file:  Target multi-FASTA file.
-        :param reference:  Selected sequences for removal in a multi-FASTA file.
-        :param manipulation:  Type of manipulation.  (remove, add, tbd..)
-        :param added_name:  The output file uses this parameter to name itself.
-        :return:  A multi-FASTA file with filter sequences.
+        :type target_file:  str.
+        :param man_file:  Sequences in a multi-FASTA file used for manipulation.
+        :type man_file:  str.
+        :param manipulation:  The type of manipulation.  (remove, add, sort, tbd..)
+        :type manipulation:  str.
+        :param output_file:  The name of the output multi-FASTA file.
+        :type output_file:  str.
+        :return:  A multi-FASTA file that has been manipulated accordingly.
+        :rtype:  str.
         """
         # Create path variables
-        file_name = output
-        new_file = Path(target_file).parent / Path(file_name)
+        new_file = Path(target_file).parent / Path(output_file)
         # Create a new multi-fasta record object using the target_file, reference, and output
         # Remove specific sequences from a fasta file
         if manipulation is 'remove':
-            self.multi_fasta_remove(target_file, reference, new_file)
+            self.multi_fasta_remove(target_file, man_file, new_file)
         # Combine all the FASTA sequence in one record object
         elif manipulation is 'add':
-            self.muli_fasta_add(target_file, reference, new_file)
+            self.muli_fasta_add(target_file, man_file, new_file)
         # Sort one fasta file based on the order of another
         # Works for alignments
         elif manipulation is 'sort':
-            self.multi_fasta_sort(target_file, reference, new_file)
+            self.multi_fasta_sort(target_file, man_file, new_file)
 
         print('A new fasta file has been created.')
         return new_file
-
 
     # def dir_config(path, tier_frame_dict):
     #     """
@@ -502,55 +460,90 @@ class GenbankUtils(object):
     #         for GENE in tier_frame_dict[tier].T:
     #             gene_path = tier_path / Path(GENE)
     #             Path.mkdir(gene_path)
+    def multi_fasta_remove(self, target_file, man_file, output_file):
+        """
+        This method removes selected reference sequences in a multi-FASTA files.
 
-    def multi_fasta_remove(target_file, reference, new_file):
-        rem_file = new_file.stem + '_removed' + new_file.suffix
-        rem_file = new_file.parent / Path(rem_file)
+        :param target_file:  Target multi-FASTA file.
+        :type target_file:  str.
+        :param man_file:  A multi-FASTA file with sequences used for removal from the the target file.
+        :type man_file:  str.
+        :param output_file:  The name of the output multi-FASTA file.
+        :type output_file:  str.
+        :return:  A multi-FASTA file with removed sequences.
+        :rtype:  str.
+        """
+        rem_file = output_file.stem + '_removed' + output_file.suffix
+        rem_file = output_file.parent / Path(rem_file)
         # Turn the reference_file into set of ids
-        if os.path.isfile(reference):
-            ids = set(record.id for record in SeqIO.parse(reference, 'fasta'))
-        elif isinstance(reference, list):
-            ids = reference
+        if os.path.isfile(man_file):
+            ids = set(record.id for record in SeqIO.parse(man_file, 'fasta'))
+        elif isinstance(man_file, list):
+            ids = man_file
 
         new_records = (record for record in SeqIO.parse(target_file, 'fasta') if record.id not in ids)
         old_records = (record for record in SeqIO.parse(target_file, 'fasta') if record.id in ids)
 
         print('Sequences have been filtered.')
-        SeqIO.write(new_records, str(new_file), 'fasta')
+        SeqIO.write(new_records, str(output_file), 'fasta')
         SeqIO.write(old_records, str(rem_file), 'fasta')
 
-    def muli_fasta_add(self, target_file, reference, new_file):
+    def muli_fasta_add(self, target_file, man_file, output_file):
+        """
+        This method adds selected reference sequences in a multi-FASTA files.
+
+        :param target_file:  Target multi-FASTA file.
+        :type target_file:  str.
+        :param man_file:  A multi-FASTA file with sequences used for appending to the target file.
+        :type man_file:  str.
+        :param output_file:  The name of the output multi-FASTA file.
+        :type output_file:  str.
+        :return:  A multi-FASTA file with added sequences.
+        :rtype:  str.
+        """
         # TODO-ROB:  Check for duplicates.
         # Concatenate the multifasta files together by chaining the SeqIO.parse generators
         # Allows one to overwrite a file by using temporary files for storage
         # adding generators - https://stackoverflow.com/questions/3211041/how-to-join-two-generators-in-python
-        if os.path.isfile(reference):
+        if os.path.isfile(man_file):
             with TemporaryFile('r+', dir=str(Path(target_file).parent)) as tmp_file:
-                new_records = itertools.chain(SeqIO.parse(target_file, 'fasta', ), SeqIO.parse(reference, 'fasta'))
+                new_records = itertools.chain(SeqIO.parse(target_file, 'fasta', ), SeqIO.parse(man_file, 'fasta'))
                 count = SeqIO.write(new_records, tmp_file, 'fasta')
                 tmp_file.seek(0)
                 print('temp file count: ' + str(count))
-                SeqIO.write(SeqIO.parse(tmp_file, 'fasta'), str(new_file), 'fasta')
+                SeqIO.write(SeqIO.parse(tmp_file, 'fasta'), str(output_file), 'fasta')
             print('Sequences have been added.')
         else:
             print('You can only add files together.  Not python objects.')
 
-    def multi_fasta_sort(self, target_file, reference, new_file):
+    def multi_fasta_sort(self, target_file, man_file, output_file):
+        """
+        This method sorts selected reference sequences in a multi-FASTA files.
+
+        :param target_file:  Target multi-FASTA file.
+        :type target_file:  str.
+        :param man_file:  A multi-FASTA file with sequences used for sorting the target file.
+        :type man_file:  str.
+        :param output_file:  The name of the output multi-FASTA file.
+        :type output_file:  str.
+        :return:  A multi-FASTA file with sorted sequences.
+        :rtype:  str.
+        """
         # TODO-ROB:  Check for duplicates.
         with TemporaryFile('r+', dir=str(Path(target_file).parent)) as tmp_file:
             aln = MultipleSeqAlignment([])
 
         # For a reference fasta file make a tuple from ids
-        if os.path.isfile(reference):
+        if os.path.isfile(man_file):
             sorted_list = []
-            for s in SeqIO.parse(reference, 'fasta'):
+            for s in SeqIO.parse(man_file, 'fasta'):
                 sorted_list.append(s.id)
             sorted_handle = tuple(sorted_list)
         # For a reference list port in as a tuple
-        elif isinstance(reference, list):
-            sorted_handle = tuple(reference)
+        elif isinstance(man_file, list):
+            sorted_handle = tuple(man_file)
 
-        # Parese the reference tuple above the unsorted file
+        # Parse the reference tuple above the unsorted file
         for sorted_seq_record in sorted_handle:
             for unsorted_aln_record in SeqIO.parse(target_file, 'fasta'):
                 # If an appropriate id is found, then append to the MSA object.
@@ -562,13 +555,16 @@ class GenbankUtils(object):
         count = AlignIO.write(aln, tmp_file, 'fasta')
         tmp_file.seek(0)
         print('temp file count: ' + str(count))
-        AlignIO.write(AlignIO.read(tmp_file, 'fasta'), str(new_file), 'fasta')
+        AlignIO.write(AlignIO.read(tmp_file, 'fasta'), str(output_file), 'fasta')
         print('Alignment has been sorted.')
 
 
 class OrthologUtils(BlastUtils, GenbankUtils):
 
     def __init__(self):
+        """
+        Various utilities to help with ortholog specific functionality.
+        """
         BlastUtils.__init__(self)
         GenbankUtils.__init__(self)
 
@@ -581,12 +577,19 @@ class OrthologUtils(BlastUtils, GenbankUtils):
         a dictionary, or they can be set using the basic project template.
 
         :param cls: An instance of a class that will retain the attributes.
+        :type cls:  object.
         :param composer: A class that will yield attributes to the cls parameter.
+        :type composer:  object.
         :param checker: A checker class used to check the type of the composer.
                 Dictionary composers will be treated differently.
+        :type checker:  object.
+        :type checker:  dict.
         :param project:  The name of the project.
+        :type project:  str.
         :param project_path:  The relative path of the project.
+        :type project_path:  str.
         :return:  Returns the instance (cls) with new attributes.
+        :rtype:  object.
         """
         ac_log = LogIt().default(logname="%s" % cls.__class__.__name__, logfile=None)
         if checker2:
@@ -625,11 +628,17 @@ class OrthologUtils(BlastUtils, GenbankUtils):
         are mapped to some basic project directories with some custom options.
 
         :param cls: An instance of a class that will retain the attributes.
+        :type cls:  object.
         :param project: The name of the project.
+        :type project:  str.
         :param project_path: The relative path of a project.
+        :type project_path:  str.
         :param new: The new project flag.
+        :type new:  bool.
         :param custom: The custom flag which can be None or a dictionary.
+        :type custom:  dict.
         :return: Returns the instance (cls) with new attributes.
+        :rtype:  object.
         """
 
         cls.project = project
@@ -667,9 +676,20 @@ class OrthologUtils(BlastUtils, GenbankUtils):
 
 class ManagerUtils(object):
     def __init__(self):
+        """
+        Various utilities to help with management specific functionality.
+        """
         pass
 
     def parse_db_config_file(self, config_file):
+        """
+        Take a YAML config file and return the config strategies and keyword arguments.
+
+        :param config_file:  A YAML config file for database management.
+        :type config_file:   str.
+        :return:  The database config strategies, and the key word arguments for database management.
+        :rtype:  tuble.
+        """
         kw = {}
         db_config_strategy = {}
         with open(config_file, 'r') as cf:
@@ -685,6 +705,20 @@ class ManagerUtils(object):
         return db_config_strategy, kw
 
     def refseq_jobber(self, email_address, base_jobname, id, code, activate):
+        """
+        A function for submitting python code as a string.
+
+        :param email_address:  The email address for PBS job notification.
+        :type email_address:  str.
+        :param base_jobname:  The base job name used for the PBS job.  Contains a %s for string formatting.
+        :type base_jobname:  str.
+        :param id:  An id used to format the base_jobname.
+        :type id:  int.
+        :param code:  Python code as a string.
+        :type code:  str.
+        :param activate:  The path to the activate script for the virtual environment being used in the PBS job.
+        :type activate:  str.
+        """
         job = SGEJob(email_address=email_address,
                      base_jobname=base_jobname % str(id), activate=activate)
         job.submit_pycode(code=code, wait=False, cleanup=False)
@@ -696,6 +730,9 @@ class ManagerUtils(object):
 
 class CookieUtils(object):
     def __init__(self):
+        """
+        Various utilities to help with cookie specific functionality.
+        """
         self.archive_options = {
             "Full": Path(''),
             "NCBI": Path('NCBI'),
@@ -725,10 +762,15 @@ class CookieUtils(object):
         can be moved to the archive path or deleted all together.
 
         :param database_path:  A path to a folder that consists of the desired data.
+        :type database_path:  str.
         :param archive_path:  A path to an output folder for archived data.
+        :type archive_path:  str.
         :param option:  An option for the archiving strategy.  Will be one of the keys in the archive_options.
+        :type option:  str.
         :param delete_flag:  A flag for deleting the original data.  USE WITH CAUTION.
+        :type delete_flag:  bool.
         :return:  Returns a list of paths to the *.tar.xz archive of the data and/or a path to the original data.
+        :rtype:  list.
         """
         archive_dict = {}
         archive_list = []
@@ -782,8 +824,11 @@ class CookieUtils(object):
         Determine the size of a directory or a file with the desired units.
 
         :param start_path:  A file or path for sizing up.
+        :type start_path:  str.
         :param units:  The denomination of bytes to return.
+        :type units:  str.
         :return:  The size as a string.  (e.g. "3.6 KB")
+        :rtype:  str.
         """
         total_size = 0
         if os.path.isfile(start_path):
@@ -799,13 +844,54 @@ class CookieUtils(object):
         return total_size
 
 
-class FullUtilities(CookieUtils, ManagerUtils, OrthologUtils, OtherUtils):
+class PackageVersion(object):
+    """Get the version of an installed python package."""
+    def __init__(self, packagename):
+        self.packagename = packagename
+        self._getversion()
+
+    def _getversion(self):
+        import_module(self.packagename)
+        version = pkg_resources.get_distribution(self.packagename).version
+        print('Version %s of %s is installed.' % (version, self.packagename))
+
+
+class FunctionRepeater(object):
+    """Repeats a function every interval. Ref: https://tinyurl.com/yckgv8m2"""
+    def __init__(self, interval, function, *args, **kwargs):
+        self._timer = None
+        self.function = function
+        self.interval = interval
+        self.args = args
+        self.kwargs = kwargs
+        self.is_running = False
+        self.start()
+
+    def _run(self):
+        self.is_running = False
+        self.start()
+        self.function(*self.args, **self.kwargs)
+
+    def start(self):
+        if not self.is_running:
+            self._timer = Timer(self.interval, self._run)
+            self._timer.start()
+            self.is_running = True
+
+    def stop(self):
+        self._timer.cancel()
+        self.is_running = False
+
+
+class FullUtilities(CookieUtils, ManagerUtils, OrthologUtils):
 
     def __init__(self):
+        """
+        A class to help bring utility functions to other modules.
+        """
         CookieUtils.__init__(self)
         ManagerUtils.__init__(self)
         OrthologUtils.__init__(self)
-        OtherUtils.__init__(self)
 
     def system_cmd(self, cmd, timeout=None, **kwargs):
         """
@@ -827,3 +913,50 @@ class FullUtilities(CookieUtils, ManagerUtils, OrthologUtils, OtherUtils):
             proc.kill()
             ret_val = proc.communicate()
         return ret_val
+
+    def group_files_by_size(self, file_dict, _path=None, groups=8):
+        """
+        Create a list of dictionaries that contain the specified number of groups of files.  Each group of files has a
+        total size that are close to each other.
+        :param file_dict:  The file names are keys, and file sizes are the values.
+        :type file_dict:  dict.
+        :param _path:  If the file_dict isn't given, then a path can be given for generating the file_dict.
+        :type _path:  str.
+        :param groups:  The number of groups to split the files into.
+        :type groups:  int.
+        :return:  A list with {groups} number of dictionaries.
+        :rtype:  list.
+        """
+        # Generate a file dict from the path if file_dict isn't given.
+        if not file_dict:
+            file_dict1 = {}
+            for file in os.listdir(_path):
+                if '.db' in file:
+                    continue
+                file_dict1[file] = Path(file).stat().st_size
+        # Initialize variables
+        group_max_size = sum(list(file_dict.values())) / groups
+        total_files = len(list(file_dict.values()))
+        group_list = []
+        file_count = 0
+        # Begin parsing the dictionary
+        for group in range(0, groups):
+            group_dict = {}
+            group_size = 0
+            for file in dict(file_dict).keys():
+                # Don't add files to the group if it's over the max size.
+                if group_size < group_max_size:
+                    file_count = file_count + 1
+                    group_size = group_size + file_dict[file]
+                    group_dict[file] = file_dict.pop(file)
+                # Append to the group list.
+                else:
+                    group_list.append(group_dict)
+                    break
+            # Append the last group to the list.  It gets skipped above.
+            if group == (groups - 1):
+                group_list.append(group_dict)
+        # If there are extra files for some reason add them to one of the groups.
+        if file_count != total_files:
+            group_list[1].update(file_dict)
+        return group_list
