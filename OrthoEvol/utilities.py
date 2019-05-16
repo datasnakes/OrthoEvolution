@@ -885,6 +885,9 @@ class FunctionRepeater(object):
 class FullUtilities(CookieUtils, ManagerUtils, OrthologUtils):
 
     def __init__(self):
+        """
+        A class to help bring utility functions to other modules.
+        """
         CookieUtils.__init__(self)
         ManagerUtils.__init__(self)
         OrthologUtils.__init__(self)
