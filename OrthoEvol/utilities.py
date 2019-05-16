@@ -137,69 +137,6 @@ class BlastUtils(object):
             logger.info("A new BLAST started at %s" % _date)
             return None
 
-    def seqid_list_config(self, seqid_list_path, taxonomy_ids, research_path=None, config=False):
-        """Create a seqid list based on the refseq_rna database for each taxonomy id.
-
-        It will also convert the gi list into a binary file which is more
-        efficient to use with NCBI's Standalone Blast tools.
-        """
-        warn("NCBI has deprecated using GI numbers.", OrthoEvolDeprecationWarning)
-        if config:
-            # Directory and file handling
-            raw_data_path = research_path / Path('raw_data')
-            index_path = research_path / Path('index')
-            taxid_file = index_path / Path('taxids.csv')
-            pd.Series(taxonomy_ids).to_csv(str(taxid_file), index=False)
-
-            # TODO Rework this
-            self.create_seqid_lists(seqid_list_path=raw_data_path, taxonomy_ids=taxonomy_ids)
-
-        else:
-            self.create_seqid_lists(seqid_list_path=seqid_list_path, taxonomy_ids=taxonomy_ids)
-
-    def create_seqid_lists(self, seqid_list_path, taxonomy_ids):
-        """Use the blastdbcmd tool to generate seqid lists.
-
-        It then uses the blastdb_aliastool to turn the list into a binary file.
-        The input (id) for the function is a taxonomy id.
-        """
-        warn("NCBI has deprecated using GI numbers.", OrthoEvolDeprecationWarning)
-        if os.path.exists(str(seqid_list_path)):
-            os.chdir(str(seqid_list_path))
-            # Use the accession #'s and the blastdbcmd tool to generate gi lists
-            # based on Organisms/Taxonomy id's.
-            # TODO Create blastdbcmd commandline tools
-            gi_time_secs = time.time()
-            with ThreadPool(3) as gilist_pool:
-                gilist_pool.map(self._taxid2seqidlist, taxonomy_ids)
-                minutes = (time.time() - gi_time_secs) / 60
-            seqidlist_log.info("Took %s minutes to create gi binary files." % minutes)
-
-    def _taxid2seqidlist(self, taxonomy_id):
-        """Use a taxonomy id in order to get the list of GI numbers."""
-        warn("NCBI has deprecated using GI numbers.", OrthoEvolDeprecationWarning)
-        tid = str(taxonomy_id)
-        binary = tid + 'gi'
-
-        if binary not in os.listdir():
-            if platform.system() == 'Linux':
-                    # TODO Convert to subprocess
-                    # TODO Test this on Linux
-                    runcmd("blastdbcmd -db refseq_rna -entry all -outfmt '%g %a' | awk ' { if ($2 == " + tid + ") { print $1 } } ' > " + tid + "gi.txt")
-                    seqidlist_log.info(tid + "gi.txt has been created.")
-
-                    # Convert the .txt file to a binary file using the blastdb_aliastool
-                    runcmd("blastdb_aliastool -gi_file_in " + tid + "gi.txt -gi_file_out " + tid + "gi")
-                    seqidlist_log.info(tid + "gi binary file has been created.")
-
-                    # Remove the gi.text file
-                    os.remove(tid + "gi.txt")
-                    seqidlist_log.info(tid + "gi.text file has been deleted.")
-            else:
-                raise NotImplementedError(platform.system() + 'is not supported')
-        else:
-            seqidlist_log.info('%s already exists' % str(binary))
-
     def my_gene_info(self, acc_dataframe, blast_query='Homo_sapiens'):
         """Use Biothings' MyGene api to get information about genes.
 
