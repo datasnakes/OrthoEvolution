@@ -5,6 +5,10 @@ from OrthoEvol.Manager.database_dispatcher import DatabaseDispatcher
 from OrthoEvol.utilities import FullUtilities
 import yaml
 import os
+from time import sleep
+from pathlib import Path
+def sleeper(secs):
+   sleep(secs)
 
 def _dispatch_config(config_file):
    # Initialize variables
@@ -26,20 +30,19 @@ def _dispatch_config(config_file):
    activate = cd['activate']
 
    # Get a list of files to upload
-   if file_list is None:
-      file_list = os.listdir(database_path)
-      file_list = [x for x in file_list if x.endswith(str(seqformat))]
-   # Split the files to upload into sub-groups
-   sub_upload_size = len(file_list) // upload_number
-   sub_upload_lists = [file_list[x:x + 100] for x in range(0, len(file_list), sub_upload_size)]
-   if (len(file_list) %% upload_number) != 0:
-      upload_number = upload_number + 1
+   file_list = os.listdir(database_path)
+   file_list = [x for x in file_list if x.endswith(str(seqformat))]
+   file_dict = {}
+   for file in file_list:
+      file_dict[file] = Path(database_path, file).stat().st_size
+   sub_upload_lists = utils.group_files_by_size(file_dict, groups=upload_number)
    add_to_default = 0
 
    # Create configuration for dispatching PBS jobs
    for sub_list in sub_upload_lists:
       add_to_default += 1
       nrr_dispatcher["NCBI_refseq_release"]["upload"].append(utils.refseq_jobber)
+      nrr_dispatcher["NCBI_refseq_release"]["upload"].append(sleeper)
       code_dict_string = str({
          "collection_subset": collection_subset,
          "seqtype": seqtype,
@@ -68,6 +71,7 @@ def _dispatch_config(config_file):
          "email_address": email,
          "id": add_to_default,
          "activate": activate})
+      nrr_config["NCBI_refseq_release"]["upload"].append({'secs':15})
    return nrr_dispatcher, nrr_config
 
 # Setup project management and function dispatcher

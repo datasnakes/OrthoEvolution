@@ -45,7 +45,6 @@ class LogIt(object):
     def deletelog(self, logfile):
         """Delete the log file."""
         self.shutdown()
-        # TODO Use contextlib here; See makedirectory function
         if os.path.isfile(logfile):
             os.remove(logfile)
 
