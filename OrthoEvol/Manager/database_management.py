@@ -206,9 +206,8 @@ class BaseDatabaseManagement(object):
         db_path = self.database_path / Path('NCBI') / Path('refseq') / Path('release') / Path(collection_subset)
         db_path.mkdir(parents=True, exist_ok=True)
         # TODO: If database exists and is same size, use the existing database.
-        ncbiftp = self.ncbiftp.getrefseqrelease(collection_subset=collection_subset, 
-                                                seqtype=seqtype, seqformat=seqformat, 
-                                                download_path=db_path)
+        self.ncbiftp.getrefseqrelease(collection_subset=collection_subset, seqtype=seqtype, 
+                                      seqformat=seqformat, download_path=db_path)
         return self.ncbiftp.files2download
 
     def upload_refseq_release_files(self, collection_subset, seqtype, seqformat, upload_list=None, database_name=None, add_to_default=None):
