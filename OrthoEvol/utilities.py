@@ -414,7 +414,7 @@ class GenbankUtils(object):
         """
         pass
 
-    def multi_fasta_manipulator(self, target_file, reference, output, manipulation='remove'):
+    def multi_fasta_manipulator(self, target_file, man_file, output_file, manipulation='remove'):
         # Inspired by the BioPython Tutorial and Cookbook ("20.1.1 Filtering a sequence file")
         """
         This method manipulates reference sequences in a multi-FASTA files.  The original
@@ -433,19 +433,18 @@ class GenbankUtils(object):
         :rtype:  str.
         """
         # Create path variables
-        file_name = output
-        new_file = Path(target_file).parent / Path(file_name)
+        new_file = Path(target_file).parent / Path(output_file)
         # Create a new multi-fasta record object using the target_file, reference, and output
         # Remove specific sequences from a fasta file
         if manipulation is 'remove':
-            self.multi_fasta_remove(target_file, reference, new_file)
+            self.multi_fasta_remove(target_file, man_file, new_file)
         # Combine all the FASTA sequence in one record object
         elif manipulation is 'add':
-            self.muli_fasta_add(target_file, reference, new_file)
+            self.muli_fasta_add(target_file, man_file, new_file)
         # Sort one fasta file based on the order of another
         # Works for alignments
         elif manipulation is 'sort':
-            self.multi_fasta_sort(target_file, reference, new_file)
+            self.multi_fasta_sort(target_file, man_file, new_file)
 
         print('A new fasta file has been created.')
         return new_file
@@ -470,6 +469,9 @@ class GenbankUtils(object):
     #         for GENE in tier_frame_dict[tier].T:
     #             gene_path = tier_path / Path(GENE)
     #             Path.mkdir(gene_path)
+    def multi_fasta_remove(self, target_file, man_file, output_file):
+        """
+        This method removes selected reference sequences in a multi-FASTA files.
 
         :param target_file:  Target multi-FASTA file.
         :type target_file:  str.
@@ -483,16 +485,16 @@ class GenbankUtils(object):
         rem_file = output_file.stem + '_removed' + output_file.suffix
         rem_file = output_file.parent / Path(rem_file)
         # Turn the reference_file into set of ids
-        if os.path.isfile(reference):
-            ids = set(record.id for record in SeqIO.parse(reference, 'fasta'))
-        elif isinstance(reference, list):
-            ids = reference
+        if os.path.isfile(man_file):
+            ids = set(record.id for record in SeqIO.parse(man_file, 'fasta'))
+        elif isinstance(man_file, list):
+            ids = man_file
 
         new_records = (record for record in SeqIO.parse(target_file, 'fasta') if record.id not in ids)
         old_records = (record for record in SeqIO.parse(target_file, 'fasta') if record.id in ids)
 
         print('Sequences have been filtered.')
-        SeqIO.write(new_records, str(new_file), 'fasta')
+        SeqIO.write(new_records, str(output_file), 'fasta')
         SeqIO.write(old_records, str(rem_file), 'fasta')
 
     def muli_fasta_add(self, target_file, man_file, output_file):
@@ -512,13 +514,13 @@ class GenbankUtils(object):
         # Concatenate the multifasta files together by chaining the SeqIO.parse generators
         # Allows one to overwrite a file by using temporary files for storage
         # adding generators - https://stackoverflow.com/questions/3211041/how-to-join-two-generators-in-python
-        if os.path.isfile(reference):
+        if os.path.isfile(man_file):
             with TemporaryFile('r+', dir=str(Path(target_file).parent)) as tmp_file:
-                new_records = itertools.chain(SeqIO.parse(target_file, 'fasta', ), SeqIO.parse(reference, 'fasta'))
+                new_records = itertools.chain(SeqIO.parse(target_file, 'fasta', ), SeqIO.parse(man_file, 'fasta'))
                 count = SeqIO.write(new_records, tmp_file, 'fasta')
                 tmp_file.seek(0)
                 print('temp file count: ' + str(count))
-                SeqIO.write(SeqIO.parse(tmp_file, 'fasta'), str(new_file), 'fasta')
+                SeqIO.write(SeqIO.parse(tmp_file, 'fasta'), str(output_file), 'fasta')
             print('Sequences have been added.')
         else:
             print('You can only add files together.  Not python objects.')
@@ -541,16 +543,16 @@ class GenbankUtils(object):
             aln = MultipleSeqAlignment([])
 
         # For a reference fasta file make a tuple from ids
-        if os.path.isfile(reference):
+        if os.path.isfile(man_file):
             sorted_list = []
-            for s in SeqIO.parse(reference, 'fasta'):
+            for s in SeqIO.parse(man_file, 'fasta'):
                 sorted_list.append(s.id)
             sorted_handle = tuple(sorted_list)
         # For a reference list port in as a tuple
-        elif isinstance(reference, list):
-            sorted_handle = tuple(reference)
+        elif isinstance(man_file, list):
+            sorted_handle = tuple(man_file)
 
-        # Parese the reference tuple above the unsorted file
+        # Parse the reference tuple above the unsorted file
         for sorted_seq_record in sorted_handle:
             for unsorted_aln_record in SeqIO.parse(target_file, 'fasta'):
                 # If an appropriate id is found, then append to the MSA object.
@@ -562,7 +564,7 @@ class GenbankUtils(object):
         count = AlignIO.write(aln, tmp_file, 'fasta')
         tmp_file.seek(0)
         print('temp file count: ' + str(count))
-        AlignIO.write(AlignIO.read(tmp_file, 'fasta'), str(new_file), 'fasta')
+        AlignIO.write(AlignIO.read(tmp_file, 'fasta'), str(output_file), 'fasta')
         print('Alignment has been sorted.')
 
 
