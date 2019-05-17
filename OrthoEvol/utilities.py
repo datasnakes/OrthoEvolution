@@ -33,7 +33,6 @@ seqidlist_log = LogIt().default(logname="gi-lists", logfile=None)
 _datefmt = '%I:%M:%S %p on %m-%d-%Y'
 _date = str(datetime.now().strftime(_datefmt))
 # Set up run command function
-runcmd = OtherUtils().runcmd
 
 
 class BlastUtils(object):
