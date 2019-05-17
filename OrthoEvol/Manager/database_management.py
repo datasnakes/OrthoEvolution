@@ -720,6 +720,11 @@ class DatabaseManagement(BaseDatabaseManagement):
             if not _biosql.template_abs_path.is_file() and (self.ftp_flag or dmp_file.exists()):
                 nrr_dispatcher["NCBI_refseq_release"]["configure"].append(self.create_biosql_taxonomy_template)
                 nrr_config["NCBI_refseq_release"]["configure"].append({})
+            elif _biosql.template_abs_path.is_file():
+                self.db_mana_log.info("The BioSQL template exists.")
+            elif not self.ftp_flag and dmp_file.exists():
+                self.db_mana_log.info("The system does not allow FTP for downloading the taxonomic dump files, but"
+                                      "they already exist.")
             else:
                 self.db_mana_log.error("The BioSQL template doesn't exist and the system does not allow FTP for "
                                        "downloading the taxonomic dump files.  The dump files are also not already"
