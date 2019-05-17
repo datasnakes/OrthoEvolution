@@ -274,7 +274,7 @@ class ProjectManagement(UserManagement):
             self.project_web = self.research_path / Path('web')
             if app:
                 self.app = app
-                self.app_path = self.project_web / Path(app)
+                self.app_path = self.project_web / Path(self.app)
 
         self.managementlog.info('The User Management class variables have been set.')
 

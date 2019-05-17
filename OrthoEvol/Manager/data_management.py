@@ -42,11 +42,11 @@ class DataMana(object):
                 self.configure(config_file)
 
     def configure(self, config_file):
-        '''
-        This method uses YAML configuration in order to initialize different classes.
+        """Use YAML configuration in order to initialize different classes.
+        
         :param config_file: A YAML file that is used to create a dictionary(kwargs) for each class.
         :return:
-        '''
+        """
         with open(config_file, 'r') as ymlfile:
             configuration = yaml.safe_load(ymlfile)
             # TODO-ROB:  Set up configuratioin to parse this full list.  For each sub configuration do something.

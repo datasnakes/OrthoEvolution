@@ -10,8 +10,8 @@ from Bio import SeqIO
 from OrthoEvol.utilities import FullUtilities
 from OrthoEvol.Tools.logit import LogIt
 from OrthoEvol.Manager.management import ProjectManagement
-from OrthoEvol.Manager.BioSQL.biosql_repo import sql
-from OrthoEvol.Manager.BioSQL.biosql_repo import scripts as sql_scripts
+from OrthoEvol.Manager.biosql.biosql_repo import sql
+from OrthoEvol.Manager.biosql.biosql_repo import scripts as sql_scripts
 
 
 class BaseBioSQL(object):
@@ -56,7 +56,10 @@ class BaseBioSQL(object):
         if project_path and project:
             self.project_path = Path(project_path) / Path(project)
         if proj_mana:
-            add_self = self.biosql_utils.attribute_config(self, composer=proj_mana, checker=ProjectManagement, project=project, project_path=project_path)
+            add_self = self.biosql_utils.attribute_config(self, composer=proj_mana, 
+                                                          checker=ProjectManagement, 
+                                                          project=project, 
+                                                          project_path=project_path)
             for var, attr in add_self.__dict__.items():
                 setattr(self, var, attr)
             self.template_rel_path = self.user_index
@@ -91,9 +94,7 @@ class BaseBioSQL(object):
         self.biosql_proc(cmd=cmd, stdout=sp.PIPE, stderr=sp.STDOUT, shell=True)
 
     def create_executable_scripts(self):
-        """
-        Changes the permissions of the BioSQL perl scripts, so that they are executable from the command line.
-        """
+        """Change permissions of the BioSQL perl scripts to make them executable."""
         # Set up the permissions for the BioSQL Perl scripts
         biosql_scripts = self.scripts
         for file in os.listdir(biosql_scripts):
@@ -106,9 +107,10 @@ class BaseBioSQL(object):
 
 class SQLiteBioSQL(BaseBioSQL):
     def __init__(self, database_name=None, proj_mana=ProjectManagement, template_name="Template-BioSQL-SQLite.db", **kwargs):
-        """
-                This class inherits the BaseBioSQL class.  It uses the base methods to load schema, load taxonomy (NCBI),
-        and create/copy template SQLite databases loaded with biosql schema and/or taxonomy data.
+        """This class inherits the BaseBioSQL class.  
+        It uses the base methods to load schema, load taxonomy (NCBI), and 
+        create/copy template SQLite databases loaded with biosql schema and/or 
+        taxonomy data.
 
         :param database_name:  The name of the database.
         :type database_name:  str.

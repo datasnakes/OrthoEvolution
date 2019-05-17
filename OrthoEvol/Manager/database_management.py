@@ -15,7 +15,7 @@ from OrthoEvol import OrthoEvolDeprecationWarning
 from OrthoEvol.Tools.logit import LogIt
 from OrthoEvol.Tools.ftp import NcbiFTPClient
 from OrthoEvol.utilities import FullUtilities
-from OrthoEvol.Manager.BioSQL import biosql
+from OrthoEvol.Manager.biosql import biosql
 from OrthoEvol.Manager.management import ProjectManagement
 from OrthoEvol.Orthologs.Blast.comparative_genetics import BaseComparativeGenetics
 from OrthoEvol.Manager.config import templates
@@ -23,7 +23,7 @@ from OrthoEvol.Manager.config import templates
 
 class BaseDatabaseManagement(object):
 
-    def __init__(self, email, driver, project=None, project_path=None, proj_mana=ProjectManagement, blast=False, ftp_flag=True):
+    def __init__(self, email, driver, project=None, project_path=None, proj_mana=None, blast=False, ftp_flag=True):
         """
         This is the base class for managing various databases.  It provides functionality for downloading and creating
         various databases for your pipeline.  There are functions available for downloading files from NCBI (BLAST,
@@ -47,7 +47,7 @@ class BaseDatabaseManagement(object):
 
         # Initialize Utilities
         self.db_mana_utils = FullUtilities()
-        self.db_mana_log = LogIt().default(logname="DatabaseManagement", logfile=None)
+        self.db_mana_log = LogIt().default(logname="Database-Management", logfile=None)
         self.project = project
         self.email = email
         self.driver = driver
@@ -148,7 +148,8 @@ class BaseDatabaseManagement(object):
         :type database_name:  str.
         """
         if self.driver.lower() == "sqlite3":
-            ncbi_db = self.biosql.SQLiteBioSQL(database_name=database_name, proj_mana=self.proj_mana)
+            ncbi_db = self.biosql.SQLiteBioSQL(database_name=database_name,
+                                               proj_mana=self.proj_mana)
             ncbi_db.copy_template_database(destination=destination)
             return ncbi_db
 
@@ -171,12 +172,12 @@ class BaseDatabaseManagement(object):
         pass
 
     def download_ncbi_taxonomy_dump_files(self, url='''ftp://ftp.ncbi.nlm.nih.gov/pub/taxonomy/taxdump.tar.gz'''):
-        """
-        Download and extract the NCBI taxonomy dump files via a GET request.
+        """Download and extract the NCBI taxonomy dump files via a GET request.
 
         :param url: A ftp link to the NCBI taxdump*.tar.gz file of interest.
         :type url: str.
         """
+        # TODO: Add this to NCBI FTP client
         dl_path = Path(self.database_path) / Path("NCBI") / Path('pub') / Path('taxonomy')
         dl_abs_path = dl_path / Path('taxdump.tar.gz')
         r = urllib.request.urlopen(url)
@@ -204,7 +205,9 @@ class BaseDatabaseManagement(object):
         """
         db_path = self.database_path / Path('NCBI') / Path('refseq') / Path('release') / Path(collection_subset)
         db_path.mkdir(parents=True, exist_ok=True)
-        ncbiftp = self.ncbiftp.getrefseqrelease(collection_subset=collection_subset, seqtype=seqtype, seqformat=seqformat, download_path=db_path)
+        # TODO: If database exists and is same size, use the existing database.
+        self.ncbiftp.getrefseqrelease(collection_subset=collection_subset, seqtype=seqtype, 
+                                      seqformat=seqformat, download_path=db_path)
         return self.ncbiftp.files2download
 
     def upload_refseq_release_files(self, collection_subset, seqtype, seqformat, upload_list=None, database_name=None, add_to_default=None):
@@ -737,22 +740,30 @@ class DatabaseManagement(BaseDatabaseManagement):
             # Get template script variables
             py_shebang = Path(activate.parent).expanduser()
             db_path = self.database_path / Path('NCBI') / Path('refseq') / Path('release') / Path(collection_subset)
+            
+            # Read the upload script
             upload_script = resource_filename(templates.__name__, 'upload_rr_pbs.py')
-            with open(upload_script, 'r') as u_s:
-                temp_script = u_s.read()
+            with open(upload_script, 'r') as upload_script:
+                temp_script = upload_script.read()
             rand_str = random.sample(string.ascii_letters + string.digits, 5)
             script_dir = Path(self.user_log, ('upload_rr' + ''.join(rand_str)))
             script_dir.mkdir()
             script_string = temp_script % (py_shebang, file_list, pbs_dict, db_path, upload_number, self.email, str(script_dir / 'upload_config.yml'))
+            
+            # Create the master upload script
             with open(str(script_dir / 'master_upload_rr_pbs.py'), 'w') as mus:
                 mus.write(script_string)
             os.chmod(str(script_dir / 'master_upload_rr_pbs.py'), mode=0o755)
-            with open(str(self.config_file), 'r') as cf:
-                conf_data = yaml.load(cf)
-            with open(str(script_dir / 'upload_config.yml'), 'w') as ucy:
+            
+            # Load the configuration file
+            with open(str(self.config_file), 'r') as cfg:
+                conf_data = yaml.load(cfg, Loader=yaml.FullLoader)
+            
+            # Write to the upload config file
+            with open(str(script_dir / 'upload_config.yml'), 'w') as upload_cfg:
                 conf_data['Database_config']['ftp_flag'] = False
                 conf_data['Database_config']['Full']['NCBI']['NCBI_refseq_release']['upload_flag'] = False
-                yaml.dump(conf_data, ucy, default_flow_style=False)
+                yaml.dump(conf_data, upload_cfg, default_flow_style=False)
             os.chmod(str(script_dir / 'upload_config.yml'), mode=0o755)
 
             def _run_upload_script():

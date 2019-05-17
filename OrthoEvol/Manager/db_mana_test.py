@@ -12,13 +12,13 @@ _jobname="jobname"
 # Set up project management
 pm_config_file = resource_filename(yml.__name__, "initialize_new.yml")
 with open(pm_config_file, 'r') as f:
-    pm_config = yaml.load(f)
+    pm_config = yaml.load(f, Loader=yaml.FullLoader)
 pm = ProjectManagement(**pm_config["Management_config"])
 
 # Set up database management
 db_config_file = resource_filename(yml.__name__, "databases.yml")
 with open(db_config_file, 'r') as f:
-    db_config = yaml.load(f)
+    db_config = yaml.load(f, Loader=yaml.FullLoader)
 db_config.update(pm_config)
 db_config['Database_config']['Full']['NCBI']['NCBI_refseq_release']['upload_number'] = 12
 db_config['Database_config']['Full']['NCBI']['NCBI_refseq_release']['pbs_dict'] = {

@@ -32,7 +32,6 @@ blastutils_log = LogIt().default(logname="blast-utils", logfile=None)
 seqidlist_log = LogIt().default(logname="gi-lists", logfile=None)
 _datefmt = '%I:%M:%S %p on %m-%d-%Y'
 _date = str(datetime.now().strftime(_datefmt))
-# Set up run command function
 
 
 class BlastUtils(object):
@@ -689,10 +688,10 @@ class ManagerUtils(object):
         :return:  The database config strategies, and the key word arguments for database management.
         :rtype:  tuble.
         """
-        kw ={}
+        kw = {}
         db_config_strategy = {}
         with open(config_file, 'r') as cf:
-            db_config = yaml.load(cf)
+            db_config = yaml.load(cf, Loader=yaml.FullLoader)
             # Get the configuration for the desired strategy
             for key, value in db_config["Database_config"].items():
                 if isinstance(value, dict):
