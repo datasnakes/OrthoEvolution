@@ -15,7 +15,7 @@ class Management(object):
         """
         This is a base class for directory management.
 
-        It maps the directories of the OrthoEvol-Script package using the pathlib module, and turns the names of each
+        It maps the directories of the OrthoEvol-Script package using the pathlib module and turns the names of each
         important directory into a pathlike object.  The base class gives the option of creating a new repository with
         cookiecutter.
 
