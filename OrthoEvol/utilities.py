@@ -702,7 +702,7 @@ class ManagerUtils(object):
                     kw[key] = value
         return db_config_strategy, kw
 
-    def refseq_jobber(self, email_address, base_jobname, id, code, activate):
+    def refseq_jobber(self, email_address, base_jobname, id, code, activate, config_dict):
         """
         A function for submitting python code as a string.
 
@@ -717,8 +717,8 @@ class ManagerUtils(object):
         :param activate:  The path to the activate script for the virtual environment being used in the PBS job.
         :type activate:  str.
         """
-        job = SGEJob(email_address=email_address,
-                     base_jobname=base_jobname % str(id), activate=activate)
+        job = SGEJob(email_address=email_address, base_jobname=base_jobname % str(id), activate=activate,
+                     config=config_dict)
         job.submit_pycode(code=code, wait=False, cleanup=False)
 
     # def template_jobber(email_address, base_jobname, id, code):

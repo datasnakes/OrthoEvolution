@@ -18,6 +18,7 @@ def _dispatch_config(config_file):
    
    # Templated variables
    file_list = %s
+   pbs_dict = %s
    database_path = "%s"
    upload_number = %s
    email = "%s"
@@ -59,20 +60,21 @@ def _dispatch_config(config_file):
          "from OrthoEvol.Manager.config import yml\n" \
          "from pkg_resources import resource_filename\n" \
          "import yaml\n" \
-         "pm_config_file = \"upload_config.yml\"\n" \
+         "pm_config_file = \"%%s\"\n" \
          "with open(pm_config_file, \'r\') as f:\n" \
          "   pm_config = yaml.load(f)\n" \
          "pm = ProjectManagement(**pm_config[\"Management_config\"])\n" \
          "code_dict_string = %%s\n" \
          "R_R = DatabaseDispatcher(config_file=\"%%s\", proj_mana=pm, **code_dict_string)\n" \
          "R_R.upload_refseq_release_files(collection_subset=\"%%s\", seqtype=\"%%s\", seqformat=\"%%s\", upload_list=%%s, add_to_default=%%s)\n" %% \
-         (code_dict_string, config_file, collection_subset, seqtype, seqformat, sub_list, add_to_default)
+         (config_file, code_dict_string, config_file, collection_subset, seqtype, seqformat, sub_list, add_to_default)
       nrr_config["NCBI_refseq_release"]["upload"].append({
          "code": sge_code_string,
          "base_jobname": "upload_rr_%%s",
          "email_address": email,
          "id": add_to_default,
-         "activate": activate})
+         "activate": activate,
+         "config_dict": pbs_dict})
       nrr_config["NCBI_refseq_release"]["upload"].append({'secs':15})
    return nrr_dispatcher, nrr_config
 

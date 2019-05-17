@@ -649,7 +649,8 @@ class DatabaseManagement(BaseDatabaseManagement):
 
     def NCBI_refseq_release(self, configure_flag=None, archive_flag=None, delete_flag=None, upload_flag=None, archive_path=None,
                             database_path=None, collection_subset=None, seqtype=None, seqformat=None, file_list=None,
-                            upload_number=8, _path=None, activate=None, template_flag=None, download_flag=None):
+                            upload_number=8, _path=None, activate=None, template_flag=None, download_flag=None,
+                            pbs_dict=None):
         """
         This is the most complicated specific strategy.  It downloads the refseq release files of choice (gbff),
         extracts the data, splits a list of files into {upload_number} lists, and uploads those file lists to
@@ -691,7 +692,7 @@ class DatabaseManagement(BaseDatabaseManagement):
         """
         nrr_dispatcher = OrderedDict({"NCBI_refseq_release": OrderedDict({"archive": [], "configure": [], "upload": []})})
         nrr_config = OrderedDict({"NCBI_refseq_release": OrderedDict({"archive": [], "configure": [], "upload": []})})
-        _biosql = self.biosql.BaseBioSQL(proj_mana=self.proj_mana)
+        _biosql = self.biosql.SQLiteBioSQL(proj_mana=self.proj_mana)
         dl_path = Path(self.database_path) / Path("NCBI") / Path('pub') / Path('taxonomy')
         dmp_file = dl_path / "nodes.dmp"
         if not archive_path:
@@ -722,6 +723,11 @@ class DatabaseManagement(BaseDatabaseManagement):
             if not _biosql.template_abs_path.is_file() and (self.ftp_flag or dmp_file.exists()):
                 nrr_dispatcher["NCBI_refseq_release"]["configure"].append(self.create_biosql_taxonomy_template)
                 nrr_config["NCBI_refseq_release"]["configure"].append({})
+            elif _biosql.template_abs_path.is_file():
+                self.db_mana_log.info("The BioSQL template exists.")
+            elif not self.ftp_flag and dmp_file.exists():
+                self.db_mana_log.info("The system does not allow FTP for downloading the taxonomic dump files, but"
+                                      "they already exist.")
             else:
                 self.db_mana_log.error("The BioSQL template doesn't exist and the system does not allow FTP for "
                                        "downloading the taxonomic dump files.  The dump files are also not already"
@@ -742,11 +748,11 @@ class DatabaseManagement(BaseDatabaseManagement):
             rand_str = random.sample(string.ascii_letters + string.digits, 5)
             script_dir = Path(self.user_log, ('upload_rr' + ''.join(rand_str)))
             script_dir.mkdir()
-            script_string = temp_script % (py_shebang, file_list, db_path, upload_number, self.email, str(script_dir / 'upload_config.yml'))
+            script_string = temp_script % (py_shebang, file_list, pbs_dict, db_path, upload_number, self.email, str(script_dir / 'upload_config.yml'))
             
             # Create the master upload script
-            with open(str(script_dir / 'master_upload_rr_pbs.py'), 'w') as master_upload:
-                master_upload.write(script_string)
+            with open(str(script_dir / 'master_upload_rr_pbs.py'), 'w') as mus:
+                mus.write(script_string)
             os.chmod(str(script_dir / 'master_upload_rr_pbs.py'), mode=0o755)
             
             # Load the configuration file
