@@ -689,7 +689,7 @@ class DatabaseManagement(BaseDatabaseManagement):
         """
         nrr_dispatcher = OrderedDict({"NCBI_refseq_release": OrderedDict({"archive": [], "configure": [], "upload": []})})
         nrr_config = OrderedDict({"NCBI_refseq_release": OrderedDict({"archive": [], "configure": [], "upload": []})})
-        _biosql = self.biosql.BaseBioSQL(proj_mana=self.proj_mana)
+        _biosql = self.biosql.SQLiteBioSQL(proj_mana=self.proj_mana)
         dl_path = Path(self.database_path) / Path("NCBI") / Path('pub') / Path('taxonomy')
         dmp_file = dl_path / "nodes.dmp"
         if not archive_path:
