@@ -935,6 +935,7 @@ class FullUtilities(CookieUtils, ManagerUtils, OrthologUtils):
                 file_dict1[file] = Path(file).stat().st_size
         # Initialize variables
         group_max_size = sum(list(file_dict.values())) / groups
+        avg_file_size = sum(list(file_dict.values())) / len(file_dict.keys())
         total_files = len(list(file_dict.values()))
         group_list = []
         file_count = 0
@@ -947,13 +948,16 @@ class FullUtilities(CookieUtils, ManagerUtils, OrthologUtils):
                 if group_size < group_max_size:
                     file_count = file_count + 1
                     group_size = group_size + file_dict[file]
-                    group_dict[file] = file_dict.pop(file)
+                    group_diff = group_size - group_max_size
+                    if (group_size < group_max_size) or (group_diff < avg_file_size):
+                        group_dict[file] = file_dict.pop(file)
                 # Append to the group list.
                 else:
                     group_list.append(group_dict)
+                    group_dict = {}
                     break
             # Append the last group to the list.  It gets skipped above.
-            if group == (groups - 1):
+            if len(group_dict.keys()) > 0:
                 group_list.append(group_dict)
         # If there are extra files for some reason add them to one of the groups.
         if file_count != total_files:
