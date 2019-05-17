@@ -1,5 +1,5 @@
-Manager Documentation
-======================
+# Manager Documentation
+
 The classes and functions in this module have been designed to help manage
 existing and new projects using the Cookies module as well as
 the different utilities found in the Tools module.
@@ -9,11 +9,12 @@ the different utilities found in the Tools module.
 This module is intended to mesh with a Flask user interface.  While the 
 Flask server/client interface is not currently set up, we are developing
 the package so that it will be easier to implement.
+
 * Whenever a new website is made the RepoManagement and WebManagement classes
 are used.
-    * Whenever a new user is created in the Flask webpage,
+  * Whenever a new user is created in the Flask webpage,
     the UserManagement class is used.
-    * Whenever an existing user creates a new project,
+  * Whenever an existing user creates a new project,
     the ProjectManagement class is used.
 
 This module does not have to be used to create a Flask
@@ -23,7 +24,7 @@ _basic_project_ flag.
 
 ## Example
 
-Using DatabaseDispatcher to set up the proper databases using a YAML
+Using DatabaseDispatcher to set up the proper databases using a `YAML`
 config file:
 
 ```python
@@ -56,7 +57,7 @@ dd = DatabaseDispatcher(config_file, pm)
 dd.dispatch(dd.strategies, dd.dispatcher, dd.configuration)
 ```
 
-
 ## Notes
+
 Please view our [BioSQL documentation](https://github.com/datasnakes/OrthoEvolution/tree/master/OrthoEvol/Manager/BioSQL/README.md) and view some of the
 static/config related [files](https://github.com/datasnakes/OrthoEvolution/tree/master/OrthoEvol/Manager/config/).
