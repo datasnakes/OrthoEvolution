@@ -21,7 +21,7 @@ class Management(object):
 
         :param repo(string): The name of the new repository to be created.
         :param home(path or path-like): The home of the file calling this name.  When creating a new
-            repository it is best to explicitly name the home path.
+            repository, it is best to explicitly name the home path.
         :param new_repo(bool): Triggers cookiecutter to create a new repository.
         """
 
