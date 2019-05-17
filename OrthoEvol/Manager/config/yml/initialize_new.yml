@@ -1,0 +1,14 @@
+# This is a configuration file to initialize a brand new repository with the ProjectManagement class.
+Management_config:
+  new_repo: True
+  new_user: True
+  new_project: True
+  new_db: False
+  new_research: True
+  new_app: False
+  new_website: False
+  repo: 'Test-Repository'
+  user: 'Test-User'
+  project: 'Test-Project'
+  research: 'Test-Research'
+  research_type: 'Test-Research-Type'

@@ -1,15 +1,16 @@
 """Class for managing, downloading and extracting features from genbank files."""
+# Standard Library
 import os
 import shutil
 from pathlib import Path
+# BioPython
 from BioSQL import BioSeqDatabase
 from Bio import SeqIO
-
+# OrthoEvol
 from OrthoEvol.Tools.logit import LogIt
-from OrthoEvol.Orthologs.utils import attribute_config
-from OrthoEvol.Orthologs.Blast.orthologs_blastn import OrthoBlastN
-from OrthoEvol.Tools.otherutils.other_utils import makedirectory
-from OrthoEvol.Orthologs.Blast.comparative_genetics import BaseComparativeGenetics
+from OrthoEvol.Orthologs.Blast import OrthoBlastN
+from OrthoEvol.Orthologs.Blast import BaseComparativeGenetics
+from OrthoEvol.utilities import FullUtilities
 
 
 class GenBank(object):
@@ -37,6 +38,7 @@ class GenBank(object):
         """
 
         # TODO-ROB: Change the way the file systems work.
+        self.genbank_utils = FullUtilities()
         self.project = project
         self.project_path = project_path
         self.solo = solo
@@ -45,8 +47,7 @@ class GenBank(object):
         self.genbanklog = LogIt().default(logname="GenBank", logfile=None)
 
         # Configuration of class attributes
-        add_self = attribute_config(self, composer=blast, checker=OrthoBlastN,
-                                    checker2=BaseComparativeGenetics,
+        add_self = self.genbank_utils.attribute_config(self, composer=blast, checker=OrthoBlastN, checker2=BaseComparativeGenetics,
                                     project=project, project_path=project_path)
         for var, attr in add_self.__dict__.items():
             setattr(self, var, attr)
@@ -63,9 +64,8 @@ class GenBank(object):
                 self.db_files_list.append(str(FILE))
 
     @staticmethod
-    def name_fasta_file(path, gene, org, feat_type, feat_type_rank, extension, mode):
-        """Name a fasta file.
-
+    def name_fasta_file(self, path, gene, org, feat_type, feat_type_rank, extension, mode):
+        """
         Provide a uniquely named FASTA file:
         * Coding sequence:
             * Single - "<path>/<gene>_<organism><feat_type_rank>.<extension>"
@@ -105,7 +105,7 @@ class GenBank(object):
             file_path = feat_path / Path(multi % (gene, feat_type_rank, extension))
 
         # Make the base directory and return an open file.
-        makedirectory(feat_path)
+        os.makedirs(str(feat_path), exist_ok=True)
         file = open(file_path, mode)
         return file
 
