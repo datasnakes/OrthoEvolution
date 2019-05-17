@@ -1,4 +1,5 @@
 *.gbff
+*.vscode
 *.log
 *.gbk
 *.pyc
