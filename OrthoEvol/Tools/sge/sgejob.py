@@ -12,10 +12,13 @@ from OrthoEvol.Tools.sge import Qstat
 
 class BaseSGEJob(object):
     """Base class for simple jobs."""
-    def __init__(self, base_jobname):
+    def __init__(self, base_jobname, config=None):
         """Initialize job attributes."""
         self.base_jobname = base_jobname
-        self.default_job_attributes = __DEFAULT__
+        if not config:
+            self.default_job_attributes = __DEFAULT__
+        else:
+            self.default_job_attributes = config
         self.file2str = file2str
         self.sgejob_log = LogIt().default(logname="SGE JOB", logfile=None)
         self.pbsworkdir = os.getcwd()
@@ -88,8 +91,8 @@ class BaseSGEJob(object):
 
 class SGEJob(BaseSGEJob):
     """Create a qsub/pbs job & script to submit python code."""
-    def __init__(self, email_address, base_jobname=None, activate=None):
-        super().__init__(base_jobname=base_jobname)
+    def __init__(self, email_address, base_jobname=None, activate=None, config=None):
+        super().__init__(base_jobname=base_jobname, config=config)
         self.email = email_address
         self.attributes = self.default_job_attributes
         self.jobname = self.default_job_attributes['job_name']
