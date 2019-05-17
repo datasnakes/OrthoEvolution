@@ -98,7 +98,6 @@ class BaseBioSQL(object):
         # Set up the permissions for the BioSQL Perl scripts
         biosql_scripts = self.scripts
         for file in os.listdir(biosql_scripts):
-            print(file)
             if '.pl' in str(file):
                 script_path = os.path.join(biosql_scripts, file)
                 self.biosqllog,info("Making script executable: ", file)
