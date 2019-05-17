@@ -242,7 +242,7 @@ class BaseDatabaseManagement(object):
 
     def get_project_genbank_database(self):
         """"""
-        print()
+        pass
 
 
 class DatabaseManagement(BaseDatabaseManagement):
