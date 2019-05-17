@@ -148,7 +148,10 @@ class Oven(object):
                 
     def bake_the_user(self, cookie_jar=None):
         """
-
+        This function uses the username given by our FLASK framework
+        and creates a new directory system for the active user using
+        our  new_user cookiecutter template.
+        """
         self.cookielog.warn('Creating directories from the Repository Cookie template.')
         if cookie_jar:
             self.cookie_jar = cookie_jar
