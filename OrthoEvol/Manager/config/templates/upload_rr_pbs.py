@@ -17,6 +17,7 @@ def _dispatch_config(config_file):
    nrr_config = {"NCBI_refseq_release": {"upload": []}}
    # Templated variables
    file_list = %s
+   pbs_dict = %s
    database_path = "%s"
    upload_number = %s
    email = "%s"
@@ -70,7 +71,8 @@ def _dispatch_config(config_file):
          "base_jobname": "upload_rr_%%s",
          "email_address": email,
          "id": add_to_default,
-         "activate": activate})
+         "activate": activate,
+         "config_dict": pbs_dict})
       nrr_config["NCBI_refseq_release"]["upload"].append({'secs':15})
    return nrr_dispatcher, nrr_config
 

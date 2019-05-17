@@ -646,7 +646,8 @@ class DatabaseManagement(BaseDatabaseManagement):
 
     def NCBI_refseq_release(self, configure_flag=None, archive_flag=None, delete_flag=None, upload_flag=None, archive_path=None,
                             database_path=None, collection_subset=None, seqtype=None, seqformat=None, file_list=None,
-                            upload_number=8, _path=None, activate=None, template_flag=None, download_flag=None):
+                            upload_number=8, _path=None, activate=None, template_flag=None, download_flag=None,
+                            pbs_dict=None):
         """
         This is the most complicated specific strategy.  It downloads the refseq release files of choice (gbff),
         extracts the data, splits a list of files into {upload_number} lists, and uploads those file lists to
@@ -737,7 +738,7 @@ class DatabaseManagement(BaseDatabaseManagement):
             rand_str = random.sample(string.ascii_letters + string.digits, 5)
             script_dir = Path(self.user_log, ('upload_rr' + ''.join(rand_str)))
             script_dir.mkdir()
-            script_string = temp_script % (py_shebang, file_list, db_path, upload_number, self.email, str(script_dir / 'upload_config.yml'))
+            script_string = temp_script % (py_shebang, file_list, pbs_dict, db_path, upload_number, self.email, str(script_dir / 'upload_config.yml'))
             with open(str(script_dir / 'master_upload_rr_pbs.py'), 'w') as mus:
                 mus.write(script_string)
             os.chmod(str(script_dir / 'master_upload_rr_pbs.py'), mode=0o755)
