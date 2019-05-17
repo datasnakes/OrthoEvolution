@@ -182,7 +182,6 @@ class BaseDatabaseManagement(object):
         dl_abs_path = dl_path / Path('taxdump.tar.gz')
         r = urllib.request.urlopen(url)
         data = r.read()
-        print('taxdump.tar.gz')
         with open(str(dl_abs_path), 'wb') as taxdump:
             taxdump.write(data)
         with tarfile.open(str(dl_abs_path)) as tar:
