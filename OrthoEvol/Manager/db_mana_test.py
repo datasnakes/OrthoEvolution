@@ -7,7 +7,7 @@ import yaml
 import getpass
 from datetime import datetime as d
 import os
-_jobname="jobname"
+_jobname = "jobname"
 
 # Set up project management
 pm_config_file = resource_filename(yml.__name__, "initialize_new.yml")
