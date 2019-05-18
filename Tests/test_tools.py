@@ -28,11 +28,12 @@ class TestTools(unittest.TestCase):
         logit.deletelog(self.logfile)
 
     def test_multiprocess(self):
+        """Test the Multiprocess class."""
         mp = Multiprocess()
         self.assertIsNotNone(mp.cpus)
 
     def test_ncbiftpclient(self):
-        """Simple download."""
+        """Test the NcbiFTPClient class."""
         ncbiftp = NcbiFTPClient(self.assertTrue('someone@gmail.com'))
         ncbiftp.download_file(self.filename)
         self.cleanup()

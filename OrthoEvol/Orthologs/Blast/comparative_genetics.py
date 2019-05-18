@@ -1,21 +1,21 @@
 """Comparative Genetics Files"""
+# Standard Library
 import os
-from pathlib import Path
-import pandas as pd
 import shutil
 import time
-# NCBITaxa().update_taxonomy_database()
+import copy
 import pkg_resources
-from ete3 import NCBITaxa
-
-from OrthoEvol.Manager.config import test
-# from pandas import ExcelWriter
+from pathlib import Path
+# OrthoEvol
+from OrthoEvol.Manager.config import data
 from OrthoEvol.Manager.management import ProjectManagement
-from OrthoEvol.Orthologs.utils import attribute_config
-from OrthoEvol.Orthologs.Blast.utils import (my_gene_info, get_dup_acc,
-                                             get_miss_acc)
+from OrthoEvol.utilities import FullUtilities
 from OrthoEvol.Tools.logit import LogIt
-
+# Other
+import pandas as pd
+from ete3 import NCBITaxa
+# from pandas import ExcelWriter
+# NCBITaxa().update_taxonomy_database()
 
 # TODO-ROB Create function for archiving and multiple runs (this can go
 # into the Management class)
@@ -73,18 +73,21 @@ class BaseComparativeGenetics(object):
         self.__pre_blast = pre_blast
         self.__post_blast = post_blast
         self.__taxon_filename = taxon_file
-        self.acc_filename = acc_file
+        self.acc_csv_filename = acc_file
         self.project = project
 
         # Initialize Logging
         self.get_time = time.time
         self.sep = 50*'*'
 
+        # Initialize Utilities
+        self.blast_utils = FullUtilities()
+
         if project_path and project:
             self.project_path = Path(project_path) / Path(project)
 
         # Configuration of class attributes.
-        add_self = attribute_config(self, composer=proj_mana, checker=ProjectManagement, project=project, project_path=project_path)
+        add_self = self.blast_utils.attribute_config(self, composer=proj_mana, checker=ProjectManagement, project=project, project_path=project_path)
         for variable, attribute in add_self.__dict__.items():
             setattr(self, variable, attribute)
 
@@ -94,13 +97,15 @@ class BaseComparativeGenetics(object):
             self.taxon_path = self.project_index / Path(self.__taxon_filename)
         # Handle the master accession file (could be before or after blast)
         if kwargs['copy_from_package']:
-            shutil.copy(pkg_resources.resource_filename(test.__name__, kwargs['MAF']), str(self.project_index))
+            shutil.copy(pkg_resources.resource_filename(data.__name__, kwargs['MAF']), str(self.project_index))
             acc_file = kwargs['MAF']
-            self.acc_filename = acc_file
+            self.acc_csv_filename = acc_file
         if acc_file is not None:
-
             # File init
-            self.acc_path = self.project_index / Path(self.acc_filename)
+            self.acc_sqlite_filename = Path(acc_file).stem + '.sqlite'
+            self.acc_sqlite_tablename = Path(acc_file).stem.replace('.', '_')
+            self.acc_csv_path = self.project_index / Path(self.acc_csv_filename)
+            self.acc_sqlite_path = self.project_index / Path(self.acc_sqlite_filename)
 
             # Handles for organism lists
             self.org_list = []
@@ -128,7 +133,8 @@ class BaseComparativeGenetics(object):
             self.blast_rhesus = []
 
             # Handles for different dataframe initializations
-            self.raw_acc_data = pd.read_csv(str(self.acc_path), dtype=str)
+            self.raw_acc_data = self.blast_utils.accession_sqlite2pandas(self.acc_sqlite_tablename, self.acc_sqlite_filename,
+                                                        path=self.project_index, acc_file=self.acc_csv_filename)
 
             # Master accession file for the blast
             self.building_filename = str(acc_file[:-4] + 'building.csv')
@@ -140,7 +146,7 @@ class BaseComparativeGenetics(object):
             self.header = self.raw_acc_data.axes[1].tolist()
 
             # Blast accession numbers
-            self.building = pd.read_csv(str(self.acc_path), dtype=str)
+            self.building = copy.deepcopy(self.raw_acc_data)
             del self.building['Tier']
             del self.building['Homo_sapiens']
             self.building = self.building.set_index('Gene')  # Object for good user output
@@ -149,7 +155,7 @@ class BaseComparativeGenetics(object):
             # Blast time points
             self.building_time_filename = self.building_filename.replace(
                 'building.csv', 'building_time.csv')  # Master time file for the blast
-            self.building_time = pd.read_csv(str(self.acc_path), dtype=str)
+            self.building_time = copy.deepcopy(self.raw_acc_data)
             del self.building_time['Tier']
             del self.building_time['Homo_sapiens']
             self.building_time = self.building_time.set_index('Gene')
@@ -181,7 +187,7 @@ class BaseComparativeGenetics(object):
             self.df = self.__data
             # Format the main pivot table #### #
             self.pt = pd.pivot_table(
-                pd.read_csv(self.acc_path),
+                copy.deepcopy(self.raw_acc_data),
                 index=['Tier','Gene'],
                 aggfunc='first')
             array = self.pt.axes[1].tolist()  # Organism list
@@ -265,14 +271,14 @@ class BaseComparativeGenetics(object):
 
         # Pre-Blast gene analysis
         if self.__pre_blast is True:
-            self.mygene_df = my_gene_info(self.acc_path)
+            self.mygene_df = self.blast_utils.my_gene_info(acc_dataframe=copy.deepcopy(self.raw_acc_data))
             self.mygene_df.to_csv(self.mygene_path, index=False)
 
         # Post-Blast accession analysis
         if self.__post_blast:
 
             # Missing
-            self.missing_dict = get_miss_acc(self.acc_path)
+            self.missing_dict = self.blast_utils.get_miss_acc(acc_dataframe=copy.deepcopy(self.raw_acc_data))
             self.missing_genes = self.missing_dict['genes']
             self.missing_gene_count = self.missing_genes['count']
             del self.missing_genes['count']
@@ -281,7 +287,7 @@ class BaseComparativeGenetics(object):
             del self.missing_organsims['count']
 
             # Duplicates
-            self.duplicated_dict = get_dup_acc(self.acc_dict, self.gene_list,
+            self.duplicated_dict = self.blast_utils.get_dup_acc(self.acc_dict, self.gene_list,
                                                self.org_list)
             self.duplicated_accessions = self.duplicated_dict['accessions']
             self.duplicated_organisms = self.duplicated_dict['organisms']
@@ -350,8 +356,7 @@ class BaseComparativeGenetics(object):
         if tiers is None:
             tiers = maf.groupby('Tier').groups.keys()
         for tier in tiers:
-            tier = str(tier)
-            tier_frame_dict[tier] = maf.groupby('Tier').get_group(tier)
+            tier_frame_dict[str(tier)] = maf.groupby('Tier').get_group(tier)
         return tier_frame_dict
 
     def get_taxon_dict(self):

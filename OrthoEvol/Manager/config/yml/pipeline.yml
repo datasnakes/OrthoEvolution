@@ -1,16 +1,3 @@
-Management_config:
-  database: 'Test-Database'
-  repo: 'Test-Repository'
-  user: 'Test-User'
-  project: 'Test-Project'
-  project_path: null
-  research: 'Test-Research'
-  research_type: 'Test-Research-Type'
-  app: 'Test-App'
-  website: 'Test-Website'
-  host: '0.0.0.0'
-  port: '5252'
-
 CompGenAnalysis_config:
   taxon_file: null
   go_list: null

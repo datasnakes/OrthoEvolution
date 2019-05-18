@@ -1,6 +1,7 @@
+# Standard Library
 import pkg_resources
 import yaml
-
+# OrthoEvol
 from OrthoEvol.Manager.management import ProjectManagement
 from OrthoEvol.Manager import config
 from OrthoEvol.Manager.database_management import BaseDatabaseManagement
@@ -25,7 +26,6 @@ class DataMana(object):
 
     def __init__(self, config_file=None, pipeline=None, new=False, start=False, **kwargs):
         """Initialize the attributes that can be used as keys in the config_file."""
-
         # Full configuration for the pipeline's YAML based variables
         self.Management_config = self.Database_config = self.CompGenAnalysis_config = self.BLASTn_config = \
             self.GenBank_config = self.Alignment_config = None
@@ -34,23 +34,19 @@ class DataMana(object):
         self.pm = self.bl = self.gb = self.al = self.db = None
         if pipeline == 'Ortho_CDS_1':
             if new is True:
-                config_file = pkg_resources.resource_filename(config.yaml.__name__,
-                                                              'config_template_new.yml')
+                config_file = pkg_resources.resource_filename(config.yaml.__name__, 'pipeline.yml')
             else:
-                config_file = pkg_resources.resource_filename(config.yaml.__name__,
-                                                              'config_template_existing.yml')
+                config_file = pkg_resources.resource_filename(config.yaml.__name__, 'config_template_existing.yml')
         if config_file is not None:
             if start is True:
                 self.configure(config_file)
 
     def configure(self, config_file):
         """Use YAML configuration in order to initialize different classes.
-
-        :param config_file: A YAML file that is used to create a
-                            dictionary(kwargs) for each class.
+        
+        :param config_file: A YAML file that is used to create a dictionary(kwargs) for each class.
         :return:
         """
-
         with open(config_file, 'r') as ymlfile:
             configuration = yaml.safe_load(ymlfile)
             # TODO-ROB:  Set up configuratioin to parse this full list.  For each sub configuration do something.
@@ -98,12 +94,6 @@ class DataMana(object):
                 self.al = self.Alignment_config
 
     def database(self, proj_mana, database_config):
-        """Set up databases.
-
-        :param proj_mana:
-        :param database_config:
-        """
-
         self.db = BaseDatabaseManagement(proj_mana=proj_mana, **database_config)
         for config_type, database_config_list in self.db.database_dict.items():
             implementation = database_config_list[0]
@@ -117,43 +107,26 @@ class DataMana(object):
             else:
                 implementation(**configuration)
 
+
             # TODO-ROB parse the config options
 
     def blast(self, proj_mana, blast_config):
-        """Run Blast.
-
-        :param proj_mana:
-        :param blast_config:
-        """
-
-        self.bl = OrthoBlastN(proj_mana=proj_mana, **self.Management_config,
-                              **blast_config)
-        self.bl.blast_config(self.bl.blast_human, 'Homo_sapiens',
-                             auto_start=True)
+        self.bl = OrthoBlastN(proj_mana=proj_mana, **self.Management_config, **blast_config)
+        self.bl.blast_config(self.bl.blast_human, 'Homo_sapiens', auto_start=True)
         # TODO-Create directories for the blast data
         # Do the blasting here using CompGenBLASTn
 
     def genbank(self, proj_mana, blast):
-        """Extract features from genbank and upload to a database.
-
-        :param proj_mana:
-        :param blast:
-        """
-
         if blast is not None:
-            self.gb = GenBank(blast=blast, **self.Management_config,
-                              **self.GenBank_config)
+            self.gb = GenBank(blast=blast, **self.Management_config, **self.GenBank_config)
         else:
-            self.gb = GenBank(blast=blast, **self.Management_config,
-                              **self.GenBank_config)
+            self.gb = GenBank(blast=blast, **self.Management_config, **self.GenBank_config)
         if blast is not None:
             if issubclass(type(blast), OrthoBlastN):
-                self.gb.create_post_blast_gbk_records(blast.org_list,
-                                                      blast.gene_dict)
+                self.gb.create_post_blast_gbk_records(blast.org_list, blast.gene_dict)
         else:
             print(proj_mana.__dict__)
-            cga = BaseComparativeGenetics(proj_mana=proj_mana,
-                                          **self.CompGenAnalysis_config)
+            cga = BaseComparativeGenetics(proj_mana=proj_mana, **self.CompGenAnalysis_config)
 
             # Parse the tier_frame_dict to get the tier
             for G_KEY in cga.tier_frame_dict.keys():
@@ -167,17 +140,10 @@ class DataMana(object):
                         accession = parts[0]
                         accession = accession.upper()
                         server_flag = False
-                        self.gb.get_gbk_file(accession, GENE, ORGANISM,
-                                             server_flag=server_flag)
+                        self.gb.get_gbk_file(accession, GENE, ORGANISM, server_flag=server_flag)
 
     def align(self, genbank):
-        """Align multifasta files.
-
-        :param genbank:
-        """
-
-        self.al = MSA(genbank=genbank, **self.Management_config,
-                      **self.Alignment_config)
+        self.al = MSA(genbank=genbank, **self.Management_config, **self.Alignment_config)
         for _program, aligner_config_list in self.al.alignment_dict.items():
             aligner = aligner_config_list[0]
             configuration = aligner_config_list[1]

@@ -25,7 +25,7 @@ class OrthoEvolDevelopmentWarning(OrthoEvolWarning):
     pass
 
 
-class OrthoEvolDeprecationWarning(OrthoEvolWarning):
+class OrthoEvolDeprecationWarning(DeprecationWarning):
     """This is the Deprecation Warning subclass.
 
     This warning is for code that is no longer maintained and will be removed

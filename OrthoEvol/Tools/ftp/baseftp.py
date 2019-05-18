@@ -3,7 +3,7 @@ from ftplib import FTP, error_perm
 import os
 import contextlib
 
-from OrthoEvol.Tools.otherutils import FunctionRepeater
+from OrthoEvol.utilities import FunctionRepeater
 
 
 class BaseFTPClient(object):
