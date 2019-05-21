@@ -15,13 +15,15 @@ class OrthoBlastN(BaseBlastN):
         best option in order to get the most accuarate accession numbers for
         downstream analysis.
 
-        :param project:  The project name (Default: 'orthologs')
+        :param project:  The project name (Default: 'orthology-inferenc')
         :param method: Method used for blasting. (Default: 3)
         :param template:  The accession file template.
         :param save_data:  A flag for saving the post_blast data to an excel file.
+        :param species:  The base species for orthology inference (Default: 'Homo_sapiens')
         :param kwargs:
         """
         super().__init__(project=project, method=method, template=template, save_data=save_data, **kwargs)
 
+
     def run(self):
-        self.configure(self.blast_human, 'Homo_sapiens', auto_start=True)
+        self.configure(self.blast_human, self.species, auto_start=True)
