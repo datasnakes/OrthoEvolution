@@ -77,7 +77,6 @@ class BaseBlastN(ComparativeGenetics):
             query_config = {'query': '',
                             'db': 'refseq_rna',
                             'temp fasta': ''}
-            return (blastn_parameters, query_config)
         # Remote blast with entrez_query
         elif method == 2:
             blastn_parameters = {'query': '', 'entrez_query': '',
@@ -88,7 +87,6 @@ class BaseBlastN(ComparativeGenetics):
             query_config = {'query': '',
                             'db': 'refseq_rna',
                             'temp fasta': ''}
-            return (blastn_parameters, query_config)
         # Local blast using taxonomy ids
         elif method == 3:
             blastn_parameters = {'query': '', 'db': 'refseq_rna_v5', 'taxids': '',
@@ -97,7 +95,6 @@ class BaseBlastN(ComparativeGenetics):
             query_config = {'query': '',
                             'db': 'refseq_rna_v5',
                             'temp fasta': ''}
-            return (blastn_parameters, query_config)
         # Default local blast
         elif method is None or method == "":
             blastn_parameters = {'query': '', 'db': 'refseq_rna',
@@ -107,9 +104,9 @@ class BaseBlastN(ComparativeGenetics):
             query_config = {'query': '',
                             'db': 'refseq_rna',
                             'temp fasta': ''}
-            return (blastn_parameters, query_config)
         else:
             raise ValueError('%s is not a blast method.' % method)
+        return (blastn_parameters, query_config)
 
     def configure(self, query_accessions, query_organism, auto_start=False):
         """This method configures everything for our BLAST workflow.
@@ -166,7 +163,8 @@ class BaseBlastN(ComparativeGenetics):
             # Create a temporary fasta file using blastdbcmd
             try:
                 blastdbcmd_query = "blastdbcmd -entry {query} -db {db} -outfmt %f -out {temp fasta}".format(**self.query_config)
-                blastdbcmd_status = run(blastdbcmd_query, stdout=PIPE, stderr=PIPE, shell=True, check=True)
+                blastdbcmd_status = run(blastdbcmd_query, stdout=PIPE,
+                                        stderr=PIPE, shell=True, check=True)
                 self.blastn_log.info("Extracted query refseq sequence to a temp.fasta file from BLAST database.")
             except CalledProcessError as err:
                 self.blastn_log.error(err.stderr.decode('utf-8'))
@@ -189,13 +187,12 @@ class BaseBlastN(ComparativeGenetics):
 
     def parse_xml(self, xml_path, gene, organism):
         """Parse the blast XML record get the best hit accession number.
-        
+
         :param xml_path:  Absolute path to the blast record.
         :param gene:  The gene of interest.
         :param organism:  The organism of interest.
         :return:  Returns one accession number in the building accession file.
         """
-
         accession = gi = raw_bitscore = description = None
         record_dict = {}
         xmlsplit = xml_path.split(os.sep)
@@ -204,9 +201,11 @@ class BaseBlastN(ComparativeGenetics):
         maximum = 0
         file_path = str(Path(xml_path))
 
+        # Read the blast_xml output file
         with open(file_path, 'r') as blast_xml:
             blast_qresult = SearchIO.read(blast_xml, 'blast-xml')
-            mapped_qresult = blast_qresult.hit_map(map_func)  # Map the hits
+            # Map the hits
+            mapped_qresult = blast_qresult.hit_map(map_func)
             # Extract hit information from xml file.
             for hit in mapped_qresult:
                 for hsp in hit.hsps:
@@ -216,12 +215,13 @@ class BaseBlastN(ComparativeGenetics):
                         # https://en.wikipedia.org/wiki/RefSeq
                         if "xr" in str(hit.id.lower()):
                             self.blastn_log.info("Encountered a predicted(X*_00000) "
-                                                 "non-coding (XR_000000)(ncRNA) RefSeq gene.  Moving to the next hit.")
+                                                 "non-coding (XR_000000)(ncRNA) RefSeq "
+                                                 "gene.  Moving to the next hit.")
                             break
                         else:
                             # If the gene is acceptable then add it to the gene list
                             # Lowercase means LOC1223214 is the name of the gene
-                            # TODO-ROB:  Change this check
+                            # TODO:  Change this check
                             maximum = hsp.bitscore_raw
                             if gene.lower() in hit.description.lower():
                                 accession = hit.id1
@@ -355,13 +355,14 @@ class BaseBlastN(ComparativeGenetics):
                             self.blastn_log.error(errmsg)
                             os.remove(xml_path)
                             self.blastn_log.info('%s was deleted.' % xml)
-                        except (KeyboardInterrupt, SystemExit) as err:
+                        # Catch either KeyboardInterrupt or SystemExit
+                        except (KeyboardInterrupt, SystemExit):
                             msg = "Keyboard interrupt or System Exit."
                             self.blastn_log.error(msg)
                             os.remove(xml_path)
                             self.blastn_log.info('%s was deleted.' % xml)
-                            raise                            
-                            
+                            raise
+
                     # If the BLAST has gone through all orthologs then create a
                     # master accession file.
                     if gene == genes[-1] and organism == self.org_list[-1]:
@@ -371,10 +372,11 @@ class BaseBlastN(ComparativeGenetics):
                             shutil.copyfile(str(self.building_time_file_path),
                                             str(self.complete_time_file_path))
                         except FileNotFoundError as fnfe:
-                            msg = 'Your blast did not create any building time files.'
+                            msg = "Your blast did not create any building time files."
                             self.blastn_log.error(fnfe)
                             self.blastn_log.error(msg)
-                            raise BlastFailure('Blast has failed to generate data. Check logs for errors.')
+                            raise BlastFailure("Blast has failed to generate "
+                                               "data. Check logs for errors.")
 
                         if self.save_data is True:
                             self.post_blast_analysis(self.project)
