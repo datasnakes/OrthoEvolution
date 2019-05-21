@@ -77,6 +77,7 @@ class BaseComparativeGenetics(object):
         self.acc_filename = acc_file
         self.project_path = project_path
         self.project = project
+        self.species = 'Homo_sapiens'
 
         # Initialize Logging
         self.get_time = time.time
@@ -94,11 +95,12 @@ class BaseComparativeGenetics(object):
             self.project_path = os.getcwd()
         # TODO: Add ability to use an existing project or project path.
         elif self.project_path and not self.project:
+            self.project = self.project_path
             raise NotImplementedError
-            
+
         self.blastn_log.debug('Project name: %s' % self.project)
         self.blastn_log.debug('Project path: %s' % self.project_path)
-            
+
         # Configuration of class attributes.
         add_self = attribute_config(self, composer=proj_mana,
                                     checker=ProjectManagement,
@@ -160,7 +162,7 @@ class BaseComparativeGenetics(object):
             # Blast accession numbers
             self.building = pd.read_csv(str(self.acc_path), dtype=str)
             del self.building['Tier']
-            del self.building['Homo_sapiens']
+            del self.building[self.species]
             self.building = self.building.set_index('Gene')  # Object for good user output
             self.building_file_path = self.data / Path(self.building_filename)
 
@@ -169,7 +171,7 @@ class BaseComparativeGenetics(object):
                 'building.csv', 'building_time.csv')  # Master time file for the blast
             self.building_time = pd.read_csv(str(self.acc_path), dtype=str)
             del self.building_time['Tier']
-            del self.building_time['Homo_sapiens']
+            del self.building_time[self.species]
             self.building_time = self.building_time.set_index('Gene')
             self.building_time_file_path = self.data / Path(self.building_time_filename)
 
@@ -206,7 +208,7 @@ class BaseComparativeGenetics(object):
             self.pt.columns = pd.Index(array, name='Organism')
 
             # Handles for full dictionaries #### #
-            self.org_dict = self.df.ix[0:, 'Homo_sapiens':].to_dict()
+            self.org_dict = self.df.ix[0:, self.species:].to_dict()
             self.gene_dict = self.df.T.to_dict()
             self.get_master_lists(self.__data)  # populates our lists
         else:
@@ -278,8 +280,9 @@ class BaseComparativeGenetics(object):
         self.acc_list = list(self.acc_dict.keys())
 
         # Get blast query list
-        self.blast_human = self.df.Homo_sapiens.tolist()
-        self.blast_rhesus = self.df.Macaca_mulatta.tolist()
+        if self.species == 'Homo_sapiens':
+            self.blast_human = self.df.Homo_sapiens.tolist()
+            self.blast_rhesus = self.df.Macaca_mulatta.tolist()
 
         # Pre-Blast gene analysis
         if self.__pre_blast is True:
@@ -445,7 +448,9 @@ class ComparativeGenetics(BaseComparativeGenetics):
         :returns:  An API for accessing the various files used before, during,
                    and after Blasting."""
 
-        super().__init__(project=project, acc_file=template, taxon_file=taxon_file, post_blast=post_blast, hgnc=False, **kwargs)
+        super().__init__(project=project, acc_file=template,
+                         taxon_file=taxon_file, post_blast=post_blast,
+                         hgnc=False, **kwargs)
 
         self.postblastlog = LogIt().default(logname="post blast", logfile=None)
 
@@ -482,11 +487,11 @@ class ComparativeGenetics(BaseComparativeGenetics):
         """
 
         # TODO-ROB:  Create this in the log file
-        if pd.isnull(self.building.get_value(gene, organism)) is False:
-            existing = self.building.get_value(gene, organism)
+        if pd.isnull(self.building.at[gene, organism]) is False:
+            existing = self.building.at[gene, organism]
             if existing == accession:
                 self.blastn_log.warning(self.sep)
-                self.blastn_log.warning("BlastN has run on this gene.")
+                self.blastn_log.warning("Blastn has run on this gene.")
                 self.blastn_log.warning("The ACCESSION(%s) for the %s %s gene already exists in our data set."
                                         % (accession, organism, gene))
                 self.blastn_log.warning(self.sep)
@@ -510,11 +515,11 @@ class ComparativeGenetics(BaseComparativeGenetics):
                 raise ValueError("The queried ACCESSION (%s) does not match the existing ACCESSION (%s).  Please see"
                                  "the log file." % (accession, existing))
 
-        self.building.set_value(gene, organism, accession)
+        self.building.at[gene, organism] = accession
         temp = self.building.reset_index()
         temp.insert(0, 'Tier', pd.Series(self.df['Tier'].tolist()))
-        # TODO-ROB make the query organism insert implicit
-        temp.insert(2, 'Homo_sapiens', self.df['Homo_sapiens'])
+        # TODO: make the query organism insert implicit
+        temp.insert(2, self.species, self.df[self.species])
         temp.set_index('Tier')
         if self.save_data is True:
             temp.to_csv(str(self.building_file_path))
@@ -529,7 +534,6 @@ class ComparativeGenetics(BaseComparativeGenetics):
         :param start:  Starting time.
         :param end:  Ending time.
         """
-
         # TODO-ROB Add a method that adds the time to the post-blast analysis API.
         # This will help us see if there is a correlation between gene, organism,
         # or accession with the length of time.
@@ -539,7 +543,7 @@ class ComparativeGenetics(BaseComparativeGenetics):
         self.building_time.set_value(gene, organism, elapsed_time)
         temp = self.building_time.reset_index()
         temp.insert(0, 'Tier', pd.Series(self.df['Tier'].tolist()))
-        temp.insert(2, 'Homo_sapiens', self.df['Homo_sapiens'])
+        temp.insert(2, self.species, self.df[self.species])
         temp.set_index('Tier')
         if self.save_data is True:
             temp.to_csv(str(self.building_time_file_path))
@@ -622,7 +626,7 @@ class ComparativeGenetics(BaseComparativeGenetics):
             rand_ws = pd.DataFrame.from_dict(
                 self.duplicated_random, orient='index')
             rand_ws.to_excel(pb_file, sheet_name="Random Duplicates")
-            msg = 'Random Duplicates were added to your excel file.'
+            msg = 'Random duplicates were added to your excel file.'
             self.postblastlog.info(msg)
         except (ValueError, AttributeError):
             pass
