@@ -58,7 +58,7 @@ setup(
         'Framework :: Cookiecutter'
     ],
     # Packages will be automatically found if not in this list.
-    packages=find_packages(exclude=['Docs', 'Examples', 'Tests']),
+    packages=find_packages(exclude=['docs', 'examples', 'tests']),
     include_package_data=True,
     entry_points={
         'console_scripts': [
