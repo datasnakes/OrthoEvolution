@@ -80,34 +80,55 @@ run `OrthoBlastN` without using our database management features,
 
 ### Performing Blast & Post-Blast Analysis
 
-``` python
+```python
 from OrthoEvol.Orthologs.Blast import OrthoBlastN
-import os
-
-# Create a blast configuration dictionary
-blast_cfg = {
-              "taxon_file": None,
-              "go_list": None,
-              "post_blast": True,
-              "template": None,
-              "save_data": True,
-              "copy_from_package": True,
-              "MAF": 'MAFV3.2.csv'
-               }
 
 
-path = os.getcwd()
-myblast = OrthoBlastN(proj_mana=None, project="blast-test", project_path=path, **blast_config)
+# Use an existing list of gpcr genes
+gpcr_blastn = OrthoBlastN(project="orthology-gpcr", method=3,
+                             save_data=True, acc_file="gpcr.csv", 
+                             copy_from_package=True)
+                             
+# View the list of genes
+gpcr_blastn.gene_list
 
-# If you want to immediately start blasting, set auto_start to True
-myblast.blast_config(myblast.blast_human, 'Homo_sapiens', auto_start=False)
+# View the blast dataframe
+gpcr_blastn.df
+                    
+# Start the blast
+gpcr_blastn.run()
+
+# Use your own accessions file.
+# You don't need to copy from package to use your own genes
+my_blastn = OrthoBlastN(project="orthology-project", method=3,
+                             save_data=True, acc_file="mygenes.csv", 
+                             copy_from_package=False)
+
+my_blastn.run()
 
 ```
-### Making the API available with Accession data
-_TODO: This is unfinished._
+
+### Customing blastn
 
 ``` python
-from OrthoEvol.Orthologs.CompGenetics import CompGenAnalysis
+from OrthoEvol.Orthologs.Blast import BaseBlastN
 
+# This is more pythonic with YAML loading
+blastconfig = {
+    "project": "test",
+    "blast_method": 3,
+    "taxon_file": None,
+    "go_list": None,
+    "post_blast": True,
+    "template": None,
+    "save_data": True,
+    "copy_from_package": False,
+    "MAF": 'test_blast.csv',
+    "project_path": None,
+    "proj_mana": None
+}
+
+
+test_blast = BaseBlastN(**blastconfig)
+test_blast.blast_config(test_blast.blast_human, 'Homo_sapiens', auto_start=True)
 ```
-
