@@ -18,18 +18,20 @@ download ftp databases, you can look at [this cli script](https://github.com/dat
 
 
 Examples
------
+---------
 
 #### Blastdb Download Example
 
-This is a simple example of using some of the modules.
+Download the [latest](ftp://ftp.ncbi.nlm.nih.gov/blast/db/v5/) blast databases (version 5 which is formatted for taxonomy ids).
+If `v5=False`, then the previously used blast databases will be downloaded. The
+[taxdb.tar.gz](ftp://ftp.ncbi.nlm.nih.gov/blast/db/v5/taxdb.tar.gz) database is also 
+downloaded with the blast databases.
 
 ``` python
 from OrthoEvol.Tools import NcbiFTPClient
 
 ncbiftp = NcbiFTPClient(email='somebody@gmail.com')
-ncbiftp.getblastdb(database_name='refseq_rna')
-
+ncbiftp.getblastdb(database_name='refseq_rna', v5=True)
 ```
 #### Windowmasker files Download Example
 
@@ -48,7 +50,8 @@ from OrthoEvol.Tools import NcbiFTPClient
 import os
 
 ncbiftp = NcbiFTPClient(email='somebody@gmail.com')
-ncbiftp.getrefseqrelease(taxon_group='vertebrate_mammalian', seqtype='rna', seqformat='gbff', download_path=os.getcwd())
+ncbiftp.getrefseqrelease(taxon_group='vertebrate_mammalian', seqtype='rna', 
+                         seqformat='gbff', download_path=os.getcwd())
 ```
 
 #### List all directories in a path
