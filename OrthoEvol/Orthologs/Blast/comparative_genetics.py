@@ -56,11 +56,13 @@ class BaseComparativeGenetics(object):
         downstream processing or for basic observation of the data.
 
         :param project:  The name of the project.
-        :param project_path:  The location of the project, which is generally defined by the ProjectManagement configuration.
+        :param project_path:  The location of the project, which is generally
+                            defined by the ProjectManagement configuration.
         :param acc_file:  The name of the accession file.
         :param taxon_file:  A file that contains an ordered list of taxonomy ids.
-        :param pre_blast:  A flag that gives the user access to an API that contains extra information about their genes
-                           using the mygene package.
+        :param pre_blast:  A flag that gives the user access to an API that
+                        contains extra information about their genes using the
+                        mygene package.
         :param post_blast:  A flag that is used to handle a BLAST result file, which returns information about misssing
                             data, duplicates, etc.
         :param hgnc:  A flag used as a placeholder for future work with HGNC files.
@@ -122,7 +124,8 @@ class BaseComparativeGenetics(object):
             self.taxon_path = self.project_index / Path(self.__taxon_filename)
         # Handle the master accession file (could be before or after blast)
         if self.copy_from_package:
-            shutil.copy(pkg_resources.resource_filename(data.__name__, kwargs['MAF']), str(self.project_index))
+            shutil.copy(pkg_resources.resource_filename(data.__name__, kwargs['MAF']),
+                        str(self.project_index))
             self.acc_file = self.MAF = kwargs['MAF']
             self.acc_filename = self.acc_file
         if self.acc_file is not None:
@@ -170,12 +173,14 @@ class BaseComparativeGenetics(object):
             self.building = pd.read_csv(str(self.acc_path), dtype=str)
             del self.building['Tier']
             del self.building[self.species]
-            self.building = self.building.set_index('Gene')  # Object for good user output
+            # Object for good user output
+            self.building = self.building.set_index('Gene')
             self.building_file_path = self.data / Path(self.building_filename)
 
             # Blast time points
+            # Master time file for the blast
             self.building_time_filename = self.building_filename.replace(
-                'building.csv', 'building_time.csv')  # Master time file for the blast
+                'building.csv', 'building_time.csv')
             self.building_time = pd.read_csv(str(self.acc_path), dtype=str)
             del self.building_time['Tier']
             del self.building_time[self.species]
@@ -219,8 +224,8 @@ class BaseComparativeGenetics(object):
             self.gene_dict = self.df.T.to_dict()
             self.get_master_lists(self.__data)  # populates our lists
         else:
-            self.building_filename = str(self.project + 'building.csv')
-            self.building_time_filename = str(self.project + 'building_time.csv')
+            self.building_filename = str(self.project + '_building.csv')
+            self.building_time_filename = str(self.project + '_building_time.csv')
 
 
 # //TODO-ROB Add HGNC python module
@@ -230,9 +235,8 @@ class BaseComparativeGenetics(object):
 
         :param file: Name of csv file.
         """
-
-        data = pd.read_csv(file, header=None)
-        file_list = list(data[0])
+        file_data = pd.read_csv(file, header=None)
+        file_list = list(file_data[0])
         return file_list
 
     def get_master_lists(self, df, csv_file=None):

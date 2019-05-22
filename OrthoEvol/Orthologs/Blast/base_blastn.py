@@ -68,10 +68,14 @@ class BaseBlastN(ComparativeGenetics):
         self.complete_time_file = self.project + '_TIME.csv'
         self.complete_time_file_path = self.data / Path(self.complete_time_file)
 
-        self.blastn_parameters, self.query_config = self.select_method(method=self.method)
+        self.blastn_parameters, self.query_config = BaseBlastN.select_method(method=self.method)
 
     def _make_blast_dir(self, gene, path):
-        """Create a blast directory for a gene."""
+        """Create a blast directory for a gene.
+
+        :param gene:  A gene that will be run with blastn.
+        :param path:  The path of the gene directory named with the gene name.
+        """
         try:
             Path.mkdir(path, exist_ok=True, parents=True)
             self.blastn_log.debug("Directory created for %s" % gene)
@@ -79,7 +83,12 @@ class BaseBlastN(ComparativeGenetics):
             self.blastn_log.debug("Directory exists for %s" % gene)
 
     def _create_temp_fasta(self, query, gene, query_config):
-        """Create a temporary fasta file using blastdbcmd."""
+        """Create a temporary fasta file using blastdbcmd.
+
+        :param query: The blast query or reference accession.
+        :param gene: The gene name of the accession.
+        :param query_config: A configuration dict for the blastdbcmd string.
+        """
         try:
             blastdbcmd_query = "blastdbcmd -entry {query} -db {db} -outfmt %f -out {temp fasta}".format(**query_config)
             blastdbcmd_status = run(blastdbcmd_query, stdout=PIPE,
@@ -97,10 +106,11 @@ class BaseBlastN(ComparativeGenetics):
                 with contextlib.suppress(ValueError):
                     self.current_gene_list.remove(gene)
 
-    def select_method(self, method):
+    @staticmethod
+    def select_method(method):
         """Select a method for running blastn.
 
-        :param method: a blast method - 1, 2, 3, or None
+        :param method: The blast method to use. Either 1, 2, or 3.
         """
         # Local blast using seqidlist
         if method == 1:
@@ -140,7 +150,7 @@ class BaseBlastN(ComparativeGenetics):
                             'temp fasta': ''}
         else:
             raise ValueError('%s is not a blast method.' % method)
-        return (blastn_parameters, query_config)
+        return blastn_parameters, query_config
 
     def configure(self, query_accessions, query_organism, auto_start=False):
         """This method configures everything for our BLAST workflow.
@@ -227,7 +237,8 @@ class BaseBlastN(ComparativeGenetics):
                 for hsp in hit.hsps:
                     # Find the highest scoring hit for each gene
                     if hsp.bitscore_raw > maximum:
-                        # If the gene is a predicted non-coding RefSeq gene then go the the next hit
+                        # If the gene is a predicted non-coding RefSeq gene
+                        # then go the the next hit
                         # https://en.wikipedia.org/wiki/RefSeq
                         if "xr" in str(hit.id.lower()):
                             self.blastn_log.info("Encountered a predicted(X*_00000) "

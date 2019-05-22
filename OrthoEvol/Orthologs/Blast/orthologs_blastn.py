@@ -8,7 +8,7 @@ class OrthoBlastN(BaseBlastN):
     def __init__(self, project="orthology-gpcr", method=3, template=None,
                  save_data=True, acc_file="gpcr.csv", copy_from_package=True,
                  **kwargs):
-        """This class inherits from the CompGenFiles class.
+        """This class inherits from the BaseBlastN class.
 
         This class utilizes it's parent classes to search a standalone
         Blast database for specific orthologs of a gene using a query organism
@@ -21,6 +21,7 @@ class OrthoBlastN(BaseBlastN):
         :param template:  The accession file template.
         :param save_data:  A flag for saving the post_blast data to an excel file.
         :param acc_file: The accession file to use. (Default: 'karg.csv')
+        :param copy_from_package: Copy the acc_file from the package. (Default: True)
         :param kwargs:
         """
         # Set values for methods to prevent using a config.
@@ -43,4 +44,5 @@ class OrthoBlastN(BaseBlastN):
                          proj_mana=self.proj_mana, **kwargs)
 
     def run(self):
+        """Run the blast using a default configuration."""
         self.configure(self.blast_human, self.species, auto_start=True)
