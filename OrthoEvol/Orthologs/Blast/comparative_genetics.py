@@ -9,7 +9,7 @@ import random
 import pkg_resources
 from ete3 import NCBITaxa
 
-from OrthoEvol.Manager.config import test
+from OrthoEvol.Manager.config import data
 # from pandas import ExcelWriter
 from OrthoEvol.Manager.management import ProjectManagement
 from OrthoEvol.Orthologs.utils import attribute_config
@@ -74,10 +74,16 @@ class BaseComparativeGenetics(object):
         self.__pre_blast = pre_blast
         self.__post_blast = post_blast
         self.__taxon_filename = taxon_file
-        self.acc_filename = acc_file
+
+        # Initialize variables
         self.project_path = project_path
         self.project = project
         self.species = 'Homo_sapiens'
+        self.taxon_file = taxon_file
+        self.acc_file = acc_file
+        self.go_list = None
+        self.proj_mana = proj_mana
+        self.copy_from_package = kwargs['copy_from_package']
 
         # Initialize Logging
         self.get_time = time.time
@@ -110,15 +116,15 @@ class BaseComparativeGenetics(object):
             setattr(self, variable, attribute)
 
         # Handle the taxon_id file and blast query
-        if taxon_file is not None:
+        if self.taxon_file is not None:
             # File init
             self.taxon_path = self.project_index / Path(self.__taxon_filename)
         # Handle the master accession file (could be before or after blast)
-        if kwargs['copy_from_package']:
-            shutil.copy(pkg_resources.resource_filename(test.__name__, kwargs['MAF']), str(self.project_index))
-            acc_file = kwargs['MAF']
-            self.acc_filename = acc_file
-        if acc_file is not None:
+        if self.copy_from_package:
+            shutil.copy(pkg_resources.resource_filename(data.__name__, kwargs['MAF']), str(self.project_index))
+            self.acc_file = self.MAF = kwargs['MAF']
+            self.acc_filename = self.acc_file
+        if self.acc_file is not None:
             # File init
             self.acc_path = self.project_index / Path(self.acc_filename)
 
@@ -151,7 +157,7 @@ class BaseComparativeGenetics(object):
             self.raw_acc_data = pd.read_csv(str(self.acc_path), dtype=str)
 
             # Master accession file for the blast
-            self.building_filename = str(acc_file[:-4] + 'building.csv')
+            self.building_filename = str(self.acc_file[:-4] + 'building.csv')
 
             # Pre-Blast objects
             self.mygene_df = pd.DataFrame()  # MyGene
@@ -319,7 +325,7 @@ class BaseComparativeGenetics(object):
         """
 
         maf = self.df
-        accession = maf.get_value(gene, organism)
+        accession = maf.at[gene, organism]
         if isinstance(accession, float):
             accession = 'missing'
         return accession
@@ -334,11 +340,11 @@ class BaseComparativeGenetics(object):
                   correspond to the go_list index.
         """
 
-        if go_list is None:
+        if self.go_list is None:
             accessions = self.acc_list
         else:
             accessions = []
-            for gene, organism in go_list:
+            for gene, organism in self.go_list:
                 accession = self.get_accession(gene, organism)
                 accessions.append(accession)
         return accessions
@@ -422,9 +428,9 @@ class BaseComparativeGenetics(object):
                 # TODO-ROB: Rework the missing functino using this.. maybe??
                 elif query_acc == 'missing':
                     continue
-                go_list = [gene, org]
+                self.go_list = [gene, org]
                 # Append so that duplicates can be identified
-                go[query_acc].append(go_list)
+                go[query_acc].append(self.go_list)
         return go
 
 
@@ -448,17 +454,17 @@ class ComparativeGenetics(BaseComparativeGenetics):
         :returns:  An API for accessing the various files used before, during,
                    and after Blasting."""
 
-        super().__init__(project=project, acc_file=template,
-                         taxon_file=taxon_file, post_blast=post_blast,
-                         hgnc=False, **kwargs)
+        super().__init__(project=project, taxon_file=taxon_file,
+                         post_blast=post_blast, hgnc=False, **kwargs)
 
         self.postblastlog = LogIt().default(logname="post blast", logfile=None)
 
+        self.acc_file = template
         # Private variables
         self.__home = os.getcwd()
-        if taxon_file is not None:
-            self.__taxon_filename = taxon_file
-            self.taxon_path = self.project_index / Path(taxon_file)
+        if self.taxon_file is not None:
+            self.__taxon_filename = self.taxon_file
+            self.taxon_path = self.project_index / Path(self.taxon_file)
         self.__post_blast = post_blast
         self.save_data = save_data
 
@@ -512,8 +518,7 @@ class ComparativeGenetics(BaseComparativeGenetics):
                     "Existing Accession Organism: %s" %
                     self.acc_dict[existing][0][1])
                 self.blastn_log.critical(self.sep)
-                raise ValueError("The queried ACCESSION (%s) does not match the existing ACCESSION (%s).  Please see"
-                                 "the log file." % (accession, existing))
+                self.blastn_log.warning("The existing accession will be overwritten.")
 
         self.building.at[gene, organism] = accession
         temp = self.building.reset_index()
@@ -540,7 +545,7 @@ class ComparativeGenetics(BaseComparativeGenetics):
 
         elapsed_time = end - start
         # Edit the data frame
-        self.building_time.set_value(gene, organism, elapsed_time)
+        self.building_time.at[gene, organism] = elapsed_time
         temp = self.building_time.reset_index()
         temp.insert(0, 'Tier', pd.Series(self.df['Tier'].tolist()))
         temp.insert(2, self.species, self.df[self.species])
