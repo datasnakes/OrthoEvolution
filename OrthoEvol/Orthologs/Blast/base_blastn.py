@@ -34,7 +34,7 @@ class BaseBlastN(ComparativeGenetics):
         :param save_data:  A flag for saving the post_blast data to an excel file.
         :param kwargs:"""
 
-        super().__init__(project=project, template=template, save_data=save_data, **kwargs)
+        super().__init__(project=project, template=template, save_data=save_data, quiet=quiet, **kwargs)
 
         if quiet:
             self.blastn_log.setLevel(logging.INFO)
