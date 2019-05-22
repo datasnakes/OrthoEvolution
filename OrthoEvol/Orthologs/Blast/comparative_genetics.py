@@ -1,13 +1,14 @@
 """Comparative Genetics Files"""
 import os
 from pathlib import Path
-import pandas as pd
 import shutil
 import time
 import random
 # NCBITaxa().update_taxonomy_database()
 import pkg_resources
+
 from ete3 import NCBITaxa
+import pandas as pd
 
 from OrthoEvol.Manager.config import data
 # from pandas import ExcelWriter
