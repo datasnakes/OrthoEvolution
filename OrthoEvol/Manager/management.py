@@ -298,10 +298,12 @@ class ProjectManagement(UserManagement):
             self.project = project
             self.research = research
             self.research_type = research_type
+
             # Project Directories:
             self.research_path = self.project_path / Path(research_type) / Path(research)
             self.project_archive = self.project_path / Path('archive')
             self.project_database = self.user_db / Path(project)
+
             # Dataset Directories:
             self.project_index = self.research_path / Path('index')
             self.data = self.research_path / Path('data')
