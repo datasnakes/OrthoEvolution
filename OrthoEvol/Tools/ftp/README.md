@@ -28,7 +28,7 @@ If `v5=False`, then the previously used blast databases will be downloaded. The
 downloaded with the blast databases.
 
 ``` python
-from OrthoEvol.Tools import NcbiFTPClient
+from OrthoEvol.Tools.ftp import NcbiFTPClient
 
 ncbiftp = NcbiFTPClient(email='somebody@gmail.com')
 ncbiftp.getblastdb(database_name='refseq_rna', v5=True)
@@ -36,7 +36,7 @@ ncbiftp.getblastdb(database_name='refseq_rna', v5=True)
 #### Windowmasker files Download Example
 
 ```python
-from OrthoEvol.Tools import NcbiFTPClient
+from OrthoEvol.Tools.ftp import NcbiFTPClient
 import os
 
 ids = ['9544', '9606']
@@ -46,7 +46,7 @@ ncbiftp.getwindowmaskerfiles(taxonomy_ids=ids, download_path=os.getcwd())
 ```
 #### Refseq Release Download Example
 ```python
-from OrthoEvol.Tools import NcbiFTPClient
+from OrthoEvol.Tools.ftp import NcbiFTPClient
 import os
 
 ncbiftp = NcbiFTPClient(email='somebody@gmail.com')
