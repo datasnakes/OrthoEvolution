@@ -12,7 +12,7 @@ class BaseFTPClient(object):
     .. seealso:: :class:`NcbiFTPClient`
     """
 
-    def __init__(self, ftpsite, email, keepalive=False, debug_lvl=0):
+    def __init__(self, ftpsite, user, password, keepalive=False, debug_lvl=0):
         """Connect to a ftp site using an email address.
 
         :param ftpsite: Address of the ftp site you want to connect to.
@@ -25,7 +25,8 @@ class BaseFTPClient(object):
         :type debug_lvl: int
         """
         self._ftpsite = ftpsite
-        self._email = email
+        self._user = user
+        self._password = password
         self._debug_lvl = debug_lvl
         self.ftp = self._login()
         self.__keepalive = keepalive
@@ -52,7 +53,7 @@ class BaseFTPClient(object):
 
         with contextlib.suppress(error_perm):
             ftp = FTP(self._ftpsite, timeout=600)
-            ftp.login(user='anonymous', passwd=self._email)
+            ftp.login(user=self._user, passwd=self._password)
             ftp.voidcmd('NOOP')
             ftp.set_debuglevel(self._debug_lvl)
 
