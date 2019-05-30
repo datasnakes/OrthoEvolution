@@ -76,7 +76,7 @@ setup(
 )
 
 # Set up the permissions for the BioSQL Perl scripts
-scripts = import_module("OrthoEvol.Manager.BioSQL.biosql_repo.scripts")
+scripts = import_module("OrthoEvol.Manager.biosql.biosql_repo.scripts")
 biosql_scripts = pkg_resources.resource_filename(scripts.__name__, "")
 for file in os.listdir(biosql_scripts):
     if '.pl' in file:
