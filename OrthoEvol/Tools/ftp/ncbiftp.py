@@ -27,17 +27,21 @@ class NcbiFTPClient(BaseFTPClient):
 
     def __init__(self, email):
         _ncbi = 'ftp.ncbi.nlm.nih.gov'
-        super().__init__(_ncbi, email, keepalive=False, debug_lvl=0)
+        super().__init__(_ncbi, user="anonymous", password=email)
         self._datafmt = '%m-%d-%Y@%I:%M:%S-%p'
         self._date = str(datetime.now().strftime(self._datafmt))
         self.blastpath = '/blast/'
         self.blastdb_path = '/blast/db/'
+        self.blastdbv5_path = '/blast/db/v5/'
         self.blastfasta_path = '/blast/db/FASTA/'
         self.refseqrelease_path = '/refseq/release/'
         self.windowmasker_path = self.blastpath + 'windowmasker_files/'
-        self._taxdb = 'taxdb.tar.gz'  # Located in self.blastdb_path
+        self.cpus = 1
 
-        # TODO Use Turn into a json file, dict, or config
+        # Located in self.blastdb_path
+        self._taxdb = ['taxdb.tar.gz', 'taxdb.tar.gz.md5']
+
+        # TODO Turn into a json file, dict, or config
         self.blastdbs = []
         self.blastfastadbs = []
         self.files2download = []
@@ -104,10 +108,13 @@ class NcbiFTPClient(BaseFTPClient):
         """Download the file if it exists.
 
         :param filename:  Name of the file to download.
+        :return:
         """
-        if not Path(filename).is_file():
-            with open(filename, 'wb') as localfile:
-                self.ftp.retrbinary('RETR %s' % filename, localfile.write)
+
+        with open(filename, 'wb') as localfile:
+            self.ftp.retrbinary('RETR %s' % filename, localfile.write, 1024)
+        localfile.close()
+        self.ncbiftp_log.info('%s was downloaded.' % str(filename))
 
     def _download_windowmasker(self, windowmaskerfile):
         """Download the window masker files."""
@@ -120,15 +127,15 @@ class NcbiFTPClient(BaseFTPClient):
                     self.ftp.retrbinary('RETR %s/wmasker.%s' % (taxid, wm_ext), localfile.write)
                     self.ncbiftp_log.info('%s was downloaded.' % str(windowmaskerfile))
             except all_errors:
-                    os.remove(windowmaskerfile)
-                    err_msg = '%s could not be download and was deleted.'
-                    self.ncbiftp_log.error(err_msg % str(windowmaskerfile))
+                os.remove(windowmaskerfile)
+                err_msg = '%s could not be download and was deleted.'
+                self.ncbiftp_log.error(err_msg % str(windowmaskerfile))
         else:
             self.ncbiftp_log.info('%s exists.' % str(windowmaskerfile))
 
     def extract_file(self, file2extract):
         """Extract a tar.gz file.
-        
+
         :param file2extract: Path to the tar.gz file to extract.
         """
         if str(file2extract).endswith('tar.gz'):
@@ -136,11 +143,15 @@ class NcbiFTPClient(BaseFTPClient):
             tar.extractall()
             tar.close()
             os.remove(file2extract)
+            log_msg = 'Files were successfully extracted from %s'
+            self.ncbiftp_log.info(log_msg % file2extract)
         elif str(file2extract).endswith('.gz'):
             with gzip.open(file2extract, 'rb') as comp:
                 with open(str(Path(file2extract).stem), 'wb') as decomp:
                     shutil.copyfileobj(comp, decomp)
             os.remove(file2extract)
+            log_msg = 'Files were successfully extracted from %s'
+            self.ncbiftp_log.info(log_msg % file2extract)
 
     def listfiles(self, path='cwd'):
         """List all files in a path.
@@ -281,9 +292,9 @@ class NcbiFTPClient(BaseFTPClient):
                 self.files2download.append(dbfile)
 
         # Append the taxonomy database
-        self.files2download.append(self._taxdb)
-        self.ncbiftp_log.info('You are about to download theses files (total = %s): %s' %
-                              (len(self.files2download), self.files2download))
+        self.files2download.extend(self._taxdb)
+        self.ncbiftp_log.info('You are about to download theses files: %s' %
+                              self.files2download)
 
         # Move to directory for file downloads
         os.chdir(download_path)
@@ -308,29 +319,23 @@ class NcbiFTPClient(BaseFTPClient):
             self.ncbiftp_log.info("Took %s minutes to extract from all files." %
                                   minutes)
 
-    def getblastdb(self, database_name, download_path, extract=True):
+    def getblastdb(self, database_name, download_path, v5=True, extract=True):
         """Download the formatted blast database.
 
-:param database_name: Name of preformatted blastdb to download.
+        :param database_name: Name of preformatted blastdb to download.
         :param download_path: Directory path/location to download blastdb.
+        :param v5 (bool): True or False to download version 5 blastdb.
         :param extract (bool): True or False for extract tar.gz db files.
-
-
-
-        :param database_name:
-
-        :param download_path:
-
-        :param extract:  (Default value = True)
-
-
-
         """
 
         if str(database_name).startswith('est'):
             raise NotImplementedError('Est dbs cannot be downloaded yet.')
-        self.ftp.cwd(self.blastdb_path)
-        blastdbfiles = self.listfiles(self.blastdb_path)
+
+        # Decide whether to download blastdb version 5
+        path = self.blastdbv5_path if v5 else self.blastdb_path
+
+        self.ftp.cwd(path)
+        blastdbfiles = self.listfiles(path)
 
         self.files2download = []
         for dbfile in blastdbfiles:
@@ -338,7 +343,7 @@ class NcbiFTPClient(BaseFTPClient):
                 self.files2download.append(dbfile)
 
         # Append the taxonomy database
-        self.files2download.append(self._taxdb)
+        self.files2download.extend(self._taxdb)
 
         # Move to directory for file downloads
         os.chdir(download_path)
@@ -355,21 +360,30 @@ class NcbiFTPClient(BaseFTPClient):
                                   (len(absentfiles), absentfiles))
             # Download the files using multiprocessing
             download_time_secs = time()
-            with ThreadPool(1) as download_pool:
-                with tqdm(total=len(self.files2download)) as pbar:
-                    for i, _ in tqdm(enumerate(download_pool.imap(self.download_file, self.files2download))):
-                        pbar.update()
-                minutes = round(((time() - download_time_secs) / 60), 2)
-            self.ncbiftp_log.info("Took %s minutes to download the files.\n" %
-                                  minutes)
+
+            try:
+                with ThreadPool(self.cpus) as download_pool:
+                    download_pool.map(self.download_file, self.files2download)
+                    minutes = round(((time() - download_time_secs) / 60), 2)
+                self.ncbiftp_log.info("Took %s minutes to download the files.\n" %
+                                      minutes)
+
+            except RuntimeError as err:
+                self.ncbiftp_log.error(err)
+                self.cpus = 1
+                # Try to download again
+                self.ncbiftp_log.warning('Attempting to download again.')
+                with ThreadPool(self.cpus) as download_pool:
+                    download_pool.map(self.download_file, self.files2download)
+                    minutes = round(((time() - download_time_secs) / 60), 2)
+                self.ncbiftp_log.info("Took %s minutes to download the files.\n" %
+                                      minutes)
 
         if extract:
             self.ncbiftp_log.info('Now it\'s time to extract files.')
             extract_time_secs = time()
-            with ThreadPool(3) as extract_pool:
-                with tqdm(total=len(self.files2download)) as pbar:
-                    for _ in tqdm(enumerate(extract_pool.imap(self.extract_file, self.files2download))):
-                        pbar.update()
+            with ThreadPool(self.cpus) as extract_pool:
+                extract_pool.map(self.extract_file, self.files2download)
                 minutes = round(((time() - extract_time_secs) / 60), 2)
             self.ncbiftp_log.info("Took %s minutes to extract from all files.\n" %
                                   minutes)

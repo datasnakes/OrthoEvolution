@@ -150,6 +150,7 @@ class UserManagement(RepoManagement):
             self.ncbi_refseq_release = self.ncbi_db_repo / Path('refseq') / Path('release')
             self.blast_db = self.ncbi_db_repo / Path('blast') / Path('db')
             self.windowmaker_files = self.ncbi_db_repo / Path('blast') / Path('windowmaker_files')
+            self.seqidlists = self.ncbi_db_repo / Path('blast') / Path('seqidlists')
             self.itis_db_repo = self.user_db / Path('ITIS')
             # Index Files:
             self.user_index = self.user_path / Path('index')
@@ -263,10 +264,12 @@ class ProjectManagement(UserManagement):
             self.project = project
             self.research = research
             self.research_type = research_type
+
             # Project Directories:
             self.research_path = self.project_path / Path(research_type) / Path(research)
             self.project_archive = self.project_path / Path('archive')
             self.project_database = self.user_db / Path(project)
+
             # Dataset Directories:
             self.project_index = self.research_path / Path('index')
             self.data = self.research_path / Path('data')

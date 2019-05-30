@@ -4,6 +4,7 @@ import os
 import shutil
 import time
 import copy
+import random
 import pkg_resources
 from pathlib import Path
 # OrthoEvol
@@ -54,11 +55,13 @@ class BaseComparativeGenetics(object):
         downstream processing or for basic observation of the data.
 
         :param project:  The name of the project.
-        :param project_path:  The location of the project, which is generally defined by the ProjectManagement configuration.
+        :param project_path:  The location of the project, which is generally
+                            defined by the ProjectManagement configuration.
         :param acc_file:  The name of the accession file.
         :param taxon_file:  A file that contains an ordered list of taxonomy ids.
-        :param pre_blast:  A flag that gives the user access to an API that contains extra information about their genes
-                           using the mygene package.
+        :param pre_blast:  A flag that gives the user access to an API that
+                        contains extra information about their genes using the
+                        mygene package.
         :param post_blast:  A flag that is used to handle a BLAST result file, which returns information about misssing
                             data, duplicates, etc.
         :param hgnc:  A flag used as a placeholder for future work with HGNC files.
@@ -74,7 +77,16 @@ class BaseComparativeGenetics(object):
         self.__post_blast = post_blast
         self.__taxon_filename = taxon_file
         self.acc_csv_filename = acc_file
+
+        # Initialize variables
+        self.project_path = project_path
         self.project = project
+        self.species = 'Homo_sapiens'
+        self.taxon_file = taxon_file
+        self.acc_file = acc_file
+        self.go_list = None
+        self.proj_mana = proj_mana
+        self.copy_from_package = kwargs['copy_from_package']
 
         # Initialize Logging
         self.get_time = time.time
@@ -83,24 +95,43 @@ class BaseComparativeGenetics(object):
         # Initialize Utilities
         self.blast_utils = FullUtilities()
 
-        if project_path and project:
-            self.project_path = Path(project_path) / Path(project)
+        if self.project_path and self.project:
+            self.project_path = Path(self.project_path) / Path(self.project)
+        elif self.project:
+            self.project_path = os.getcwd()
+        # If user does not want to use a project name, create one anyway.
+        elif not self.project and not self.project_path:
+            five_ints = random.sample(range(1, 9), 5)  # 5 random integers
+            five_ints_str = ''.join(str(e) for e in five_ints)
+            self.project = "project" + five_ints_str  # New project name
+            self.project_path = os.getcwd()
+        # TODO: Add ability to use an existing project or project path.
+        elif self.project_path and not self.project:
+            self.project = self.project_path
+            raise NotImplementedError
+
+        self.blastn_log.debug('Project name: %s' % self.project)
+        self.blastn_log.debug('Project path: %s' % self.project_path)
 
         # Configuration of class attributes.
-        add_self = self.blast_utils.attribute_config(self, composer=proj_mana, checker=ProjectManagement, project=project, project_path=project_path)
+        add_self = attribute_config(self, composer=proj_mana,
+                                    checker=ProjectManagement,
+                                    project=self.project,
+                                    project_path=self.project_path)
         for variable, attribute in add_self.__dict__.items():
             setattr(self, variable, attribute)
 
         # Handle the taxon_id file and blast query
-        if taxon_file is not None:
+        if self.taxon_file is not None:
             # File init
             self.taxon_path = self.project_index / Path(self.__taxon_filename)
         # Handle the master accession file (could be before or after blast)
-        if kwargs['copy_from_package']:
-            shutil.copy(pkg_resources.resource_filename(data.__name__, kwargs['MAF']), str(self.project_index))
-            acc_file = kwargs['MAF']
-            self.acc_csv_filename = acc_file
-        if acc_file is not None:
+        if self.copy_from_package:
+            shutil.copy(pkg_resources.resource_filename(data.__name__, kwargs['MAF']),
+                        str(self.project_index))
+            self.acc_file = self.MAF = kwargs['MAF']
+            self.acc_filename = self.acc_file
+        if self.acc_file is not None:
             # File init
             self.acc_sqlite_filename = Path(acc_file).stem + '.sqlite'
             self.acc_sqlite_tablename = Path(acc_file).stem.replace('.', '_')
@@ -134,10 +165,10 @@ class BaseComparativeGenetics(object):
 
             # Handles for different dataframe initializations
             self.raw_acc_data = self.blast_utils.accession_sqlite2pandas(self.acc_sqlite_tablename, self.acc_sqlite_filename,
-                                                        path=self.project_index, acc_file=self.acc_csv_filename)
+                                                                         path=self.project_index, acc_file=self.acc_csv_filename)
 
             # Master accession file for the blast
-            self.building_filename = str(acc_file[:-4] + 'building.csv')
+            self.building_filename = str(self.acc_file[:-4] + 'building.csv')
 
             # Pre-Blast objects
             self.mygene_df = pd.DataFrame()  # MyGene
@@ -148,16 +179,18 @@ class BaseComparativeGenetics(object):
             # Blast accession numbers
             self.building = copy.deepcopy(self.raw_acc_data)
             del self.building['Tier']
-            del self.building['Homo_sapiens']
-            self.building = self.building.set_index('Gene')  # Object for good user output
+            del self.building[self.species]
+            # Object for good user output
+            self.building = self.building.set_index('Gene')
             self.building_file_path = self.data / Path(self.building_filename)
 
             # Blast time points
+            # Master time file for the blast
             self.building_time_filename = self.building_filename.replace(
                 'building.csv', 'building_time.csv')  # Master time file for the blast
             self.building_time = copy.deepcopy(self.raw_acc_data)
             del self.building_time['Tier']
-            del self.building_time['Homo_sapiens']
+            del self.building_time[self.species]
             self.building_time = self.building_time.set_index('Gene')
             self.building_time_file_path = self.data / Path(self.building_time_filename)
 
@@ -188,18 +221,18 @@ class BaseComparativeGenetics(object):
             # Format the main pivot table #### #
             self.pt = pd.pivot_table(
                 copy.deepcopy(self.raw_acc_data),
-                index=['Tier','Gene'],
+                index=['Tier', 'Gene'],
                 aggfunc='first')
             array = self.pt.axes[1].tolist()  # Organism list
             self.pt.columns = pd.Index(array, name='Organism')
 
             # Handles for full dictionaries #### #
-            self.org_dict = self.df.ix[0:, 'Homo_sapiens':].to_dict()
+            self.org_dict = self.df.ix[0:, self.species:].to_dict()
             self.gene_dict = self.df.T.to_dict()
             self.get_master_lists(self.__data)  # populates our lists
         else:
-            self.building_filename = str(self.project + 'building.csv')
-            self.building_time_filename = str(self.project + 'building_time.csv')
+            self.building_filename = str(self.project + '_building.csv')
+            self.building_time_filename = str(self.project + '_building_time.csv')
 
 
 # //TODO-ROB Add HGNC python module
@@ -209,9 +242,8 @@ class BaseComparativeGenetics(object):
 
         :param file: Name of csv file.
         """
-
-        data = pd.read_csv(file, header=None)
-        file_list = list(data[0])
+        file_data = pd.read_csv(file, header=None)
+        file_list = list(file_data[0])
         return file_list
 
     def get_master_lists(self, df, csv_file=None):
@@ -266,19 +298,22 @@ class BaseComparativeGenetics(object):
         self.acc_list = list(self.acc_dict.keys())
 
         # Get blast query list
-        self.blast_human = self.df.Homo_sapiens.tolist()
-        self.blast_rhesus = self.df.Macaca_mulatta.tolist()
+        if self.species == 'Homo_sapiens':
+            self.blast_human = self.df.Homo_sapiens.tolist()
+            self.blast_rhesus = self.df.Macaca_mulatta.tolist()
 
         # Pre-Blast gene analysis
         if self.__pre_blast is True:
-            self.mygene_df = self.blast_utils.my_gene_info(acc_dataframe=copy.deepcopy(self.raw_acc_data))
+            self.mygene_df = self.blast_utils.my_gene_info(
+                acc_dataframe=copy.deepcopy(self.raw_acc_data))
             self.mygene_df.to_csv(self.mygene_path, index=False)
 
         # Post-Blast accession analysis
         if self.__post_blast:
 
             # Missing
-            self.missing_dict = self.blast_utils.get_miss_acc(acc_dataframe=copy.deepcopy(self.raw_acc_data))
+            self.missing_dict = self.blast_utils.get_miss_acc(
+                acc_dataframe=copy.deepcopy(self.raw_acc_data))
             self.missing_genes = self.missing_dict['genes']
             self.missing_gene_count = self.missing_genes['count']
             del self.missing_genes['count']
@@ -288,7 +323,7 @@ class BaseComparativeGenetics(object):
 
             # Duplicates
             self.duplicated_dict = self.blast_utils.get_dup_acc(self.acc_dict, self.gene_list,
-                                               self.org_list)
+                                                                self.org_list)
             self.duplicated_accessions = self.duplicated_dict['accessions']
             self.duplicated_organisms = self.duplicated_dict['organisms']
             self.duplicated_genes = self.duplicated_dict['genes']
@@ -304,7 +339,7 @@ class BaseComparativeGenetics(object):
         """
 
         maf = self.df
-        accession = maf.get_value(gene, organism)
+        accession = maf.at[gene, organism]
         if isinstance(accession, float):
             accession = 'missing'
         return accession
@@ -319,11 +354,11 @@ class BaseComparativeGenetics(object):
                   correspond to the go_list index.
         """
 
-        if go_list is None:
+        if self.go_list is None:
             accessions = self.acc_list
         else:
             accessions = []
-            for gene, organism in go_list:
+            for gene, organism in self.go_list:
                 accession = self.get_accession(gene, organism)
                 accessions.append(accession)
         return accessions
@@ -406,9 +441,9 @@ class BaseComparativeGenetics(object):
                 # TODO-ROB: Rework the missing functino using this.. maybe??
                 elif query_acc == 'missing':
                     continue
-                go_list = [gene, org]
+                self.go_list = [gene, org]
                 # Append so that duplicates can be identified
-                go[query_acc].append(go_list)
+                go[query_acc].append(self.go_list)
         return go
 
 
@@ -432,15 +467,17 @@ class ComparativeGenetics(BaseComparativeGenetics):
         :returns:  An API for accessing the various files used before, during,
                    and after Blasting."""
 
-        super().__init__(project=project, acc_file=template, taxon_file=taxon_file, post_blast=post_blast, hgnc=False, **kwargs)
+        super().__init__(project=project, taxon_file=taxon_file,
+                         post_blast=post_blast, hgnc=False, **kwargs)
 
         self.postblastlog = LogIt().default(logname="post blast", logfile=None)
 
+        self.acc_file = template
         # Private variables
         self.__home = os.getcwd()
-        if taxon_file is not None:
-            self.__taxon_filename = taxon_file
-            self.taxon_path = self.project_index / Path(taxon_file)
+        if self.taxon_file is not None:
+            self.__taxon_filename = self.taxon_file
+            self.taxon_path = self.project_index / Path(self.taxon_file)
         self.__post_blast = post_blast
         self.save_data = save_data
 
@@ -469,11 +506,11 @@ class ComparativeGenetics(BaseComparativeGenetics):
         """
 
         # TODO-ROB:  Create this in the log file
-        if pd.isnull(self.building.get_value(gene, organism)) is False:
-            existing = self.building.get_value(gene, organism)
+        if pd.isnull(self.building.at[gene, organism]) is False:
+            existing = self.building.at[gene, organism]
             if existing == accession:
                 self.blastn_log.warning(self.sep)
-                self.blastn_log.warning("BlastN has run on this gene.")
+                self.blastn_log.warning("Blastn has run on this gene.")
                 self.blastn_log.warning("The ACCESSION(%s) for the %s %s gene already exists in our data set."
                                         % (accession, organism, gene))
                 self.blastn_log.warning(self.sep)
@@ -494,14 +531,13 @@ class ComparativeGenetics(BaseComparativeGenetics):
                     "Existing Accession Organism: %s" %
                     self.acc_dict[existing][0][1])
                 self.blastn_log.critical(self.sep)
-                raise ValueError("The queried ACCESSION (%s) does not match the existing ACCESSION (%s).  Please see"
-                                 "the log file." % (accession, existing))
+                self.blastn_log.warning("The existing accession will be overwritten.")
 
-        self.building.set_value(gene, organism, accession)
+        self.building.at[gene, organism] = accession
         temp = self.building.reset_index()
         temp.insert(0, 'Tier', pd.Series(self.df['Tier'].tolist()))
-        # TODO-ROB make the query organism insert implicit
-        temp.insert(2, 'Homo_sapiens', self.df['Homo_sapiens'])
+        # TODO: make the query organism insert implicit
+        temp.insert(2, self.species, self.df[self.species])
         temp.set_index('Tier')
         if self.save_data is True:
             temp.to_csv(str(self.building_file_path))
@@ -516,17 +552,16 @@ class ComparativeGenetics(BaseComparativeGenetics):
         :param start:  Starting time.
         :param end:  Ending time.
         """
-
         # TODO-ROB Add a method that adds the time to the post-blast analysis API.
         # This will help us see if there is a correlation between gene, organism,
         # or accession with the length of time.
 
         elapsed_time = end - start
         # Edit the data frame
-        self.building_time.set_value(gene, organism, elapsed_time)
+        self.building_time.at[gene, organism] = elapsed_time
         temp = self.building_time.reset_index()
         temp.insert(0, 'Tier', pd.Series(self.df['Tier'].tolist()))
-        temp.insert(2, 'Homo_sapiens', self.df['Homo_sapiens'])
+        temp.insert(2, self.species, self.df[self.species])
         temp.set_index('Tier')
         if self.save_data is True:
             temp.to_csv(str(self.building_time_file_path))
@@ -609,7 +644,7 @@ class ComparativeGenetics(BaseComparativeGenetics):
             rand_ws = pd.DataFrame.from_dict(
                 self.duplicated_random, orient='index')
             rand_ws.to_excel(pb_file, sheet_name="Random Duplicates")
-            msg = 'Random Duplicates were added to your excel file.'
+            msg = 'Random duplicates were added to your excel file.'
             self.postblastlog.info(msg)
         except (ValueError, AttributeError):
             pass
