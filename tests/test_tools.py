@@ -11,9 +11,8 @@ from OrthoEvol.Tools.ftp import NcbiFTPClient
 class TestTools(unittest.TestCase):
     """Test the Tools module."""
 
-    def setUp(self, logfile='test.log', filename='README.ftp'):
+    def setUp(self, logfile='test.log'):
         self.logfile = logfile
-        self.filename = filename
 
     def test_logit(self):
         """Test the LogIt class."""
