@@ -49,7 +49,7 @@ class BaseFTPClient(object):
         return voidcmd, filetransfer
 
     def _login(self):
-        """Connect to the FTP server anonymously."""
+        """Connect to the FTP server."""
 
         with contextlib.suppress(error_perm):
             ftp = FTP(self._ftpsite, timeout=600)
