@@ -1,4 +1,4 @@
-"""Comparative Genetics Files"""
+"""Comparative Genetics"""
 # Standard Library
 import os
 import shutil
@@ -18,7 +18,7 @@ from ete3 import NCBITaxa
 # from pandas import ExcelWriter
 # NCBITaxa().update_taxonomy_database()
 
-# TODO-ROB Create function for archiving and multiple runs (this can go
+# TODO: Create function for archiving and multiple runs (this can go
 # into the Management class)
 
 
@@ -33,7 +33,7 @@ class BaseComparativeGenetics(object):
     # Initialize Logging
     blastn_log = LogIt().default(logname="blastn", logfile=None)
 
-    # TODO-ROB:  CREAT PRE-BLAST and POST-BLAST functions
+    # TODO:  CREAT PRE-BLAST and POST-BLAST functions
     def __init__(self, project=None, project_path=os.getcwd(), acc_file=None,
                  taxon_file=None, pre_blast=False, post_blast=True, hgnc=False,
                  proj_mana=ProjectManagement, **kwargs):
@@ -62,11 +62,13 @@ class BaseComparativeGenetics(object):
         :param pre_blast:  A flag that gives the user access to an API that
                         contains extra information about their genes using the
                         mygene package.
-        :param post_blast:  A flag that is used to handle a BLAST result file, which returns information about misssing
+        :param post_blast:  A flag that is used to handle a BLAST result file, 
+                            which returns information about misssing
                             data, duplicates, etc.
         :param hgnc:  A flag used as a placeholder for future work with HGNC files.
-        :param proj_mana:  This parameter is used to compose (vs inherit) the ProjectManagement class with the
-                           CompGenObjects class.  This parameter allows the various blast classes to function with or
+        :param proj_mana:  This parameter is used to compose (vs inherit) the
+                           ProjectManagement class with the ComparativeGenetics class.  
+                           This parameter allows the various blast classes to function with or
                            without the Manager module.
         :param kwargs:  The kwargs here are generally used for standalone blasting or for development.
         :returns:  A pandas data-frame, pivot-table, and associated lists and dictionaries.
@@ -114,10 +116,10 @@ class BaseComparativeGenetics(object):
         self.blastn_log.debug('Project path: %s' % self.project_path)
 
         # Configuration of class attributes.
-        add_self = attribute_config(self, composer=proj_mana,
-                                    checker=ProjectManagement,
-                                    project=self.project,
-                                    project_path=self.project_path)
+        add_self = self.blast_utils.attribute_config(self, composer=proj_mana,
+                                                     checker=ProjectManagement,
+                                                     project=self.project,
+                                                     project_path=self.project_path)
         for variable, attribute in add_self.__dict__.items():
             setattr(self, variable, attribute)
 
