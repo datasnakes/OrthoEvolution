@@ -18,9 +18,9 @@ class TestOrthologs(unittest.TestCase):
         """Test the OrthoBlastN class."""
         with self.assertRaises(EnvironmentError):
             gpcr_blastn = OrthoBlastN(project=self.project, method=3,
-                                      save_data=True, acc_file="gpcr.csv",
+                                      save_data=True, acc_file=None,
                                       copy_from_package=True)
-            self.assertEqual(gpcr_blastn.acc_file, "gpcr.csv")
+            self.assertEqual(gpcr_blastn.acc_file, None)
             self.assertTrue(gpcr_blastn.copy_from_package)
         self.delete_project(project_path=self.project)
 
