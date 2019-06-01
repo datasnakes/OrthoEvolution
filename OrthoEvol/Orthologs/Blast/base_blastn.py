@@ -43,6 +43,7 @@ class BaseBlastN(ComparativeGenetics):
 
         # Method variable
         self.method = method
+
         # Create a date format
         self._fmt = '%a %b %d at %I:%M:%S %p %Y'
         self.date_format = str(d.now().strftime(self._fmt))
@@ -294,9 +295,9 @@ class BaseBlastN(ComparativeGenetics):
         """
         if not pre_configured:
             query = self.df[query_organism].tolist()
-            self.blast_config(query_accessions=query,
-                              query_organism=query_organism,
-                              auto_start=True)
+            self.configure(query_accessions=query,
+                           query_organism=query_organism,
+                           auto_start=True)
             genes = self.current_gene_list  # Gene list created by blast_config.
         elif pre_configured:
             genes = genes
