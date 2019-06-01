@@ -32,6 +32,7 @@ class BaseBlastN(ComparativeGenetics):
         :param method:  Method used for blasting. (1, 2, 3, or None)
         :param template:  The accession file template.
         :param save_data:  A flag for saving the post_blast data to an excel file.
+        :param quiet:  A flag for determining the level of logging verbosity. 
         :param kwargs:"""
 
         super().__init__(project=project, template=template, save_data=save_data, quiet=quiet, **kwargs)
