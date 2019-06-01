@@ -1,4 +1,4 @@
-"""Optimized for use with local/standalone NCBI BLAST 2.6.0."""
+"""Optimized for use with local/standalone NCBI BLAST 2.8.0."""
 # Standard Library
 import os
 import shutil
@@ -15,13 +15,10 @@ from OrthoEvol.Orthologs.Blast.base_blastn import BaseBlastN
 # Other
 from xml.etree.ElementTree import ParseError
 
-# TODO-ROB: Find packages for script timing and analysis
-# TODO-ROB:  Rework the save_data parameter.
-# TODO-ROB:  Rework the query organism stuff.
-
 
 class OrthoBlastN(BaseBlastN):
-    """Combines Project Management features with NCBI's Blast+."""
+    """OrthoBlastN provides a preconfigured and orthology optimized version
+    of the BaseBlastN class."""
 
     def __init__(self, project="orthology-gpcr", method=3, template=None,
                  save_data=True, acc_file="gpcr.csv", copy_from_package=True,
