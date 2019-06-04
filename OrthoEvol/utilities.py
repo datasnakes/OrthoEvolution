@@ -1,7 +1,6 @@
 """Helpful utilities for performing Blastn."""
 # Standard Library
 import csv
-import datetime
 import itertools
 import os
 import shutil
@@ -834,7 +833,7 @@ class CookieUtils(object):
             size = str(size/self.bytesize_options[units]) + (" %s" % units)
             return size
 
-        for dirpath, dirnames, filenames in os.walk(start_path):
+        for dirpath, _, filenames in os.walk(start_path):
             for f in filenames:
                 fp = os.path.join(dirpath, f)
                 total_size += os.path.getsize(fp)
@@ -939,7 +938,7 @@ class FullUtilities(CookieUtils, ManagerUtils, OrthologUtils):
         group_list = []
         file_count = 0
         # Begin parsing the dictionary
-        for group in range(0, groups):
+        for _ in range(0, groups):
             group_dict = {}
             group_size = 0
             for file in dict(file_dict).keys():
