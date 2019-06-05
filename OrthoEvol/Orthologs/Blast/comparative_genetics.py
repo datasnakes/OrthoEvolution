@@ -129,7 +129,7 @@ class BaseComparativeGenetics(object):
         # Handle the master accession file (could be before or after blast)
         if self.copy_from_package:
             shutil.copy(pkg_resources.resource_filename(data.__name__, self.acc_file),
-                        self.project_index)
+                        str(self.project_index))
             self.acc_filename = self.acc_file
         if self.acc_file is not None:
             # File init
