@@ -1,4 +1,6 @@
 import getpass
+import string
+import random
 from collections import OrderedDict
 from pkg_resources import resource_filename
 from datetime import datetime as d
@@ -38,10 +40,17 @@ class BasePBSJob(object):
         self.cputime = cput
         self.walltime = walltime
         # other attributes
-        self.job_name = job_name
+        self.base_name = job_name
+        self.base_id, self.job_name = self.get_base_job_name()
         self.directive_list = directive_list
 
         # Set up PBS variables
         self.pbs_work_dir = pbs_work_dir
         self.script_cmd = script_cmd
         self.email = email
+
+    def get_base_job_name(self, length=5):
+        base_id = ''.join(random.sample(string.ascii_letters + string.digits, length))
+        job_name = self.base_name + "_%s" % base_id
+
+        return base_id, job_name
