@@ -1,6 +1,10 @@
 import getpass
-from datetime import datetime as d
 from collections import OrderedDict
+from pkg_resources import resource_filename
+from datetime import datetime as d
+from OrthoEvol.Tools.logit import LogIt
+from OrthoEvol.Manager.config import templates
+
 
 class BasePBSJob(object):
     """Base class for PBS jobs."""
@@ -9,11 +13,13 @@ class BasePBSJob(object):
                  date_format='%a %b %d %I:%M:%S %p %Y', chunk_resources=None, cput='72:00:00', walltime='48:00:00',
                  job_name=None, pbs_work_dir=None, script_cmd=None, email=None, directive_list=None):
 
+        self.pbs_log = LogIt().default(logname="PBS JOB", logfile=None)
+        self.temp_pbs = resource_filename(templates.__name__, "temp.pbs")
         # Set up commented script header
         self.author = author
         self.project_name = project_name
         self.description = description
-        self.date_format = date_format
+        self.current_date = d.now().strftime(date_format)
 
         # Set up PBS directives/attributes
         # resources
