@@ -184,7 +184,6 @@ class UserManagement(RepoManagement):
             self.projects = home
             self.Cookies = Path(Cookies.__path__[0])
             self.project_cookie = self.Cookies / Path('new_project')
-            self.user_db
             if project:
                 self.project = project
                 self.project_path = home / Path(project)

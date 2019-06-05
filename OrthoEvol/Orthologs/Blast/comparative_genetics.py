@@ -78,6 +78,7 @@ class BaseComparativeGenetics(object):
         self.__pre_blast = pre_blast
         self.__post_blast = post_blast
         self.__taxon_filename = taxon_file
+        self.acc_file = acc_file
         self.acc_csv_filename = acc_file
 
         # Initialize variables
@@ -85,7 +86,6 @@ class BaseComparativeGenetics(object):
         self.project = project
         self.species = 'Homo_sapiens'
         self.taxon_file = taxon_file
-        self.acc_file = acc_file
         self.go_list = None
         self.proj_mana = proj_mana
         self.copy_from_package = kwargs['copy_from_package']
@@ -96,30 +96,30 @@ class BaseComparativeGenetics(object):
 
         # Initialize Utilities
         self.blast_utils = FullUtilities()
-
+        blast_utils = FullUtilities()
         if self.project_path and self.project:
-            self.project_path = Path(self.project_path) / Path(self.project)
-        elif self.project:
-            self.project_path = os.getcwd()
+            self.project_path = Path(project_path) / Path(project)
+        elif self.project and not self.project_path:
+            self.project_path = self.project
         # If user does not want to use a project name, create one anyway.
         elif not self.project and not self.project_path:
-            five_ints = random.sample(range(1, 9), 5)  # 5 random integers
-            five_ints_str = ''.join(str(e) for e in five_ints)
-            self.project = "project" + five_ints_str  # New project name
+            four_ints = random.sample(range(1, 9), 4)  # 4 random integers
+            four_ints_str = ''.join(str(e) for e in four_ints)
+            self.project = "orthoevol" + four_ints_str  # New project name
             self.project_path = os.getcwd()
         # TODO: Add ability to use an existing project or project path.
         elif self.project_path and not self.project:
-            self.project = self.project_path
             raise NotImplementedError
 
         self.blastn_log.debug('Project name: %s' % self.project)
         self.blastn_log.debug('Project path: %s' % self.project_path)
-
+        
         # Configuration of class attributes.
-        add_self = self.blast_utils.attribute_config(self, composer=proj_mana,
-                                                     checker=ProjectManagement,
-                                                     project=self.project,
-                                                     project_path=self.project_path)
+        add_self = blast_utils.attribute_config(cls=self,
+                                                composer=proj_mana,
+                                                checker=ProjectManagement,
+                                                project=project,
+                                                project_path=project_path)
         for variable, attribute in add_self.__dict__.items():
             setattr(self, variable, attribute)
 
@@ -129,9 +129,8 @@ class BaseComparativeGenetics(object):
             self.taxon_path = self.project_index / Path(self.__taxon_filename)
         # Handle the master accession file (could be before or after blast)
         if self.copy_from_package:
-            shutil.copy(pkg_resources.resource_filename(data.__name__, kwargs['MAF']),
-                        str(self.project_index))
-            self.acc_file = self.MAF = kwargs['MAF']
+            shutil.copy(pkg_resources.resource_filename(data.__name__, self.acc_file),
+                        self.project_index)
             self.acc_filename = self.acc_file
         if self.acc_file is not None:
             # File init
@@ -453,7 +452,7 @@ class ComparativeGenetics(BaseComparativeGenetics):
     """Main Comparative Genetics class."""
 
     def __init__(self, project, template=None, taxon_file=None, post_blast=False, save_data=True, **kwargs):
-        """Inherit CompGenObjects to build a file layer to the Blast workflow.
+        """Inherits BaseComparativeGenetics to build a file layer to the Blast workflow.
 
         This class handles all of the files before and after the Blast occurs.
         It also uses a building file to start where a previous blast left off.
@@ -465,9 +464,9 @@ class ComparativeGenetics(BaseComparativeGenetics):
         :param post_blast:  A flag that triggers the post blast analysis.
         :param save_data:  A flag that indicates whether the data should be
                            saved in an excel file or not.
-        :param kwargs:  Mostly used for CompGenObjects
+        :param kwargs:  Mostly used for BaseComparativeGenetics
         :returns:  An API for accessing the various files used before, during,
-                   and after Blasting."""
+                   and after blasting."""
 
         super().__init__(project=project, taxon_file=taxon_file,
                          post_blast=post_blast, hgnc=False, **kwargs)

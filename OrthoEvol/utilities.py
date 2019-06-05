@@ -66,10 +66,11 @@ class BlastUtils(object):
 
     def gene_list_config(self, file, data_path, gene_list, taxon_dict, logger):
         """Create or use a blast configuration file (accession file).
+
         This function configures different files for new BLASTS.
-        It also helps recognize whether or not a BLAST was terminated in the middle
-        of the workflow.  This removes the last line of the accession file if it
-        is incomplete.
+        It also helps recognize whether or not a BLAST was terminated in the
+        middle of the workflow.  This removes the last line of the accession
+        file if it is incomplete.
 
         :param file:  An accession file to analyze.
         :type file:  str.
@@ -566,7 +567,7 @@ class OrthologUtils(BlastUtils, GenbankUtils):
         GenbankUtils.__init__(self)
 
     def attribute_config(self, cls, composer, checker, project=None, project_path=None, checker2=None):
-        """Set/configure attributes.
+        """Set or configure attributes.
 
         Attribute Configuration takes an instance of a class and sets various
         attributes. The attributes are set by determining the type of configuration.
@@ -637,9 +638,11 @@ class OrthologUtils(BlastUtils, GenbankUtils):
         :return: Returns the instance (cls) with new attributes.
         :rtype:  object.
         """
-
+        
+        if not project or not project_path:
+            raise NameError('A project and project_path must be specified.')
         cls.project = project
-        cls.project_path = project_path / Path(project)
+        cls.project_path = Path(project_path) / Path(project)
         cls.project_index = cls.project_path / Path('index')
         cls.user_index = cls.project_path / Path('index')
         cls.db_archives = cls.project_path / Path('archive')
@@ -647,7 +650,7 @@ class OrthologUtils(BlastUtils, GenbankUtils):
         cls.data = cls.project_path / Path('data')
         cls.research_path = cls.project_path
         cls.user_db = cls.project_path / Path('databases')
-        cls.project_database = cls.user_db / Path(project)
+        cls.project_database = cls.user_db / Path(cls.project)
         cls.itis_db_repo = cls.user_db / Path('ITIS')
         cls.ncbi_db_repo = cls.user_db / Path('NCBI')
         cls.blast_db = cls.ncbi_db_repo / Path('blast') / Path('db')
@@ -656,7 +659,7 @@ class OrthologUtils(BlastUtils, GenbankUtils):
         cls.NCBI_refseq_release = cls.ncbi_db_repo / Path('refseq') / Path('release')
 
         # Use the basic_project cookie to create the directory structure
-        if new or (not Path(cls.project_path).is_dir()):
+        if new or (not Path(project_path).is_dir()):
             Kitchen = Oven(project=project, basic_project=True)
             Kitchen.bake_the_project(cookie_jar=project_path)
 

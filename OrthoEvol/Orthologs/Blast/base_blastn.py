@@ -20,7 +20,8 @@ from xml.etree.ElementTree import ParseError
 class BaseBlastN(ComparativeGenetics):
     """Base BlastN class."""
 
-    def __init__(self, project, method, template=None, save_data=True, quiet=True, **kwargs):
+    def __init__(self, project, method, acc_file, template=None, save_data=True, 
+                 verbose=False, **kwargs):
         """This class inherits from the ComparativeGenetics class.
         This class utilizes it's parent classes to search a standalone
         Blast database for specific orthologs of a gene using a query organism
@@ -35,15 +36,17 @@ class BaseBlastN(ComparativeGenetics):
         :param quiet:  A flag for determining the level of logging verbosity. 
         :param kwargs:"""
 
-        super().__init__(project=project, template=template, save_data=save_data, quiet=quiet, **kwargs)
+        super().__init__(project=project, method=method, acc_file=acc_file,
+                         template=template, save_data=save_data, verbose=verbose, **kwargs)
 
-        if quiet:
-            self.blastn_log.setLevel(logging.INFO)
-        else:
+        if verbose:
             self.blastn_log.setLevel(logging.DEBUG)
+        else:
+            self.blastn_log.setLevel(logging.INFO)
 
         # Method variable
         self.method = method
+        self.acc_file = acc_file
 
         # Create a date format
         self._fmt = '%a %b %d at %I:%M:%S %p %Y'

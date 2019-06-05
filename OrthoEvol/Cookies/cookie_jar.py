@@ -62,8 +62,9 @@ class CookBook(object):
 class Oven(object):
     """Class that deploys cookiecutter templates."""
 
-    def __init__(self, repo=None, user=None, project=None, basic_project=False, website=None, db_repo="databases",
-                 output_dir=os.getcwd(), recipes=CookBook()):
+    def __init__(self, repo=None, user=None, project=None, basic_project=False,
+                 website=None, db_repo="databases", output_dir=os.getcwd(), 
+                 recipes=CookBook()):
         """Deploy custom cookiecutter templates:
 
         The Oven uses the different Ingredients (parameters/attributes) and
