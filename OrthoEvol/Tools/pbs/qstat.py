@@ -2,7 +2,7 @@
 from subprocess import check_output, CalledProcessError
 import getpass
 import re
-
+from time import sleep
 
 class Qstat(object):
     """Access and parse information from qstat commands."""
@@ -46,9 +46,9 @@ class Qstat(object):
         for line in lines:
             els = self.split_regex.split(line)
             try:
-            	j = {"job_id": els[0], "name": els[1], "user": els[2], "elapsed_time": els[3],
-                 	"status": els[4], "queue": els[5]}
-            	jobs.append(j)
+                j = {"job_id": els[0], "name": els[1], "user": els[2], "elapsed_time": els[3],
+                     "status": els[4], "queue": els[5]}
+                jobs.append(j)
 
             except IndexError:
                 pass
@@ -110,3 +110,27 @@ class Qstat(object):
             self.watch(job_id)
         else:
             return 'Job id not found.'
+
+    def wait_on_job_completion(self, job_id):
+        """Use Qstat to monitor your job.
+
+        :param job_id: The job id to be monitored.
+        """
+
+        # TODO Allow either slack notifications or email or text.
+        qwatch = self.watch(job_id)
+        if qwatch == 'Job id not found.':
+            #self.pbs_log.info('%s has finished.' % job_id)
+            sleep(30)
+        elif qwatch == 'Waiting for %s to start running.' % job_id:
+            #self.pbs_log.info('%s is queued to run.' % job_id)
+            #self.pbs_log.info('Waiting for %s to start.' % job_id)
+            sleep(30)
+            self.wait_on_job_completion(job_id)
+        elif qwatch == 'Waiting for %s to finish running.' % job_id:
+            #self.pbs_log.info('%s is running.' % job_id)
+            #self.pbs_log.info('Waiting for %s to finish.' % job_id)
+            sleep(30)
+            self.wait_on_job_completion(job_id)
+        else:
+            self.wait_on_job_completion(job_id)
