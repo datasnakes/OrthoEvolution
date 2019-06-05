@@ -71,7 +71,7 @@ class BasePBSJob(object):
         os.remove(jobname + '.py')
         self.pbs_log.warning('%s.py has been deleted.' % jobname)
 
-    def submit_job(self, cleanup, wait=True):
+    def submit_pbs_script(self, cleanup, wait=True):
         """Submit a job using qsub.
 
         :param cleanup: (Default value = False)
