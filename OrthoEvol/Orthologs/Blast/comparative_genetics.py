@@ -96,7 +96,6 @@ class BaseComparativeGenetics(object):
 
         # Initialize Utilities
         self.blast_utils = FullUtilities()
-        blast_utils = FullUtilities()
         if self.project_path and self.project:
             self.project_path = Path(project_path) / Path(project)
         elif self.project and not self.project_path:
@@ -115,11 +114,11 @@ class BaseComparativeGenetics(object):
         self.blastn_log.debug('Project path: %s' % self.project_path)
         
         # Configuration of class attributes.
-        add_self = blast_utils.attribute_config(cls=self,
-                                                composer=proj_mana,
-                                                checker=ProjectManagement,
-                                                project=project,
-                                                project_path=project_path)
+        add_self = self.blast_utils.attribute_config(cls=self,
+                                                     composer=proj_mana,
+                                                     checker=ProjectManagement,
+                                                     project=project,
+                                                     project_path=project_path)
         for variable, attribute in add_self.__dict__.items():
             setattr(self, variable, attribute)
 
