@@ -61,6 +61,9 @@ class Management(object):
 
         if self.repo:
             self.repo_path = self.file_home / Path(self.repo)
+        else:
+            self.repo_path = self.file_home
+
         self.managementlog.info('The BaseManagement class variables have been set.')
 
         # Make a new repository.
@@ -92,6 +95,10 @@ class RepoManagement(Management):
         super().__init__(repo=repo, home=home, new_repo=new_repo, **kwargs)
 
         self.repo = repo
+        if self.repo:
+            self.repo_path = self.file_home / Path(self.repo)
+        else:
+            self.repo_path = self.file_home
         # Users and Important Documentation:
         self.docs = self.repo_path / Path('docs')
         self.users = self.repo_path / Path('users')
@@ -101,9 +108,9 @@ class RepoManagement(Management):
         self.ftp = self.repo_web / Path('ftp')
         self.wasabi = self.repo_web / Path('wasabi')
         self.flask = self.repo_web / Path('flask')
+        self.user = user
 
         if user:
-            self.user = user  # FROM Flask
             self.user_path = self.users / Path(self.user)
 
         self.Kitchen = Oven(repo=self.repo, user=self.user, output_dir=self.users)
@@ -138,10 +145,12 @@ class UserManagement(RepoManagement):
         :param new_user (bool):  Flag for creating a new user.
         :param new_project (bool):  Flag for creating a new project.
         """
+        self.user = user
+        self.repo = repo
 
+        super().__init__(repo=self.repo, user=self.user, home=home, new_user=new_user,
+                         **kwargs)
         if user or (user and repo):
-            super().__init__(repo=repo, user=user, home=home, new_user=new_user, **kwargs)
-            self.user = user
             # NCBI and Proprietary Database Repositories:
             self.user_db = self.user_path / Path('databases')
             self.user_archive = self.user_path / Path('archive')
@@ -165,10 +174,17 @@ class UserManagement(RepoManagement):
             if project:
                 self.project = project
                 self.project_path = self.projects / Path(project)
+
+            if new_db:
+                self.managementlog.info('The database cookie is being prepared for the Oven.')
+                self.Kitchen.bake_the_db_repo(db_config_file=db_config_file,
+                                              db_path=self.user_db)
+                # TODO-ROB:  Determine what type of database as well.
         else:
             self.projects = home
             self.Cookies = Path(Cookies.__path__[0])
             self.project_cookie = self.Cookies / Path('new_project')
+            self.user_db
             if project:
                 self.project = project
                 self.project_path = home / Path(project)
@@ -177,15 +193,9 @@ class UserManagement(RepoManagement):
 
         self.managementlog.info('The User Management class variables have been set.')
 
-        if new_project is True:
+        if new_project:
             self.managementlog.info('The project cookie is being prepared for the Oven.')
             self.Kitchen.bake_the_project()
-        if new_db is True:
-            self.managementlog.info('The database cookie is being prepared for the Oven.')
-            self.Kitchen.bake_the_db_repo(user_db=self.user_db,
-                                          db_path_dict=self.db_path_dict,
-                                          ncbi_db_repo=self.ncbi_db_repo)
-            # TODO-ROB:  Determine what type of database as well.
 
     # def zip_mail(self, comp_filename, zip_path, destination=''):
     #     Zipper = ZipUtils(comp_filename, zip_path)
@@ -270,33 +280,46 @@ class ProjectManagement(UserManagement):
                              new_project=new_project, **kwargs)
 
             self.project = project
-            self.research = research
-            self.research_type = research_type
+            self.repo = repo
+            self.user = user
+            # Use values from parameters if not None
+            if research:
+                self.research = research
+            if research_type:
+                self.research_type = research_type
 
             # Project Directories:
-            self.research_path = self.project_path / Path(research_type) / Path(research)
             self.project_archive = self.project_path / Path('archive')
-            self.project_database = self.user_db / Path(project)
+
+            if self.user:
+                self.project_database = self.user_db / Path(project)
+            else:
+                self.project_database = Path("databases") / Path(project)
 
             # Dataset Directories:
+            if not research or not research_type:
+                self.research_path = self.project_path
+            else:
+                self.research_path = self.project_path / Path(research_type) / Path(research)
             self.project_index = self.research_path / Path('index')
             self.data = self.research_path / Path('data')
             self.raw_data = self.research_path / Path('raw_data')
             self.project_web = self.research_path / Path('web')
+
             if app:
                 self.app = app
                 self.app_path = self.project_web / Path(self.app)
 
         self.managementlog.info('The User Management class variables have been set.')
 
-        if new_research is True:
+        if new_research:
             self.managementlog.info('The research cookie is being prepared for the Oven.')
             self.research_type = research_type
             self.Kitchen = Oven(repo=self.repo, user=self.user,
                                 project=self.project, output_dir=self.project_path)
             self.Kitchen.bake_the_research(research_type=self.research_type,
                                            research=self.research)
-            if new_app is True:
+            if new_app:
                 self.managementlog.info('The app cookie is being prepared for the Oven.')
                 self.app = app
                 self.app_path = self.project_path / \
