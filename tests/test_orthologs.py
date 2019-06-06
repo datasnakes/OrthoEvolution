@@ -19,7 +19,8 @@ class TestOrthologs(unittest.TestCase):
         """Test the BaseBlastN class."""
         # The with statement is for travisci where a BLASTDB variable
         # is not set.
-        # TIP: Remove the with statement if testing locally.
+        # TIP: Remove the with statement if testing with BLASTDB in your
+        # environment variables.
         with self.assertRaises(EnvironmentError):
             gpcr_blastn = BaseBlastN(project=self.project, method=3,
                                      save_data=True, acc_file="gpcr.csv",
