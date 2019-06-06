@@ -38,7 +38,7 @@ class BaseBlastN(ComparativeGenetics):
 
         super().__init__(project=project, method=method, acc_file=acc_file,
                          template=template, save_data=save_data, verbose=verbose, **kwargs)
-        # Set the verbosity level or the level of information.
+
         if verbose:
             self.blastn_log.setLevel(logging.DEBUG)
         else:

@@ -74,8 +74,8 @@ class Management(object):
 
 class RepoManagement(Management):
 
-    def __init__(self, repo, user=None, home=os.getcwd(),
-                 new_user=False, new_repo=False, **kwargs):
+    def __init__(self, repo, user=None, home=os.getcwd(), new_user=False,
+                 new_repo=False, **kwargs):
         """
         This is the Repository Management class, which inherits the Management base class.  This class has to be paired
         with a repository name.  It gives the option of creating a filesystem for a new user and a new repository
@@ -254,12 +254,12 @@ class ProjectManagement(UserManagement):
         """
         This is the Project Management class, which manages the directories of
         the current project.  Each project requires a repository, user, and project name.
-        It gives the option of starting a new type of research within an 
-        existing project.  An application directory for the specific research/dataset 
+        It gives the option of starting a new type of research within an
+        existing project.  An application directory for the specific research/dataset
         can also be generated
 
         It gives access to the project directories including index
-        files, the raw data, the processed data, the project db_config_file, 
+        files, the raw data, the processed data, the project db_config_file,
         and the web files for serving data.
 
         :param repo (string):  The name of the repository.
