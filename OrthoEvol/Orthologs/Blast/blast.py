@@ -38,7 +38,7 @@ class BaseBlastN(ComparativeGenetics):
 
         super().__init__(project=project, method=method, acc_file=acc_file,
                          template=template, save_data=save_data, verbose=verbose, **kwargs)
-
+        # Set the verbosity level or the level of information.
         if verbose:
             self.blastn_log.setLevel(logging.DEBUG)
         else:
@@ -303,14 +303,14 @@ class BaseBlastN(ComparativeGenetics):
                            query_organism=query_organism,
                            auto_start=True)
             genes = self.current_gene_list  # Gene list created by blast_config.
-        elif pre_configured:
+        else:
             genes = genes
 
         if len(genes) < 1:
             self.blastn_log.fatal('There are no genes to run with blastn.')
 
         else:
-            datefmt = str(d.now().strftime(self.date_format))
+            datefmt = self.date_format
             self.blastn_log.debug('The blast began on {}'.format(datefmt))
 
             # TIP Steps to run blastn for orthology inference
