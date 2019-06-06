@@ -366,10 +366,11 @@ class BlastUtils(object):
         acc_path = Path(path) / Path(acc_file)
         db_path = Path(path) / Path(db_name)
         with sqlite3.connect(str(db_path)) as conn:
-            print(acc_path)
-            print(db_path)
             df = pd.read_csv(acc_path, dtype=str)
             df.to_sql(name=table_name, con=conn, if_exists='replace', index=False)
+
+            return "The accession file is located in %s, and the "
+            "database file is located in %s" % (acc_path, db_path)
 
     def accession_sqlite2pandas(self, table_name, db_name, path, exists=True,
                                 acc_file=None):
@@ -391,12 +392,12 @@ class BlastUtils(object):
         """
         db_path = Path(path) / Path(db_name)
         if not exists or not db_path.is_file():
-            self.accession_csv2sqlite(acc_file=acc_file, table_name=table_name,
-                                      db_name=db_name, path=path)
+            msg = self.accession_csv2sqlite(acc_file=acc_file, table_name=table_name,
+                                            db_name=db_name, path=path)
         conn = sqlite3.connect(str(db_path))
         df = pd.read_sql_query("SELECT * FROM %s" % table_name, conn)
         conn.close()
-        return df
+        return (df, msg)
 
 
 class GenbankUtils(object):
@@ -618,7 +619,7 @@ class OrthologUtils(BlastUtils, GenbankUtils):
 
         return cls
 
-    def standalone_config(self, cls, project, project_path, new=False, custom=None):
+    def standalone_config(self, cls, project, project_path, custom=None):
         """Configure a standalone project.
 
         A standalone configuration uses the variables listed.  These variables are
@@ -659,9 +660,8 @@ class OrthologUtils(BlastUtils, GenbankUtils):
         cls.NCBI_refseq_release = cls.ncbi_db_repo / Path('refseq') / Path('release')
 
         # Use the basic_project cookie to create the directory structure
-        if new or (not Path(project_path).is_dir()):
-            Kitchen = Oven(project=project, basic_project=True)
-            Kitchen.bake_the_project(cookie_jar=project_path)
+        Kitchen = Oven(project=project, basic_project=True)
+        Kitchen.bake_the_project(cookie_jar=project_path)
 
         # Use the custom dictionary to set the path variables
         # and to make the directories if necessary.  This overrides
