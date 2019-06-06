@@ -1,5 +1,4 @@
-from .orthologs_blastn import OrthoBlastN
-from .base_blastn import BaseBlastN
+from .blast import BaseBlastN, OrthoBlastN
 from .comparative_genetics import BaseComparativeGenetics, ComparativeGenetics
 
 

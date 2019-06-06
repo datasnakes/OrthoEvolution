@@ -62,12 +62,12 @@ class BaseComparativeGenetics(object):
         :param pre_blast:  A flag that gives the user access to an API that
                         contains extra information about their genes using the
                         mygene package.
-        :param post_blast:  A flag that is used to handle a BLAST result file, 
+        :param post_blast:  A flag that is used to handle a BLAST result file,
                             which returns information about misssing
                             data, duplicates, etc.
         :param hgnc:  A flag used as a placeholder for future work with HGNC files.
         :param proj_mana:  This parameter is used to compose (vs inherit) the
-                           ProjectManagement class with the ComparativeGenetics class.  
+                           ProjectManagement class with the ComparativeGenetics class.
                            This parameter allows the various blast classes to function with or
                            without the Manager module.
         :param kwargs:  The kwargs here are generally used for standalone blasting or for development.
@@ -112,7 +112,7 @@ class BaseComparativeGenetics(object):
 
         self.blastn_log.debug('Project name: %s' % self.project)
         self.blastn_log.debug('Project path: %s' % self.project_path)
-        
+
         # Configuration of class attributes.
         add_self = self.blast_utils.attribute_config(cls=self,
                                                      composer=proj_mana,

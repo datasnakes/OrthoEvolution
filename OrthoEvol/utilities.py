@@ -50,8 +50,9 @@ class BlastUtils(object):
         return hit
 
     def paml_org_formatter(self, organisms):
-        """Take a list of organisms and format each organism name for PAML, which can only take names that
-        are less than a certain length (36 characters?).
+        """Take a list of organisms and format each organism name for PAML,
+        which can only take names that are less than a certain length
+        (36 characters?).
 
         :param organisms:  A list of organisms
         :type organisms:  list.
@@ -158,7 +159,9 @@ class BlastUtils(object):
         mg_df = pd.DataFrame(mygene_query['out'])
         mg_df.drop(mg_df.columns[[1, 2, 6]], axis=1, inplace=True)
         # Rename the columns
-        mg_df.rename(columns={'entrezgene': 'Entrez ID', 'summary': 'Gene Summary', 'query': 'RefSeqRNA Accession',
+        mg_df.rename(columns={'entrezgene': 'Entrez ID',
+                              'summary': 'Gene Summary',
+                              'query': 'RefSeqRNA Accession',
                               'name': 'Gene Name'},
                      inplace=True)
 
@@ -176,17 +179,17 @@ class BlastUtils(object):
         return hot_data
 
     def get_dup_acc(self, acc_dict, gene_list, org_list):
-        """
-        This function is used to analyze an accession file post-BLAST.  It uses the accession dictionary as a base to get
-        duplicated accession numbers.
+        """Get duplicated accession numbers during post-blast analysis.
 
-        :param acc_dict:  A dictionary with accession numbers as keys, and a gene/organism list as values.
+        :param acc_dict:  A dictionary with accession numbers as keys, and a
+                          gene/organism list as values.
         :type acc_dict:  dict.
         :param gene_list:  A full list of genes.
         :type gene_list:  list.
         :param org_list:  A full list of organisms.
         :type org_list:  list.
-        :return:  A master duplication dictionary used to initialize the duplicate class variables.
+        :return:  A master duplication dictionary used to initialize the
+                  duplicate class variables.
         :rtype:  dict.
         """
 
@@ -288,8 +291,7 @@ class BlastUtils(object):
         return duplicated_dict
 
     def get_miss_acc(self, acc_dataframe):
-        """This function is used to analyze an accession file post-BLAST.  It generates several files and dictionaries
-         regarding missing accession numbers.
+        """Get missing accession numbers during post-blast analysis.
 
         :param acc_dataframe:  A pandas dataframe containing the accession csv file data(post BLAST).
         :type acc_dataframe:  pd.DataFrame
@@ -348,10 +350,10 @@ class BlastUtils(object):
     #     raise NotImplementedError
 
     def accession_csv2sqlite(self, acc_file, table_name, db_name, path):
-        """
-        Convert a OrthoEvolution accession file in csv format to an sqlite3 database.
+        """Convert am OrthoEvol csv accession file to an sqlite3 database.
 
-        :param acc_file:  The name of the accession file.  The file name is used to create a table in the
+        :param acc_file:  The name of the accession file.  The file name is
+                          used to create a table in the
         sqlite3 database.  Any periods will be replaced with underscores.
         :type acc_file: str
         :param table_name: The name of the table in the database.
@@ -369,9 +371,10 @@ class BlastUtils(object):
             df = pd.read_csv(acc_path, dtype=str)
             df.to_sql(name=table_name, con=conn, if_exists='replace', index=False)
 
-    def accession_sqlite2pandas(self, table_name, db_name, path, exists=True, acc_file=None):
-        """
-        Convert a sqlite3 database with an OrthoEvolution accession table to a pandas dataframe.
+    def accession_sqlite2pandas(self, table_name, db_name, path, exists=True,
+                                acc_file=None):
+        """Convert a sqlite3 database with an OrthoEvol accession table to a pandas dataframe.
+
         :param table_name: Name of the table in the database.
         :type table_name: str
         :param db_name: The name of the new database.
@@ -388,7 +391,8 @@ class BlastUtils(object):
         """
         db_path = Path(path) / Path(db_name)
         if not exists or not db_path.is_file():
-            self.accession_csv2sqlite(acc_file=acc_file, table_name=table_name, db_name=db_name, path=path)
+            self.accession_csv2sqlite(acc_file=acc_file, table_name=table_name,
+                                      db_name=db_name, path=path)
         conn = sqlite3.connect(str(db_path))
         df = pd.read_sql_query("SELECT * FROM %s" % table_name, conn)
         conn.close()
@@ -398,17 +402,17 @@ class BlastUtils(object):
 class GenbankUtils(object):
 
     def __init__(self):
-        """
-        Various utilities to help with genbank specific functionality.
-        """
+        """Various utilities to help with genbank specific functionality."""
         pass
 
-    def multi_fasta_manipulator(self, target_file, man_file, output_file, manipulation='remove'):
+    def multi_fasta_manipulator(self, target_file, man_file, output_file,
+                                manipulation='remove'):
         # Inspired by the BioPython Tutorial and Cookbook ("20.1.1 Filtering a sequence file")
-        """
-        This method manipulates reference sequences in a multi-FASTA files.  The original
-        purpose was to filter files created by the GUIDANCE2 alignment program, but
-        the function has been made in order to accommodate other situations as well.
+        """Manipulate reference sequences in multifasta files.
+
+        The original purpose was to filter files created by the GUIDANCE2
+        alignment program, but this function has been made in order to
+        accommodate other situations as well.
 
         :param target_file:  Target multi-FASTA file.
         :type target_file:  str.
@@ -423,7 +427,8 @@ class GenbankUtils(object):
         """
         # Create path variables
         new_file = Path(target_file).parent / Path(output_file)
-        # Create a new multi-fasta record object using the target_file, reference, and output
+        # Create a new multi-fasta record object using the target_file,
+        # reference, and output
         # Remove specific sequences from a fasta file
         if manipulation is 'remove':
             self.multi_fasta_remove(target_file, man_file, new_file)
@@ -459,8 +464,7 @@ class GenbankUtils(object):
     #             gene_path = tier_path / Path(GENE)
     #             Path.mkdir(gene_path)
     def multi_fasta_remove(self, target_file, man_file, output_file):
-        """
-        This method removes selected reference sequences in a multi-FASTA files.
+        """Remove selected reference sequences in a multi-FASTA files.
 
         :param target_file:  Target multi-FASTA file.
         :type target_file:  str.
@@ -487,8 +491,7 @@ class GenbankUtils(object):
         SeqIO.write(old_records, str(rem_file), 'fasta')
 
     def muli_fasta_add(self, target_file, man_file, output_file):
-        """
-        This method adds selected reference sequences in a multi-FASTA files.
+        """Add selected reference sequences in a multi-FASTA files.
 
         :param target_file:  Target multi-FASTA file.
         :type target_file:  str.
@@ -515,8 +518,7 @@ class GenbankUtils(object):
             print('You can only add files together.  Not python objects.')
 
     def multi_fasta_sort(self, target_file, man_file, output_file):
-        """
-        This method sorts selected reference sequences in a multi-FASTA files.
+        """Sorts selected reference sequences in a multi-FASTA files.
 
         :param target_file:  Target multi-FASTA file.
         :type target_file:  str.
@@ -560,9 +562,7 @@ class GenbankUtils(object):
 class OrthologUtils(BlastUtils, GenbankUtils):
 
     def __init__(self):
-        """
-        Various utilities to help with ortholog specific functionality.
-        """
+        """Various utilities to help with ortholog specific functionality."""
         BlastUtils.__init__(self)
         GenbankUtils.__init__(self)
 
@@ -638,7 +638,7 @@ class OrthologUtils(BlastUtils, GenbankUtils):
         :return: Returns the instance (cls) with new attributes.
         :rtype:  object.
         """
-        
+
         if not project or not project_path:
             raise NameError('A project and project_path must be specified.')
         cls.project = project
@@ -676,14 +676,11 @@ class OrthologUtils(BlastUtils, GenbankUtils):
 
 class ManagerUtils(object):
     def __init__(self):
-        """
-        Various utilities to help with management specific functionality.
-        """
+        """Various utilities to help with management specific functionality."""
         pass
 
     def parse_db_config_file(self, config_file):
-        """
-        Take a YAML config file and return the config strategies and keyword arguments.
+        """Parse a YAML config file and return the config strategies and keyword arguments.
 
         :param config_file:  A YAML config file for database management.
         :type config_file:   str.
@@ -705,8 +702,7 @@ class ManagerUtils(object):
         return db_config_strategy, kw
 
     def refseq_jobber(self, email_address, base_jobname, id, code, activate, config_dict):
-        """
-        A function for submitting python code as a string.
+        """Submit python code as a string.
 
         :param email_address:  The email address for PBS job notification.
         :type email_address:  str.
@@ -730,9 +726,7 @@ class ManagerUtils(object):
 
 class CookieUtils(object):
     def __init__(self):
-        """
-        Various utilities to help with cookie specific functionality.
-        """
+        """Various utilities to help with cookie specific functionality."""
         self.archive_options = {
             "Full": Path(''),
             "NCBI": Path('NCBI'),
@@ -754,8 +748,7 @@ class CookieUtils(object):
         }
 
     def archive(self, database_path, archive_path, option, delete_flag=False):
-        """
-        Archive a database directory from a Cookie templated directory structure.
+        """Archive a database directory from a Cookie templated directory structure.
 
         This utility creates a YAML config dictionary that contains path-like
         objects for archiving.  The original data
@@ -820,8 +813,7 @@ class CookieUtils(object):
         return archive_list
 
     def get_size(self, start_path, units="KB"):
-        """
-        Determine the size of a directory or a file with the desired units.
+        """Determine the size of a directory or a file with the desired units.
 
         :param start_path:  A file or path for sizing up.
         :type start_path:  str.
@@ -886,16 +878,14 @@ class FunctionRepeater(object):
 class FullUtilities(CookieUtils, ManagerUtils, OrthologUtils):
 
     def __init__(self):
-        """
-        A class to help bring utility functions to other modules.
-        """
+        """A class to help bring utility functions to other modules."""
         CookieUtils.__init__(self)
         ManagerUtils.__init__(self)
         OrthologUtils.__init__(self)
 
     def system_cmd(self, cmd, timeout=None, **kwargs):
-        """
-        A function for making system calls, while preforming proper exception handling.
+        """Make system calls, while preforming proper exception handling.
+
         :param cmd:  A list that contains the arguments for Popen.
         :param timeout:  A timeout variable.
         :param kwargs:  Any other keyword arguments for Popen.
@@ -915,9 +905,10 @@ class FullUtilities(CookieUtils, ManagerUtils, OrthologUtils):
         return ret_val
 
     def group_files_by_size(self, file_dict, _path=None, groups=8):
-        """
-        Create a list of dictionaries that contain the specified number of groups of files.  Each group of files has a
-        total size that are close to each other.
+        """Create a list of dictionaries that contain the specified number of groups of files.
+
+        Each group of files has a total size that are close to each other.
+
         :param file_dict:  The file names are keys, and file sizes are the values.
         :type file_dict:  dict.
         :param _path:  If the file_dict isn't given, then a path can be given for generating the file_dict.
