@@ -36,7 +36,7 @@ class BaseComparativeGenetics(object):
     # TODO:  CREAT PRE-BLAST and POST-BLAST functions
     def __init__(self, project=None, project_path=os.getcwd(), acc_file=None,
                  taxon_file=None, pre_blast=False, post_blast=True, hgnc=False,
-                 proj_mana=ProjectManagement, **kwargs):
+                 proj_mana=None, **kwargs):
         """This is the base class for the Blast module.
 
         It parses an accession file in order to provide easy handling for data.
@@ -130,7 +130,9 @@ class BaseComparativeGenetics(object):
         if self.copy_from_package:
             shutil.copy(pkg_resources.resource_filename(data.__name__, self.acc_file),
                         str(self.project_index))
-            self.acc_filename = self.acc_file
+        else:
+            shutil.copy(self.acc_file, str(self.project_index))
+        self.acc_filename = self.acc_file
         if self.acc_file is not None:
             # File init
             self.acc_sqlite_filename = Path(acc_file).stem + '.sqlite'
@@ -164,9 +166,9 @@ class BaseComparativeGenetics(object):
             self.blast_rhesus = []
 
             # Handles for different dataframe initializations
-            self.raw_acc_data = self.blast_utils.accession_sqlite2pandas(self.acc_sqlite_tablename, self.acc_sqlite_filename,
-                                                                         path=self.project_index, acc_file=self.acc_csv_filename)
-
+            self.raw_acc_data, log_msg = self.blast_utils.accession_sqlite2pandas(self.acc_sqlite_tablename, self.acc_sqlite_filename,
+                                                                                  path=self.project_index, acc_file=self.acc_csv_filename)
+            self.blastn_log.debug(log_msg)
             # Master accession file for the blast
             self.building_filename = str(self.acc_file[:-4] + 'building.csv')
 
