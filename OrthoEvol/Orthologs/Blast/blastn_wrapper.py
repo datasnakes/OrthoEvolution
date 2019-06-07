@@ -110,6 +110,11 @@ class NcbiblastnCommandline(_NcbiblastMain2SeqCommandline):
             # Extension options:
             _Switch(["-no_greedy", "no_greedy"],
                     "Use non-greedy dynamic programming extension"),
+            _Switch(["-subject_besthit", "subject_besthit"],
+                    "A new option that culls HSPs on a per subject"
+                    " sequence basis by removing HSPs that are completely "
+                    "enveloped by another HSP. This is an experimental option "
+                    "and is subject to change"),
             _Option(["-min_raw_gapped_score", "min_raw_gapped_score"],
                     "Minimum raw gapped score to keep an alignment in the "
                     "preliminary gapped and traceback stages (integer).",

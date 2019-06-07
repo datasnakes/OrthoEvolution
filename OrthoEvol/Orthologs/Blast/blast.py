@@ -1,4 +1,4 @@
-"""Optimized for use with local/standalone NCBI BLAST 2.8.0."""
+"""Optimized for use with local/standalone NCBI BLAST 2.8.1"""
 import os
 import shutil
 import contextlib
