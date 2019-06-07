@@ -92,11 +92,13 @@ class BaseDatabaseManagement(object):
 
         For other types of blast data, please see the NCBIREADME.md file.
 
-        :param database_name:  A string that represents a pattern in the files of interest.
-        :type database_name:  string.
+        :param database_name:  A string that represents a pattern in the files of interest, defaults to "refseq_rna"
+        :type database_name:  str, optional
+        :param v5: A flag that determines which version of blastdb to use, defaults to True
+        :type v5: bool, optional
         :param set_blastdb:  A flag that determines whether the BLASTDB environment
                             variable is automatically set.
-        :type set_blastdb:  bool.
+        :type set_blastdb:  bool, optional
         """
         # <path>/<user or basic_project>/databases/NCBI/blast/db/<database_name>
         dl_path = Path(self.database_path) / Path("NCBI") / Path("blast") / Path("db")
@@ -333,8 +335,7 @@ class DatabaseManagement(BaseDatabaseManagement):
         print(self)
         return {}, {}
 
-    def full(self, NCBI, ITIS, Projects=None,
-             configure_flag=None, archive_flag=None, delete_flag=None, project_flag=None, _path=None):
+    def full(self, NCBI, ITIS, Projects=None, configure_flag=None, archive_flag=None, delete_flag=None, project_flag=None, _path=None):
         """
         The most generalized strategy available.  This configures everything.  The 3 primary flags (configure, archive,
         and delete) will be passed down to the more specific strategies, which will inherit these values unless

@@ -158,7 +158,23 @@ class BaseBlastN(ComparativeGenetics):
         return blastn_parameters, query_config
 
     def blastn_wrapper(self, gene, organism, parameters, xml_path, gene_path):
-        """Run the Ncbiblastncommandline wrapper modified by this package."""
+        """Use NCBI's blastn wrapper to run blast.
+
+        The function includes a try/except to ensure that errors are caught
+        and that if a blast stops while blasting, incomplete files will be
+        removed.
+
+        :param gene: The input gene for the blast run.
+        :type gene: str
+        :param organism: The organism to retrieve a hit for.
+        :type organism: str
+        :param parameters: A dictionary of blastn parameters.
+        :type parameters: dict
+        :param xml_path: The path to the xml output file.
+        :type xml_path: str
+        :param gene_path: The path to the gene's directory.
+        :type gene_path: str
+        """
         try:
             self.blastn_log.info('Blast run has started.')
             start_time = self.get_time()
@@ -207,7 +223,8 @@ class BaseBlastN(ComparativeGenetics):
             raise
 
     def configure(self, query_accessions, query_organism, auto_start=False):
-        """This method configures everything for our BLAST workflow.
+        """Configure the BLAST workflow.
+
         It configures the accession file, which works with interrupted Blasts.
         It configures a gene_list for blasting the right genes.
 
@@ -402,7 +419,7 @@ class BaseBlastN(ComparativeGenetics):
                             self.blastn_log.error('%s was deleted' % xml)
 
                     else:
-                         # Set up blast parameters
+                        # Set up blast parameters
                         query_seq_path = str(gene_path / Path('temp.fasta'))
                         # Add blastn parameters for each method to dict
                         if self.method == 1:

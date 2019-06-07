@@ -26,10 +26,15 @@ class NcbiFTPClient(BaseFTPClient):
     """Access NCBI's FTP servers with ease."""
 
     def __init__(self, email):
+        """Initialize the NcbiFTPClient.
+
+        :param email: A valid email address to use a password.
+        :type email: str
+        """
         _ncbi = 'ftp.ncbi.nlm.nih.gov'
         super().__init__(_ncbi, user="anonymous", password=email)
-        self._datafmt = '%m-%d-%Y@%I:%M:%S-%p'
-        self._date = str(datetime.now().strftime(self._datafmt))
+        self._datefmt = '%m-%d-%Y@%I:%M:%S-%p'
+        self._date = str(datetime.now().strftime(self._datefmt))
         self.blastpath = '/blast/'
         self.blastdb_path = '/blast/db/'
         self.blastdbv5_path = '/blast/db/v5/'
@@ -38,7 +43,7 @@ class NcbiFTPClient(BaseFTPClient):
         self.windowmasker_path = self.blastpath + 'windowmasker_files/'
         self.cpus = 1
 
-        # Located in self.blastdb_path
+        # Located in the blastdb path
         self._taxdb = ['taxdb.tar.gz', 'taxdb.tar.gz.md5']
 
         # TODO Turn into a json file, dict, or config
@@ -117,7 +122,11 @@ class NcbiFTPClient(BaseFTPClient):
         self.ncbiftp_log.info('%s was downloaded.' % str(filename))
 
     def _download_windowmasker(self, windowmaskerfile):
-        """Download the window masker files."""
+        """Download the window masker files.
+
+        :param windowmaskerfile: A path to a window masker file to download.
+        :type windowmaskerfile: str
+        """
         wm = windowmaskerfile.split(sep='.')
         taxid = wm[0]
         wm_ext = wm[1]
@@ -226,7 +235,20 @@ class NcbiFTPClient(BaseFTPClient):
 
     def getrefseqrelease(self, collection_subset, seqtype, seqformat, download_path,
                          extract=True):
-        """Download the refseq release database."""
+        """Download the refseq release database.
+
+        :param collection_subset: [description]
+        :type collection_subset: [type]
+        :param seqtype: [description]
+        :type seqtype: [type]
+        :param seqformat: [description]
+        :type seqformat: [type]
+        :param download_path: [description]
+        :type download_path: [type]
+        :param extract: [description], defaults to True
+        :type extract: bool, optional
+        :raises FileNotFoundError: [description]
+        """
         self.ftp = self._login()
         self.ftp.cwd(self.refseqrelease_path)
         taxon_dirs = self.listdirectories(self.refseqrelease_path)
@@ -240,8 +262,8 @@ class NcbiFTPClient(BaseFTPClient):
         releasefiles = self.listfiles(curpath)
 
         self.files2download = []
-        pattern = re.compile('^' + collection_subset + '[.](.*?)[.]' + seqtype
-                             + '[.]' + seqformat + '[.]gz$')
+        pattern = re.compile('^' + collection_subset +
+                             '[.](.*?)[.]' + seqtype + '[.]' + seqformat + '[.]gz$')
         for releasefile in releasefiles:
             if re.match(pattern, releasefile):
                 self.files2download.append(releasefile)
@@ -276,8 +298,8 @@ class NcbiFTPClient(BaseFTPClient):
     def getblastfasta(self, database_name, download_path, extract=True):
         """Download the fasta sequence database (not formatted).
 
-        :param database_name:
-        :param download_path:
+        :param database_name: The name of the database to download.
+        :param download_path: The path to download the database to.
         :param extract:  (Default value = True)
         """
 
@@ -370,7 +392,6 @@ class NcbiFTPClient(BaseFTPClient):
 
             except RuntimeError as err:
                 self.ncbiftp_log.error(err)
-                self.cpus = 1
                 # Try to download again
                 self.ncbiftp_log.warning('Attempting to download again.')
                 with ThreadPool(self.cpus) as download_pool:

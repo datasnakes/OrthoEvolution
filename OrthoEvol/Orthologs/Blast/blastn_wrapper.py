@@ -99,7 +99,8 @@ class NcbiblastnCommandline(_NcbiblastMain2SeqCommandline):
                     """Discontiguous MegaBLAST template type (string).
                     Allowed values: 'coding', 'coding_and_optimal' or 'optimal'
                     Requires: template_length.""",
-                    checker_function=lambda value: value in ['coding', 'coding_and_optimal', 'optimal'],
+                    checker_function=lambda value: value in [
+                        'coding', 'coding_and_optimal', 'optimal'],
                     equate=False),
             _Option(["-template_length", "template_length"],
                     """Discontiguous MegaBLAST template length (integer).
