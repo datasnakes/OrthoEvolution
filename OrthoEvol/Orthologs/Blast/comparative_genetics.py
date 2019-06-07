@@ -166,9 +166,8 @@ class BaseComparativeGenetics(object):
             self.blast_rhesus = []
 
             # Handles for different dataframe initializations
-            self.raw_acc_data, log_msg = self.blast_utils.accession_sqlite2pandas(self.acc_sqlite_tablename, self.acc_sqlite_filename,
+            self.raw_acc_data = self.blast_utils.accession_sqlite2pandas(self.acc_sqlite_tablename, self.acc_sqlite_filename,
                                                                                   path=self.project_index, acc_file=self.acc_csv_filename)
-            self.blastn_log.debug(log_msg)
             # Master accession file for the blast
             self.building_filename = str(self.acc_file[:-4] + 'building.csv')
 

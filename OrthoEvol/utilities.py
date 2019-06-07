@@ -367,10 +367,8 @@ class BlastUtils(object):
         db_path = Path(path) / Path(db_name)
         with sqlite3.connect(str(db_path)) as conn:
             df = pd.read_csv(acc_path, dtype=str)
-            df.to_sql(name=table_name, con=conn, if_exists='replace', index=False)
-
-            return "The accession file is located in %s, and the "
-            "database file is located in %s" % (acc_path, db_path)
+            df.to_sql(name=table_name, con=conn, if_exists='replace',
+                      index=False)
 
     def accession_sqlite2pandas(self, table_name, db_name, path, exists=True,
                                 acc_file=None):
@@ -392,12 +390,12 @@ class BlastUtils(object):
         """
         db_path = Path(path) / Path(db_name)
         if not exists or not db_path.is_file():
-            msg = self.accession_csv2sqlite(acc_file=acc_file, table_name=table_name,
-                                            db_name=db_name, path=path)
+            self.accession_csv2sqlite(acc_file=acc_file, table_name=table_name,
+                                      db_name=db_name, path=path)
         conn = sqlite3.connect(str(db_path))
         df = pd.read_sql_query("SELECT * FROM %s" % table_name, conn)
         conn.close()
-        return (df, msg)
+        return df
 
 
 class GenbankUtils(object):
