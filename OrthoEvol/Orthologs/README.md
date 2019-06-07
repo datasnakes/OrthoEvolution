@@ -1,10 +1,12 @@
 # Orthologs Documentation
+
 This top level module includes submodules such as [Align](https://github.com/datasnakes/OrthoEvolution/blob/master/OrthoEvol/Orthologs/Align/README.md) (for aligning multi fasta files),
 [Phylogenetics](https://github.com/datasnakes/OrthoEvolution/blob/master/OrthoEvol/Orthologs/Phylogenetics/README.md) (for analyzing multiple sequence alignments), [BioSQL]() (for database creation),
 [Blast](https://github.com/datasnakes/OrthoEvolution/tree/master/OrthoEvol/Orthologs/Blast) (includes tools for using NCBI's blastn command line), and [Genbank](https://github.com/datasnakes/OrthoEvolution/blob/master/OrthoEvol/Orthologs/Genbank/README.md).
 (for tools to extract features from genbank files).
 
 ## Usage & Examples
+
 These classes are optimized to be used together (very little work to do that),
 but can also be used as standalone classes/methods.
 

@@ -30,30 +30,26 @@ Before you use this function, you need for `NCBI Blast+` to be installed and in 
 Download the latest standalone blast executables from
 [here](ftp://ftp.ncbi.nlm.nih.gov/blast/executables/blast+/LATEST/). We are currently using version `2.8.1`.
 
-
 #### Our Blast Methods
 
 NCBI's `blastn` can be configured (using its parameters) in a number of different ways 
-(for local or remote use or with seqidlists or taxids). For typical orthology analyses, 
+(i.e. local or remote use and with seqidlists or taxids). For typical orthology analyses, 
 it's important to take advantage of the speed and efficiency of NCBI's newest 
 preformatted blast databases ([blastdbv5](https://ftp.ncbi.nlm.nih.gov/blast/db/v5/)). 
-In order to do that, we've implemented a method (`1`) that uses taxids (taxonomic identifiers). 
+In order to do that, we've implemented a method (`1`) that uses taxids (taxonomic groups — species level and higher level taxa). 
 View more about our methods below.
 
-
-Method    |  Description   
+Method    |  Description  
 ----------|--------------------------------------------------------------------
 1         |  Local blast using taxids. Utilizes local databases (`refseq_rna_v5`).
 2         |  Remote blast using an entrez query. Uses entrez species name and query 
 None      |  A single query method not useful for orthology inference
 
-
 #### Our Custom Accession File Format
 
-We use a specifically formatted `accession file` with our headers as `Tier`, `Gene`,
- `Organism` to store blast output and input. This allows for distinguishing genes 
-by families or features. The `Tier` header can be omitted, but the other headers are requirements.
-
+We use a specifically formatted `accession file` with our headers as `Tier`, `Gene`, 
+`Organism` to store blast output and input. This allows for distinguishing genes 
+by families or features. The `Tier` header can be omitted, but the other headers are requirements. 
 The Accession numbers are stored in a `.csv` file.  The following table is an example
 of how we format our blast input file.
 
