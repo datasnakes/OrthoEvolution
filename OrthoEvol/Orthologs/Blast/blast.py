@@ -30,7 +30,7 @@ class BaseBlastN(ComparativeGenetics):
         downstream analysis.
 
         :param project:  The project name.
-        :param method:  Method used for blasting. (1, 2, 3, or None)
+        :param method:  Method used for blasting. (1, 2, or None)
         :param template:  The accession file template.
         :param save_data:  A flag for saving the post_blast data to an excel file.
         :param quiet:  A flag for determining the level of logging verbosity.
@@ -115,19 +115,19 @@ class BaseBlastN(ComparativeGenetics):
                     self.current_gene_list.remove(gene)
 
     @staticmethod
-    def select_method(method):
+    def select_method(method=1):
         """Select a method for running blastn.
 
-        :param method: The blast method to use. Either 1, 2, or 3.
+        :param method: The blast method to use. Either 1, 2, or None.
         """
-        # Local blast using seqidlist
+        # Local blast using taxonomy ids
         if method == 1:
-            blastn_parameters = {'query': '', 'db': 'refseq_rna',
-                                 'strand': 'plus', 'evalue': 0.01, 'outfmt': 5,
-                                 'seqidlist': '', 'max_target_seqs': 10,
-                                 'task': 'blastn'}
+            blastn_parameters = {'query': '', 'db': 'refseq_rna_v5',
+                                 'taxids': '', 'strand': 'plus',
+                                 'evalue': 0.01, 'outfmt': 5,
+                                 'max_target_seqs': 10, 'task': 'blastn'}
             query_config = {'query': '',
-                            'db': 'refseq_rna',
+                            'db': 'refseq_rna_v5',
                             'temp fasta': ''}
         # Remote blast with entrez_query
         elif method == 2:
@@ -138,14 +138,6 @@ class BaseBlastN(ComparativeGenetics):
                                  'task': 'blastn', 'remote': 'True'}
             query_config = {'query': '',
                             'db': 'refseq_rna',
-                            'temp fasta': ''}
-        # Local blast using taxonomy ids
-        elif method == 3:
-            blastn_parameters = {'query': '', 'db': 'refseq_rna_v5', 'taxids': '',
-                                 'strand': 'plus', 'evalue': 0.01, 'outfmt': 5,
-                                 'max_target_seqs': 10, 'task': 'blastn'}
-            query_config = {'query': '',
-                            'db': 'refseq_rna_v5',
                             'temp fasta': ''}
         # Default local blast
         elif method is None or method == "":
@@ -159,6 +151,55 @@ class BaseBlastN(ComparativeGenetics):
         else:
             raise ValueError('%s is not a blast method.' % method)
         return blastn_parameters, query_config
+
+    def blastn_wrapper(self, gene, organism, parameters, xml_path, gene_path):
+        """Run the Ncbiblastncommandline wrapper modified in this package."""
+        try:
+            self.blastn_log.info('Blast run has started.')
+            start_time = self.get_time()
+            with open(xml_path, 'w') as blast_xml:
+                # Update blastn parameters
+                self.blastn_parameters.update(parameters)
+
+                # Use Biopython's NCBIBlastnCommandline tool
+                result_handle = NcbiblastnCommandline(**self.blastn_parameters)
+                # Capture the standard output
+                stdout_str, _ = result_handle()
+
+                # Write the stdout_str to the xml file
+                blast_xml.write(stdout_str)
+                end_time = self.get_time()
+                elapsed_time = round(end_time - start_time, 2)
+                self.blastn_log.debug("%s was created." % blast_xml.name)
+                self.blastn_log.info("The BLAST took %ss." % elapsed_time)
+                self.blastn_log.debug('Blast run has ended.')
+                self.add_blast_time(gene, organism, start_time, end_time)
+                blast_xml.close()
+
+                # Parse the blast output file
+                self.parse_xml(xml_path, gene, organism)
+
+                # Make blast sleep if server blast
+                if self.method == 2:
+                    time.sleep(30)  # Prevents server lockout
+
+        # Catch either ApplicationError or ParseError
+        except (ApplicationError, ParseError) as err:
+            try:
+                errmsg = 'Parse Error - %s' % err.msg
+            except AttributeError:
+                errmsg = err.stderr
+            self.blastn_log.error(errmsg)
+            os.remove(xml_path)
+            self.blastn_log.info('%s was deleted.' % xml_path)
+
+        # Catch either KeyboardInterrupt or SystemExit
+        except (KeyboardInterrupt, SystemExit):
+            msg = "Keyboard interrupt or System Exit."
+            self.blastn_log.error(msg)
+            os.remove(xml_path)
+            self.blastn_log.error('%s was deleted.' % xml_path)
+            raise
 
     def configure(self, query_accessions, query_organism, auto_start=False):
         """This method configures everything for our BLAST workflow.
@@ -218,6 +259,20 @@ class BaseBlastN(ComparativeGenetics):
             self.runblast(genes=self.current_gene_list,
                           query_organism=query_organism,
                           pre_configured=auto_start)
+
+    def create_maf(self):
+        """Create a master accessions file if the blast has completed."""
+        try:
+            shutil.copyfile(str(self.building_file_path),
+                            str(self.complete_file_path))
+            shutil.copyfile(str(self.building_time_file_path),
+                            str(self.complete_time_file_path))
+        except FileNotFoundError as fnfe:
+            msg = "Your blast did not create building time files."
+            self.blastn_log.error(fnfe)
+            self.blastn_log.error(msg)
+            raise BlastFailure("Blast has failed to generate "
+                               "data. Check logs for errors.")
 
     def parse_xml(self, xml_path, gene, organism):
         """Parse the blast XML record get the best hit accession number.
@@ -344,83 +399,32 @@ class BaseBlastN(ComparativeGenetics):
                             self.blastn_log.error('%s was deleted' % xml)
 
                     else:
+                         # Set up blast parameters
+                        query_seq_path = str(gene_path / Path('temp.fasta'))
+                        # Add blastn parameters for each method to dict
+                        elif self.method == 1:
+                            update_dict = {'query': query_seq_path,
+                                           'taxids': taxon_id}
+                        if self.method == 2:
+                            update_dict = {'query': query_seq_path,
+                                           'entrez_query': organism}
+                        else:
+                            update_dict = {'query': query_seq_path}
+
                         self.blastn_log.debug('Blast run has started.')
-                        start_time = self.get_time()
                         self.blastn_log.info("Current gene: %s (%s)." %
                                              (gene, self.tier_dict[gene]))
                         self.blastn_log.info("Current organism: %s (%s)." % (organism, taxon_id))
-                        try:
-                            with open(xml_path, 'w') as blast_xml:
-                                # Set up blast parameters
-                                query_seq_path = str(gene_path / Path('temp.fasta'))
-
-                                # Add blastn parameters for each method to dict
-                                if self.method == 2:
-                                    update_dict = {'query': query_seq_path,
-                                                   'entrez_query': organism}
-                                elif self.method == 3:
-                                    update_dict = {'query': query_seq_path,
-                                                   'taxids': taxon_id}
-                                else:
-                                    update_dict = {'query': query_seq_path}
-
-                                # Update blastn parameters
-                                self.blastn_parameters.update(update_dict)
-
-                                # Use Biopython's NCBIBlastnCommandline tool
-                                result_handle = NcbiblastnCommandline(**self.blastn_parameters)
-                                # Capture the standard output
-                                stdout_str, _ = result_handle()
-
-                                # Write the stdout_str to the xml file
-                                blast_xml.write(stdout_str)
-                                end_time = self.get_time()
-                                elapsed_time = round(end_time - start_time, 2)
-                                self.blastn_log.debug("%s was created." % blast_xml.name)
-                                self.blastn_log.info("The BLAST took %ss." % elapsed_time)
-                                self.blastn_log.debug('Blast run has ended.')
-                                self.add_blast_time(gene, organism, start_time, end_time)
-                                blast_xml.close()
-                                self.parse_xml(xml_path, gene, organism)
-
-                                # Make blast sleep if server blast
-                                if self.method == 2:
-                                    time.sleep(30)  # Prevents server lockout
-
-                        # Catch either ApplicationError or ParseError
-                        except (ApplicationError, ParseError) as err:
-                            try:
-                                errmsg = 'Parse Error - %s' % err.msg
-                            except AttributeError:
-                                errmsg = err.stderr
-                            self.blastn_log.error(errmsg)
-                            os.remove(xml_path)
-                            self.blastn_log.info('%s was deleted.' % xml)
-
-                        # Catch either KeyboardInterrupt or SystemExit
-                        except (KeyboardInterrupt, SystemExit):
-                            msg = "Keyboard interrupt or System Exit."
-                            self.blastn_log.error(msg)
-                            os.remove(xml_path)
-                            self.blastn_log.error('%s was deleted.' % xml)
-                            raise
+                        # Run Ncbiblastncommandline
+                        self.blastn_wrapper(xml_path=xml_path, gene_path=gene_path,
+                                            parameters=update_dict, gene=gene,
+                                            organism=organism)
 
                     # If the BLAST has gone through all orthologs then create a
                     # master accession file.
                     if gene == genes[-1] and organism == self.org_list[-1]:
-                        try:
-                            shutil.copyfile(str(self.building_file_path),
-                                            str(self.complete_file_path))
-                            shutil.copyfile(str(self.building_time_file_path),
-                                            str(self.complete_time_file_path))
-                        except FileNotFoundError as fnfe:
-                            msg = "Your blast did not create building time files."
-                            self.blastn_log.error(fnfe)
-                            self.blastn_log.error(msg)
-                            raise BlastFailure("Blast has failed to generate "
-                                               "data. Check logs for errors.")
-
-                        if self.save_data is True:
+                        self.create_maf()
+                        if self.save_data:
                             self.post_blast_analysis(self.project)
                             self.blastn_log.info("Post-blast analysis is complete")
 
@@ -432,7 +436,7 @@ class OrthoBlastN(BaseBlastN):
     """OrthoBlastN provides a preconfigured and orthology optimized version
     of the BaseBlastN class."""
 
-    def __init__(self, project="orthology-gpcr", method=3, template=None,
+    def __init__(self, project="orthology-gpcr", method=1, template=None,
                  save_data=True, acc_file="gpcr.csv", copy_from_package=True,
                  **kwargs):
         """This class inherits from the BaseBlastN class.
