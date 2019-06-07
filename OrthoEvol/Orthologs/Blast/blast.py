@@ -121,6 +121,8 @@ class BaseBlastN(ComparativeGenetics):
         :param method: The blast method to use. Either 1, 2, or None.
         """
         # Local blast using taxonomy ids
+        # TIP: This is the fastest version and recommended for blasting with
+        # multiple species and multiple genes.
         if method == 1:
             blastn_parameters = {'query': '', 'db': 'refseq_rna_v5',
                                  'taxids': '', 'strand': 'plus',
@@ -130,6 +132,7 @@ class BaseBlastN(ComparativeGenetics):
                             'db': 'refseq_rna_v5',
                             'temp fasta': ''}
         # Remote blast with entrez_query
+        # XXX: This cannot be used with taxids.
         elif method == 2:
             blastn_parameters = {'query': '', 'entrez_query': '',
                                  'db': 'refseq_rna',
@@ -140,10 +143,12 @@ class BaseBlastN(ComparativeGenetics):
                             'db': 'refseq_rna',
                             'temp fasta': ''}
         # Default local blast
+        # XXX Unless you are have a very simple blast....
+        # i.e. only a query fasta
         elif method is None or method == "":
             blastn_parameters = {'query': '', 'db': 'refseq_rna',
                                  'strand': 'plus', 'evalue': 0.01,
-                                 'outfmt': 5, 'max_target_seqs': 10,
+                                 'outfmt': 5, 'max_target_seqs': 500,
                                  'task': 'blastn'}
             query_config = {'query': '',
                             'db': 'refseq_rna',
@@ -153,7 +158,7 @@ class BaseBlastN(ComparativeGenetics):
         return blastn_parameters, query_config
 
     def blastn_wrapper(self, gene, organism, parameters, xml_path, gene_path):
-        """Run the Ncbiblastncommandline wrapper modified in this package."""
+        """Run the Ncbiblastncommandline wrapper modified by this package."""
         try:
             self.blastn_log.info('Blast run has started.')
             start_time = self.get_time()
@@ -357,16 +362,14 @@ class BaseBlastN(ComparativeGenetics):
             self.configure(query_accessions=query,
                            query_organism=query_organism,
                            auto_start=True)
-            genes = self.current_gene_list  # Gene list created by blast_config.
-        else:
-            genes = genes
+            # Gene list created by blast_config.
+            genes = self.current_gene_list
 
         if len(genes) < 1:
             self.blastn_log.fatal('There are no genes to run with blastn.')
 
         else:
-            datefmt = self.date_format
-            self.blastn_log.debug('The blast began on {}'.format(datefmt))
+            self.blastn_log.debug('The blast began on {}'.format(self.date_format))
 
             # TIP Steps to run blastn for orthology inference
             # 1.  Iterate over genes of interest
@@ -402,10 +405,10 @@ class BaseBlastN(ComparativeGenetics):
                          # Set up blast parameters
                         query_seq_path = str(gene_path / Path('temp.fasta'))
                         # Add blastn parameters for each method to dict
-                        elif self.method == 1:
+                        if self.method == 1:
                             update_dict = {'query': query_seq_path,
                                            'taxids': taxon_id}
-                        if self.method == 2:
+                        elif self.method == 2:
                             update_dict = {'query': query_seq_path,
                                            'entrez_query': organism}
                         else:
@@ -448,7 +451,7 @@ class OrthoBlastN(BaseBlastN):
         downstream analysis.
 
         :param project:  The project name (Default: 'orthology-gpcr')
-        :param method: Method used for blasting. (Default: 3)
+        :param method: Method used for blasting. (Default: 1)
         :param template:  The accession file template.
         :param save_data:  A flag for saving the post_blast data to an excel file.
         :param acc_file: The accession file to use. (Default: 'gpcr.csv')
