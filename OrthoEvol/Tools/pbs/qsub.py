@@ -3,6 +3,7 @@ import string
 import random
 import os
 import subprocess as sp
+from pathlib import Path
 from collections import OrderedDict
 from pkg_resources import resource_filename
 from datetime import datetime as d
@@ -122,15 +123,53 @@ class Qsub(BaseQsub):
             code = None
         return code
 
-    def write_template_string(self):
-        pass
+    def write_template_string(self, code, extension):
+        filename = Path(self.pbs_work_dir) / self.job_name + extension
+        with open(filename, 'w') as f:
+            f.write(code)
 
-    def submit_python_script(self, python_code=None, python_template=None, python_attributes=None,
-                             pbs_code=None, pbs_template=None, pbs_attributes=None):
+    def create_header_section(self, file):
+        with open(file, 'a') as f:
+            f.write("# Author:  %s\n" % self.author)
+            f.write("# Date Created: %s\n" % self.current_date)
+            f.write("# Project Name: %s\n" % self.project_name)
+            f.write("# Description: %s\n\n" % self.description)
+
+    def create_directives_section(self, file):
+        with open(file, 'a') as f:
+            f.write("#PBS -l %s\n" % self.resource_str)
+            f.write("#PBS -l cput=%s\n" % self.cputime)
+            f.write("#PBS -l walltime=%s\n" % self.walltime)
+            f.write("#PBS -N %s\n" % self.job_name)
+            f.write("#PBS -o %s\n" % (self.job_name + ".o"))
+            f.write("#PBS -e %s\n" % (self.job_name + ".e"))
+            f.write("#PBS -M %s\n" % self.email)
+            if self.directive_list is not None:
+                for directive in self.directive_list:
+                    f.write("#PBS %s\n" % directive)
+            f.write("\n")
+
+    def create_commands_section(self, file):
+        with open(file, 'a') as f:
+            f.write("cd %s\n" % self.pbs_work_dir)
+            if self.activate_script is not None:
+                f.write("source %s\n" % self.activate_script)
+            if self.primary_pbs_cmd is not None:
+                f.write(self.primary_pbs_cmd + "\n")
+            if self.pbs_command_list:
+                for cmd in self.pbs_command_list:
+                    f.write(cmd + "\n")
+            if self.email_command is not None:
+                f.write(self.email_command + "\n")
+
+    def create_scripts(self, python_code=None, python_template=None, python_attributes=None,
+                       pbs_code=None, pbs_template=None, pbs_attributes=None, custom_pbs=False):
         """
         Python code is supplied as a file or as a string.  The string or file can be a template string or file, which
         can be supplied a dictionary to fill in the templated variables.  Additionally, a PBS file (the default from the
-        package or a custom) is used in conjunction with the python file in order to submit the job.
+        package or a custom) is used in conjunction with the python file in order to submit the job.  The PBS file can
+        be generated from a template or a custom script can be generated with a minimum set of parameters already set
+        up.
 
         :param python_code:
         :type python_code:
@@ -144,16 +183,28 @@ class Qsub(BaseQsub):
         :type pbs_template:
         :param pbs_attributes:
         :type pbs_attributes:
+        :param custom_pbs:
+        :type custom_pbs:
         :return:
         :rtype:
         """
 
         # Configure the Python Code
-        python_code = self.format_template(code=python_code, template=python_template, attributes=python_attributes)
+        python_code = self.format_template_string(code=python_code, template=python_template, attributes=python_attributes)
         if python_code is None:
             raise ValueError("The python code string or template file needs to be given.")
-        pbs_code = self.format_template(code=pbs_code, template=pbs_template, attributes=pbs_attributes)
-        if pbs_code is None:
-            pbs_code = self.format_template(template=self.pbs_template, attributes=pbs_attributes)
+        self.write_template_string(python_code, extension=".py")
+        # Configure the PBS Code
+        if not custom_pbs:
+            pbs_code = self.format_template_string(code=pbs_code, template=pbs_template, attributes=pbs_attributes)
             if pbs_code is None:
-                raise ValueError("Please supply pbs attributes.")
+                pbs_code = self.format_template_string(template=self.pbs_template, attributes=pbs_attributes)
+                if pbs_code is None:
+                    raise ValueError("Please supply pbs attributes.")
+            self.write_template_string(pbs_code, extension=".pbs")
+        else:
+            pbs_file = str(Path(self.pbs_work_dir) / self.job_name + '.pbs')
+            self.create_header_section(file=pbs_file)
+            self.create_directives_section(file=pbs_file)
+            self.create_commands_section(file=pbs_file)
+
