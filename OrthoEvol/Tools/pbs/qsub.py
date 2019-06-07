@@ -30,7 +30,7 @@ class BaseQsub(object):
         :param wait: (Default value = True)
         """
         try:
-            cmd = ['qsub ' + self.pbs_script]  # this is the command
+            cmd = ['qsub ' + str(self.pbs_script)]  # this is the command
             # Shell MUST be True
             cmd_status = self.pbs_utils.system_cmd(cmd, stdout=sp.PIPE, stderr=sp.PIPE, shell=True, check=True)
         except sp.CalledProcessError as err:
@@ -40,7 +40,7 @@ class BaseQsub(object):
                 # The cmd_status has stdout that must be decoded.
                 # When a qsub job is submitted, the stdout is the job id.
                 submitted_jobid = cmd_status.stdout.decode('utf-8')
-                self.pbs_log.info(self.pbs_script + ' was submitted.')
+                self.pbs_log.info(str(self.pbs_script) + ' was submitted.')
                 self.pbs_log.info('Your job id is: %s' % submitted_jobid)
 
             else:  # Unsuccessful. Stdout will be '1'
@@ -49,24 +49,45 @@ class BaseQsub(object):
 
 class Qsub(BaseQsub):
 
-    def __init__(self, pbs_script=None, author=getpass.getuser(), project_name="OrthoEvol", description="This is a basic pbs job",
+    def __init__(self, author=getpass.getuser(), project_name="OrthoEvol", description="This is a basic pbs job",
                  date_format='%a %b %d %I:%M:%S %p %Y', chunk_resources=None, cput='72:00:00', walltime='48:00:00',
-                 job_name=None, pbs_work_dir=None, script_cmd=None, email=None, directive_list=None,
-                 activate_script=None):
+                 job_name=None, pbs_work_dir=None, email=None, directive_list=None, primary_pbs_cmd=None,
+                 pbs_command_list=None, email_command=None, activate_script=None):
 
-        super().__init__(pbs_script=pbs_script)
+        self.base_name = job_name
+        self.base_id, self.job_name = self.get_base_job_name()
+        self.pbs_script = Path(self.pbs_work_dir) / self.job_name + '.pbs'
+        self.python_script = Path(self.pbs_work_dir) / self.job_name + '.py'
+        super().__init__(pbs_script=self.pbs_script)
 
         self.pbs_template = resource_filename(templates.__name__, "temp.pbs")
-        # Get path to activate script for python virtual environment
-        self.activate_script = activate_script
-        # Set up commented script header
+
+        # PBS - header info
         self.author = author
         self.project_name = project_name
         self.description = description
         self.current_date = d.now().strftime(date_format)
+        # PBS - directives/attributes
+        self.resource_str = self.get_resource_string(chunk_resources=chunk_resources)
+        self.cputime = cput
+        self.walltime = walltime
+        self.directive_list = directive_list
+        # PBS - commands
+        self.pbs_work_dir = pbs_work_dir
+        self.activate_script = activate_script  # for python virtual environment activation
+        self.primary_pbs_cmd = primary_pbs_cmd
+        self.pbs_command_list = pbs_command_list
+        self.email = email
+        if email_command is None:
+            if email is not None:
+                self.email_command = "mail -s \"%s.py script completed\" %s <<< 'Check your output'" % \
+                                     (self.job_name, self.email)
+            else:
+                self.email_command = None
+        else:
+            self.email_command = email_command
 
-        # Set up PBS directives/attributes
-        # resources
+    def get_resource_string(self, chunk_resources=None):
         if chunk_resources is None:
             chunk_resources = OrderedDict({
                 "select": 1,
@@ -78,18 +99,8 @@ class Qsub(BaseQsub):
         for k, v in chunk_resources.items():
             if v is not None:
                 resource_list.append("%s=%s" % (k, v))
-        self.resource_str = ":".join(resource_list)
-        self.cputime = cput
-        self.walltime = walltime
-        # other attributes
-        self.base_name = job_name
-        self.base_id, self.job_name = self.get_base_job_name()
-        self.directive_list = directive_list
-
-        # Set up PBS variables
-        self.pbs_work_dir = pbs_work_dir
-        self.script_cmd = script_cmd
-        self.email = email
+        resource_str = ":".join(resource_list)
+        return resource_str
 
     def get_base_job_name(self, length=5):
         base_id = ''.join(random.sample(string.ascii_letters + string.digits, length))
@@ -203,8 +214,7 @@ class Qsub(BaseQsub):
                     raise ValueError("Please supply pbs attributes.")
             self.write_template_string(pbs_code, extension=".pbs")
         else:
-            pbs_file = str(Path(self.pbs_work_dir) / self.job_name + '.pbs')
-            self.create_header_section(file=pbs_file)
-            self.create_directives_section(file=pbs_file)
-            self.create_commands_section(file=pbs_file)
+            self.create_header_section(file=self.pbs_script)
+            self.create_directives_section(file=self.pbs_script)
+            self.create_commands_section(file=self.pbs_script)
 
