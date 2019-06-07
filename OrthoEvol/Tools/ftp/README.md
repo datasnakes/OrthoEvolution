@@ -22,10 +22,10 @@ Examples
 
 #### Blastdb Download Example
 
-Download the [latest](ftp://ftp.ncbi.nlm.nih.gov/blast/db/v5/) blast databases (version 5 which is formatted for taxonomy ids).
-If `v5=False`, then the previously used blast databases will be downloaded. The
-[taxdb.tar.gz](ftp://ftp.ncbi.nlm.nih.gov/blast/db/v5/taxdb.tar.gz) database is also
-downloaded with the blast databases.
+Download the [latest](ftp://ftp.ncbi.nlm.nih.gov/blast/db/v5/) blast databases 
+(version 5 which is formatted for taxonomy ids). If `v5=False`, then the previously used 
+blast databases will be downloaded. The [taxdb.tar.gz](ftp://ftp.ncbi.nlm.nih.gov/blast/db/v5/taxdb.tar.gz) database is also
+downloaded (by default) with the preformatted blast databases.
 
 ``` python
 from OrthoEvol.Tools.ftp import NcbiFTPClient
