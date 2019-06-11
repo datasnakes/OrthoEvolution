@@ -126,7 +126,7 @@ class BaseComparativeGenetics(object):
             # File init
             self.taxon_path = self.project_index / Path(self.__taxon_filename)
         # Handle the master accession file (could be before or after blast)
-        if self.copy_from_package:
+        if "copy_from_package" in list(kwargs.keys()):
             shutil.copy(pkg_resources.resource_filename(data.__name__, self.acc_file),
                         str(self.project_index))
         else:
