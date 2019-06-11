@@ -77,16 +77,13 @@ class BaseComparativeGenetics(object):
         # Private Variables
         self.__pre_blast = pre_blast
         self.__post_blast = post_blast
-        self.__taxon_filename = taxon_file
         self.acc_file = acc_file
-        self.acc_csv_filename = acc_file
 
         # Initialize variables
         self.project_path = project_path
         self.project = project
         self.species = 'Homo_sapiens'
         self.taxon_file = taxon_file
-        self.go_list = None
         self.proj_mana = proj_mana
 
         # Initialize Logging
@@ -124,7 +121,7 @@ class BaseComparativeGenetics(object):
         # Handle the taxon_id file and blast query
         if self.taxon_file is not None:
             # File init
-            self.taxon_path = self.project_index / Path(self.__taxon_filename)
+            self.taxon_path = self.project_index / Path(self.taxon_file)
         # Handle the master accession file (could be before or after blast)
         if "copy_from_package" in list(kwargs.keys()):
             shutil.copy(pkg_resources.resource_filename(data.__name__, self.acc_file),
@@ -136,7 +133,7 @@ class BaseComparativeGenetics(object):
             # File init
             self.acc_sqlite_filename = Path(acc_file).stem + '.sqlite'
             self.acc_sqlite_tablename = Path(acc_file).stem.replace('.', '_')
-            self.acc_csv_path = self.project_index / Path(self.acc_csv_filename)
+            self.acc_csv_path = self.project_index / Path(self.acc_file)
             self.acc_sqlite_path = self.project_index / Path(self.acc_sqlite_filename)
 
             # Handles for organism lists
@@ -166,7 +163,7 @@ class BaseComparativeGenetics(object):
 
             # Handles for different dataframe initializations
             self.raw_acc_data = self.blast_utils.accession_sqlite2pandas(self.acc_sqlite_tablename, self.acc_sqlite_filename,
-                                                                                  path=self.project_index, acc_file=self.acc_csv_filename)
+                                                                         path=self.project_index, acc_file=self.acc_file)
             # Master accession file for the blast
             self.building_filename = str(self.acc_file[:-4] + 'building.csv')
 
@@ -276,7 +273,7 @@ class BaseComparativeGenetics(object):
         self.org_count = len(self.org_list)
         self.ncbi_orgs = list(org.replace('_', ' ') for org in self.org_list)
 
-        if self.__taxon_filename is not None:
+        if self.taxon_file is not None:
             # Load taxon ids from a file
             self.taxon_ids = self.get_file_list(self.taxon_path)
         else:
@@ -354,11 +351,11 @@ class BaseComparativeGenetics(object):
                   correspond to the go_list index.
         """
 
-        if self.go_list is None:
+        if go_list is None:
             accessions = self.acc_list
         else:
             accessions = []
-            for gene, organism in self.go_list:
+            for gene, organism in go_list:
                 accession = self.get_accession(gene, organism)
                 accessions.append(accession)
         return accessions
@@ -441,9 +438,9 @@ class BaseComparativeGenetics(object):
                 # TODO-ROB: Rework the missing functino using this.. maybe??
                 elif query_acc == 'missing':
                     continue
-                self.go_list = [gene, org]
+                go_list = [gene, org]
                 # Append so that duplicates can be identified
-                go[query_acc].append(self.go_list)
+                go[query_acc].append(go_list)
         return go
 
 
@@ -476,7 +473,6 @@ class ComparativeGenetics(BaseComparativeGenetics):
         # Private variables
         self.__home = os.getcwd()
         if self.taxon_file is not None:
-            self.__taxon_filename = self.taxon_file
             self.taxon_path = self.project_index / Path(self.taxon_file)
         self.__post_blast = post_blast
         self.save_data = save_data

@@ -478,7 +478,6 @@ class OrthoBlastN(BaseBlastN):
         # Set values for methods to prevent using a config.
         self.taxon_file = None
         self.__post_blast = True
-        self.go_list = None
         self.project_path = None
         self.proj_mana = None
         self.acc_file = self.MAF = acc_file
@@ -491,7 +490,7 @@ class OrthoBlastN(BaseBlastN):
                          MAF=self.MAF,
                          taxon_file=self.taxon_file,
                          post_blast=self.__post_blast,
-                         go_list=self.go_list, project_path=self.project_path,
+                         project_path=self.project_path,
                          proj_mana=self.proj_mana, **kwargs)
 
     def run(self):
