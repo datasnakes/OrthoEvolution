@@ -25,7 +25,7 @@ from tqdm import tqdm
 class NcbiFTPClient(BaseFTPClient):
     """Access NCBI's FTP servers with ease."""
 
-    def __init__(self, email):
+    def __init__(self, email, **kwargs):
         """Initialize the NcbiFTPClient.
 
         :param email: A valid email address to use a password.
