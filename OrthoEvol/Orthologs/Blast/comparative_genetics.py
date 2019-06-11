@@ -88,7 +88,6 @@ class BaseComparativeGenetics(object):
         self.taxon_file = taxon_file
         self.go_list = None
         self.proj_mana = proj_mana
-        self.copy_from_package = kwargs['copy_from_package']
 
         # Initialize Logging
         self.get_time = time.time
