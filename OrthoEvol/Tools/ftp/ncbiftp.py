@@ -32,7 +32,7 @@ class NcbiFTPClient(BaseFTPClient):
         :type email: str
         """
         _ncbi = 'ftp.ncbi.nlm.nih.gov'
-        super().__init__(_ncbi, user="anonymous", password=email)
+        super().__init__(_ncbi, user="anonymous", password=email, **kwargs)
         self._datefmt = '%m-%d-%Y@%I:%M:%S-%p'
         self._date = str(datetime.now().strftime(self._datefmt))
         self.blastpath = '/blast/'
