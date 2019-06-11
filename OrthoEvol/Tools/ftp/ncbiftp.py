@@ -9,16 +9,12 @@ from time import time
 from pathlib import Path
 from datetime import datetime
 from multiprocessing.pool import ThreadPool
+from ftplib import error_perm, all_errors
 # OrthoEvol
 from OrthoEvol.Tools.ftp.baseftp import BaseFTPClient
 from OrthoEvol.Tools.logit import LogIt
+from OrthoEvol import OrthoEvolDeprecationWarning
 # Other
-from ftplib import error_perm, all_errors
-# from progress.bar import Bar
-# TODO Create a progress bar; Integrate with Threading/downloading
-
-from OrthoEvol.Tools.ftp.baseftp import BaseFTPClient
-from OrthoEvol.Tools.logit import LogIt
 from tqdm import tqdm
 
 
@@ -121,6 +117,21 @@ class NcbiFTPClient(BaseFTPClient):
         localfile.close()
         self.ncbiftp_log.info('%s was downloaded.' % str(filename))
 
+    def _download_pool(self, files):
+        """Download files using a thread pool.
+
+        :param files: A list of files to download.
+        :type files: list
+        """
+        download_time_secs = time()
+        with ThreadPool(self.cpus) as download_pool:
+            with tqdm(total=len(filesd)) as pbar:
+                for i, _ in tqdm(enumerate(download_pool.imap(self.download_file, files))):
+                    pbar.update()
+            minutes = round(((time() - download_time_secs) / 60), 2)
+        self.ncbiftp_log.info("Took %s minutes to download the files." %
+                              minutes)
+
     def _download_windowmasker(self, windowmaskerfile):
         """Download the window masker files.
 
@@ -162,6 +173,21 @@ class NcbiFTPClient(BaseFTPClient):
             log_msg = 'Files were successfully extracted from %s'
             self.ncbiftp_log.info(log_msg % file2extract)
 
+    def _extract_pool(self, files):
+        """Extract files using a thread pool.
+
+        :param files: A list of files to extract.
+        :type files: list
+        """
+        extract_time_secs = time()
+        with ThreadPool(self.cpus) as extract_pool:
+            with tqdm(total=len(files)) as pbar:
+                for _ in tqdm(enumerate(extract_pool.imap(self.extract_file, files))):
+                    pbar.update()
+            minutes = round(((time() - extract_time_secs) / 60), 2)
+        self.ncbiftp_log.info("Took %s minutes to extract from all files.\n" %
+                              minutes)
+
     def listfiles(self, path='cwd'):
         """List all files in a path.
 
@@ -197,6 +223,7 @@ class NcbiFTPClient(BaseFTPClient):
         :param download_path:  Path to download files to.
         :return:
         """
+        raise OrthoEvolDeprecationWarning('This function will be removed soon.')
 
         self.ftp.cwd(self.windowmasker_path)
         taxonomy_dirs = self.listdirectories(self.windowmasker_path)
@@ -275,25 +302,11 @@ class NcbiFTPClient(BaseFTPClient):
         os.chdir(download_path)
 
         # Download the files using multiprocessing
-        download_time_secs = time()
-        with ThreadPool(1) as download_pool:
-            with tqdm(total=len(self.files2download)) as pbar:
-                for i, _ in tqdm(enumerate(download_pool.imap(self.download_file, self.files2download))):
-                    pbar.update()
-            minutes = round(((time() - download_time_secs) / 60), 2)
-        self.ncbiftp_log.info("Took %s minutes to download the files." %
-                              minutes)
+        self._download_pool(files=self.files2download)
 
         if extract:
             self.ncbiftp_log.info('The compressed files are about to be extracted.')
-            extract_time_secs = time()
-            with ThreadPool(1) as extract_pool:
-                with tqdm(total=len(self.files2download)) as pbar:
-                    for i, _ in tqdm(enumerate(extract_pool.imap(self.extract_file, self.files2download))):
-                        pbar.update()
-                minutes = round(((time() - extract_time_secs) / 60), 2)
-            self.ncbiftp_log.info("Took %s minutes to extract from all files." %
-                                  minutes)
+            self._extract_pool(files=self.files2download)
 
     def getblastfasta(self, database_name, download_path, extract=True):
         """Download the fasta sequence database (not formatted).
@@ -302,12 +315,13 @@ class NcbiFTPClient(BaseFTPClient):
         :param download_path: The path to download the database to.
         :param extract:  (Default value = True)
         """
-
+        # XXX This class does not support est files yet.
         if str(database_name).startswith('est'):
             raise NotImplementedError('Est dbs cannot be downloaded yet.')
         self.ftp.cwd(self.blastfasta_path)
         blastfastafiles = self.listfiles(self.blastfasta_path)
 
+        # Create a list of files to download
         self.files2download = []
         for dbfile in blastfastafiles:
             if database_name in str(dbfile):
@@ -322,24 +336,11 @@ class NcbiFTPClient(BaseFTPClient):
         os.chdir(download_path)
 
         # Download the files using multiprocessing
-        download_time_secs = time()
-        with ThreadPool(1) as download_pool:
-            with tqdm(total=len(self.files2download)) as pbar:
-                for i, _ in tqdm(enumerate(download_pool.imap(self.download_file, self.files2download))):
-                    pbar.update()
-            minutes = round(((time() - download_time_secs) / 60), 2)
-        self.ncbiftp_log.info("Took %s minutes to download the files." %
-                              minutes)
+        self._download_pool(files=self.files2download)
 
         if extract:
-            extract_time_secs = time()
-            with ThreadPool(1) as extract_pool:
-                with tqdm(total=len(self.files2download)) as pbar:
-                    for i, _ in tqdm(enumerate(extract_pool.imap(self.extract_file, self.files2download))):
-                        pbar.update()
-                minutes = round(((time() - extract_time_secs) / 60), 2)
-            self.ncbiftp_log.info("Took %s minutes to extract from all files." %
-                                  minutes)
+            self.ncbiftp_log.info('Now it\'s time to extract files.')
+            self._extract_pool(files=self.files2download)
 
     def getblastdb(self, database_name, download_path, v5=True, extract=True):
         """Download the formatted blast database.
@@ -359,6 +360,7 @@ class NcbiFTPClient(BaseFTPClient):
         self.ftp.cwd(path)
         blastdbfiles = self.listfiles(path)
 
+        # Create a list of files to download
         self.files2download = []
         for dbfile in blastdbfiles:
             if database_name in str(dbfile):
@@ -381,33 +383,18 @@ class NcbiFTPClient(BaseFTPClient):
             self.ncbiftp_log.info('You are about to download these files (total = %s): %s\n' %
                                   (len(absentfiles), absentfiles))
             # Download the files using multiprocessing
-            download_time_secs = time()
-
             try:
-                with ThreadPool(self.cpus) as download_pool:
-                    download_pool.map(self.download_file, self.files2download)
-                    minutes = round(((time() - download_time_secs) / 60), 2)
-                self.ncbiftp_log.info("Took %s minutes to download the files.\n" %
-                                      minutes)
+                self._download_pool(files=self.files2download)
 
             except RuntimeError as err:
                 self.ncbiftp_log.error(err)
                 # Try to download again
                 self.ncbiftp_log.warning('Attempting to download again.')
-                with ThreadPool(self.cpus) as download_pool:
-                    download_pool.map(self.download_file, self.files2download)
-                    minutes = round(((time() - download_time_secs) / 60), 2)
-                self.ncbiftp_log.info("Took %s minutes to download the files.\n" %
-                                      minutes)
-
+                self._download_pool(files=self.files2download)
+        # Extract or decompress archive files (tar.gz)
         if extract:
             self.ncbiftp_log.info('Now it\'s time to extract files.')
-            extract_time_secs = time()
-            with ThreadPool(self.cpus) as extract_pool:
-                extract_pool.map(self.extract_file, self.files2download)
-                minutes = round(((time() - extract_time_secs) / 60), 2)
-            self.ncbiftp_log.info("Took %s minutes to extract from all files.\n" %
-                                  minutes)
+            self._extract_pool(files=self.files2download)
 
         # Remove all tar.gz files
         curfiles = os.listdir()
