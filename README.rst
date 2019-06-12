@@ -61,13 +61,82 @@ Examples
 ----------------
 Check out this `tutorial <https://github.com/datasnakes/OrthoEvolution/wiki/Tutorial>`__ in our Wiki Docs.
 
+Also, please view `examples <https://github.com/datasnakes/OrthoEvolution/examples>`__ of how to utilize this package to build tools.
+
+
+Running a pre-configured local blast
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 .. code:: python
 
-    import OrthoEvol
+    from OrthoEvol.Orthologs.Blast import OrthoBlastN
+
+    # Use an existing list of gpcr genes
+    gpcr_blastn = OrthoBlastN(project="orthology-gpcr", method=1,
+                             save_data=True, acc_file="gpcr.csv", 
+                             copy_from_package=True)
+
+    # Run blast
+    gpcr_blastn.run()
+
+
+Simple project creation
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+.. code:: python
+
+    from OrthoEvol.Manager.management import ProjectManagement
+
+    ProjectManagement(repo="test-repo", user=None,
+                      project="test-[roject",
+                      research=None,
+                      research_type='comparative_genetics',
+                      new_repo=False, new_user=False, new_project=True,
+                      new_research=False)
+
+Simple blast database downloading
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+.. code:: python
+
+    from OrthoEvol.Tools.ftp import NcbiFTPClient
+
+    ncbiftp = NcbiFTPClient(email='somebody@gmail.com')
+    ncbiftp.getblastdb(database_name='refseq_rna', v5=True)
+
+Creating projects and databases dynamically 
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+.. code:: python
+
+    from OrthoEvol.Manager.management import ProjectManagement
+    from OrthoEvol.Manager.database_dispatcher import DatabaseDispatcher
+    from OrthoEvol.Manager.config import yml
+    from pkg_resources import resource_filename
+    from pathlib import Path
+    import yaml
+
+    # Set up project management
+    pm_config_file = resource_filename(yml.__name__, "initialize_new.yml")
+    with open(pm_config_file, 'r') as f:
+        pm_config = yaml.load(f)
+    pm = ProjectManagement(**pm_config["Management_config"])
+
+    # Set up database management
+    db_config_file = resource_filename(yml.__name__, "databases.yml")
+    with open(db_config_file, 'r') as f:
+        db_config = yaml.load(f)
+    config = db_config.update(pm_config)
+
+    # Generate main config file for this job
+    config_file = pm.user_log / Path("upload_config.yml")
+    with open(str(config_file), 'w') as cf:
+        yaml.dump(config, cf, default_flow_style=False)
+
+    # Set up database dispatcher and dispatch the functions
+    dd = DatabaseDispatcher(config_file, pm)
+    dd.dispatch(dd.strategies, dd.dispatcher, dd.configuration)
+
 
 Tests
 ----------------
-To run tests, type ``nosetests Tests/`` in the OrthoEvolution directory.
+To run tests, type ``nosetests tests/`` in the OrthoEvolution directory.
 
 Contributors
 ----------------

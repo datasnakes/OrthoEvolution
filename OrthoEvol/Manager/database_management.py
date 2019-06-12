@@ -76,8 +76,7 @@ class BaseDatabaseManagement(object):
             self.database_path = Path(project_path)
 
     def download_windowmasker_files(self, taxonomy_ids):
-        """
-        Download the WindowMasker files used in the BLAST database.
+        """Download the WindowMasker files used in the BLAST database.
 
         :param taxonomy_ids:  Taxonomy ids for the organisms of interest.
         :type taxonomy_ids:  list.
@@ -88,20 +87,25 @@ class BaseDatabaseManagement(object):
         dl_path = Path(self.database_path) / Path("NCBI") / Path('blast') / Path('windowmasker_files')
         self.ncbiftp.getwindowmaskerfiles(taxonomy_ids=taxonomy_ids, download_path=str(dl_path))
 
-    def download_blast_database(self, database_name="refseq_rna", set_blastdb=True):
-        """
-        Download the blast database files for using NCBI's BLAST+ command line.  For other types of blast data, please
-        see the NCBIREADME.md file.
+    def download_blast_database(self, database_name="refseq_rna", v5=True, set_blastdb=True):
+        """Download the blast database files for using NCBI's BLAST+ command line.
 
-        :param database_name:  A string that represents a pattern in the files of interest.
-        :type database_name:  string.
-        :param set_blastdb:  A flag that determines whether the BLASTDB environment variable is automatically set.
-        :type set_blastdb:  bool.
+        For other types of blast data, please see the NCBIREADME.md file.
+
+        :param database_name:  A string that represents a pattern in the files of interest, defaults to "refseq_rna"
+        :type database_name:  str, optional
+        :param v5: A flag that determines which version of blastdb to use, defaults to True
+        :type v5: bool, optional
+        :param set_blastdb:  A flag that determines whether the BLASTDB environment
+                            variable is automatically set.
+        :type set_blastdb:  bool, optional
         """
         # <path>/<user or basic_project>/databases/NCBI/blast/db/<database_name>
         dl_path = Path(self.database_path) / Path("NCBI") / Path("blast") / Path("db")
 
-        self.ncbiftp.getblastdb(database_name=database_name, download_path=str(dl_path))
+        # Download the preformatted blast database.
+        self.ncbiftp.getblastdb(database_name=database_name, v5=v5,
+                                download_path=str(dl_path))
 
         env_vars = dict(os.environ).keys()
         if set_blastdb or ("BLASTDB" not in env_vars):
@@ -125,7 +129,10 @@ class BaseDatabaseManagement(object):
                     with open(str(set_prof), "a+") as b_prof:
                         b_prof.write("export PATH=\"%s:$PATH\"" % str(dl_path))
                     cmd = ["source %s" % str(set_prof)]
-                    stdout = self.db_mana_utils.system_cmd(cmd=cmd, stdout=sp.PIPE, stderr=sp.STDOUT, shell=True)
+                    stdout = self.db_mana_utils.system_cmd(cmd=cmd,
+                                                           stdout=sp.PIPE,
+                                                           stderr=sp.STDOUT,
+                                                           shell=True)
         else:
             self.db_mana_log.critical("Please set the BLAST environment variables in your .bash_profile!!")
             self.db_mana_log.info("The appropriate environment variable is \'BLASTDB=%s\'." % str(dl_path))
@@ -205,7 +212,7 @@ class BaseDatabaseManagement(object):
         db_path = self.database_path / Path('NCBI') / Path('refseq') / Path('release') / Path(collection_subset)
         db_path.mkdir(parents=True, exist_ok=True)
         # TODO: If database exists and is same size, use the existing database.
-        self.ncbiftp.getrefseqrelease(collection_subset=collection_subset, seqtype=seqtype, 
+        self.ncbiftp.getrefseqrelease(collection_subset=collection_subset, seqtype=seqtype,
                                       seqformat=seqformat, download_path=db_path)
         return self.ncbiftp.files2download
 
@@ -328,8 +335,7 @@ class DatabaseManagement(BaseDatabaseManagement):
         print(self)
         return {}, {}
 
-    def full(self, NCBI, ITIS, Projects=None,
-             configure_flag=None, archive_flag=None, delete_flag=None, project_flag=None, _path=None):
+    def full(self, NCBI, ITIS, Projects=None, configure_flag=None, archive_flag=None, delete_flag=None, project_flag=None, _path=None):
         """
         The most generalized strategy available.  This configures everything.  The 3 primary flags (configure, archive,
         and delete) will be passed down to the more specific strategies, which will inherit these values unless
@@ -739,7 +745,7 @@ class DatabaseManagement(BaseDatabaseManagement):
             # Get template script variables
             py_shebang = Path(activate.parent).expanduser()
             db_path = self.database_path / Path('NCBI') / Path('refseq') / Path('release') / Path(collection_subset)
-            
+
             # Read the upload script
             upload_script = resource_filename(templates.__name__, 'upload_rr_pbs.py')
             with open(upload_script, 'r') as upload_script:
@@ -748,16 +754,16 @@ class DatabaseManagement(BaseDatabaseManagement):
             script_dir = Path(self.user_log, ('upload_rr' + ''.join(rand_str)))
             script_dir.mkdir()
             script_string = temp_script % (py_shebang, file_list, pbs_dict, db_path, upload_number, self.email, str(script_dir / 'upload_config.yml'))
-            
+
             # Create the master upload script
             with open(str(script_dir / 'master_upload_rr_pbs.py'), 'w') as mus:
                 mus.write(script_string)
             os.chmod(str(script_dir / 'master_upload_rr_pbs.py'), mode=0o755)
-            
+
             # Load the configuration file
             with open(str(self.config_file), 'r') as cfg:
                 conf_data = yaml.load(cfg, Loader=yaml.FullLoader)
-            
+
             # Write to the upload config file
             with open(str(script_dir / 'upload_config.yml'), 'w') as upload_cfg:
                 conf_data['Database_config']['ftp_flag'] = False

@@ -157,7 +157,7 @@ class SGEJob(BaseSGEJob):
 
         Submit python code.
 
-        :param code: The python code to be run.
+        :param code: The python code to be run. 
         :param cleanup:  Cleanup your job. (Default value = True)
         :param default:  Default or custom job. (Default value = True)
         """

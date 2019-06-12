@@ -1,8 +1,6 @@
-from .orthologs_blastn import OrthoBlastN
-from .base_blastn import BaseBlastN
+from .blast import BaseBlastN, OrthoBlastN
 from .comparative_genetics import BaseComparativeGenetics, ComparativeGenetics
-from OrthoEvol.Orthologs import OrthologsWarning
-import warnings
+
 
 # Make this explicit, then they show up in the API docs
 __all__ = ("BaseComparativeGenetics",
@@ -10,5 +8,3 @@ __all__ = ("BaseComparativeGenetics",
            "OrthoBlastN",
            "BaseBlastN"
            )
-
-warnings.warn('Ensure that `BLASTDB` and `WINDOW_MASKER_PATH` are set as environment variables.', OrthologsWarning)
