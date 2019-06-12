@@ -35,8 +35,8 @@ class BaseComparativeGenetics(object):
 
     # TODO:  CREAT PRE-BLAST and POST-BLAST functions
     def __init__(self, project=None, project_path=os.getcwd(), acc_file=None,
-                 taxon_file=None, pre_blast=False, post_blast=True, hgnc=False,
-                 proj_mana=None, **kwargs):
+                 taxon_file=None, ref_species=None, pre_blast=False,
+                 post_blast=True, hgnc=False, proj_mana=None, **kwargs):
         """This is the base class for the Blast module.
 
         It parses an accession file in order to provide easy handling for data.
@@ -59,6 +59,7 @@ class BaseComparativeGenetics(object):
                             defined by the ProjectManagement configuration.
         :param acc_file:  The name of the accession file.
         :param taxon_file:  A file that contains an ordered list of taxonomy ids.
+        :param ref_species: A reference species or organism for the blast query.
         :param pre_blast:  A flag that gives the user access to an API that
                         contains extra information about their genes using the
                         mygene package.
@@ -82,7 +83,7 @@ class BaseComparativeGenetics(object):
         # Initialize variables
         self.project_path = project_path
         self.project = project
-        self.species = 'Homo_sapiens'
+        self.ref_species = ref_species
         self.taxon_file = taxon_file
         self.proj_mana = proj_mana
 
@@ -176,7 +177,7 @@ class BaseComparativeGenetics(object):
             # Blast accession numbers
             self.building = copy.deepcopy(self.raw_acc_data)
             del self.building['Tier']
-            del self.building[self.species]
+            del self.building[self.ref_species]
             # Object for good user output
             self.building = self.building.set_index('Gene')
             self.building_file_path = self.data / Path(self.building_filename)
@@ -187,7 +188,7 @@ class BaseComparativeGenetics(object):
                 'building.csv', 'building_time.csv')  # Master time file for the blast
             self.building_time = copy.deepcopy(self.raw_acc_data)
             del self.building_time['Tier']
-            del self.building_time[self.species]
+            del self.building_time[self.ref_species]
             self.building_time = self.building_time.set_index('Gene')
             self.building_time_file_path = self.data / Path(self.building_time_filename)
 
@@ -224,7 +225,7 @@ class BaseComparativeGenetics(object):
             self.pt.columns = pd.Index(array, name='Organism')
 
             # Handles for full dictionaries #### #
-            self.org_dict = self.df.ix[0:, self.species:].to_dict()
+            self.org_dict = self.df.ix[0:, self.ref_species:].to_dict()
             self.gene_dict = self.df.T.to_dict()
             self.get_master_lists(self.__data)  # populates our lists
         else:
@@ -295,7 +296,7 @@ class BaseComparativeGenetics(object):
         self.acc_list = list(self.acc_dict.keys())
 
         # Get blast query list
-        if self.species == 'Homo_sapiens':
+        if self.ref_species == 'Homo_sapiens':
             self.blast_human = self.df.Homo_sapiens.tolist()
             self.blast_rhesus = self.df.Macaca_mulatta.tolist()
 
@@ -435,7 +436,7 @@ class BaseComparativeGenetics(object):
                 query_acc = self.get_accession(gene, org)
                 if query_acc not in go:
                     go[query_acc] = []
-                # TODO-ROB: Rework the missing functino using this.. maybe??
+                # TODO-ROB: Rework the missing function using this.. maybe??
                 elif query_acc == 'missing':
                     continue
                 go_list = [gene, org]
@@ -447,7 +448,8 @@ class BaseComparativeGenetics(object):
 class ComparativeGenetics(BaseComparativeGenetics):
     """Main Comparative Genetics class."""
 
-    def __init__(self, project, template=None, taxon_file=None, post_blast=False, save_data=True, **kwargs):
+    def __init__(self, project, template=None, taxon_file=None, ref_species=None,
+                 post_blast=False, save_data=True, **kwargs):
         """Inherits BaseComparativeGenetics to build a file layer to the Blast workflow.
 
         This class handles all of the files before and after the Blast occurs.
@@ -457,6 +459,7 @@ class ComparativeGenetics(BaseComparativeGenetics):
         :param template:  A template accession file in the desired format.
                           See the Blast README for an example.
         :param taxon_file:  A list of taxon ids in a text file.
+        :param ref_species: A reference species or organism for the blast query.
         :param post_blast:  A flag that triggers the post blast analysis.
         :param save_data:  A flag that indicates whether the data should be
                            saved in an excel file or not.
@@ -468,6 +471,7 @@ class ComparativeGenetics(BaseComparativeGenetics):
                          post_blast=post_blast, hgnc=False, **kwargs)
 
         self.postblastlog = LogIt().default(logname="post blast", logfile=None)
+        self.ref_species = ref_species
 
         self.acc_file = template
         # Private variables
@@ -533,7 +537,7 @@ class ComparativeGenetics(BaseComparativeGenetics):
         temp = self.building.reset_index()
         temp.insert(0, 'Tier', pd.Series(self.df['Tier'].tolist()))
         # TODO: make the query organism insert implicit
-        temp.insert(2, self.species, self.df[self.species])
+        temp.insert(2, self.ref_species, self.df[self.ref_species])
         temp.set_index('Tier')
         if self.save_data is True:
             temp.to_csv(str(self.building_file_path))
@@ -557,7 +561,7 @@ class ComparativeGenetics(BaseComparativeGenetics):
         self.building_time.at[gene, organism] = elapsed_time
         temp = self.building_time.reset_index()
         temp.insert(0, 'Tier', pd.Series(self.df['Tier'].tolist()))
-        temp.insert(2, self.species, self.df[self.species])
+        temp.insert(2, self.ref_species, self.df[self.ref_species])
         temp.set_index('Tier')
         if self.save_data is True:
             temp.to_csv(str(self.building_time_file_path))

@@ -114,7 +114,7 @@ gpcr_blastn.run()
 
 # Use your own accessions file.
 # You don't need to copy from package to use your own genes
-my_blastn = OrthoBlastN(project="orthology-project", method=3,
+my_blastn = OrthoBlastN(project="orthology-project", method=1,
                              save_data=True, acc_file="mygenes.csv", 
                              copy_from_package=False)
 
@@ -130,7 +130,7 @@ from OrthoEvol.Orthologs.Blast import BaseBlastN
 # This is more pythonic with YAML loading
 blastconfig = {
     "project": "test",
-    "blast_method": 3,
+    "method": 1,
     "taxon_file": None,
     "go_list": None,
     "post_blast": True,
@@ -139,10 +139,10 @@ blastconfig = {
     "copy_from_package": False,
     "acc_file": 'test_blast.csv',
     "project_path": None,
-    "proj_mana": None
+    "proj_mana": None,
 }
 
 
 test_blast = BaseBlastN(**blastconfig)
-test_blast.blast_config(test_blast.blast_human, 'Homo_sapiens', auto_start=True)
+test_blast.configure(test_blast.blast_human, 'Homo_sapiens', auto_start=True)
 ```

@@ -20,8 +20,8 @@ from xml.etree.ElementTree import ParseError
 class BaseBlastN(ComparativeGenetics):
     """Base BlastN class."""
 
-    def __init__(self, project, method, acc_file, template=None, save_data=True,
-                 verbose=False, **kwargs):
+    def __init__(self, project, method, acc_file, copy_from_package,
+                 ref_species, template=None, save_data=True, verbose=False, **kwargs):
         """This class inherits from the ComparativeGenetics class.
         This class utilizes it's parent classes to search a standalone
         Blast database for specific orthologs of a gene using a query organism
@@ -31,13 +31,17 @@ class BaseBlastN(ComparativeGenetics):
 
         :param project:  The project name.
         :param method:  Method used for blasting. (1, 2, or None)
+        :param acc_file: The name/path of the accession file.
+        :param copy_from_package: Copy the acc_file from the package. (True or False)
+        :param ref_species: A reference species or organism for the blast query.
         :param template:  The accession file template.
         :param save_data:  A flag for saving the post_blast data to an excel file.
         :param quiet:  A flag for determining the level of logging verbosity.
         :param kwargs:"""
 
         super().__init__(project=project, method=method, acc_file=acc_file,
-                         template=template, save_data=save_data, verbose=verbose, **kwargs)
+                         template=template, save_data=save_data,
+                         verbose=verbose, **kwargs)
 
         if verbose:
             self.blastn_log.setLevel(logging.DEBUG)
@@ -47,6 +51,8 @@ class BaseBlastN(ComparativeGenetics):
         # Method variable
         self.method = method
         self.acc_file = acc_file
+        self.ref_species = ref_species
+        self.copy_from_package = copy_from_package
 
         # Create a date format
         self._fmt = '%a %b %d at %I:%M:%S %p %Y'
@@ -479,15 +485,15 @@ class OrthoBlastN(BaseBlastN):
         self.taxon_file = None
         self.__post_blast = True
         self.project_path = None
+        self.ref_species = 'Homo_sapiens'
         self.proj_mana = None
-        self.acc_file = self.MAF = acc_file
+        self.acc_file = acc_file
         self.copy_from_package = copy_from_package
 
         # Initialize class
         super().__init__(project=project, method=method, template=template,
                          save_data=save_data, acc_file=self.acc_file,
                          copy_from_package=self.copy_from_package,
-                         MAF=self.MAF,
                          taxon_file=self.taxon_file,
                          post_blast=self.__post_blast,
                          project_path=self.project_path,
@@ -495,7 +501,7 @@ class OrthoBlastN(BaseBlastN):
 
     def run(self):
         """Run the blast using a default configuration."""
-        self.configure(self.blast_human, self.species, auto_start=True)
+        self.configure(self.blast_human, self.ref_species, auto_start=True)
 
 
 class BlastFailure(BaseException):

@@ -22,11 +22,12 @@ class TestOrthologs(unittest.TestCase):
         # TIP: Remove the with statement if testing with BLASTDB in your
         # environment variables.
         with self.assertRaises(EnvironmentError):
-            gpcr_blastn = BaseBlastN(project=self.project, method=3,
+            gpcr_blastn = BaseBlastN(project=self.project, method=1,
                                      save_data=True, acc_file="gpcr.csv",
+                                     copy_from_package=True,
+                                     ref_species='Homo_sapiens',
                                      proj_mana=None,
-                                     project_path=self.project_path,
-                                     copy_from_package=True)
+                                     project_path=self.project_path)
             self.assertEqual(gpcr_blastn.proj_mana, None)
             self.assertEqual(gpcr_blastn.acc_file, "gpcr.csv")
             self.assertTrue(gpcr_blastn.copy_from_package)
