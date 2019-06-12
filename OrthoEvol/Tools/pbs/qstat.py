@@ -10,9 +10,10 @@ from dateutil import parser
 import random
 from datetime import datetime
 from time import sleep
-from qwatch import utils
+from OrthoEvol.Manager.config import scripts, yml
 from pkg_resources import resource_filename
-from qwatch import _setup_yaml
+from OrthoEvol.Tools.pbs import _setup_yaml
+from OrthoEvol.Tools import pbs
 
 
 class BaseQwatch(object):
@@ -109,9 +110,9 @@ class BaseQwatch(object):
         self.plot_filename = Path()
         self._new_keyword_log = Path()
         # Initialize utility files
-        self._yaml_config = resource_filename(utils.__name__, 'qstat_dict.yml')
-        self.r_line_graph_filename = resource_filename(utils.__name__, 'line_graph_workflow.R')
-        self._async_filename = resource_filename(utils.__name__, 'async_qwatch.py')
+        self._yaml_config = resource_filename(yml.__name__, 'qstat_dict.yml')
+        self.r_line_graph_filename = resource_filename(scripts.__name__, 'line_graph_workflow.R')
+        self._async_filename = resource_filename(pbs.__name__, 'watcher.py')
         # Initialize other file based attributes
         self.infile = infile
         while directory.is_dir():
