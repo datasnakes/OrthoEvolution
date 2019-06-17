@@ -12,8 +12,15 @@ from datetime import datetime
 from time import sleep
 from OrthoEvol.Manager.config import scripts, yml
 from pkg_resources import resource_filename
-from OrthoEvol.Tools.pbs import _setup_yaml
 from OrthoEvol.Tools import pbs
+
+def represent_dictionary_order(cls, dict_data):
+    return cls.represent_mapping('tag:yaml.org,2002:map', dict_data.items())
+
+
+def _setup_yaml():
+    """ https://stackoverflow.com/a/8661021 """
+    yaml.add_representer(OrderedDict, represent_dictionary_order)
 
 
 class BaseQwatch(object):
