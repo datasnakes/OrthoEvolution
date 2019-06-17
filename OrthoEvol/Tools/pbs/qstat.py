@@ -105,7 +105,7 @@ class BaseQwatch(object):
         elif isinstance(jobs, list):
             self.jobs = jobs
         elif isinstance(jobs, tuple):
-            self.users = list(jobs)
+            self.jobs = list(jobs)
         else:
             raise TypeError("The jobs parameter is a single job string or a multi-job list.")
 
@@ -573,7 +573,7 @@ class Qwatch(BaseQwatch):
         if job_dict:
             data = self.get_data(data_frame=True, python_datetime=python_datetime)
             self.update_csv(file=self.data_filename, data=data)
-            print(f"Updated qstat data for {job_id}")
+            print(f"Updated qstat data for {self.jobs[0]}")
 
             if job_dict[self.jobs[0]]['job_state'] == 'Q':
                 sleep(self.sleeper)
