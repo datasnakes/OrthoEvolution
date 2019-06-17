@@ -129,18 +129,6 @@ class BaseQwatch(object):
         self.watch = watch
         self.sleeper = sleeper
 
-    def update_qstat_data(self, save, process, data):
-        # Save qstat output
-        if save:
-            self.save_qstat_data()
-        # Process qstat output and create the filtered yaml file
-        if process:
-            self.qstat_to_filtered_yaml()
-        # Take the filtered yaml file and create a dictionary
-        if data:
-            _data = self.filtered_yaml_to_dict()
-            return _data
-
     def initialize_file_names(self):
         # Get a filename pattern based on other user input
         if not self.filename_pattern:
@@ -205,6 +193,35 @@ class BaseQwatch(object):
                 if not test:
                     with open(self.yaml_filename, 'w') as yf2:
                         yaml.dump(kept_dict, stream=yf2, default_flow_style=False)
+
+    def filtered_yaml_to_dict(self):
+        """
+        This function loads the yaml file created with qstat_to_filtered_yaml and validates the qstat data.
+        :return: A dictionary of jobs.
+        :rtype: dict
+        """
+        if not self.yaml_filename.is_file() or self.watch is True:
+            self.qstat_to_filtered_yaml()
+        else:
+            with open(self.yaml_filename, 'r') as yf:
+                test = yaml.load(yf)
+                if not test:
+                    self.qstat_to_filtered_yaml()
+        with open(self.yaml_filename, 'r') as yf2:
+            jobs_dict = yaml.load(yf2)
+        return jobs_dict
+
+    def update_qstat_data(self, save, process, data):
+        # Save qstat output
+        if save:
+            self.save_qstat_data()
+        # Process qstat output and create the filtered yaml file
+        if process:
+            self.qstat_to_filtered_yaml()
+        # Take the filtered yaml file and create a dictionary
+        if data:
+            _data = self.filtered_yaml_to_dict()
+            return _data
 
     def qstat_to_dict(self):
         """
@@ -288,23 +305,6 @@ class BaseQwatch(object):
                 qstat_sentence = None
                 prev_item = item
         return mast_dict
-
-    def filtered_yaml_to_dict(self):
-        """
-        This function loads the yaml file created with qstat_to_filtered_yaml and validates the qstat data.
-        :return: A dictionary of jobs.
-        :rtype: dict
-        """
-        if not self.yaml_filename.is_file() or self.watch is True:
-            self.qstat_to_filtered_yaml()
-        else:
-            with open(self.yaml_filename, 'r') as yf:
-                test = yaml.load(yf)
-                if not test:
-                    self.qstat_to_filtered_yaml()
-        with open(self.yaml_filename, 'r') as yf2:
-            jobs_dict = yaml.load(yf2)
-        return jobs_dict
 
     def get_dicts(self, python_datetime=None):
         """
