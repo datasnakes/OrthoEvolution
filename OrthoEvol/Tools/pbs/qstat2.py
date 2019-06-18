@@ -86,6 +86,13 @@ class BaseQstat(object):
         self.cmd = cmd
 
     def configure_data_file(self, extra_data):
+        """
+        Configure the primary data file by appending extra data to it.  The csv header
+        is only appended when the primary data file does not exist.
+
+        :param extra_data:  The abolute path to a csv file that contains qstat data.
+        :type extra_data:  str.
+        """
         # Open infile containing data
         with open(extra_data, 'r') as _if:
             in_data = csv.reader(_if, delimiter=",")
