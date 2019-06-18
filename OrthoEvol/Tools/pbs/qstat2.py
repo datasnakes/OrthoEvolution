@@ -4,13 +4,6 @@ import csv
 
 
 class BaseQstat(object):
-    """
-    The BaseQstat class processes the output from the pbs command 'qstat'.  It
-    specifically parses output from 'qstat -f', which displays a full status report
-    for all of the jobs in the queue.  Because each line of output per job consists of
-    attribute_names and values for those attributes, the qstat data is parsed into a
-    dictionary.  The qstat data is then converted to csv format and saved in a .csv file.
-    """
     # Static qstat Keywords
 
     __misc_kw = ["Checkpoint", "Error_Path", "exec_host", "exec_vnode", "Hold_Types", "Join_Path",
@@ -39,6 +32,30 @@ class BaseQstat(object):
                        }
 
     def __init__(self, job, infile=None, outfile=None, home=None, cmd="qstat -f"):
+        """
+        The BaseQstat class processes the output from the pbs command 'qstat'.  It
+        specifically parses output from 'qstat -f', which displays a full status report
+        for all of the jobs in the queue.  Because each line of output per job consists of
+        attribute_names and values for those attributes, the qstat data is parsed into a
+        dictionary.  The qstat data is then converted to csv format and saved in a .csv file.
+        The Base class only process one job, and it only gathers data on one point in time.
+
+        :param job:  The name of the job to analyze.
+        :type job:  str.
+        :param infile:  The input file and the output file are used in tandem to determine the
+        data file that will be used.  If only one of these values are given (infile/outfile), then
+        it will be used as the data file.  If neither of these values are given, then a default file
+        ("job_data.csv") will be used.  If both are given, then the infile data is appended to the outfile,
+        which is used as the data file.
+        :type infile:  str.
+        :param outfile:  See infile.
+        :type outfile: str.
+        :param home:  An absolute path to the director where qstat data will be stored.
+        :type home:  str.
+        :param cmd:  The qstat command used to produce the job status report.
+        :type cmd:  str.
+        """
+
         self.job = job
         self.outfile = outfile
         if not home:
