@@ -61,7 +61,9 @@ class BaseQstat(object):
         if not home:
             self.home = Path(os.getcwd()) / str(job).replace(".", "")
         else:
-            self.home = home
+            self.home = Path(home)
+        if not self.home.exists():
+            self.home.mkdir(parents=True)
 
         # Use infile as data file whether it exists or not
         if infile is not None and outfile is None:
@@ -76,25 +78,26 @@ class BaseQstat(object):
         # but also append the infile data to it.
         elif infile is not None and outfile is not None:
             self.data_file = self.home / outfile
-            self.configure_data_file(infile=infile)
-
+            # For this to work the infile must be an absolute path.
+            if Path(infile).exists():
+                self.configure_data_file(extra_data=infile)
+            else:
+                raise FileExistsError("The infile must be an absolute path.")
         self.cmd = cmd
 
-    def configure_data_file(self, infile):
-        # For this to work the infile must be an absolute path.
-        if Path(infile).exists():
-            # Open infile containing data
-            with open(infile, 'r') as _if:
-                in_data = csv.reader(_if, delimiter=",")
-                line_count = 0
-                header_flag = Path(self.data_file).exists()
-                with open(self.data_file, 'a') as _df:
-                    out_data = csv.writer(_df, delimiter=",")
-                    for row in in_data:
-                        if line_count == 0:
-                            # Write infile header if data file doesn't exist
-                            if not header_flag:
-                                out_data.writerow(row)
-                            line_count += 1
-                        else:
+    def configure_data_file(self, extra_data):
+        # Open infile containing data
+        with open(extra_data, 'r') as _if:
+            in_data = csv.reader(_if, delimiter=",")
+            line_count = 0
+            header_flag = Path(self.data_file).exists()
+            with open(self.data_file, 'a') as _df:
+                out_data = csv.writer(_df, delimiter=",")
+                for row in in_data:
+                    if line_count == 0:
+                        # Write infile header if data file doesn't exist
+                        if not header_flag:
                             out_data.writerow(row)
+                        line_count += 1
+                    else:
+                        out_data.writerow(row)
