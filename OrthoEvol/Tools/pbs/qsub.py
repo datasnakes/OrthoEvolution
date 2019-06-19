@@ -19,8 +19,8 @@ class BaseQsub(object):
 
     def __init__(self, pbs_script=None):
 
-        self.pbs_log = LogIt().default(logname="PBS JOB", logfile=None)
-        self.pbs_utils = FullUtilities()
+        self.qsub_log = LogIt().default(logname="PBS - QSUB", logfile=None)
+        self.qsub_utils = FullUtilities()
         self.pbs_script = pbs_script
 
     def submit_pbs_script(self):
@@ -32,19 +32,19 @@ class BaseQsub(object):
         try:
             cmd = ['qsub ' + str(self.pbs_script)]  # this is the command
             # Shell MUST be True
-            cmd_status = self.pbs_utils.system_cmd(cmd, stdout=sp.PIPE, stderr=sp.PIPE, shell=True, check=True)
+            proc = self.qsub_utils.system_cmd(cmd, stdout=sp.PIPE, stderr=sp.PIPE, shell=True, check=True)
         except sp.CalledProcessError as err:
-            self.pbs_log.error(err.stderr.decode('utf-8'))
+            self.qsub_log.error(err.stderr.decode('utf-8'))
         else:
-            if cmd_status.returncode == 0:  # Command was successful.
+            if proc.returncode == 0:  # Command was successful.
                 # The cmd_status has stdout that must be decoded.
                 # When a qsub job is submitted, the stdout is the job id.
-                submitted_jobid = cmd_status.stdout.decode('utf-8')
-                self.pbs_log.info(str(self.pbs_script) + ' was submitted.')
-                self.pbs_log.info('Your job id is: %s' % submitted_jobid)
+                submitted_jobid = proc.stdout.decode('utf-8')
+                self.qsub_log.info(str(self.pbs_script) + ' was submitted.')
+                self.qsub_log.info('Your job id is: %s' % submitted_jobid)
 
             else:  # Unsuccessful. Stdout will be '1'
-                self.pbs_log.error('PBS job not submitted.')
+                self.qsub_log.error('PBS job not submitted.')
 
 
 class Qsub(BaseQsub):
@@ -114,11 +114,11 @@ class Qsub(BaseQsub):
         :param jobname: The name of the job being run or to be run.
         """
 
-        self.pbs_log.warning('Your job will now be cleaned up.')
+        self.qsub_log.warning('Your job will now be cleaned up.')
         os.remove(jobname + '.pbs')
-        self.pbs_log.warning('%s.pbs has been deleted.', jobname)
+        self.qsub_log.warning('%s.pbs has been deleted.', jobname)
         os.remove(jobname + '.py')
-        self.pbs_log.warning('%s.py has been deleted.' % jobname)
+        self.qsub_log.warning('%s.py has been deleted.' % jobname)
 
     def format_template_string(self, code=None, template=None, attributes=None):
 
