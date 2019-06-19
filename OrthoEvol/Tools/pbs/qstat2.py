@@ -1,6 +1,9 @@
-from pathlib import Path
 import os
 import csv
+import subprocess as sp
+from pathlib import Path
+from OrthoEvol.utilities import FullUtilities
+from OrthoEvol.Tools.logit import LogIt
 
 
 class BaseQstat(object):
@@ -84,6 +87,9 @@ class BaseQstat(object):
             else:
                 raise FileExistsError("The infile must be an absolute path.")
         self.cmd = cmd
+        self.qstat_utils = FullUtilities()
+        self.qstat_log = LogIt().default(logname="PBS - QSTAT", logfile=None)
+        self.qstat_data = None
 
     def configure_data_file(self, extra_data):
         """
@@ -108,3 +114,19 @@ class BaseQstat(object):
                         line_count += 1
                     else:
                         out_data.writerow(row)
+
+    def get_qstat_output(self):
+        """
+        A function that calls qstat in a subprocess and stores the output
+        in a class variable (qstat_data).  The data is the list returned from
+        readlines().
+        """
+        try:
+            proc = self.qstat_utils.system_cmd(self.cmd, stderr=sp.PIPE, stdout=sp.PIPE, shell=True, encoding='utf-8',
+                                               universal_newlines=False)
+        except sp.CalledProcessError as err:
+            self.qstat_log.error(err.stderr.decode('utf-8'))
+        else:
+            if proc.returncode == 0:
+                self.qstat_data = proc.stdout.readlines()
+
