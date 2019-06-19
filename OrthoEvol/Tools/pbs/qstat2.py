@@ -1,8 +1,12 @@
 import os
 import csv
+import yaml
 import subprocess as sp
+from pkg_resources import resource_filename
+from collections import OrderedDict
 from pathlib import Path
 from OrthoEvol.utilities import FullUtilities
+from OrthoEvol.Manager.config import yml
 from OrthoEvol.Tools.logit import LogIt
 
 
@@ -90,6 +94,8 @@ class BaseQstat(object):
         self.qstat_utils = FullUtilities()
         self.qstat_log = LogIt().default(logname="PBS - QSTAT", logfile=None)
         self.qstat_data = None
+        self.qstat_dict = None
+        self._yaml_config = resource_filename(yml.__name__, 'qstat_dict.yml')
 
     def configure_data_file(self, extra_data):
         """
@@ -130,3 +136,82 @@ class BaseQstat(object):
             if proc.returncode == 0:
                 self.qstat_data = proc.stdout.readlines()
 
+    def parse_qstat_data(self):
+        """
+        The qstat parser takes the qstat data from the 'qstat -f' command and parses it
+        into a ditionary.  It uses the qstat keywords found in the qstat yaml file.
+        """
+        mast_dict = OrderedDict()
+        job_count = 0
+        phrase_continuation_flag = None
+        with open(self._yaml_config, 'r') as yf:
+            qstat_keywords = yaml.load(yf)
+        if isinstance(self.qstat_data, list):
+            qstat_sentence = None
+            continuation_phrase = ""
+            qstat_phrase = ""
+            prev_item = None
+            for item in self.qstat_data:
+                # If a new job is identified then create the nested dictionary
+                if "Job Id" in item:
+                    job_count += 1
+                    _ = item.split(": ")
+                    job_id_key = "%s" % _[1].replace("\r\n", "")
+                    job_id_key = job_id_key.replace("\n", "")
+                    mast_dict[job_id_key] = OrderedDict()
+                    mast_dict[job_id_key]["Job_Id"] = job_id_key
+                # The current line information is used to determine single or multi-lined parsing for the
+                # previous line.
+                # If the a new keyword is recognized, then parse the line.
+                elif "    " in item and any(kw in item for kw in list(qstat_keywords["Job Id"].keys()) + list(qstat_keywords["Job Id"]["Variable_List"].keys())) or item == "\n":
+                    item = item.replace("    ", "")
+                    # Join the multi-lined "phrases" into one "sentence"
+                    if phrase_continuation_flag is True:
+                        qstat_sentence = qstat_phrase + continuation_phrase
+                        phrase_continuation_flag = False
+                    #  If the phrase is a single line
+                    elif qstat_phrase == prev_item:
+                        qstat_sentence = qstat_phrase
+                    # Updates the qstat phrase unless it's in between lines or the end of file
+                    if item != "\n":
+                        qstat_phrase = item
+                    else:
+                        pass
+                # If there is no keyword and tabbed whitespace is recognized, then the current line
+                # is a continuation phrase for the most recent qstat keyword
+                elif "\t" in item:
+                    phrase_continuation_flag = True
+                    continuation_phrase = continuation_phrase + item
+
+                # For multi-line phrases format the qstat sentence
+                if phrase_continuation_flag is False:
+                    qstat_sentence = qstat_sentence.replace("\n\t", "").replace('\n', '')
+                    continuation_phrase = ""
+                    phrase_continuation_flag = None
+                    qstat_list = qstat_sentence.split(" = ")
+                    qstat_keyword = qstat_list[0]
+                    qstat_value = qstat_list[1]
+                    # The variable list is unique in that it can be split into a dictionary of
+                    # environment variables
+                    if qstat_keyword == "Variable_List":
+                        qstat_value = qstat_value.split(",")
+                        temp_dict = OrderedDict(var.split("=") for var in qstat_value)
+                        for vl_key, vl_value in temp_dict.items():
+                            if vl_value[0] == "/" or vl_value[0] == "\\":
+                                vl_value = Path(vl_value)
+                            temp_dict[vl_key] = vl_value
+                        mast_dict[job_id_key]["Variable_List"] = temp_dict
+                    # All of the other qstat keywords/sentences are basic key/value pairs
+                    else:
+                        mast_dict[job_id_key][qstat_keyword] = qstat_value
+
+                # For single line Phrases
+                elif qstat_sentence:
+                    qstat_sentence = qstat_sentence.replace("\n\t", "")
+                    qstat_list = qstat_sentence.split(" = ")
+                    qstat_keyword = qstat_list[0]
+                    qstat_value = qstat_list[1]
+                    mast_dict[job_id_key][qstat_keyword] = qstat_value.replace('\n', '')
+                qstat_sentence = None
+                prev_item = item
+        self.qstat_dict = mast_dict
