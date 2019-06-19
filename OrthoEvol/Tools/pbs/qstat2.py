@@ -63,7 +63,7 @@ class BaseQstat(object):
         :type cmd:  str.
         """
 
-        self.job = job
+        self.target_job = job
         self.outfile = outfile
         if not home:
             self.home = Path(os.getcwd()) / str(job).replace(".", "")
@@ -95,6 +95,7 @@ class BaseQstat(object):
         self.qstat_log = LogIt().default(logname="PBS - QSTAT", logfile=None)
         self.qstat_data = None
         self.qstat_dict = None
+        self.target_job_dict = None
         self._yaml_config = resource_filename(yml.__name__, 'qstat_dict.yml')
 
     def configure_data_file(self, extra_data):
@@ -215,3 +216,16 @@ class BaseQstat(object):
                 qstat_sentence = None
                 prev_item = item
         self.qstat_dict = mast_dict
+
+    def filter_qstat_data(self):
+        """
+        Filter the qstat data and keep the target job.
+        :param job_dict:
+        :type job_dict:
+        :return:
+        :rtype:
+        """
+        for j in self.qstat_dict.keys():
+            if self.qstat_dict[j]["Job_Id"] == self.target_job:
+                self.target_job_dict = j
+
