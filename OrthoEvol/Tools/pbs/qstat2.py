@@ -225,13 +225,16 @@ class BaseQstat(object):
                 prev_item = item
         return mast_dict
 
-    def qstat_to_csv(self, file, qstat_dict, target_job):
+    def dataframe_to_csv(self, file, qstat_dict, target_job, overwrite=False):
         data_file = Path(file)
         target_df = self.get_target_dataframe(qstat_dict=qstat_dict, target_job=target_job)
         if data_file.is_file():
-            file_df = pd.read_csv(file, index_col=False)
-            updated_df = pd.concat([file_df, target_df])
-            updated_df.to_csv(file, index=False, index_label=False)
+            if not overwrite:
+                file_df = pd.read_csv(file, index_col=False)
+                updated_df = pd.concat([file_df, target_df])
+                updated_df.to_csv(file, index=False, index_label=False)
+            else:
+                target_df.to_csv(str(data_file), index=False, index_label=False)
         else:
             target_df.to_csv(str(data_file), index=False, index_label=False)
 
@@ -278,7 +281,7 @@ class BaseQstat(object):
         data_dict = OrderedDict()
         # Store the python datetime
         data_dict["datetime"] = [python_datetime]
-        data_dict["Job_Id"] = target_job
+        data_dict["Job_Id"] = [target_job]
         for keyword in qstat_dict[target_job].keys():
             # Store all of the dynamic data so that it can be converted to a dataframe.
             if keyword in self.__dynamic_kw:
