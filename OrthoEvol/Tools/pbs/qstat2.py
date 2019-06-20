@@ -2,6 +2,8 @@ import os
 import csv
 import yaml
 import subprocess as sp
+from dateutil import parser
+from datetime import datetime
 from pkg_resources import resource_filename
 from collections import OrderedDict
 from pathlib import Path
@@ -98,10 +100,10 @@ class BaseQstat(object):
         # QSTAT data objects
         self.qstat_data = None
         self.qstat_dict = None
+        self.static_data = None
         self.qstat_dataframe = None
         self.target_job_dict = None
         self.target_job_dataframe = None
-
 
     def configure_data_file(self, extra_data):
         """
@@ -220,7 +222,7 @@ class BaseQstat(object):
                     mast_dict[job_id_key][qstat_keyword] = qstat_value.replace('\n', '')
                 qstat_sentence = None
                 prev_item = item
-        self.qstat_dict = mast_dict
+        return mast_dict
 
     def filter_qstat_jobs(self, qstat_dict, target_job):
         """
@@ -237,5 +239,23 @@ class BaseQstat(object):
         else:
             return target_job_dict
 
-    def qstat_to_dataframe(self):
-        pass
+    def filter_qstat_keywords(self, qstat_dict, static_flag=False, python_datetime=datetime.now()):
+        data_dict = OrderedDict()
+        for job in qstat_dict.keys():
+            data_dict[job] = OrderedDict()
+            # Store the python datetime
+            if not static_flag:
+                data_dict[job]["datetime"] = [python_datetime]
+            for keyword in qstat_dict[job].keys():
+                # Store all of the dynamic data so that it can be converted to a dataframe.
+                if not static_flag:
+                    if keyword in self.__dynamic_kw:
+                        data_dict[job][keyword] = [qstat_dict[job][keyword]]
+                # Copy the static data.
+                else:
+                    if keyword in self.__static_kw:
+                        if keyword in self.__job_time_kw:
+                            data_dict[job][keyword] = str(parser.parse(qstat_dict[job][keyword]))
+                        else:
+                            data_dict[job][keyword] = qstat_dict[job][keyword]
+        return data_dict
