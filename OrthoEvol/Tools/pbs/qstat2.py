@@ -106,7 +106,7 @@ class BaseQstat(object):
         self.target_job_dict = None
         self.target_job_dataframe = None
 
-    def configure_data_file(self, extra_data):
+    def configure_data_file(self, file, extra_data):
         """
         Configure the primary data file by appending extra data to it.  The csv header
         is only appended when the primary data file does not exist.
@@ -114,12 +114,13 @@ class BaseQstat(object):
         :param extra_data:  The abolute path to a csv file that contains qstat data.
         :type extra_data:  str.
         """
+        data_file = Path(file)
         # Open infile containing data
         with open(extra_data, 'r') as _if:
             in_data = csv.reader(_if, delimiter=",")
             line_count = 0
-            header_flag = Path(self.data_file).exists()
-            with open(self.data_file, 'a') as _df:
+            header_flag = data_file.exists()
+            with open(str(data_file), 'a') as _df:
                 out_data = csv.writer(_df, delimiter=",")
                 for row in in_data:
                     if line_count == 0:
