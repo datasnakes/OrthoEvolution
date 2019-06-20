@@ -137,7 +137,7 @@ class BaseQstat(object):
             if proc.returncode == 0:
                 self.qstat_data = proc.stdout.readlines()
 
-    def parse_qstat_data(self):
+    def qstat_to_dict(self):
         """
         The qstat parser takes the qstat data from the 'qstat -f' command and parses it
         into a ditionary.  It uses the qstat keywords found in the qstat yaml file.
@@ -217,13 +217,10 @@ class BaseQstat(object):
                 prev_item = item
         self.qstat_dict = mast_dict
 
-    def filter_qstat_data(self):
+    def filter_qstat(self):
         """
-        Filter the qstat data and keep the target job.
-        :param job_dict:
-        :type job_dict:
-        :return:
-        :rtype:
+        Filter out all of the qstat jobs other than the target job.  This sets up the
+        class variables for the target dataframe and target dictionary.
         """
         for j in self.qstat_dict.keys():
             if self.qstat_dict[j]["Job_Id"] == self.target_job:
