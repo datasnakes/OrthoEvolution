@@ -131,20 +131,21 @@ class BaseQstat(object):
                     else:
                         out_data.writerow(row)
 
-    def get_qstat_output(self):
+    def get_qstat_output(self, cmd):
         """
         A function that calls qstat in a subprocess and stores the output
         in a class variable (qstat_data).  The data is the list returned from
         readlines().
         """
         try:
-            proc = self.qstat_utils.system_cmd(self.cmd, stderr=sp.PIPE, stdout=sp.PIPE, shell=True, encoding='utf-8',
+            proc = self.qstat_utils.system_cmd(cmd, stderr=sp.PIPE, stdout=sp.PIPE, shell=True, encoding='utf-8',
                                                universal_newlines=False)
         except sp.CalledProcessError as err:
             self.qstat_log.error(err.stderr.decode('utf-8'))
         else:
             if proc.returncode == 0:
-                self.qstat_data = proc.stdout.readlines()
+                qstat_data = proc.stdout.readlines()
+                return qstat_data
 
     def qstat_to_dict(self, qstat_data):
         """
