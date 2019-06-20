@@ -225,25 +225,30 @@ class BaseQstat(object):
                 prev_item = item
         return mast_dict
 
-    def filter_qstat_jobs(self, qstat_dict, target_job):
+    def qstat_to_csv(self, file, qstat_dict, target_job):
+        data_file = Path(file)
+        target_df = self.get_target_dataframe(qstat_dict=qstat_dict, target_job=target_job)
+        if data_file.is_file():
+            file_df = pd.read_csv(file, index_col=False)
+            updated_df = pd.concat([file_df, target_df])
+            updated_df.to_csv(file, index=False, index_label=False)
+        else:
+            target_df.to_csv(str(data_file), index=False, index_label=False)
+
+    def get_target_data(self, qstat_dict, target_job):
         """
         Filter out all of the qstat jobs other than the target job.  This sets up the
         class variables for the target dataframe and target dictionary.
         """
-        target_job_dict = None
-        for j in qstat_dict.keys():
-            if qstat_dict[j]["Job_Id"] == target_job:
-                target_job_dict = qstat_dict[j]
-                break
-        if not target_job_dict:
+        if target_job not in qstat_dict.keys():
             raise ValueError("The target job does not exist in the qstat data provided.")
-        else:
-            return target_job_dict
+        target_job_dict = qstat_dict[target_job]
+        return target_job_dict
 
-    def filter_qstat_keywords(self, qstat_dict, static_flag=False, python_datetime=datetime.now()):
+    def get_static_target_data(self, qstat_dict, target_job):
         """
-        This function takes a qstat dictionary and returns a dictionary that contains "dynamic" data that can be plotted
-        or "static" data related to the jobs.
+        This function takes a qstat dictionary and returns a dictionary that contains
+        "static" data related to the job of interest.
         :param qstat_dict:
         :type qstat_dict:
         :param static_flag:
@@ -253,32 +258,34 @@ class BaseQstat(object):
         :return:
         :rtype:
         """
-        data_dict = OrderedDict()
-        if static_flag:
-            for job in qstat_dict.keys():
-                data_dict[job] = OrderedDict()
-                for keyword in qstat_dict[job].keys():
-                    if keyword in self.__static_kw:
-                        if keyword in self.__job_time_kw:
-                            data_dict[job][keyword] = str(parser.parse(qstat_dict[job][keyword]))
-                        else:
-                            data_dict[job][keyword] = qstat_dict[job][keyword]
-            _data = data_dict
-        else:
-            for job in qstat_dict.keys():
-                data_dict[job] = OrderedDict()
-                # Store the python datetime
-                data_dict[job]["datetime"] = [python_datetime]
-                for keyword in qstat_dict[job].keys():
-                    # Store all of the dynamic data so that it can be converted to a dataframe.
-                    if keyword in self.__dynamic_kw:
-                        data_dict[job][keyword] = [qstat_dict[job][keyword]]
+        if target_job not in qstat_dict.keys():
+            raise ValueError("The target job does not exist in the qstat data provided.")
 
-            # Finish converting dynamic data into a pandas dataframe
-            if len(qstat_dict.keys()) > 0:
-                data_frame = pd.DataFrame.from_dict(data_dict)
-            else:
-                for job in qstat_dict.keys():
-                    data_frame = pd.DataFrame.from_dict(dict(qstat_dict[job]))
-            _data = data_frame
-        return _data
+        data_dict = OrderedDict()
+        data_dict[target_job] = OrderedDict()
+        for keyword in qstat_dict[target_job].keys():
+            if keyword in self.__static_kw:
+                if keyword in self.__job_time_kw:
+                    data_dict[target_job][keyword] = str(parser.parse(qstat_dict[target_job][keyword]))
+                else:
+                    data_dict[target_job][keyword] = qstat_dict[target_job][keyword]
+        return data_dict
+
+    def get_target_dataframe(self, qstat_dict, target_job, python_datetime=datetime.now()):
+        if target_job not in qstat_dict.keys():
+            raise ValueError("The target job does not exist in the qstat data provided.")
+
+        data_dict = OrderedDict()
+        # Store the python datetime
+        data_dict["datetime"] = [python_datetime]
+        data_dict["Job_Id"] = target_job
+        for keyword in qstat_dict[target_job].keys():
+            # Store all of the dynamic data so that it can be converted to a dataframe.
+            if keyword in self.__dynamic_kw:
+                data_dict[keyword] = [qstat_dict[target_job][keyword]]
+
+        # Finish converting dynamic data into a pandas dataframe
+        df = pd.DataFrame.from_dict(dict(data_dict))
+        return df
+
+
