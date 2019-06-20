@@ -63,6 +63,10 @@ class BaseQstat(object):
         :type cmd:  str.
         """
 
+        self.qstat_utils = FullUtilities()
+        self.qstat_log = LogIt().default(logname="PBS - QSTAT", logfile=None)
+        self._yaml_config = resource_filename(yml.__name__, 'qstat_dict.yml')
+        self.cmd = cmd
         self.target_job = job
         self.outfile = outfile
         if not home:
@@ -90,13 +94,14 @@ class BaseQstat(object):
                 self.configure_data_file(extra_data=infile)
             else:
                 raise FileExistsError("The infile must be an absolute path.")
-        self.cmd = cmd
-        self.qstat_utils = FullUtilities()
-        self.qstat_log = LogIt().default(logname="PBS - QSTAT", logfile=None)
+
+        # QSTAT data objects
         self.qstat_data = None
         self.qstat_dict = None
+        self.qstat_dataframe = None
         self.target_job_dict = None
-        self._yaml_config = resource_filename(yml.__name__, 'qstat_dict.yml')
+        self.target_job_dataframe = None
+
 
     def configure_data_file(self, extra_data):
         """
@@ -226,3 +231,5 @@ class BaseQstat(object):
             if self.qstat_dict[j]["Job_Id"] == self.target_job:
                 self.target_job_dict = j
 
+    def qstat_to_dataframe(self):
+        pass
