@@ -142,7 +142,7 @@ class BaseQstat(object):
             if proc.returncode == 0:
                 self.qstat_data = proc.stdout.readlines()
 
-    def qstat_to_dict(self):
+    def qstat_to_dict(self, qstat_data):
         """
         The qstat parser takes the qstat data from the 'qstat -f' command and parses it
         into a ditionary.  It uses the qstat keywords found in the qstat yaml file.
@@ -152,12 +152,12 @@ class BaseQstat(object):
         phrase_continuation_flag = None
         with open(self._yaml_config, 'r') as yf:
             qstat_keywords = yaml.load(yf)
-        if isinstance(self.qstat_data, list):
+        if isinstance(qstat_data, list):
             qstat_sentence = None
             continuation_phrase = ""
             qstat_phrase = ""
             prev_item = None
-            for item in self.qstat_data:
+            for item in qstat_data:
                 # If a new job is identified then create the nested dictionary
                 if "Job Id" in item:
                     job_count += 1
@@ -222,14 +222,20 @@ class BaseQstat(object):
                 prev_item = item
         self.qstat_dict = mast_dict
 
-    def filter_qstat(self):
+    def filter_qstat_jobs(self, qstat_dict, target_job):
         """
         Filter out all of the qstat jobs other than the target job.  This sets up the
         class variables for the target dataframe and target dictionary.
         """
-        for j in self.qstat_dict.keys():
-            if self.qstat_dict[j]["Job_Id"] == self.target_job:
-                self.target_job_dict = j
+        target_job_dict = None
+        for j in qstat_dict.keys():
+            if qstat_dict[j]["Job_Id"] == target_job:
+                target_job_dict = qstat_dict[j]
+                break
+        if not target_job_dict:
+            raise ValueError("The target job does not exist in the qstat data provided.")
+        else:
+            return target_job_dict
 
     def qstat_to_dataframe(self):
         pass
