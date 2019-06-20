@@ -2,6 +2,7 @@ import os
 import csv
 import yaml
 import subprocess as sp
+import pandas as pd
 from dateutil import parser
 from datetime import datetime
 from pkg_resources import resource_filename
@@ -240,22 +241,44 @@ class BaseQstat(object):
             return target_job_dict
 
     def filter_qstat_keywords(self, qstat_dict, static_flag=False, python_datetime=datetime.now()):
+        """
+        This function takes a qstat dictionary and returns a dictionary that contains "dynamic" data that can be plotted
+        or "static" data related to the jobs.
+        :param qstat_dict:
+        :type qstat_dict:
+        :param static_flag:
+        :type static_flag:
+        :param python_datetime:
+        :type python_datetime:
+        :return:
+        :rtype:
+        """
         data_dict = OrderedDict()
-        for job in qstat_dict.keys():
-            data_dict[job] = OrderedDict()
-            # Store the python datetime
-            if not static_flag:
-                data_dict[job]["datetime"] = [python_datetime]
-            for keyword in qstat_dict[job].keys():
-                # Store all of the dynamic data so that it can be converted to a dataframe.
-                if not static_flag:
-                    if keyword in self.__dynamic_kw:
-                        data_dict[job][keyword] = [qstat_dict[job][keyword]]
-                # Copy the static data.
-                else:
+        if static_flag:
+            for job in qstat_dict.keys():
+                data_dict[job] = OrderedDict()
+                for keyword in qstat_dict[job].keys():
                     if keyword in self.__static_kw:
                         if keyword in self.__job_time_kw:
                             data_dict[job][keyword] = str(parser.parse(qstat_dict[job][keyword]))
                         else:
                             data_dict[job][keyword] = qstat_dict[job][keyword]
-        return data_dict
+            _data = data_dict
+        else:
+            for job in qstat_dict.keys():
+                data_dict[job] = OrderedDict()
+                # Store the python datetime
+                data_dict[job]["datetime"] = [python_datetime]
+                for keyword in qstat_dict[job].keys():
+                    # Store all of the dynamic data so that it can be converted to a dataframe.
+                    if keyword in self.__dynamic_kw:
+                        data_dict[job][keyword] = [qstat_dict[job][keyword]]
+
+            # Finish converting dynamic data into a pandas dataframe
+            if len(qstat_dict.keys()) > 0:
+                data_frame = pd.DataFrame.from_dict(data_dict)
+            else:
+                for job in qstat_dict.keys():
+                    data_frame = pd.DataFrame.from_dict(dict(qstat_dict[job]))
+            _data = data_frame
+        return _data
