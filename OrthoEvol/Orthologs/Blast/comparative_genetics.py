@@ -468,7 +468,8 @@ class ComparativeGenetics(BaseComparativeGenetics):
                    and after blasting."""
 
         super().__init__(project=project, taxon_file=taxon_file,
-                         post_blast=post_blast, hgnc=False, **kwargs)
+                         ref_species=ref_species, post_blast=post_blast, 
+                         hgnc=False, **kwargs)
 
         self.postblastlog = LogIt().default(logname="post blast", logfile=None)
         self.ref_species = ref_species

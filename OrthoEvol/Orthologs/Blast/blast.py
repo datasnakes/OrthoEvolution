@@ -40,8 +40,9 @@ class BaseBlastN(ComparativeGenetics):
         :param kwargs:"""
 
         super().__init__(project=project, method=method, acc_file=acc_file,
-                         template=template, save_data=save_data,
-                         verbose=verbose, **kwargs)
+                         copy_from_package=copy_from_package, 
+                         ref_species=ref_species, template=template,
+                         save_data=save_data, verbose=verbose, **kwargs)
 
         if verbose:
             self.blastn_log.setLevel(logging.DEBUG)
@@ -484,7 +485,7 @@ class OrthoBlastN(BaseBlastN):
         # Set values for methods to prevent using a config.
         self.taxon_file = None
         self.__post_blast = True
-        self.project_path = None
+        self.project_path = os.getcwd()
         self.ref_species = 'Homo_sapiens'
         self.proj_mana = None
         self.acc_file = acc_file
@@ -494,6 +495,7 @@ class OrthoBlastN(BaseBlastN):
         super().__init__(project=project, method=method, template=template,
                          save_data=save_data, acc_file=self.acc_file,
                          copy_from_package=self.copy_from_package,
+                         ref_species=self.ref_species,
                          taxon_file=self.taxon_file,
                          post_blast=self.__post_blast,
                          project_path=self.project_path,
