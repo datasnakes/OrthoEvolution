@@ -131,7 +131,7 @@ class BaseQstat(object):
                     else:
                         out_data.writerow(row)
 
-    def get_qstat_output(self, cmd):
+    def qstat_data(self, cmd):
         """
         A function that calls qstat in a subprocess and stores the output
         in a class variable (qstat_data).  The data is the list returned from
@@ -147,7 +147,7 @@ class BaseQstat(object):
                 qstat_data = proc.stdout.readlines()
                 return qstat_data
 
-    def qstat_to_dict(self, qstat_data):
+    def to_dict(self, qstat_data):
         """
         The qstat parser takes the qstat data from the 'qstat -f' command and parses it
         into a ditionary.  It uses the qstat keywords found in the qstat yaml file.
@@ -227,20 +227,7 @@ class BaseQstat(object):
                 prev_item = item
         return mast_dict
 
-    def dataframe_to_csv(self, file, qstat_dict, target_job, overwrite=False):
-        data_file = Path(file)
-        target_df = self.get_target_dataframe(qstat_dict=qstat_dict, target_job=target_job)
-        if data_file.is_file():
-            if not overwrite:
-                file_df = pd.read_csv(file, index_col=False)
-                updated_df = pd.concat([file_df, target_df])
-                updated_df.to_csv(file, index=False, index_label=False)
-            else:
-                target_df.to_csv(str(data_file), index=False, index_label=False)
-        else:
-            target_df.to_csv(str(data_file), index=False, index_label=False)
-
-    def get_target_data(self, qstat_dict, target_job):
+    def target_data(self, qstat_dict, target_job):
         """
         Filter out all of the qstat jobs other than the target job.  This sets up the
         class variables for the target dataframe and target dictionary.
@@ -250,7 +237,7 @@ class BaseQstat(object):
         target_job_dict = qstat_dict[target_job]
         return target_job_dict
 
-    def get_static_target_data(self, qstat_dict, target_job):
+    def static_data(self, qstat_dict, target_job):
         """
         This function takes a qstat dictionary and returns a dictionary that contains
         "static" data related to the job of interest.
@@ -276,7 +263,7 @@ class BaseQstat(object):
                     data_dict[target_job][keyword] = qstat_dict[target_job][keyword]
         return data_dict
 
-    def get_target_dataframe(self, qstat_dict, target_job, python_datetime=datetime.now()):
+    def to_dataframe(self, qstat_dict, target_job, python_datetime=datetime.now()):
         if target_job not in qstat_dict.keys():
             raise ValueError("The target job does not exist in the qstat data provided.")
 
@@ -293,4 +280,17 @@ class BaseQstat(object):
         df = pd.DataFrame.from_dict(dict(data_dict))
         return df
 
+    def to_csv(self, file, qstat_dict, target_job, overwrite=False):
+        data_file = Path(file)
+        target_df = self.to_dataframe(qstat_dict=qstat_dict, target_job=target_job)
+        if data_file.is_file():
+            if not overwrite:
+                with open(data_file, 'a') as _f:
+                    target_df.to_csv(_f, header=False, index=False, index_label=False)
+            else:
+                with open(data_file, 'w') as _f:
+                    target_df.to_csv(str(data_file), index=False, index_label=False)
+        else:
+            with open(data_file, 'w') as _f:
+                target_df.to_csv(str(data_file), index=False, index_label=False)
 
