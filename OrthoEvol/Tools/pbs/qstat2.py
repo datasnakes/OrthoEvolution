@@ -341,3 +341,9 @@ class BaseQstat(object):
 
     def to_sqlite(self):
         pass
+
+
+class Qstat(BaseQstat):
+
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
