@@ -111,7 +111,9 @@ class BaseQstat(object):
         Configure the primary data file by appending extra data to it.  The csv header
         is only appended when the primary data file does not exist.
 
-        :param extra_data:  The abolute path to a csv file that contains qstat data.
+        :param file:  The absolute path to a csv file that will be updated.
+        :type file:  str.
+        :param extra_data:  The abolute path to a csv file that contains extra qstat data.
         :type extra_data:  str.
         """
         data_file = Path(file)
@@ -136,6 +138,12 @@ class BaseQstat(object):
         A function that calls qstat in a subprocess and stores the output
         in a class variable (qstat_data).  The data is the list returned from
         readlines().
+
+        :param cmd:  The qstat command used to generate qstat data.  This is usually
+        'qstat -f'
+        :type cmd:  str.
+        :return:  Output generated and read from the qstat command.
+        :rtype:  list.
         """
         try:
             proc = self.qstat_utils.system_cmd(cmd, stderr=sp.PIPE, stdout=sp.PIPE, shell=True, encoding='utf-8',
@@ -151,6 +159,11 @@ class BaseQstat(object):
         """
         The qstat parser takes the qstat data from the 'qstat -f' command and parses it
         into a ditionary.  It uses the qstat keywords found in the qstat yaml file.
+
+        :param qstat_data:  Output data generated from the qstat command.
+        :type qstat_data:  list.
+        :return:  A nest dictionary that uses JobId's as keys.
+        :rtype:  dict.
         """
         mast_dict = OrderedDict()
         job_count = 0
@@ -231,6 +244,13 @@ class BaseQstat(object):
         """
         Filter out all of the qstat jobs other than the target job.  This sets up the
         class variables for the target dataframe and target dictionary.
+
+                :param qstat_dict:  Qstat data that has been parsed into a dictionary.
+        :type qstat_dict:  dict.
+        :param target_job:  The target job that's being analyzed.
+        :type target_job:  str.
+        :return:  A dictionary that contains all of the target job's static and dynamic data.
+        :rtype:  dict.
         """
         if target_job not in qstat_dict.keys():
             raise ValueError("The target job does not exist in the qstat data provided.")
@@ -241,14 +261,13 @@ class BaseQstat(object):
         """
         This function takes a qstat dictionary and returns a dictionary that contains
         "static" data related to the job of interest.
-        :param qstat_dict:
-        :type qstat_dict:
-        :param static_flag:
-        :type static_flag:
-        :param python_datetime:
-        :type python_datetime:
-        :return:
-        :rtype:
+
+        :param qstat_dict:  Qstat data that has been parsed into a dictionary.
+        :type qstat_dict:  dict.
+        :param target_job:  The target job that's being analyzed.
+        :type target_job:  str.
+        :return:  A dictionary that contains the static data of the target job.
+        :rtype:  dict.
         """
         if target_job not in qstat_dict.keys():
             raise ValueError("The target job does not exist in the qstat data provided.")
@@ -264,6 +283,19 @@ class BaseQstat(object):
         return data_dict
 
     def to_dataframe(self, qstat_dict, target_job, python_datetime=datetime.now()):
+        """
+        Convert a qstat dictionary to a dataframe that contains data, which can be
+        plotted.
+
+        :param qstat_dict:  Qstat data that has been parsed into a dictionary.
+        :type qstat_dict:  dict.
+        :param target_job:  The target job that's being analyzed.
+        :type target_job:  str.
+        :param python_datetime:  The date and time that the qstat data was collected.
+        :type python_datetime:  str.
+        :return:  A dataframe that contains dynamic data.
+        :rtype:  pd.DataFrame
+        """
         if target_job not in qstat_dict.keys():
             raise ValueError("The target job does not exist in the qstat data provided.")
 
@@ -281,6 +313,19 @@ class BaseQstat(object):
         return df
 
     def to_csv(self, file, qstat_dict, target_job, overwrite=False):
+        """
+        Convert a qstat dictionary to a csv file that contains data, which can be
+        plotted.
+
+        :param file:  The absolute path of the csv file.
+        :type file:  str.
+        :param qstat_dict:  Qstat data that has been parsed into a dictionary.
+        :type qstat_dict:  dict.
+        :param target_job:  The target job that's being analyzed.
+        :type target_job:  str.
+        :param overwrite:  A flag to determine weather the csv file will be overwritten.
+        :type overwrite:  bool.
+        """
         data_file = Path(file)
         target_df = self.to_dataframe(qstat_dict=qstat_dict, target_job=target_job)
         if data_file.is_file():
