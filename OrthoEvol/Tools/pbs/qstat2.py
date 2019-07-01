@@ -101,10 +101,9 @@ class BaseQstat(object):
         # QSTAT data objects
         self.qstat_data = None
         self.qstat_dict = None
-        self.static_data = None
-        self.qstat_dataframe = None
-        self.target_job_dict = None
-        self.target_job_dataframe = None
+        self.job_dict = None
+        self.static_dict = None
+        self.job_dataframe = None
 
     def configure_data_file(self, file, extra_data):
         """
@@ -133,10 +132,29 @@ class BaseQstat(object):
                     else:
                         out_data.writerow(row)
 
-    def qstat_data(self, cmd):
+    def run_qstat(self, csv_flag=True, sqlite_flag=False):
         """
-        A function that calls qstat in a subprocess and stores the output
-        in a class variable (qstat_data).  The data is the list returned from
+        This method runs the qstat command, generates qstat data, parses it into various formats,
+        and saves the data if desired.
+
+        :param csv_flag:  A flag that determines if the data is saved in a csv file.
+        :type csv_flag:  bool.
+        :param sqlite_flag:  A flag that determines if the data is saved in a sqlite database.
+        :type sqlite_flag:  bool.
+        """
+        self.qstat_data = self.qstat_output(cmd=self.cmd)
+        self.qstat_dict = self.to_dict(qstat_data=self.qstat_data)
+        self.job_dict = self.target_data(qstat_dict=self.qstat_dict, target_job=self.target_job)
+        self.static_dict = self.static_data(qstat_dict=self.qstat_dict, target_job=self.target_job)
+        self.job_dataframe = self.to_dataframe(qstat_dict=self.qstat_dict, target_job=self.target_job)
+        if csv_flag:
+            self.to_csv(file=self.data_file, qstat_dict=self.qstat_dict, target_job=self.target_job)
+        if sqlite_flag:
+            self.to_sqlite()
+
+    def qstat_output(self, cmd):
+        """
+        A function that calls qstat via subprocess.  The data is the list returned from
         readlines().
 
         :param cmd:  The qstat command used to generate qstat data.  This is usually
