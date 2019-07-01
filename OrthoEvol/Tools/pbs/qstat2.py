@@ -94,7 +94,7 @@ class BaseQstat(object):
             self.data_file = self.home / outfile
             # For this to work the infile must be an absolute path.
             if Path(infile).exists():
-                self.configure_data_file(extra_data=infile)
+                self.configure_data_file(file=self.data_file, extra_data=infile)
             else:
                 raise FileExistsError("The infile must be an absolute path.")
 
