@@ -294,3 +294,5 @@ class BaseQstat(object):
             with open(data_file, 'w') as _f:
                 target_df.to_csv(str(data_file), index=False, index_label=False)
 
+    def to_sqlite(self):
+        pass
