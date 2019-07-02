@@ -15,6 +15,7 @@ from OrthoEvol.Manager.config import yml
 from OrthoEvol.Tools.logit import LogIt
 from OrthoEvol.Tools.pbs import TargetJobKeyError
 
+
 class BaseQstat(object):
     # Static qstat Keywords
 
@@ -99,6 +100,7 @@ class BaseQstat(object):
                 self.configure_data_file(file=self.data_file, extra_data=infile)
             else:
                 raise FileExistsError("The infile must be an absolute path.")
+        self.info_file = self.data_file.parent / (str(self.data_file.stem) + '.yml')
 
         # QSTAT data objects
         self.qstat_data = None
@@ -144,13 +146,19 @@ class BaseQstat(object):
         :param sqlite_flag:  A flag that determines if the data is saved in a sqlite database.
         :type sqlite_flag:  bool.
         """
+        # Get raw qstat data
         self.qstat_data = self.qstat_output(cmd=self.cmd)
+        # Convert raw data to nested dictionary
         self.qstat_dict = self.to_dict(qstat_data=self.qstat_data)
+        # Isolate data for target PBS job
         self.job_dict = self.target_data(qstat_dict=self.qstat_dict, target_job=self.target_job)
+        # Isolate static data for target PBS job
         self.static_dict = self.static_data(qstat_dict=self.qstat_dict, target_job=self.target_job)
+        # Create a pandas dataframe for target PBS job, formatted for creating a CSV file.
         self.job_dataframe = self.to_dataframe(qstat_dict=self.qstat_dict, target_job=self.target_job)
         if csv_flag:
             self.to_csv(file=self.data_file, qstat_dict=self.qstat_dict, target_job=self.target_job)
+            self.static_data_to_yaml(file=self.info_file, qstat_dict=self.qstat_dict, target_job=self.target_job)
         if sqlite_flag:
             self.to_sqlite()
 
@@ -302,6 +310,20 @@ class BaseQstat(object):
                     data_dict[target_job][keyword] = qstat_dict[target_job][keyword]
         return data_dict
 
+    def static_data_to_yaml(self, file, qstat_dict, target_job, overwrite=False):
+        data_file = Path(file)
+        static_data = self.static_data(qstat_dict=qstat_dict, target_job=target_job)
+        if data_file.is_file():
+            if not overwrite:
+                with open(data_file, 'a') as _f:
+                    yaml.dump(static_data, _f, default_flow_style=False)
+            else:
+                with open(data_file, 'w') as _f:
+                    yaml.dump(static_data, _f, default_flow_style=False)
+        else:
+            with open(data_file, 'w') as _f:
+                yaml.dump(static_data, _f, default_flow_style=False)
+
     def to_dataframe(self, qstat_dict, target_job, python_datetime=datetime.now()):
         """
         Convert a qstat dictionary to a dataframe that contains data, which can be
@@ -360,6 +382,10 @@ class BaseQstat(object):
                 target_df.to_csv(str(data_file), index=False, index_label=False)
 
     def to_sqlite(self):
+        # Have a table that consists of static data per job,
+        # and another table that keeps up with dynamic data.
+        # Each dynamic row will have a primary key (the JobID)
+        # that links to a static row.
         pass
 
 
