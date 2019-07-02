@@ -1,17 +1,19 @@
 import os
 import csv
 import yaml
+import sys
 import subprocess as sp
 import pandas as pd
 from dateutil import parser
 from datetime import datetime
+from time import sleep
 from pkg_resources import resource_filename
 from collections import OrderedDict
 from pathlib import Path
 from OrthoEvol.utilities import FullUtilities
 from OrthoEvol.Manager.config import yml
 from OrthoEvol.Tools.logit import LogIt
-
+from OrthoEvol.Tools.pbs import TargetJobKeyError
 
 class BaseQstat(object):
     # Static qstat Keywords
@@ -363,5 +365,54 @@ class BaseQstat(object):
 
 class Qstat(BaseQstat):
 
-    def __init__(self, **kwargs):
+    def __init__(self, wait_time=120, **kwargs):
+
         super().__init__(**kwargs)
+        self.wait_time = wait_time
+        self.watch_count = 0
+
+    def countdown(self, wait_time=None):
+        """
+        This method takes a wait time and preforms a countdown in the terminal
+        during the wait period.
+
+        :param wait_time:
+        :type wait_time:
+        :return:
+        :rtype:
+        """
+        while wait_time > 0:
+            sys.stdout.write(str(wait_time) + '     \r')
+            wait_time -= 1
+            sleep(1)
+        sys.stdout.write('\r')
+
+    def watch(self, count=None, python_datetime=datetime.now()):
+        if count is None:
+            self.watch_count = 0
+        self._watch(count=count, python_datetime=python_datetime)
+
+    def _watch(self, count=None, python_datetime=datetime.now(), first_time=None):
+        """Wait until a job finishes and get updates."""
+        # Count the number of data-points that have been taken during the watch.
+        if count is None:
+            self.watch_count += 1
+        elif count is not None:
+            self.watch_count = count + 1
+
+        if first_time is None:
+            first_time = True
+        else:
+            first_time = first_time
+
+        try:
+            self.run_qstat(csv_flag=True, sqlite_flag=False)
+            self.qstat_log.info("Added data-point %s from qstat for %s." % (self.watch_count, self.target_job))
+            if not first_time:
+                self.countdown(wait_time=self.wait_time)
+            self._watch(python_datetime=python_datetime, first_time=False)
+        except TargetJobKeyError:
+            if first_time:
+                raise TargetJobKeyError("The target job cannot be found:  %s" % self.target_job)
+            else:
+                self.qstat_log.info('Finished watching %s' % self.target_job)
