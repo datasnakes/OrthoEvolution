@@ -382,7 +382,7 @@ class Qstat(BaseQstat):
         :rtype:
         """
         while wait_time > 0:
-            sys.stdout.write(str(wait_time) + '     \r')
+            sys.stdout.write('Countdown: ' + '\033[91m' + str(wait_time) + '\033[0m' + '     \r')
             wait_time -= 1
             sleep(1)
         sys.stdout.write('\r')
