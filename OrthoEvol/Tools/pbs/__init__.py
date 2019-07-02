@@ -5,7 +5,14 @@ from .qstat import Qwatch
 __all__ = ("BaseQsub",
            "Qsub",
            "Qwatch",
+           "TargetJobKeyError"
            )
+
+
+class TargetJobKeyError(KeyError):
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
 
 # # Borrowed from the discussion in the link below:
 # # https://stackoverflow.com/questions/44247099/click-command-line-interfaces-make-options-required-if-other-optional-option-is
