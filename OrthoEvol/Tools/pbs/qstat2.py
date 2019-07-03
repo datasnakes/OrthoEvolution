@@ -4,6 +4,8 @@ import yaml
 import sys
 import subprocess as sp
 import pandas as pd
+import plotly.graph_objs as go
+import plotly
 from dateutil import parser
 from datetime import datetime
 from time import sleep
@@ -442,3 +444,85 @@ class Qstat(BaseQstat):
                 raise TargetJobKeyError("The target job cannot be found:  %s" % self.target_job)
             else:
                 self.qstat_log.info('Finished watching %s' % self.target_job)
+
+    def plot_data(self, data_file):
+        df = pd.DataFrame.from_csv(str(data_file))
+        df_home = Path(data_file).parent
+
+        dt = df["datetime"]
+        job_state = list(df['job_state'])
+        # Memory data
+        ru_mem = list(df['resources_used.mem'])
+        ru_mem = [int(str_num.replace("kb", "")) for str_num in ru_mem]
+        ru_vmem = list(df['resources_used.vmem'])
+        ru_vmem = [int(str_num.replace("kb", "")) for str_num in ru_vmem]
+        # CPU data
+        ru_cpupercent = list(df["resources_used.cpupercent"])
+        ru_cpupercent = [int(str_num) for str_num in ru_cpupercent]
+        ru_cput = list(df["resources_used.cput"])
+        ru_cput = [int(str_num) for str_num in ru_cput]
+
+        # Memory traces
+        vmem_trace = go.Scatter(
+            x=dt,
+            y=ru_vmem,
+            text=job_state,
+            textposition='top center',
+            mode='lines+text',
+            name="Virtual Memory",
+            line=dict(
+                color='rgb(205, 12, 24)',
+                width=4
+            )
+        )
+
+        mem_trace = go.Scatter(
+            x=dt,
+            y=ru_mem,
+            text=job_state,
+            textposition='top center',
+            mode='lines+text',
+            name="Memory",
+            line=dict(
+                color='rgb(22, 96, 167)',
+                width=4
+            )
+        )
+        # CPU traces
+        cpupercent_trace = go.Scatter(
+            x=dt,
+            y=ru_cpupercent,
+            text=job_state,
+            textposition='top center',
+            mode='line+text',
+            name="CPU Percentage",
+            line=dict(
+                color='rgb(205, 12, 24)',
+                width=4
+            )
+        )
+
+        cput_trace = go.Scatter(
+            x=dt,
+            y=ru_cput,
+            text=job_state,
+            textposition='top center',
+            mode='line+text',
+            name="CPU Time",
+            line=dict(
+                color='rgb(205, 12, 24)',
+                width=4
+            )
+        )
+
+
+        # Memory plot
+        mem_html_file = df_home / "mem-plot.html"
+        plotly.offline.plot([mem_trace, vmem_trace], filename=str(mem_html_file), auto_open=False)
+
+        # CPU plots
+        cpupercent_html_file = df_home / "cpupercent-plot.html"
+        cput_html_file = df_home / "cput-plot.html"
+        plotly.offline.plot([cpupercent_trace], filename=str(cpupercent_html_file), auto_open=False)
+        plotly.offline.plot([cput_trace], filename=str(cput_html_file), auto_open=False)
+
