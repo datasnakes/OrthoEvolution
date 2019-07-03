@@ -313,6 +313,18 @@ class BaseQstat(object):
         return data_dict
 
     def static_data_to_yaml(self, file, qstat_dict, target_job, overwrite=False):
+        """
+        This method saves the static data to a YAML file.
+
+        :param file:  The absolute path of the yaml file.
+        :type file:  str.
+        :param qstat_dict:  Qstat data that has been parsed into a dictionary.
+        :type qstat_dict:  dict.
+        :param target_job:  The target job that's being analyzed.
+        :type target_job:  str.
+        :param overwrite:  A flag to determine weather the yaml file will be overwritten.
+        :type overwrite:  bool.
+        """
         data_file = Path(file)
         static_data = self.static_data(qstat_dict=qstat_dict, target_job=target_job)
         if data_file.is_file():
@@ -404,10 +416,8 @@ class Qstat(BaseQstat):
         This method takes a wait time and preforms a countdown in the terminal
         during the wait period.
 
-        :param wait_time:
-        :type wait_time:
-        :return:
-        :rtype:
+        :param wait_time:  The time in seconds to wait.
+        :type wait_time:  int.
         """
         while wait_time > 0:
             sys.stdout.write('Countdown: ' + '\033[91m' + str(wait_time) + '\033[0m' + '     \r')
@@ -416,12 +426,32 @@ class Qstat(BaseQstat):
         sys.stdout.write('\r')
 
     def watch(self, count=None, python_datetime=datetime.now()):
+        """
+        This watch method is directly used by the end user to collect data on the
+        target job over time.
+
+        :param count:  The count of qstat data points collected.
+        :type count:  int.
+        :param python_datetime:  A date time that will be added to the qstat data.
+        :type python_datetime:  datetime.
+        """
         if count is None:
             self.watch_count = 0
         self._watch(count=count, python_datetime=python_datetime)
 
     def _watch(self, count=None, python_datetime=datetime.now(), first_time=None):
-        """Wait until a job finishes and get updates."""
+        """
+        This method should normally not be used by the end user.  It also collects
+        data on the target job over time.
+
+        :param count:  The count of qstat data points collected.
+        :type count:  int.
+        :param python_datetime:  A date time that will be added to the qstat data.
+        :type python_datetime:  datetime.
+        :param first_time:  A flag that determines weather it's the first time
+        this function has been run for the target job.
+        :type first_time:  bool.
+        """
         # Count the number of data-points that have been taken during the watch.
         if count is None:
             self.watch_count += 1
@@ -446,6 +476,14 @@ class Qstat(BaseQstat):
                 self.qstat_log.info('Finished watching %s' % self.target_job)
 
     def plot_data(self, data_file):
+        """
+        This method plots qstat data over time.  Three different interactive plotly
+        line graphs are created.  One with mem and vmem, one with cpu percentage,
+        and one with cpu time.
+
+        :param data_file:  A csv file that contains qstat data.
+        :type data_file:  str.
+        """
         df = pd.DataFrame.from_csv(str(data_file))
         df_home = Path(data_file).parent
 
