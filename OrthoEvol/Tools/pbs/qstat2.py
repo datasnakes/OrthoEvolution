@@ -568,15 +568,15 @@ class Qstat(BaseQstat):
 class MultiQstat(object):
 
     def __init__(self, jobs, config_home="~/.pbs", cmd="qstat -f"):
-
         self.cmd = cmd
         self.target_jobs = jobs
         self.config_home = config_home
         self.job_dict = {}
+        self.job_list = []
 
     def watch(self, jobs, infile=None, outfile=None, cmd=None, wait_time=120):
         self.job_dict = self.get_qstat_dict(jobs, infile=infile, outfile=outfile, cmd=cmd, wait_time=wait_time)
-        self.multi_watch(job_dict=self.job_dict)
+        self.job_list = self.multi_watch(job_dict=self.job_dict)
 
     def get_qstat_dict(self, jobs, infile=None, outfile=None, cmd=None, wait_time=120):
         job_dict = {}
@@ -601,8 +601,9 @@ class MultiQstat(object):
             # Append task list for asnychronous programming
             tasks.append(asyncio.ensure_future(self._async_watch(qstat=_qstat, count=_qstat.watch_count)))
         # Run task list and then close
-        ioloop.run_until_complete(asyncio.wait(tasks))
+        job_list = ioloop.run_until_complete(asyncio.wait(tasks))
         ioloop.close()
+        return job_list
 
     async def _async_watch(self, qstat=Qstat(), first_time=None, count=None):
         """Wait until a list of jobs finishes and get updates."""
@@ -622,9 +623,13 @@ class MultiQstat(object):
             qstat.qstat_log.info("Added data-point %s from qstat for %s." % (qstat.watch_count, qstat.target_job))
             if not first_time:
                 await asyncio.sleep(qstat.wait_time)
-            await self._async_watch(qstat=qstat, first_time=False)
+            temp_qstat = self._async_watch(qstat=qstat, first_time=False)
         except TargetJobKeyError:
             if first_time:
                 raise TargetJobKeyError("The target job cannot be found:  %s" % qstat.target_job)
             else:
                 qstat.qstat_log.info('Finished watching %s' % qstat.target_job)
+                temp_qstat = qstat
+        qstat = temp_qstat
+        return qstat
+
