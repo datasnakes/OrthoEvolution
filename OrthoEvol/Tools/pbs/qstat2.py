@@ -568,16 +568,18 @@ class Qstat(BaseQstat):
 class MultiQstat(object):
 
     def __init__(self, jobs, config_home="~/.pbs", cmd="qstat -f"):
+
         self.cmd = cmd
         self.target_jobs = jobs
         self.config_home = config_home
+        self.job_dict = {}
 
-    def multi_watch(self, jobs, infile=None, outfile=None, cmd=None, wait_time=120):
-        # Set up list/dict objects for saving qstat data
-        tasks = []
-        job_objects = {}
-        ioloop = asyncio.get_event_loop()
+    def watch(self, jobs, infile=None, outfile=None, cmd=None, wait_time=120):
+        self.job_dict = self.get_qstat_dict(jobs, infile=infile, outfile=outfile, cmd=cmd, wait_time=wait_time)
+        self.multi_watch(job_dict=self.job_dict)
 
+    def get_qstat_dict(self, jobs, infile=None, outfile=None, cmd=None, wait_time=120):
+        job_dict = {}
         for job in jobs:
             # Get qstat parameters for each target job
             home = str(self.config_home / job)
@@ -587,14 +589,20 @@ class MultiQstat(object):
                 outfile = str(job) + '.csv'
             _qstat = Qstat(job=job, home=home, infile=infile, outfile=outfile, cmd=cmd, wait_time=wait_time)
             # Create a dictionary value for each job
-            job_objects[job] = _qstat
+            job_dict[job] = _qstat
+        return job_dict
+
+    def multi_watch(self, job_dict):
+        # Set up list/dict objects for saving qstat data
+        tasks = []
+        ioloop = asyncio.get_event_loop()
+
+        for _qstat in job_dict.keys():
             # Append task list for asnychronous programming
             tasks.append(asyncio.ensure_future(self._async_watch(qstat=_qstat, count=_qstat.watch_count)))
         # Run task list and then close
         ioloop.run_until_complete(asyncio.wait(tasks))
         ioloop.close()
-
-        return job_objects
 
     async def _async_watch(self, qstat=Qstat(), first_time=None, count=None):
         """Wait until a list of jobs finishes and get updates."""
