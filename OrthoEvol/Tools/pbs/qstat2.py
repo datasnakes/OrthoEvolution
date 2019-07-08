@@ -1,3 +1,4 @@
+import asyncio
 import os
 import csv
 import yaml
@@ -553,7 +554,6 @@ class Qstat(BaseQstat):
             )
         )
 
-
         # Memory plot
         mem_html_file = df_home / "mem-plot.html"
         plotly.offline.plot([mem_trace, vmem_trace], filename=str(mem_html_file), auto_open=False)
@@ -564,3 +564,59 @@ class Qstat(BaseQstat):
         plotly.offline.plot([cpupercent_trace], filename=str(cpupercent_html_file), auto_open=False)
         plotly.offline.plot([cput_trace], filename=str(cput_html_file), auto_open=False)
 
+
+class MultiQstat(object):
+
+    def __init__(self, jobs, config_home="~/.pbs", cmd="qstat -f"):
+        self.cmd = cmd
+        self.target_jobs = jobs
+        self.config_home = config_home
+
+    def multi_watch(self, jobs, infile=None, outfile=None, cmd=None, wait_time=120):
+        # Set up list/dict objects for saving qstat data
+        tasks = []
+        job_objects = {}
+        ioloop = asyncio.get_event_loop()
+
+        for job in jobs:
+            # Get qstat parameters for each target job
+            home = str(self.config_home / job)
+            if infile is None:
+                infile = str(job) + '.csv'
+            if outfile is None:
+                outfile = str(job) + '.csv'
+            _qstat = Qstat(job=job, home=home, infile=infile, outfile=outfile, cmd=cmd, wait_time=wait_time)
+            # Create a dictionary value for each job
+            job_objects[job] = _qstat
+            # Append task list for asnychronous programming
+            tasks.append(asyncio.ensure_future(self._async_watch(qstat=_qstat, count=_qstat.watch_count)))
+        # Run task list and then close
+        ioloop.run_until_complete(asyncio.wait(tasks))
+        ioloop.close()
+
+        return job_objects
+
+    async def _async_watch(self, qstat=Qstat(), first_time=None, count=None):
+        """Wait until a list of jobs finishes and get updates."""
+        # Count the number of data-points that have been taken during the watch.
+        if count is None:
+            qstat.watch_count += 1
+        elif count is not None:
+            qstat.watch_count = count + 1
+
+        if first_time is None:
+            first_time = True
+        else:
+            first_time = first_time
+
+        try:
+            qstat.run_qstat(csv_flag=True, sqlite_flag=False)
+            qstat.qstat_log.info("Added data-point %s from qstat for %s." % (qstat.watch_count, qstat.target_job))
+            if not first_time:
+                await asyncio.sleep(qstat.wait_time)
+            await self._async_watch(qstat=qstat, first_time=False)
+        except TargetJobKeyError:
+            if first_time:
+                raise TargetJobKeyError("The target job cannot be found:  %s" % qstat.target_job)
+            else:
+                qstat.qstat_log.info('Finished watching %s' % qstat.target_job)
