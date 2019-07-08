@@ -1,10 +1,12 @@
 from .qsub import BaseQsub, Qsub
-from .qstat import Qwatch
+from .qstat2 import BaseQstat, Qstat, MultiQstat
 
 
 __all__ = ("BaseQsub",
            "Qsub",
-           "Qwatch",
+           "BaseQstat",
+           "Qstat",
+           "MultiQstat",
            "TargetJobKeyError"
            )
 
