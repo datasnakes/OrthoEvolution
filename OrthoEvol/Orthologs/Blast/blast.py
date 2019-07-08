@@ -246,6 +246,9 @@ class BaseBlastN(ComparativeGenetics):
 
         self.blastn_log.debug('Blast configuration has begun.')
         self.blastn_log.debug('Configuring the accession file.')
+        
+        if self.ref_species:
+            query_organism = self.ref_species
 
         # CONFIGURE and UPDATE the gene_list based on the existence of an
         # incomplete blast file
@@ -475,6 +478,7 @@ class OrthoBlastN(BaseBlastN):
         downstream analysis.
 
         :param project:  The project name (Default: 'orthology-gpcr')
+        :param project_path:  The path of the project (Default: 'os.getcwd()')
         :param method: Method used for blasting. (Default: 1)
         :param template:  The accession file template.
         :param save_data:  A flag for saving the post_blast data to an excel file.
