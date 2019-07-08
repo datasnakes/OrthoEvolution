@@ -568,17 +568,71 @@ class Qstat(BaseQstat):
 class MultiQstat(object):
 
     def __init__(self, jobs, config_home="~/.pbs", cmd="qstat -f"):
+        """
+        This object is used to watch multiple pbs jobs and collect data on these
+        jobs asynchronously.
+
+        :param jobs:  A list of pbs jobs to watch.
+        :type jobs:  list.
+        :param config_home:  A configuration directory for storing pbs jobs.
+        :type config_home:  str.
+        :param cmd:  The qstat command used to produce the job status report.
+        :type cmd:  str.
+        """
+
         self.cmd = cmd
         self.target_jobs = jobs
-        self.config_home = config_home
+        self.config_home = Path(config_home)
         self.job_dict = {}
         self.job_list = []
 
     def watch(self, jobs, infile=None, outfile=None, cmd=None, wait_time=120):
+        """
+        The watch method populates the job dictionary, which is used to watch
+        the target jobs.  The most up to date job info is assigned to the
+        job list class variable.
+
+        :param jobs:  A list of target jobs.
+        :type jobs:  list.
+        :param infile:  The input file and the output file are used in tandem to determine the
+        data file that will be used.  If only one of these values are given (infile/outfile), then
+        it will be used as the data file.  If neither of these values are given, then a default file
+        ("job_data.csv") will be used.  If both are given, then the infile data is appended to the outfile,
+        which is used as the data file.
+        :type infile:  str.
+        :param outfile:  See infile.
+        :type outfile: str.
+        :param cmd:  The qstat command used to produce the job status report.
+        :type cmd:  str.
+        :param wait_time:  The amount of time to wait in between each point of data being collected.
+        :type wait_time:  int.
+        """
         self.job_dict = self.get_qstat_dict(jobs, infile=infile, outfile=outfile, cmd=cmd, wait_time=wait_time)
         self.job_list = self.multi_watch(job_dict=self.job_dict)
 
     def get_qstat_dict(self, jobs, infile=None, outfile=None, cmd=None, wait_time=120):
+        """
+        This job populates a dictionary with qstat objects that correspond to
+        individual pbs jobs.
+
+        :param jobs:  A list of target jobs.
+        :type jobs:  list.
+        :param infile:  The input file and the output file are used in tandem to determine the
+        data file that will be used.  If only one of these values are given (infile/outfile), then
+        it will be used as the data file.  If neither of these values are given, then a default file
+        ("job_data.csv") will be used.  If both are given, then the infile data is appended to the outfile,
+        which is used as the data file.
+        :type infile:  str.
+        :param outfile:  See infile.
+        :type outfile: str.
+        :param cmd:  The qstat command used to produce the job status report.
+        :type cmd:  str.
+        :param wait_time:  The amount of time to wait in between each point of data being collected.
+        :type wait_time:  int.
+        :return:  The job dictionary is returned.
+        :rtype:  dict.
+        """
+
         job_dict = {}
         for job in jobs:
             # Get qstat parameters for each target job
@@ -593,6 +647,17 @@ class MultiQstat(object):
         return job_dict
 
     def multi_watch(self, job_dict):
+        """
+        The multi_watch method takes a dictionary of qstat jobs and
+        uses them to asynchronously watch the target jobs in the dictionary.
+
+        :param job_dict:  A dictionary whose values are Qstat objects.
+        :type job_dict:  dict.
+        :return:  A list of updated qstat jobs that are returned from the asynchronous
+        watch method.
+        :rtype:  list.
+        """
+
         # Set up list/dict objects for saving qstat data
         tasks = []
         ioloop = asyncio.get_event_loop()
@@ -606,7 +671,20 @@ class MultiQstat(object):
         return job_list
 
     async def _async_watch(self, qstat=Qstat(), first_time=None, count=None):
-        """Wait until a list of jobs finishes and get updates."""
+        """
+        This asynchronous method runs Qstat commands for multiple jobs.  The
+        asynchronous component is used during the waiting period in between data
+        points.
+
+        :param qstat:  A called qstat object.
+        :type qstat:  Qstat.
+        :param first_time:  A flag that helps determine if it's the first time that a function is used.
+        :type first_time:  bool.
+        :param count:  A number that corresponds to the number of times that a job has been observed.
+        :type count:  int.
+        :return:  An updated Qstat object.
+        :rtype:  Qstat.
+        """
         # Count the number of data-points that have been taken during the watch.
         if count is None:
             qstat.watch_count += 1
