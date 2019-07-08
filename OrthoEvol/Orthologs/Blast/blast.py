@@ -463,9 +463,9 @@ class OrthoBlastN(BaseBlastN):
     """OrthoBlastN provides a preconfigured and orthology optimized version
     of the BaseBlastN class."""
 
-    def __init__(self, project="orthology-gpcr", method=1, template=None,
-                 save_data=True, acc_file="gpcr.csv", copy_from_package=True,
-                 **kwargs):
+    def __init__(self, project="orthology-gpcr", project_path=os.getcwd(),
+                 method=1, template=None, save_data=True, acc_file="gpcr.csv",
+                 copy_from_package=True, **kwargs):
         """This class inherits from the BaseBlastN class.
 
         This class utilizes it's parent classes to search a standalone
@@ -485,7 +485,7 @@ class OrthoBlastN(BaseBlastN):
         # Set values for methods to prevent using a config.
         self.taxon_file = None
         self.__post_blast = True
-        self.project_path = os.getcwd()
+        self.project_path = project_path
         self.ref_species = 'Homo_sapiens'
         self.proj_mana = None
         self.acc_file = acc_file
