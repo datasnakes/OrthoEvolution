@@ -73,7 +73,7 @@ class BaseDatabaseManagement(object):
             if blast:
                 self.gene_data = BaseComparativeGenetics(project=self.project, project_path=project_path, proj_mana=proj_mana, copy_from_package=True, MAF='MAFV3.3_short.csv')
         else:
-            self.database_path = Path(project_path)
+            self.database_path = Path(project_path) / Path(project) / Path("databases")
 
     def download_windowmasker_files(self, taxonomy_ids):
         """Download the WindowMasker files used in the BLAST database.
@@ -102,6 +102,9 @@ class BaseDatabaseManagement(object):
         """
         # <path>/<user or basic_project>/databases/NCBI/blast/db/<database_name>
         dl_path = Path(self.database_path) / Path("NCBI") / Path("blast") / Path("db")
+        
+        if v5:
+            dl_path = Path(dl_path) / Path("v5")
 
         # Download the preformatted blast database.
         self.ncbiftp.getblastdb(database_name=database_name, v5=v5,
