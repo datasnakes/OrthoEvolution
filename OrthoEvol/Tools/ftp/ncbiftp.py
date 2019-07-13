@@ -125,7 +125,7 @@ class NcbiFTPClient(BaseFTPClient):
         """
         download_time_secs = time()
         with ThreadPool(self.cpus) as download_pool:
-            with tqdm(total=len(filesd)) as pbar:
+            with tqdm(total=len(files)) as pbar:
                 for i, _ in tqdm(enumerate(download_pool.imap(self.download_file, files))):
                     pbar.update()
             minutes = round(((time() - download_time_secs) / 60), 2)
