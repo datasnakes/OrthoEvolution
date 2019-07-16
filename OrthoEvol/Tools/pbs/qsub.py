@@ -11,7 +11,6 @@ from time import sleep
 from OrthoEvol.Tools.logit import LogIt
 from OrthoEvol.Manager.config import templates
 from OrthoEvol.utilities import FullUtilities
-from OrthoEvol.Tools.sge import Qstat
 
 
 class BaseQsub(object):
