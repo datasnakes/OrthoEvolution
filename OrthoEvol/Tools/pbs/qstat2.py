@@ -426,7 +426,7 @@ class Qstat(BaseQstat):
             sleep(1)
         sys.stdout.write('\r')
 
-    def watch(self, count=None, python_datetime=datetime.now()):
+    def watch(self, count=None, python_datetime=datetime.now(), max_count=None):
         """
         This watch method is directly used by the end user to collect data on the
         target job over time.
@@ -435,12 +435,15 @@ class Qstat(BaseQstat):
         :type count:  int.
         :param python_datetime:  A date time that will be added to the qstat data.
         :type python_datetime:  datetime.
+        :param max_count:  The maximum number of times that Qstat will collect data
+        points on the target job.
+        :type max_count:  int.
         """
         if count is None:
             self.watch_count = 0
-        self._watch(count=count, python_datetime=python_datetime)
+        self._watch(count=count, python_datetime=python_datetime, max_count=max_count)
 
-    def _watch(self, count=None, python_datetime=datetime.now(), first_time=None):
+    def _watch(self, count=None, python_datetime=datetime.now(), first_time=None, max_count=None):
         """
         This method should normally not be used by the end user.  It also collects
         data on the target job over time.
@@ -452,6 +455,9 @@ class Qstat(BaseQstat):
         :param first_time:  A flag that determines weather it's the first time
         this function has been run for the target job.
         :type first_time:  bool.
+        :param max_count:  The maximum number of times that Qstat will collect data
+        points on the target job.
+        :type max_count:  int.
         """
         # Count the number of data-points that have been taken during the watch.
         if count is None:
@@ -463,16 +469,20 @@ class Qstat(BaseQstat):
             first_time = True
         else:
             first_time = first_time
-
         try:
+
             self.run_qstat(csv_flag=True, sqlite_flag=False)
             self.qstat_log.info("Added data-point %s from qstat for %s." % (self.watch_count, self.target_job))
             if not first_time:
+                if max_count is not None:
+                    raise TargetJobKeyError
                 self.countdown(wait_time=self.wait_time)
-            self._watch(python_datetime=python_datetime, first_time=False)
+            self._watch(python_datetime=python_datetime, first_time=False, max_count=max_count)
         except TargetJobKeyError:
             if first_time:
                 raise TargetJobKeyError("The target job cannot be found:  %s" % self.target_job)
+            elif max_count is not None:
+                self.qstat_log.info('Watched %s for %s iterations.' % (self.target_job, max_count))
             else:
                 self.qstat_log.info('Finished watching %s' % self.target_job)
 
