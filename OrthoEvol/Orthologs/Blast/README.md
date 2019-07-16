@@ -137,12 +137,13 @@ blastconfig = {
     "template": None,
     "save_data": True,
     "copy_from_package": False,
-    "acc_file": 'test_blast.csv',
+    "acc_file": "test_blast.csv",
     "project_path": None,
     "proj_mana": None,
+    "ref_species": "Homo_sapiens"
 }
 
 
 test_blast = BaseBlastN(**blastconfig)
-test_blast.configure(test_blast.blast_human, 'Homo_sapiens', auto_start=True)
+test_blast.configure(test_blast.blast_human, auto_start=True)
 ```

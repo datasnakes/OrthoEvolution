@@ -40,8 +40,9 @@ class BaseBlastN(ComparativeGenetics):
         :param kwargs:"""
 
         super().__init__(project=project, method=method, acc_file=acc_file,
-                         template=template, save_data=save_data,
-                         verbose=verbose, **kwargs)
+                         copy_from_package=copy_from_package, 
+                         ref_species=ref_species, template=template,
+                         save_data=save_data, verbose=verbose, **kwargs)
 
         if verbose:
             self.blastn_log.setLevel(logging.DEBUG)
@@ -245,6 +246,9 @@ class BaseBlastN(ComparativeGenetics):
 
         self.blastn_log.debug('Blast configuration has begun.')
         self.blastn_log.debug('Configuring the accession file.')
+        
+        if self.ref_species:
+            query_organism = self.ref_species
 
         # CONFIGURE and UPDATE the gene_list based on the existence of an
         # incomplete blast file
@@ -462,9 +466,9 @@ class OrthoBlastN(BaseBlastN):
     """OrthoBlastN provides a preconfigured and orthology optimized version
     of the BaseBlastN class."""
 
-    def __init__(self, project="orthology-gpcr", method=1, template=None,
-                 save_data=True, acc_file="gpcr.csv", copy_from_package=True,
-                 **kwargs):
+    def __init__(self, project="orthology-gpcr", project_path=os.getcwd(),
+                 method=1, template=None, save_data=True, acc_file="gpcr.csv",
+                 copy_from_package=True, **kwargs):
         """This class inherits from the BaseBlastN class.
 
         This class utilizes it's parent classes to search a standalone
@@ -474,6 +478,7 @@ class OrthoBlastN(BaseBlastN):
         downstream analysis.
 
         :param project:  The project name (Default: 'orthology-gpcr')
+        :param project_path:  The path of the project (Default: 'os.getcwd()')
         :param method: Method used for blasting. (Default: 1)
         :param template:  The accession file template.
         :param save_data:  A flag for saving the post_blast data to an excel file.
@@ -484,7 +489,7 @@ class OrthoBlastN(BaseBlastN):
         # Set values for methods to prevent using a config.
         self.taxon_file = None
         self.__post_blast = True
-        self.project_path = None
+        self.project_path = project_path
         self.ref_species = 'Homo_sapiens'
         self.proj_mana = None
         self.acc_file = acc_file
@@ -494,6 +499,7 @@ class OrthoBlastN(BaseBlastN):
         super().__init__(project=project, method=method, template=template,
                          save_data=save_data, acc_file=self.acc_file,
                          copy_from_package=self.copy_from_package,
+                         ref_species=self.ref_species,
                          taxon_file=self.taxon_file,
                          post_blast=self.__post_blast,
                          project_path=self.project_path,
