@@ -182,7 +182,7 @@ class BaseQstat(object):
         :rtype:  list.
         """
         try:
-            proc = self.qstat_utils.system_cmd(cmd, stderr=sp.PIPE, stdout=sp.PIPE, shell=True, encoding='utf-8',
+            proc = self.qstat_utils.system_cmd(cmd, stderr=sp.PIPE, stdout=sp.PIPE, shell=True,
                                                universal_newlines=False)
         except sp.CalledProcessError as err:
             self.qstat_log.error(err.stderr.decode('utf-8'))
