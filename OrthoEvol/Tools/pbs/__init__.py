@@ -1,11 +1,5 @@
 from .qsub import BaseQsub, Qsub
-from .qstat2 import BaseQstat, Qstat, MultiQstat
-
-
-class TargetJobKeyError(KeyError):
-
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
+from .qstat2 import BaseQstat, Qstat, MultiQstat, TargetJobKeyError
 
 
 __all__ = ("BaseQsub",

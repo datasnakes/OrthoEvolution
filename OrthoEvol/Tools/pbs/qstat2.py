@@ -16,7 +16,12 @@ from pathlib import Path
 from OrthoEvol.utilities import FullUtilities
 from OrthoEvol.Manager.config import yml
 from OrthoEvol.Tools.logit import LogIt
-from OrthoEvol.Tools.pbs import TargetJobKeyError
+
+
+class TargetJobKeyError(KeyError):
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
 
 
 class BaseQstat(object):
