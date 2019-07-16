@@ -2,6 +2,12 @@ from .qsub import BaseQsub, Qsub
 from .qstat2 import BaseQstat, Qstat, MultiQstat
 
 
+class TargetJobKeyError(KeyError):
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+
 __all__ = ("BaseQsub",
            "Qsub",
            "BaseQstat",
@@ -10,11 +16,6 @@ __all__ = ("BaseQsub",
            "TargetJobKeyError"
            )
 
-
-class TargetJobKeyError(KeyError):
-
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
 
 # # Borrowed from the discussion in the link below:
 # # https://stackoverflow.com/questions/44247099/click-command-line-interfaces-make-options-required-if-other-optional-option-is
