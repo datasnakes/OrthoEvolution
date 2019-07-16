@@ -411,9 +411,9 @@ class BaseQstat(object):
 
 class Qstat(BaseQstat):
 
-    def __init__(self, wait_time=120, **kwargs):
+    def __init__(self, job, wait_time=120, **kwargs):
 
-        super().__init__(**kwargs)
+        super().__init__(job=job, **kwargs)
         self.wait_time = wait_time
         self.watch_count = 0
 
