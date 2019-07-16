@@ -685,7 +685,7 @@ class MultiQstat(object):
         ioloop.close()
         return job_list
 
-    async def _async_watch(self, qstat=Qstat(), first_time=None, count=None):
+    async def _async_watch(self, qstat, first_time=None, count=None):
         """
         This asynchronous method runs Qstat commands for multiple jobs.  The
         asynchronous component is used during the waiting period in between data
