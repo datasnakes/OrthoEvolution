@@ -52,7 +52,7 @@ class BaseQstat(object):
                        "all": __keywords
                        }
 
-    def __init__(self, job, infile=None, outfile=None, home=None, cmd="qstat -f"):
+    def __init__(self, job, infile=None, outfile=None, home=None):
         """
         The BaseQstat class processes the output from the pbs command 'qstat'.  It
         specifically parses output from 'qstat -f', which displays a full status report
@@ -80,8 +80,8 @@ class BaseQstat(object):
         self.qstat_utils = FullUtilities()
         self.qstat_log = LogIt().default(logname="PBS - QSTAT", logfile=None)
         self._yaml_config = resource_filename(yml.__name__, 'qstat.yml')
-        self.cmd = cmd
         self.target_job = job
+        self.cmd = 'qstat -f' + self.target_job
         self.outfile = outfile
         if not home:
             self.home = Path(os.getcwd()) / str(job).replace(".", "")
@@ -351,7 +351,7 @@ class BaseQstat(object):
             with open(data_file, 'w') as _f:
                 yaml.dump(static_data, _f, default_flow_style=False)
 
-    def to_dataframe(self, qstat_dict, target_job, python_datetime=datetime.now()):
+    def to_dataframe(self, qstat_dict, target_job):
         """
         Convert a qstat dictionary to a dataframe that contains data, which can be
         plotted.
@@ -370,7 +370,7 @@ class BaseQstat(object):
 
         data_dict = OrderedDict()
         # Store the python datetime
-        data_dict["datetime"] = [python_datetime]
+        data_dict["datetime"] = [datetime.now()]
         data_dict["Job_Id"] = [target_job]
         for keyword in qstat_dict[target_job].keys():
             # Store all of the dynamic data so that it can be converted to a dataframe.
@@ -438,7 +438,7 @@ class Qstat(BaseQstat):
             sleep(1)
         sys.stdout.write('\r')
 
-    def watch(self, count=None, python_datetime=datetime.now(), max_count=None):
+    def watch(self, count=None, max_count=None):
         """
         This watch method is directly used by the end user to collect data on the
         target job over time.
@@ -453,9 +453,9 @@ class Qstat(BaseQstat):
         """
         if count is None:
             self.watch_count = 0
-        self._watch(count=count, python_datetime=python_datetime, max_count=max_count)
+        self._watch(count=count, max_count=max_count)
 
-    def _watch(self, count=None, python_datetime=datetime.now(), first_time=None, max_count=None):
+    def _watch(self, count=None, first_time=None, max_count=None):
         """
         This method should normally not be used by the end user.  It also collects
         data on the target job over time.
@@ -482,19 +482,15 @@ class Qstat(BaseQstat):
         else:
             first_time = first_time
         try:
-            self.qstat_log.info('running qstat...')
             self.run_qstat(csv_flag=True, sqlite_flag=False)
             self.qstat_log.info("Added data-point %s from qstat for %s." % (self.watch_count, self.target_job))
             if not first_time:
-                self.qstat_log.info('nft')
-                if self.watch_count > max_count:
-                    self.qstat_log.info('mc: ', max_count)
+                if self.watch_count == max_count:
                     raise TargetJobKeyError
                 self.countdown(wait_time=self.wait_time)
-            self._watch(python_datetime=python_datetime, first_time=False, max_count=max_count)
+            self._watch(first_time=False, max_count=max_count)
         except TargetJobKeyError:
             if first_time:
-                self.qstat_log.info('ft:  TJKE')
                 raise TargetJobKeyError("The target job cannot be found:  %s" % self.target_job)
             elif max_count is not None:
                 self.qstat_log.info('Watched %s for %s iterations.' % (self.target_job, max_count))
