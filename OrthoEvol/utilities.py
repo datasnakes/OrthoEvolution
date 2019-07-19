@@ -891,11 +891,13 @@ class FullUtilities(CookieUtils, ManagerUtils, OrthologUtils):
         ManagerUtils.__init__(self)
         OrthologUtils.__init__(self)
 
-    def system_cmd(self, cmd, timeout=None, **kwargs):
+    def system_cmd(self, cmd, timeout=None, write_flag=False, file_name=None, **kwargs):
         """
         A function for making system calls, while preforming proper exception handling.
         :param cmd:  A list that contains the arguments for Popen.
         :param timeout:  A timeout variable.
+        :param write_flag:  A flag used to write each line of output to a file.
+        :param file_name:  The name of the to be written to.
         :param kwargs:  Any other keyword arguments for Popen.
         :return:  Returns the stdout and stderr as a tuple.
         """
@@ -903,6 +905,9 @@ class FullUtilities(CookieUtils, ManagerUtils, OrthologUtils):
         for line in iter(proc.stdout.readline, ""):
             print(line, end="")
             sys.stdout.flush()
+            if write_flag:
+                with open(file_name, 'a') as output_file:
+                    output_file.write(line)
         try:
             proc.communicate(timeout=timeout)
         except TimeoutExpired:
