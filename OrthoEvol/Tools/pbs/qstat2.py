@@ -156,7 +156,7 @@ class BaseQstat(object):
         :type sqlite_flag:  bool.
         """
         # Get raw qstat data
-        self.qstat_data = self.qstat_output(cmd=self.cmd, log_file=str(self.qstat_log_file))
+        self.qstat_data = self.qstat_output(cmd=self.cmd, log_file=str(self.qstat_log_file), print_flag=False)
         # Convert raw data to nested dictionary
         self.qstat_dict = self.to_dict(qstat_data=self.qstat_data)
         # Isolate data for target PBS job
@@ -171,7 +171,7 @@ class BaseQstat(object):
         if sqlite_flag:
             self.to_sqlite()
 
-    def qstat_output(self, cmd, log_file):
+    def qstat_output(self, cmd, log_file, print_flag=False):
         """
         A function that calls qstat via subprocess.  The data is the list returned from
         readlines().
@@ -182,12 +182,14 @@ class BaseQstat(object):
         :param log_file:  The log file is a file that is used to save the output data gererated
         by the qstat command.
         :type log_file:  str.
+        :param print_flag:  A flag used to print the output of the qstat command.
+        :type print_flag:  bool.
         :return:  Output generated and read from the qstat command.
         :rtype:  list.
         """
         try:
-            proc = self.qstat_utils.system_cmd(cmd, write_flag=True, file_name=log_file, stderr=sp.PIPE, stdout=sp.PIPE,
-                                               shell=True, universal_newlines=False)
+            proc = self.qstat_utils.system_cmd(cmd, write_flag=True, print_flag=print_flag, file_name=log_file,
+                                               stderr=sp.PIPE, stdout=sp.PIPE, shell=True, universal_newlines=False)
         except sp.CalledProcessError as err:
             self.qstat_log.error(err.stderr.decode('utf-8'))
         else:
