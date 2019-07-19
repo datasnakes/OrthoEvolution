@@ -482,19 +482,19 @@ class Qstat(BaseQstat):
         else:
             first_time = first_time
         try:
-            print('running qstat...')
+            self.qstat_log.info('running qstat...')
             self.run_qstat(csv_flag=True, sqlite_flag=False)
             self.qstat_log.info("Added data-point %s from qstat for %s." % (self.watch_count, self.target_job))
             if not first_time:
-                print('nft')
+                self.qstat_log.info('nft')
                 if max_count > self.watch_count:
-                    print('mc: ', max_count)
+                    self.qstat_log.info('mc: ', max_count)
                     raise TargetJobKeyError
                 self.countdown(wait_time=self.wait_time)
             self._watch(python_datetime=python_datetime, first_time=False, max_count=max_count)
         except TargetJobKeyError:
             if first_time:
-                print('ft:  TJKE')
+                self.qstat_log.info('ft:  TJKE')
                 raise TargetJobKeyError("The target job cannot be found:  %s" % self.target_job)
             elif max_count is not None:
                 self.qstat_log.info('Watched %s for %s iterations.' % (self.target_job, max_count))
