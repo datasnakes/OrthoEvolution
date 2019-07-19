@@ -156,7 +156,7 @@ class BaseQstat(object):
         :type sqlite_flag:  bool.
         """
         # Get raw qstat data
-        self.qstat_data = self.qstat_output(cmd=self.cmd, log_file=str(self.qstat_log_file), print_flag=False)
+        self.qstat_data = self.qstat_output(cmd=[self.cmd], log_file=str(self.qstat_log_file), print_flag=False)
         # Convert raw data to nested dictionary
         self.qstat_dict = self.to_dict(qstat_data=self.qstat_data)
         # Isolate data for target PBS job
@@ -189,6 +189,7 @@ class BaseQstat(object):
         """
         if isinstance(cmd, str):
             cmd = [cmd]
+
         try:
             proc = self.qstat_utils.system_cmd(cmd, write_flag=True, print_flag=print_flag, file_name=log_file,
                                                stderr=sp.PIPE, stdout=sp.PIPE, shell=True, universal_newlines=False)
