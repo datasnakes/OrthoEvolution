@@ -79,7 +79,7 @@ class BaseQstat(object):
 
         self.qstat_utils = FullUtilities()
         self.qstat_log = LogIt().default(logname="PBS - QSTAT", logfile=None)
-        self._yaml_config = resource_filename(yml.__name__, 'qstat_dict.yml')
+        self._yaml_config = resource_filename(yml.__name__, 'qstat.yml')
         self.cmd = cmd
         self.target_job = job
         self.outfile = outfile
