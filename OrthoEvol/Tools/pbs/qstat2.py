@@ -91,6 +91,7 @@ class BaseQstat(object):
             self.home.mkdir(parents=True)
 
         # Use infile as data file whether it exists or not
+        self.qstat_log = self.home / str(self.target_job) + ".log"
         if infile is not None and outfile is None:
             self.data_file = self.home / infile
         # Use outfile as data file whether it exists or not
@@ -155,7 +156,7 @@ class BaseQstat(object):
         :type sqlite_flag:  bool.
         """
         # Get raw qstat data
-        self.qstat_data = self.qstat_output(cmd=self.cmd)
+        self.qstat_data = self.qstat_output(cmd=self.cmd, log_file=str(self.qstat_log))
         # Convert raw data to nested dictionary
         self.qstat_dict = self.to_dict(qstat_data=self.qstat_data)
         # Isolate data for target PBS job
@@ -170,7 +171,7 @@ class BaseQstat(object):
         if sqlite_flag:
             self.to_sqlite()
 
-    def qstat_output(self, cmd):
+    def qstat_output(self, cmd, log_file):
         """
         A function that calls qstat via subprocess.  The data is the list returned from
         readlines().
@@ -178,17 +179,21 @@ class BaseQstat(object):
         :param cmd:  The qstat command used to generate qstat data.  This is usually
         'qstat -f'
         :type cmd:  str.
+        :param log_file:  The log file is a file that is used to save the output data gererated
+        by the qstat command.
+        :type log_file:  str.
         :return:  Output generated and read from the qstat command.
         :rtype:  list.
         """
         try:
-            proc = self.qstat_utils.system_cmd(cmd, stderr=sp.PIPE, stdout=sp.PIPE, shell=True,
-                                               universal_newlines=False)
+            proc = self.qstat_utils.system_cmd(cmd, write_flag=True, file_name=log_file, stderr=sp.PIPE, stdout=sp.PIPE,
+                                               shell=True, universal_newlines=False)
         except sp.CalledProcessError as err:
             self.qstat_log.error(err.stderr.decode('utf-8'))
         else:
             if proc.returncode == 0:
-                qstat_data = proc.stdout.readlines()
+                with open(log_file, 'r') as lf:
+                    qstat_data = lf.readlines()
                 return qstat_data
 
     def to_dict(self, qstat_data):
