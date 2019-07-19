@@ -81,7 +81,7 @@ class BaseQstat(object):
         self.qstat_log = LogIt().default(logname="PBS - QSTAT", logfile=None)
         self._yaml_config = resource_filename(yml.__name__, 'qstat.yml')
         self.target_job = job
-        self.cmd = 'qstat -f' + self.target_job
+        self.cmd = 'qstat -f ' + self.target_job
         self.outfile = outfile
         if not home:
             self.home = Path(os.getcwd()) / str(job).replace(".", "")
@@ -156,7 +156,7 @@ class BaseQstat(object):
         :type sqlite_flag:  bool.
         """
         # Get raw qstat data
-        self.qstat_data = self.qstat_output(cmd=[self.cmd], log_file=str(self.qstat_log_file), print_flag=False)
+        self.qstat_data = self.qstat_output(cmd=self.cmd, log_file=str(self.qstat_log_file), print_flag=False)
         # Convert raw data to nested dictionary
         self.qstat_dict = self.to_dict(qstat_data=self.qstat_data)
         # Isolate data for target PBS job
@@ -187,9 +187,6 @@ class BaseQstat(object):
         :return:  Output generated and read from the qstat command.
         :rtype:  list.
         """
-        if isinstance(cmd, str):
-            cmd = [cmd]
-
         try:
             proc = self.qstat_utils.system_cmd(cmd, write_flag=True, print_flag=print_flag, file_name=log_file,
                                                stderr=sp.PIPE, stdout=sp.PIPE, shell=True, universal_newlines=False)
