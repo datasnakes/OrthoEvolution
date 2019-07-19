@@ -914,6 +914,7 @@ class FullUtilities(CookieUtils, ManagerUtils, OrthologUtils):
         except TimeoutExpired:
             proc.kill()
         if proc.returncode != 0:
+            print(proc.returncode)
             stdout, stderr = proc.communicate()
             raise sp.CalledProcessError(proc.returncode, cmd, stdout, stderr)
 
