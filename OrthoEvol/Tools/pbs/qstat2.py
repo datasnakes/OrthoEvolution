@@ -486,7 +486,7 @@ class Qstat(BaseQstat):
             self.run_qstat(csv_flag=True, sqlite_flag=False)
             self.qstat_log.info("Added data-point %s from qstat for %s." % (self.watch_count, self.target_job))
             if not first_time:
-                if max_count is not None:
+                if max_count > self.watch_count:
                     raise TargetJobKeyError
                 self.countdown(wait_time=self.wait_time)
             self._watch(python_datetime=python_datetime, first_time=False, max_count=max_count)
