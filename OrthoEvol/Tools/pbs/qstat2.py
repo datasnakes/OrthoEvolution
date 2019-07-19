@@ -91,7 +91,7 @@ class BaseQstat(object):
             self.home.mkdir(parents=True)
 
         # Use infile as data file whether it exists or not
-        self.qstat_log = self.home / str(self.target_job) + ".log"
+        self.qstat_log = self.home / (str(self.target_job) + ".log")
         if infile is not None and outfile is None:
             self.data_file = self.home / infile
         # Use outfile as data file whether it exists or not
