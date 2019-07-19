@@ -173,7 +173,7 @@ class BaseQstat(object):
 
     def qstat_output(self, cmd, log_file, print_flag=False):
         """
-        A function that calls qstat via subprocess.  The data is the list returned from
+        A function that calls qdstat via subprocess.  The data is the list returned from
         readlines().
 
         :param cmd:  The qstat command used to generate qstat data.  This is usually
