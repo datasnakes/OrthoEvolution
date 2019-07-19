@@ -1,31 +1,30 @@
+import asyncio
 import os
-import shutil
-import click
-import subprocess
+import csv
 import yaml
-from pathlib import Path
+import sys
+import subprocess as sp
 import pandas as pd
-from collections import OrderedDict
+import plotly.graph_objs as go
+import plotly
 from dateutil import parser
-import random
 from datetime import datetime
 from time import sleep
-from OrthoEvol.Manager.config import scripts, yml
 from pkg_resources import resource_filename
-from OrthoEvol.Tools import pbs
-
-def represent_dictionary_order(cls, dict_data):
-    return cls.represent_mapping('tag:yaml.org,2002:map', dict_data.items())
-
-
-def _setup_yaml():
-    """ https://stackoverflow.com/a/8661021 """
-    yaml.add_representer(OrderedDict, represent_dictionary_order)
+from collections import OrderedDict
+from pathlib import Path
+from OrthoEvol.utilities import FullUtilities
+from OrthoEvol.Manager.config import yml
+from OrthoEvol.Tools.logit import LogIt
 
 
-class BaseQwatch(object):
-    # Setup the yaml with OrderedDict
-    _setup_yaml()
+class TargetJobKeyError(KeyError):
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+
+class BaseQstat(object):
     # Static qstat Keywords
 
     __misc_kw = ["Checkpoint", "Error_Path", "exec_host", "exec_vnode", "Hold_Types", "Join_Path",
@@ -53,202 +52,173 @@ class BaseQwatch(object):
                        "all": __keywords
                        }
 
-    def __init__(self, jobs=None, users=os.getlogin(), email=None, infile=None, watch=None, filename_pattern=None,
-                 directory=f"qwatch{random.randint(9001, 100000)}", cmd="qstat -f", sleeper=120,
-                 clean=False, slack=None):
-
-        # TODO-ROB: Implement emial notifications
-        # TODO-ROB: Implement slack notifications
-        # TODO-ROB: Add logger (through click?)
-        # TODO-ROB: Do the rework in get_dicts()
+    def __init__(self, job, infile=None, outfile=None, home=None):
         """
-        A class for parsing "qstat -f" output on SGE systems for monitoring
-        jobs and for making smart downstream decisions about resource allocation.
-        This class uses asyncio in order to monitor multiple jobs at the same time.
+        The BaseQstat class processes the output from the pbs command 'qstat'.  It
+        specifically parses output from 'qstat -f', which displays a full status report
+        for all of the jobs in the queue.  Because each line of output per job consists of
+        attribute_names and values for those attributes, the qstat data is parsed into a
+        dictionary.  The qstat data is then converted to csv format and saved in a .csv file.
+        The Base class only process one job, and it only gathers data on one point in time.
 
-        :param jobs:  Jobs to look for.
-        :type jobs: list
-        :param email: Email to send files to
-        :type email: list
-        :param infile: A file that contains 'qstat -f' output
-        :type infile: str
-        :param watch: A flag that indicates that the selected jobs are to be watched
-        :type watch: bool
-        :param filename_pattern: A pattern used to create all of the files.
-        :type filename_pattern: str
-        :param directory: The directory that is used to contain the output files.
-        :type directory: str
-        :param users: Users to look for in the job que.
-        :type users: list
-        :param cmd: The qstat command to use.  This should only be able to change if new parsers are created.
-        :type cmd: str
-        :param sleeper: The minimum length of time in between each data point.
-        :type sleeper: int
+        :param job:  The name of the job to analyze.
+        :type job:  str.
+        :param infile:  The input file and the output file are used in tandem to determine the
+        data file that will be used.  If only one of these values are given (infile/outfile), then
+        it will be used as the data file.  If neither of these values are given, then a default file
+        ("job_data.csv") will be used.  If both are given, then the infile data is appended to the outfile,
+        which is used as the data file.
+        :type infile:  str.
+        :param outfile:  See infile.
+        :type outfile: str.
+        :param home:  An absolute path to the director where qstat data will be stored.
+        :type home:  str.
+        :param cmd:  The qstat command used to produce the job status report.
+        :type cmd:  str.
         """
-        self.cmd = cmd
-        # Get a user list
-        if not users:
-            self.users = []
-        elif isinstance(users, str):
-            self.users = [users]
-        elif isinstance(users, list):
-            self.users = users
-        elif isinstance(users, tuple):
-            self.users = list(users)
+
+        self.qstat_utils = FullUtilities()
+        self.qstat_log = LogIt().default(logname="PBS - QSTAT", logfile=None)
+        self._yaml_config = resource_filename(yml.__name__, 'qstat.yml')
+        self.target_job = job
+        self.cmd = 'qstat -f ' + self.target_job
+        self.outfile = outfile
+        if not home:
+            self.home = Path(os.getcwd()) / str(job).replace(".", "")
         else:
-            raise TypeError("The users parameter is a single user string or a multi-user list.")
-        # Get a job list
-        if not jobs:
-            self.jobs = []
-        elif isinstance(jobs, str):
-            self.jobs = [jobs]
-        elif isinstance(jobs, list):
-            self.jobs = jobs
-        elif isinstance(jobs, tuple):
-            self.jobs = list(jobs)
-        else:
-            raise TypeError("The jobs parameter is a single job string or a multi-job list.")
+            self.home = Path(home)
+        if not self.home.exists():
+            self.home.mkdir(parents=True)
 
-        # Initialize file types
-        self.qstat_filename = Path()
-        self.yaml_filename = Path()
-        self.data_filename = Path()
-        self.info_filename = Path()
-        self.plot_filename = Path()
-        self._new_keyword_log = Path()
-        # Initialize utility files
-        self._yaml_config = resource_filename(yml.__name__, 'qstat_dict.yml')
-        self.r_line_graph_filename = resource_filename(scripts.__name__, 'line_graph_workflow.R')
-        self._async_filename = resource_filename(pbs.__name__, 'watcher.py')
-        # Initialize other file based attributes
-        self.infile = infile
-        while directory.is_dir():
-            directory = Path(f"qwatch{random.randint(9001, 100000)}")
-        self.directory = directory
-        self.directory.mkdir(parents=True)
-        self._temp_yml = directory / Path("temp_yml.yml")
-        self.filename_pattern = filename_pattern
-        self.initialize_file_names()
-
-        # Initialize other attributes
-        self.orig_jobs = self.jobs
-        self.email = email
-        self.watch = watch
-        self.sleeper = sleeper
-
-    def initialize_file_names(self):
-        # Get a filename pattern based on other user input
-        if not self.filename_pattern:
-            if self.infile:
-                filename_pattern = f"{self.infile}"
-            elif len(self.users) == 1 and len(self.jobs) == 0:
-                filename_pattern = f"{self.users[0]}"
-            elif len(self.jobs) == 1 and len(self.users) == 0:
-                filename_pattern = f"{self.jobs[0]}"
+        # Use infile as data file whether it exists or not
+        self.qstat_log_file = self.home / (str(self.target_job) + ".log")
+        if infile is not None and outfile is None:
+            self.data_file = self.home / infile
+        # Use outfile as data file whether it exists or not
+        elif infile is None and outfile is not None:
+            self.data_file = self.home / outfile
+        # Use a default file name like "job_data.csv"
+        elif infile is None and outfile is None:
+            self.data_file = self.home / "job_data.csv"
+        # Use the outfile as the data file whether it exists or not,
+        # but also append the infile data to it.
+        elif infile is not None and outfile is not None:
+            self.data_file = self.home / outfile
+            # For this to work the infile must be an absolute path.
+            if Path(infile).exists():
+                self.configure_data_file(file=self.data_file, extra_data=infile)
             else:
-                current_user = os.getlogin()
-                _id = random.randint(10000, 99999)
-                filename_pattern = f"{current_user}_{_id}"
-            self.filename_pattern = filename_pattern.replace('.', '_')
+                raise FileExistsError("The infile must be an absolute path.")
+        self.info_file = self.data_file.parent / (str(self.data_file.stem) + '.yml')
 
-        # Create file names using the pattern
-        self.yaml_filename = Path(self.directory) / Path(f"{self.filename_pattern}.yml")
-        self.data_filename = Path(self.directory) / Path(f"{self.filename_pattern}.data")
-        self.info_filename = Path(self.directory) / Path(f"{self.filename_pattern}.info")
-        self.plot_filename = Path(self.directory) / Path(f"{self.filename_pattern}_plot.png")
-        self._new_keyword_log = self.directory / Path('lost_and_found_qstat_keywords.log')
+        # QSTAT data objects
+        self.qstat_data = None
+        self.qstat_dict = None
+        self.job_dict = None
+        self.static_dict = None
+        self.job_dataframe = None
 
-    def save_qstat_data(self):
+    def configure_data_file(self, file, extra_data):
         """
-        Save the 'qstat -f' output to the qstat_file or set the infile to the qstat_file.
+        Configure the primary data file by appending extra data to it.  The csv header
+        is only appended when the primary data file does not exist.
+
+        :param file:  The absolute path to a csv file that will be updated.
+        :type file:  str.
+        :param extra_data:  The abolute path to a csv file that contains extra qstat data.
+        :type extra_data:  str.
         """
-        if self.infile:
-            self.qstat_filename = Path(self.infile)
+        data_file = Path(file)
+        # Open infile containing data
+        with open(extra_data, 'r') as _if:
+            in_data = csv.reader(_if, delimiter=",")
+            line_count = 0
+            header_flag = data_file.exists()
+            with open(str(data_file), 'a') as _df:
+                out_data = csv.writer(_df, delimiter=",")
+                for row in in_data:
+                    if line_count == 0:
+                        # Write infile header if data file doesn't exist
+                        if not header_flag:
+                            out_data.writerow(row)
+                        line_count += 1
+                    else:
+                        out_data.writerow(row)
+
+    def run_qstat(self, csv_flag=True, sqlite_flag=False):
+        """
+        This method runs the qstat command, generates qstat data, parses it into various formats,
+        and saves the data if desired.
+
+        :param csv_flag:  A flag that determines if the data is saved in a csv file.
+        :type csv_flag:  bool.
+        :param sqlite_flag:  A flag that determines if the data is saved in a sqlite database.
+        :type sqlite_flag:  bool.
+        """
+        # Get raw qstat data
+        self.qstat_data = self.qstat_output(cmd=self.cmd, log_file=str(self.qstat_log_file), print_flag=False)
+        # Convert raw data to nested dictionary
+        self.qstat_dict = self.to_dict(qstat_data=self.qstat_data)
+        # Isolate data for target PBS job
+        self.job_dict = self.target_data(qstat_dict=self.qstat_dict, target_job=self.target_job)
+        # Isolate static data for target PBS job
+        self.static_dict = self.static_data(qstat_dict=self.qstat_dict, target_job=self.target_job)
+        # Create a pandas dataframe for target PBS job, formatted for creating a CSV file.
+        self.job_dataframe = self.to_dataframe(qstat_dict=self.qstat_dict, target_job=self.target_job)
+        if csv_flag:
+            self.to_csv(file=self.data_file, qstat_dict=self.qstat_dict, target_job=self.target_job)
+            self.static_data_to_yaml(file=self.info_file, qstat_dict=self.qstat_dict, target_job=self.target_job)
+        if sqlite_flag:
+            self.to_sqlite()
+
+    def qstat_output(self, cmd, log_file, print_flag=False):
+        """
+        A function that calls qdstat via subprocess.  The data is the list returned from
+        readlines().
+
+        :param cmd:  The qstat command used to generate qstat data.  This is usually
+        'qstat -f'
+        :type cmd:  str.
+        :param log_file:  The log file is a file that is used to save the output data gererated
+        by the qstat command.
+        :type log_file:  str.
+        :param print_flag:  A flag used to print the output of the qstat command.
+        :type print_flag:  bool.
+        :return:  Output generated and read from the qstat command.
+        :rtype:  list.
+        """
+        try:
+            proc = self.qstat_utils.system_cmd(cmd, write_flag=True, print_flag=print_flag, file_name=log_file,
+                                               stderr=sp.PIPE, stdout=sp.PIPE, shell=True, universal_newlines=False)
+        except sp.CalledProcessError as err:
+            self.qstat_log.error(err.stderr.decode('utf-8'))
         else:
-            self.qstat_filename = Path(self.directory) / Path(f"{self.filename_pattern}.qstat")
-            qstat = subprocess.Popen(self.cmd, stderr=subprocess.PIPE,
-                                     stdout=subprocess.PIPE, shell=True,
-                                     encoding='utf-8', universal_newlines=False)
-            out = qstat.stdout.readlines()
-            error = qstat.stderr.readlines()
-            with open(self.qstat_filename, 'w') as qf:
-                qf.writelines(out)
-            print(error)
+            if proc.returncode == 0:
+                with open(log_file, 'r') as lf:
+                    qstat_data = lf.readlines()
+                return qstat_data
 
-    def qstat_to_filtered_yaml(self):
+    def to_dict(self, qstat_data):
         """
-        This function saves the qstat information to a yaml file.  It parses the qstat data, filters out the unwanted
-        jobs, and then validates the data before saving it in YAML format.  It doesn't return anything, but it does
-        create a file.
-        """
+        The qstat parser takes the qstat data from the 'qstat -f' command and parses it
+        into a ditionary.  It uses the qstat keywords found in the qstat yaml file.
 
-        job_dict = self.qstat_to_dict()
-
-        # Filter and keep only the selected jobs and then create a YAML file
-        kept_jobs, kept_dict = self.filter_jobs(job_dict)
-        self.jobs = kept_jobs
-
-        # If the yaml file doesnt exist then update the jobs and dump the qstat data
-        if not self.yaml_filename.is_file() or self.watch is True:
-            with open(self.yaml_filename, 'w') as yf:
-                yaml.dump(kept_dict, stream=yf, default_flow_style=False)
-
-        # If the yaml file is empty, then overwrite it.
-        else:
-            with open(self.yaml_filename, 'r') as yf:
-                test = yaml.load(yf)
-                if not test:
-                    with open(self.yaml_filename, 'w') as yf2:
-                        yaml.dump(kept_dict, stream=yf2, default_flow_style=False)
-
-    def filtered_yaml_to_dict(self):
-        """
-        This function loads the yaml file created with qstat_to_filtered_yaml and validates the qstat data.
-        :return: A dictionary of jobs.
-        :rtype: dict
-        """
-        if not self.yaml_filename.is_file() or self.watch is True:
-            self.qstat_to_filtered_yaml()
-        else:
-            with open(self.yaml_filename, 'r') as yf:
-                test = yaml.load(yf)
-                if not test:
-                    self.qstat_to_filtered_yaml()
-        with open(self.yaml_filename, 'r') as yf2:
-            jobs_dict = yaml.load(yf2)
-        return jobs_dict
-
-    def update_qstat_data(self, save, process, data):
-        # Save qstat output
-        if save:
-            self.save_qstat_data()
-        # Process qstat output and create the filtered yaml file
-        if process:
-            self.qstat_to_filtered_yaml()
-        # Take the filtered yaml file and create a dictionary
-        if data:
-            _data = self.filtered_yaml_to_dict()
-            return _data
-
-    def qstat_to_dict(self):
-        """
-        The qstat parser takes the qstat file from the user infile or from the
-        'qstat -f' command and parses it.  It uses the qstat keywords found in the
-        qstat yaml file.
-        :return:  A dictionary of jobs.
-        :rtype: dict
+        :param qstat_data:  Output data generated from the qstat command.
+        :type qstat_data:  list.
+        :return:  A nest dictionary that uses JobId's as keys.
+        :rtype:  dict.
         """
         mast_dict = OrderedDict()
         job_count = 0
         phrase_continuation_flag = None
         with open(self._yaml_config, 'r') as yf:
             qstat_keywords = yaml.load(yf)
-        with open(self.qstat_filename, 'r') as qf:
+        if isinstance(qstat_data, list):
             qstat_sentence = None
             continuation_phrase = ""
             qstat_phrase = ""
             prev_item = None
-            for item in qf.readlines():
+            for item in qstat_data:
                 # If a new job is identified then create the nested dictionary
                 if "Job Id" in item:
                     job_count += 1
@@ -313,337 +283,452 @@ class BaseQwatch(object):
                 prev_item = item
         return mast_dict
 
-    def get_dicts(self, python_datetime=None):
+    def target_data(self, qstat_dict, target_job):
         """
-        This function takes the filtered yaml file and creates a nested dictionary object that is suitable for
-        creating/updating the info and data csv files.
+        Filter out all of the qstat jobs other than the target job.  This sets up the
+        class variables for the target dataframe and target dictionary.
 
-        :param python_datetime:
-        :type python_datetime:
-        :return:
-        :rtype:
+                :param qstat_dict:  Qstat data that has been parsed into a dictionary.
+        :type qstat_dict:  dict.
+        :param target_job:  The target job that's being analyzed.
+        :type target_job:  str.
+        :return:  A dictionary that contains all of the target job's static and dynamic data.
+        :rtype:  dict.
         """
-        df = self.filtered_yaml_to_dict()
-        # jobs_dict = self.filtered_yaml_to_dict()
-        #df = OrderedDict()
-        master_dict = OrderedDict()
-        info_dict = OrderedDict()
+        if target_job not in qstat_dict.keys():
+            raise ValueError("The target job does not exist in the qstat data provided.")
+        target_job_dict = qstat_dict[target_job]
+        return target_job_dict
+
+    def static_data(self, qstat_dict, target_job):
+        """
+        This function takes a qstat dictionary and returns a dictionary that contains
+        "static" data related to the job of interest.
+
+        :param qstat_dict:  Qstat data that has been parsed into a dictionary.
+        :type qstat_dict:  dict.
+        :param target_job:  The target job that's being analyzed.
+        :type target_job:  str.
+        :return:  A dictionary that contains the static data of the target job.
+        :rtype:  dict.
+        """
+        if target_job not in qstat_dict.keys():
+            raise ValueError("The target job does not exist in the qstat data provided.")
+
         data_dict = OrderedDict()
-        # TODO-ROB: Rework this or rework filterd_yaml_to_dict
-        # for job in jobs_dict.keys():
-        #     row = OrderedDict()
-        #     _job = OrderedDict()
-        #     row = jobs_dict[job]
-        #     _job[job] = row
-        #     df.update(_job)
-        for job in df.keys():
-            var_dict = OrderedDict()
-            # Store PBS Environment Variables
-            for var in df[job]['Variable_List'].keys():
-                var_dict[var] = [df[job]['Variable_List'][var]]
-            info_dict[job] = var_dict
-            data_dict[job] = OrderedDict()
-            # Store the python datetime
-            if python_datetime:
-                info_dict[job]["datetime"] = [python_datetime]
-                data_dict[job]["datetime"] = [python_datetime]
-            # Loop through the keywords
-            for keyword in df[job].keys():
-                # Store all of the dynamic data
-                if keyword in self.__static_kw:
-                    if keyword != "Variable_List":
-                        # Store the job time values in a datetime format
-                        if keyword in self.__job_time_kw:
-                            info_dict[job][keyword] = [str(parser.parse(df[job][keyword]))]
-                        else:
-                            info_dict[job][keyword] = [df[job][keyword]]
-                # Store all of the dynamic data
-                elif keyword in self.__dynamic_kw:
-                    data_dict[job][keyword] = [df[job][keyword]]
-
-        master_dict["info"] = info_dict
-        master_dict["data"] = data_dict
-        return master_dict
-
-    def get_dataframes(self, python_datetime=None):
-        """
-        This function returns a dataframe of the current yaml data.  It is specifically used by the update_csv function
-        for creating csv files of the qstat data
-        :param python_datetime:
-        :type python_datetime:
-        :return:
-        :rtype:
-        """
-        master_dict = self.get_dicts(python_datetime=python_datetime)
-        master_df = OrderedDict()
-        for key in master_dict.keys():
-            if len(self.jobs) > 1:
-                master_df[key] = pd.DataFrame.from_dict(master_dict[key])
-            else:
-                for job in master_dict[key].keys():
-                    master_df[key] = pd.DataFrame.from_dict(dict(master_dict[key][job]))
-
-        return master_df
-
-    def get_info(self, data_frame=False, python_datetime=None):
-        """
-        Get the data in the info file as a python object (dictionary or dataframe).
-        :param data_frame:
-        :type data_frame:
-        :param python_datetime:
-        :type python_datetime:
-        :return:
-        :rtype:
-        """
-        if data_frame:
-            _data = self.get_dataframes(python_datetime=python_datetime)
-        else:
-            _data = self.get_dicts(python_datetime=python_datetime)
-        return _data["info"]
-
-    def get_data(self, data_frame=False, python_datetime=None):
-        """
-        Get the data in the data file as a python object (dictionary or dataframe).
-        :param data_frame:
-        :type data_frame:
-        :param python_datetime:
-        :type python_datetime:
-        :return:
-        :rtype:
-        """
-        if data_frame:
-            _data = self.get_dataframes(python_datetime=python_datetime)
-        else:
-            _data = self.get_dicts(python_datetime=python_datetime)
-        return _data["data"]
-
-    def filter_jobs(self, job_dict):
-        """
-        Filter a job dict based on the input user or job list.
-        :param job_dict:
-        :type job_dict:
-        :return:
-        :rtype:
-        """
-        kept_jobs = []
-        if len(self.jobs) != 0 or len(self.users) != 0:
-            # Create a new list of kept jobs
-            for j in job_dict.keys():
-                if len(self.users) > 0:
-                    if job_dict[j]["Variable_List"]["PBS_O_LOGNAME"] in self.users:
-                        kept_jobs.append(j)
-                elif len(self.jobs) > 0:
-                    if job_dict[j]["Job_Id"] in self.jobs:
-                        kept_jobs.append(j)
-        # If no user or job is given then use all the jobs
-        else:
-            kept_jobs += list(job_dict.keys())
-        # Format the kept job data
-        kept_jobs = list(set(kept_jobs))
-        kept_dict = OrderedDict((k, job_dict[k]) for k in kept_jobs)
-        return kept_jobs, kept_dict
-
-    def clean_output(self, ext_list=[".info", ".data", ".png", ".log"]):
-
-        for root, dirs, files in os.walk(self.directory):
-            for file in files:
-                if Path(file).suffix not in ext_list:
-                    file_to_delete = str(Path(root) / Path(file))
-                    os.remove(file_to_delete)
-
-
-class Qwatch(BaseQwatch):
-
-    def __init__(self, **kwargs):
-        """
-        This is the top level qwatch class.  It watches jobs, updates csv data files, and plots
-        graphs by calling an R script file.  If multiple jobs are being watched, then asyncio
-        is utilized for efficiency.
-        :param kwargs:
-        :type kwargs:
-        """
-        super().__init__(**kwargs)
-        self.qwatch = BaseQwatch
-
-    def _get_subset_kwargs(self, skipped_kwargs):
-        """
-        Get kwargs that are subset from the original object.  This is used specifically for the async_qwatch.py
-        script.
-        :param skipped_kwargs:
-        :type skipped_kwargs:
-        :return:
-        :rtype:
-        """
-        _kwargs = {}
-        for var, attr in self.__dict__.items():
-            if var not in skipped_kwargs:
-                _kwargs[var] = attr
-        return _kwargs
-
-    def new_keyword_logger(self, data):
-        """
-        This logger function checks for new keywords, and adds them to a
-        lost_and_found_keywords.log file.
-        :param data: The data to check.
-        """
-        with open(self._yaml_config, 'r') as yc:
-            _checker_dict = yaml.load(yc)
-            _checker_list = list()
-            _checker_list.append('Job Id')
-            _checker_list = _checker_list + list(_checker_dict['Job Id'].keys())
-            _checker_list = _checker_list + list(_checker_dict['Job Id']['Variable_List'].keys())
-        _data_index_list = list(data.index)
-        diff = list(set(_data_index_list) - set(_checker_list))
-        if diff == [0]:
-            diff = []
-        if len(diff) != 0:
-            if not self._new_keyword_log.is_file():
-                with open(self._new_keyword_log, 'w') as cl:
-                    cl.write("***********************************   NOTICE  ***********************************\n\n")
-                    cl.write("This is a log file for new keywords that were missed by the parser.")
-                    cl.write("Please email this file to Rob Gilmore at rgilmore@umc.edu, if new keywords were logged.")
-                    cl.write("Thanks!\n\n")
-                    cl.write("***********************************   NOTICE  ***********************************")
-            with open(self._new_keyword_log, 'a') as cl:
-                cl.write('Unresolved qstat keyword: %s' % diff)
-
-    def update_csv(self, file, data):
-        """
-        The update_csv file is named appropriately, but it also checks for undocumented qstat keywords.
-        :param file:
-        :type file:
-        :param data:
-        :type data:
-        :return:
-        :rtype:
-        """
-
-        # Check for undocumented keywords
-        self.new_keyword_logger(data)
-
-        # Append new data to the csv file (either .info or .data
-        if file.is_file():
-            file_df = pd.read_csv(file, index_col=False)
-            updated_df = pd.concat([file_df, data])
-            updated_df.to_csv(file, index=False, index_label=False)
-        else:
-            data.to_csv(file, index=False, index_label=False)
-
-    def watch_jobs(self):
-        """
-        This function watches all of the jobs that passed the filter.  Multiple jobs will
-        utilize asyncio and the seperate async_qwatch.py script.
-        :return:
-        :rtype:
-        """
-        # Initialize data
-        self.save_qstat_data()
-        self.qstat_to_filtered_yaml()
-        if len(self.jobs) > 1:
-            kw_dict = {}
-            kw_dict["jobs"] = self.jobs
-            kw_dict["kwargs"] = self._get_subset_kwargs(skipped_kwargs=["jobs", "directory", "qwatch", "watch", "_yaml_config",
-                                                                        "info_filename", "plot_filename", "qstat_filename",
-                                                                        "data_filename", "yaml_filename", "users",
-                                                                        "filename_pattern", "orig_jobs",
-                                                                        "_async_filename", "r_line_graph_filename"])
-
-            kw_dict["sleeper"] = 5
-            kw_dict["directory"] = self.directory
-            # Call the asyncio setup for multiple jobs and begin watching
-            with open(self._temp_yml, 'w') as ty:
-                yaml.dump(kw_dict, stream=ty, default_flow_style=False)
-
-            qstat = subprocess.Popen(f'python3.6 {self._async_filename} -yamlfile {self._temp_yml}', stderr=subprocess.PIPE,
-                                     stdout=subprocess.PIPE, shell=True,
-                                     encoding='utf-8', universal_newlines=False)
-            out = qstat.stdout.read()
-            error = qstat.stderr.read()
-            print(f'out: {out}')
-            print(f'error: {error}')
-        elif len(self.jobs) == 1:
-            # Call the single job watcher
-            self._watch(datetime.now())
-
-    def _watch(self, python_datetime=None, first_time=True):
-        """Wait until a job finishes and get updates."""
-
-        job_dict = self.update_qstat_data(save=True, process=True, data=True)
-
-        if job_dict:
-            data = self.get_data(data_frame=True, python_datetime=python_datetime)
-            self.update_csv(file=self.data_filename, data=data)
-            print(f"Updated qstat data for {self.jobs[0]}")
-
-            if job_dict[self.jobs[0]]['job_state'] == 'Q':
-                sleep(self.sleeper)
-                self._watch(datetime.now(), first_time=True)
-            elif job_dict[self.jobs[0]]['job_state'] == 'R':
-                # Create the static data file on the first instance of a running job
-                if first_time:
-                    info = self.get_info(data_frame=True, python_datetime=python_datetime)
-                    self.update_csv(file=self.info_filename, data=info)
-                sleep(self.sleeper)
-                self._watch(datetime.now(), first_time=False)
-
-        return f'Finished {self.jobs[0]}'
-
-    def plot_memory(self, data_file=None, info_file=None, file_pattern=None, directory=None, jobs=None, rdata_save=False):
-        """
-        Plot a graph of the memory vs time.  Utilizes an R script which creates a ggplot2 line graph.
-        :param data_file:
-        :type data_file:
-        :param info_file:
-        :type info_file:
-        :param file_pattern:
-        :type file_pattern:
-        :param directory:
-        :type directory:
-        :param jobs:
-        :type jobs:
-        :param rdata_save:
-        :type rdata_save:
-        :return:
-        :rtype:
-        """
-        if jobs:
-            for job in jobs:
-                print(f'job: {job}')
-                if directory:
-                    dir_path = Path(directory) / Path(job)
+        data_dict[target_job] = OrderedDict()
+        for keyword in qstat_dict[target_job].keys():
+            if keyword in self.__static_kw:
+                if keyword in self.__job_time_kw:
+                    data_dict[target_job][keyword] = str(parser.parse(qstat_dict[target_job][keyword]))
                 else:
-                    dir_path = Path(job)
-                print(f'directory: {dir_path}')
-                if not data_file:
-                    if not file_pattern:
-                        df = dir_path / Path(f'{job}.csv')
-                    else:
-                        df = dir_path / Path(f'{file_pattern}.csv')
-                print(f'data_file: {df}')
-                if not info_file:
-                    if not file_pattern:
-                        inf = dir_path / Path(f'{job}_info.txt')
-                    else:
-                        inf = dir_path / Path(f'{file_pattern}.txt')
-                print(f'info_file: {inf}')
-                cmd = f'Rscript {self.r_line_graph_filename} -d {str(df)} -i {str(inf)}'
-                if rdata_save:
-                    cmd = cmd + ' --rdata_save'
-                if file_pattern:
-                    cmd = cmd + f' --name {file_pattern}'
-                print(f'cmd: {cmd}')
-                plot = subprocess.Popen(cmd,
-                                        stderr=subprocess.PIPE, stdout=subprocess.PIPE, shell=True,encoding='utf-8',
-                                        universal_newlines=False)
-                out = plot.stdout.readlines()
-                error = plot.stderr.readlines()
-                print(out)
-                print(error)
+                    data_dict[target_job][keyword] = qstat_dict[target_job][keyword]
+        return data_dict
+
+    def static_data_to_yaml(self, file, qstat_dict, target_job, overwrite=False):
+        """
+        This method saves the static data to a YAML file.
+
+        :param file:  The absolute path of the yaml file.
+        :type file:  str.
+        :param qstat_dict:  Qstat data that has been parsed into a dictionary.
+        :type qstat_dict:  dict.
+        :param target_job:  The target job that's being analyzed.
+        :type target_job:  str.
+        :param overwrite:  A flag to determine weather the yaml file will be overwritten.
+        :type overwrite:  bool.
+        """
+        data_file = Path(file)
+        static_data = self.static_data(qstat_dict=qstat_dict, target_job=target_job)
+        if data_file.is_file():
+            if not overwrite:
+                with open(data_file, 'a') as _f:
+                    yaml.dump(static_data, _f, default_flow_style=False)
+            else:
+                with open(data_file, 'w') as _f:
+                    yaml.dump(static_data, _f, default_flow_style=False)
         else:
-            plot = subprocess.Popen(f'Rscript {self.r_line_graph_filename} -d {str(self.data_filename)} '
-                                    f'-i {str(self.info_filename)} --name {self.filename_pattern}', stderr=subprocess.PIPE,
-                                    stdout=subprocess.PIPE, shell=True, encoding='utf-8', universal_newlines=False)
-            out = plot.stdout.readlines()
-            error = plot.stderr.readlines()
-            print(out)
-            print(error)
+            with open(data_file, 'w') as _f:
+                yaml.dump(static_data, _f, default_flow_style=False)
+
+    def to_dataframe(self, qstat_dict, target_job):
+        """
+        Convert a qstat dictionary to a dataframe that contains data, which can be
+        plotted.
+
+        :param qstat_dict:  Qstat data that has been parsed into a dictionary.
+        :type qstat_dict:  dict.
+        :param target_job:  The target job that's being analyzed.
+        :type target_job:  str.
+        :param python_datetime:  The date and time that the qstat data was collected.
+        :type python_datetime:  str.
+        :return:  A dataframe that contains dynamic data.
+        :rtype:  pd.DataFrame
+        """
+        if target_job not in qstat_dict.keys():
+            raise ValueError("The target job does not exist in the qstat data provided.")
+
+        data_dict = OrderedDict()
+        # Store the python datetime
+        data_dict["datetime"] = [datetime.now()]
+        data_dict["Job_Id"] = [target_job]
+        for keyword in qstat_dict[target_job].keys():
+            # Store all of the dynamic data so that it can be converted to a dataframe.
+            if keyword in self.__dynamic_kw:
+                data_dict[keyword] = [qstat_dict[target_job][keyword]]
+
+        # Finish converting dynamic data into a pandas dataframe
+        df = pd.DataFrame.from_dict(dict(data_dict))
+        return df
+
+    def to_csv(self, file, qstat_dict, target_job, overwrite=False):
+        """
+        Convert a qstat dictionary to a csv file that contains data, which can be
+        plotted.
+
+        :param file:  The absolute path of the csv file.
+        :type file:  str.
+        :param qstat_dict:  Qstat data that has been parsed into a dictionary.
+        :type qstat_dict:  dict.
+        :param target_job:  The target job that's being analyzed.
+        :type target_job:  str.
+        :param overwrite:  A flag to determine weather the csv file will be overwritten.
+        :type overwrite:  bool.
+        """
+        data_file = Path(file)
+        target_df = self.to_dataframe(qstat_dict=qstat_dict, target_job=target_job)
+        if data_file.is_file():
+            if not overwrite:
+                with open(data_file, 'a') as _f:
+                    target_df.to_csv(_f, header=False, index=False, index_label=False)
+            else:
+                with open(data_file, 'w') as _f:
+                    target_df.to_csv(str(data_file), index=False, index_label=False)
+        else:
+            with open(data_file, 'w') as _f:
+                target_df.to_csv(str(data_file), index=False, index_label=False)
+
+    def to_sqlite(self):
+        # Have a table that consists of static data per job,
+        # and another table that keeps up with dynamic data.
+        # Each dynamic row will have a primary key (the JobID)
+        # that links to a static row.
+        pass
+
+
+class Qstat(BaseQstat):
+
+    def __init__(self, job, wait_time=120, **kwargs):
+
+        super().__init__(job=job, **kwargs)
+        self.wait_time = wait_time
+        self.watch_count = 0
+
+    def countdown(self, wait_time=None):
+        """
+        This method takes a wait time and preforms a countdown in the terminal
+        during the wait period.
+
+        :param wait_time:  The time in seconds to wait.
+        :type wait_time:  int.
+        """
+        while wait_time > 0:
+            sys.stdout.write('Countdown: ' + '\033[91m' + str(wait_time) + '\033[0m' + '     \r')
+            wait_time -= 1
+            sleep(1)
+        sys.stdout.write('\r')
+
+    def watch(self, count=None, max_count=None):
+        """
+        This watch method is directly used by the end user to collect data on the
+        target job over time.
+
+        :param count:  The count of qstat data points collected.
+        :type count:  int.
+        :param python_datetime:  A date time that will be added to the qstat data.
+        :type python_datetime:  datetime.
+        :param max_count:  The maximum number of times that Qstat will collect data
+        points on the target job.
+        :type max_count:  int.
+        """
+        if count is None:
+            self.watch_count = 0
+        self._watch(count=count, max_count=max_count)
+
+    def _watch(self, count=None, first_time=None, max_count=None):
+        """
+        This method should normally not be used by the end user.  It also collects
+        data on the target job over time.
+
+        :param count:  The count of qstat data points collected.
+        :type count:  int.
+        :param python_datetime:  A date time that will be added to the qstat data.
+        :type python_datetime:  datetime.
+        :param first_time:  A flag that determines weather it's the first time
+        this function has been run for the target job.
+        :type first_time:  bool.
+        :param max_count:  The maximum number of times that Qstat will collect data
+        points on the target job.
+        :type max_count:  int.
+        """
+        # Count the number of data-points that have been taken during the watch.
+        if count is None:
+            self.watch_count += 1
+        elif count is not None:
+            self.watch_count = count + 1
+
+        if first_time is None:
+            first_time = True
+        else:
+            first_time = first_time
+        try:
+            self.run_qstat(csv_flag=True, sqlite_flag=False)
+            self.qstat_log.info("Added data-point %s from qstat for %s." % (self.watch_count, self.target_job))
+            if not first_time:
+                if self.watch_count == max_count:
+                    raise TargetJobKeyError
+                self.countdown(wait_time=self.wait_time)
+            self._watch(first_time=False, max_count=max_count)
+        except TargetJobKeyError:
+            if first_time:
+                raise TargetJobKeyError("The target job cannot be found:  %s" % self.target_job)
+            elif max_count is not None:
+                self.qstat_log.info('Watched %s for %s iterations.' % (self.target_job, max_count))
+            else:
+                self.qstat_log.info('Finished watching %s' % self.target_job)
+
+    def plot_data(self, data_file):
+        """
+        This method plots qstat data over time.  Three different interactive plotly
+        line graphs are created.  One with mem and vmem, one with cpu percentage,
+        and one with cpu time.
+
+        :param data_file:  A csv file that contains qstat data.
+        :type data_file:  str.
+        """
+        df = pd.DataFrame.from_csv(str(data_file))
+        df_home = Path(data_file).parent
+
+        dt = df["datetime"]
+        job_state = list(df['job_state'])
+        # Memory data
+        ru_mem = list(df['resources_used.mem'])
+        ru_mem = [int(str_num.replace("kb", "")) for str_num in ru_mem]
+        ru_vmem = list(df['resources_used.vmem'])
+        ru_vmem = [int(str_num.replace("kb", "")) for str_num in ru_vmem]
+        # CPU data
+        ru_cpupercent = list(df["resources_used.cpupercent"])
+        ru_cpupercent = [int(str_num) for str_num in ru_cpupercent]
+        ru_cput = list(df["resources_used.cput"])
+        ru_cput = [int(str_num) for str_num in ru_cput]
+
+        # Memory traces
+        vmem_trace = go.Scatter(
+            x=dt,
+            y=ru_vmem,
+            text=job_state,
+            textposition='top center',
+            mode='lines+text',
+            name="Virtual Memory",
+            line=dict(
+                color='rgb(205, 12, 24)',
+                width=4
+            )
+        )
+
+        mem_trace = go.Scatter(
+            x=dt,
+            y=ru_mem,
+            text=job_state,
+            textposition='top center',
+            mode='lines+text',
+            name="Memory",
+            line=dict(
+                color='rgb(22, 96, 167)',
+                width=4
+            )
+        )
+        # CPU traces
+        cpupercent_trace = go.Scatter(
+            x=dt,
+            y=ru_cpupercent,
+            text=job_state,
+            textposition='top center',
+            mode='line+text',
+            name="CPU Percentage",
+            line=dict(
+                color='rgb(205, 12, 24)',
+                width=4
+            )
+        )
+
+        cput_trace = go.Scatter(
+            x=dt,
+            y=ru_cput,
+            text=job_state,
+            textposition='top center',
+            mode='line+text',
+            name="CPU Time",
+            line=dict(
+                color='rgb(205, 12, 24)',
+                width=4
+            )
+        )
+
+        # Memory plot
+        mem_html_file = df_home / "mem-plot.html"
+        plotly.offline.plot([mem_trace, vmem_trace], filename=str(mem_html_file), auto_open=False)
+
+        # CPU plots
+        cpupercent_html_file = df_home / "cpupercent-plot.html"
+        cput_html_file = df_home / "cput-plot.html"
+        plotly.offline.plot([cpupercent_trace], filename=str(cpupercent_html_file), auto_open=False)
+        plotly.offline.plot([cput_trace], filename=str(cput_html_file), auto_open=False)
+
+
+class MultiQstat(object):
+
+    def __init__(self, jobs, config_home="~/.pbs", cmd="qstat -f"):
+        """
+        This object is used to watch multiple pbs jobs and collect data on these
+        jobs asynchronously.
+
+        :param jobs:  A list of pbs jobs to watch.
+        :type jobs:  list.
+        :param config_home:  A configuration directory for storing pbs jobs.
+        :type config_home:  str.
+        :param cmd:  The qstat command used to produce the job status report.
+        :type cmd:  str.
+        """
+
+        self.cmd = cmd
+        self.target_jobs = jobs
+        self.config_home = Path(config_home)
+        self.job_dict = {}
+        self.job_list = []
+
+    def watch(self, jobs, infile=None, outfile=None, cmd=None, wait_time=120):
+        """
+        The watch method populates the job dictionary, which is used to watch
+        the target jobs.  The most up to date job info is assigned to the
+        job list class variable.
+
+        :param jobs:  A list of target jobs.
+        :type jobs:  list.
+        :param infile:  The input file and the output file are used in tandem to determine the
+        data file that will be used.  If only one of these values are given (infile/outfile), then
+        it will be used as the data file.  If neither of these values are given, then a default file
+        ("job_data.csv") will be used.  If both are given, then the infile data is appended to the outfile,
+        which is used as the data file.
+        :type infile:  str.
+        :param outfile:  See infile.
+        :type outfile: str.
+        :param cmd:  The qstat command used to produce the job status report.
+        :type cmd:  str.
+        :param wait_time:  The amount of time to wait in between each point of data being collected.
+        :type wait_time:  int.
+        """
+        self.job_dict = self.get_qstat_dict(jobs, infile=infile, outfile=outfile, cmd=cmd, wait_time=wait_time)
+        self.job_list = self.multi_watch(job_dict=self.job_dict)
+
+    def get_qstat_dict(self, jobs, infile=None, outfile=None, cmd=None, wait_time=120):
+        """
+        This job populates a dictionary with qstat objects that correspond to
+        individual pbs jobs.
+
+        :param jobs:  A list of target jobs.
+        :type jobs:  list.
+        :param infile:  The input file and the output file are used in tandem to determine the
+        data file that will be used.  If only one of these values are given (infile/outfile), then
+        it will be used as the data file.  If neither of these values are given, then a default file
+        ("job_data.csv") will be used.  If both are given, then the infile data is appended to the outfile,
+        which is used as the data file.
+        :type infile:  str.
+        :param outfile:  See infile.
+        :type outfile: str.
+        :param cmd:  The qstat command used to produce the job status report.
+        :type cmd:  str.
+        :param wait_time:  The amount of time to wait in between each point of data being collected.
+        :type wait_time:  int.
+        :return:  The job dictionary is returned.
+        :rtype:  dict.
+        """
+
+        job_dict = {}
+        for job in jobs:
+            # Get qstat parameters for each target job
+            home = str(self.config_home / job)
+            if infile is None:
+                infile = str(job) + '.csv'
+            if outfile is None:
+                outfile = str(job) + '.csv'
+            _qstat = Qstat(job=job, home=home, infile=infile, outfile=outfile, cmd=cmd, wait_time=wait_time)
+            # Create a dictionary value for each job
+            job_dict[job] = _qstat
+        return job_dict
+
+    def multi_watch(self, job_dict):
+        """
+        The multi_watch method takes a dictionary of qstat jobs and
+        uses them to asynchronously watch the target jobs in the dictionary.
+
+        :param job_dict:  A dictionary whose values are Qstat objects.
+        :type job_dict:  dict.
+        :return:  A list of updated qstat jobs that are returned from the asynchronous
+        watch method.
+        :rtype:  list.
+        """
+
+        # Set up list/dict objects for saving qstat data
+        tasks = []
+        ioloop = asyncio.get_event_loop()
+
+        for _qstat in job_dict.keys():
+            # Append task list for asnychronous programming
+            tasks.append(asyncio.ensure_future(self._async_watch(qstat=_qstat, count=_qstat.watch_count)))
+        # Run task list and then close
+        job_list = ioloop.run_until_complete(asyncio.wait(tasks))
+        ioloop.close()
+        return job_list
+
+    async def _async_watch(self, qstat, first_time=None, count=None):
+        """
+        This asynchronous method runs Qstat commands for multiple jobs.  The
+        asynchronous component is used during the waiting period in between data
+        points.
+
+        :param qstat:  A called qstat object.
+        :type qstat:  Qstat.
+        :param first_time:  A flag that helps determine if it's the first time that a function is used.
+        :type first_time:  bool.
+        :param count:  A number that corresponds to the number of times that a job has been observed.
+        :type count:  int.
+        :return:  An updated Qstat object.
+        :rtype:  Qstat.
+        """
+        # Count the number of data-points that have been taken during the watch.
+        if count is None:
+            qstat.watch_count += 1
+        elif count is not None:
+            qstat.watch_count = count + 1
+
+        if first_time is None:
+            first_time = True
+        else:
+            first_time = first_time
+
+        try:
+            qstat.run_qstat(csv_flag=True, sqlite_flag=False)
+            qstat.qstat_log.info("Added data-point %s from qstat for %s." % (qstat.watch_count, qstat.target_job))
+            if not first_time:
+                await asyncio.sleep(qstat.wait_time)
+            temp_qstat = self._async_watch(qstat=qstat, first_time=False)
+        except TargetJobKeyError:
+            if first_time:
+                raise TargetJobKeyError("The target job cannot be found:  %s" % qstat.target_job)
+            else:
+                qstat.qstat_log.info('Finished watching %s' % qstat.target_job)
+                temp_qstat = qstat
+        qstat = temp_qstat
+        return qstat
+

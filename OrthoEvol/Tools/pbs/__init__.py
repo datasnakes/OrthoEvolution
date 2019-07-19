@@ -1,5 +1,5 @@
 from .qsub import BaseQsub, Qsub
-from .qstat2 import BaseQstat, Qstat, MultiQstat, TargetJobKeyError
+from .qstat import BaseQstat, Qstat, MultiQstat, TargetJobKeyError
 
 
 __all__ = ("BaseQsub",
