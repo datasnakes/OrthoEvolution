@@ -187,6 +187,8 @@ class BaseQstat(object):
         :return:  Output generated and read from the qstat command.
         :rtype:  list.
         """
+        if isinstance(cmd, str):
+            cmd = [cmd]
         try:
             proc = self.qstat_utils.system_cmd(cmd, write_flag=True, print_flag=print_flag, file_name=log_file,
                                                stderr=sp.PIPE, stdout=sp.PIPE, shell=True, universal_newlines=False)
