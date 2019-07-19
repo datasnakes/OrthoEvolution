@@ -487,7 +487,7 @@ class Qstat(BaseQstat):
             self.qstat_log.info("Added data-point %s from qstat for %s." % (self.watch_count, self.target_job))
             if not first_time:
                 self.qstat_log.info('nft')
-                if max_count > self.watch_count:
+                if self.watch_count > max_count:
                     self.qstat_log.info('mc: ', max_count)
                     raise TargetJobKeyError
                 self.countdown(wait_time=self.wait_time)
