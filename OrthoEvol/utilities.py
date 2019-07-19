@@ -891,7 +891,7 @@ class FullUtilities(CookieUtils, ManagerUtils, OrthologUtils):
         ManagerUtils.__init__(self)
         OrthologUtils.__init__(self)
 
-    def system_cmd(self, cmd, timeout=None, write_flag=False, file_name=None, **kwargs):
+    def system_cmd(self, cmd, timeout=None, print_flag=True, write_flag=False, file_name=None, **kwargs):
         """
         A function for making system calls, while preforming proper exception handling.
         :param cmd:  A list that contains the arguments for Popen.
@@ -903,7 +903,8 @@ class FullUtilities(CookieUtils, ManagerUtils, OrthologUtils):
         """
         proc = sp.Popen(cmd, **kwargs, encoding="utf-8")
         for line in iter(proc.stdout.readline, ""):
-            print(line, end="")
+            if print_flag:
+                print(line, end="")
             sys.stdout.flush()
             if write_flag:
                 with open(file_name, 'a') as output_file:
