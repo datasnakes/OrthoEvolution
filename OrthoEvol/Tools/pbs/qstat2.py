@@ -91,7 +91,7 @@ class BaseQstat(object):
             self.home.mkdir(parents=True)
 
         # Use infile as data file whether it exists or not
-        self.qstat_log = self.home / (str(self.target_job) + ".log")
+        self.qstat_log_file = self.home / (str(self.target_job) + ".log")
         if infile is not None and outfile is None:
             self.data_file = self.home / infile
         # Use outfile as data file whether it exists or not
@@ -156,7 +156,7 @@ class BaseQstat(object):
         :type sqlite_flag:  bool.
         """
         # Get raw qstat data
-        self.qstat_data = self.qstat_output(cmd=self.cmd, log_file=str(self.qstat_log))
+        self.qstat_data = self.qstat_output(cmd=self.cmd, log_file=str(self.qstat_log_file))
         # Convert raw data to nested dictionary
         self.qstat_dict = self.to_dict(qstat_data=self.qstat_data)
         # Isolate data for target PBS job
