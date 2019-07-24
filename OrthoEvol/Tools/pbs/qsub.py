@@ -2,6 +2,7 @@ import getpass
 import string
 import random
 import os
+import shutil
 import subprocess as sp
 from pathlib import Path
 from collections import OrderedDict
@@ -16,11 +17,32 @@ from OrthoEvol.utilities import FullUtilities
 class BaseQsub(object):
     """Base class for PBS jobs."""
 
-    def __init__(self, pbs_script=None):
+    def __init__(self, pbs_script=None, pbs_working_dir=None):
 
         self.qsub_log = LogIt().default(logname="PBS - QSUB", logfile=None)
         self.qsub_utils = FullUtilities()
-        self.pbs_script = pbs_script
+
+        if not pbs_working_dir:
+            if not pbs_script:
+                self.pbs_work_dir = Path(os.getcwd())
+            else:
+                self.pbs_work_dir = Path(pbs_script).parent
+        else:
+            self.pbs_work_dir = Path(pbs_working_dir)
+
+        self.pbs_script = self.pbs_work_dir / Path(pbs_script).name
+
+        # Create the pbs working directory if it doesn't exist
+        # and copy the script if it's not in the pbs working directory
+        if not self.pbs_work_dir.exists():
+            self.pbs_work_dir.mkdir(parents=True)
+            shutil.copy(pbs_script, str(self.pbs_script))
+        else:
+            if not self.pbs_script.exists():
+                shutil.copy(pbs_script, str(self.pbs_script))
+
+        self.qsub_job_id = None
+        self.qsub_job_directory = None
 
     def submit_pbs_script(self):
         """Submit a job using qsub.
@@ -38,9 +60,10 @@ class BaseQsub(object):
             if proc.returncode == 0:  # Command was successful.
                 # The cmd_status has stdout that must be decoded.
                 # When a qsub job is submitted, the stdout is the job id.
-                submitted_jobid = proc.stdout.decode('utf-8')
+                self.qsub_job_id = proc.stdout.decode('utf-8')
                 self.qsub_log.info(str(self.pbs_script) + ' was submitted.')
-                self.qsub_log.info('Your job id is: %s' % submitted_jobid)
+                self.qsub_log.info('Your job id is: %s' % self.qsub_job_id)
+                self.qsub_job_directory = self.pbs_work_dir / self.qsub_job_id
 
             else:  # Unsuccessful. Stdout will be '1'
                 self.qsub_log.error('PBS job not submitted.')
