@@ -44,14 +44,15 @@ class BaseQsub(object):
         self.qsub_job_id = None
         self.qsub_job_directory = None
 
-    def submit_pbs_script(self):
+    def submit_pbs_script(self, cmd=None):
         """Submit a job using qsub.
 
         :param cleanup: (Default value = False)
         :param wait: (Default value = True)
         """
         try:
-            cmd = ['qsub ' + str(self.pbs_script)]  # this is the command
+            if cmd is None:
+                cmd = ['qsub ' + str(self.pbs_script)]  # this is the command
             # Shell MUST be True
             proc = self.qsub_utils.system_cmd(cmd, stdout=sp.PIPE, stderr=sp.PIPE, shell=True, check=True)
         except sp.CalledProcessError as err:
@@ -71,21 +72,24 @@ class BaseQsub(object):
 
 class Qsub(BaseQsub):
 
-    def __init__(self, author=getpass.getuser(), project_name="OrthoEvol", description="This is a basic pbs job",
+    def __init__(self, author=None, project_name="OrthoEvol", description="This is a basic pbs job",
                  date_format='%a %b %d %I:%M:%S %p %Y', chunk_resources=None, cput='72:00:00', walltime='48:00:00',
-                 job_name=None, pbs_work_dir=None, email=None, directive_list=None, primary_pbs_cmd=None,
+                 job_name=None, email=None, directive_list=None, primary_pbs_cmd=None, pbs_working_dir=None,
                  pbs_command_list=None, email_command=None, activate_script=None):
 
         self.base_name = job_name
         self.base_id, self.job_name = self.get_base_job_name()
-        self.pbs_script = Path(self.pbs_work_dir) / self.job_name + '.pbs'
+        pbs_script = Path(self.pbs_work_dir) / self.job_name + '.pbs'
         self.python_script = Path(self.pbs_work_dir) / self.job_name + '.py'
-        super().__init__(pbs_script=self.pbs_script)
+        super().__init__(pbs_script=pbs_script, pbs_working_dir=pbs_working_dir)
 
         self.pbs_template = resource_filename(templates.__name__, "temp.pbs")
 
         # PBS - header info
-        self.author = author
+        if author is None:
+            self.author = getpass.getuser()
+        else:
+            self.author = author
         self.project_name = project_name
         self.description = description
         self.current_date = d.now().strftime(date_format)
@@ -95,7 +99,6 @@ class Qsub(BaseQsub):
         self.walltime = walltime
         self.directive_list = directive_list
         # PBS - commands
-        self.pbs_work_dir = pbs_work_dir
         self.activate_script = activate_script  # for python virtual environment activation
         self.primary_pbs_cmd = primary_pbs_cmd
         self.pbs_command_list = pbs_command_list
@@ -148,7 +151,7 @@ class Qsub(BaseQsub):
             code_template = string.Template(code)
             code = code_template.substitute(attributes)
         elif template and attributes is not None:
-            with open(template, 'r') as tem:
+            with open(str(template), 'r') as tem:
                 code = tem.read()
                 code_template = string.Template(code)
                 code = code_template.substitute(attributes)
@@ -158,7 +161,7 @@ class Qsub(BaseQsub):
 
     def write_template_string(self, code, extension):
         filename = Path(self.pbs_work_dir) / self.job_name + extension
-        with open(filename, 'w') as f:
+        with open(str(filename), 'w') as f:
             f.write(code)
 
     def create_header_section(self, file):
@@ -170,13 +173,18 @@ class Qsub(BaseQsub):
 
     def create_directives_section(self, file):
         with open(file, 'a') as f:
-            f.write("#PBS -l %s\n" % self.resource_str)
-            f.write("#PBS -l cput=%s\n" % self.cputime)
-            f.write("#PBS -l walltime=%s\n" % self.walltime)
-            f.write("#PBS -N %s\n" % self.job_name)
-            f.write("#PBS -o %s\n" % (self.job_name + ".o"))
-            f.write("#PBS -e %s\n" % (self.job_name + ".e"))
-            f.write("#PBS -M %s\n" % self.email)
+            if self.resource_str is not None:
+                f.write("#PBS -l %s\n" % self.resource_str)
+            if self.cputime is not None:
+                f.write("#PBS -l cput=%s\n" % self.cputime)
+            if self.walltime is not None:
+                f.write("#PBS -l walltime=%s\n" % self.walltime)
+            if self.job_name is not None:
+                f.write("#PBS -N %s\n" % self.job_name)
+                f.write("#PBS -o %s\n" % str(self.pbs_work_dir / "$PBS_JOBID" / (self.job_name + ".o")))
+                f.write("#PBS -e %s\n" % str(self.pbs_work_dir / "$PBS_JOBID" / (self.job_name + ".e")))
+            if self.email is not None:
+                f.write("#PBS -M %s\n" % self.email)
             if self.directive_list is not None:
                 for directive in self.directive_list:
                     f.write("#PBS %s\n" % directive)
@@ -184,9 +192,10 @@ class Qsub(BaseQsub):
 
     def create_commands_section(self, file):
         with open(file, 'a') as f:
-            f.write("cd %s\n" % self.pbs_work_dir)
+            f.write("cd %s\n" % str(self.pbs_work_dir))
+            f.write("mkdir $PBS_JOBID")
             if self.activate_script is not None:
-                f.write("source %s\n" % self.activate_script)
+                f.write("source %s\n" % str(self.activate_script))
             if self.primary_pbs_cmd is not None:
                 f.write(self.primary_pbs_cmd + "\n")
             if self.pbs_command_list:
