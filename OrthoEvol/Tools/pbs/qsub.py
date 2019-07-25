@@ -64,10 +64,10 @@ class BaseQsub(object):
             if proc.returncode == 0:  # Command was successful.
                 # The cmd_status has stdout that must be decoded.
                 # When a qsub job is submitted, the stdout is the job id.
-                self.qsub_job_id = proc.stdout.decode('utf-8')
+                self.pbs_job_id = proc.stdout.decode('utf-8')
                 self.qsub_log.info(str(self.pbs_script) + ' was submitted.')
-                self.qsub_log.info('Your job id is: %s' % self.qsub_job_id)
-                self.qsub_job_directory = self.pbs_work_dir / self.qsub_job_id
+                self.qsub_log.info('Your job id is: %s' % self.pbs_job_id)
+                self.qsub_job_directory = self.pbs_work_dir / self.pbs_job_id
 
             else:  # Unsuccessful. Stdout will be '1'
                 self.qsub_log.error('PBS job not submitted.')
@@ -163,7 +163,7 @@ class Qsub(BaseQsub):
         return code
 
     def write_template_string(self, code, extension):
-        filename = Path(self.pbs_work_dir) / self.job_name + extension
+        filename = Path(self.pbs_work_dir) / str(self.job_name + extension)
         with open(str(filename), 'w') as f:
             f.write(code)
 
@@ -253,3 +253,10 @@ class Qsub(BaseQsub):
             self.create_directives_section(file=self.pbs_script)
             self.create_commands_section(file=self.pbs_script)
 
+    def submit_python_job(self, cmd=None, py_template_string=None, py_template_file=None, python_attributes=None,
+                          pbs_template_string=None, pbs_template_file=None, pbs_attributes=None):
+        self.format_python_script(py_template_string=py_template_string, py_template_file=py_template_file,
+                                  python_attributes=python_attributes)
+        self.set_up_pbs_script(pbs_template_string=pbs_template_string, pbs_template_file=pbs_template_file,
+                               pbs_attributes=pbs_attributes)
+        self.submit_pbs_script(cmd=cmd)
