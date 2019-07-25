@@ -52,7 +52,7 @@ class BaseQstat(object):
                        "all": __keywords
                        }
 
-    def __init__(self, job, infile=None, outfile=None, home=None):
+    def __init__(self, job_id, infile=None, outfile=None, home=None):
         """
         The BaseQstat class processes the output from the pbs command 'qstat'.  It
         specifically parses output from 'qstat -f', which displays a full status report
@@ -61,8 +61,8 @@ class BaseQstat(object):
         dictionary.  The qstat data is then converted to csv format and saved in a .csv file.
         The Base class only process one job, and it only gathers data on one point in time.
 
-        :param job:  The name of the job to analyze.
-        :type job:  str.
+        :param job_id:  The name of the PBS job_id to analyze.
+        :type job_id:  str.
         :param infile:  The input file and the output file are used in tandem to determine the
         data file that will be used.  If only one of these values are given (infile/outfile), then
         it will be used as the data file.  If neither of these values are given, then a default file
@@ -80,18 +80,18 @@ class BaseQstat(object):
         self.qstat_utils = FullUtilities()
         self.qstat_log = LogIt().default(logname="PBS - QSTAT", logfile=None)
         self._yaml_config = resource_filename(yml.__name__, 'qstat.yml')
-        self.target_job = job
-        self.cmd = 'qstat -f ' + self.target_job
+        self.pbs_job_id = job_id
+        self.cmd = 'qstat -f ' + self.pbs_job_id
         self.outfile = outfile
         if not home:
-            self.home = Path(os.getcwd()) / str(job).replace(".", "")
+            self.home = Path(os.getcwd()) / str(job_id).replace(".", "")
         else:
             self.home = Path(home)
         if not self.home.exists():
             self.home.mkdir(parents=True)
 
         # Use infile as data file whether it exists or not
-        self.qstat_log_file = self.home / (str(self.target_job) + ".log")
+        self.qstat_log_file = self.home / (str(self.pbs_job_id) + ".log")
         if infile is not None and outfile is None:
             self.data_file = self.home / infile
         # Use outfile as data file whether it exists or not
@@ -160,14 +160,14 @@ class BaseQstat(object):
         # Convert raw data to nested dictionary
         self.qstat_dict = self.to_dict(qstat_data=self.qstat_data)
         # Isolate data for target PBS job
-        self.job_dict = self.target_data(qstat_dict=self.qstat_dict, target_job=self.target_job)
+        self.job_dict = self.target_data(qstat_dict=self.qstat_dict, target_job=self.pbs_job_id)
         # Isolate static data for target PBS job
-        self.static_dict = self.static_data(qstat_dict=self.qstat_dict, target_job=self.target_job)
+        self.static_dict = self.static_data(qstat_dict=self.qstat_dict, target_job=self.pbs_job_id)
         # Create a pandas dataframe for target PBS job, formatted for creating a CSV file.
-        self.job_dataframe = self.to_dataframe(qstat_dict=self.qstat_dict, target_job=self.target_job)
+        self.job_dataframe = self.to_dataframe(qstat_dict=self.qstat_dict, target_job=self.pbs_job_id)
         if csv_flag:
-            self.to_csv(file=self.data_file, qstat_dict=self.qstat_dict, target_job=self.target_job)
-            self.static_data_to_yaml(file=self.info_file, qstat_dict=self.qstat_dict, target_job=self.target_job)
+            self.to_csv(file=self.data_file, qstat_dict=self.qstat_dict, target_job=self.pbs_job_id)
+            self.static_data_to_yaml(file=self.info_file, qstat_dict=self.qstat_dict, target_job=self.pbs_job_id)
         if sqlite_flag:
             self.to_sqlite()
 
@@ -418,9 +418,9 @@ class BaseQstat(object):
 
 class Qstat(BaseQstat):
 
-    def __init__(self, job, wait_time=120, **kwargs):
+    def __init__(self, job_id, wait_time=120, **kwargs):
 
-        super().__init__(job=job, **kwargs)
+        super().__init__(job_id=job_id, **kwargs)
         self.wait_time = wait_time
         self.watch_count = 0
 
@@ -483,7 +483,7 @@ class Qstat(BaseQstat):
             first_time = first_time
         try:
             self.run_qstat(csv_flag=True, sqlite_flag=False)
-            self.qstat_log.info("Added data-point %s from qstat for %s." % (self.watch_count, self.target_job))
+            self.qstat_log.info("Added data-point %s from qstat for %s." % (self.watch_count, self.pbs_job_id))
             if not first_time:
                 if self.watch_count == max_count:
                     raise TargetJobKeyError
@@ -491,11 +491,11 @@ class Qstat(BaseQstat):
             self._watch(first_time=False, max_count=max_count)
         except TargetJobKeyError:
             if first_time:
-                raise TargetJobKeyError("The target job cannot be found:  %s" % self.target_job)
+                raise TargetJobKeyError("The target job cannot be found:  %s" % self.pbs_job_id)
             elif max_count is not None:
-                self.qstat_log.info('Watched %s for %s iterations.' % (self.target_job, max_count))
+                self.qstat_log.info('Watched %s for %s iterations.' % (self.pbs_job_id, max_count))
             else:
-                self.qstat_log.info('Finished watching %s' % self.target_job)
+                self.qstat_log.info('Finished watching %s' % self.pbs_job_id)
 
     def plot_data(self, data_file):
         """
@@ -662,7 +662,7 @@ class MultiQstat(object):
                 infile = str(job) + '.csv'
             if outfile is None:
                 outfile = str(job) + '.csv'
-            _qstat = Qstat(job=job, home=home, infile=infile, outfile=outfile, cmd=cmd, wait_time=wait_time)
+            _qstat = Qstat(job_id=job, home=home, infile=infile, outfile=outfile, cmd=cmd, wait_time=wait_time)
             # Create a dictionary value for each job
             job_dict[job] = _qstat
         return job_dict
