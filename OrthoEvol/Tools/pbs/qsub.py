@@ -30,19 +30,21 @@ class BaseQsub(object):
         else:
             self.pbs_work_dir = Path(pbs_working_dir)
 
+        self.supplied_pbs_script = pbs_script
         self.pbs_script = self.pbs_work_dir / Path(pbs_script).name
 
+        self.pbs_job_id = None
+        self.qsub_job_directory = None
+
+    def create_pbs_directory(self):
         # Create the pbs working directory if it doesn't exist
-        # and copy the script if it's not in the pbs working directory
         if not self.pbs_work_dir.exists():
             self.pbs_work_dir.mkdir(parents=True)
-            shutil.copy(pbs_script, str(self.pbs_script))
-        else:
-            if not self.pbs_script.exists():
-                shutil.copy(pbs_script, str(self.pbs_script))
 
-        self.qsub_job_id = None
-        self.qsub_job_directory = None
+    def copy_pbs_script(self):
+        # Copy the script if it's not in the pbs working directory
+        if not self.pbs_script.exists():
+            shutil.copy(self.supplied_pbs_script, str(self.pbs_script))
 
     def submit_pbs_script(self, cmd=None):
         """Submit a job using qsub.
@@ -50,6 +52,7 @@ class BaseQsub(object):
         :param cleanup: (Default value = False)
         :param wait: (Default value = True)
         """
+
         try:
             if cmd is None:
                 cmd = ['qsub ' + str(self.pbs_script)]  # this is the command
