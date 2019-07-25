@@ -207,8 +207,15 @@ class Qsub(BaseQsub):
             if self.email_command is not None:
                 f.write(self.email_command + "\n")
 
-    def set_up_python_job(self, template_string=None, template_file=None, python_attributes=None,
-                          pbs_template_string=None, pbs_template_file=None, pbs_attributes=None, custom_pbs=False):
+    def format_python_script(self, py_template_string=None, py_template_file=None, python_attributes=None):
+        # Configure the Python Code
+        python_code = self.format_template_string(code=py_template_string, template=py_template_file,
+                                                  attributes=python_attributes)
+        if python_code is None:
+            raise ValueError("The python code string or template file needs to be given.")
+        self.write_template_string(python_code, extension=".py")
+
+    def set_up_pbs_script(self, pbs_template_string=None, pbs_template_file=None, pbs_attributes=None):
         """
         Python code is supplied as a file or as a string.  The string or file can be a template string or file, which
         can be supplied a dictionary to fill in the templated variables.  Additionally, a PBS file (the default from the
@@ -216,37 +223,25 @@ class Qsub(BaseQsub):
         be generated from a template or a custom script can be generated with a minimum set of parameters already set
         up.
 
-        :param template_string:
-        :type template_string:
-        :param template_file:
-        :type template_file:
-        :param python_attributes:
-        :type python_attributes:
         :param pbs_template_string:
         :type pbs_template_string:
         :param pbs_template_file:
         :type pbs_template_file:
         :param pbs_attributes:
         :type pbs_attributes:
-        :param custom_pbs:
-        :type custom_pbs:
         :return:
         :rtype:
         """
 
-        # Configure the Python Code
-        python_code = self.format_template_string(code=template_string, template=template_file,
-                                                  attributes=python_attributes)
-        if python_code is None:
-            raise ValueError("The python code string or template file needs to be given.")
-        self.write_template_string(python_code, extension=".py")
         # Configure the PBS Code
-        if not custom_pbs:
-            pbs_code = self.format_template_string(code=pbs_template_string, template=pbs_template_file, attributes=pbs_attributes)
-            if pbs_code is None:
-                pbs_code = self.format_template_string(template=self.pbs_template, attributes=pbs_attributes)
-                if pbs_code is None:
-                    raise ValueError("Please supply pbs attributes.")
+        if pbs_attributes is not None:
+            if pbs_template_file is not None:
+                pbs_code = self.format_template_string(template=pbs_template_file, attributes=pbs_attributes)
+            elif pbs_template_string is not None:
+                pbs_code = self.format_template_string(code=pbs_template_string, attributes=pbs_attributes)
+            else:
+                raise ValueError("Please supply the pbs_template_file or pbs_template_string to generate the proper"
+                                 "pbs script.")
             self.write_template_string(pbs_code, extension=".pbs")
         else:
             self.create_header_section(file=self.pbs_script)
