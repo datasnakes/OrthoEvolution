@@ -17,7 +17,7 @@ from OrthoEvol.utilities import FullUtilities
 class BaseQsub(object):
     """Base class for PBS jobs."""
 
-    def __init__(self, pbs_script=None, pbs_working_dir=None):
+    def __init__(self, pbs_script, pbs_working_dir=None):
 
         self.qsub_log = LogIt().default(logname="PBS - QSUB", logfile=None)
         self.qsub_utils = FullUtilities()
@@ -204,8 +204,8 @@ class Qsub(BaseQsub):
             if self.email_command is not None:
                 f.write(self.email_command + "\n")
 
-    def create_scripts(self, python_code=None, python_template=None, python_attributes=None,
-                       pbs_code=None, pbs_template=None, pbs_attributes=None, custom_pbs=False):
+    def set_up_python_job(self, template_string=None, template_file=None, python_attributes=None,
+                          pbs_template_string=None, pbs_template_file=None, pbs_attributes=None, custom_pbs=False):
         """
         Python code is supplied as a file or as a string.  The string or file can be a template string or file, which
         can be supplied a dictionary to fill in the templated variables.  Additionally, a PBS file (the default from the
@@ -213,16 +213,16 @@ class Qsub(BaseQsub):
         be generated from a template or a custom script can be generated with a minimum set of parameters already set
         up.
 
-        :param python_code:
-        :type python_code:
-        :param python_template:
-        :type python_template:
+        :param template_string:
+        :type template_string:
+        :param template_file:
+        :type template_file:
         :param python_attributes:
         :type python_attributes:
-        :param pbs_code:
-        :type pbs_code:
-        :param pbs_template:
-        :type pbs_template:
+        :param pbs_template_string:
+        :type pbs_template_string:
+        :param pbs_template_file:
+        :type pbs_template_file:
         :param pbs_attributes:
         :type pbs_attributes:
         :param custom_pbs:
@@ -232,13 +232,14 @@ class Qsub(BaseQsub):
         """
 
         # Configure the Python Code
-        python_code = self.format_template_string(code=python_code, template=python_template, attributes=python_attributes)
+        python_code = self.format_template_string(code=template_string, template=template_file,
+                                                  attributes=python_attributes)
         if python_code is None:
             raise ValueError("The python code string or template file needs to be given.")
         self.write_template_string(python_code, extension=".py")
         # Configure the PBS Code
         if not custom_pbs:
-            pbs_code = self.format_template_string(code=pbs_code, template=pbs_template, attributes=pbs_attributes)
+            pbs_code = self.format_template_string(code=pbs_template_string, template=pbs_template_file, attributes=pbs_attributes)
             if pbs_code is None:
                 pbs_code = self.format_template_string(template=self.pbs_template, attributes=pbs_attributes)
                 if pbs_code is None:
