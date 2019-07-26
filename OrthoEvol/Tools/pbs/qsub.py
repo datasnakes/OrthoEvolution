@@ -180,8 +180,8 @@ class Qsub(BaseQsub):
                 f.write("#PBS -l walltime=%s\n" % self.walltime)
             if self.job_name is not None:
                 f.write("#PBS -N %s\n" % self.job_name)
-                f.write("#PBS -o %s\n" % str(self.pbs_working_dir / "$PBS_JOBID" / (self.job_name + ".o")))
-                f.write("#PBS -e %s\n" % str(self.pbs_working_dir / "$PBS_JOBID" / (self.job_name + ".e")))
+                f.write("#PBS -o %s\n" % str(self.pbs_working_dir / (self.job_name + ".o")))
+                f.write("#PBS -e %s\n" % str(self.pbs_working_dir / (self.job_name + ".e")))
             if self.email is not None:
                 f.write("#PBS -M %s\n" % self.email)
             if self.directive_list is not None:
@@ -192,7 +192,6 @@ class Qsub(BaseQsub):
     def create_commands_section(self, file):
         with open(file, 'a') as f:
             f.write("cd %s\n" % str(self.pbs_working_dir))
-            f.write("mkdir $PBS_JOBID\n")
             if self.pbs_command_list:
                 for cmd in self.pbs_command_list:
                     f.write(cmd + "\n")
