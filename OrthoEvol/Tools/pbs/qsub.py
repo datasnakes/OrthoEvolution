@@ -92,9 +92,9 @@ class Qsub(BaseQsub):
         if pbs_script is not None:
             self.supplied_pbs_script = pbs_script
         else:
-            self.pbs_script = Path(self.pbs_working_dir) / self.job_name + '.pbs'
+            self.pbs_script = Path(self.pbs_working_dir) / (self.job_name + '.pbs')
 
-        self.python_script = Path(self.pbs_working_dir) / self.job_name + '.py'
+        self.python_script = Path(self.pbs_working_dir) / (self.job_name + '.py')
         self.pbs_template = resource_filename(templates.__name__, "temp.pbs")
 
         # PBS - header info
