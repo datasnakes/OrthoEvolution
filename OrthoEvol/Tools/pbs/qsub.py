@@ -17,37 +17,28 @@ from OrthoEvol.utilities import FullUtilities
 class BaseQsub(object):
     """Base class for PBS jobs."""
 
-    def __init__(self, pbs_script, pbs_working_dir=None):
+    def __init__(self, pbs_script, pbs_working_dir):
 
         self.qsub_log = LogIt().default(logname="PBS - QSUB", logfile=None)
         self.qsub_utils = FullUtilities()
 
-        if not pbs_working_dir:
-            if not pbs_script:
-                self.pbs_work_dir = Path(os.getcwd())
-            else:
-                self.pbs_work_dir = Path(pbs_script).parent
-        else:
-            self.pbs_work_dir = Path(pbs_working_dir)
+        self.pbs_working_dir = Path(pbs_working_dir)
+        if not self.pbs_working_dir.exists():
+            self.pbs_working_dir.mkdir(parents=True)
 
-        self.supplied_pbs_script = pbs_script
-        if not pbs_script:
-            self.pbs_script = self.pbs_work_dir / Path("*.pbs")
-        else:
-            self.pbs_script = self.pbs_work_dir / Path(pbs_script).name
+        self.supplied_pbs_script = Path(pbs_script)
+        self.pbs_script = self.pbs_working_dir / self.supplied_pbs_script.name
 
         self.pbs_job_id = None
         self.qsub_job_directory = None
 
-    def create_pbs_directory(self):
-        # Create the pbs working directory if it doesn't exist
-        if not self.pbs_work_dir.exists():
-            self.pbs_work_dir.mkdir(parents=True)
-
     def copy_pbs_script(self):
-        # Copy the script if it's not in the pbs working directory
-        if not self.pbs_script.exists():
-            shutil.copy(self.supplied_pbs_script, str(self.pbs_script))
+        # if the supplied script exists make sure its in the PBS working directory
+        if self.supplied_pbs_script.exists():
+            if not self.supplied_pbs_script == self.pbs_script:
+                shutil.copy(str(self.supplied_pbs_script), str(self.pbs_script))
+        else:
+            raise FileExistsError("The PBS script does not exists.")
 
     def submit_pbs_script(self, cmd=None):
         """Submit a job using qsub.
@@ -58,7 +49,7 @@ class BaseQsub(object):
 
         try:
             if cmd is None:
-                cmd = ['qsub ' + str(self.pbs_script)]  # this is the command
+                cmd = ['qsub ' + str(self.supplied_pbs_script)]  # this is the command
             # Shell MUST be True
             proc = self.qsub_utils.system_cmd(cmd, stdout=sp.PIPE, stderr=sp.PIPE, shell=True, check=True)
         except sp.CalledProcessError as err:
@@ -68,7 +59,7 @@ class BaseQsub(object):
                 # The cmd_status has stdout that must be decoded.
                 # When a qsub job is submitted, the stdout is the job id.
                 self.pbs_job_id = proc.stdout.decode('utf-8')
-                self.qsub_log.info(str(self.pbs_script) + ' was submitted.')
+                self.qsub_log.info(str(self.supplied_pbs_script) + ' was submitted.')
                 self.qsub_log.info('Your job id is: %s' % self.pbs_job_id)
                 self.qsub_job_directory = self.pbs_work_dir / self.pbs_job_id
 
