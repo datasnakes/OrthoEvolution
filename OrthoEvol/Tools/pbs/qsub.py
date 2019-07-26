@@ -68,7 +68,7 @@ class BaseQsub(object):
             # Shell MUST be True
             proc = self.qsub_utils.system_cmd(cmd, stdout=sp.PIPE, stderr=sp.PIPE, shell=True)
         except sp.CalledProcessError as err:
-            self.qsub_log.error(err.stderr.decode('utf-8'))
+            self.qsub_log.error(err.stderr)
         else:
             if proc.returncode == 0:  # Command was successful.
                 # The cmd_status has stdout that must be decoded.
