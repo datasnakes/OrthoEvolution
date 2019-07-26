@@ -75,17 +75,22 @@ class BaseQsub(object):
 
 class Qsub(BaseQsub):
 
-    def __init__(self, author=None, project_name="OrthoEvol", description="This is a basic pbs job",
+    def __init__(self, pbs_script=None, python_script=None, author=None, project_name="OrthoEvol", description="This is a basic pbs job",
                  date_format='%a %b %d %I:%M:%S %p %Y', chunk_resources=None, cput='72:00:00', walltime='48:00:00',
-                 job_name=None, email=None, directive_list=None, primary_pbs_cmd=None, pbs_working_dir=None,
-                 pbs_command_list=None, email_command=None, activate_script=None):
+                 job_name=None, email=None, directive_list=None, pbs_working_dir=None, pbs_command_list=None,
+                 email_command=None):
 
         self.base_name = job_name
         self.base_id, self.job_name = self.get_base_job_name()
-        pbs_script = Path(self.pbs_work_dir) / self.job_name + '.pbs'
-        self.python_script = Path(self.pbs_work_dir) / self.job_name + '.py'
-        super().__init__(pbs_script=pbs_script, pbs_working_dir=pbs_working_dir)
 
+        self.supplied_python_script = python_script
+        self.python_script = Path(pbs_working_dir) / self.job_name + '.py'
+
+        super().__init__(pbs_script=pbs_script, pbs_working_dir=pbs_working_dir)
+        if pbs_script is not None:
+            self.supplied_pbs_script = pbs_script
+        else:
+            self.pbs_script = Path(pbs_working_dir) / self.job_name + '.pbs'
         self.pbs_template = resource_filename(templates.__name__, "temp.pbs")
 
         # PBS - header info
@@ -102,9 +107,8 @@ class Qsub(BaseQsub):
         self.walltime = walltime
         self.directive_list = directive_list
         # PBS - commands
-        self.activate_script = activate_script  # for python virtual environment activation
-        self.primary_pbs_cmd = primary_pbs_cmd
-        self.pbs_command_list = pbs_command_list
+        self.pbs_command_list = []
+        self.pbs_command_list.extend(pbs_command_list)
         self.email = email
         if email_command is None:
             if email is not None:
@@ -114,6 +118,15 @@ class Qsub(BaseQsub):
                 self.email_command = None
         else:
             self.email_command = email_command
+
+    def configure_pbs_job(self):
+        self.create_pbs_directory()
+        self.copy_pbs_script()
+
+    def copy_python_script(self):
+        # Copy the script if it's not in the pbs working directory
+        if not self.python_script.exists():
+            shutil.copy(self.supplied_pbs_script, str(self.pbs_script))
 
     def get_resource_string(self, chunk_resources=None):
         if chunk_resources is None:
@@ -197,10 +210,6 @@ class Qsub(BaseQsub):
         with open(file, 'a') as f:
             f.write("cd %s\n" % str(self.pbs_work_dir))
             f.write("mkdir $PBS_JOBID")
-            if self.activate_script is not None:
-                f.write("source %s\n" % str(self.activate_script))
-            if self.primary_pbs_cmd is not None:
-                f.write(self.primary_pbs_cmd + "\n")
             if self.pbs_command_list:
                 for cmd in self.pbs_command_list:
                     f.write(cmd + "\n")
@@ -249,9 +258,14 @@ class Qsub(BaseQsub):
             self.create_commands_section(file=self.pbs_script)
 
     def submit_python_job(self, cmd=None, py_template_string=None, py_template_file=None, python_attributes=None,
-                          pbs_template_string=None, pbs_template_file=None, pbs_attributes=None):
+                          pbs_template_string=None, pbs_template_file=None, pbs_attributes=None,
+                          custom_python_cmd=None):
         self.format_python_script(py_template_string=py_template_string, py_template_file=py_template_file,
                                   python_attributes=python_attributes)
+        if custom_python_cmd is not None:
+            self.pbs_command_list.append(custom_python_cmd)
+        else:
+            self.pbs_command_list.append("python %s" % self.python_script)
         self.set_up_pbs_script(pbs_template_string=pbs_template_string, pbs_template_file=pbs_template_file,
                                pbs_attributes=pbs_attributes)
         self.submit_pbs_script(cmd=cmd)
