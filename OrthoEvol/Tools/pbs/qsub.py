@@ -192,7 +192,7 @@ class Qsub(BaseQsub):
     def create_commands_section(self, file):
         with open(file, 'a') as f:
             f.write("cd %s\n" % str(self.pbs_working_dir))
-            f.write("mkdir $PBS_JOBID")
+            f.write("mkdir $PBS_JOBID\n")
             if self.pbs_command_list:
                 for cmd in self.pbs_command_list:
                     f.write(cmd + "\n")
