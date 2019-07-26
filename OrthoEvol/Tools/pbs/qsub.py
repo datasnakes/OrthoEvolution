@@ -38,8 +38,6 @@ class BaseQsub(object):
         if not self.pbs_working_dir.exists():
             self.pbs_working_dir.mkdir(parents=True)
 
-        self.supplied_pbs_script = Path(pbs_script)
-
         self.pbs_job_id = None
         self.qsub_job_directory = None
 
