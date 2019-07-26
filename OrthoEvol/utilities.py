@@ -910,12 +910,11 @@ class FullUtilities(CookieUtils, ManagerUtils, OrthologUtils):
                 with open(file_name, 'a') as output_file:
                     output_file.write(line)
         try:
-            proc.communicate(timeout=timeout)
+            stdout, stderr = proc.communicate(timeout=timeout)
+            if proc.returncode != 0:
+                raise sp.CalledProcessError(proc.returncode, cmd, stdout, stderr)
         except TimeoutExpired:
             proc.kill()
-        if proc.returncode != 0:
-            stdout, stderr = proc.communicate()
-            raise sp.CalledProcessError(proc.returncode, cmd, stdout, stderr)
 
         return proc
 
