@@ -31,7 +31,10 @@ class BaseQsub(object):
             self.pbs_work_dir = Path(pbs_working_dir)
 
         self.supplied_pbs_script = pbs_script
-        self.pbs_script = self.pbs_work_dir / Path(pbs_script).name
+        if not pbs_script:
+            self.pbs_script = self.pbs_work_dir / Path("*.pbs")
+        else:
+            self.pbs_script = self.pbs_work_dir / Path(pbs_script).name
 
         self.pbs_job_id = None
         self.qsub_job_directory = None
