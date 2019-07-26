@@ -220,9 +220,8 @@ class Qsub(BaseQsub):
         # Configure the Python Code
         python_code = self.format_template_string(code=py_template_string, template=py_template_file,
                                                   attributes=python_attributes)
-        if python_code is None:
-            raise ValueError("The python code string or template file needs to be given.")
-        self.write_template_string(python_code, extension=".py")
+        if python_code is not None:
+            self.write_template_string(python_code, extension=".py")
 
     def set_up_pbs_script(self, pbs_template_string=None, pbs_template_file=None, pbs_attributes=None):
         """
