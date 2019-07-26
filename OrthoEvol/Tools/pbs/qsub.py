@@ -131,7 +131,7 @@ class Qsub(BaseQsub):
             chunk_resources = OrderedDict({
                 "select": 1,
                 "ncpus": 1,
-                "memgb": "6gb"
+                "mem": "6gb"
             })
 
         resource_list = []
