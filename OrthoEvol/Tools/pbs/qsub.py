@@ -74,7 +74,7 @@ class BaseQsub(object):
                 # The cmd_status has stdout that must be decoded.
                 # When a qsub job is submitted, the stdout is the job id.
                 self.pbs_proc = proc
-                self.pbs_job_id = proc.stdout
+                self.pbs_job_id = proc.stdout[0]
                 self.qsub_log.info(str(self.pbs_script) + ' was submitted.')
                 self.qsub_log.info('Your job id is: %s' % self.pbs_job_id)
                 self.qsub_job_directory = self.pbs_working_dir / self.pbs_job_id
