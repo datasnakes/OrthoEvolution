@@ -15,9 +15,27 @@ from OrthoEvol.utilities import FullUtilities
 
 
 class BaseQsub(object):
-    """Base class for PBS jobs."""
 
-    def __init__(self, pbs_script, job_name, base_job_id=None, pbs_working_dir=None):
+    def __init__(self, job_name, pbs_script=None, base_job_id=None, pbs_working_dir=None):
+        """
+        The BaseQsub class is the most basic means to create PBS jobs using qsub.
+        It takes a given pbs script and creates a new directory for the pbs job using
+        a randomly generating string of letters/numbers.  After the supplied pbs script
+        is copied into the new folder it can be submitted to the system.  After submission
+        the PBS job id will be available as a class variable.
+
+        :param pbs_script:   The path to the PBS script that will be submitted to the system.
+        :type pbs_script:  str.
+        :param job_name:  A job name that will be used for naming the pbs working directory, and
+        for the -N parameter in the PBS script.
+        :type job_name:  str.
+        :param base_job_id:  While usually none, this can be used to re-run a PBS job that was
+        created by this class.
+        :type base_job_id:  str.
+        :param pbs_working_dir:  The path to the PBS working directory where the scripts will be
+        copied to and where the job will be started and run by the PBS system.
+        :type pbs_working_dir:  str.
+        """
 
         self.qsub_log = LogIt().default(logname="PBS - QSUB", logfile=None)
         self.qsub_utils = FullUtilities()
@@ -46,31 +64,51 @@ class BaseQsub(object):
         self.qsub_job_directory = None
 
     def get_base_job_name(self, length=5):
+        """
+        Returns a tuple of the base job id and the job_name.  The base
+        job id can be of any length.
+
+        :param length:  The number of characters used in the base job id.
+        :type length:  int.
+        """
         base_id = ''.join(random.sample(string.ascii_letters + string.digits, length))
         job_name = self.base_name + "_%s" % base_id
 
         return base_id, job_name
 
     def copy_supplied_script(self, supplied_script, new_script):
+        """
+        Copies a supplied script/file using the new script/file name and
+        location unless the supplied script doesn't exist.
+
+        :param supplied_script:  The script to be copied.
+        :type supplied_script:  str.
+        :param new_script:  The path (<path>/<new-script-name>) to copy the supplied
+        script to.
+        :type new_script:  str.
+        """
         # if the supplied script exists make sure its in the PBS working directory
         if Path(supplied_script).exists():
             if not Path(supplied_script) == Path(new_script):
                 shutil.copy(str(supplied_script), str(new_script))
         else:
-            raise FileExistsError("The PBS script does not exists.")
+            raise FileExistsError("The script does not exists.")
 
-    def submit_pbs_script(self, cmd=None):
-        """Submit a job using qsub.
+    def submit_pbs_script(self, cmd=None, **kwargs):
+        """
+        A function to submit the PBS job to the system.
 
-        :param cleanup: (Default value = False)
-        :param wait: (Default value = True)
+        :param cmd:  A command list/string used qsub system call.
+        :type cmd:  list or str.
+        :param kwargs:  Keyword arguments used in subprocess.Popen.
+        :type kwargs:  dict.
         """
 
         try:
             if cmd is None:
                 cmd = ['qsub ' + str(self.pbs_script)]  # this is the command
             # Shell MUST be True
-            proc = self.qsub_utils.system_cmd(cmd, stdout=sp.PIPE, stderr=sp.PIPE, shell=True)
+            proc = self.qsub_utils.system_cmd(cmd, stdout=sp.PIPE, stderr=sp.PIPE, **kwargs)
         except sp.CalledProcessError as err:
             self.qsub_log.error(err.stderr)
         else:
