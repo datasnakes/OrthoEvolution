@@ -432,7 +432,7 @@ class Qsub(BaseQsub):
         """
         if not rerun:
             # Format or copy the python script.
-            if python_attributes is None:
+            if python_attributes is not None:
                 self.format_python_script(py_template_string=py_template_string, py_template_file=py_template_file,
                                           python_attributes=python_attributes)
             elif not self.python_script.exists():
