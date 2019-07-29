@@ -131,6 +131,44 @@ class Qsub(BaseQsub):
                  date_format='%a %b %d %I:%M:%S %p %Y', chunk_resources=None, cput='72:00:00', walltime='48:00:00',
                  email=None, directive_list=None, pbs_command_list=None,
                  email_command=None, **kwargs):
+        """
+        The Qsub class is the primary means of creating a job.  It adds the additional
+        functionality of creating custom PBS jobs by using template PBS scripts or by
+        utilizing the it's parameters to create each section of the PBS script (header,
+        directives, and commands sections).  It also gives the ability to format/template/submit
+        python based PBS jobs.
+
+        :param python_script:  The path to the python script that will be submitted.
+        :type python_script:  str.
+        :param author:  The name of the person submitting the PBS job.  Used in the header section
+        of the PBS script.
+        :type author:  str.
+        :param project_name:  The project name associated with the PBS job.  Used in the header
+        section of the PBS script.
+        :type project_name:  str.
+        :param description:  A description of the job used in the header section of the PBS script.
+        :type description:  str.
+        :param date_format:  The date format used in the header section of the PBS script.
+        :type date_format:  str.
+        :param chunk_resources:  A dictionary of chunk resources used by the -l parameter.  Used in
+        the directives section of the PBS script.
+        :type chunk_resources:  dict.
+        :param cput:  The cpu time used in the directives section of the PBS script.
+        :type cput:  str.
+        :param walltime:  The walltime used in the directives section of the PBS script.
+        :type walltime:  str.
+        :param email:  The email of the author or user.  Used in the directives section of the PBS
+        script.
+        :type email:  str.
+        :param directive_list:  A list of other directives to use in the PBS script.
+        :type directive_list:  list.
+        :param pbs_command_list:  A list of extra PBS commands to add to the PBS script.
+        :type pbs_command_list:  list.
+        :param email_command:  A custom email command used in the command section of the PBS script.
+        :type email_command:  str.
+        :param kwargs:  Keyword arguments given to the BaseQsub class.
+        :type kwargs:  dict.
+        """
 
         super().__init__(**kwargs)
 
@@ -170,6 +208,17 @@ class Qsub(BaseQsub):
             self.email_command = email_command
 
     def get_resource_string(self, chunk_resources=None):
+        """
+        Creates a list of chunk resources that will be used in the
+        directives section of the custom PBS script.
+
+        :param chunk_resources:  A dictionary of values used in the PBS directive section.
+        The default will look like this after it is added to the PBS script:
+          '#PBS -l select=1:ncpus=1:mem=6gb'
+        :type chunk_resources:  dict.
+        :return:  A string that will added to the directive list.
+        :rtype:  str.
+        """
         if chunk_resources is None:
             chunk_resources = OrderedDict({
                 "select": 1,
@@ -185,6 +234,20 @@ class Qsub(BaseQsub):
         return resource_str
 
     def format_template_string(self, code=None, template=None, attributes=None):
+        """
+        Using string Templating, this function takes a dictionary of attributes
+        that are used to format the given code or template file.
+        See https://docs.python.org/3.4/library/string.html#string.Template.
+
+        :param code:  A string of code that is a template.
+        :type code:  str.
+        :param template:  The path to a file that is a template.
+        :type template:  str.
+        :param attributes:  A dictionary of attributes for templating the code/file.
+        :type attributes:  dict.
+        :return:  The template code with the attribute variables filled in.
+        :rtype:  str.
+        """
 
         if code and attributes is not None:
             code_template = string.Template(code)
@@ -199,6 +262,19 @@ class Qsub(BaseQsub):
         return code
 
     def write_template_string(self, code, extension, file=None):
+        """
+        This function writes a code string to a file located in the
+        PBS working directory.  It uses the job_name and the extension to
+        create the file:  <pbs_working_dir>/<job_name>.<extension>
+
+        :param code:  The code that will be written to the file.
+        :type code:   str.
+        :param extension:  The extension of the file.  Usually '.pbs' or '.py'.
+        :type extension:  str.
+        :param file:  A path to the file that will be written.
+        :type file:  str.
+        """
+
         if file is None:
             filename = Path(self.pbs_working_dir) / str(self.job_name + extension)
         else:
@@ -207,6 +283,13 @@ class Qsub(BaseQsub):
             f.write(code)
 
     def create_header_section(self, file):
+        """
+        Create the header section of the supplied PBS file.
+
+        :param file:  A path to the PBS file.
+        :type file:  str.
+        """
+
         with open(file, 'a') as f:
             f.write("# Author:  %s\n" % self.author)
             f.write("# Date Created: %s\n" % self.current_date)
@@ -214,6 +297,12 @@ class Qsub(BaseQsub):
             f.write("# Description: %s\n\n" % self.description)
 
     def create_directives_section(self, file):
+        """
+        Create the directive section of the PBS file.
+
+        :param file:  A path to the PBS file.
+        :type file:  str.
+        """
         with open(file, 'a') as f:
             if self.resource_str is not None:
                 f.write("#PBS -l %s\n" % self.resource_str)
@@ -233,6 +322,12 @@ class Qsub(BaseQsub):
             f.write("\n")
 
     def create_commands_section(self, file):
+        """
+        Create the command section of the PBS file.
+
+        :param file:  A path to the PBS file.
+        :type file:  str.
+        """
         with open(file, 'a') as f:
             f.write("cd %s\n" % str(self.pbs_working_dir))
             if self.pbs_command_list:
@@ -256,14 +351,14 @@ class Qsub(BaseQsub):
         be generated from a template or a custom script can be generated with a minimum set of parameters already set
         up.
 
-        :param pbs_template_string:
-        :type pbs_template_string:
-        :param pbs_template_file:
-        :type pbs_template_file:
-        :param pbs_attributes:
-        :type pbs_attributes:
-        :return:
-        :rtype:
+        See https://docs.python.org/3.4/library/string.html#string.Template.
+
+        :param pbs_template_string:  The PBS script as a string.
+        :type pbs_template_string:  str.
+        :param pbs_template_file:  A path to the PBS template.
+        :type pbs_template_file:  str.
+        :param pbs_attributes:  A dictionary of attributes that will be used with the template.
+        :type pbs_attributes:  dict.
         """
 
         # Configure the PBS Code
@@ -284,6 +379,33 @@ class Qsub(BaseQsub):
     def submit_python_job(self, cmd=None, py_template_string=None, py_template_file=None, python_attributes=None,
                           pbs_template_string=None, pbs_template_file=None, pbs_attributes=None,
                           custom_python_cmd=None, rerun=False):
+        """
+        This function is the primary means of submitting a PBS job that runs a python script.
+        It will format and copy the PBS script and the Python script that will be submitted
+        by the PBS system.  The PBS script will either be customized using the class parameters
+        or it will be formatted using the template parameters.  It also takes custom python commands
+        as a list, which is useful for certain actions like activating virutal environments.
+
+        :param cmd:  The command used to run the qsub job.
+        :type cmd:  str.
+        :param py_template_string:  Python code as a string.
+        :type py_template_string:  str.
+        :param py_template_file:  A path to the python template.
+        :type py_template_file:  str.
+        :param python_attributes:  A dictionary of attributes that will be used with the template.
+        :type python_attributes:  dict.
+        :param pbs_template_string:  The PBS script as a string.
+        :type pbs_template_string:  str.
+        :param pbs_template_file:  A path to the PBS template.
+        :type pbs_template_file:  str.
+        :param pbs_attributes:  A dictionary of attributes that will be used with the template.
+        :type pbs_attributes:  dict.
+        :param custom_python_cmd:  A list of custom commands that are used to create the command
+        section of the PBS script.
+        :type custom_python_cmd:  list.
+        :param rerun:  A flag used to rerun a previously created job.
+        :type rerun:  bool.
+        """
         if not rerun:
             self.format_python_script(py_template_string=py_template_string, py_template_file=py_template_file,
                                       python_attributes=python_attributes)
