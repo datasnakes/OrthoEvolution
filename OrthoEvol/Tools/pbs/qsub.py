@@ -337,11 +337,31 @@ class Qsub(BaseQsub):
                 f.write(self.email_command + "\n")
 
     def format_python_script(self, py_template_string=None, py_template_file=None, python_attributes=None):
+        """
+        Lightly wrapping the format_template_script, this function formats a python script
+        as a string using the supplied attributes.  The code/script is then writen to the
+        the pbs working directory using the naming convention:
+        <pbs_working_dir>/<job_name>.py
+
+        See https://docs.python.org/3.4/library/string.html#string.Template.
+
+
+        :param py_template_string:  Python code as a string.
+        :type py_template_string:  str.
+        :param py_template_file:  A path to the python template.
+        :type py_template_file:  str.
+        :param python_attributes:  A dictionary of attributes that will be used with the template.
+        :type python_attributes:  dict.
+        """
+
+        if py_template_file == self.python_script:
+            raise FileExistsError("The script provided already exists.  Do not overwrite.")
         # Configure the Python Code
         python_code = self.format_template_string(code=py_template_string, template=py_template_file,
                                                   attributes=python_attributes)
+
         if python_code is not None:
-            self.write_template_string(python_code, file=self.supplied_python_script)
+            self.write_template_string(python_code, file=self.python_script)
 
     def set_up_pbs_script(self, pbs_template_string=None, pbs_template_file=None, pbs_attributes=None):
         """
@@ -361,6 +381,9 @@ class Qsub(BaseQsub):
         :type pbs_attributes:  dict.
         """
 
+        if pbs_template_file == self.pbs_script:
+            raise FileExistsError("The script provided already exists.  Do not overwrite.")
+
         # Configure the PBS Code
         if pbs_attributes is not None:
             if pbs_template_file is not None:
@@ -370,11 +393,12 @@ class Qsub(BaseQsub):
             else:
                 raise ValueError("Please supply the pbs_template_file or pbs_template_string to generate the proper"
                                  "pbs script.")
-            self.write_template_string(pbs_code, file=self.supplied_pbs_script)
+            if pbs_code is not None:
+                self.write_template_string(pbs_code, file=self.pbs_script)
         else:
-            self.create_header_section(file=self.supplied_pbs_script)
-            self.create_directives_section(file=self.supplied_pbs_script)
-            self.create_commands_section(file=self.supplied_pbs_script)
+            self.create_header_section(file=self.pbs_script)
+            self.create_directives_section(file=self.pbs_script)
+            self.create_commands_section(file=self.pbs_script)
 
     def submit_python_job(self, cmd=None, py_template_string=None, py_template_file=None, python_attributes=None,
                           pbs_template_string=None, pbs_template_file=None, pbs_attributes=None,
@@ -407,15 +431,27 @@ class Qsub(BaseQsub):
         :type rerun:  bool.
         """
         if not rerun:
-            self.format_python_script(py_template_string=py_template_string, py_template_file=py_template_file,
-                                      python_attributes=python_attributes)
+            # Format or copy the python script.
+            if python_attributes is None:
+                self.format_python_script(py_template_string=py_template_string, py_template_file=py_template_file,
+                                          python_attributes=python_attributes)
+            elif not self.python_script.exists():
+                self.copy_supplied_script(supplied_script=self.supplied_python_script, new_script=self.python_script)
+
+            # Set up the custom python command
             if custom_python_cmd is not None:
                 self.pbs_command_list.append(custom_python_cmd)
             else:
                 self.pbs_command_list.append("python %s" % self.python_script)
-            self.copy_supplied_script(supplied_script=self.supplied_python_script, new_script=self.python_script)
+
+            # Format the PBS script, create a custom PBS script, or copy the PBS script
             self.set_up_pbs_script(pbs_template_string=pbs_template_string, pbs_template_file=pbs_template_file,
                                    pbs_attributes=pbs_attributes)
-            self.copy_supplied_script(supplied_script=self.supplied_pbs_script, new_script=self.pbs_script)
+            if not self.pbs_script.exists():
+                self.copy_supplied_script(supplied_script=self.supplied_pbs_script, new_script=self.pbs_script)
+
+            # Submit job
+            self.submit_pbs_script(cmd=cmd)
         else:
+            # Submit job as rerun
             self.submit_pbs_script(cmd=cmd)
