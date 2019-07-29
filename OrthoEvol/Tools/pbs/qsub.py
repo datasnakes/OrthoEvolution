@@ -17,12 +17,16 @@ from OrthoEvol.utilities import FullUtilities
 class BaseQsub(object):
     """Base class for PBS jobs."""
 
-    def __init__(self, pbs_script, job_name, pbs_working_dir=None):
+    def __init__(self, pbs_script, job_name, base_job_id=None, pbs_working_dir=None):
 
         self.qsub_log = LogIt().default(logname="PBS - QSUB", logfile=None)
         self.qsub_utils = FullUtilities()
         self.base_name = job_name
-        self.base_id, self.job_name = self.get_base_job_name()
+        if base_job_id is None:
+            self.base_id, self.job_name = self.get_base_job_name()
+        else:
+            self.base_id = base_job_id
+            self.job_name = self.base_name + "_%s" % base_job_id
         # PBS working directory
         if pbs_working_dir is None:
             self.pbs_working_dir = Path(os.getcwd()) / Path(self.job_name)
@@ -241,15 +245,17 @@ class Qsub(BaseQsub):
 
     def submit_python_job(self, cmd=None, py_template_string=None, py_template_file=None, python_attributes=None,
                           pbs_template_string=None, pbs_template_file=None, pbs_attributes=None,
-                          custom_python_cmd=None):
-        self.format_python_script(py_template_string=py_template_string, py_template_file=py_template_file,
-                                  python_attributes=python_attributes)
-        if custom_python_cmd is not None:
-            self.pbs_command_list.append(custom_python_cmd)
+                          custom_python_cmd=None, rerun=False):
+        if not rerun:
+            self.format_python_script(py_template_string=py_template_string, py_template_file=py_template_file,
+                                      python_attributes=python_attributes)
+            if custom_python_cmd is not None:
+                self.pbs_command_list.append(custom_python_cmd)
+            else:
+                self.pbs_command_list.append("python %s" % self.python_script)
+            self.copy_supplied_script(supplied_script=self.supplied_python_script, new_script=self.python_script)
+            self.set_up_pbs_script(pbs_template_string=pbs_template_string, pbs_template_file=pbs_template_file,
+                                   pbs_attributes=pbs_attributes)
+            self.copy_supplied_script(supplied_script=self.supplied_pbs_script, new_script=self.pbs_script)
         else:
-            self.pbs_command_list.append("python %s" % self.python_script)
-        self.copy_supplied_script(supplied_script=self.supplied_python_script, new_script=self.python_script)
-        self.set_up_pbs_script(pbs_template_string=pbs_template_string, pbs_template_file=pbs_template_file,
-                               pbs_attributes=pbs_attributes)
-        self.copy_supplied_script(supplied_script=self.supplied_pbs_script, new_script=self.pbs_script)
-        self.submit_pbs_script(cmd=cmd)
+            self.submit_pbs_script(cmd=cmd)
