@@ -61,6 +61,7 @@ class BaseQsub(object):
             self.pbs_working_dir.mkdir(parents=True)
 
         self.pbs_job_id = None
+        self.pbs_proc = None
         self.qsub_job_directory = None
 
     def get_base_job_name(self, length=5):
