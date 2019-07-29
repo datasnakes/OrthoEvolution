@@ -902,7 +902,9 @@ class FullUtilities(CookieUtils, ManagerUtils, OrthologUtils):
         :return:  Returns the stdout and stderr as a tuple.
         """
         proc = sp.Popen(cmd, **kwargs, encoding="utf-8")
+        stdout_list = []
         for line in iter(proc.stdout.readline, ""):
+            stdout_list.append(line.rstrip())
             if print_flag:
                 print(line, end="")
             sys.stdout.flush()
@@ -915,7 +917,7 @@ class FullUtilities(CookieUtils, ManagerUtils, OrthologUtils):
                 raise sp.CalledProcessError(proc.returncode, cmd, stdout, stderr)
         except TimeoutExpired:
             proc.kill()
-
+        proc.stdout = stdout_list
         return proc
 
     def group_files_by_size(self, file_dict, _path=None, groups=8):
