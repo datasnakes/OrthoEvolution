@@ -106,7 +106,7 @@ class BaseQsub(object):
 
         try:
             if cmd is None:
-                cmd = ['qsub ' + str(self.pbs_script)]  # this is the command
+                cmd = ['qsub', str(self.pbs_script)]  # this is the command
             # Shell MUST be True
             proc = self.qsub_utils.system_cmd(cmd, stdout=sp.PIPE, stderr=sp.PIPE, **kwargs)
         except sp.CalledProcessError as err:
