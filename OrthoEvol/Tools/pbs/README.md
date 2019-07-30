@@ -15,6 +15,20 @@ Qsub is OrthoEvol's solution for submitting a PBS job using Python.  It primaril
 submit jobs.  This class also lets the end user utilize [string templating](https://docs.python.org/3.4/library/string.html#string.Template.)
 for Python or PBS scripts.  Custom PBS scripts can also be created using the optional Qsub parameters.
 
+#### BaseQsub Example:
+
+```python
+from OrthoEvol.Tools.pbs import BaseQsub
+
+# Initialize the job before submitting, including directory creation.
+base_job = BaseQsub(job_name="test", pbs_script="test.pbs")
+# Copy the supplied pbs script to the new directory named with the <job_name> parameter
+base_job.copy_supplied_script(supplied_script=base_job.supplied_pbs_script, new_script=base_job.pbs_script)
+# Submit the PBS script
+base_job.submit_pbs_script()
+# Use the PBS job_id created by the PBS system
+print(base_job.pbs_job_id)
+```
 
 
 ## Qstat
