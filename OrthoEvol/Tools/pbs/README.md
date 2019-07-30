@@ -21,7 +21,7 @@ for Python or PBS scripts.  Custom PBS scripts can also be created using the opt
 from OrthoEvol.Tools.pbs import BaseQsub
 
 # Initialize the job before submitting, including directory creation.
-base_job = BaseQsub(job_name="test", pbs_script="test.pbs")
+base_job = BaseQsub(job_name="GH_test", pbs_script="test.pbs")
 # Copy the supplied pbs script to the new directory named with the <job_name> parameter
 base_job.copy_supplied_script(supplied_script=base_job.supplied_pbs_script, new_script=base_job.pbs_script)
 # Submit the PBS script
@@ -30,5 +30,27 @@ base_job.submit_pbs_script()
 print(base_job.pbs_job_id)
 ```
 
+#### Qsub Example:
+
+```python
+from OrthoEvol.Tools.pbs import Qsub
+
+# Initialize the job before submitting, including directory creation.
+job = Qsub(python_script='test.py', job_name='GH_test',author='grabear', description='This is an example on GitHub.', 
+           pbs_command_list=["pyenv activate pbs37"])
+# Set up new directory with PBS/python scripts, and submit the job
+job.submit_python_job()
+# To resubmit the job use the rerun parameter
+job.submit_python_job(rerun=True)
+
+# If you have created a file with string templating, then set up the attributes for python and PBS separately
+py_attrs = {"pbs_wd": job.pbs_working_dir, "author":"grabear", "iterations": 4}
+pbs_attrs = {"pbs_wd": job.pbs_working_dir, "author":"grabear", "walltime": "72:00:00"}
+# Use them in the job submission call
+job.submit_python_job(py_template_file="test.py", python_attributes=py_attrs, pbs_template_file="test.pbs", 
+                      pbs_attributes=pbs_attrs)
+# Use the PBS job_id created by the PBS system                    
+print(job.pbs_job_id)
+```
 
 ## Qstat
