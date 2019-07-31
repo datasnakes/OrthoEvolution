@@ -52,7 +52,7 @@ class BaseQstat(object):
                        "all": __keywords
                        }
 
-    def __init__(self, job_id, infile=None, outfile=None, home=None):
+    def __init__(self, job_id, infile=None, outfile=None, home=None, cmd=None):
         """
         The BaseQstat class processes the output from the pbs command 'qstat'.  It
         specifically parses output from 'qstat -f', which displays a full status report
@@ -81,7 +81,10 @@ class BaseQstat(object):
         self.qstat_log = LogIt().default(logname="PBS - QSTAT", logfile=None)
         self._yaml_config = resource_filename(yml.__name__, 'qstat.yml')
         self.pbs_job_id = job_id
-        self.cmd = 'qstat -f ' + self.pbs_job_id
+        if cmd is None:
+            self.cmd = 'qstat -f ' + self.pbs_job_id
+        else:
+            self.cmd = cmd
         self.outfile = outfile
         if not home:
             self.home = Path(os.getcwd()) / str(job_id).replace(".", "")
