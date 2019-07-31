@@ -25,16 +25,17 @@ Job Id:
   Priority:
   qtime:
   Rerunable:
-  Resource_List.cput:
-  Resource_List.mem:
-  Resource_List.mpiprocs:
-  Resource_List.ncpus:
-  Resource_List.nodect:
-  Resource_List.nodes:
-  Resource_List.place:
-  Resource_List.select:
-  Resource_List.walltime:
-  Resource_List.file:
+  Resource_List:
+    Resource_List.cput:
+    Resource_List.mem:
+    Resource_List.mpiprocs:
+    Resource_List.ncpus:
+    Resource_List.nodect:
+    Resource_List.nodes:
+    Resource_List.place:
+    Resource_List.select:
+    Resource_List.walltime:
+    Resource_List.file:
   stime:
   session_id:
   Shell_Path_List:
