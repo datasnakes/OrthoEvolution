@@ -216,6 +216,9 @@ class BaseQstat(object):
         phrase_continuation_flag = None
         with open(self._yaml_config, 'r') as yf:
             qstat_keywords = yaml.load(yf)
+        primary_keys = list(qstat_keywords["Job Id"].keys())
+        resource_list_keys = list(qstat_keywords["Job Id"]["Resource_List"].keys())
+        variable_list_keys = list(qstat_keywords["Job Id"]["Variable_List"].keys())
         if isinstance(qstat_data, list):
             qstat_sentence = None
             continuation_phrase = ""
@@ -225,15 +228,16 @@ class BaseQstat(object):
                 # If a new job is identified then create the nested dictionary
                 if "Job Id" in item:
                     job_count += 1
+                    resource_list_count = 0
                     _ = item.split(": ")
                     job_id_key = "%s" % _[1].replace("\r\n", "")
                     job_id_key = job_id_key.replace("\n", "")
                     mast_dict[job_id_key] = OrderedDict()
-                    mast_dict[job_id_key]["Job_Id"] = job_id_key
+                    #mast_dict[job_id_key]["Job_Id"] = job_id_key
                 # The current line information is used to determine single or multi-lined parsing for the
                 # previous line.
                 # If the a new keyword is recognized, then parse the line.
-                elif "    " in item and any(kw in item for kw in list(qstat_keywords["Job Id"].keys()) + list(qstat_keywords["Job Id"]["Variable_List"].keys())) or item == "\n":
+                elif "    " in item and any(kw in item for kw in (primary_keys + resource_list_keys + variable_list_keys)) or item == "\n":
                     item = item.replace("    ", "")
                     # Join the multi-lined "phrases" into one "sentence"
                     if phrase_continuation_flag is True:
@@ -266,10 +270,10 @@ class BaseQstat(object):
                     if qstat_keyword == "Variable_List":
                         qstat_value = qstat_value.split(",")
                         temp_dict = OrderedDict(var.split("=") for var in qstat_value)
-                        for vl_key, vl_value in temp_dict.items():
-                            if vl_value[0] == "/" or vl_value[0] == "\\":
-                                vl_value = Path(vl_value)
-                            temp_dict[vl_key] = vl_value
+                        #for vl_key, vl_value in temp_dict.items():
+                            # if vl_value[0] == "/" or vl_value[0] == "\\":
+                            #     vl_value = Path(vl_value)
+                            #temp_dict[vl_key] = vl_value
                         mast_dict[job_id_key]["Variable_List"] = temp_dict
                     # All of the other qstat keywords/sentences are basic key/value pairs
                     else:
@@ -281,7 +285,15 @@ class BaseQstat(object):
                     qstat_list = qstat_sentence.split(" = ")
                     qstat_keyword = qstat_list[0]
                     qstat_value = qstat_list[1]
-                    mast_dict[job_id_key][qstat_keyword] = qstat_value.replace('\n', '')
+                    if "Resource_List" in qstat_keyword:
+                        rl_list = qstat_keyword.split('.')
+                        rl_keyword = rl_list[1]
+                        rl_value = qstat_value
+                        if resource_list_count == 0:
+                            mast_dict[job_id_key]["Resource_List"] = OrderedDict()
+                        mast_dict[job_id_key]["Resource_List"][rl_keyword] = rl_value
+                    else:
+                        mast_dict[job_id_key][qstat_keyword] = qstat_value.replace('\n', '')
                 qstat_sentence = None
                 prev_item = item
         return mast_dict
