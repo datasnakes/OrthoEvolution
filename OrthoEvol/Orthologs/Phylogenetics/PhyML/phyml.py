@@ -1,14 +1,15 @@
-from Bio.Phylo.Applications import PhymlCommandline
 import sys
+
+from Bio.Phylo.Applications import PhymlCommandline
 
 from OrthoEvol.Tools.logit import LogIt
 
 
 class PhyML(object):
-    """The PhyML class uses Biopython's PhyMLCommandline wrapper to generate trees
-    from the PhyML executable."""
+    """The PhyML class uses Biopython's PhyMLCommandline wrapper to generate 
+    trees from the PhyML executable."""
 
-    def __init__(self, phyml_input, datatype='aa'):
+    def __init__(self, phyml_input, datatype="aa"):
         """Run phyml to generate tree results.
 
         If you're using Linux, ensure that your phyml path is set in your bash
@@ -29,9 +30,8 @@ class PhyML(object):
         self.phyml_exe = phyml_exe
         self.datatype = datatype
         self.phyml_input = phyml_input
-        self._runphyml()
 
-    def _runphyml(self):
+    def run(self):
         """"Run phyml.
 
         Input a phylip formatted alignment file and describe the datatype
