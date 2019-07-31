@@ -292,6 +292,7 @@ class BaseQstat(object):
                         if resource_list_count == 0:
                             mast_dict[job_id_key]["Resource_List"] = OrderedDict()
                         mast_dict[job_id_key]["Resource_List"][rl_keyword] = rl_value
+                        resource_list_count += 1
                     else:
                         mast_dict[job_id_key][qstat_keyword] = qstat_value.replace('\n', '')
                 qstat_sentence = None
