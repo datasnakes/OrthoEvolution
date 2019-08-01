@@ -9,8 +9,14 @@ class PhyML(object):
     """The PhyML class uses Biopython's PhyMLCommandline wrapper to generate 
     trees from the PhyML executable."""
 
-    def __init__(self, phyml_input, datatype="aa"):
-        """Run phyml to generate tree results.
+
+    def __init__(self, infile, datatype="aa"):
+        """Input a phylip formatted alignment file and specify a datatype.
+
+        :param infile: An input file that is phylip formatted.
+        :type infile: str
+        :param datatype: The datatype of the infile ("nt"/"aa"), defaults to "aa"
+        :type datatype: str, optional
 
         If you're using Linux, ensure that your phyml path is set in your bash
         profile. If you're using Windows, this function will look for the name
@@ -29,15 +35,11 @@ class PhyML(object):
         phyml_exe = exe_name
         self.phyml_exe = phyml_exe
         self.datatype = datatype
-        self.phyml_input = phyml_input
+        self.phyml_input = infile
 
     def run(self):
-        """"Run phyml.
-
-        Input a phylip formatted alignment file and describe the datatype
-        ('nt' or 'aa').
-        """
-
+        """"Run phyml."""
+        # TODO: Add try/except logic.
         run_phyml = PhymlCommandline(self.phyml_exe,
                                      input=self.phyml_input,
                                      datatype=self.datatype)
