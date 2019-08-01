@@ -201,103 +201,281 @@ class BaseQstat(object):
                     qstat_data = lf.readlines()
                 return qstat_data
 
-    def to_dict(self, qstat_data):
-        """
-        The qstat parser takes the qstat data from the 'qstat -f' command and parses it
-        into a ditionary.  It uses the qstat keywords found in the qstat yaml file.
-
-        :param qstat_data:  Output data generated from the qstat command.
-        :type qstat_data:  list.
-        :return:  A nest dictionary that uses JobId's as keys.
-        :rtype:  dict.
-        """
-        mast_dict = OrderedDict()
+    def identify_jobs(self, qstat_data):
         job_count = 0
-        phrase_continuation_flag = None
-        with open(self._yaml_config, 'r') as yf:
-            qstat_keywords = yaml.load(yf)
-        primary_keys = list(qstat_keywords["Job Id"].keys())
-        resource_list_keys = list(qstat_keywords["Job Id"]["Resource_List"].keys())
-        variable_list_keys = list(qstat_keywords["Job Id"]["Variable_List"].keys())
+        master_dict = OrderedDict()
         if isinstance(qstat_data, list):
-            qstat_sentence = None
-            continuation_phrase = ""
-            qstat_phrase = ""
-            prev_item = None
             for item in qstat_data:
-                # If a new job is identified then create the nested dictionary
                 if "Job Id" in item:
                     job_count += 1
-                    resource_list_count = 0
                     _ = item.split(": ")
                     job_id_key = "%s" % _[1].replace("\r\n", "")
                     job_id_key = job_id_key.replace("\n", "")
-                    mast_dict[job_id_key] = OrderedDict()
-                    #mast_dict[job_id_key]["Job_Id"] = job_id_key
-                # The current line information is used to determine single or multi-lined parsing for the
-                # previous line.
-                # If the a new keyword is recognized, then parse the line.
-                elif "    " in item and any(kw in item for kw in (primary_keys + resource_list_keys + variable_list_keys)) or item == "\n":
-                    item = item.replace("    ", "")
-                    # Join the multi-lined "phrases" into one "sentence"
-                    if phrase_continuation_flag is True:
-                        qstat_sentence = qstat_phrase + continuation_phrase
-                        phrase_continuation_flag = False
-                    #  If the phrase is a single line
-                    elif qstat_phrase == prev_item:
-                        qstat_sentence = qstat_phrase
-                    # Updates the qstat phrase unless it's in between lines or the end of file
-                    if item != "\n":
-                        qstat_phrase = item
-                    else:
-                        pass
-                # If there is no keyword and tabbed whitespace is recognized, then the current line
-                # is a continuation phrase for the most recent qstat keyword
-                elif "\t" in item:
-                    phrase_continuation_flag = True
-                    continuation_phrase = continuation_phrase + item
+                    master_dict[job_id_key] = []
+                else:
+                    master_dict[job_id_key].append(item)
+        return master_dict
 
-                # For multi-line phrases format the qstat sentence
-                if phrase_continuation_flag is False:
-                    qstat_sentence = qstat_sentence.replace("\n\t", "").replace('\n', '')
-                    continuation_phrase = ""
-                    phrase_continuation_flag = None
-                    qstat_list = qstat_sentence.split(" = ")
-                    qstat_keyword = qstat_list[0]
-                    qstat_value = qstat_list[1]
-                    # The variable list is unique in that it can be split into a dictionary of
-                    # environment variables
-                    if qstat_keyword == "Variable_List":
-                        qstat_value = qstat_value.split(",")
-                        temp_dict = OrderedDict(var.split("=") for var in qstat_value)
-                        #for vl_key, vl_value in temp_dict.items():
-                            # if vl_value[0] == "/" or vl_value[0] == "\\":
-                            #     vl_value = Path(vl_value)
-                            #temp_dict[vl_key] = vl_value
-                        mast_dict[job_id_key]["Variable_List"] = temp_dict
-                    # All of the other qstat keywords/sentences are basic key/value pairs
+    def identify_qstat_keywords(self, job_data, extra_keywords=None):
+        with open(self._yaml_config, 'r') as yf:
+            qstat_keywords = yaml.load(yf)
+        primary_keys = list(qstat_keywords["Job Id"].keys())
+        primary_keys.remove("Resource_List")
+        resource_list_keys = list(qstat_keywords["Job Id"]["Resource_List"].keys())
+        if extra_keywords is not None:
+            primary_keys = list(primary_keys + extra_keywords)
+        if isinstance(job_data, dict):
+            master_dict = OrderedDict()
+            for job, data_list in job_data.items():
+                master_dict[job] = OrderedDict()
+                line_key = None
+                for line in data_list:
+                    if "    " in line:
+                        if any(kw in line for kw in (primary_keys + resource_list_keys)):
+                            key_list = list(primary_keys + resource_list_keys)
+                            for kw in key_list:
+                                if ("    %s = " % kw) in line:
+                                    line_key = kw
+                                    break
+                            master_dict[job][line_key] = line
+                        elif " = " in line:
+                            raise KeyError(
+                                "It looks like you need to use the 'extra_keyword' parameter.  Add the keyword in the"
+                                "following string:  \n    `%s`.\nPlease file an issue at https://github.com/datasnakes/OrthoEvolution/issues"
+                                "and copy this Error message." % line)
+                    elif line == "\n":
+                        continue
+                    elif line_key is not None:
+                        if isinstance(master_dict[job][line_key], str):
+                            master_dict[job][line_key] = [master_dict[job][line_key]]
+                        master_dict[job][line_key].append(line)
                     else:
-                        mast_dict[job_id_key][qstat_keyword] = qstat_value
+                        raise ValueError("line not parsed correctly")
+            return master_dict
+        else:
+            raise TypeError("input data is not a dictionary")
 
-                # For single line Phrases
-                elif qstat_sentence:
-                    qstat_sentence = qstat_sentence.replace("\n\t", "")
-                    qstat_list = qstat_sentence.split(" = ")
-                    qstat_keyword = qstat_list[0]
-                    qstat_value = qstat_list[1]
-                    if "Resource_List" in qstat_keyword:
-                        rl_list = qstat_keyword.split('.')
-                        rl_keyword = rl_list[1]
-                        rl_value = qstat_value
-                        if resource_list_count == 0:
-                            mast_dict[job_id_key]["Resource_List"] = OrderedDict()
-                        mast_dict[job_id_key]["Resource_List"][rl_keyword] = rl_value.replace('\n', '')
-                        resource_list_count += 1
+    def remove_whitespace(self, job_data):
+        master_dict = OrderedDict()
+        for job, job_dict in job_data.items():
+            master_dict[job] = OrderedDict()
+            for key, value in job_dict.items():
+                if isinstance(value, str):
+                    value = value.replace("    ", "")
+                    value = value.replace("\n", "")
+                    value = value.replace("\t", "")
+                    master_dict[job][key] = value
+                elif isinstance(value, list):
+                    temp_list = []
+                    for item in value:
+                        item = item.replace("    ", "")
+                        item = item.replace("\n", "")
+                        item = item.replace("\t", "")
+                        temp_list.append(item)
+                    master_dict[job][key] = temp_list
+        return master_dict
+
+    def update_qstat_keywords(self, job_data):
+        master_dict = OrderedDict()
+        for job, job_dict in job_data.items():
+            master_dict[job] = OrderedDict()
+            for key, value in job_dict.items():
+                new_value = ""
+                if key != "Variable_List":
+                    if isinstance(value, list):
+                        for item in value:
+                            item = item.replace(("%s = " % key), '')
+                            new_value += item
+                        master_dict[job][key] = new_value
                     else:
-                        mast_dict[job_id_key][qstat_keyword] = qstat_value.replace('\n', '')
-                qstat_sentence = None
-                prev_item = item
-        return mast_dict
+                        value = value.replace(("%s = " % key), '')
+                        master_dict[job][key] = value
+                else:
+                    master_dict[job][key] = value
+        return master_dict
+
+    def parse_variable_list(self, job_data):
+        with open(self._yaml_config, 'r') as yf:
+            qstat_keywords = yaml.load(yf)
+        primary_keys = list(qstat_keywords["Job Id"].keys())
+        primary_keys.remove("Resource_List")
+        master_dict = OrderedDict()
+        for job, job_dict in job_data.items():
+            master_dict[job] = OrderedDict()
+            for key, value in job_dict.items():
+                master_dict[job][key] = OrderedDict()
+                if key == "Variable_List":
+                    value[0] = value[0].replace(("%s = " % key), '')
+                    value = ''.join(value).split(',')
+                    for item in value:
+                        _ = item.split("=")
+                        print(_)
+                        v_key = _[0]
+                        v_item = _[1]
+                        master_dict[job][key][v_key] = v_item
+                else:
+                    master_dict[job][key] = value
+        return master_dict
+
+    def parse_resource_list(self, job_data):
+        with open(self._yaml_config, 'r') as yf:
+            qstat_keywords = yaml.load(yf)
+        primary_keys = list(qstat_keywords["Job Id"].keys())
+        primary_keys.remove("Resource_List")
+        resource_list_keys = list(qstat_keywords["Job Id"]["Resource_List"].keys())
+        master_dict = OrderedDict()
+        for job, job_dict in job_data.items():
+            master_dict[job] = OrderedDict()
+            for key, value in job_dict.items():
+                if key in resource_list_keys:
+                    if "Resource_List" not in master_dict[job].keys():
+                        master_dict[job]["Resource_List"] = OrderedDict()
+                    key = key.split('.')[1]
+                    master_dict[job]["Resource_List"][key] = value
+                else:
+                    master_dict[job][key] = value
+        return master_dict
+
+    def parse_to_int(self, job_data):
+        master_dict = OrderedDict()
+        for job, job_dict in job_data.items():
+            master_dict[job] = OrderedDict()
+            for key, value in job_dict.items():
+                if isinstance(value, str):
+                    try:
+                        master_dict[job][key] = int(value)
+                    except ValueError:
+                        master_dict[job][key] = value
+                elif isinstance(value, OrderedDict):
+                    master_dict[job][key] = OrderedDict()
+                    for k, v in value.items():
+                        if isinstance(v, str):
+                            try:
+                                master_dict[job][key][k] = int(v)
+                            except ValueError:
+                                master_dict[job][key][k] = v
+                else:
+                    master_dict[job][key] = value
+        return master_dict
+
+    def _to_dict(self, qstat_data, ordered=True):
+        jobs_dict = self.identify_jobs(qstat_data)
+        jobs_dict = self.identify_qstat_keywords(job_data=jobs_dict, extra_keywords=["Mail_Users"])
+        jobs_dict = self.remove_whitespace(job_data=jobs_dict)
+        jobs_dict = self.update_qstat_keywords(job_data=jobs_dict)
+        jobs_dict = self.parse_variable_list(job_data=jobs_dict)
+        jobs_dict = self.parse_resource_list(job_data=jobs_dict)
+        jobs_dict = self.parse_to_int(job_data=jobs_dict)
+        if not ordered:
+            jobs_dict = dict(jobs_dict)
+            for keys, values in jobs_dict.items():
+                if isinstance(values, OrderedDict):
+                    jobs_dict[keys] = dict(values)
+                    for keys2, values2 in values.items():
+                        if isinstance(values2, OrderedDict):
+                            jobs_dict[keys][keys2] = dict(values2)
+                            for keys3, values3 in values2.items():
+                                if isinstance(values3, OrderedDict):
+                                    jobs_dict[keys][keys2][keys3] = dict(values3)
+        return jobs_dict
+
+    # def to_dict(self, qstat_data):
+    #     """
+    #     The qstat parser takes the qstat data from the 'qstat -f' command and parses it
+    #     into a ditionary.  It uses the qstat keywords found in the qstat yaml file.
+    #
+    #     :param qstat_data:  Output data generated from the qstat command.
+    #     :type qstat_data:  list.
+    #     :return:  A nest dictionary that uses JobId's as keys.
+    #     :rtype:  dict.
+    #     """
+    #     mast_dict = OrderedDict()
+    #     job_count = 0
+    #     phrase_continuation_flag = None
+    #     with open(self._yaml_config, 'r') as yf:
+    #         qstat_keywords = yaml.load(yf)
+    #     primary_keys = list(qstat_keywords["Job Id"].keys())
+    #     resource_list_keys = list(qstat_keywords["Job Id"]["Resource_List"].keys())
+    #     variable_list_keys = list(qstat_keywords["Job Id"]["Variable_List"].keys())
+    #     if isinstance(qstat_data, list):
+    #         qstat_sentence = None
+    #         continuation_phrase = ""
+    #         qstat_phrase = ""
+    #         prev_item = None
+    #         for item in qstat_data:
+    #             # If a new job is identified then create the nested dictionary
+    #             if "Job Id" in item:
+    #                 job_count += 1
+    #                 resource_list_count = 0
+    #                 _ = item.split(": ")
+    #                 job_id_key = "%s" % _[1].replace("\r\n", "")
+    #                 job_id_key = job_id_key.replace("\n", "")
+    #                 mast_dict[job_id_key] = OrderedDict()
+    #                 #mast_dict[job_id_key]["Job_Id"] = job_id_key
+    #             # The current line information is used to determine single or multi-lined parsing for the
+    #             # previous line.
+    #             # If the a new keyword is recognized, then parse the line.
+    #             elif "    " in item and any(kw in item for kw in (primary_keys + resource_list_keys + variable_list_keys)) or item == "\n":
+    #                 item = item.replace("    ", "")
+    #                 # Join the multi-lined "phrases" into one "sentence"
+    #                 if phrase_continuation_flag is True:
+    #                     qstat_sentence = qstat_phrase + continuation_phrase
+    #                     phrase_continuation_flag = False
+    #                 #  If the phrase is a single line
+    #                 elif qstat_phrase == prev_item:
+    #                     qstat_sentence = qstat_phrase
+    #                 # Updates the qstat phrase unless it's in between lines or the end of file
+    #                 if item != "\n":
+    #                     qstat_phrase = item
+    #                 else:
+    #                     pass
+    #             # If there is no keyword and tabbed whitespace is recognized, then the current line
+    #             # is a continuation phrase for the most recent qstat keyword
+    #             elif "\t" in item:
+    #                 phrase_continuation_flag = True
+    #                 continuation_phrase = continuation_phrase + item
+    #
+    #             # For multi-line phrases format the qstat sentence
+    #             if phrase_continuation_flag is False:
+    #                 qstat_sentence = qstat_sentence.replace("\n\t", "").replace('\n', '')
+    #                 continuation_phrase = ""
+    #                 phrase_continuation_flag = None
+    #                 qstat_list = qstat_sentence.split(" = ")
+    #                 qstat_keyword = qstat_list[0]
+    #                 qstat_value = qstat_list[1]
+    #                 # The variable list is unique in that it can be split into a dictionary of
+    #                 # environment variables
+    #                 if qstat_keyword == "Variable_List":
+    #                     qstat_value = qstat_value.split(",")
+    #                     temp_dict = OrderedDict(var.split("=") for var in qstat_value)
+    #                     #for vl_key, vl_value in temp_dict.items():
+    #                         # if vl_value[0] == "/" or vl_value[0] == "\\":
+    #                         #     vl_value = Path(vl_value)
+    #                         #temp_dict[vl_key] = vl_value
+    #                     mast_dict[job_id_key]["Variable_List"] = temp_dict
+    #                 # All of the other qstat keywords/sentences are basic key/value pairs
+    #                 else:
+    #                     mast_dict[job_id_key][qstat_keyword] = qstat_value
+    #
+    #             # For single line Phrases
+    #             elif qstat_sentence:
+    #                 qstat_sentence = qstat_sentence.replace("\n\t", "")
+    #                 qstat_list = qstat_sentence.split(" = ")
+    #                 qstat_keyword = qstat_list[0]
+    #                 qstat_value = qstat_list[1]
+    #                 if "Resource_List" in qstat_keyword:
+    #                     rl_list = qstat_keyword.split('.')
+    #                     rl_keyword = rl_list[1]
+    #                     rl_value = qstat_value
+    #                     if resource_list_count == 0:
+    #                         mast_dict[job_id_key]["Resource_List"] = OrderedDict()
+    #                     mast_dict[job_id_key]["Resource_List"][rl_keyword] = rl_value.replace('\n', '')
+    #                     resource_list_count += 1
+    #                 else:
+    #                     mast_dict[job_id_key][qstat_keyword] = qstat_value.replace('\n', '')
+    #             qstat_sentence = None
+    #             prev_item = item
+    #     return mast_dict
 
     def target_data(self, qstat_dict, target_job):
         """
