@@ -9,7 +9,6 @@ class PhyML(object):
     """The PhyML class uses Biopython's PhyMLCommandline wrapper to generate 
     trees from the PhyML executable."""
 
-
     def __init__(self, infile, datatype="aa"):
         """Input a phylip formatted alignment file and specify a datatype.
 
@@ -22,7 +21,7 @@ class PhyML(object):
         profile. If you're using Windows, this function will look for the name
         of the executable 'PhyML-3.1_win32.exe'.
         """
-        self.phyml_log = LogIt().default(logname="GenBank", logfile=None)
+        self.phyml_log = LogIt().default(logname="Phyml", logfile=None)
 
         # Use the phyml executable file
         phyml_exe = None
@@ -37,6 +36,18 @@ class PhyML(object):
         self.datatype = datatype
         self.phyml_input = infile
 
+    def _validate_format(self, infile):
+        """"Validate the format of the input file.
+
+        :param infile: An input file that is phylip formatted.
+        :type infile: str
+        """
+        pass
+
+    def _check_exe(self):
+        """Check to see if the phyml exe is in the path."""
+        pass
+
     def run(self):
         """"Run phyml."""
         # TODO: Add try/except logic.
@@ -44,5 +55,7 @@ class PhyML(object):
                                      input=self.phyml_input,
                                      datatype=self.datatype)
         out_log, err_log = run_phyml()
-        self.phyml_log(out_log)
-        self.phyml_log(err_log)
+        if out_log:
+            self.phyml_log.info(out_log)
+        if err_log:
+            self.phyml_log.error(err_log)
