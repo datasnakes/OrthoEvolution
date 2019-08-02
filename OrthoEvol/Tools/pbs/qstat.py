@@ -3,6 +3,7 @@ import os
 import csv
 import yaml
 import sys
+import json
 import subprocess as sp
 import pandas as pd
 import plotly.graph_objs as go
@@ -52,7 +53,7 @@ class BaseQstat(object):
                        "all": __keywords
                        }
 
-    def __init__(self, job_id, infile=None, outfile=None, home=None, cmd=None):
+    def __init__(self, job_id, infile=None, outfile=None, home=None, cmd=None, capture_json=False):
         """
         The BaseQstat class processes the output from the pbs command 'qstat'.  It
         specifically parses output from 'qstat -f', which displays a full status report
@@ -81,8 +82,12 @@ class BaseQstat(object):
         self.qstat_log = LogIt().default(logname="PBS - QSTAT", logfile=None)
         self._yaml_config = resource_filename(yml.__name__, 'qstat.yml')
         self.pbs_job_id = job_id
+        self.capture_json = capture_json
         if cmd is None:
-            self.cmd = 'qstat -f ' + self.pbs_job_id
+            if not capture_json:
+                self.cmd = 'qstat -f ' + self.pbs_job_id
+            else:
+                self.cmd = 'qstat -f %s -F json' % self.pbs_job_id
         else:
             self.cmd = cmd
         self.outfile = outfile
@@ -148,7 +153,7 @@ class BaseQstat(object):
                     else:
                         out_data.writerow(row)
 
-    def run_qstat(self, csv_flag=True, sqlite_flag=False, ordered=False):
+    def run_qstat(self, csv_flag=True, sqlite_flag=False, ordered=False, capture_json=False):
         """
         This method runs the qstat command, generates qstat data, parses it into various formats,
         and saves the data if desired.
@@ -162,9 +167,14 @@ class BaseQstat(object):
         :type ordered:  bool.
         """
         # Get raw qstat data
-        self.qstat_data = self.qstat_output(cmd=self.cmd, log_file=str(self.qstat_log_file), print_flag=False)
-        # Convert raw data to nested dictionary
-        self.qstat_dict = self.to_dict(qstat_data=self.qstat_data, ordered=ordered)
+        if capture_json:
+            self.qstat_data = self.qstat_output(cmd=self.cmd, log_file=str(self.qstat_log_file), print_flag=False,
+                                                capture_json=True)
+            self.qstat_data = self.qstat_data['Jobs']
+        else:
+            self.qstat_data = self.qstat_output(cmd=self.cmd, log_file=str(self.qstat_log_file), print_flag=False)
+            # Convert raw data to nested dictionary
+            self.qstat_dict = self.to_dict(qstat_data=self.qstat_data, ordered=ordered)
         # Isolate data for target PBS job
         self.job_dict = self.target_data(qstat_dict=self.qstat_dict, target_job=self.pbs_job_id)
         # Isolate static data for target PBS job
@@ -177,7 +187,7 @@ class BaseQstat(object):
         if sqlite_flag:
             self.to_sqlite()
 
-    def qstat_output(self, cmd, log_file, print_flag=False):
+    def qstat_output(self, cmd, log_file, print_flag=False, capture_json=False):
         """
         A function that calls qdstat via subprocess.  The data is the list returned from
         readlines().
@@ -201,7 +211,10 @@ class BaseQstat(object):
         else:
             if proc.returncode == 0:
                 with open(log_file, 'r') as lf:
-                    qstat_data = lf.readlines()
+                    if not capture_json:
+                        qstat_data = lf.readlines()
+                    else:
+                        qstat_data = json.load(lf)
                 return qstat_data
 
     def identify_jobs(self, job_data):
