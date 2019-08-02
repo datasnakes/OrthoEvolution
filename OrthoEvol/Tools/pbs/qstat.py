@@ -205,6 +205,8 @@ class BaseQstat(object):
         :rtype:  list.
         """
         try:
+            if Path(log_file).exists():
+                os.remove(str(log_file))
             proc = self.qstat_utils.system_cmd(cmd, write_flag=True, print_flag=print_flag, file_name=log_file,
                                                stderr=sp.PIPE, stdout=sp.PIPE, shell=True, universal_newlines=False)
         except sp.CalledProcessError as err:
