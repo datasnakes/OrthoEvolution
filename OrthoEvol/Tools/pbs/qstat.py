@@ -878,10 +878,6 @@ class MultiQstat(object):
         for job in jobs:
             # Get qstat parameters for each target job
             home = str(self.config_home / job)
-            if infile is None:
-                infile = str(job) + '.csv'
-            if outfile is None:
-                outfile = str(job) + '.csv'
             _qstat = Qstat(job_id=job, home=home, infile=infile, outfile=outfile, cmd=cmd, wait_time=wait_time)
             # Create a dictionary value for each job
             job_dict[job] = _qstat
