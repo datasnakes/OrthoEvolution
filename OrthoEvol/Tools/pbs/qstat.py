@@ -148,7 +148,7 @@ class BaseQstat(object):
                     else:
                         out_data.writerow(row)
 
-    def run_qstat(self, csv_flag=True, sqlite_flag=False):
+    def run_qstat(self, csv_flag=True, sqlite_flag=False, ordered=False):
         """
         This method runs the qstat command, generates qstat data, parses it into various formats,
         and saves the data if desired.
@@ -157,11 +157,14 @@ class BaseQstat(object):
         :type csv_flag:  bool.
         :param sqlite_flag:  A flag that determines if the data is saved in a sqlite database.
         :type sqlite_flag:  bool.
+        :param ordered:  A flag that controls whether or not the parsed qstat
+        data will be returned as an ordered dictionary or a standard dict.
+        :type ordered:  bool.
         """
         # Get raw qstat data
         self.qstat_data = self.qstat_output(cmd=self.cmd, log_file=str(self.qstat_log_file), print_flag=False)
         # Convert raw data to nested dictionary
-        self.qstat_dict = self.to_dict(qstat_data=self.qstat_data)
+        self.qstat_dict = self.to_dict(qstat_data=self.qstat_data, ordered=ordered)
         # Isolate data for target PBS job
         self.job_dict = self.target_data(qstat_dict=self.qstat_dict, target_job=self.pbs_job_id)
         # Isolate static data for target PBS job
