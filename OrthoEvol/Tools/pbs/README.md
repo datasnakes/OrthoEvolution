@@ -15,7 +15,7 @@ Qsub is OrthoEvol's solution for submitting a PBS job using Python.  It primaril
 submit jobs.  This class also lets the end user utilize [string templating](https://docs.python.org/3.4/library/string.html#string.Template.)
 for Python or PBS scripts.  Custom PBS scripts can also be created using the optional Qsub parameters.
 
-#### BaseQsub Example:
+#### BaseQsub class Example:
 
 ```python
 from OrthoEvol.Tools.pbs import BaseQsub
@@ -30,7 +30,7 @@ base_job.submit_pbs_script()
 print(base_job.pbs_job_id)
 ```
 
-#### Qsub Example:
+#### Qsub class Example:
 
 ```python
 from OrthoEvol.Tools.pbs import Qsub
@@ -61,3 +61,35 @@ print(job.pbs_job_id)
 Qstat was developed in order to help monitor PBS jobs.  It's primary function is to collect data on a submitted job every
 interval (which is specified by the user).  While we do have a proprietary means of parsing qstat output, more modern versions
 of PBSpro have an option to parse qstat data into JSON format directly.
+
+#### BaseQstat class Example:
+
+```python
+from OrthoEvol.Tools.pbs import BaseQstat
+from pprint import pprint
+# Initialize qstat
+job = BaseQstat(job_id="12345.sequoia")
+# Run qstat
+job.run_qstat(csv_flag=False)
+
+# print data
+pprint(job.qstat_dict)
+```
+
+#### Qstat class Examples:
+
+```python
+from OrthoEvol.Tools.pbs import Qstat
+from pprint import pprint
+import pandas as pd
+
+# Initialize qstat with an interval of 240 seconds
+job = Qstat(job_id="12345.sequoia", wait_time=240)
+# Watch the job and collect data for 10 intervals
+job.watch(max_count=10)
+# Print the plottable data
+data = pd.DataFrame.from_csv(str(job.data_file))
+data = data.to_dict()
+pprint(data)
+
+```
