@@ -211,7 +211,7 @@ class BaseQstat(object):
         (e.g. - one list item per line).
         :type job_data: list
         :return:  A dictionary that uses PBS job ids as keys.
-        :rtype:  dict.
+        :rtype:  OrderedDict.
         """
         job_count = 0
         master_dict = OrderedDict()
@@ -241,7 +241,7 @@ class BaseQstat(object):
         :type extra_keywords:  list.
         :return:  A dictionary with keywords that have been identified and assigned
         to the appropriate data.
-        :rtype:  dict.
+        :rtype:  OrderedDict.
         """
         with open(self._yaml_config, 'r') as yf:
             qstat_keywords = yaml.load(yf)
@@ -290,7 +290,7 @@ class BaseQstat(object):
         :param job_data:  The output data from the identify_qstat_keywords method.
         :type job_data:  dict.
         :return:  The data no longer has unneeded whitespace.
-        :rtype:  dict.
+        :rtype:  OrderedDict.
         """
         master_dict = OrderedDict()
         for job, job_dict in job_data.items():
@@ -322,7 +322,7 @@ class BaseQstat(object):
         :type job_data:  dict.
         :return:  A cleaner version of the data that doesn't contain any redundancies
         in the values.
-        :rtype:  dict.
+        :rtype:  OrderedDict.
         """
         master_dict = OrderedDict()
         for job, job_dict in job_data.items():
@@ -351,7 +351,7 @@ class BaseQstat(object):
         :param job_data:  The output data from the update_qstat_keywords method.
         :type job_data:  dict.
         :return:  The job data now has each variable list parsed.
-        :rtype:   dict.
+        :rtype:   OrderedDict.
         """
         with open(self._yaml_config, 'r') as yf:
             qstat_keywords = yaml.load(yf)
@@ -384,7 +384,7 @@ class BaseQstat(object):
         :param job_data:  The output data from the parse_variable_list method.
         :type job_data:  dict.
         :return:  The job data now has each resource list parsed.
-        :rtype:   dict.
+        :rtype:   OrderedDict.
         """
         with open(self._yaml_config, 'r') as yf:
             qstat_keywords = yaml.load(yf)
@@ -413,7 +413,7 @@ class BaseQstat(object):
         :param job_data:  The output data from the parse_resource_list method.
         :type job_data:  dict.
         :return:  The job data will now have some values as integers.
-        :rtype:   dict.
+        :rtype:   OrderedDict.
         """
         master_dict = OrderedDict()
         for job, job_dict in job_data.items():
@@ -451,25 +451,16 @@ class BaseQstat(object):
         :return:  A dictionary of jobs.
         :rtype:  dict.
         """
-        jobs_dict = self.identify_jobs(qstat_data)
-        jobs_dict = self.identify_qstat_keywords(job_data=jobs_dict, extra_keywords=["Mail_Users"])
-        jobs_dict = self.remove_whitespace(job_data=jobs_dict)
-        jobs_dict = self.update_qstat_keywords(job_data=jobs_dict)
-        jobs_dict = self.parse_variable_list(job_data=jobs_dict)
-        jobs_dict = self.parse_resource_list(job_data=jobs_dict)
-        jobs_dict = self.parse_to_int(job_data=jobs_dict)
+        job_dict = self.identify_jobs(qstat_data)
+        job_dict = self.identify_qstat_keywords(job_data=job_dict, extra_keywords=["Mail_Users"])
+        job_dict = self.remove_whitespace(job_data=job_dict)
+        job_dict = self.update_qstat_keywords(job_data=job_dict)
+        job_dict = self.parse_variable_list(job_data=job_dict)
+        job_dict = self.parse_resource_list(job_data=job_dict)
+        job_dict = self.parse_to_int(job_data=job_dict)
         if not ordered:
-            jobs_dict = dict(jobs_dict)
-            for keys, values in jobs_dict.items():
-                if isinstance(values, OrderedDict):
-                    jobs_dict[keys] = dict(values)
-                    for keys2, values2 in values.items():
-                        if isinstance(values2, OrderedDict):
-                            jobs_dict[keys][keys2] = dict(values2)
-                            for keys3, values3 in values2.items():
-                                if isinstance(values3, OrderedDict):
-                                    jobs_dict[keys][keys2][keys3] = dict(values3)
-        return jobs_dict
+            job_dict = self.parse_to_unordered(job_data=job_dict)
+        return job_dict
 
     def target_data(self, qstat_dict, target_job):
         """
