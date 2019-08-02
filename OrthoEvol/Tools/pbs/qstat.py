@@ -436,6 +436,29 @@ class BaseQstat(object):
                     master_dict[job][key] = value
         return master_dict
 
+    def parse_to_unordered(self, job_data):
+        """
+        Qstat Parsing - Optional Stage 8
+        Taking data from Stage 7, this function converts all of the
+        OrderedDicts in the job_data to standard dict objects.
+
+        :param job_data:  The output data from the parse_to_int method.
+        :type job_data:  dict.
+        :return:  The data will now be a dict instead of OrderedDict.
+        :rtype:  dict.
+        """
+        job_data = dict(job_data)
+        for keys, values in job_data.items():
+            if isinstance(values, OrderedDict):
+                job_data[keys] = dict(values)
+                for keys2, values2 in values.items():
+                    if isinstance(values2, OrderedDict):
+                        job_data[keys][keys2] = dict(values2)
+                        for keys3, values3 in values2.items():
+                            if isinstance(values3, OrderedDict):
+                                job_data[keys][keys2][keys3] = dict(values3)
+        return job_data
+
     def to_dict(self, qstat_data, ordered=True):
         """
         The to_dict parser takes qstat data and parses it in 7 to 8 stages.
