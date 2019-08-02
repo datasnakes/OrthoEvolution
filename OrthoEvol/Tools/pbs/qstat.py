@@ -171,7 +171,7 @@ class BaseQstat(object):
         if capture_json:
             self.qstat_data = self.qstat_output(cmd=self.cmd, log_file=str(self.qstat_log_file), print_flag=False,
                                                 capture_json=True)
-            self.qstat_data = self.qstat_data['Jobs']
+            self.qstat_dict = self.qstat_data['Jobs']
         else:
             self.qstat_data = self.qstat_output(cmd=self.cmd, log_file=str(self.qstat_log_file), print_flag=False)
             # Convert raw data to nested dictionary
