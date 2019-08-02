@@ -87,7 +87,8 @@ class BaseQstat(object):
             if not capture_json:
                 self.cmd = 'qstat -f ' + self.pbs_job_id
             else:
-                self.cmd = 'qstat -f %s -F json' % self.pbs_job_id
+                job_num = [int(job_id) for s in job_id.split(sep=".") if s.isdigit()]
+                self.cmd = 'qstat -f %s -F json' % job_num
         else:
             self.cmd = cmd
         self.outfile = outfile
