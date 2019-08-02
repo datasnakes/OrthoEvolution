@@ -899,7 +899,7 @@ class MultiQstat(object):
         tasks = []
         ioloop = asyncio.get_event_loop()
 
-        for _qstat in job_dict.keys():
+        for _qstat in job_dict.values():
             # Append task list for asnychronous programming
             tasks.append(asyncio.ensure_future(self._async_watch(qstat=_qstat, count=_qstat.watch_count)))
         # Run task list and then close
