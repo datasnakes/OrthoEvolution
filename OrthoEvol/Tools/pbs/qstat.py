@@ -370,7 +370,6 @@ class BaseQstat(object):
                     value = ''.join(value).split(',')
                     for item in value:
                         _ = item.split("=")
-                        print(_)
                         v_key = _[0]
                         v_item = _[1]
                         master_dict[job][key][v_key] = v_item
