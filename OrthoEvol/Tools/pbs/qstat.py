@@ -201,11 +201,22 @@ class BaseQstat(object):
                     qstat_data = lf.readlines()
                 return qstat_data
 
-    def identify_jobs(self, qstat_data):
+    def identify_jobs(self, job_data):
+        """
+        Qstat Parsing - Stage 1
+        This essential first step takes the qstat data and identifies jobs.  It
+        groups the data based on the PBS job id that it corresponds to.
+
+        :param job_data:  The qstat output data in a `readlines` format
+        (e.g. - one list item per line).
+        :type job_data: list
+        :return:  A dictionary that uses PBS job ids as keys.
+        :rtype:  dict.
+        """
         job_count = 0
         master_dict = OrderedDict()
-        if isinstance(qstat_data, list):
-            for item in qstat_data:
+        if isinstance(job_data, list):
+            for item in job_data:
                 if "Job Id" in item:
                     job_count += 1
                     _ = item.split(": ")
@@ -217,6 +228,21 @@ class BaseQstat(object):
         return master_dict
 
     def identify_qstat_keywords(self, job_data, extra_keywords=None):
+        """
+        Qstat Parsing - Stage 2
+        Taking data from Stage 1, this function further parses the qstat data
+        by nesting the data and using the PBS keywords as keys.  It also
+        differentiates between single and multi-line PBS keywords/values.
+
+        :param job_data:  The output data from the 'identify_jobs` method.
+        :type job_data:  dict.
+        :param extra_keywords:  A list of extra keywords potentially missing from
+        the OrthoEvols yaml_config file.
+        :type extra_keywords:  list.
+        :return:  A dictionary with keywords that have been identified and assigned
+        to the appropriate data.
+        :rtype:  dict.
+        """
         with open(self._yaml_config, 'r') as yf:
             qstat_keywords = yaml.load(yf)
         primary_keys = list(qstat_keywords["Job Id"].keys())
@@ -256,6 +282,16 @@ class BaseQstat(object):
             raise TypeError("input data is not a dictionary")
 
     def remove_whitespace(self, job_data):
+        """
+        Qstat Parsing - Stage 3
+        Taking data from Stage 2, this method removes any whitespace from the
+        data including the 4x spaces, newline characters (\n), and tab characters (\t).
+
+        :param job_data:  The output data from the identify_qstat_keywords method.
+        :type job_data:  dict.
+        :return:  The data no longer has unneeded whitespace.
+        :rtype:  dict.
+        """
         master_dict = OrderedDict()
         for job, job_dict in job_data.items():
             master_dict[job] = OrderedDict()
@@ -276,6 +312,18 @@ class BaseQstat(object):
         return master_dict
 
     def update_qstat_keywords(self, job_data):
+        """
+        Qstat Parsing - Stage 4
+        Taking data from Stage 3, this method further parses the qstat
+        data by removing any of the leading keyword data since the dictionary
+        keys have already taken advantage of this information.
+
+        :param job_data:  The output data from the remove_whitespace method.
+        :type job_data:  dict.
+        :return:  A cleaner version of the data that doesn't contain any redundancies
+        in the values.
+        :rtype:  dict.
+        """
         master_dict = OrderedDict()
         for job, job_dict in job_data.items():
             master_dict[job] = OrderedDict()
@@ -295,6 +343,16 @@ class BaseQstat(object):
         return master_dict
 
     def parse_variable_list(self, job_data):
+        """
+        Qstat Parsing - Stage 5
+        Taking data from Stage 4, this method parses the Variable_List,
+        which contains special PBS environment variables.
+
+        :param job_data:  The output data from the update_qstat_keywords method.
+        :type job_data:  dict.
+        :return:  The job data now has each variable list parsed.
+        :rtype:   dict.
+        """
         with open(self._yaml_config, 'r') as yf:
             qstat_keywords = yaml.load(yf)
         primary_keys = list(qstat_keywords["Job Id"].keys())
@@ -318,6 +376,16 @@ class BaseQstat(object):
         return master_dict
 
     def parse_resource_list(self, job_data):
+        """
+        Qstat Parsing - Stage 6
+        Taking data from Stage 5, this method takes all of the PBS variables
+        that contain Resource_List information and parses them into a dictionary.
+
+        :param job_data:  The output data from the parse_variable_list method.
+        :type job_data:  dict.
+        :return:  The job data now has each resource list parsed.
+        :rtype:   dict.
+        """
         with open(self._yaml_config, 'r') as yf:
             qstat_keywords = yaml.load(yf)
         primary_keys = list(qstat_keywords["Job Id"].keys())
@@ -337,6 +405,16 @@ class BaseQstat(object):
         return master_dict
 
     def parse_to_int(self, job_data):
+        """
+        Qstat Parsing - Stage 7
+        Taking data from Stage 6, this method converts any strings
+        that ONLY contain numbers and converts them to integers.
+
+        :param job_data:  The output data from the parse_resource_list method.
+        :type job_data:  dict.
+        :return:  The job data will now have some values as integers.
+        :rtype:   dict.
+        """
         master_dict = OrderedDict()
         for job, job_dict in job_data.items():
             master_dict[job] = OrderedDict()
@@ -358,7 +436,21 @@ class BaseQstat(object):
                     master_dict[job][key] = value
         return master_dict
 
-    def _to_dict(self, qstat_data, ordered=True):
+    def to_dict(self, qstat_data, ordered=True):
+        """
+        The to_dict parser takes qstat data and parses it in 7 to 8 stages.
+        The final product is a nested dictionary that uses PBS job ids
+        as keys.
+
+        :param job_data:  The qstat output data in a `readlines` format
+        (e.g. - one list item per line).
+        :type job_data: list
+        :param ordered:  A flag that controls whether or not the parsed qstat
+        data will be returned as an ordered dictionary or a standard dict.
+        :type ordered:  bool.
+        :return:  A dictionary of jobs.
+        :rtype:  dict.
+        """
         jobs_dict = self.identify_jobs(qstat_data)
         jobs_dict = self.identify_qstat_keywords(job_data=jobs_dict, extra_keywords=["Mail_Users"])
         jobs_dict = self.remove_whitespace(job_data=jobs_dict)
