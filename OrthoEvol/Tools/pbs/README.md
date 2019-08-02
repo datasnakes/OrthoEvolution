@@ -57,3 +57,7 @@ print(job.pbs_job_id)
 ```
 
 ## Qstat
+
+Qstat was developed in order to help monitor PBS jobs.  It's primary function is to collect data on a submitted job every
+interval (which is specified by the user).  While we do have a proprietary means of parsing qstat output, more modern versions
+of PBSpro have an option to parse qstat data into JSON format directly.
