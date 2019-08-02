@@ -935,15 +935,15 @@ class MultiQstat(object):
 
         try:
             qstat.run_qstat(csv_flag=True, sqlite_flag=False)
-            qstat.qstat_log.info("Added data-point %s from qstat for %s." % (qstat.watch_count, qstat.target_job))
+            qstat.qstat_log.info("Added data-point %s from qstat for %s." % (qstat.watch_count, qstat.pbs_job_id))
             if not first_time:
                 await asyncio.sleep(qstat.wait_time)
             temp_qstat = self._async_watch(qstat=qstat, first_time=False)
         except TargetJobKeyError:
             if first_time:
-                raise TargetJobKeyError("The target job cannot be found:  %s" % qstat.target_job)
+                raise TargetJobKeyError("The target job cannot be found:  %s" % qstat.pbs_job_id)
             else:
-                qstat.qstat_log.info('Finished watching %s' % qstat.target_job)
+                qstat.qstat_log.info('Finished watching %s' % qstat.pbs_job_id)
                 temp_qstat = qstat
         qstat = temp_qstat
         return qstat
