@@ -59,5 +59,4 @@ dd.dispatch(dd.strategies, dd.dispatcher, dd.configuration)
 
 ## Notes
 
-Please view our [BioSQL documentation](https://github.com/datasnakes/OrthoEvolution/tree/master/OrthoEvol/Manager/BioSQL/README.md) and view some of the
-static/config related [files](https://github.com/datasnakes/OrthoEvolution/tree/master/OrthoEvol/Manager/config/).
+Please view our [BioSQL documentation](https://github.com/datasnakes/OrthoEvolution/tree/master/OrthoEvol/Manager/BioSQL/README.md) and view some of the static/config related [files](https://github.com/datasnakes/OrthoEvolution/tree/master/OrthoEvol/Manager/config/).

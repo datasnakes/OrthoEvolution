@@ -11,12 +11,8 @@ from OrthoEvol.Tools.ftp import NcbiFTPClient
 class TestTools(unittest.TestCase):
     """Test the Tools module."""
 
-    def setUp(self, logfile='test.log', filename='README.ftp'):
+    def setUp(self, logfile='test.log'):
         self.logfile = logfile
-        self.filename = filename
-
-    def cleanup(self):
-        os.remove(self.filename)
 
     def test_logit(self):
         """Test the LogIt class."""
@@ -35,8 +31,8 @@ class TestTools(unittest.TestCase):
     def test_ncbiftpclient(self):
         """Test the NcbiFTPClient class."""
         ncbiftp = NcbiFTPClient(self.assertTrue('someone@gmail.com'))
-        ncbiftp.download_file(self.filename)
-        self.cleanup()
+        self.assertIsNotNone(ncbiftp.ftp.welcome)
+        ncbiftp.close_connection()
 
 
 if __name__ == '__main__':
