@@ -46,7 +46,7 @@ class BaseQsub(object):
             self.base_id = base_job_id
             self.job_name = self.base_name + "_%s" % base_job_id
         # PBS working directory
-        if pbs_working_dir is None:
+        if not pbs_working_dir:
             self.pbs_working_dir = Path(os.getcwd()) / Path(self.job_name)
         else:
             self.pbs_working_dir = Path(pbs_working_dir) / Path(self.job_name)
