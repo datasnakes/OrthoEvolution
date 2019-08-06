@@ -175,7 +175,7 @@ class Qsub(BaseQsub):
 
         # Python script
         self.python_script = Path(self.pbs_working_dir) / (self.job_name + '.py')
-        if python_script is not None:
+        if not python_script:
             self.supplied_python_script = Path(python_script)
         else:
             self.supplied_python_script = self.python_script
