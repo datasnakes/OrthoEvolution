@@ -334,7 +334,7 @@ class Qsub(BaseQsub):
             if self.pbs_command_list:
                 for cmd in self.pbs_command_list:
                     f.write(cmd + "\n")
-            if self.email_command is not None:
+            if not self.email_command:
                 f.write(self.email_command + "\n")
 
     def format_python_script(self, py_template_string=None, py_template_file=None, python_attributes=None):
