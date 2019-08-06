@@ -928,7 +928,7 @@ class MultiQstat(object):
         elif count is not None:
             qstat.watch_count = count + 1
 
-        if first_time is None:
+        if not first_time:
             first_time = True
         else:
             first_time = first_time
