@@ -276,7 +276,7 @@ class Qsub(BaseQsub):
         :type file:  str.
         """
 
-        if file is None:
+        if not file:
             filename = Path(self.pbs_working_dir) / str(self.job_name + extension)
         else:
             filename = Path(file)
