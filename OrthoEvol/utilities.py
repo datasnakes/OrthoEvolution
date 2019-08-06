@@ -21,7 +21,6 @@ from Bio.Align import MultipleSeqAlignment
 # OrthoEvol
 from OrthoEvol.Cookies.cookie_jar import Oven
 from OrthoEvol.Tools.logit import LogIt
-#from OrthoEvol.Tools.sge import SGEJob
 # Other
 import pandas as pd
 import yaml
