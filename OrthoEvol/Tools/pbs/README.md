@@ -78,7 +78,7 @@ job.run_qstat(csv_flag=False)
 pprint(job.qstat_dict)
 ```
 
-#### Qstat class Examples:
+#### Qstat
 
 ```python
 from OrthoEvol.Tools.pbs import Qstat
