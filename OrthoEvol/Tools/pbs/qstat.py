@@ -83,7 +83,7 @@ class BaseQstat(object):
         self._yaml_config = resource_filename(yml.__name__, 'qstat.yml')
         self.pbs_job_id = job_id
         self.capture_json = capture_json
-        if cmd is None:
+        if not cmd:
             if not capture_json:
                 self.cmd = 'qstat -f ' + self.pbs_job_id
             else:
