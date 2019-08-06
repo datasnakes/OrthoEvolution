@@ -62,6 +62,8 @@ Qstat was developed in order to help monitor PBS jobs.  It's primary function is
 interval (which is specified by the user).  While we do have a proprietary means of parsing qstat output, more modern versions
 of PBSpro have an option to parse qstat data into JSON format directly.
 
+### Examples
+
 #### BaseQstat class Example:
 
 ```python
