@@ -64,7 +64,7 @@ of PBSpro have an option to parse qstat data into JSON format directly.
 
 ### Examples
 
-#### BaseQstat class Example:
+#### BaseQstat
 
 ```python
 from OrthoEvol.Tools.pbs import BaseQstat
