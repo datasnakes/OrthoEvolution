@@ -40,7 +40,7 @@ class BaseQsub(object):
         self.qsub_log = LogIt().default(logname="PBS - QSUB", logfile=None)
         self.qsub_utils = FullUtilities()
         self.base_name = job_name
-        if base_job_id is None:
+        if not base_job_id:
             self.base_id, self.job_name = self.get_base_job_name()
         else:
             self.base_id = base_job_id
