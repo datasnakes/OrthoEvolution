@@ -199,7 +199,7 @@ class Qsub(BaseQsub):
         self.pbs_command_list = []
         self.pbs_command_list.extend(pbs_command_list)
         self.email = email
-        if email_command is None:
+        if not email_command:
             if email is not None:
                 self.email_command = "mail -s \"%s.py script completed\" %s <<< 'Check your output'" % \
                                      (self.job_name, self.email)
