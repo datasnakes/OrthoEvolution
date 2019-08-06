@@ -183,7 +183,7 @@ class Qsub(BaseQsub):
         self.pbs_template = resource_filename(templates.__name__, "temp.pbs")
 
         # PBS - header info
-        if author is None:
+        if not author:
             self.author = getpass.getuser()
         else:
             self.author = author
