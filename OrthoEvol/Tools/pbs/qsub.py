@@ -93,7 +93,7 @@ class BaseQsub(object):
             if not Path(supplied_script) == Path(new_script):
                 shutil.copy(str(supplied_script), str(new_script))
                 self.qsub_log.info("The supplied script, %s, \n has been copied to a new location, %s." %
-                                   (supplied_script, new_script))
+                                   (str(supplied_script), str(new_script)))
         else:
             raise FileExistsError("The script does not exists.")
 
@@ -385,7 +385,7 @@ class Qsub(BaseQsub):
         """
 
         if pbs_template_file == self.pbs_script:
-            raise FileExistsError("The script provided already exists.  Do not overwrite.")
+            raise FileExistsError("The script provided, %s, already exists.  Do not overwrite." % self.pbs_script)
 
         # Configure the PBS Code
         if pbs_attributes is not None:
@@ -457,8 +457,8 @@ class Qsub(BaseQsub):
 
             # Submit job
             self.submit_pbs_script(cmd=cmd)
-            self.qsub_log.info("The PBS script was submitted.")
+            self.qsub_log.info("The PBS script, %s, was submitted." % str(self.pbs_script))
         else:
             # Submit job as rerun
             self.submit_pbs_script(cmd=cmd)
-            self.qsub_log.info("The PBS script was re-submitted.")
+            self.qsub_log.info("The PBS script, %s, was re-submitted." % str(self.pbs_script))
