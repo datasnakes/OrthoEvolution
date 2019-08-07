@@ -92,6 +92,8 @@ class BaseQsub(object):
         if Path(supplied_script).exists():
             if not Path(supplied_script) == Path(new_script):
                 shutil.copy(str(supplied_script), str(new_script))
+                self.qsub_log.info("The supplied script, %s, \n has been copied to a new location, %s." %
+                                   (supplied_script, new_script))
         else:
             raise FileExistsError("The script does not exists.")
 
@@ -436,6 +438,7 @@ class Qsub(BaseQsub):
             if python_attributes is not None:
                 self.format_python_script(py_template_string=py_template_string, py_template_file=py_template_file,
                                           python_attributes=python_attributes)
+                self.qsub_log.info("The Python script has been formatted.")
             elif not self.python_script.exists():
                 self.copy_supplied_script(supplied_script=self.supplied_python_script, new_script=self.python_script)
 
@@ -448,11 +451,14 @@ class Qsub(BaseQsub):
             # Format the PBS script, create a custom PBS script, or copy the PBS script
             self.set_up_pbs_script(pbs_template_string=pbs_template_string, pbs_template_file=pbs_template_file,
                                    pbs_attributes=pbs_attributes)
+            self.qsub_log.info("The PBS script has been set up.")
             if not self.pbs_script.exists():
                 self.copy_supplied_script(supplied_script=self.supplied_pbs_script, new_script=self.pbs_script)
 
             # Submit job
             self.submit_pbs_script(cmd=cmd)
+            self.qsub_log.info("The PBS script was submitted.")
         else:
             # Submit job as rerun
             self.submit_pbs_script(cmd=cmd)
+            self.qsub_log.info("The PBS script was re-submitted.")
