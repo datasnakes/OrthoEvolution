@@ -492,6 +492,7 @@ class BaseQstat(object):
         :return:  A dictionary of jobs.
         :rtype:  dict.
         """
+        self.qstat_log.info("Parsing qstat data...")
         job_dict = self.identify_jobs(qstat_data)
         job_dict = self.identify_qstat_keywords(job_data=job_dict, extra_keywords=["Mail_Users"])
         job_dict = self.remove_whitespace(job_data=job_dict)
@@ -564,12 +565,15 @@ class BaseQstat(object):
             if not overwrite:
                 with open(data_file, 'a') as _f:
                     yaml.dump(static_data, _f, default_flow_style=False)
+                self.qstat_log.info("Appending %s with new static data." % str(data_file))
             else:
                 with open(data_file, 'w') as _f:
                     yaml.dump(static_data, _f, default_flow_style=False)
+                self.qstat_log.info("Overwriting %s with new static data." % str(data_file))
         else:
             with open(data_file, 'w') as _f:
                 yaml.dump(static_data, _f, default_flow_style=False)
+            self.qstat_log.info("Create %s and adding new static data." % str(data_file))
 
     def to_dataframe(self, qstat_dict, target_job):
         """
@@ -621,12 +625,15 @@ class BaseQstat(object):
             if not overwrite:
                 with open(data_file, 'a') as _f:
                     target_df.to_csv(_f, header=False, index=False, index_label=False)
+                self.qstat_log.info("Appending %s with new data for plotting." % str(data_file))
             else:
                 with open(data_file, 'w') as _f:
                     target_df.to_csv(str(data_file), index=False, index_label=False)
+                self.qstat_log.info("Overwriting %s with new data for plotting." % str(data_file))
         else:
             with open(data_file, 'w') as _f:
                 target_df.to_csv(str(data_file), index=False, index_label=False)
+            self.qstat_log.info("Create %s and adding new data for plotting." % str(data_file))
 
     def to_sqlite(self):
         # Have a table that consists of static data per job,
