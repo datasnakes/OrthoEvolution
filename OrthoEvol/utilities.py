@@ -21,7 +21,6 @@ from Bio.Align import MultipleSeqAlignment
 # OrthoEvol
 from OrthoEvol.Cookies.cookie_jar import Oven
 from OrthoEvol.Tools.logit import LogIt
-from OrthoEvol.Tools.sge import SGEJob
 # Other
 import pandas as pd
 import yaml
@@ -881,26 +880,35 @@ class FullUtilities(CookieUtils, ManagerUtils, OrthologUtils):
         ManagerUtils.__init__(self)
         OrthologUtils.__init__(self)
 
-    def system_cmd(self, cmd, timeout=None, **kwargs):
-        """Make system calls, while preforming proper exception handling.
+    def system_cmd(self, cmd, timeout=None, print_flag=True, write_flag=False, file_name=None, **kwargs):
+        """
+        A function for making system calls, while preforming proper exception handling.
 
         :param cmd:  A list that contains the arguments for Popen.
         :param timeout:  A timeout variable.
+        :param write_flag:  A flag used to write each line of output to a file.
+        :param file_name:  The name of the to be written to.
         :param kwargs:  Any other keyword arguments for Popen.
         :return:  Returns the stdout and stderr as a tuple.
         """
         proc = sp.Popen(cmd, **kwargs, encoding="utf-8")
-        ret_val = []
+        stdout_list = []
         for line in iter(proc.stdout.readline, ""):
-            print(line, end="")
-            ret_val.append(line)
+            stdout_list.append(line.rstrip())
+            if print_flag:
+                print(line, end="")
             sys.stdout.flush()
+            if write_flag:
+                with open(file_name, 'a') as output_file:
+                    output_file.write(line)
         try:
-            proc.communicate(timeout=timeout)
+            stdout, stderr = proc.communicate(timeout=timeout)
+            if proc.returncode != 0:
+                raise sp.CalledProcessError(proc.returncode, cmd, stdout, stderr)
         except TimeoutExpired:
             proc.kill()
-            ret_val = proc.communicate()
-        return ret_val
+        proc.stdout = stdout_list
+        return proc
 
     def group_files_by_size(self, file_dict, _path=None, groups=8):
         """Create a list of dictionaries that contain the specified number of groups of files.
