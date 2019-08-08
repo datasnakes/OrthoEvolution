@@ -1,4 +1,5 @@
 # Parallel Documentation
+
 The parellel module is home to the `Multiprocess` class which uses python's native multiprocessing
 module. Find more information [here](https://docs.python.org/3.6/library/multiprocessing.html). It will
 soon be home to [MPI (Message Passing Interface)](http://mpi4py.readthedocs.io/en/stable/) which is also a form of parallel computing.
@@ -12,10 +13,10 @@ using clustering or SGE (Sun Grid Engine). We have a [sge module](https://github
 
 ## Examples
 
-### A Random Example
+### A Simple Example
 
 ```python
-from OrthoEvol.Tools import Multiprocess
+from OrthoEvol.Tools.parallel import Multiprocess
 
 
 def printwords(word):
@@ -26,5 +27,5 @@ words = ['bae', 'luh', 'cuh']
 
 if __name__ == '__main__':
     mp = Multiprocess()
-    mp.map2function(printwords, words)
+    mp.map2function(printwords, words, processors=8)
 ```
