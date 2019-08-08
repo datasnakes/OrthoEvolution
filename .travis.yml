@@ -1,4 +1,3 @@
-sudo: false
 language: python
 cache: pip
 python:
@@ -7,10 +6,13 @@ python:
 notifications:
   email: datasnakes@gmail.com
 # command to install dependencies
+before_install:
+ - sudo apt-get install -qq phyml
 install:
   - "pip install --upgrade pip setuptools wheel"
   - "pip install --only-binary=numpy,scipy numpy scipy"
   - "pip install matplotlib ipython jupyter sympy nose"
   - "pip install -r requirements.txt"
 # command to run nosetests
-script: nosetests tests/ --verbosity=3
+script:
+ - nosetests tests/ --verbosity=3
