@@ -1,6 +1,9 @@
 import os
+
 import pandas as pd
 from ete3 import EvolTree, Tree
+
+from OrthoEvol.Tools.logit import LogIt
 
 
 class ETE3PAML(object):
@@ -24,6 +27,9 @@ class ETE3PAML(object):
         :param pamlsrc: [description], defaults to None
         :type pamlsrc: [type], optional
         """
+        # Set up the logger
+        self.paml_log = LogIt().default(logname="paml", logfile=None)
+
         self.infile = infile
         self.species_tree = species_tree
         self.workdir = workdir
@@ -61,7 +67,7 @@ class ETE3PAML(object):
                 if organism in self.aln_str:
                     branches_to_keep.append(organism)
                 else:
-                    print('No sequence for %s.' % organism)
+                    self.paml_log.warning('No sequence for %s.' % organism)
     
                 self._speciestree.prune(branches_to_keep, preserve_branch_length=True)
         except ValueError as e:
@@ -89,5 +95,5 @@ class ETE3PAML(object):
 
         # Set the binpath of the codeml binary
         tree.execpath = self.pamlsrc
-
+        
         tree.run_model(model + '.' + outfile)  # Run the model M1 M2 M3 M0
