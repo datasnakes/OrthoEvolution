@@ -2,6 +2,7 @@ import sys
 import shutil
 
 from Bio.Phylo.Applications import PhymlCommandline
+from Bio.Application import ApplicationError
 
 from OrthoEvol.Tools.logit import LogIt
 
@@ -62,5 +63,5 @@ class PhyML(object):
                 self.phyml_log.info(out_log)
             if err_log:
                 self.phyml_log.error(err_log)
-        except Exception as e:
-            self.phyml_log.exception("PhyML wrapper error: %s" % e)
+        except ApplicationError as e:
+            self.phyml_log.exception(e)
