@@ -41,13 +41,15 @@ class ETE3PAML(object):
 
         # Import your species tree
         self._speciestree = Tree(self.species_tree, format=1)
-        # TODO import organisms list
 
         # Import alignment file as string
-        alignment_file = open(self.infile, 'r')
-        alignment_str = alignment_file.read()
-        self.aln_str = alignment_str
-        alignment_file.close()
+        self.aln_str = self._import_alignment()
+
+    def _import_alignment(self):
+        """Import alignment file as string."""
+        with open(self.infile, 'r') as alignment_file:
+            alignment_str = alignment_file.read()
+        return alignment_str
 
     def prune_tree(self, organisms_list, organisms_file=None, column_header="Organisms"):
         """Prune branches for species not in the alignment file.
@@ -56,7 +58,7 @@ class ETE3PAML(object):
         Some species may not be present in the alignment file due to lack of
         matching with blast or simply the gene not being in the genome.
         """
-
+        # If an organisms file is used, import and convert to list.
         if organisms_file:
             organisms_df = pd.read_csv(organisms_file)
             organisms_list = list(organisms_df[column_header])
@@ -71,7 +73,7 @@ class ETE3PAML(object):
     
                 self._speciestree.prune(branches_to_keep, preserve_branch_length=True)
         except ValueError as e:
-            print(e)
+            self.paml_log.exception(e)
             
         else:
             # Write the tree to a file if not a ValueError
