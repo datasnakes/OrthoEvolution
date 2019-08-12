@@ -1,27 +1,36 @@
 import os
-import pexpect  # I used this to feed input into shell executable
 import sys
-# TODO Create better wrappers.
+import shutil
+
+import pexpect  # I used this to feed input into shell executable
+from OrthoEvol.Tools.logit import LogIt
 
 
 class Phylip(object):
-    """A class that serves as a wrapper for the Phylip Excecutable."""
+    """A class that serves as a wrapper for the Phylip excecutable."""
 
-    def __init__(self, inputfile):
-        """The input file should be a phylip formatted multiple sequence alignment.
+    def __init__(self, infile):
+        """Initialize the Phylip class.
 
-        :param inputfile: Input a phylip formatted multiple sequence alignment.
+        :param infile: Input a phylip formatted multiple sequence alignment.
         """
-
+        self.infile = infile
         self._rename = os.rename
-        if sys.platform == 'win32' or 'win64':
-            sys.exit("This module is strictly for use on Linux at the moment.")
+        # Set up logging
+        self.phylip_log = LogIt().default(logname="Phyml", logfile=None)
+        if sys.platform != 'linux':
+            err_msg = "This module is strictly for use on Linux at the moment."
+            raise OSError(err_msg)
 
-        self.inputfile = inputfile
+    def _validate_format(self, infile):
+        """Validate the format of the Phylip file"""
+        pass
 
-        # Rename the input file to infile
-        self._rename(self.inputfile, "infile")
-        self.inputfile = "infile"
+    def _temp_infile(self, infile):
+        """Create a temporary infile named infile"""
+        shutil.copyfile(self.infile, "infile")
+        infile = "infile"
+        return infile
 
     def dnapars(self, outfile, outtree):
         """Generate a maximum parsimony tree using dnapars.
@@ -29,12 +38,19 @@ class Phylip(object):
         :param outfile:  Standard output filename.
         :param outtree:  Name of maximum parsimony tree.
         """
-
-        dnapars = pexpect.spawnu("dnapars infile")
-        dnapars.sendline("Y\r")
-        dnapars.waitnoecho()
-        self._rename("outfile", outfile + "_dnapars_output")
-        self._rename("outtree", outtree + "_maxparsimony_tree")
+        infile = self._temp_infile(infile=self.infile)
+        try:
+            dnapars = pexpect.spawnu("dnapars %s" % infile)
+            dnapars.sendline("Y\r")
+            dnapars.waitnoecho()
+            # TODO: Figure out how to catch output.
+        except pexpect.EOF as e:
+            self.phylip_log.exception(e)
+        else:
+            self._rename("outfile", outfile)
+            self._rename("outtree", outtree)
+        finally:
+            os.remove(infile)
 
     def dnaml(self, outfile, outtree):
         """Generate a maximum likelihoood tree using dnapaml.
@@ -42,20 +58,32 @@ class Phylip(object):
         :param outfile:  Standard output filename.
         :param outtree:  Name of maximum likelihoood tree.
         """
+        infile = self._temp_infile(infile=self.infile)
+        try:
+            dnaml = pexpect.spawnu("dnaml %s" % infile)
+            dnaml.sendline("Y\r")
+            dnaml.waitnoecho()
+        except pexpect.EOF as e:
+            self.phylip_log.exception(e)
+        else:
+            self._rename("outfile", outfile)
+            self._rename("outtree", outtree)
+        finally:
+            os.remove(infile)
 
-        dnaml = pexpect.spawnu("dnaml infile")
-        dnaml.sendline("Y\r")
-        dnaml.waitnoecho()
-        self._rename("outfile", outfile + "_dnaml_output")
-        self._rename("outtree", outtree + "_maxlikelihood_tree")
-
-    def dnadist(self, dnadist_output):
+    def dnadist(self, outfile):
         """Generate a distance matrix using dnadist.
 
-        :param dnadist_output:  Dnadist output filename.
+        :param outfile:  dnadist output filename.
         """
-
-        dnadist = pexpect.spawnu("dnadist infile")
-        dnadist.sendline("Y\r")
-        dnadist.waitnoecho()
-        self._rename("outfile", dnadist_output + "_dnadist")
+        infile = self._temp_infile(infile=self.infile)
+        try:
+            dnadist = pexpect.spawnu("dnadist %s" % infile)
+            dnadist.sendline("Y\r")
+            dnadist.waitnoecho()
+        except pexpect.EOF as e:
+            self.phylip_log.exception(e)
+        else:
+            self._rename("outfile", outfile)
+        finally:
+            os.remove(infile)
