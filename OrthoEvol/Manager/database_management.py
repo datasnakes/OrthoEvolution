@@ -12,6 +12,7 @@ from pkg_resources import resource_filename
 import subprocess as sp
 # OrthoEvol
 from OrthoEvol import OrthoEvolDeprecationWarning
+from OrthoEvol.Tools.pbs import Qsub
 from OrthoEvol.Tools.logit import LogIt
 from OrthoEvol.Tools.ftp import NcbiFTPClient
 from OrthoEvol.utilities import FullUtilities
@@ -782,6 +783,9 @@ class DatabaseManagement(BaseDatabaseManagement):
             nrr_config["NCBI_refseq_release"]['upload'].append({})
 
         return nrr_dispatcher, nrr_config
+
+    def refseq_release_dispatcher(self):
+        pass
 
     def itis(self, ITIS_taxonomy, configure_flag=None, archive_flag=None, delete_flag=None, database_path=None, archive_path=None, _path=None):
         itis_dispatcher = OrderedDict()
