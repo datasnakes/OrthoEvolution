@@ -5,11 +5,13 @@ import string
 import urllib.request
 import tarfile
 import yaml
+import shutil
 from collections import OrderedDict
 from importlib import import_module
 from pathlib import Path
 from pkg_resources import resource_filename
 import subprocess as sp
+from time import sleep
 # OrthoEvol
 from OrthoEvol import OrthoEvolDeprecationWarning
 from OrthoEvol.Tools.pbs import Qsub
@@ -784,8 +786,84 @@ class DatabaseManagement(BaseDatabaseManagement):
 
         return nrr_dispatcher, nrr_config
 
-    def refseq_release_dispatcher(self):
-        pass
+    def refseq_release_dispatcher(self, job_name, upload_number, job_path=None, cmd=None, custom_python_cmd=None,
+                                  rerun=False, **kwargs):
+        # Create sleeper function for dispatching
+        def sleeper(secs):
+            sleep(secs)
+
+        # Get path to upload script template, and read code as a string for later.
+        upload_script = Path(resource_filename(templates.__name__, 'upload_refseq_release_template.py'))
+        with open(str(upload_script), 'r') as us_temp:
+            upload_script_code = us_temp.read()
+
+        # Create the folder for the PBS jobs used for uploading files
+        if not job_path:
+            rand_str = random.sample(string.ascii_letters + string.digits, 5)
+            job_path = Path(self.user_log, ('upload_rr' + ''.join(rand_str)))
+        if not job_path.exists():
+            job_path.mkdir()
+
+        # Create job config file
+        job_config_file = job_path / 'upload_config.yml'
+        with open(str(self.config_file), 'r') as cfg:
+            conf_data = yaml.load(cfg, Loader=yaml.FullLoader)
+        with open(str(job_config_file), 'w') as upload_cfg:
+            conf_data['Database_config']['ftp_flag'] = False
+            conf_data['Database_config']['Full']['NCBI']['NCBI_refseq_release']['upload_flag'] = False
+            yaml.dump(conf_data, upload_cfg, default_flow_style=False)
+        os.chmod(str(job_config_file), mode=0o755)
+
+        # Create python attributes for PBS job submission function
+        python_attributes = conf_data['Database_config']['Full']['NCBI']['NCBI_refseq_release']
+        python_attributes["config_file"] = str(job_config_file)
+
+        # Initialize a function dispatcher.
+        pm = ProjectManagement(**conf_data["Management_config"])
+        dd = DatabaseDispatcher(job_config_file, pm)
+
+        # Initialize variables
+        nrr_dispatcher = {"NCBI_refseq_release": {"upload": []}}
+        nrr_config = {"NCBI_refseq_release": {"upload": []}}
+
+        # Get a list of files to upload
+        seqformat = str(python_attributes["seqformat"])
+        collection_subset = str(python_attributes["collection_subset"])
+        database_path = self.database_path / Path('NCBI') / Path('refseq') / Path('release') / Path(collection_subset)
+        file_list = os.listdir(database_path)
+        file_list = [x for x in file_list if x.endswith(seqformat)]
+        file_dict = {}
+        for file in file_list:
+            file_dict[file] = Path(database_path, file).stat().st_size
+        sub_upload_lists = self.db_mana_utils.group_files_by_size(file_dict, groups=upload_number)
+        add_to_default = 0
+
+        # Create configuration for dispatching PBS jobs
+        for sub_list in sub_upload_lists:
+            # Set up PBS job
+            add_to_default += 1
+            pbs_working_dir = job_path / str(add_to_default)
+            qsub_job = Qsub(python_script=str(upload_script), pbs_working_dir=pbs_working_dir, job_name=job_name,
+                            email=self.email, **kwargs)
+
+            # Rewrite various attributes on a per-job basis
+            python_attributes["add_to_default"] = add_to_default
+            python_attributes["sub_list"] = sub_list
+
+            # Add the submission function and kwargs to the dispatcher
+            nrr_dispatcher["NCBI_refseq_release"]["upload"].append(qsub_job.submit_python_job)
+            nrr_config["NCBI_refseq_release"]["upload"].append({
+                "py_template_string": upload_script_code,
+                "python_attributes": python_attributes,
+                "cmd": cmd,
+                "rerun": rerun,
+                "custom_python_cmd": custom_python_cmd
+            })
+            # Add a sleeper in between each job
+            nrr_dispatcher["NCBI_refseq_release"]["upload"].append(sleeper)
+            nrr_config["NCBI_refseq_release"]["upload"].append({'secs': 15})
+        # Dispatch all of the upload jobs.
+        dd.dispatch(strategies=list(nrr_dispatcher.keys()), dispatcher=nrr_dispatcher, configuration=nrr_config)
 
     def itis(self, ITIS_taxonomy, configure_flag=None, archive_flag=None, delete_flag=None, database_path=None, archive_path=None, _path=None):
         itis_dispatcher = OrderedDict()
