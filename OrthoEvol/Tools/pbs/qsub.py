@@ -91,6 +91,7 @@ class BaseQsub(object):
         # if the supplied script exists make sure its in the PBS working directory
         if Path(supplied_script).exists():
             if not Path(supplied_script) == Path(new_script):
+                Path(Path(new_script).parent).mkdir(parents=True, exist_ok=True)
                 shutil.copy(str(supplied_script), str(new_script))
                 self.qsub_log.info("The supplied script, %s, \n has been copied to a new location, %s." %
                                    (str(supplied_script), str(new_script)))
@@ -177,7 +178,7 @@ class Qsub(BaseQsub):
 
         # Python script
         self.python_script = Path(self.pbs_working_dir) / (self.job_name + '.py')
-        if not python_script:
+        if python_script:
             self.supplied_python_script = Path(python_script)
         else:
             self.supplied_python_script = self.python_script
@@ -336,7 +337,7 @@ class Qsub(BaseQsub):
             if self.pbs_command_list:
                 for cmd in self.pbs_command_list:
                     f.write(cmd + "\n")
-            if not self.email_command:
+            if self.email_command:
                 f.write(self.email_command + "\n")
 
     def format_python_script(self, py_template_string=None, py_template_file=None, python_attributes=None):
@@ -363,7 +364,7 @@ class Qsub(BaseQsub):
         python_code = self.format_template_string(code=py_template_string, template=py_template_file,
                                                   attributes=python_attributes)
 
-        if not python_code:
+        if python_code:
             self.write_template_string(python_code, file=self.python_script)
 
     def set_up_pbs_script(self, pbs_template_string=None, pbs_template_file=None, pbs_attributes=None):
