@@ -658,12 +658,13 @@ class DatabaseManagement(BaseDatabaseManagement):
             npt_config["NCBI_pub_taxonomy"].append({})
         return npt_dispatcher, npt_config
 
-    def NCBI_refseq_release(self, configure_flag=None, archive_flag=None, delete_flag=None, upload_flag=None, archive_path=None,
-                            database_path=None, collection_subset=None, seqtype=None, seqformat=None, file_list=None,
-                            upload_number=8, _path=None, activate=None, template_flag=None, download_flag=None,
-                            pbs_dict=None):
+    def NCBI_refseq_release(self, configure_flag=None, archive_flag=None, delete_flag=None, upload_flag=None,
+                            archive_path=None, database_path=None, collection_subset=None, seqtype=None, seqformat=None,
+                            upload_number=8, template_flag=None, download_flag=None, upload_job_name=None, upload_job_path=None,
+                            upload_cmd=None, custom_python_cmd=None, upload_rerun_flag=False, **kwargs):
+
         """
-        This is the most complicated specific strategy.  It downloads the refseq release files of choice (gbff),
+                This is the most complicated specific strategy.  It downloads the refseq release files of choice (gbff),
         extracts the data, splits a list of files into {upload_number} lists, and uploads those file lists to
         {upload_number} BioSQL databases.  The resulting databases can be used to access sequence data with accession
         numbers.  Due to the long upload time (>24 hours) this class currently only uses PBS to break the uploading up
@@ -677,26 +678,36 @@ class DatabaseManagement(BaseDatabaseManagement):
         :type delete_flag:  bool.
         :param upload_flag:  A flag that uploads refseq release files to BioSQL database(s).
         :type upload_flag:  bool.
-        :param database_path:  User supplied relative path to the databases.
-        :type database_path:   str.
         :param archive_path:  User supplied relative path to the archived databases.
         :type archive_path:   str.
+        :param database_path:  User supplied relative path to the databases.
+        :type database_path:   str.
         :param collection_subset: The collection subset of interest.
         :type collection_subset: str.
         :param seqtype: The type of sequence (rna, protein, genomic).
         :type seqtype: str.
         :param seqformat: The format of the sequence file (usually 'gbff' for GenBank Flat File).
         :type seqformat: str.
-        :param file_list:  A list of files to upload.
-        :type file_list:  list.
         :param upload_number:  The number of databases to upload (defautls to 8)
         :type upload_number:  int.
-        :param activate:  Absolute path to a virtual environments activate script.  This is used for PBS scripts.
-        :type activate:  str.
         :param template_flag:  A flag that loads a BioSQL database with NCBI taxonomy data.  This takes a very long time.
         :type template_flag:  bool.
         :param download_flag:  A flag that downloads the proper refseq release files from NCBI's ftp site.
         :type download_flag:  bool.
+        :param upload_job_name:  The job name used in the Qsub job.
+        :type upload_job_name:   str.
+        :param upload_job_path:  The parent path to the pbs working directory of
+        any of the pbs jobs that are submitted.
+        :type upload_job_path:  str.
+        :param upload_cmd:  The command used to run the qsub job.
+        :type upload_cmd:  str.
+        :param custom_python_cmd:  A list of custom commands that are used to create the command
+        section of the PBS script.
+        :type custom_python_cmd:  list.
+        :param upload_rerun_flag:  A flag used to rerun a previously created job.
+        :type upload_rerun_flag:  bool.
+        :param kwargs:  Key words that are used in the Qsub jobs that are created.
+        :type kwargs:  dict.
         :return:  A tuple containing 2 objects:  a list of functions for managing a BioSQL database with NCBI refseq
         data, and a list of dictionaries containing kwargs for each function.
         :rtype:  tuple.
@@ -748,46 +759,43 @@ class DatabaseManagement(BaseDatabaseManagement):
                 raise ValueError("The upload_number must be greater than 8.  The NCBI refseq release files are too bing"
                                  "for anything less than 8 seperate BioSQL databases.")
 
-            # Get template script variables
-            py_shebang = Path(activate.parent).expanduser()
-            db_path = self.database_path / Path('NCBI') / Path('refseq') / Path('release') / Path(collection_subset)
-
-            # Read the upload script
-            upload_script = resource_filename(templates.__name__, 'upload_rr_pbs.py')
-            with open(upload_script, 'r') as upload_script:
-                temp_script = upload_script.read()
-            rand_str = random.sample(string.ascii_letters + string.digits, 5)
-            script_dir = Path(self.user_log, ('upload_rr' + ''.join(rand_str)))
-            script_dir.mkdir()
-            script_string = temp_script % (py_shebang, file_list, pbs_dict, db_path, upload_number, self.email, str(script_dir / 'upload_config.yml'))
-
-            # Create the master upload script
-            with open(str(script_dir / 'master_upload_rr_pbs.py'), 'w') as mus:
-                mus.write(script_string)
-            os.chmod(str(script_dir / 'master_upload_rr_pbs.py'), mode=0o755)
-
-            # Load the configuration file
-            with open(str(self.config_file), 'r') as cfg:
-                conf_data = yaml.load(cfg, Loader=yaml.FullLoader)
-
-            # Write to the upload config file
-            with open(str(script_dir / 'upload_config.yml'), 'w') as upload_cfg:
-                conf_data['Database_config']['ftp_flag'] = False
-                conf_data['Database_config']['Full']['NCBI']['NCBI_refseq_release']['upload_flag'] = False
-                yaml.dump(conf_data, upload_cfg, default_flow_style=False)
-            os.chmod(str(script_dir / 'upload_config.yml'), mode=0o755)
-
-            def _run_upload_script():
-                self.db_mana_utils.system_cmd(cmd='%s/master_upload_rr_pbs.py' % str(script_dir), cwd=str(script_dir),
-                                              stdout=sp.PIPE, stderr=sp.STDOUT, shell=True)
-
-            nrr_dispatcher["NCBI_refseq_release"]['upload'].append(_run_upload_script)
-            nrr_config["NCBI_refseq_release"]['upload'].append({})
+            nrr_dispatcher["NCBI_refseq_release"]['upload'].append(self.refseq_release_dispatcher)
+            config_dict = {
+                "job_name": upload_job_name,
+                "upload_number": upload_number,
+                "job_path": upload_job_path,
+                "cmd": upload_cmd,
+                "custom_python_cmd": custom_python_cmd,
+                "rerun": upload_rerun_flag
+            }
+            config_dict.update(**kwargs)
+            nrr_config["NCBI_refseq_release"]['upload'].append(config_dict)
 
         return nrr_dispatcher, nrr_config
 
     def refseq_release_dispatcher(self, job_name, upload_number, job_path=None, cmd=None, custom_python_cmd=None,
                                   rerun=False, **kwargs):
+        """
+        For dispatching PBS jobs that upload refseq release files to
+        BioSQL databases.
+
+        :param job_name:  The job name used in the Qsub job.
+        :type job_name:   str.
+        :param upload_number:  The number of databases to upload to.
+        :type upload_number:  int.
+        :param job_path:  The parent path to the pbs working directory of
+        any of the pbs jobs that are submitted.
+        :type job_path:  str.
+        :param cmd:  The command used to run the qsub job.
+        :type cmd:  str.
+        :param custom_python_cmd:  A list of custom commands that are used to create the command
+        section of the PBS script.
+        :type custom_python_cmd:  list.
+        :param rerun:  A flag used to rerun a previously created job.
+        :type rerun:  bool.
+        :param kwargs:  Key words that are used in the Qsub jobs that are created.
+        :type kwargs:  dict.
+        """
         # Create sleeper function for dispatching
         def sleeper(secs):
             sleep(secs)
