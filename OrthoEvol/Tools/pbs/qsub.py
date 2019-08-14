@@ -254,12 +254,12 @@ class Qsub(BaseQsub):
 
         if code and attributes is not None:
             code_template = string.Template(code)
-            code = code_template.substitute(attributes)
+            code = code_template.safe_substitute(attributes)
         elif template and attributes is not None:
             with open(str(template), 'r') as tem:
                 code = tem.read()
                 code_template = string.Template(code)
-                code = code_template.substitute(attributes)
+                code = code_template.safe_substitute(attributes)
         else:
             code = None
         return code
