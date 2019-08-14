@@ -194,6 +194,12 @@ class Qsub(BaseQsub):
         self.description = description
         self.current_date = d.now().strftime(date_format)
         # PBS - directives/attributes
+        if not chunk_resources:
+            chunk_resources = OrderedDict({
+                "select": 1,
+                "ncpus": 1,
+                "mem": "6gb"
+            })
         self.resource_str = self.get_resource_string(chunk_resources=chunk_resources)
         self.cputime = cput
         self.walltime = walltime
@@ -223,13 +229,6 @@ class Qsub(BaseQsub):
         :return:  A string that will added to the directive list.
         :rtype:  str.
         """
-        if chunk_resources is None:
-            chunk_resources = OrderedDict({
-                "select": 1,
-                "ncpus": 1,
-                "mem": "6gb"
-            })
-
         resource_list = []
         for k, v in chunk_resources.items():
             if v is not None:
