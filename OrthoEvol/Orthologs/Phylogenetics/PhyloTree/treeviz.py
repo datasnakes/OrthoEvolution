@@ -5,26 +5,38 @@ from Bio import Phylo
 
 from OrthoEvol.Orthologs import OrthologsDevelopmentWarning
 
-# Warn users about this module
-warnings.warn('This module is still under development and '
-              'may undergo significant changes prior to its official release.',
-              OrthologsDevelopmentWarning)
-
 
 class TreeViz(object):
     """Tools that allow visualization of a newick formatted tree."""
 
-    def __init__(self, path2tree, treeformat='newick'):
-        """Import the path to the tree.
+    def __init__(self, path, tree_format='newick'):
+        """Initialize the class.
 
-        :param path2tree:  Path to your tree file.
-        :param treeformat:  (Default value = 'newick')
+        :param path:  The path to your tree file.
+        :type path: str
+        :param tree_format:  The format of the tree, default value = 'newick'
+        :type path: tree_format
         """
-        self.path2tree = path2tree
-        self.treeformat = treeformat
-        self.tree = Phylo.read(self.path2tree, self.treeformat)
+        # Warn users about this module
+        warnings.warn('This module is still under development and '
+                      'may undergo significant changes prior to its official '
+                      'release.', OrthologsDevelopmentWarning)
+        self.path = path
+        self.tree_format = tree_format
+        # Read the tree
+        self.tree = self.read_tree(path=path, tree_format=tree_format)
 
-    def drawtree(self):
+    def read_tree(self, path, tree_format):
+        """Read the phylogenetic tree.
+
+        :param path: The path to your tree file.
+        :type path: str
+        :param tree_format: The format of the tree, default value = 'newick'
+        :type tree_format: str
+        """
+        tree = Phylo.read(file=self.path, format=self.tree_format)
+        return tree
+
+    def draw_tree(self):
         """Import a newick formatted tree and visualize it."""
-
         Phylo.draw(self.tree)
