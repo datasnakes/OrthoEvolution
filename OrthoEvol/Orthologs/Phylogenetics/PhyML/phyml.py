@@ -3,6 +3,7 @@ import shutil
 
 from Bio.Phylo.Applications import PhymlCommandline
 from Bio.Application import ApplicationError
+from Bio import AlignIO
 
 from OrthoEvol.Tools.logit import LogIt
 
@@ -28,15 +29,22 @@ class PhyML(object):
         # Check that the phyml executable is in the path
         self.phyml_exe = self._check_exe()
         self.datatype = datatype
-        self.infile = infile
+        if self._validate_format(infile):
+            self.infile = infile
 
-    def _validate_format(self, infile):
+    def _validate_format(self):
         """"Validate the format of the input file.
 
         :param infile: An input file that is phylip formatted.
         :type infile: str
         """
-        pass
+        try:
+            AlignIO.read(open(self.infile), "phylip")
+        except ValueError as e:
+            self.phyml_log.exception(e)
+        else:
+            return True
+        return False
 
     def _check_exe(self):
         """Check to see if the phyml exe is in the path."""
@@ -50,12 +58,13 @@ class PhyML(object):
         else:
             self.phyml_log.error("%s is not in the path." % phyml_exe)
 
-    def run(self):
+    def run(self, model="WAG", alpha="e", bootstrap=100):
         """"Run phyml."""
         try:
             run_phyml = PhymlCommandline(self.phyml_exe,
                                          input=self.infile,
-                                         datatype=self.datatype)
+                                         datatype=self.datatype, model=model,
+                                         alpha=alpha, bootstrap=bootstrap)
             self.phyml_log.info("Running %s on %s" % (self.phyml_exe,
                                                       self.infile))
             out_log, err_log = run_phyml()
