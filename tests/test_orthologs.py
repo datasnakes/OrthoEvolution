@@ -41,9 +41,9 @@ class TestOrthologs(unittest.TestCase):
 
     def test_phyml(self):
         """Test the PhyML class."""
-        PhyML(infile='test_data/HTR1E_aligned.phy', datatype='aa').run()
-        self.assertIsNotNone('test_data/HTR1E_aligned.phy_phyml_stats.txt')
-        self.assertIsNotNone('test_data/HTR1E_aligned.phy_phyml_tree.txt')
+        PhyML(infile='test_data/test.phy', datatype='nt').run()
+        self.assertIsNotNone('test_data/test.phy_phyml_stats.txt')
+        self.assertIsNotNone('test_data/test.phy_phyml_tree.txt')
         self.delete_phyml_output()
 
 
