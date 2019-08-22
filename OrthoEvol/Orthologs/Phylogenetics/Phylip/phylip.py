@@ -3,6 +3,7 @@ import sys
 import shutil
 
 import pexpect  # I used this to feed input into shell executable
+from Bio import AlignIO
 
 from OrthoEvol.Tools.logit import LogIt
 
@@ -15,7 +16,8 @@ class Phylip(object):
 
         :param infile: A phylip formatted multiple sequence alignment.
         """
-        self.infile = infile
+        if self._validate_format(infile):
+            self.infile = infile
         self._rename = os.rename
         # Set up logging
         self.phylip_log = LogIt().default(logname="Phylip", logfile=None)
@@ -30,14 +32,21 @@ class Phylip(object):
         :param infile: A phylip formatted multiple sequence alignment.
         :type infile: str
         """
-        pass
+        try:
+            AlignIO.read(open(infile), "phylip")
+        except ValueError as e:
+            self.phylip_log.exception(e)
+        else:
+            return True
+        # TODO: Return an exception?
+        return False
 
     def _temp_infile(self, infile):
         """Create a temporary infile named infile.
 
         :param infile:  A phylip formatted multiple sequence alignment.
         """
-        shutil.copyfile(self.infile, "infile")
+        shutil.copyfile(infile, "infile")
         temp_infile = "infile"
         return temp_infile
 
@@ -52,10 +61,11 @@ class Phylip(object):
             dnapars = pexpect.spawnu("dnapars %s" % infile)
             dnapars.sendline("Y\r")
             dnapars.waitnoecho()
-            # TODO: Figure out how to catch output.
         except pexpect.EOF as e:
+            self.phylip_log.error(dnapars.read())
             self.phylip_log.exception(e)
         else:
+            self.phylip_log.info(dnapars.read())
             self._rename("outfile", outfile)
             self._rename("outtree", outtree)
         finally:
@@ -73,8 +83,10 @@ class Phylip(object):
             dnaml.sendline("Y\r")
             dnaml.waitnoecho()
         except pexpect.EOF as e:
+            self.phylip_log.error(dnaml.read())
             self.phylip_log.exception(e)
         else:
+            self.phylip_log.info(dnaml.read())
             self._rename("outfile", outfile)
             self._rename("outtree", outtree)
         finally:
@@ -91,8 +103,10 @@ class Phylip(object):
             dnadist.sendline("Y\r")
             dnadist.waitnoecho()
         except pexpect.EOF as e:
+            self.phylip_log.error(dnadist.read())
             self.phylip_log.exception(e)
         else:
+            self.phylip_log.info(dnadist.read())
             self._rename("outfile", outfile)
         finally:
             os.remove(infile)
