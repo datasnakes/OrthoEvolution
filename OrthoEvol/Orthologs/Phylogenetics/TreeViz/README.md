@@ -8,7 +8,7 @@ trees from existing tree files.
 ### Draw a newick formatted tree
 
 ```python
-from OrthoEvol.Orthologs.Phylogenetics.PhyloTree import TreeViz
+from OrthoEvol.Orthologs.Phylogenetics.TreeViz import TreeViz
 
 TreeViz(path='path/to/newick/tree', tree_format='newick')
 ```

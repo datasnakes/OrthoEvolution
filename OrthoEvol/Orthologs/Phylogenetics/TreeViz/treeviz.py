@@ -2,6 +2,7 @@
 import warnings
 
 from Bio import Phylo
+from ete3 import Tree
 
 from OrthoEvol.Orthologs import OrthologsDevelopmentWarning
 
@@ -37,6 +38,11 @@ class TreeViz(object):
         tree = Phylo.read(file=self.path, format=self.tree_format)
         return tree
 
-    def draw_tree(self):
+    def draw_tree(self, drawing_type="default"):
         """Import a newick formatted tree and visualize it."""
-        Phylo.draw(self.tree)
+        if drawing_type == "ascii":
+            Phylo.draw_ascii(self.tree)
+        elif drawing_type == "graphviz":
+            Phylo.draw_graphviz(self.tree)
+        elif drawing_type == "default":
+            Phylo.draw(self.tree)

@@ -4,7 +4,7 @@ from Bio import AlignIO
 from OrthoEvol.Orthologs import OrthologsWarning
 
 from OrthoEvol.Orthologs.Phylogenetics.PAML import ETE3PAML
-from OrthoEvol.Orthologs.Phylogenetics.PhyloTree import TreeViz
+from OrthoEvol.Orthologs.Phylogenetics.TreeViz import TreeViz
 from OrthoEvol.Orthologs.Phylogenetics import PhyML
 from OrthoEvol.Orthologs.Phylogenetics import Phylip
 from OrthoEvol.Orthologs.Phylogenetics.IQTree import IQTreeCommandline
