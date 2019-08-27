@@ -14,7 +14,7 @@ class TestOrthologs(unittest.TestCase):
     def setUp(self, project="gpcr", project_path="projects"):
         self.project = project
         self.project_path = project_path
-        self.cur_dir = os.getcwd()
+        self.cur_dir = os.path.dirname(os.path.abspath(__file__))
         self.join = os.path.join
 
     def delete_project(self, project_path):
