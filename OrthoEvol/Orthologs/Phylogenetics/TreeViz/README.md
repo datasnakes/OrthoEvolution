@@ -5,12 +5,15 @@ trees from existing tree files.
 
 ## Example
 
-### Draw a newick formatted tree
+### Draw and save a newick formatted tree
 
 ```python
 from OrthoEvol.Orthologs.Phylogenetics.TreeViz import TreeViz
 
-TreeViz(path='path/to/newick/tree', tree_format='newick')
+t = TreeViz(path='tree.txt', tree_format='newick')
+
+t.draw_tree()
+t.save_tree('example.png')
 ```
 
 ## Notes
