@@ -52,7 +52,7 @@ class TestOrthologs(unittest.TestCase):
 
     def test_treeviz(self):
         """Test the TreeViz class."""
-        t = TreeViz(path='tree.txt', tree_format='newick')
+        t = TreeViz(path='test_data/test_tree.txt', tree_format='newick')
         t.draw_tree()
         t.save_tree('test_data/example.png')
         self.assertIsNotNone('test_data/example.png')
