@@ -21,11 +21,11 @@ class TestOrthologs(unittest.TestCase):
         rmtree(project_path)
 
     def delete_phyml_output(self):
-        os.remove('test_data/HTR1E_aligned.phy_phyml_stats.txt')
-        os.remove('test_data/HTR1E_aligned.phy_phyml_tree.txt')
+        os.remove('test.phy_phyml_stats.txt')
+        os.remove('test.phy_phyml_tree.txt')
 
     def delete_treeviz_output(self):
-        os.remove('test_data/example.png')
+        os.remove('example.png')
 
     def test_baseblastn(self):
         """Test the BaseBlastN class."""
@@ -48,10 +48,8 @@ class TestOrthologs(unittest.TestCase):
     def test_phyml(self):
         """Test the PhyML class."""
         PhyML(infile=self.join(self.cur_dir, 'test_data/test.phy'), datatype='nt').run()
-        self.assertIsNotNone(self.join(self.cur_dir, 
-                                       'test_data/test.phy_phyml_stats.txt'))
-        self.assertIsNotNone(self.join(self.cur_dir, 
-                                       'test_data/test.phy_phyml_tree.txt'))
+        self.assertIsNotNone('test.phy_phyml_stats.txt')
+        self.assertIsNotNone('test.phy_phyml_tree.txt')
         self.delete_phyml_output()
 
     def test_treeviz(self):
@@ -59,8 +57,8 @@ class TestOrthologs(unittest.TestCase):
         t = TreeViz(path=self.join(self.cur_dir, 'test_data/test_tree.txt'),
                     tree_format='newick')
         t.draw_tree()
-        t.save_tree(self.join(self.cur_dir, 'test_data/example.png'))
-        self.assertIsNotNone(self.join(self.cur_dir, 'test_data/example.png'))
+        t.save_tree('example.png')
+        self.assertIsNotNone('example.png')
         self.delete_treeviz_output()
 
 
