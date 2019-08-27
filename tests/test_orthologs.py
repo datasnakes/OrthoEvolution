@@ -5,6 +5,7 @@ import os
 
 from OrthoEvol.Orthologs.Blast import BaseBlastN
 from OrthoEvol.Orthologs.Phylogenetics.PhyML import PhyML
+from OrthoEvol.Orthologs.Phylogenetics.TreeViz import TreeViz
 
 
 class TestOrthologs(unittest.TestCase):
@@ -20,6 +21,9 @@ class TestOrthologs(unittest.TestCase):
     def delete_phyml_output(self):
         os.remove('test_data/HTR1E_aligned.phy_phyml_stats.txt')
         os.remove('test_data/HTR1E_aligned.phy_phyml_tree.txt')
+
+    def delete_treeviz_output(self):
+        os.remove('test_data/example.png')
 
     def test_baseblastn(self):
         """Test the BaseBlastN class."""
@@ -45,6 +49,14 @@ class TestOrthologs(unittest.TestCase):
         self.assertIsNotNone('test_data/test.phy_phyml_stats.txt')
         self.assertIsNotNone('test_data/test.phy_phyml_tree.txt')
         self.delete_phyml_output()
+
+    def test_treeviz(self):
+        """Test the TreeViz class."""
+        t = TreeViz(path='tree.txt', tree_format='newick')
+        t.draw_tree()
+        t.save_tree('test_data/example.png')
+        self.assertIsNotNone('test_data/example.png')
+        self.delete_treeviz_output()
 
 
 if __name__ == '__main__':
