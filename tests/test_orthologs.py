@@ -21,8 +21,8 @@ class TestOrthologs(unittest.TestCase):
         rmtree(project_path)
 
     def delete_phyml_output(self):
-        os.remove('test.phy_phyml_stats.txt')
-        os.remove('test.phy_phyml_tree.txt')
+        os.remove(self.join(self.cur_dir, 'test_data/test.phy_phyml_stats.txt'))
+        os.remove(self.join(self.cur_dir, 'test_data/test.phy_phyml_tree.txt'))
 
     def delete_treeviz_output(self):
         os.remove('example.png')
@@ -47,9 +47,10 @@ class TestOrthologs(unittest.TestCase):
 
     def test_phyml(self):
         """Test the PhyML class."""
-        PhyML(infile=self.join(self.cur_dir, 'test_data/test.phy'), datatype='nt').run()
-        self.assertIsNotNone('test.phy_phyml_stats.txt')
-        self.assertIsNotNone('test.phy_phyml_tree.txt')
+        p = PhyML(infile=self.join(self.cur_dir, 'test_data/test.phy'), datatype='nt')
+        p.run(bootstrap=0)
+        self.assertIsNotNone(self.join(self.cur_dir, 'test_data/test.phy_phyml_stats.txt'))
+        self.assertIsNotNone(self.join(self.cur_dir, 'test_data/test.phy_phyml_tree.txt'))
         self.delete_phyml_output()
 
     def test_treeviz(self):
