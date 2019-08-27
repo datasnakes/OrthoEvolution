@@ -14,6 +14,8 @@ class TestOrthologs(unittest.TestCase):
     def setUp(self, project="gpcr", project_path="projects"):
         self.project = project
         self.project_path = project_path
+        self.cur_dir = os.getcwd()
+        self.join = os.path.join
 
     def delete_project(self, project_path):
         rmtree(project_path)
@@ -45,17 +47,20 @@ class TestOrthologs(unittest.TestCase):
 
     def test_phyml(self):
         """Test the PhyML class."""
-        PhyML(infile='test_data/test.phy', datatype='nt').run()
-        self.assertIsNotNone('test_data/test.phy_phyml_stats.txt')
-        self.assertIsNotNone('test_data/test.phy_phyml_tree.txt')
+        PhyML(infile=self.join(self.cur_dir, 'test_data/test.phy'), datatype='nt').run()
+        self.assertIsNotNone(self.join(self.cur_dir, 
+                                       'test_data/test.phy_phyml_stats.txt'))
+        self.assertIsNotNone(self.join(self.cur_dir, 
+                                       'test_data/test.phy_phyml_tree.txt'))
         self.delete_phyml_output()
 
     def test_treeviz(self):
         """Test the TreeViz class."""
-        t = TreeViz(path='test_data/test_tree.txt', tree_format='newick')
+        t = TreeViz(path=self.join(self.cur_dir, 'test_data/test_tree.txt'),
+                    tree_format='newick')
         t.draw_tree()
-        t.save_tree('test_data/example.png')
-        self.assertIsNotNone('test_data/example.png')
+        t.save_tree(self.join(self.cur_dir, 'test_data/example.png'))
+        self.assertIsNotNone(self.join(self.cur_dir, 'test_data/example.png'))
         self.delete_treeviz_output()
 
 

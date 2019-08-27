@@ -18,21 +18,31 @@ REQUIREMENTS = os.path.join(COOKIE, 'requirements', 'dev.txt')
 
 @task
 def build(ctx):
-    """Build the cookiecutter.
-
-    :param ctx: 
-
-    """
+    """Build the cookiecutter.
+
+
+
+    :param ctx: 
+
+
+
+    """
+
     ctx.run('cookiecutter {0} --no-input'.format(HERE))
 
 
 @task
 def clean(ctx):
-    """Clean out generated cookiecutter.
-
-    :param ctx: 
-
-    """
+    """Clean out generated cookiecutter.
+
+
+
+    :param ctx: 
+
+
+
+    """
+
     if os.path.exists(COOKIE):
         shutil.rmtree(COOKIE)
         print('Removed {0}'.format(COOKIE))
@@ -41,22 +51,33 @@ def clean(ctx):
 
 
 def _run_flask_command(ctx, command):
-    """
-
-    :param ctx: 
-    :param command: 
-
-    """
+    """
+
+
+
+    :param ctx: 
+
+    :param command: 
+
+
+
+    """
+
     ctx.run('FLASK_APP={0} flask {1}'.format(AUTOAPP, command), echo=True)
 
 
 @task(pre=[clean, build])
 def test(ctx):
-    """Run lint commands and tests.
-
-    :param ctx: 
-
-    """
+    """Run lint commands and tests.
+
+
+
+    :param ctx: 
+
+
+
+    """
+
     ctx.run('pip install -r {0} --ignore-installed'.format(REQUIREMENTS),
             echo=True)
     os.chdir(COOKIE)
@@ -65,12 +86,18 @@ def test(ctx):
 
 @task
 def readme(ctx, browse=False):
-    """
-
-    :param ctx: 
-    :param browse:  (Default value = False)
-
-    """
+    """
+
+
+
+    :param ctx: 
+
+    :param browse:  (Default value = False)
+
+
+
+    """
+
     ctx.run("rst2html.py README.rst > README.html")
     if browse:
         webbrowser.open_new_tab('README.html')
