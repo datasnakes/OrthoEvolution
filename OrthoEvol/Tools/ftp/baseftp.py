@@ -3,7 +3,7 @@ from ftplib import FTP, error_perm
 import os
 import contextlib
 
-from OrthoEvol.Tools.otherutils import FunctionRepeater
+from OrthoEvol.utilities import FunctionRepeater
 
 
 class BaseFTPClient(object):
@@ -12,20 +12,22 @@ class BaseFTPClient(object):
     .. seealso:: :class:`NcbiFTPClient`
     """
 
-    def __init__(self, ftpsite, email, keepalive=False, debug_lvl=0):
-        """Connect to a ftp site using an email address.
+    def __init__(self, ftpsite, user, password, keepalive=False, debug_lvl=0):
+        """Connect to a ftp site using a username and password.
 
-        :param ftpsite: Address of the ftp site you want to connect to.
-        :param email: Input your email address.
-        :param keepalive: Flag to determine whether to keepalive the connection
-                          (Default value = False)
-        :type keepalive: bool
-        :param debug_lvl: Verbosity level for debugging ftp connection
-                          (Default value = 0)
-        :type debug_lvl: int
+        :param ftpsite: The url or http address of the ftp site you want to connect to.
+        :param user: The name of the user that will log in.
+        :type user: str
+        :param password: The password needed to log in to the ftp site.
+        :type password: str
+        :param keepalive: Flag to determine whether to keepalive the connection, defaults to False
+        :type keepalive: bool, optional
+        :param debug_lvl: Verbosity level for debugging ftp connection, defaults to 0
+        :type debug_lvl: int, optional
         """
         self._ftpsite = ftpsite
-        self._email = email
+        self._user = user
+        self._password = password
         self._debug_lvl = debug_lvl
         self.ftp = self._login()
         self.__keepalive = keepalive
@@ -48,11 +50,11 @@ class BaseFTPClient(object):
         return voidcmd, filetransfer
 
     def _login(self):
-        """Connect to the FTP server anonymously."""
+        """Connect to the FTP server."""
 
         with contextlib.suppress(error_perm):
             ftp = FTP(self._ftpsite, timeout=600)
-            ftp.login(user='anonymous', passwd=self._email)
+            ftp.login(user=self._user, passwd=self._password)
             ftp.voidcmd('NOOP')
             ftp.set_debuglevel(self._debug_lvl)
 

@@ -1,27 +1,29 @@
-"""Directory management tools for the OrthoEvol package."""
+"""Directory management tools for the package."""
+# Standard Library
 import os
-import pkg_resources
 from pathlib import Path
+import pkg_resources
+# OrthoEvol
 from OrthoEvol import Cookies, Orthologs, Manager, Tools
 from OrthoEvol.Cookies import Oven
 from OrthoEvol.Tools.logit import LogIt
 
 
 class Management(object):
+
     def __init__(self, repo=None, home=os.getcwd(), new_repo=False, **kwargs):
-        """Base class for directory management.
+        """
+        This is a base class for directory management.
 
-        It maps the directories of the OrthoEvol-Script package using the
-        pathlib module, and turns the names of each important directory into
-        a pathlike object.  The base class gives the option of creating a new
-        repository with cookiecutter.
+        It maps the directories of the OrthoEvol-Script package using the pathlib module and turns the names of each
+        important directory into a pathlike object.  The base class gives the option of creating a new repository with
+        cookiecutter.
 
-        :param repo (string): The name of the new repository to be created.
-        :param home (path or path-like): The home of the file calling this name.
-                                        When creating a new repository it is
-                                        best to explicitly name the home path.
-        :param new_repo (bool): Creates a new repository."""
-
+        :param repo(string): The name of the new repository to be created.
+        :param home(path or path-like): The home of the file calling this name.  When creating a new
+            repository, it is best to explicitly name the home path.
+        :param new_repo(bool): Triggers cookiecutter to create a new repository.
+        """
 
         self.repo = repo
         self.file_home = Path(home)  # Home of the file calling this class
@@ -55,10 +57,13 @@ class Management(object):
         self.send2server = self.Tools / Path('send2server')
         self.sge = self.Tools / Path('sge')
         self.slackify = self.Tools / Path('slackify')
-        self.otherutils = self.Tools / Path('otherutils')
+        self.utils = self.Tools / Path('utils')
 
         if self.repo:
             self.repo_path = self.file_home / Path(self.repo)
+        else:
+            self.repo_path = self.file_home
+
         self.managementlog.info('The BaseManagement class variables have been set.')
 
         # Make a new repository.
@@ -68,19 +73,16 @@ class Management(object):
 
 
 class RepoManagement(Management):
-    """Repository Management for OrthoEvol."""
 
-    def __init__(self, repo, user=None, home=os.getcwd(),
-                 new_user=False, new_repo=False, **kwargs):
-        """Manage repositories.
-
-        This class has to be paired with a repository name.  It gives the
-        option of creating a filesystem for a new user and a new repository
+    def __init__(self, repo, user=None, home=os.getcwd(), new_user=False,
+                 new_repo=False, **kwargs):
+        """
+        This is the Repository Management class, which inherits the Management base class.  This class has to be paired
+        with a repository name.  It gives the option of creating a filesystem for a new user and a new repository
         using cookiecutter.
 
-        This class maps the named repository, which includes top level access
-        to front facing web servers, important documents, and the top level
-        users directory.
+        This class maps the named repository, which includes top level access to front facing web servers, important
+        documents, and the top level users directory.
 
         :param repo (string):  The name of the repository.
         :param user (string):  The name of the current user if any.
@@ -93,6 +95,10 @@ class RepoManagement(Management):
         super().__init__(repo=repo, home=home, new_repo=new_repo, **kwargs)
 
         self.repo = repo
+        if self.repo:
+            self.repo_path = self.file_home / Path(self.repo)
+        else:
+            self.repo_path = self.file_home
         # Users and Important Documentation:
         self.docs = self.repo_path / Path('docs')
         self.users = self.repo_path / Path('users')
@@ -102,9 +108,9 @@ class RepoManagement(Management):
         self.ftp = self.repo_web / Path('ftp')
         self.wasabi = self.repo_web / Path('wasabi')
         self.flask = self.repo_web / Path('flask')
+        self.user = user
 
         if user:
-            self.user = user  # FROM Flask
             self.user_path = self.users / Path(self.user)
 
         self.Kitchen = Oven(repo=self.repo, user=self.user, output_dir=self.users)
@@ -113,14 +119,10 @@ class RepoManagement(Management):
         if new_user is True:
             self.managementlog.info('The user cookie is being prepared for the Oven.')
             self.Kitchen.bake_the_user()
-
-
 # TODO-ROB:  Edit the setup.py file for cookiecutter.
 
 
 class UserManagement(RepoManagement):
-    """User Management for OrthoEvol."""
-
     # TODO-ROB CREATE THESE IN A VIRTUAL ENVIRONMENT FOR EACH USER
     # TODO-ROB The virtual environment can be the name of the user
     # TODO-ROB When the user logs in, they will activate the virtual environment
@@ -128,17 +130,13 @@ class UserManagement(RepoManagement):
 
     def __init__(self, repo, user, project=None, db_config_file=None, home=os.getcwd(),
                  new_user=False, new_project=False, new_db=False, archive=False, **kwargs):
-        """Manages the current user's directories.
+        """
+        This is the User Management class, which manages the current users directories.  This class has to be paired
+        with a repository and a user.  It gives access to user paths, and provides functionality for creating new
+        projects and new project db_config_file for the current user.  It also give the option of creating a new user.
 
-        This class has to be paired with a repository and a user.  It gives
-        access to user paths, and provides functionality for creating new
-        projects and new project db_config_file for the current user.  It also
-        gives the option of creating a new user.
-
-        This class maps a users directory, which gives access to directories
-        for db_config_file (NCBI and proprietary), index files for quickly
-        retrieving project data, project log files, user affiliated journal
-        articles, and projects.
+        This class maps a users directory, which gives access to directories for db_config_file (NCBI and proprietary), index
+        files for quickly retrieving project data, project log files, user affiliated journal articles, and projects.
 
         :param repo (string):  The name of the repository.
         :param user (string):  The name of the current user if any.
@@ -147,10 +145,12 @@ class UserManagement(RepoManagement):
         :param new_user (bool):  Flag for creating a new user.
         :param new_project (bool):  Flag for creating a new project.
         """
+        self.user = user
+        self.repo = repo
 
+        super().__init__(repo=self.repo, user=self.user, home=home, new_user=new_user,
+                         **kwargs)
         if user or (user and repo):
-            super().__init__(repo=repo, user=user, home=home, new_user=new_user, **kwargs)
-            self.user = user
             # NCBI and Proprietary Database Repositories:
             self.user_db = self.user_path / Path('databases')
             self.user_archive = self.user_path / Path('archive')
@@ -159,6 +159,7 @@ class UserManagement(RepoManagement):
             self.ncbi_refseq_release = self.ncbi_db_repo / Path('refseq') / Path('release')
             self.blast_db = self.ncbi_db_repo / Path('blast') / Path('db')
             self.windowmaker_files = self.ncbi_db_repo / Path('blast') / Path('windowmaker_files')
+            self.seqidlists = self.ncbi_db_repo / Path('blast') / Path('seqidlists')
             self.itis_db_repo = self.user_db / Path('ITIS')
             # Index Files:
             self.user_index = self.user_path / Path('index')
@@ -173,6 +174,12 @@ class UserManagement(RepoManagement):
             if project:
                 self.project = project
                 self.project_path = self.projects / Path(project)
+
+            if new_db:
+                self.managementlog.info('The database cookie is being prepared for the Oven.')
+                self.Kitchen.bake_the_db_repo(db_config_file=db_config_file,
+                                              db_path=self.user_db)
+                # TODO-ROB:  Determine what type of database as well.
         else:
             self.projects = home
             self.Cookies = Path(Cookies.__path__[0])
@@ -180,48 +187,29 @@ class UserManagement(RepoManagement):
             if project:
                 self.project = project
                 self.project_path = home / Path(project)
-        self.Kitchen = Oven(repo=self.repo, user=self.user, project=self.project, output_dir=self.projects)
+        self.Kitchen = Oven(repo=self.repo, user=self.user,
+                            project=self.project, output_dir=self.projects)
 
         self.managementlog.info('The User Management class variables have been set.')
 
-        if new_project is True:
+        if new_project:
             self.managementlog.info('The project cookie is being prepared for the Oven.')
             self.Kitchen.bake_the_project()
-        if new_db is True:
-            self.managementlog.info('The database cookie is being prepared for the Oven.')
-            self.Kitchen.bake_the_db_repo(user_db=self.user_db, db_path_dict=self.db_path_dict,
-                                          ncbi_db_repo=self.ncbi_db_repo)
-            # TODO-ROB:  Determine what type of database as well.
 
-    def zip_mail(self, comp_filename, zip_path, destination=''):
-        """Zip and mail a file or folder.
-
-        :param comp_filename:
-        :param zip_path:
-        :param destination:  (Default value = '')
-        """
-
-        pass
-        # TODO Remodel this.
-
-
-#        Zipper = ZipUtils(comp_filename, zip_path)
-#        Zipper_path = Zipper.compress()
-#        # TODO-ROB add proper destination syntax.
-#        self.managementlog.info('%s is being sent to %s' % (Zipper_path, destination))
+    # def zip_mail(self, comp_filename, zip_path, destination=''):
+    #     Zipper = ZipUtils(comp_filename, zip_path)
+    #     Zipper_path = Zipper.compress()
+    #     # TODO-ROB add proper destination syntax.
+    #     self.managementlog.info('%s is being sent to %s' % (Zipper_path, destination))
 
 
 class WebsiteManagement(RepoManagement):
-    """Website Management for OrthoEvol."""
 
     def __init__(self, repo, website, host='0.0.0.0', port='5252',
                  home=os.getcwd(), new_website=False, create_admin=False, **kwargs):
-        """Install a template for Flask using cookiecutter.
-
-        The official cookiecutter-flask template
-        (https://github.com/sloria/cookiecutter-flask) has been edited for our
-        own purposes.  This app class uses cookiecutter hooks to deploy the
-        flask server.
+        """This is the Website Management class, which installs a template for Flask using cookiecutter.  The
+        official cookiecutter-flask template (https://github.com/sloria/cookiecutter-flask) has been edited for our own
+        purposes.  This app class uses cookiecutter hooks to deploy the flask server.
 
         :param repo (string):  The name of the repository.
         :param website (string):  The name of the website.  Not a url, so
@@ -246,15 +234,12 @@ class WebsiteManagement(RepoManagement):
 
         self.Kitchen = Oven(repo=self.repo, user=self.user,
                             website=self.website, output_dir=self.flask)
-        logmsg = 'The Website Management class variables have been set.'
-        self.managementlog.info(logmsg)
+        self.managementlog.info('The Website Management class variables have been set.')
 
         if new_website is True:
-            logmsg = 'The website cookie is being prepared for the Oven.'
-            self.managementlog.info(logmsg)
-            self.Kitchen.bake_the_website(host=self.web_host,
-                                          port=self.web_port,
-                                          website_path=self.website_path)
+            self.managementlog.info('The website cookie is being prepared for the Oven.')
+            self.Kitchen.bake_the_website(
+                host=self.web_host, port=self.web_port, website_path=self.website_path)
 
     def stop_server(self):
         """Stop the server running the website."""
@@ -262,16 +247,15 @@ class WebsiteManagement(RepoManagement):
 
 
 class ProjectManagement(UserManagement):
-    """Project Management for OrthoEvol."""
 
     def __init__(self, repo, user, project, research=None, research_type=None,
                  app=None, home=os.getcwd(), new_project=False, new_research=False,
                  new_app=False, **kwargs):
-        """Manage the directories of the current project.
-
-        Each project requires a repository, user, and project name.  It gives
-        the option of starting a new type of research within an existing
-        project.  An application directory for the specific research/dataset
+        """
+        This is the Project Management class, which manages the directories of
+        the current project.  Each project requires a repository, user, and project name.
+        It gives the option of starting a new type of research within an
+        existing project.  An application directory for the specific research/dataset
         can also be generated
 
         It gives access to the project directories including index
@@ -295,35 +279,48 @@ class ProjectManagement(UserManagement):
                              new_project=new_project, **kwargs)
 
             self.project = project
-            self.research = research
-            self.research_type = research_type
+            self.repo = repo
+            self.user = user
+            # Use values from parameters if not None
+            if research:
+                self.research = research
+            if research_type:
+                self.research_type = research_type
+
             # Project Directories:
-            self.research_path = self.project_path / Path(research_type) / Path(research)
             self.project_archive = self.project_path / Path('archive')
-            self.project_database = self.user_db / Path(project)
+
+            if self.user:
+                self.project_database = self.user_db / Path(project)
+            else:
+                self.project_database = Path("databases") / Path(project)
+
             # Dataset Directories:
+            if not research or not research_type:
+                self.research_path = self.project_path
+            else:
+                self.research_path = self.project_path / Path(research_type) / Path(research)
             self.project_index = self.research_path / Path('index')
             self.data = self.research_path / Path('data')
             self.raw_data = self.research_path / Path('raw_data')
             self.project_web = self.research_path / Path('web')
+
             if app:
                 self.app = app
-                self.app_path = self.project_web / Path(app)
-        logmsg = 'The User Management class variables have been set.'
-        self.managementlog.info(logmsg)
+                self.app_path = self.project_web / Path(self.app)
 
-        if new_research is True:
-            logmsg = 'The research cookie is being prepared for the Oven.'
-            self.managementlog.info(logmsg)
+        self.managementlog.info('The User Management class variables have been set.')
+
+        if new_research:
+            self.managementlog.info('The research cookie is being prepared for the Oven.')
             self.research_type = research_type
             self.Kitchen = Oven(repo=self.repo, user=self.user,
-                                project=self.project,
-                                output_dir=self.project_path)
+                                project=self.project, output_dir=self.project_path)
             self.Kitchen.bake_the_research(research_type=self.research_type,
                                            research=self.research)
-            if new_app is True:
-                logmsg = 'The app cookie is being prepared for the Oven.'
-                self.managementlog.info(logmsg)
+            if new_app:
+                self.managementlog.info('The app cookie is being prepared for the Oven.')
                 self.app = app
-                self.app_path = self.project_path / Path(research_type) / Path(research) / Path('web')
+                self.app_path = self.project_path / \
+                    Path(research_type) / Path(research) / Path('web')
                 self.Kitchen.bake_the_app(app=self.app)

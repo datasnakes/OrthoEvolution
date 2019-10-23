@@ -1,24 +1,17 @@
+# Standard Library
 import os
 from pathlib import Path
 from shutil import copy
-
 import pkg_resources
+# BioPython
 from Bio.Phylo.PAML import codeml
-
+# OrthoEvol
 from OrthoEvol.Manager.config import paml_control_files
 
 
 class CodemlRun(object):
-    """Run codeml."""
 
     def __init__(self, P2N_alignment, iqtree_newick, control_file='codeml-8-11-2017.ctl', home=os.getcwd()):
-        """Run codeml using input from pal2nal and iqtree.
-
-        :param P2N_alignment:
-        :param iqtree_newick:
-        :param control_file:
-        :param home:
-        """
         # Set up paths
         self.home = Path(home)
         self.paml_path = self.home / Path('PAML')
@@ -41,12 +34,10 @@ class CodemlRun(object):
         self.control_setup(self.control_template)
 
     def control_setup(self, control_template):
-        """Set up the control file.
-
-        :param control_template:
-        """
-
         self.cml.read_ctl_file(control_template)
         self.cml.print_options()
         self.cml.ctl_file = str(self.control_file)
         self.cml.write_ctl_file()
+
+
+
