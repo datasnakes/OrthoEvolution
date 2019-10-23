@@ -19,14 +19,14 @@ up for one script which is shown in the example below.
 ### Simple logging
 
 ```python
-from OrthoEvol.Tools import LogIt
+from OrthoEvol.Tools.logit import LogIt
 genbank_log = LogIt().default(logname="genbank", logfile=None)
 ```
 
 ### Use logging with ETE3PAML
 
 ```python
-from OrthoEvol.Tools import LogIt
+from OrthoEvol.Tools.logit import LogIt
 from OrthoEvol.Orthologs.Phylogenetics import ETE3PAML
 
 # Set up your loggers

@@ -1,4 +1,5 @@
 *.gbff
+*.vscode
 *.log
 *.gbk
 *.pyc
@@ -8,7 +9,11 @@ shiny_dir_mana.txt
 /.Rproj*
 /.idea
 /.idea/**
-.spyproject/*
+
+# Spyder project settings
+.spyderproject
+.spyproject
+
 Datasnakes/Manager/TODO.py
 TODO.py
 # Byte-compiled / optimized / DLL files
@@ -47,5 +52,23 @@ coverage.xml
 # Translations
 *.mo
 
+# Environments
+.env
+.venv
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/
+
 err.txt
 .pypiprc
+
+# Environments
+.env
+.venv
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/

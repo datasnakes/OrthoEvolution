@@ -75,8 +75,6 @@ slack.send_msg(channel='channelname', message=message_to_channel)
 from OrthoEvol.Tools.ftp import BaseFTPClient, NcbiFTPClient
 from OrthoEvol.Tools.logit import LogIt
 from OrthoEvol.Tools.mygene import MyGene
-from OrthoEvol.Tools.otherutils import (formatlist, splitlist, makedirectory,
-                                        PackageVersion, runcmd)
 from OrthoEvol.Tools.parallel import Multiprocess
 # from OrthoEvol.Tools.pandoc import PandocConverter
 from OrthoEvol.Tools.send2server import S2S
@@ -85,7 +83,6 @@ from OrthoEvol.Tools.sge import (BaseSGEJob, SGEJob, Qstat, SGEPipelineTask,
                                  writecodefile,
                                  file2str)
 from OrthoEvol.Tools.slackify import Slackify
-from OrthoEvol.Tools.streamieo import StreamIEO
 ```
 
 
