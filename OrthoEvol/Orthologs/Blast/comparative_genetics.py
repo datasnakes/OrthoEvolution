@@ -33,7 +33,7 @@ class BaseComparativeGenetics(object):
     # Initialize Logging
     blastn_log = LogIt().default(logname="blastn", logfile=None)
 
-    # TODO:  CREAT PRE-BLAST and POST-BLAST functions
+    # TODO:  CREATE PRE-BLAST and POST-BLAST functions
     def __init__(self, project=None, project_path=os.getcwd(), acc_file=None,
                  taxon_file=None, ref_species=None, pre_blast=False,
                  post_blast=True, hgnc=False, proj_mana=None, **kwargs):
@@ -468,7 +468,7 @@ class ComparativeGenetics(BaseComparativeGenetics):
                    and after blasting."""
 
         super().__init__(project=project, taxon_file=taxon_file,
-                         ref_species=ref_species, post_blast=post_blast, 
+                         ref_species=ref_species, post_blast=post_blast,
                          hgnc=False, **kwargs)
 
         self.postblastlog = LogIt().default(logname="post blast", logfile=None)
