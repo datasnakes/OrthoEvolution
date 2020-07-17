@@ -6,7 +6,7 @@ from OrthoEvol.Manager.management import ProjectManagement
 from OrthoEvol.Manager import config
 from OrthoEvol.Manager.database_management import BaseDatabaseManagement
 from OrthoEvol.Orthologs.Align import MultipleSequenceAlignment as MSA
-from OrthoEvol.Orthologs.Blast.orthologs_blastn import OrthoBlastN
+from OrthoEvol.Orthologs.Blast.blast import OrthoBlastN
 from OrthoEvol.Orthologs.Blast.comparative_genetics import BaseComparativeGenetics
 from OrthoEvol.Orthologs.GenBank.genbank import GenBank
 
@@ -36,14 +36,15 @@ class DataMana(object):
             if new is True:
                 config_file = pkg_resources.resource_filename(config.yaml.__name__, 'pipeline.yml')
             else:
-                config_file = pkg_resources.resource_filename(config.yaml.__name__, 'config_template_existing.yml')
+                config_file = pkg_resources.resource_filename(
+                    config.yaml.__name__, 'config_template_existing.yml')
         if config_file is not None:
             if start is True:
                 self.configure(config_file)
 
     def configure(self, config_file):
         """Use YAML configuration in order to initialize different classes.
-        
+
         :param config_file: A YAML file that is used to create a dictionary(kwargs) for each class.
         :return:
         """
@@ -107,10 +108,16 @@ class DataMana(object):
             else:
                 implementation(**configuration)
 
-
             # TODO-ROB parse the config options
 
     def blast(self, proj_mana, blast_config):
+        """Run blast.
+
+        :param proj_mana: [description]
+        :type proj_mana: [type]
+        :param blast_config: [description]
+        :type blast_config: [type]
+        """
         self.bl = OrthoBlastN(proj_mana=proj_mana, **self.Management_config, **blast_config)
         self.bl.blast_config(self.bl.blast_human, 'Homo_sapiens', auto_start=True)
         # TODO-Create directories for the blast data
