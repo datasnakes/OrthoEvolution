@@ -1,6 +1,6 @@
 tqdm==4.25.0
 ete3>=3.0.0b35
-pandas>=0.19.2
+pandas>=1.0.5
 openpyxl>=2.5.0
 pexpect==4.4.0
 slacker==0.9.42
