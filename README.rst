@@ -138,6 +138,8 @@ Tests
 ----------------
 To run tests, type ``nosetests tests/`` in the OrthoEvolution directory.
 
+First, install the ``nose` package using pip.
+
 Contributors
 ----------------
 This package was created by the Datasnakes.
