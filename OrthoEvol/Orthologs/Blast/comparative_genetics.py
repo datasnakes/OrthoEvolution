@@ -225,7 +225,7 @@ class BaseComparativeGenetics(object):
             self.pt.columns = pd.Index(array, name='Organism')
 
             # Handles for full dictionaries #### #
-            self.org_dict = self.df.ix[0:, self.ref_species:].to_dict()
+            self.org_dict = self.df.loc[0:, self.ref_species:].to_dict()
             self.gene_dict = self.df.T.to_dict()
             self.get_master_lists(self.__data)  # populates our lists
         else:
