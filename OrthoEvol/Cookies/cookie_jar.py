@@ -63,7 +63,7 @@ class Oven(object):
     """Class that deploys cookiecutter templates."""
 
     def __init__(self, repo=None, user=None, project=None, basic_project=False,
-                 website=None, db_repo="databases", output_dir=os.getcwd(), 
+                 website=None, db_repo="databases", output_dir=os.getcwd(),
                  recipes=CookBook()):
         """Deploy custom cookiecutter templates:
 
@@ -103,7 +103,17 @@ class Oven(object):
                             "recipes": self.Recipes.__dict__}
 
     def _check_ingredients(self, cookie, path, no_input, extra_context):
-        """Check if a directory exists. If not, create it."""
+        """Check if a directory exists. If not, create it.
+
+        :param cookie: [description]
+        :type cookie: [type]
+        :param path: [description]
+        :type path: [type]
+        :param no_input: [description]
+        :type no_input: [type]
+        :param extra_context: [description]
+        :type extra_context: [type]
+        """
         if self.cookie_jar:
             if self.exists(str(path)):
                 os.chmod(str(path), mode=0o777)
