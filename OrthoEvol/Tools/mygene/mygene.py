@@ -37,7 +37,11 @@ class MyGene(object):
         """
 
         accfile = pd.read_csv(self.infile)
-        acclist = list([accession.upper() for accession in accfile.Homo_sapiens])
+        # Ensure infile has 'Homo_sapiens' column.
+        if not 'Homo_sapiens' in accfile.columns:
+            raise KeyError('"Homo_sapiens" column does not exist.')
+        else:
+            acclist = list([accession.upper() for accession in accfile.Homo_sapiens])
         return acclist
 
     def query_mygene(self):
