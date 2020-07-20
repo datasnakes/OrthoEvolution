@@ -315,7 +315,8 @@ class ProjectManagement(UserManagement):
             self.managementlog.info('The research cookie is being prepared for the Oven.')
             self.research_type = research_type
             self.Kitchen = Oven(repo=self.repo, user=self.user,
-                                project=self.project, output_dir=self.project_path)
+                                project=self.project,
+                                output_dir=self.project_path)
             self.Kitchen.bake_the_research(research_type=self.research_type,
                                            research=self.research)
             if new_app:
