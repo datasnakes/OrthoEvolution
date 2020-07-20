@@ -37,7 +37,7 @@ class MyGene(object):
         """
 
         accfile = pd.read_csv(self.infile)
-        acclist = list([accession.upper() for accession in accfile['Homo_Sapiens']])
+        acclist = list([accession.upper() for accession in accfile.Homo_sapiens])
         return acclist
 
     def query_mygene(self):
