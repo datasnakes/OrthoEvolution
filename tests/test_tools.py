@@ -18,10 +18,6 @@ class TestTools(unittest.TestCase):
         self.logfile = logfile
         self.infile = resource_filename(test.__name__, 'test_blast.csv')
         self.outfile = 'out_mygene.csv'
-        
-    def tearDown(self):
-        os.remove(self.logfile)
-        os.remove(self.outfile)
 
     def test_logit(self):
         """Test the LogIt class."""
@@ -30,6 +26,7 @@ class TestTools(unittest.TestCase):
         self.assertEqual(str(test.name), 'TESTLOG')
         self.assertTrue(os.path.isfile(self.logfile))
         logit.shutdown()
+        logit.deletelog(self.logfile)
 
     def test_multiprocess(self):
         """Test the Multiprocess class."""
@@ -50,6 +47,7 @@ class TestTools(unittest.TestCase):
         self.assertIsNotNone(mg.accessions_list)
         self.assertIsInstance(mg.accessions_list, list)
         mg.query_mygene()
+        os.remove(self.outfile)
 
 
 if __name__ == '__main__':
