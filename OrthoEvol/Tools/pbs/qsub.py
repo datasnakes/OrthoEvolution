@@ -1,16 +1,18 @@
 import getpass
-import string
-import random
 import os
+import random
 import shutil
+import string
 import subprocess as sp
-from pathlib import Path
 from collections import OrderedDict
-from pkg_resources import resource_filename
 from datetime import datetime as d
+from pathlib import Path
 from time import sleep
-from OrthoEvol.Tools.logit import LogIt
+
+from pkg_resources import resource_filename
+
 from OrthoEvol.Manager.config import templates
+from OrthoEvol.Tools.logit import LogIt
 from OrthoEvol.utilities import FullUtilities
 
 
@@ -385,14 +387,17 @@ class Qsub(BaseQsub):
         """
 
         if pbs_template_file == self.pbs_script:
-            raise FileExistsError("The script provided, %s, already exists.  Do not overwrite." % self.pbs_script)
+            raise FileExistsError(
+                "The script provided, %s, already exists.  Do not overwrite." % self.pbs_script)
 
         # Configure the PBS Code
         if pbs_attributes is not None:
             if pbs_template_file is not None:
-                pbs_code = self.format_template_string(template=pbs_template_file, attributes=pbs_attributes)
+                pbs_code = self.format_template_string(
+                    template=pbs_template_file, attributes=pbs_attributes)
             elif pbs_template_string is not None:
-                pbs_code = self.format_template_string(code=pbs_template_string, attributes=pbs_attributes)
+                pbs_code = self.format_template_string(
+                    code=pbs_template_string, attributes=pbs_attributes)
             else:
                 raise ValueError("Please supply the pbs_template_file or pbs_template_string to generate the proper"
                                  "pbs script.")
@@ -440,7 +445,8 @@ class Qsub(BaseQsub):
                                           python_attributes=python_attributes)
                 self.qsub_log.info("The Python script has been formatted.")
             elif not self.python_script.exists():
-                self.copy_supplied_script(supplied_script=self.supplied_python_script, new_script=self.python_script)
+                self.copy_supplied_script(
+                    supplied_script=self.supplied_python_script, new_script=self.python_script)
 
             # Set up the custom python command
             if custom_python_cmd is not None:
@@ -453,7 +459,8 @@ class Qsub(BaseQsub):
                                    pbs_attributes=pbs_attributes)
             self.qsub_log.info("The PBS script has been set up.")
             if not self.pbs_script.exists():
-                self.copy_supplied_script(supplied_script=self.supplied_pbs_script, new_script=self.pbs_script)
+                self.copy_supplied_script(
+                    supplied_script=self.supplied_pbs_script, new_script=self.pbs_script)
 
             # Submit job
             self.submit_pbs_script(cmd=cmd)
