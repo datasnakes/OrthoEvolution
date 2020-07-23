@@ -18,6 +18,6 @@ install:
   - "pip install ."
 # command to run unittests
 script:
-  - pytest --cov=./
+  - pytest --cov-report=xml --cov=OrthoEvol tests/
 after_success:
   - codecov
