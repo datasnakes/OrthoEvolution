@@ -13,6 +13,9 @@
 .. image:: https://readthedocs.org/projects/orthoevolution/badge/?version=latest
    :target: http://orthoevolution.readthedocs.io/en/latest/?badge=latest
 
+.. image:: https://codecov.io/gh/codecov/OrthoEvolution/branch/master/graph/badge.svg
+  :target: https://codecov.io/gh/codecov/OrthoEvolution
+
 
 OrthoEvolution
 ====================
