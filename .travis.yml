@@ -15,12 +15,7 @@ install:
   - "pip install --only-binary=numpy,scipy numpy scipy"
   - "pip install matplotlib ipython jupyter sympy pytest"
   - "pip install -r requirements.txt"
-<<<<<<< HEAD
   - "pip install ."
 # command to run unittests via pytest
 script:
   - pytest tests/
-=======
-# command to run unittests
-script: pytest tests
->>>>>>> e4766d7... Add pytest to .travis.yml.
