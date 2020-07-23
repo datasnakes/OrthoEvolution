@@ -136,9 +136,9 @@ Creating projects and databases dynamically
 
 Tests
 ----------------
-To run tests, type ``nosetests tests/`` in the OrthoEvolution directory.
+To run tests, type ``pytest tests`` in the OrthoEvolution directory.
 
-First, install the ``nose` package using pip.
+First, install the ``pytest` package using pip.
 
 Contributors
 ----------------
