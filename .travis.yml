@@ -10,7 +10,7 @@ notifications:
 install:
   - "pip install --upgrade pip setuptools wheel"
   - "pip install --only-binary=numpy,scipy numpy scipy"
-  - "pip install matplotlib ipython jupyter sympy nose"
+  - "pip install matplotlib ipython jupyter sympy pytest"
   - "pip install -r requirements.txt"
-# command to run nosetests
+# command to run unittests
 script: pytest tests
