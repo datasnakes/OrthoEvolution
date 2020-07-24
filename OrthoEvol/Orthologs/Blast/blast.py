@@ -504,7 +504,9 @@ class OrthoBlastN(BaseBlastN):
                          taxon_file=self.taxon_file,
                          post_blast=self.__post_blast,
                          project_path=self.project_path,
-                         proj_mana=self.proj_mana, **kwargs)
+                         proj_mana=self.proj_mana,
+                         auto_start=self.auto_start,
+                         **kwargs)
 
     def run(self):
         """Run the blast using a default configuration."""
