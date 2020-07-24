@@ -2,7 +2,7 @@
 import unittest
 from shutil import rmtree
 
-from OrthoEvol.Orthologs.Blast import BaseBlastN
+from OrthoEvol.Orthologs.Blast import BaseBlastN, OrthoBlastN
 
 
 class TestOrthologs(unittest.TestCase):
@@ -32,6 +32,14 @@ class TestOrthologs(unittest.TestCase):
             self.assertEqual(gpcr_blastn.acc_file, "gpcr.csv")
             self.assertTrue(gpcr_blastn.copy_from_package)
             self.delete_project(project_path=self.project_path)
+
+    def test_orthoblastn(self):
+        """Test the OrthoBlastN class."""
+        ortho_blastn = OrthoBlastN(project="orthology-project", method=1,
+                                   save_data=True, acc_file="gpcr.csv",
+                                   copy_from_package=True)
+        self.assertEqual(ortho_blastn.ref_species, 'Homo_sapiens')
+        self.assertTrue(ortho_blastn.copy_from_package)
 
 
 if __name__ == '__main__':
