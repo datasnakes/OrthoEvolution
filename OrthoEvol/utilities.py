@@ -225,7 +225,8 @@ class BlastUtils(object):
                         # Categorize the different types of duplication
                     # Duplicates that persist across an organisms
                     if orgs.count(o) == len(go_list):
-                        blastutils_log.warning("A duplicate accession number(%s) persists ONLY across %s for %s." % (accession, o, genes))
+                        blastutils_log.warning(
+                            "A duplicate accession number(%s) persists ONLY across %s for %s." % (accession, o, genes))
                         duplicated_dict['organisms'][o][accession] = genes
                         del duplicated_dict['genes'][g]
                         break
@@ -233,13 +234,15 @@ class BlastUtils(object):
                     elif orgs.count(o) != 1:
                         alt_genes = list(
                             gene for gene, org in go_list if org == o)
-                        blastutils_log.warn("A duplicate accession number(%s) persists across %s for %s." % (accession, o, alt_genes))
+                        blastutils_log.warn(
+                            "A duplicate accession number(%s) persists across %s for %s." % (accession, o, alt_genes))
                         blastutils_log.warn("%s is also duplicated elsewhere." % accession)
                         duplicated_dict['organisms'][o][accession] = alt_genes
 
                     # Duplicates that persist across a gene
                     if genes.count(g) == len(go_list):
-                        blastutils_log.critical("A duplicate accession number(%s) persists across %s for %s." % (accession, g, orgs))
+                        blastutils_log.critical(
+                            "A duplicate accession number(%s) persists across %s for %s." % (accession, g, orgs))
                         duplicated_dict['genes'][g][accession] = orgs
                         del duplicated_dict['organisms'][o]
                         break
@@ -247,7 +250,8 @@ class BlastUtils(object):
                     elif genes.count(g) != 1:
                         alt_orgs = list(
                             org for gene, org in go_list if gene == g)
-                        blastutils_log.critical("A duplicate accession number(%s) persists across %s for %s." % (accession, g, alt_orgs))
+                        blastutils_log.critical(
+                            "A duplicate accession number(%s) persists across %s for %s." % (accession, g, alt_orgs))
                         blastutils_log.critical("%s is also duplicated elsewhere." % accession)
                         duplicated_dict['genes'][g][accession] = alt_orgs
 
@@ -268,7 +272,8 @@ class BlastUtils(object):
                         del duplicated_dict['genes'][g]
                         if accession not in duplicated_dict['other']:
                             duplicated_dict['other'][accession] = []
-                        blastutils_log.critical("%s is duplicated, but cannot be categorized as random." % accession)
+                        blastutils_log.critical(
+                            "%s is duplicated, but cannot be categorized as random." % accession)
                         duplicated_dict['other'][accession].append(go)
             # Duplicate Organism count dictionary
             dup_org = pd.DataFrame.from_dict(duplicated_dict['organisms'])
@@ -315,11 +320,12 @@ class BlastUtils(object):
             if miss != 0:
                 missing_dict['organisms'][organism] = {}
                 # Missing Gene dict {'HTR1A': True}
-                missing_genes = miss_gene_df.ix[:, organism].to_dict()
+                missing_genes = miss_gene_df.loc[:, organism].to_dict()
                 # Do a list comprehension to get a list of genes
                 missing_dict['organisms'][organism]['missing genes'] = list(key for key, value in missing_genes.items()
                                                                             if value)  # Value is True for miss accns
-                blastutils_log.critical("%s is missing %s." % (organism, str(missing_dict['organisms'][organism]['missing genes'])))
+                blastutils_log.critical("%s is missing %s." % (organism, str(
+                    missing_dict['organisms'][organism]['missing genes'])))
                 # Number of missing accessions per organism
                 missing_dict['organisms'][organism]['count'] = miss
                 total_miss += miss
@@ -330,13 +336,14 @@ class BlastUtils(object):
         total_miss = 0
         for gene, miss in gene_dict.items():
             if miss != 0:
-                missing_orgs = miss_gene_df.T.ix[:, gene].to_dict()
+                missing_orgs = miss_gene_df.T.loc[:, gene].to_dict()
                 missing_dict['genes'][gene] = {}
                 # Do a list comprehension to get a list of organisms
                 missing_dict['genes'][gene]['missing organisms'] = list(key for key, value in missing_orgs.items()
                                                                         if value  # Value is True for missing accessions
                                                                         if key != 'Tier')  # Don't include 'Tier'
-                blastutils_log.critical("%s is missing %s." % (gene, str(missing_dict['genes'][gene]['missing organisms'])))
+                blastutils_log.critical("%s is missing %s." % (
+                    gene, str(missing_dict['genes'][gene]['missing organisms'])))
                 # Number of missing accessions per gene
                 missing_dict['genes'][gene]['count'] = miss
                 total_miss += miss
@@ -481,7 +488,8 @@ class GenbankUtils(object):
         elif isinstance(man_file, list):
             ids = man_file
 
-        new_records = (record for record in SeqIO.parse(target_file, 'fasta') if record.id not in ids)
+        new_records = (record for record in SeqIO.parse(
+            target_file, 'fasta') if record.id not in ids)
         old_records = (record for record in SeqIO.parse(target_file, 'fasta') if record.id in ids)
 
         print('Sequences have been filtered.')
@@ -506,7 +514,8 @@ class GenbankUtils(object):
         # adding generators - https://stackoverflow.com/questions/3211041/how-to-join-two-generators-in-python
         if os.path.isfile(man_file):
             with TemporaryFile('r+', dir=str(Path(target_file).parent)) as tmp_file:
-                new_records = itertools.chain(SeqIO.parse(target_file, 'fasta', ), SeqIO.parse(man_file, 'fasta'))
+                new_records = itertools.chain(SeqIO.parse(
+                    target_file, 'fasta', ), SeqIO.parse(man_file, 'fasta'))
                 count = SeqIO.write(new_records, tmp_file, 'fasta')
                 tmp_file.seek(0)
                 print('temp file count: ' + str(count))
@@ -596,20 +605,24 @@ class OrthologUtils(BlastUtils, GenbankUtils):
         if issubclass(type(composer), checker) or check2:
             for key, value in composer.__dict__.items():
                 setattr(cls, key, value)
-            ac_log.info("The attribute configuration was accomplished by composing %s with %s." % (cls.__class__.__name__, composer.__class__.__name__))
+            ac_log.info("The attribute configuration was accomplished by composing %s with %s." % (
+                cls.__class__.__name__, composer.__class__.__name__))
 
         # Attribute configuration using a dictionary.
         elif isinstance(composer, dict):
             for key, value in composer.items():
                 setattr(cls, key, value)
-            ac_log.info("The attribute configuration of %s was accomplished by using a dictionary." % cls.__class__.__name__)
+            ac_log.info(
+                "The attribute configuration of %s was accomplished by using a dictionary." % cls.__class__.__name__)
 
         # Attribute configuration without composer
         elif composer is None:
             if not (project or project_path):
-                raise BrokenPipeError("Without the Project Management class, a project name and project path must be included.")
+                raise BrokenPipeError(
+                    "Without the Project Management class, a project name and project path must be included.")
             cls = self.standalone_config(cls, project, project_path)
-            ac_log.info("The attribute configuration of %s was accomplished by using a standalone project." % cls.__class__.__name__)
+            ac_log.info(
+                "The attribute configuration of %s was accomplished by using a standalone project." % cls.__class__.__name__)
         # Make sure self.project and self.project_path have values
         if not (cls.project or cls.project_path):
             raise BrokenPipeError("The project name and project path attributes have not been set.")
@@ -790,17 +803,21 @@ class CookieUtils(object):
             archive_filename = shutil.make_archive(base_name=str(output_pathname), format="xztar", root_dir=root_dir,
                                                    base_dir=base_dir, logger=archive_log)
             archive_size = self.get_size(archive_filename)
-            archive_log.warning("A %s archive file was created at %s." % (archive_filename, archive_size))
+            archive_log.warning("A %s archive file was created at %s." %
+                                (archive_filename, archive_size))
             # TODO-ROB:  Logging.  And log to a README.md file.
             # Delete the files if desired.
             if delete_flag:
-                archive_log.critical("The original data will be deleted recursively at %s." % data_path)
+                archive_log.critical(
+                    "The original data will be deleted recursively at %s." % data_path)
                 from OrthoEvol import OrthoEvolWarning
-                OrthoEvolWarning("You're about to delete your database (%s).  Are you sure??" % data_path)
+                OrthoEvolWarning(
+                    "You're about to delete your database (%s).  Are you sure??" % data_path)
                 shutil.rmtree(path=data_path)
                 archive_list.append(str(archive_filename))
             else:
-                archive_log.critical("The original data will be moved recursively from %s to %s." % (data_path, output_pathname))
+                archive_log.critical("The original data will be moved recursively from %s to %s." % (
+                    data_path, output_pathname))
                 output_pathname.mkdir()
                 shutil.move(src=str(data_path), dst=str(output_pathname))
                 shutil.move(src=str(archive_filename), dst=str(output_pathname))
@@ -835,6 +852,7 @@ class CookieUtils(object):
 
 class PackageVersion(object):
     """Get the version of an installed python package."""
+
     def __init__(self, packagename):
         self.packagename = packagename
         self._getversion()
@@ -847,6 +865,7 @@ class PackageVersion(object):
 
 class FunctionRepeater(object):
     """Repeats a function every interval. Ref: https://tinyurl.com/yckgv8m2"""
+
     def __init__(self, interval, function, *args, **kwargs):
         self._timer = None
         self.function = function
