@@ -40,7 +40,7 @@ class BaseBlastN(ComparativeGenetics):
         :param kwargs:"""
 
         super().__init__(project=project, method=method, acc_file=acc_file,
-                         copy_from_package=copy_from_package, 
+                         copy_from_package=copy_from_package,
                          ref_species=ref_species, template=template,
                          save_data=save_data, verbose=verbose, **kwargs)
 
@@ -246,7 +246,7 @@ class BaseBlastN(ComparativeGenetics):
 
         self.blastn_log.debug('Blast configuration has begun.')
         self.blastn_log.debug('Configuring the accession file.')
-        
+
         if self.ref_species:
             query_organism = self.ref_species
 
@@ -468,7 +468,7 @@ class OrthoBlastN(BaseBlastN):
 
     def __init__(self, project="orthology-gpcr", project_path=os.getcwd(),
                  method=1, template=None, save_data=True, acc_file="gpcr.csv",
-                 copy_from_package=True, **kwargs):
+                 copy_from_package=True, auto_start=False, **kwargs):
         """This class inherits from the BaseBlastN class.
 
         This class utilizes it's parent classes to search a standalone
@@ -494,6 +494,7 @@ class OrthoBlastN(BaseBlastN):
         self.proj_mana = None
         self.acc_file = acc_file
         self.copy_from_package = copy_from_package
+        self.auto_start = auto_start
 
         # Initialize class
         super().__init__(project=project, method=method, template=template,
@@ -507,7 +508,8 @@ class OrthoBlastN(BaseBlastN):
 
     def run(self):
         """Run the blast using a default configuration."""
-        self.configure(self.blast_human, self.ref_species, auto_start=True)
+        self.configure(self.blast_human, self.ref_species,
+                       auto_start=self.auto_start)
 
 
 class BlastFailure(BaseException):
