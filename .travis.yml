@@ -10,9 +10,9 @@ notifications:
 install:
   - "pip install --upgrade pip setuptools wheel"
   - "pip install --only-binary=numpy,scipy numpy scipy"
-  - "pip install matplotlib ipython jupyter sympy pytest>=4.6 codecov pytest-cov"
+  - "pip install matplotlib ipython jupyter sympy pytest"
   - "pip install -r requirements.txt"
   - "pip install ."
-# command to run unittests
+# command to run unittests via pytest
 script:
   - pytest tests/
