@@ -32,6 +32,7 @@ class TestTools(unittest.TestCase):
         """Test the Multiprocess class."""
         mp = Multiprocess()
         self.assertIsNotNone(mp.cpus)
+        self.assertEqual(mp.num_procs, mp.cpus - 1)
 
     def test_ncbiftpclient(self):
         """Test the NcbiFTPClient class."""
