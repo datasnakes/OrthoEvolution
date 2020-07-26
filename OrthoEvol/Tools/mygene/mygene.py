@@ -39,7 +39,7 @@ class MyGene(object):
         accfile = pd.read_csv(self.infile)
         # Ensure infile has 'Homo_sapiens' column.
         if 'Homo_sapiens' not in accfile.columns:
-            raise KeyError('"Homo_sapiens" column does noFt exist.')
+            raise KeyError('"Homo_sapiens" column does not exist.')
         else:
             acclist = list([accession.upper() for accession in accfile.Homo_sapiens])
         return acclist
