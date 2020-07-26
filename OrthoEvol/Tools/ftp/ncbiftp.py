@@ -93,7 +93,9 @@ class NcbiFTPClient(BaseFTPClient):
         try:
             self.ftp.cwd(path)
         except error_perm as ep:
-            self.ncbiftp_log.info("Current path: %s" % self.ftp.pwd() + ep.__str__() + path)
+            self.ncbiftp_log.info(
+                "Current path: %s" %
+                self.ftp.pwd() + ep.__str__() + path)
             return [], []
         else:
             self.ftp.retrlines('LIST', lambda x: file_list.append(x.split()))
@@ -126,7 +128,8 @@ class NcbiFTPClient(BaseFTPClient):
         download_time_secs = time()
         with ThreadPool(self.cpus) as download_pool:
             with tqdm(total=len(files)) as pbar:
-                for i, _ in tqdm(enumerate(download_pool.imap(self.download_file, files))):
+                for i, _ in tqdm(
+                        enumerate(download_pool.imap(self.download_file, files))):
                     pbar.update()
             minutes = round(((time() - download_time_secs) / 60), 2)
         self.ncbiftp_log.info("Took %s minutes to download the files." %
@@ -144,7 +147,9 @@ class NcbiFTPClient(BaseFTPClient):
         if not os.path.exists(windowmaskerfile):
             try:
                 with open(windowmaskerfile, 'wb') as localfile:
-                    self.ftp.retrbinary('RETR %s/wmasker.%s' % (taxid, wm_ext), localfile.write)
+                    self.ftp.retrbinary(
+                        'RETR %s/wmasker.%s' %
+                        (taxid, wm_ext), localfile.write)
                     self.ncbiftp_log.info('%s was downloaded.' % str(windowmaskerfile))
             except all_errors:
                 os.remove(windowmaskerfile)
@@ -253,7 +258,8 @@ class NcbiFTPClient(BaseFTPClient):
         download_time_secs = time()
         with ThreadPool(1) as download_pool:
             with tqdm(total=len(self.files2download)) as pbar:
-                for i, _ in tqdm(enumerate(download_pool.imap(self._download_windowmasker, windowmaskerfiles))):
+                for i, _ in tqdm(enumerate(download_pool.imap(
+                        self._download_windowmasker, windowmaskerfiles))):
                     pbar.update()
             minutes = round(((time() - download_time_secs) / 60), 2)
         self.ncbiftp_log.info("Took %s minutes to download the files." %
