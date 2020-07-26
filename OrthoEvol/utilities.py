@@ -234,9 +234,9 @@ class BlastUtils(object):
                     elif orgs.count(o) != 1:
                         alt_genes = list(
                             gene for gene, org in go_list if org == o)
-                        blastutils_log.warn(
+                        blastutils_log.warning(
                             "A duplicate accession number(%s) persists across %s for %s." % (accession, o, alt_genes))
-                        blastutils_log.warn("%s is also duplicated elsewhere." % accession)
+                        blastutils_log.warning("%s is also duplicated elsewhere." % accession)
                         duplicated_dict['organisms'][o][accession] = alt_genes
 
                     # Duplicates that persist across a gene
