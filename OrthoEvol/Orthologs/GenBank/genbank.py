@@ -47,8 +47,9 @@ class GenBank(object):
         self.genbanklog = LogIt().default(logname="GenBank", logfile=None)
 
         # Configuration of class attributes
-        add_self = self.genbank_utils.attribute_config(self, composer=blast, checker=OrthoBlastN, checker2=BaseComparativeGenetics,
-                                    project=project, project_path=project_path)
+        add_self = self.genbank_utils.attribute_config(self, composer=blast, checker=OrthoBlastN,
+                                                       checker2=BaseComparativeGenetics,
+                                                       project=project, project_path=project_path)
         for var, attr in add_self.__dict__.items():
             setattr(self, var, attr)
 
@@ -64,7 +65,8 @@ class GenBank(object):
                 self.db_files_list.append(str(FILE))
 
     @staticmethod
-    def name_fasta_file(self, path, gene, org, feat_type, feat_type_rank, extension, mode):
+    def name_fasta_file(self, path, gene, org, feat_type,
+                        feat_type_rank, extension, mode):
         """
         Provide a uniquely named FASTA file:
         * Coding sequence:
@@ -189,7 +191,7 @@ class GenBank(object):
                 db = server[SUB_DB_NAME]
                 try:
                     record = db.lookup(accession=accession)
-                    gbk_file = '%s_%s.gbk' % (gene , organism)
+                    gbk_file = '%s_%s.gbk' % (gene, organism)
                     gbk_file_path = gene_path / Path(gbk_file)
                     with open(gbk_file_path, 'w') as GB_file:
                         GB_file.write(record.format('genbank'))
@@ -200,12 +202,16 @@ class GenBank(object):
                     server_flag = True
                     break
                 except IndexError:
-                    self.genbanklog.critical('Index Error in %s.  Moving to the next database...' % SUB_DB_NAME)
+                    self.genbanklog.critical(
+                        'Index Error in %s.  Moving to the next database...' %
+                        SUB_DB_NAME)
                     continue
 
         # If the file has not been created after searching, then raise an error
         if server_flag is not True:
-            self.genbanklog.critical("The GenBank file was not created for %s (%s, %s)." % (accession, gene, organism))
+            self.genbanklog.critical(
+                "The GenBank file was not created for %s (%s, %s)." %
+                (accession, gene, organism))
             raise FileNotFoundError
 
     def gbk_quality_control(self, gbk_file, gene, organism):
@@ -234,13 +240,16 @@ class GenBank(object):
             gbk_organism = gbk_organism[0]
             gbk_organism = gbk_organism.replace(" ", "_")
         else:
-            self.genbanklog.critical("Two organisms exist in the GenBank file.  Is this normal?")
+            self.genbanklog.critical(
+                "Two organisms exist in the GenBank file.  Is this normal?")
             raise BrokenPipeError
 
         # Check to make sure the organism in the GenBank file matches the
         # organism from the accession file
         if gbk_organism == organism:
-            self.genbanklog.info("The GenBank organism, %s, has been verified for %s." % (organism, gene))
+            self.genbanklog.info(
+                "The GenBank organism, %s, has been verified for %s." %
+                (organism, gene))
         else:
             organism_flag = True
 
@@ -260,7 +269,9 @@ class GenBank(object):
         for gbk_gene in gbk_genes:
             if gbk_gene == gene:
                 gene_flag = False
-                self.genbanklog.info("The GenBank gene, %s, has been verified for %s." % (gene, organism))
+                self.genbanklog.info(
+                    "The GenBank gene, %s, has been verified for %s." %
+                    (gene, organism))
                 break
             else:
                 gene_flag = True
@@ -301,14 +312,18 @@ class GenBank(object):
             db_file_path = self.target_gbk_db_path / Path(db_name)
             # Create the db file if it exists
             if os.path.isfile(str(db_file_path)) is False:
-                self.genbanklog.warn('Copying Template BioSQL Database...  This may take a few minutes...')
+                self.genbanklog.warn(
+                    'Copying Template BioSQL Database...  This may take a few minutes...')
                 shutil.copy2('Template_BioSQL_DB.db', str(db_file_path))
 
-            # If it already exists then the database is bad, or needs to be update.  Delete it.
+            # If it already exists then the database is bad, or needs to be update.
+            # Delete it.
             else:
-                # TODO-ROB: This part is broken until the template db creation and management is added
+                # TODO-ROB: This part is broken until the template db creation and
+                # management is added
                 os.remove(str(db_file_path))
-                self.genbanklog.warn('Copying Template BioSQL Database...  This may take a few minutes...')
+                self.genbanklog.warn(
+                    'Copying Template BioSQL Database...  This may take a few minutes...')
                 shutil.copy2('Template_BioSQL_DB.db', str(db_file_path))
 
             server = BioSeqDatabase.open_database(driver='sqlite3', db=str(db_file_path))
@@ -317,7 +332,8 @@ class GenBank(object):
             for GENE in os.listdir(str(gene_path)):
                 sub_db_name = GENE
                 genbank_path = gene_path / Path(GENE) / Path('GENBANK')
-                # Parse the GenBank file names for each gene in order to upload them to a custom BioSQL database
+                # Parse the GenBank file names for each gene in order to upload them to a
+                # custom BioSQL database
                 for FILE in os.listdir(str(genbank_path)):
                     # Try to load the database.
                     try:
@@ -327,11 +343,18 @@ class GenBank(object):
                         count = db.load(SeqIO.parse(FILE, 'genbank'))
                         server.commit()
                         self.genbanklog.info('Server Commited %s' % sub_db_name)
-                        self.genbanklog.info('%s database loaded with %s.' % (db.dbid, FILE))
-                        self.genbanklog.info("That file contains %s genbank records." % str(count))
+                        self.genbanklog.info(
+                            '%s database loaded with %s.' %
+                            (db.dbid, FILE))
+                        self.genbanklog.info(
+                            "That file contains %s genbank records." %
+                            str(count))
                         t_count = t_count + count
-                        self.genbanklog.info('The total number of files loaded so far is %i.' % t_count)
-                    # If the database cannot be loaded then rollback the server and raise an error.
+                        self.genbanklog.info(
+                            'The total number of files loaded so far is %i.' %
+                            t_count)
+                    # If the database cannot be loaded then rollback the server and raise
+                    # an error.
                     except BaseException:
                         server.rollback()
                         # Try to delete the sub database and commit
@@ -365,18 +388,21 @@ class GenBank(object):
                 try:
                     for db_name in server.keys():
                         db = server[db_name]
-                        # For each GenBank record in the database write a set of FASTA files.
+                        # For each GenBank record in the database write a set of FASTA
+                        # files.
                         for item in db.keys():
                             record = db.lookup(item)
                             self.write_fasta_files(record, acc_dict)
-                            self.genbanklog.info("FASTA files for %s created from BioSQL database." % item)
-                except:
+                            self.genbanklog.info(
+                                "FASTA files for %s created from BioSQL database." % item)
+                except BaseException:
                     raise()
         # Get FASTA files from the GenBank files.
         # TODO-ROB change this.  Broken by new directory structure
         # TODO-ROB directory looks like /raw_data/Gene_1/GENBANK/*.gbk
         elif db is False:
-            # Parse the directory that contain the GenBank records for the project of interest.
+            # Parse the directory that contain the GenBank records for the project of
+            # interest.
             for _, _, gbk_files in os.walk(str(self.target_gbk_files_path)):
                 # For each genbank record write a set of FASTA files.
                 for gbk_file in gbk_files:
@@ -436,13 +462,16 @@ class GenBank(object):
                 'feat_type_rank': str(feat_type_rank),
                 'path': str(self.raw_data / Path(gene) / Path('GENBANK'))
             }
-            # Set up minimalistic FASTA headers and sequence entries for Nucleic Acid and Amino Acid sequences.
+            # Set up minimalistic FASTA headers and sequence entries for Nucleic Acid
+            # and Amino Acid sequences.
             na_entry = ">{min_org}\n{na_seq}\n".format(**fmt)
             aa_entry = ">{min_org}\n{aa_seq}\n".format(**fmt)
             # For full FASTA headers/sequences set min_fasta to False
             if self.min_fasta is False:
-                na_entry = ">gi|{na_gi}|ref|{na_acc_n}| {na_description}\n{na_seq}\n".format(**fmt)
-                aa_entry = ">gi|{aa_gi}|reg|{aa_acc_n}| {aa_description} {org}\n{aa_seq}\n".format(**fmt)
+                na_entry = ">gi|{na_gi}|ref|{na_acc_n}| {na_description}\n{na_seq}\n".format(
+                    **fmt)
+                aa_entry = ">gi|{aa_gi}|reg|{aa_acc_n}| {aa_description} {org}\n{aa_seq}\n".format(
+                    **fmt)
             # ######### End ######### #
 
             # ############ Write desired FASTA files ############ #
@@ -472,28 +501,33 @@ class GenBank(object):
         if feat_type == "CDS":
             # Create a .ffn file (FASTA for Coding Nucleic Acids)
             extension = '.ffn'
-            file = self.name_fasta_file(path, gene, org, feat_type, feat_type_rank, extension, mode)
+            file = self.name_fasta_file(
+                path, gene, org, feat_type, feat_type_rank, extension, mode)
             file.write(na_entry)
             file.close()
             # Create a .faa file (FASTA for Amino Acids)
             extension = '.faa'
-            file = self.name_fasta_file(path, gene, org, 'Protein', feat_type_rank, extension, mode)
+            file = self.name_fasta_file(
+                path, gene, org, 'Protein', feat_type_rank, extension, mode)
             file.write(aa_entry)
             file.close()
 
         elif feat_type == "misc_feature":
             # Create a custom entry for miscellaneous features.
-            na_entry = ">gi|{na_gi}|ref|{na_acc_n}| {na_description} Feature: {na_misc_feat}\n{na_seq}\n".format(**fmt)
+            na_entry = ">gi|{na_gi}|ref|{na_acc_n}| {na_description} Feature: {na_misc_feat}\n{na_seq}\n".format(
+                **fmt)
             # Creates .fna files (generic FASTA file for Nucleic Acids)
             extension = '.fna'
-            file = self.name_fasta_file(path, gene, org, feat_type, feat_type_rank, extension, mode)
+            file = self.name_fasta_file(
+                path, gene, org, feat_type, feat_type_rank, extension, mode)
             file.write(na_entry)
             file.close()
 
         elif feat_type != "variation":
             # Creates .fasta files (generic FASTA file)
             extension = '.fasta'
-            file = self.name_fasta_file(path, gene, org, 'Other', feat_type_rank, extension, mode)
+            file = self.name_fasta_file(
+                path, gene, org, 'Other', feat_type_rank, extension, mode)
             file.write(na_entry)
             file.close()
 
@@ -531,7 +565,8 @@ class GenBank(object):
             file.write(aa_entry)
             file.close()
         elif feat_type == "misc_feature":
-            na_entry = ">gi|{na_gi}|ref|{na_acc_n}| {na_description} Feature: {na_misc_feat}\n{na_seq}\n".format(**fmt)
+            na_entry = ">gi|{na_gi}|ref|{na_acc_n}| {na_description} Feature: {na_misc_feat}\n{na_seq}\n".format(
+                **fmt)
             # Creates .fna files (generic FASTA file for Nucleic Acids)
             extension = '.fna'
             file = self.name_fasta_file(path, gene, org, feat_type,

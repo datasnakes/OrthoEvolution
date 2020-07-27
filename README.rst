@@ -13,6 +13,9 @@
 .. image:: https://readthedocs.org/projects/orthoevolution/badge/?version=latest
    :target: http://orthoevolution.readthedocs.io/en/latest/?badge=latest
 
+.. image:: https://codecov.io/gh/codecov/OrthoEvolution/branch/master/graph/badge.svg
+  :target: https://codecov.io/gh/codecov/OrthoEvolution
+
 
 OrthoEvolution
 ====================
@@ -136,9 +139,9 @@ Creating projects and databases dynamically
 
 Tests
 ----------------
-To run tests, type ``nosetests tests/`` in the OrthoEvolution directory.
+To run tests, type ``pytest tests`` in the OrthoEvolution directory.
 
-First, install the ``nose` package using pip.
+First, install the ``pytest` package using pip.
 
 Contributors
 ----------------

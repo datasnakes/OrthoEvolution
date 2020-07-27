@@ -1,22 +1,24 @@
 import asyncio
-import os
 import csv
-import yaml
-import sys
 import json
+import os
 import subprocess as sp
-import pandas as pd
-import plotly.graph_objs as go
-import plotly
-from dateutil import parser
-from datetime import datetime
-from time import sleep
-from pkg_resources import resource_filename
+import sys
 from collections import OrderedDict
+from datetime import datetime
 from pathlib import Path
-from OrthoEvol.utilities import FullUtilities
+from time import sleep
+
+import pandas as pd
+import plotly
+import plotly.graph_objs as go
+import yaml
+from dateutil import parser
+from pkg_resources import resource_filename
+
 from OrthoEvol.Manager.config import yml
 from OrthoEvol.Tools.logit import LogIt
+from OrthoEvol.utilities import FullUtilities
 
 
 class TargetJobKeyError(KeyError):
@@ -29,19 +31,19 @@ class BaseQstat(object):
     # Static qstat Keywords
 
     __misc_kw = ["Checkpoint", "Error_Path", "exec_host", "exec_vnode", "Hold_Types", "Join_Path",
-                             "Keep_Files", "Mail_Points", "Output_Path", "Rerunable", "Resource_List.mpiprocs",
-                             "Resource_List.ncpus", "Resource_List.nodect", "Resource_List.nodes",
-                             "Resource_List.place", "Resource_List.select", "jobdir", "Variable_List", "umask",
-                             "project", "Submit_arguments"]
+                 "Keep_Files", "Mail_Points", "Output_Path", "Rerunable", "Resource_List.mpiprocs",
+                 "Resource_List.ncpus", "Resource_List.nodect", "Resource_List.nodes",
+                 "Resource_List.place", "Resource_List.select", "jobdir", "Variable_List", "umask",
+                 "project", "Submit_arguments"]
     __job_limits_kw = ["ctime", "etime", "qtime", "stime", "mtime", "Resource_List.walltime", "Resource_List.cput",
-                           "Resource_List.mem"]
+                       "Resource_List.mem"]
     __job_time_kw = ["ctime", "etime", "qtime", "stime", "mtime"]
     __job_info_kw = ["Job_Id", "Job_Name", "Job_Owner", "queue", "server", "session_id"]
     __static_kw = __job_info_kw + __job_limits_kw + __misc_kw
     # Dynamic qstat Keywords
     __misc_data_kw = ["job_state", "Priority", "substate", "comment", "run_count"]
     __job_data_kw = ["resources_used.cpupercent", "resources_used.cput", "resources_used.mem",
-                            "resources_used.vmem", "resources_used.walltime", "resources_used.ncpus"]
+                     "resources_used.vmem", "resources_used.walltime", "resources_used.ncpus"]
     __dynamic_kw = __job_data_kw + __misc_data_kw
     # All Keywords
     __keywords = __static_kw + __dynamic_kw
@@ -173,7 +175,8 @@ class BaseQstat(object):
                                                 capture_json=True)
             self.qstat_dict = self.qstat_data['Jobs']
         else:
-            self.qstat_data = self.qstat_output(cmd=self.cmd, log_file=str(self.qstat_log_file), print_flag=False)
+            self.qstat_data = self.qstat_output(
+                cmd=self.cmd, log_file=str(self.qstat_log_file), print_flag=False)
             # Convert raw data to nested dictionary
             self.qstat_dict = self.to_dict(qstat_data=self.qstat_data, ordered=ordered)
         # Isolate data for target PBS job
@@ -181,10 +184,12 @@ class BaseQstat(object):
         # Isolate static data for target PBS job
         self.static_dict = self.static_data(qstat_dict=self.qstat_dict, target_job=self.pbs_job_id)
         # Create a pandas dataframe for target PBS job, formatted for creating a CSV file.
-        self.job_dataframe = self.to_dataframe(qstat_dict=self.qstat_dict, target_job=self.pbs_job_id)
+        self.job_dataframe = self.to_dataframe(
+            qstat_dict=self.qstat_dict, target_job=self.pbs_job_id)
         if csv_flag:
             self.to_csv(file=self.data_file, qstat_dict=self.qstat_dict, target_job=self.pbs_job_id)
-            self.static_data_to_yaml(file=self.info_file, qstat_dict=self.qstat_dict, target_job=self.pbs_job_id)
+            self.static_data_to_yaml(
+                file=self.info_file, qstat_dict=self.qstat_dict, target_job=self.pbs_job_id)
         if sqlite_flag:
             self.to_sqlite()
 
@@ -541,7 +546,8 @@ class BaseQstat(object):
         for keyword in qstat_dict[target_job].keys():
             if keyword in self.__static_kw:
                 if keyword in self.__job_time_kw:
-                    data_dict[target_job][keyword] = str(parser.parse(qstat_dict[target_job][keyword]))
+                    data_dict[target_job][keyword] = str(
+                        parser.parse(qstat_dict[target_job][keyword]))
                 else:
                     data_dict[target_job][keyword] = qstat_dict[target_job][keyword]
         return data_dict
@@ -710,7 +716,8 @@ class Qstat(BaseQstat):
             first_time = first_time
         try:
             self.run_qstat(csv_flag=True, sqlite_flag=False)
-            self.qstat_log.info("Added data-point %s from qstat for %s." % (self.watch_count, self.pbs_job_id))
+            self.qstat_log.info("Added data-point %s from qstat for %s." %
+                                (self.watch_count, self.pbs_job_id))
             if not first_time:
                 if self.watch_count == max_count:
                     raise TargetJobKeyError
@@ -855,7 +862,8 @@ class MultiQstat(object):
         :param wait_time:  The amount of time to wait in between each point of data being collected.
         :type wait_time:  int.
         """
-        self.job_dict = self.get_qstat_dict(jobs, infile=infile, outfile=outfile, cmd=cmd, wait_time=wait_time)
+        self.job_dict = self.get_qstat_dict(
+            jobs, infile=infile, outfile=outfile, cmd=cmd, wait_time=wait_time)
         self.job_list = self.multi_watch(job_dict=self.job_dict)
 
     def get_qstat_dict(self, jobs, infile=None, outfile=None, cmd=None, wait_time=120):
@@ -885,7 +893,8 @@ class MultiQstat(object):
         for job in jobs:
             # Get qstat parameters for each target job
             home = str(self.config_home / job)
-            _qstat = Qstat(job_id=job, home=home, infile=infile, outfile=outfile, cmd=cmd, wait_time=wait_time)
+            _qstat = Qstat(job_id=job, home=home, infile=infile,
+                           outfile=outfile, cmd=cmd, wait_time=wait_time)
             # Create a dictionary value for each job
             job_dict[job] = _qstat
         return job_dict
@@ -908,7 +917,8 @@ class MultiQstat(object):
 
         for _qstat in job_dict.values():
             # Append task list for asnychronous programming
-            tasks.append(asyncio.ensure_future(self._async_watch(qstat=_qstat, count=_qstat.watch_count)))
+            tasks.append(asyncio.ensure_future(
+                self._async_watch(qstat=_qstat, count=_qstat.watch_count)))
         # Run task list and then close
         job_list = ioloop.run_until_complete(asyncio.wait(tasks))
         ioloop.close()
@@ -942,7 +952,8 @@ class MultiQstat(object):
 
         try:
             qstat.run_qstat(csv_flag=True, sqlite_flag=False)
-            qstat.qstat_log.info("Added data-point %s from qstat for %s." % (qstat.watch_count, qstat.pbs_job_id))
+            qstat.qstat_log.info("Added data-point %s from qstat for %s." %
+                                 (qstat.watch_count, qstat.pbs_job_id))
             if not first_time:
                 await asyncio.sleep(qstat.wait_time)
             temp_qstat = self._async_watch(qstat=qstat, first_time=False)
@@ -954,4 +965,3 @@ class MultiQstat(object):
                 temp_qstat = qstat
         qstat = temp_qstat
         return qstat
-
