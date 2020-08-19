@@ -402,22 +402,24 @@ class BaseComparativeGenetics(object):
         ["class", "family", "genus", "kingdowm", "order", "phylum", "species",
         "superkingdom"].
         """
-
         ncbi = NCBITaxa()
         taxa_dict = {}
         for organism in self.org_list:
-            taxa_dict[organism] = {}
-            taxid = self.taxon_dict[organism]
-            lineage = ncbi.get_lineage(taxid)
-            names = ncbi.get_taxid_translator(lineage)
-            ranks = ncbi.get_rank(lineage)
-            for id in lineage:
-                if ranks[id] == 'no rank':
-                    continue
-                if ranks[id] not in ['superkingdom', 'kingdom', 'phylum',
-                                     'class', 'order', 'family', 'genus', 'species']:
-                    continue
-                taxa_dict[organism][ranks[id]] = names[id]
+            try:
+                taxa_dict[organism] = {}
+                taxid = self.taxon_dict[organism]
+                lineage = ncbi.get_lineage(taxid)
+                names = ncbi.get_taxid_translator(lineage)
+                ranks = ncbi.get_rank(lineage)
+                for id in lineage:
+                    if ranks[id] == 'no rank':
+                        continue
+                    if ranks[id] not in ['superkingdom', 'kingdom', 'phylum',
+                                        'class', 'order', 'family', 'genus', 'species']:
+                        continue
+                    taxa_dict[organism][ranks[id]] = names[id]
+            except KeyError as ke:
+                self.blastn_log.exception(ke)
         return taxa_dict
 
     def get_acc_dict(self):
