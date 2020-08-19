@@ -1,5 +1,5 @@
 Database_config:
-  email:  "datasnakes@gmail.com"
+  email:  "rgilmore@umc.edu"
   driver: "sqlite3"
   Full:
     configure_flag: False
