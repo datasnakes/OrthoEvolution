@@ -366,7 +366,7 @@ class Qsub(BaseQsub):
                                                   attributes=python_attributes)
 
         if not python_code:
-            self.write_template_string(python_code, file=self.python_script)
+            self.write_template_string(python_code, extension=".py", file=self.python_script)
 
     def set_up_pbs_script(self, pbs_template_string=None, pbs_template_file=None, pbs_attributes=None):
         """
