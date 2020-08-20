@@ -1,12 +1,6 @@
 .. image:: https://travis-ci.org/datasnakes/OrthoEvolution.svg?branch=master
     :target: https://travis-ci.org/datasnakes/OrthoEvolution
 
-.. image:: https://api.codacy.com/project/badge/Grade/25062944794a4d14b5cab274a885ac27
-   :target: https://www.codacy.com/app/datasnakes/OrthoEvolution?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=datasnakes/OrthoEvolution&amp;utm_campaign=Badge_Grade
-
-.. image:: https://img.shields.io/badge/chat-on%20gitter-753A88.svg
-   :target: https://gitter.im/datasnakes/OrthoEvolution
-
 .. image:: https://badge.fury.io/py/OrthoEvol.svg
    :target: https://badge.fury.io/py/OrthoEvol
 
@@ -15,6 +9,13 @@
 
 .. image:: https://codecov.io/gh/codecov/OrthoEvolution/branch/master/graph/badge.svg
   :target: https://codecov.io/gh/codecov/OrthoEvolution
+
+.. image:: https://badgen.net/github/last-commit/datasnakes/OrthoEvolution
+  :target: https://github.com/datasnakes/OrthoEvolution/commits/master
+
+.. image:: https://img.shields.io/badge/chat-on%20gitter-753A88.svg
+   :target: https://gitter.im/datasnakes/OrthoEvolution
+
 
 
 OrthoEvolution
