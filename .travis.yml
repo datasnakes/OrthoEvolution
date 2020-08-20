@@ -1,23 +1,28 @@
 language: python
-dist: xenial
 os: linux
 cache: pip
-python:
-  - "3.5"
-  - "3.6"
-  - "3.7"
-  - "3.8"
 notifications:
   email: datasnakes@gmail.com
 # command to install dependencies
 install:
   - "pip install --upgrade pip setuptools wheel"
   - "pip install --only-binary=numpy,scipy numpy scipy"
-  - "pip install matplotlib ipython jupyter sympy pytest>=4.6 codecov pytest-cov"
+  - "pip install matplotlib ipython jupyter sympy pytest codecov pytest-cov"
   - "pip install -r requirements.txt"
   - "pip install ."
+jobs:
+  include:
+    - python: 3.5
+      dist: trusty
+    - python: 3.6
+      dist: xenial
+    - python: 3.7
+      dist: xenial
+    - python: 3.8
+      dist: xenial
 # command to run unittests
 script:
   - pytest --cov-report=xml --cov=OrthoEvol tests/
+# upload code coverage
 after_success:
   - codecov
