@@ -1,5 +1,5 @@
 tqdm==4.25.0
-ete3>=3.0.0b35
+ete3==3.0.0b35
 pandas>=0.25.3
 openpyxl>=2.5.0
 pexpect==4.4.0
