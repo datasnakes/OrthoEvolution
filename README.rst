@@ -7,8 +7,8 @@
 .. image:: https://readthedocs.org/projects/orthoevolution/badge/?version=latest
    :target: http://orthoevolution.readthedocs.io/en/latest/?badge=latest
 
-.. image:: https://codecov.io/gh/codecov/OrthoEvolution/branch/master/graph/badge.svg
-  :target: https://codecov.io/gh/codecov/OrthoEvolution
+.. image:: https://codecov.io/gh/datasnakes/OrthoEvolution/branch/master/graph/badge.svg
+   :target: https://codecov.io/gh/datasnakes/OrthoEvolution
 
 .. image:: https://badgen.net/github/last-commit/datasnakes/OrthoEvolution
   :target: https://github.com/datasnakes/OrthoEvolution/commits/master
