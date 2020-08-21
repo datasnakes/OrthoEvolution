@@ -1,0 +1,20 @@
+CompGenAnalysis_config:
+  taxon_file: null
+  go_list: null
+  post_blast: true
+  template: null
+  save_data: true
+  copy_from_package: true
+  MAF: 'MAFV3.2.csv'
+
+GenBank_config:
+  solo: false
+  multi: true
+  min_fasta: true
+
+Alignment_config:
+  aln_program: 'GUIDANCE2'
+  Guidance_config:
+    seqFile: "C:\\Users\\rgilmore\\PycharmProjects\\OrthoEvolution\\OrthoEvol\\Manager\\config\\test.faa"
+    msaProgram: "CLUSTALW"
+    seqType: "nuc"

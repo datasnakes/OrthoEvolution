@@ -1,0 +1,3 @@
+[run]
+source=OrthoEvol
+disable_warnings = couldnt-parse

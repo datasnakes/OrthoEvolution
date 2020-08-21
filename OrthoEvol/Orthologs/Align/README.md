@@ -1,4 +1,5 @@
 # Align Documentation
+
 This module aids in aligning multiple sequence fasta files, and in particular,
 it has been designed to optimize aligning orthologous mammalian sequences. We've
 found that [clustal omega](http://www.ebi.ac.uk/Tools/msa/clustalo/help/faq.html)
@@ -12,11 +13,13 @@ to help us to remove poor sequences (guidance2) and to prep sequences better for
 PAML analysis (pal2nal).
 
 ## Examples
+
 Clustal Omega is mainly used to align our the cds sequences. It's best to use clustal omega
 with amino acid sequences.
 
 
 ### Using the MultipleSequenceAlignment class
+
 The MultipleSequenceAlignment class was carefully designed to optimize the
 alignment strategies for orthology inference and speed.
 
@@ -41,6 +44,7 @@ msa.pal2nal(aa_alignment='HTR1A_aligned_clustal.ffn', na_fasta=fastafile,
 ```
 
 ### Running Clustal Omega
+
 It's important to note that the default parameters for `ClustalO` are as follows:
 `seqtype="PROTEIN"`, `infmt="fasta"`, `outfmt="fasta"`
 
@@ -55,6 +59,7 @@ for gene in gene_list:
 ```
 
 ### Running the Pal2Nal command line wrapper
+
 By default, the out format is in clustal or aln format.
 ```python
 from OrthoEvol.Orthologs.Align import Pal2NalCommandline

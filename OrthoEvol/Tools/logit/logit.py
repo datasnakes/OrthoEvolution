@@ -1,7 +1,7 @@
 """Main logging class to make logging easier."""
 import os
 import sys
-from logzero import setup_logger, LogFormatter, logging
+from logzero import setup_logger, LogFormatter, logging, colors
 
 
 class LogIt(object):
@@ -20,6 +20,11 @@ class LogIt(object):
                             "%(module)s - line %(lineno)d]:%(end_color)s %(message)s")
         self._formatter = LogFormatter(fmt=self._log_format,
                                        datefmt=self._date_format)
+
+        # Add a color for the critical level
+        self._formatter.DEFAULT_COLORS[50] = colors.Fore.LIGHTRED_EX
+        # Changed color for the debug level
+        self._formatter.DEFAULT_COLORS[10] = colors.Fore.LIGHTBLUE_EX
         self.logging = logging
 
     def default(self, logname, logfile):
@@ -48,12 +53,12 @@ class LogIt(object):
         :return: A custom_log object is returned.
         """
 
-        if fmt is 'default':
+        if fmt == 'default':
             fmt = '[%(levelname)-2s - %(name)s]: %(message)s'
-        elif fmt is 'custom':
+        elif fmt == 'custom':
             # TODO Allow customization
             raise NotImplementedError('Feature not integrated yet!')
-        elif fmt is not 'default' or 'custom':
+        elif fmt != 'default' or 'custom':
             raise Exception('User did not provide a format for the logger.')
 
         custom_log = setup_logger(name=logname, logfile=logfile,
@@ -67,7 +72,6 @@ class LogIt(object):
         """
 
         self.shutdown()
-        # TODO Use contextlib here; See makedirectory function
         if os.path.isfile(logfile):
             os.remove(logfile)
 

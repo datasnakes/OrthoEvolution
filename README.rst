@@ -1,17 +1,21 @@
 .. image:: https://travis-ci.org/datasnakes/OrthoEvolution.svg?branch=master
     :target: https://travis-ci.org/datasnakes/OrthoEvolution
 
-.. image:: https://api.codacy.com/project/badge/Grade/25062944794a4d14b5cab274a885ac27
-   :target: https://www.codacy.com/app/datasnakes/OrthoEvolution?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=datasnakes/OrthoEvolution&amp;utm_campaign=Badge_Grade
-
-.. image:: https://img.shields.io/badge/chat-on%20gitter-753A88.svg
-   :target: https://gitter.im/datasnakes/OrthoEvolution
-
 .. image:: https://badge.fury.io/py/OrthoEvol.svg
    :target: https://badge.fury.io/py/OrthoEvol
 
 .. image:: https://readthedocs.org/projects/orthoevolution/badge/?version=latest
    :target: http://orthoevolution.readthedocs.io/en/latest/?badge=latest
+
+.. image:: https://codecov.io/gh/datasnakes/OrthoEvolution/branch/master/graph/badge.svg
+   :target: https://codecov.io/gh/datasnakes/OrthoEvolution
+
+.. image:: https://badgen.net/github/last-commit/datasnakes/OrthoEvolution
+  :target: https://github.com/datasnakes/OrthoEvolution/commits/master
+
+.. image:: https://img.shields.io/badge/chat-on%20gitter-753A88.svg
+   :target: https://gitter.im/datasnakes/OrthoEvolution
+
 
 
 OrthoEvolution
@@ -61,13 +65,84 @@ Examples
 ----------------
 Check out this `tutorial <https://github.com/datasnakes/OrthoEvolution/wiki/Tutorial>`__ in our Wiki Docs.
 
+Also, please view `examples <https://github.com/datasnakes/OrthoEvolution/examples>`__ of how to utilize this package to build tools.
+
+
+Running a pre-configured local blast
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 .. code:: python
 
-    import OrthoEvol
+    from OrthoEvol.Orthologs.Blast import OrthoBlastN
+
+    # Use an existing list of gpcr genes
+    gpcr_blastn = OrthoBlastN(project="orthology-gpcr", method=1,
+                             save_data=True, acc_file="gpcr.csv", 
+                             copy_from_package=True)
+
+    # Run blast
+    gpcr_blastn.run()
+
+
+Simple project creation
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+.. code:: python
+
+    from OrthoEvol.Manager.management import ProjectManagement
+
+    ProjectManagement(repo="test-repo", user=None,
+                      project="test-[roject",
+                      research=None,
+                      research_type='comparative_genetics',
+                      new_repo=False, new_user=False, new_project=True,
+                      new_research=False)
+
+Simple blast database downloading
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+.. code:: python
+
+    from OrthoEvol.Tools.ftp import NcbiFTPClient
+
+    ncbiftp = NcbiFTPClient(email='somebody@gmail.com')
+    ncbiftp.getblastdb(database_name='refseq_rna', v5=True)
+
+Creating projects and databases dynamically 
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+.. code:: python
+
+    from OrthoEvol.Manager.management import ProjectManagement
+    from OrthoEvol.Manager.database_dispatcher import DatabaseDispatcher
+    from OrthoEvol.Manager.config import yml
+    from pkg_resources import resource_filename
+    from pathlib import Path
+    import yaml
+
+    # Set up project management
+    pm_config_file = resource_filename(yml.__name__, "initialize_new.yml")
+    with open(pm_config_file, 'r') as f:
+        pm_config = yaml.load(f)
+    pm = ProjectManagement(**pm_config["Management_config"])
+
+    # Set up database management
+    db_config_file = resource_filename(yml.__name__, "databases.yml")
+    with open(db_config_file, 'r') as f:
+        db_config = yaml.load(f)
+    config = db_config.update(pm_config)
+
+    # Generate main config file for this job
+    config_file = pm.user_log / Path("upload_config.yml")
+    with open(str(config_file), 'w') as cf:
+        yaml.dump(config, cf, default_flow_style=False)
+
+    # Set up database dispatcher and dispatch the functions
+    dd = DatabaseDispatcher(config_file, pm)
+    dd.dispatch(dd.strategies, dd.dispatcher, dd.configuration)
+
 
 Tests
 ----------------
-To run tests, type ``nosetests Tests/`` in the OrthoEvolution directory.
+To run tests, type ``pytest tests`` in the OrthoEvolution directory.
+
+First, install the ``pytest` package using pip.
 
 Contributors
 ----------------
@@ -94,6 +169,3 @@ computational molecular biology and bioinformatics. Bioinformatics 2009
 Jun 1; 25(11) 1422-3 http://dx.doi.org/10.1093/bioinformatics/btp163
 pmid:19304878*
 
-License
-----------------
-`MIT <https://github.com/datasnakes/OrthoEvolution/blob/master/LICENSE>`_

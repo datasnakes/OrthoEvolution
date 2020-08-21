@@ -15,9 +15,6 @@ import sys
 import pkg_resources
 from importlib import import_module
 
-## Save the standard error of the setup file. This can be removed soon.
-#sys.stderr = open('err.txt', 'w')
-
 # Set the home path of the setup script/package
 home = path.abspath(path.dirname(__file__))
 name = 'OrthoEvol'
@@ -29,19 +26,16 @@ def readme():
         return f.read()
 
 # Setup the package by adding information to these parameters
-
-
 setup(
     name=name,
     author='Rob Gilmore & Shaurita Hutchins',
     author_email='datasnakes@gmail.com',
     description="This package aids in the analysis of orthologous genes.",
-    version='0.9.0a2',
+    version='1.0.0b1',
     long_description=readme(),
     url='https://github.com/datasnakes/OrthoEvolution',
     license='MIT',
     keywords='bioinformatics science evolution orthology psychiatry genetics',
-    download_url='',
     classifiers=[
         'Development Status :: 3 - Alpha',
         'Intended Audience :: Science/Research',
@@ -56,24 +50,30 @@ setup(
         'Programming Language :: Python :: 3.5',
         'Programming Language :: Python :: 3.6',
         'Framework :: Flask',
-        'Framework :: R-Shiny',
         'Framework :: Cookiecutter'
     ],
     # Packages will be automatically found if not in this list.
-    packages=find_packages(exclude=['Docs', 'Examples', 'Tests']),
+    packages=find_packages(exclude=['docs', 'examples', 'tests']),
     include_package_data=True,
+    python_requires='~=3.5',
     entry_points={
         'console_scripts': [
                 'orthoevol=OrthoEvol.Orthologs.command_line:main'
         ]
     },
+    project_urls={
+            'Docs': 'https://orthoevolution.readthedocs.io/',
+            'Releases': 'https://github.com/datasnakes/OrthoEvolution/releases',
+            'Bug Reports': 'https://github.com/datasnakes/OrthoEvolution/issues',
+            'Source': 'https://github.com/datasnakes/OrthoEvolution/',
+            },
     zip_safe=False,
-    test_suite='nose.collector',
-    tests_require=['nose']
+    setup_requires=['pytest-runner'],
+    tests_require=['pytest']
 )
 
 # Set up the permissions for the BioSQL Perl scripts
-scripts = import_module("OrthoEvol.Manager.BioSQL.biosql_repo.scripts")
+scripts = import_module("OrthoEvol.Manager.biosql.biosql_repo.scripts")
 biosql_scripts = pkg_resources.resource_filename(scripts.__name__, "")
 for file in os.listdir(biosql_scripts):
     if '.pl' in file:

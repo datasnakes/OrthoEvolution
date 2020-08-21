@@ -1,16 +1,45 @@
-sudo: false
 language: python
+os: linux
 cache: pip
-python:
-  - "3.5"
-  - "3.6"
 notifications:
-  email: l0p2k8x1d2n0s8t0@vallendergenetics.slack.com
-# command to install dependencies
-install:
-  - "pip install --upgrade pip setuptools wheel"
-  - "pip install --only-binary=numpy,scipy numpy scipy"
-  - "pip install matplotlib ipython jupyter sympy nose"
-  - "pip install -r requirements.txt"
-# command to run nosetests
-script: nosetests Tests/ --verbosity=3
+  email: datasnakes@gmail.com
+jobs:
+  include:
+    - python: 3.5
+      dist: trusty
+      install:
+        - pip install --upgrade pip setuptools wheel
+        - pip install --only-binary=numpy,scipy numpy scipy
+        - pip install matplotlib ipython jupyter sympy pytest codecov "pytest-cov<=2.6.0"
+        - pip install -r requirements.txt
+        - pip install .
+    - python: 3.6
+      dist: xenial
+      install:
+        - pip install --upgrade pip setuptools wheel
+        - pip install --only-binary=numpy,scipy numpy scipy
+        - pip install matplotlib ipython jupyter sympy pytest codecov pytest-cov
+        - pip install -r requirements.txt
+        - pip install .
+    - python: 3.7
+      dist: xenial
+      install:
+        - pip install --upgrade pip setuptools wheel
+        - pip install --only-binary=numpy,scipy numpy scipy
+        - pip install matplotlib ipython jupyter sympy pytest codecov pytest-cov
+        - pip install -r requirements.txt
+        - pip install .
+    - python: 3.8
+      dist: xenial
+      install:
+        - pip install --upgrade pip setuptools wheel
+        - pip install --only-binary=numpy,scipy numpy scipy
+        - pip install matplotlib ipython jupyter sympy pytest codecov pytest-cov
+        - pip install -r requirements.txt
+        - pip install .
+# command to run unittests
+script:
+  - pytest --cov-report=xml --cov=OrthoEvol tests/
+# upload code coverage
+after_success:
+  - codecov

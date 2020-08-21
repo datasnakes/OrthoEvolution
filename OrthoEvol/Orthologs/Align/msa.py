@@ -1,16 +1,18 @@
+# Standard Library
 import os
 import shutil
 import subprocess
 from pathlib import Path
+# BioPython
 from Bio import SeqIO
-
+from Bio.Align.Applications import ClustalOmegaCommandline
+# OrthoEvol
 from OrthoEvol.Tools.logit import LogIt
-from OrthoEvol.Orthologs.utils import attribute_config
-from OrthoEvol.Orthologs.Align.guidance2 import Guidance2Commandline
-from OrthoEvol.Orthologs.Align.pal2nal import PAL2NALCommandline
-from OrthoEvol.Orthologs.Align.orthoclustal import ClustalO
+from OrthoEvol.utilities import FullUtilities
 from OrthoEvol.Orthologs.GenBank import GenBank
-from OrthoEvol.Orthologs.GenBank import multi_fasta_manipulator
+from OrthoEvol.Orthologs.Align.pal2nal import Pal2NalCommandline
+from OrthoEvol.Orthologs.Align.guidance2 import Guidance2Commandline
+from OrthoEvol.Orthologs.Align.orthoclustal import ClustalO
 
 
 class MultipleSequenceAlignment(object):
@@ -41,6 +43,9 @@ class MultipleSequenceAlignment(object):
         self.pal2nallog = __log.default('pal2nal', __logfile)
         self.clustalolog = __log.default('clustalo', __logfile)
 
+        # Initialize Utilities
+        self.msa_utils = FullUtilities()
+
         # stop_codons = ['TAG', 'TAA', 'TGA']
 
         self.program = None
@@ -51,8 +56,7 @@ class MultipleSequenceAlignment(object):
             self.project_path = Path(project_path) / Path(project)
 
         # Configuration of class attributes
-        add_self = attribute_config(self, composer=genbank, checker=GenBank,
-                                    project=project, project_path=project_path)
+        add_self = self.msa_utils.attribute_config(self, composer=genbank, checker=GenBank, project=project, project_path=project_path)
         for var, attr in add_self.__dict__.items():
             setattr(self, var, attr)
 
@@ -104,14 +108,14 @@ class MultipleSequenceAlignment(object):
         gene = Path(seqFile).stem
         geneDir = self.raw_data / Path(gene)
         self.guidancelog.info(geneDir)
-        if seqType is 'nuc':
+        if seqType == 'nuc':
             g2_seqFile = str(geneDir / Path(gene + '_G2.ffn'))  # Need for all iterations
             rem_file = str(geneDir / Path(gene + '_G2_removed.ffn'))   # Need for all iterations
             g2_alnFile = str(geneDir / Path(gene + '_G2_na.aln'))
             g2_seqcolFilter = str(geneDir / Path(gene + 'G2sfcf_na.aln'))
             g2_colFilter = str(geneDir / Path(gene + '_G2cf_na.aln'))
             g2_maskedFile = str(geneDir / Path(gene + '_G2mf_na.aln'))
-        elif seqType is 'aa':
+        elif seqType == 'aa':
             g2_seqFile = str(geneDir / Path(gene + '_G2.faa'))  # Need for all iterations
             rem_file = str(geneDir / Path(gene + '_G2_removed.faa'))   # Need for all iterations
             g2_alnFile = str(geneDir / Path(gene + '_G2_aa.aln'))
@@ -166,15 +170,15 @@ class MultipleSequenceAlignment(object):
 
                     # Filter the input NA fasta file using Guidance output
                     # Creates the g2_seqFile
-                    multi_fasta_manipulator(seqFile, g2_rem_file, g2_seqFile, manipulation='remove')  # Do after copying (iter_1) or adding (iter_n)
+                    self.msa_utils.multi_fasta_manipulator(seqFile, g2_rem_file, g2_seqFile, manipulation='remove')  # Do after copying (iter_1) or adding (iter_n)
                     iterFlag = True
 
                 elif set_iter >= iteration > 1:
 
                     # Depending on the filter strategy increment the seqCutoff
-                    if seqFilter is "inclusive":
+                    if seqFilter == "inclusive":
                         kwargs['seqCutoff'] -= kwargs['increment']
-                    elif seqFilter is "exclusive":
+                    elif seqFilter == "exclusive":
                         kwargs['seqCutoff'] += kwargs['increment']
                     # seqFile changes to g2_seqFile and the cutoffs change
                     G2Cmd = Guidance2Commandline(seqFile=g2_seqFile, msaProgram=msaProgram, seqType=seqType,
@@ -194,15 +198,15 @@ class MultipleSequenceAlignment(object):
                     # If sequences are removed, then iterate again on the "good" sequences
                     if rem_count > 0:
                         # Add new sequences to the rem_file
-                        multi_fasta_manipulator(rem_file, g2_rem_file, rem_file, manipulation='add')
+                        self.msa_utils.multi_fasta_manipulator(rem_file, g2_rem_file, rem_file, manipulation='add')
                         # Filter the input fasta file using the updated rem_file
-                        multi_fasta_manipulator(seqFile, rem_file, g2_seqFile, manipulation='remove')
+                        self.msa_utils.multi_fasta_manipulator(seqFile, rem_file, g2_seqFile, manipulation='remove')
                         iterFlag = True
                     # If sequences aren't removed, then stop iterating
                     if rem_count < 0 or set_iter == iteration:
                         filtered_alignment = Path(iterDir) / Path('%s.%s.aln.Sorted.With_Names' % (dataset, msaProgram))
                         renamed_alignment = shutil.copy(str(filtered_alignment), g2_alnFile)
-                        multi_fasta_manipulator(str(renamed_alignment), str(seqFile), str(renamed_alignment), manipulation='sort')
+                        self.msa_utils.multi_fasta_manipulator(str(renamed_alignment), str(seqFile), str(renamed_alignment), manipulation='sort')
                         iterFlag = False
 
             if columnFilter is not None:
@@ -215,7 +219,7 @@ class MultipleSequenceAlignment(object):
                                              rprScores=g2_rprScores, output=g2_maskedFile, **kwargs)
                 self.alignmentlog.info(G2Cmd)
                 subprocess.check_call([str(G2Cmd)], stderr=subprocess.STDOUT, shell=True)
-                multi_fasta_manipulator(g2_maskedFile, str(seqFile), g2_maskedFile, manipulation='sort')
+                self.msa_utils.multi_fasta_manipulator(g2_maskedFile, str(seqFile), g2_maskedFile, manipulation='sort')
 
         # Only COLUMN FILTER the bad columns
         elif columnFilter is not None:
@@ -236,7 +240,7 @@ class MultipleSequenceAlignment(object):
                                          rprScores=kwargs['rprScores'], output=kwargs['maskedFile'], **kwargs)
             self.guidancelog.info(G2Cmd)
             subprocess.check_call([str(G2Cmd)], stderr=subprocess.STDOUT, shell=True)
-            multi_fasta_manipulator(kwargs['maskedFile'], str(seqFile), kwargs['maskedFile'], manipulation='sort')
+            self.msa_utils.multi_fasta_manipulator(kwargs['maskedFile'], str(seqFile), kwargs['maskedFile'], manipulation='sort')
 
     def pal2nal(self, aa_alignment, na_fasta, output_type='paml', nogap=True, nomismatch=True, downstream='paml'):
         """This Pal2Nal method works with the Pal2Nal command line wrapper.
@@ -294,8 +298,8 @@ class MultipleSequenceAlignment(object):
                 for err in error:
                     if '>' in err:
                         removed.append(err.strip('>' '\n'))
-                multi_fasta_manipulator(na_fasta, removed, na_fasta)
-                multi_fasta_manipulator(aa_alignment, removed, aa_alignment)
+                self.msa_utils.multi_fasta_manipulator(na_fasta, removed, na_fasta)
+                self.msa_utils.multi_fasta_manipulator(aa_alignment, removed, aa_alignment)
 
             # If no errors then break the while loop
             else:

@@ -22,9 +22,9 @@ def printwords(word):
     print(word)
 
 
-words = ['bae', 'luh', 'cuh']
+words = ['python', 'rust', 'javascript']
 
 if __name__ == '__main__':
     mp = Multiprocess()
-    mp.map2function(printwords, words)
+    mp.map_to_function(printwords, words)
 ```
