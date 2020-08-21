@@ -94,7 +94,7 @@ class GenBank(object):
         # Create path variables.  (typically raw_data/<gene>/GENBANK
         feat_path = path
         # Create a format-able string for file names
-        if feat_type_rank is "CDS":
+        if feat_type_rank == "CDS":
             single = '%s_%s%s%s'
             multi = '%s%s%s'
         else:
@@ -406,7 +406,7 @@ class GenBank(object):
             for _, _, gbk_files in os.walk(str(self.target_gbk_files_path)):
                 # For each genbank record write a set of FASTA files.
                 for gbk_file in gbk_files:
-                    if Path(gbk_file).suffix is '.gbk':
+                    if Path(gbk_file).suffix == '.gbk':
                         record = SeqIO.read(gbk_file, 'genbank')
                         self.write_fasta_files(record, acc_dict)
                         self.genbanklog.info("FASTA files for %s created." % gbk_file)

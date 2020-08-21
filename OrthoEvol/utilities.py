@@ -28,6 +28,7 @@ import yaml
 # Set up logging
 blastutils_log = LogIt().default(logname="blast-utils", logfile=None)
 seqidlist_log = LogIt().default(logname="gi-lists", logfile=None)
+utils_log = LogIt().default(logname="utils", logfile=None)
 _datefmt = '%I:%M:%S %p on %m-%d-%Y'
 _date = str(datetime.now().strftime(_datefmt))
 
@@ -445,17 +446,17 @@ class GenbankUtils(object):
         # Create a new multi-fasta record object using the target_file,
         # reference, and output
         # Remove specific sequences from a fasta file
-        if manipulation is 'remove':
+        if manipulation == 'remove':
             self.multi_fasta_remove(target_file, man_file, new_file)
         # Combine all the FASTA sequence in one record object
-        elif manipulation is 'add':
+        elif manipulation == 'add':
             self.muli_fasta_add(target_file, man_file, new_file)
         # Sort one fasta file based on the order of another
         # Works for alignments
-        elif manipulation is 'sort':
+        elif manipulation == 'sort':
             self.multi_fasta_sort(target_file, man_file, new_file)
 
-        print('A new fasta file has been created.')
+        utils_log.info('A new fasta file has been created.')
         return new_file
 
     # def dir_config(path, tier_frame_dict):
@@ -505,7 +506,7 @@ class GenbankUtils(object):
                 target_file,
                 'fasta') if record.id in ids)
 
-        print('Sequences have been filtered.')
+        utils_log.info('Sequences have been filtered.')
         SeqIO.write(new_records, str(output_file), 'fasta')
         SeqIO.write(old_records, str(rem_file), 'fasta')
 
@@ -532,11 +533,11 @@ class GenbankUtils(object):
                     target_file, 'fasta', ), SeqIO.parse(man_file, 'fasta'))
                 count = SeqIO.write(new_records, tmp_file, 'fasta')
                 tmp_file.seek(0)
-                print('temp file count: ' + str(count))
+                utils_log.info('temp file count: ' + str(count))
                 SeqIO.write(SeqIO.parse(tmp_file, 'fasta'), str(output_file), 'fasta')
-            print('Sequences have been added.')
+            utils_log.info('Sequences have been added.')
         else:
-            print('You can only add files together.  Not python objects.')
+            utils_log.warning('You can only add files together.  Not python objects.')
 
     def multi_fasta_sort(self, target_file, man_file, output_file):
         """Sorts selected reference sequences in a multi-FASTA files.
@@ -569,15 +570,15 @@ class GenbankUtils(object):
             for unsorted_aln_record in SeqIO.parse(target_file, 'fasta'):
                 # If an appropriate id is found, then append to the MSA object.
                 if unsorted_aln_record.id == sorted_seq_record.id:
-                    print(unsorted_aln_record.id)
-                    print(sorted_seq_record.id)
+                    utils_log.info(unsorted_aln_record.id)
+                    utils_log.info(sorted_seq_record.id)
                     aln.append(unsorted_aln_record)  # MSA object
                     break
         count = AlignIO.write(aln, tmp_file, 'fasta')
         tmp_file.seek(0)
-        print('temp file count: ' + str(count))
+        utils_log.info('temp file count: ' + str(count))
         AlignIO.write(AlignIO.read(tmp_file, 'fasta'), str(output_file), 'fasta')
-        print('Alignment has been sorted.')
+        utils_log.info('Alignment has been sorted.')
 
 
 class OrthologUtils(BlastUtils, GenbankUtils):
@@ -877,7 +878,7 @@ class PackageVersion(object):
     def _getversion(self):
         import_module(self.packagename)
         version = pkg_resources.get_distribution(self.packagename).version
-        print('Version %s of %s is installed.' % (version, self.packagename))
+        utils_log.info('Version %s of %s is installed.' % (version, self.packagename))
 
 
 class FunctionRepeater(object):
@@ -933,7 +934,7 @@ class FullUtilities(CookieUtils, ManagerUtils, OrthologUtils):
         for line in iter(proc.stdout.readline, ""):
             stdout_list.append(line.rstrip())
             if print_flag:
-                print(line, end="")
+                utils_log.info(line, end="")
             sys.stdout.flush()
             if write_flag:
                 with open(file_name, 'a') as output_file:

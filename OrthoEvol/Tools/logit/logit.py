@@ -53,12 +53,12 @@ class LogIt(object):
         :return: A custom_log object is returned.
         """
 
-        if fmt is 'default':
+        if fmt == 'default':
             fmt = '[%(levelname)-2s - %(name)s]: %(message)s'
-        elif fmt is 'custom':
+        elif fmt == 'custom':
             # TODO Allow customization
             raise NotImplementedError('Feature not integrated yet!')
-        elif fmt is not 'default' or 'custom':
+        elif fmt != 'default' or 'custom':
             raise Exception('User did not provide a format for the logger.')
 
         custom_log = setup_logger(name=logname, logfile=logfile,
