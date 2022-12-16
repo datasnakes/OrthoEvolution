@@ -1,10 +1,12 @@
 # Docs
+
 This folder hosts our tutorial documents used for our readthedocs page as well
 as functions to create our docs dynamically.
 
 Our readthedocs page is [here](http://orthoevolution.readthedocs.io/en/master/).
 
 ## Software Dependencies
+
 [Pandoc](http://johnmacfarlane.net/pandoc/) must be installed to use our `PandocConverter` class.
 
 You can install it using the `pypandoc` package as well.

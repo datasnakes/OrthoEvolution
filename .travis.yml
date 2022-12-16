@@ -1,18 +1,53 @@
 language: python
+os: linux
 cache: pip
-python:
-  - "3.5"
-  - "3.6"
 notifications:
   email: datasnakes@gmail.com
-# command to install dependencies
-before_install:
-  - sudo apt-get install -qq phyml
-install:
-  - "pip install --upgrade pip setuptools wheel"
-  - "pip install --only-binary=numpy,scipy numpy scipy"
-  - "pip install ipython jupyter sympy nose"
-  - "pip install -r requirements.txt"
-# command to run nosetests
+jobs:
+  include:
+    - python: 3.5
+      dist: trusty
+      before_install:
+        - sudo apt-get install -qq phyml
+      install:
+        - pip install --upgrade pip setuptools wheel
+        - pip install --only-binary=numpy,scipy numpy scipy
+        - pip install matplotlib ipython jupyter sympy pytest codecov "pytest-cov<=2.6.0"
+        - pip install -r requirements.txt
+        - pip install .
+    - python: 3.6
+      dist: xenial
+      before_install:
+        - sudo apt-get install -qq phyml
+      install:
+        - pip install --upgrade pip setuptools wheel
+        - pip install --only-binary=numpy,scipy numpy scipy
+        - pip install matplotlib ipython jupyter sympy pytest codecov pytest-cov
+        - pip install -r requirements.txt
+        - pip install .
+    - python: 3.7
+      dist: xenial
+      before_install:
+        - sudo apt-get install -qq phyml
+      install:
+        - pip install --upgrade pip setuptools wheel
+        - pip install --only-binary=numpy,scipy numpy scipy
+        - pip install matplotlib ipython jupyter sympy pytest codecov pytest-cov
+        - pip install -r requirements.txt
+        - pip install .
+    - python: 3.8
+      dist: xenial
+      before_install:
+        - sudo apt-get install -qq phyml
+      install:
+        - pip install --upgrade pip setuptools wheel
+        - pip install --only-binary=numpy,scipy numpy scipy
+        - pip install matplotlib ipython jupyter sympy pytest codecov pytest-cov
+        - pip install -r requirements.txt
+        - pip install .
+# command to run unittests
 script:
-  - nosetests tests/ --verbosity=3
+  - pytest --cov-report=xml --cov=OrthoEvol tests/
+# upload code coverage
+after_success:
+  - codecov

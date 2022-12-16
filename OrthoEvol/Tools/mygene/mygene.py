@@ -33,10 +33,15 @@ class MyGene(object):
     def _import_accfile(self):
         """Import the accession file and make Homo_Sapiens column a list.
 
-:return: Returns a list of accessions."""
+        :return: Returns a list of accessions.
+        """
 
         accfile = pd.read_csv(self.infile)
-        acclist = list([accession.upper() for accession in accfile.Homo_Sapiens])
+        # Ensure infile has 'Homo_sapiens' column.
+        if 'Homo_sapiens' not in accfile.columns:
+            raise KeyError('"Homo_sapiens" column does not exist.')
+        else:
+            acclist = list([accession.upper() for accession in accfile.Homo_sapiens])
         return acclist
 
     def query_mygene(self):

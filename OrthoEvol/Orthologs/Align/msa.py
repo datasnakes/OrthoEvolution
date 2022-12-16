@@ -108,14 +108,14 @@ class MultipleSequenceAlignment(object):
         gene = Path(seqFile).stem
         geneDir = self.raw_data / Path(gene)
         self.guidancelog.info(geneDir)
-        if seqType is 'nuc':
+        if seqType == 'nuc':
             g2_seqFile = str(geneDir / Path(gene + '_G2.ffn'))  # Need for all iterations
             rem_file = str(geneDir / Path(gene + '_G2_removed.ffn'))   # Need for all iterations
             g2_alnFile = str(geneDir / Path(gene + '_G2_na.aln'))
             g2_seqcolFilter = str(geneDir / Path(gene + 'G2sfcf_na.aln'))
             g2_colFilter = str(geneDir / Path(gene + '_G2cf_na.aln'))
             g2_maskedFile = str(geneDir / Path(gene + '_G2mf_na.aln'))
-        elif seqType is 'aa':
+        elif seqType == 'aa':
             g2_seqFile = str(geneDir / Path(gene + '_G2.faa'))  # Need for all iterations
             rem_file = str(geneDir / Path(gene + '_G2_removed.faa'))   # Need for all iterations
             g2_alnFile = str(geneDir / Path(gene + '_G2_aa.aln'))
@@ -176,9 +176,9 @@ class MultipleSequenceAlignment(object):
                 elif set_iter >= iteration > 1:
 
                     # Depending on the filter strategy increment the seqCutoff
-                    if seqFilter is "inclusive":
+                    if seqFilter == "inclusive":
                         kwargs['seqCutoff'] -= kwargs['increment']
-                    elif seqFilter is "exclusive":
+                    elif seqFilter == "exclusive":
                         kwargs['seqCutoff'] += kwargs['increment']
                     # seqFile changes to g2_seqFile and the cutoffs change
                     G2Cmd = Guidance2Commandline(seqFile=g2_seqFile, msaProgram=msaProgram, seqType=seqType,

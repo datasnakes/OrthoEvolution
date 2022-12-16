@@ -63,7 +63,7 @@ class Oven(object):
     """Class that deploys cookiecutter templates."""
 
     def __init__(self, repo=None, user=None, project=None, basic_project=False,
-                 website=None, db_repo="databases", output_dir=os.getcwd(), 
+                 website=None, db_repo="databases", output_dir=os.getcwd(),
                  recipes=CookBook()):
         """Deploy custom cookiecutter templates:
 
@@ -103,7 +103,17 @@ class Oven(object):
                             "recipes": self.Recipes.__dict__}
 
     def _check_ingredients(self, cookie, path, no_input, extra_context):
-        """Check if a directory exists. If not, create it."""
+        """Check if a directory exists. If not, create it.
+
+        :param cookie: [description]
+        :type cookie: [type]
+        :param path: [description]
+        :type path: [type]
+        :param no_input: [description]
+        :type no_input: [type]
+        :param extra_context: [description]
+        :type extra_context: [type]
+        """
         if self.cookie_jar:
             if self.exists(str(path)):
                 os.chmod(str(path), mode=0o777)
@@ -117,7 +127,7 @@ class Oven(object):
             self.cookielog.info('%s was created. ✔' % str(path))
 
     def bake_the_repo(self, cookie_jar=None):
-        self.cookielog.warn('Creating directories from the Repository Cookie template.')
+        self.cookielog.warning('Creating directories from the Repository Cookie template.')
         """
             This function creates a new repository.  If a repository name
             is given to the class, then it is given a name.  If not, cookiecutter
@@ -153,7 +163,7 @@ class Oven(object):
         :param cookie_jar:  (Default value = None)
         """
 
-        self.cookielog.warn('Creating directories from the User Cookie template.')
+        self.cookielog.warning('Creating directories from the User Cookie template.')
         if cookie_jar:
             self.cookie_jar = cookie_jar
 
@@ -171,7 +181,7 @@ class Oven(object):
         :return: A new project inside the user's project directory.
         """
 
-        self.cookielog.warn('Creating directories from the Project Cookie template.')
+        self.cookielog.warning('Creating directories from the Project Cookie template.')
         if cookie_jar:
             self.cookie_jar = cookie_jar
         # Add the project
@@ -188,7 +198,7 @@ class Oven(object):
             if self.exists(str(self.cookie_jar / Path(self.project))):
                 self.cookielog.info('Project exists. ✔')
             else:
-                self.cookielog.warn('A project linked to a user/repository is being created.')
+                self.cookielog.warning('A project linked to a user/repository is being created.')
                 cookiecutter(str(self.Recipes.project_cookie), extra_context=e_c, no_input=no_input,
                              output_dir=str(self.cookie_jar))
                 # Logging
@@ -202,7 +212,7 @@ class Oven(object):
             if self.exists(str(self.cookie_jar / Path(self.project))):
                 self.cookielog.info('Project exists. ✔')
             else:
-                self.cookielog.warn('A basic standalone project is being created.')
+                self.cookielog.warning('A basic standalone project is being created.')
                 cookiecutter(str(self.Recipes.basic_project_cookie), extra_context=e_c, no_input=no_input,
                              output_dir=str(self.cookie_jar))
                 self.cookielog.info(
@@ -261,7 +271,7 @@ class Oven(object):
         :param cookie_jar:  (Default value = None)
         """
 
-        self.cookielog.warn('Creating directories from the Website Cookie template.')
+        self.cookielog.warning('Creating directories from the Website Cookie template.')
         if cookie_jar:
             self.cookie_jar = cookie_jar
         # TODO-ROB:  Add heavy logging here
@@ -280,8 +290,8 @@ class Oven(object):
         run_script(script_path=str(script_path), cwd=str(website_path))
         self.cookielog.info(
             'Directories have been created for the Flask Web Server, %s. ✔' % self.website)
-        self.cookielog.warn('The %s Flask Server should now be running on http://%s:%s' %
-                            (self.website, host, port))
+        self.cookielog.warning('The %s Flask Server should now be running on http://%s:%s' %
+                               (self.website, host, port))
 
     def bake_the_research(self, research_type, research, cookie_jar=None):
         """Create a directory for a new research project.
@@ -291,7 +301,7 @@ class Oven(object):
         :param cookie_jar:  (Default value = None)
         """
 
-        self.cookielog.warn('Creating directories from the Research Cookie template.')
+        self.cookielog.warning('Creating directories from the Research Cookie template.')
         if cookie_jar:
             self.cookie_jar = cookie_jar
 
@@ -310,7 +320,7 @@ class Oven(object):
         :param cookie_jar:  (Default value = None)
         """
 
-        self.cookielog.warn('Creating directories from the App Cookie template.')
+        self.cookielog.warning('Creating directories from the App Cookie template.')
         if cookie_jar:
             self.cookie_jar = cookie_jar
         e_c = {"app_name": app}

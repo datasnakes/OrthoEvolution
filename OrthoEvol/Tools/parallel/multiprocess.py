@@ -32,7 +32,8 @@ class Multiprocess(object):
         logger = logzero.logger
         return logger
 
-    def map2function(self, function, iterable, procs=None):
+    def map_to_function(self, function, iterable, procs=None):
+
         """Start a pool to run your function with a list.
 
         :param function: Input a python function.

@@ -11,7 +11,13 @@ from OrthoEvol.Orthologs.Phylogenetics.IQTree.iqtree import IQTreeCommandline
 
 
 class FilteredTree(object):
-    """# TODO Insert Doctring """
+    """Run IQTree to generate a "filtered" tree or best tree.
+
+    :param alignment: Path to multiple sequence alignment file.
+    :param dataType:  Input datatype. (Default value = 'CODON')
+    :param home: Path of working directory.  (Default value = PWD)
+        """
+
     def __init__(self, alignment, dataType='CODON', home=os.getcwd()):
         self.home = Path(home)
         self.iqtree_path = self.home / Path('IQTREE')

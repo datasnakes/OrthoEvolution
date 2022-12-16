@@ -5,9 +5,9 @@ This is the test suite.
 
 Usage
 --------
-Ensure that nose is installed.
+Ensure that pytest is installed.
 
-`pip install nose`
+`pip install pytest`
 
 Run our tests from the top directory, `OrthoEvolution`, by typing:
-`nosetests Tests/`
+`pytest tests`

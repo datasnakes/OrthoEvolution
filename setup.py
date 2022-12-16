@@ -15,9 +15,6 @@ import sys
 import pkg_resources
 from importlib import import_module
 
-## Save the standard error of the setup file. This can be removed soon.
-#sys.stderr = open('err.txt', 'w')
-
 # Set the home path of the setup script/package
 home = path.abspath(path.dirname(__file__))
 name = 'OrthoEvol'
@@ -29,14 +26,12 @@ def readme():
         return f.read()
 
 # Setup the package by adding information to these parameters
-
-
 setup(
     name=name,
     author='Rob Gilmore & Shaurita Hutchins',
     author_email='datasnakes@gmail.com',
     description="This package aids in the analysis of orthologous genes.",
-    version='0.9.0a2',
+    version='1.0.0b1',
     long_description=readme(),
     url='https://github.com/datasnakes/OrthoEvolution',
     license='MIT',
@@ -60,19 +55,21 @@ setup(
     # Packages will be automatically found if not in this list.
     packages=find_packages(exclude=['docs', 'examples', 'tests']),
     include_package_data=True,
+    python_requires='~=3.5',
     entry_points={
         'console_scripts': [
                 'orthoevol=OrthoEvol.Orthologs.command_line:main'
         ]
     },
     project_urls={
-            'Documentation': 'https://orthoevolution.readthedocs.io/',
+            'Docs': 'https://orthoevolution.readthedocs.io/',
             'Releases': 'https://github.com/datasnakes/OrthoEvolution/releases',
-            'Issues': 'https://github.com/datasnakes/OrthoEvolution/issues',
+            'Bug Reports': 'https://github.com/datasnakes/OrthoEvolution/issues',
+            'Source': 'https://github.com/datasnakes/OrthoEvolution/',
             },
     zip_safe=False,
-    test_suite='nose.collector',
-    tests_require=['nose']
+    setup_requires=['pytest-runner'],
+    tests_require=['pytest']
 )
 
 # Set up the permissions for the BioSQL Perl scripts

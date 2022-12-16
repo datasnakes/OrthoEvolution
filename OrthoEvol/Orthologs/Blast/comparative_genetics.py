@@ -33,7 +33,7 @@ class BaseComparativeGenetics(object):
     # Initialize Logging
     blastn_log = LogIt().default(logname="blastn", logfile=None)
 
-    # TODO:  CREAT PRE-BLAST and POST-BLAST functions
+    # TODO:  CREATE PRE-BLAST and POST-BLAST functions
     def __init__(self, project=None, project_path=os.getcwd(), acc_file=None,
                  taxon_file=None, ref_species=None, pre_blast=False,
                  post_blast=True, hgnc=False, proj_mana=None, **kwargs):
@@ -225,7 +225,7 @@ class BaseComparativeGenetics(object):
             self.pt.columns = pd.Index(array, name='Organism')
 
             # Handles for full dictionaries #### #
-            self.org_dict = self.df.ix[0:, self.ref_species:].to_dict()
+            self.org_dict = self.df.loc[:, self.ref_species:].to_dict()
             self.gene_dict = self.df.T.to_dict()
             self.get_master_lists(self.__data)  # populates our lists
         else:
@@ -402,22 +402,24 @@ class BaseComparativeGenetics(object):
         ["class", "family", "genus", "kingdowm", "order", "phylum", "species",
         "superkingdom"].
         """
-
         ncbi = NCBITaxa()
         taxa_dict = {}
         for organism in self.org_list:
-            taxa_dict[organism] = {}
-            taxid = self.taxon_dict[organism]
-            lineage = ncbi.get_lineage(taxid)
-            names = ncbi.get_taxid_translator(lineage)
-            ranks = ncbi.get_rank(lineage)
-            for id in lineage:
-                if ranks[id] == 'no rank':
-                    continue
-                if ranks[id] not in ['superkingdom', 'kingdom', 'phylum',
-                                     'class', 'order', 'family', 'genus', 'species']:
-                    continue
-                taxa_dict[organism][ranks[id]] = names[id]
+            try:
+                taxa_dict[organism] = {}
+                taxid = self.taxon_dict[organism]
+                lineage = ncbi.get_lineage(taxid)
+                names = ncbi.get_taxid_translator(lineage)
+                ranks = ncbi.get_rank(lineage)
+                for id in lineage:
+                    if ranks[id] == 'no rank':
+                        continue
+                    if ranks[id] not in ['superkingdom', 'kingdom', 'phylum',
+                                        'class', 'order', 'family', 'genus', 'species']:
+                        continue
+                    taxa_dict[organism][ranks[id]] = names[id]
+            except KeyError as ke:
+                self.blastn_log.exception(ke)
         return taxa_dict
 
     def get_acc_dict(self):
@@ -468,7 +470,7 @@ class ComparativeGenetics(BaseComparativeGenetics):
                    and after blasting."""
 
         super().__init__(project=project, taxon_file=taxon_file,
-                         ref_species=ref_species, post_blast=post_blast, 
+                         ref_species=ref_species, post_blast=post_blast,
                          hgnc=False, **kwargs)
 
         self.postblastlog = LogIt().default(logname="post blast", logfile=None)

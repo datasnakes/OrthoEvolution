@@ -3,10 +3,9 @@ import unittest
 from shutil import rmtree
 import os
 
-from OrthoEvol.Orthologs.Blast import BaseBlastN
+from OrthoEvol.Orthologs.Blast import BaseBlastN, OrthoBlastN
 from OrthoEvol.Orthologs.Phylogenetics.PhyML import PhyML
 from OrthoEvol.Orthologs.Phylogenetics.TreeViz import TreeViz
-
 
 class TestOrthologs(unittest.TestCase):
     """Test the Orthologs module."""
@@ -61,6 +60,16 @@ class TestOrthologs(unittest.TestCase):
         t.save_tree('example.png')
         self.assertIsNotNone('example.png')
         self.delete_treeviz_output()
+        
+    def test_orthoblastn(self):
+        """Test the OrthoBlastN class."""
+        with self.assertRaises(EnvironmentError):
+            ortho_blastn = OrthoBlastN(project="orthology-project",
+                                       method=1, save_data=True,
+                                       acc_file="gpcr.csv",
+                                       copy_from_package=True)
+            self.assertEqual(ortho_blastn.ref_species, 'Homo_sapiens')
+            self.assertTrue(ortho_blastn.copy_from_package)
 
 
 if __name__ == '__main__':
