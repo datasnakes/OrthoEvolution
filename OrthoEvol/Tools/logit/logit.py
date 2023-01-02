@@ -2,6 +2,7 @@
 import os
 import sys
 from logzero import setup_logger, LogFormatter, logging, colors
+import logzero
 
 
 class LogIt(object):
@@ -22,9 +23,9 @@ class LogIt(object):
                                        datefmt=self._date_format)
 
         # Add a color for the critical level
-        self._formatter.DEFAULT_COLORS[50] = colors.Fore.LIGHTRED_EX
+        self._formatter.DEFAULT_COLORS['CRITICAL'] = colors.Fore.LIGHTRED_EX
         # Changed color for the debug level
-        self._formatter.DEFAULT_COLORS[10] = colors.Fore.LIGHTBLUE_EX
+        self._formatter.DEFAULT_COLORS['DEBUG'] = colors.Fore.LIGHTBLUE_EX
         self.logging = logging
 
     def default(self, logname, logfile):
