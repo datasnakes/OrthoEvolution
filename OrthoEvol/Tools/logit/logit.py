@@ -2,8 +2,7 @@
 import os
 import sys
 from logzero import setup_logger, LogFormatter, logging, colors
-import logzero
-
+from logging import CRITICAL, ERROR, WARNING, INFO, DEBUG
 
 class LogIt(object):
     """LogIt makes logging easier by creating easy loggers."""
@@ -19,13 +18,19 @@ class LogIt(object):
         self._date_format = '%b-%d-%Y at %I:%M:%S %p'  # Used to add date
         self._log_format = ("%(color)s[%(levelname)s | %(name)s] [%(asctime)s | "
                             "%(module)s - line %(lineno)d]:%(end_color)s %(message)s")
-        self._formatter = LogFormatter(fmt=self._log_format,
-                                       datefmt=self._date_format)
 
-        # Add a color for the critical level
-        self._formatter.DEFAULT_COLORS['CRITICAL'] = colors.Fore.LIGHTRED_EX
-        # Changed color for the debug level
-        self._formatter.DEFAULT_COLORS['DEBUG'] = colors.Fore.LIGHTBLUE_EX
+        # Add custom colors for CRITICAL and DEBUG
+        self._COLORS = {DEBUG: colors.Fore.LIGHTBLUE_EX,
+        INFO: colors.Fore.GREEN,
+        WARNING: colors.Fore.YELLOW,
+        ERROR: colors.Fore.RED,
+        CRITICAL: colors.Fore.LIGHTRED_EX
+        }
+        
+        self._formatter = LogFormatter(fmt=self._log_format,
+                                       datefmt=self._date_format,
+                                       colors=self._COLORS)
+
         self.logging = logging
 
     def default(self, logname, logfile):
