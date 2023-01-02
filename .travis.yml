@@ -4,7 +4,7 @@ cache: pip
 notifications:
   email: datasnakes@gmail.com
 jobs:
-  include:W
+  include:
     - python: 3.7
       dist: xenial
       before_install:
