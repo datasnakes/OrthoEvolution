@@ -8,7 +8,7 @@ slacker==0.9.42
 biopython==1.70
 tablib>=0.11.5
 mygene>=3.0.0
-cookiecutter>=2.1.1
+cookiecutter
 Flask>=1.0
 Flask-Login>=0.4.0
 Flask-Mail>=0.9.1
