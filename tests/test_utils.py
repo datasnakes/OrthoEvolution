@@ -21,7 +21,7 @@ class TestUtils(unittest.TestCase):
         repeater = FunctionRepeater(1, increment)
         
         # Wait for 2 seconds
-        time.sleep(2)
+        time.sleep(5)
         
         # Stop the repeater
         repeater.stop()

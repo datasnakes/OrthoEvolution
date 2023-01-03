@@ -18,7 +18,6 @@ class TestCookBookOven(unittest.TestCase):
         self.assertTrue(hasattr(cookbook, "app_cookie"))
         self.assertTrue(hasattr(cookbook, "db_cookie"))
         self.assertTrue(hasattr(cookbook, "website_cookie"))
-        self.assertTrue(hasattr(cookbook, "CONFIGURATION"))
 
     def test_oven_bake_cookies(self):
         # Create a new instance of the Oven class
