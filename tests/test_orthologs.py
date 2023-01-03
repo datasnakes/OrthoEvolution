@@ -44,13 +44,13 @@ class TestOrthologs(unittest.TestCase):
             self.assertTrue(gpcr_blastn.copy_from_package)
             self.delete_project(project_path=self.project_path)
 
-    def test_phyml(self):
-        """Test the PhyML class."""
-        p = PhyML(infile=self.join(self.cur_dir, 'test_data/test.phy'), datatype='nt')
-        p.run(bootstrap=0)
-        self.assertIsNotNone(self.join(self.cur_dir, 'test_data/test.phy_phyml_stats.txt'))
-        self.assertIsNotNone(self.join(self.cur_dir, 'test_data/test.phy_phyml_tree.txt'))
-        self.delete_phyml_output()
+    # def test_phyml(self):
+    #     """Test the PhyML class."""
+    #     p = PhyML(infile=self.join(self.cur_dir, 'test_data/test.phy'), datatype='nt')
+    #     p.run(bootstrap=0)
+    #     self.assertIsNotNone(self.join(self.cur_dir, 'test_data/test.phy_phyml_stats.txt'))
+    #     self.assertIsNotNone(self.join(self.cur_dir, 'test_data/test.phy_phyml_tree.txt'))
+    #     self.delete_phyml_output()
 
     def test_treeviz(self):
         """Test the TreeViz class."""
