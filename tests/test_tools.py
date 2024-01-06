@@ -50,7 +50,7 @@ class TestTools(unittest.TestCase):
         mg.query_mygene()
         os.remove(self.outfile)
 
-    def test_mv():
+    def test_mv(self):
         # Create a file to move
         with open("test.txt", "w") as f:
             f.write("Test content")
@@ -73,7 +73,7 @@ class TestTools(unittest.TestCase):
         # Clean up
         os.remove("moved.txt")
 
-    def test_cp():
+    def test_cp(self):
         # Create a file to copy
         with open("test.txt", "w") as f:
             f.write("Test content")
