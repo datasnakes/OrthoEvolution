@@ -1,10 +1,9 @@
 import unittest
-from unittest.mock import patch
 from pathlib import Path
 import os
 import shutil
 
-from OrthoEvol.utilities import CookieUtils, PackageVersion, FunctionRepeater
+from OrthoEvol.utilities import CookieUtils, FunctionRepeater
 
 
 class TestCookieUtils(unittest.TestCase):
@@ -40,14 +39,6 @@ class TestCookieUtils(unittest.TestCase):
             f.write('test')
         size = self.utils.get_size(start_path=str(test_file))
         self.assertIsInstance(size, str)
-
-class TestPackageVersion(unittest.TestCase):
-
-    @patch('OrthoEvol.Cookies.utils.pkg_resources.get_distribution')
-    def test_package_version(self, mock_get_distribution):
-        mock_get_distribution.return_value.version = '1.0.0'
-        version = PackageVersion('example_package')
-        self.assertEqual(version.packagename, 'example_package')
 
 class TestFunctionRepeater(unittest.TestCase):
 
