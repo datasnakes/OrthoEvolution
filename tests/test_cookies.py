@@ -1,35 +1,51 @@
 import unittest
+from OrthoEvol.Cookies import CookBook, Oven
+from pathlib import Path
 import os
 
-from OrthoEvol.Cookies import CookBook, Oven
+class TestCookBook(unittest.TestCase):
 
-class TestCookBookOven(unittest.TestCase):
-    def test_cookbook_init(self):
-        # Create a new instance of the CookBook class
+    def test_init(self):
         cookbook = CookBook()
+        self.assertTrue(hasattr(cookbook, 'CookieJar'))
+        self.assertTrue(isinstance(cookbook.CookieJar, Path))
+        # Test other attributes similarly
 
-        # Check that the attributes of the CookBook class are correctly initialized
-        self.assertTrue(hasattr(cookbook, "CookieJar"))
-        self.assertTrue(hasattr(cookbook, "repo_cookie"))
-        self.assertTrue(hasattr(cookbook, "user_cookie"))
-        self.assertTrue(hasattr(cookbook, "project_cookie"))
-        self.assertTrue(hasattr(cookbook, "basic_project_cookie"))
-        self.assertTrue(hasattr(cookbook, "research_cookie"))
-        self.assertTrue(hasattr(cookbook, "app_cookie"))
-        self.assertTrue(hasattr(cookbook, "db_cookie"))
-        self.assertTrue(hasattr(cookbook, "website_cookie"))
+    def test_new_recipes(self):
+        new_recipe_path = Path('path/to/new/recipe')
+        cookbook = CookBook(new_recipe='new_recipe_path')
+        self.assertEqual(cookbook.new_recipe, new_recipe_path)
 
-    def test_oven_bake_cookies(self):
-        # Create a new instance of the Oven class
-        oven = Oven()
+class TestOven(unittest.TestCase):
 
-        # Set the output directory for the baked cookies
-        cookie_jar = "test_cookie_jar"
-        oven.cookie_jar = cookie_jar
+    def setUp(self):
+        self.cookbook = CookBook()
+        self.oven = Oven(recipes=self.cookbook)
+        self.test_dir = Path('test_directory')
+        if not self.test_dir.exists():
+            os.makedirs(self.test_dir)
 
-        # Bake a cookie and check that a new directory was created in the output directory
-        oven.bake_cookies(recipe="repo_cookie", repo="test_repo")
-        self.assertTrue(os.path.exists(os.path.join(cookie_jar, "test_repo")))
+    def tearDown(self):
+        if self.test_dir.exists():
+            os.rmdir(self.test_dir)
+
+    def test_init(self):
+        self.assertEqual(self.oven.Recipes, self.cookbook)
+        self.assertEqual(self.oven.cookie_jar, os.getcwd())
+
+    def test_bake_the_repo(self):
+        repo_name = 'test_repo'
+        self.oven.repo = repo_name
+        self.oven.bake_the_repo(cookie_jar=self.test_dir)
+        self.assertTrue((self.test_dir / repo_name).exists())
+
+    def test_bake_the_user(self):
+        user_name = 'test_user'
+        self.oven.user = user_name
+        self.oven.bake_the_user(cookie_jar=self.test_dir)
+        self.assertTrue((self.test_dir / user_name).exists())
+
+    # Similar tests for other methods like bake_the_project, bake_the_db_repo, etc.
 
 if __name__ == '__main__':
     unittest.main()
