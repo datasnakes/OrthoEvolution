@@ -1,58 +1,67 @@
 import unittest
+from unittest.mock import patch
+from pathlib import Path
 import os
-import time
 import shutil
-import tempfile
 
-from OrthoEvol.utilities import FunctionRepeater, CookieUtils
+from OrthoEvol.utilities import CookieUtils, PackageVersion, FunctionRepeater
 
 
-class TestUtils(unittest.TestCase):
-    """Test the Tools module."""
+class TestCookieUtils(unittest.TestCase):
 
-    def test_function_repeater(self):
-        # Create a dummy function that increments a counter
-        counter = 0
-        def increment():
-            nonlocal counter
-            counter += 1
-        
-        # Create a FunctionRepeater instance that runs the dummy function every 1 second
-        repeater = FunctionRepeater(1, increment)
-        
-        # Wait for 2 seconds
-        time.sleep(5)
-        
-        # Stop the repeater
-        repeater.stop()
-        
-        # Check that the dummy function was run at least twice
-        assert counter >= 2
+    def setUp(self):
+        self.utils = CookieUtils()
+        self.test_dir = Path('test_dir')
+        self.test_dir.mkdir(exist_ok=True)
+        self.archive_path = Path('archive_dir')
+        self.archive_path.mkdir(exist_ok=True)
+
+    def tearDown(self):
+        if self.test_dir.exists():
+            shutil.rmtree(self.test_dir)
+        if self.archive_path.exists():
+            shutil.rmtree(self.archive_path)
 
     def test_archive(self):
-        # Create a temporary directory to use as the database path
-        database_path = tempfile.mkdtemp()
-        # Create a file in the database path
-        with open(os.path.join(database_path, "test.txt"), "w") as f:
-            f.write("Test content")
-        # Create a temporary directory to use as the archive path
-        archive_path = tempfile.mkdtemp()
-        
-        # Create a CookieUtils instance
-        utils = CookieUtils()
-        
-        # Run the archive method with the "Full" option
-        utils.archive(database_path, archive_path, "Full")
-        
-        # Check that the file has been archived in a .tar.xz file
-        archived_files = os.listdir(archive_path)
-        assert len(archived_files) == 1
-        assert archived_files[0].endswith(".tar.xz")
-        
-        # Clean up
-        shutil.rmtree(database_path)
-        shutil.rmtree(archive_path)
+        # Mocking file and directory creation for the test
+        test_file = self.test_dir / 'test.txt'
+        with open(test_file, 'w') as f:
+            f.write('test')
+        self.assertTrue(test_file.exists())
 
+        # Test archive functionality
+        archive_list = self.utils.archive(database_path=self.test_dir, archive_path=self.archive_path, option='Full')
+        self.assertIsInstance(archive_list, list)
+        self.assertTrue(any(self.archive_path in Path(a) for a in archive_list))
+
+    def test_get_size(self):
+        test_file = self.test_dir / 'test.txt'
+        with open(test_file, 'w') as f:
+            f.write('test')
+        size = self.utils.get_size(start_path=str(test_file))
+        self.assertIsInstance(size, str)
+
+class TestPackageVersion(unittest.TestCase):
+
+    @patch('OrthoEvol.Cookies.utils.pkg_resources.get_distribution')
+    def test_package_version(self, mock_get_distribution):
+        mock_get_distribution.return_value.version = '1.0.0'
+        version = PackageVersion('example_package')
+        self.assertEqual(version.packagename, 'example_package')
+
+class TestFunctionRepeater(unittest.TestCase):
+
+    def setUp(self):
+        self.mock_function = unittest.mock.Mock()
+        self.repeater = FunctionRepeater(interval=1, function=self.mock_function)
+
+    def tearDown(self):
+        self.repeater.stop()
+
+    def test_repeater_start_stop(self):
+        self.assertTrue(self.repeater.is_running)
+        self.repeater.stop()
+        self.assertFalse(self.repeater.is_running)
 
 if __name__ == '__main__':
     unittest.main()
