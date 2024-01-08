@@ -11,7 +11,10 @@ from OrthoEvol.Manager.config import paml_control_files
 
 class CodemlRun(object):
 
-    def __init__(self, P2N_alignment, iqtree_newick, control_file='codeml-8-11-2017.ctl', home=os.getcwd()):
+    def __init__(self, P2N_alignment, iqtree_newick, control_file='codeml-8-11-2017.ctl',
+                 home=os.getcwd()):
+        # TODO: Generalize API and functions.
+
         # Set up paths
         self.home = Path(home)
         self.paml_path = self.home / Path('PAML')
@@ -20,7 +23,8 @@ class CodemlRun(object):
         # Set up genes control file name and get the OrthoEvol control file path
         self.gene = str(iqtree_newick).replace('_iqtree.nwk', '')
         self.control_file = self.paml_path / Path(self.gene + '.ctl')
-        self.control_template = pkg_resources.resource_filename(paml_control_files.__name__, control_file)
+        self.control_template = pkg_resources.resource_filename(
+            paml_control_files.__name__, control_file)
         print(self.control_template)
 
         # Set up CODEML input files
@@ -30,7 +34,9 @@ class CodemlRun(object):
         self.iqtree_newick = copy(str(self.iqtree_newick), str(self.paml_path))
         os.chdir(str(self.paml_path))
 
-        self.cml = codeml.Codeml(self.P2N_alignment, self.iqtree_newick, working_dir=str(self.paml_path), out_file=self.gene +'_codeml.out')
+        self.cml = codeml.Codeml(self.P2N_alignment, self.iqtree_newick,
+                                 working_dir=str(self.paml_path),
+                                 out_file=self.gene + '_codeml.out')
         self.control_setup(self.control_template)
 
     def control_setup(self, control_template):
@@ -38,6 +44,3 @@ class CodemlRun(object):
         self.cml.print_options()
         self.cml.ctl_file = str(self.control_file)
         self.cml.write_ctl_file()
-
-
-
