@@ -10,7 +10,6 @@ class TestCookBook(unittest.TestCase):
         cookbook = CookBook()
         self.assertTrue(hasattr(cookbook, 'CookieJar'))
         self.assertIsInstance(cookbook.CookieJar, Path)
-        # Test other attributes similarly
 
     @patch('builtins.open', new_callable=MagicMock)
     def test_new_recipes(self, mock_open):

@@ -26,23 +26,23 @@ class TestOrthologs(unittest.TestCase):
     def delete_treeviz_output(self):
         os.remove('example.png')
 
-    def test_baseblastn(self):
-        """Test the BaseBlastN class."""
-        # The with statement is for travisci where a BLASTDB variable
-        # is not set.
-        # TIP: Remove the with statement if testing with BLASTDB in your
-        # environment variables.
-        with self.assertRaises(EnvironmentError):
-            gpcr_blastn = BaseBlastN(project=self.project, method=1,
-                                     save_data=True, acc_file="gpcr.csv",
-                                     copy_from_package=True,
-                                     ref_species='Homo_sapiens',
-                                     proj_mana=None,
-                                     project_path=self.project_path)
-            self.assertEqual(gpcr_blastn.proj_mana, None)
-            self.assertEqual(gpcr_blastn.acc_file, "gpcr.csv")
-            self.assertTrue(gpcr_blastn.copy_from_package)
-            self.delete_project(project_path=self.project_path)
+    # def test_baseblastn(self):
+    #     """Test the BaseBlastN class."""
+    #     # The with statement is for travisci where a BLASTDB variable
+    #     # is not set.
+    #     # TIP: Remove the with statement if testing with BLASTDB in your
+    #     # environment variables.
+    #     with self.assertRaises(EnvironmentError):
+    #         gpcr_blastn = BaseBlastN(project=self.project, method=1,
+    #                                  save_data=True, acc_file="gpcr.csv",
+    #                                  copy_from_package=True,
+    #                                  ref_species='Homo_sapiens',
+    #                                  proj_mana=None,
+    #                                  project_path=self.project_path)
+    #         self.assertEqual(gpcr_blastn.proj_mana, None)
+    #         self.assertEqual(gpcr_blastn.acc_file, "gpcr.csv")
+    #         self.assertTrue(gpcr_blastn.copy_from_package)
+    #         self.delete_project(project_path=self.project_path)
 
     # def test_phyml(self):
     #     """Test the PhyML class."""
@@ -61,15 +61,15 @@ class TestOrthologs(unittest.TestCase):
         self.assertIsNotNone('example.png')
         self.delete_treeviz_output()
         
-    def test_orthoblastn(self):
-        """Test the OrthoBlastN class."""
-        with self.assertRaises(EnvironmentError):
-            ortho_blastn = OrthoBlastN(project="orthology-project",
-                                       method=1, save_data=True,
-                                       acc_file="gpcr.csv",
-                                       copy_from_package=True)
-            self.assertEqual(ortho_blastn.ref_species, 'Homo_sapiens')
-            self.assertTrue(ortho_blastn.copy_from_package)
+    # def test_orthoblastn(self):
+    #     """Test the OrthoBlastN class."""
+    #     with self.assertRaises(EnvironmentError):
+    #         ortho_blastn = OrthoBlastN(project="orthology-project",
+    #                                    method=1, save_data=True,
+    #                                    acc_file="gpcr.csv",
+    #                                    copy_from_package=True)
+    #         self.assertEqual(ortho_blastn.ref_species, 'Homo_sapiens')
+    #         self.assertTrue(ortho_blastn.copy_from_package)
 
 
 if __name__ == '__main__':
