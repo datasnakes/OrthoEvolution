@@ -56,7 +56,9 @@ class PhyML(object):
         if shutil.which(phyml_exe):
             return phyml_exe
         else:
-            self.phyml_log.error("%s is not in the path." % phyml_exe)
+            error_message = f"{phyml_exe} is not in the PATH. Please ensure that the PhyML executable is installed and available in your system's PATH."
+            self.phyml_log.error(error_message)
+            raise FileNotFoundError(error_message)
 
     def run(self, model="WAG", alpha="e", bootstrap=100):
         """"Run phyml."""
