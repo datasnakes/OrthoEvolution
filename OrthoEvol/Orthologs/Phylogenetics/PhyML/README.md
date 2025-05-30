@@ -8,7 +8,7 @@ Learn more about PhyML [here](http://www.atgc-montpellier.fr/).
 
 ## Default Parameters
 
-The default dataype is `'aa' (amino acid)`, but you may use 'nt' for nucleotide.
+The default datatype is `'aa' (amino acid)`, but you may use 'nt' for nucleotide.
 
 ## Examples
 
