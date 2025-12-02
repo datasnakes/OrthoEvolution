@@ -1,0 +1,3 @@
+# Documentation build dependencies for Read the Docs
+sphinx
+pypandoc
