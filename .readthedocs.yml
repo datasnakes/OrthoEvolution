@@ -14,12 +14,8 @@ build:
 python:
   version: 3.9
   install:
-    - method: pip
-      path: .
-    - method: pip
-      # Install documentation dependencies
-      pip_install:
-        - sphinx
-        - pypandoc
+    - path: .
+    - requirements: requirements.txt
+    - requirements: docs/requirements-docs.txt
 
 # Sphinx will be auto-detected from docs/docs/source/conf.py
