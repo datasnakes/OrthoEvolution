@@ -25,16 +25,24 @@ class GenBank(object):
         downloaded from the .gbff, and uploaded to a custom BopSQL database for
         faster acquisition of GenBank data.
 
-        :param project:  The name of the project.
+        :param project: The name of the project.
+        :type project: str
         :param project_path: The relative path to the project.
-        :param solo:  A flag for adding single fasta files.
-        :param multi:  A flag for adding multi-fasta files.
-        :param archive: A flag for archiving current GenBank Data.  # TODO
+        :type project_path: str or Path or None
+        :param solo: A flag for adding single fasta files.
+        :type solo: bool
+        :param multi: A flag for adding multi-fasta files.
+        :type multi: bool
+        :param archive: A flag for archiving current GenBank Data.
+        :type archive: bool
         :param min_fasta: A flag for minimizing FASTA file headers.
-        :param blast:  The blast parameter is used for composing various
-                       Orthologs.Blast classes.  Can be a class, a dict,
-                       or none.
-        :returns:  .gbff files/databases, .gbk files/databases, & FASTA files.
+        :type min_fasta: bool
+        :param blast: The blast parameter is used for composing various
+                       Orthologs.Blast classes. Can be a class, a dict, or None.
+        :type blast: class or dict or None
+        :param kwargs: Additional keyword arguments for configuration.
+        :type kwargs: dict
+        :returns: .gbff files/databases, .gbk files/databases, & FASTA files.
         """
 
         # TODO-ROB: Change the way the file systems work.
@@ -65,10 +73,9 @@ class GenBank(object):
                 self.db_files_list.append(str(FILE))
 
     @staticmethod
-    def name_fasta_file(self, path, gene, org, feat_type,
+    def name_fasta_file(path, gene, org, feat_type,
                         feat_type_rank, extension, mode):
-        """
-        Provide a uniquely named FASTA file:
+        """Provide a uniquely named FASTA file.
         * Coding sequence:
             * Single - "<path>/<gene>_<organism><feat_type_rank>.<extension>"
             * Multi  - "<path>/<gene><feat_type_rank>.<extension>"
@@ -76,23 +83,29 @@ class GenBank(object):
             * Single - "<path>/<gene>_<organism>_<feat_type_rank>.<extension>"
             * Multi  - "<path>/<gene>_<feat_type_rank>.<extension>"
 
-        :param path:  The path where the file will be made.
-        :param gene:  The gene name.
-        :param org:  The organism name.
-        :param feat_type:  The type of feature from the GenBank record.
-                           (CDS, UTR, misc_feature, variation, etc.)
-        :param feat_type_rank:  The feature type  + the rank.
-                                (There can be multiple misc_features and
-                                 variations)
-        :param extension:  The file extension.
-                           (".ffn", ".faa", ".fna", ".fasta")
-        :param mode:  The mode ("w" or "a") for writing the file.  Write to a
-                      solo-FASTA file.  Append a multi-FASTA file.
-        :return:  The uniquely named FASTA file.
+        :param path: The path where the file will be made.
+        :type path: str or Path
+        :param gene: The gene name.
+        :type gene: str
+        :param org: The organism name.
+        :type org: str
+        :param feat_type: The type of feature from the GenBank record
+                          (CDS, UTR, misc_feature, variation, etc.).
+        :type feat_type: str
+        :param feat_type_rank: The feature type + the rank
+                                (There can be multiple misc_features and variations).
+        :type feat_type_rank: str
+        :param extension: The file extension (".ffn", ".faa", ".fna", ".fasta").
+        :type extension: str
+        :param mode: The mode ("w" or "a") for writing the file.
+                     Write to a solo-FASTA file. Append a multi-FASTA file.
+        :type mode: str
+        :return: The uniquely named FASTA file.
+        :rtype: file object
         """
 
         # Create path variables.  (typically raw_data/<gene>/GENBANK
-        feat_path = path
+        feat_path = Path(path)
         # Create a format-able string for file names
         if feat_type_rank == "CDS":
             single = '%s_%s%s%s'

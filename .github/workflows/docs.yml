@@ -1,0 +1,73 @@
+name: Documentation
+
+on:
+  push:
+    branches: [ master, main, dev-master, dev-refactored ]
+    paths:
+      - 'docs/**'
+      - 'OrthoEvol/**'
+      - 'setup.py'
+      - '.readthedocs.yml'
+  pull_request:
+    branches: [ master, main, dev-master, dev-refactored ]
+    paths:
+      - 'docs/**'
+      - 'OrthoEvol/**'
+      - 'setup.py'
+      - '.readthedocs.yml'
+  workflow_dispatch:
+
+jobs:
+  build-docs:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.9'
+
+    - name: Cache pip
+      uses: actions/cache@v4
+      with:
+        path: ~/.cache/pip
+        key: ${{ runner.os }}-pip-docs-${{ hashFiles('**/requirements.txt') }}
+        restore-keys: |
+          ${{ runner.os }}-pip-docs-
+
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip setuptools wheel
+        pip install sphinx pypandoc
+        pip install -r requirements.txt
+        pip install -e .
+
+    - name: Update and build documentation
+      run: |
+        python docs/update_docs.py
+
+    - name: Check for documentation errors
+      run: |
+        if [ -d "docs/docs/_build" ] && [ -f "docs/docs/_build/index.html" ]; then
+          echo "✓ Documentation built successfully"
+          echo "Found HTML files:"
+          find docs/docs/_build -maxdepth 1 -name "*.html" | head -5
+          echo "Build directory structure:"
+          ls -la docs/docs/_build/ | head -10
+        else
+          echo "✗ Documentation build failed"
+          echo "Checking build directory:"
+          ls -la docs/docs/_build/ 2>&1 || echo "Build directory does not exist"
+          exit 1
+        fi
+
+    - name: Upload documentation artifacts
+      if: success()
+      uses: actions/upload-artifact@v4
+      with:
+        name: documentation
+        path: docs/docs/_build
+        retention-days: 7

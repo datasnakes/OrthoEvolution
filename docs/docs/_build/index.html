@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+
+<html lang="python" data-content_root="./">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>OrthoEvolution &#8212; OrthoEvolution 1.0.0b2 documentation</title>
+    <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=fa44fd50" />
+    <link rel="stylesheet" type="text/css" href="_static/basic.css?v=b08954a9" />
+    <link rel="stylesheet" type="text/css" href="_static/alabaster.css?v=27fed22d" />
+    <script src="_static/documentation_options.js?v=3e4b6f43"></script>
+    <script src="_static/doctools.js?v=9bcbadda"></script>
+    <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Tutorial" href="tutorial/orthoevolreadme.html" />
+   
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
+
+  
+  
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <section id="orthoevolution">
+<h1>OrthoEvolution<a class="headerlink" href="#orthoevolution" title="Link to this heading">¶</a></h1>
+<a class="reference external image-reference" href="https://travis-ci.org/datasnakes/OrthoEvolution"><img alt="https://travis-ci.org/datasnakes/OrthoEvolution.svg?branch=master" src="https://travis-ci.org/datasnakes/OrthoEvolution.svg?branch=master" />
+</a>
+<a class="reference external image-reference" href="https://www.codacy.com/app/datasnakes/OrthoEvolution?utm_source=github.com&amp;amp;utm_medium=referral&amp;amp;utm_content=datasnakes/OrthoEvolution&amp;amp;utm_campaign=Badge_Grade"><img alt="https://api.codacy.com/project/badge/Grade/25062944794a4d14b5cab274a885ac27" src="https://api.codacy.com/project/badge/Grade/25062944794a4d14b5cab274a885ac27" />
+</a>
+<a class="reference external image-reference" href="https://gitter.im/datasnakes/OrthoEvolution"><img alt="https://img.shields.io/badge/chat-on%20gitter-753A88.svg" src="https://img.shields.io/badge/chat-on%20gitter-753A88.svg" />
+</a>
+<a class="reference external image-reference" href="https://badge.fury.io/py/OrthoEvol"><img alt="https://badge.fury.io/py/OrthoEvol.svg" src="https://badge.fury.io/py/OrthoEvol.svg" />
+</a>
+<a class="reference external image-reference" href="http://orthoevolution.readthedocs.io/en/latest/?badge=latest"><img alt="https://readthedocs.org/projects/orthoevolution/badge/?version=latest" src="https://readthedocs.org/projects/orthoevolution/badge/?version=latest" />
+</a>
+<p>OrthoEvolution is an <strong>easy to use</strong> and comprehensive python package which aids in the <strong>analysis and
+visualization of comparative evolutionary genetics</strong> related projects such as the <strong>inference of orthologs</strong>.</p>
+<section id="overview">
+<h2>Overview<a class="headerlink" href="#overview" title="Link to this heading">¶</a></h2>
+<p>This package focuses on <strong>inferring orthologs</strong> using NCBI's blast, various sequence alignment strategies,
+and phylogenetics analyses including PAML, PhyML, ete3, and more tools.</p>
+<p>Ultimately, the goal of this project is to create a <strong>reusable pipeline</strong> for the
+inference of orthologs in order to ensure reproducibility of data as well as improve
+the management and analysis of (what can be) large datasets.  The Cookies, Manager, Pipeline,
+and Tools modules act as a framework for our workflow, while the Orthologs
+module provides access to specific functions for our various ortholog inference projects.</p>
+<p>View our <a class="reference external" href="http://orthoevolution.readthedocs.io/en/master/">read the docs</a> and feel free to also
+read <a class="reference external" href="https://www.frontiersin.org/articles/10.3389/fnhum.2014.00283/full">this related paper</a> to gain
+more insight into this project/python package.</p>
+</section>
+<section id="installation">
+<h2>Installation<a class="headerlink" href="#installation" title="Link to this heading">¶</a></h2>
+<p>View the below methods for installing this package. <strong>Python 3.9 or higher is required.</strong></p>
+<section id="pypi">
+<h3>PyPi<a class="headerlink" href="#pypi" title="Link to this heading">¶</a></h3>
+<p><code class="docutils literal notranslate"><span class="pre">pip</span> <span class="pre">install</span> <span class="pre">OrthoEvol</span></code></p>
+</section>
+<section id="github">
+<h3>GitHub<a class="headerlink" href="#github" title="Link to this heading">¶</a></h3>
+<ol class="arabic simple">
+<li><p>Download the zip file and unzip it or <code class="docutils literal notranslate"><span class="pre">git</span> <span class="pre">clone</span> <span class="pre">https://github.com/datasnakes/OrthoEvolution.git</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">cd</span> <span class="pre">OrthoEvolution</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">pip</span> <span class="pre">install</span> <span class="pre">.</span></code></p></li>
+</ol>
+</section>
+<section id="development-code">
+<h3>Development Code<a class="headerlink" href="#development-code" title="Link to this heading">¶</a></h3>
+<p><strong>WARNING</strong> : This code is actively under development and may not be reliable.  Please create an <a class="reference external" href="https://github.com/datasnakes/OrthoEvolution/issues">issue</a> for questions about development.</p>
+<ol class="arabic simple">
+<li><p>Download the zip file and unzip it or <code class="docutils literal notranslate"><span class="pre">git</span> <span class="pre">clone</span> <span class="pre">-b</span> <span class="pre">dev-master</span> <span class="pre">https://github.com/datasnakes/OrthoEvolution.git</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">cd</span> <span class="pre">OrthoEvolution</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">pip</span> <span class="pre">install</span> <span class="pre">.</span></code></p></li>
+</ol>
+</section>
+</section>
+<section id="examples">
+<h2>Examples<a class="headerlink" href="#examples" title="Link to this heading">¶</a></h2>
+<p>View <a class="reference external" href="#detailed-documentation">detailed documentation</a> below.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">OrthoEvol</span>
+</pre></div>
+</div>
+</section>
+<section id="tests">
+<h2>Tests<a class="headerlink" href="#tests" title="Link to this heading">¶</a></h2>
+<p>To run tests, type <code class="docutils literal notranslate"><span class="pre">nosetests</span> <span class="pre">Tests/</span></code> in the OrthoEvolution directory.</p>
+</section>
+<section id="contributors">
+<h2>Contributors<a class="headerlink" href="#contributors" title="Link to this heading">¶</a></h2>
+<p>This package was created by the Datasnakes.</p>
+<ul class="simple">
+<li><p>Rob Gilmore | Github: <a class="reference external" href="https://github.com/grabear">&#64;grabear</a> |
+<a class="reference external" href="mailto:robgilmore127&#37;&#52;&#48;gmail&#46;com">✉</a></p></li>
+<li><p>Shaurita Hutchins | Github:
+<a class="reference external" href="https://github.com/sdhutchins">&#64;sdhutchins</a> |
+<a class="reference external" href="mailto:sdhutchins&#37;&#52;&#48;outlook&#46;com">✉</a></p></li>
+</ul>
+<p>If you would like to contribute to this package, install the package in development mode,
+and check out our <a class="reference external" href="https://github.com/datasnakes/OrthoEvolution/blob/master/CONTRIBUTING.rst">contributing guidelines</a>.</p>
+</section>
+<section id="citations">
+<h2>Citations<a class="headerlink" href="#citations" title="Link to this heading">¶</a></h2>
+<p>We're so thankful to have a resource such as
+<a class="reference external" href="http://biopython.org/wiki/Biopython">Biopython</a>. They inspired this
+package.</p>
+<p><em>Cock, P.J.A. et al. Biopython: freely available Python tools for
+computational molecular biology and bioinformatics. Bioinformatics 2009
+Jun 1; 25(11) 1422-3 http://dx.doi.org/10.1093/bioinformatics/btp163
+pmid:19304878</em></p>
+</section>
+<section id="license">
+<h2>License<a class="headerlink" href="#license" title="Link to this heading">¶</a></h2>
+<p><a class="reference external" href="https://github.com/datasnakes/OrthoEvolution/blob/master/LICENSE">MIT</a></p>
+<div class="toctree-wrapper compound">
+</div>
+</section>
+</section>
+<section id="detailed-documentation">
+<h1>Detailed Documentation<a class="headerlink" href="#detailed-documentation" title="Link to this heading">¶</a></h1>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="tutorial/orthoevolreadme.html">Tutorial</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="tutorial/orthoevolreadme.html#using-the-cookies-module">Using the Cookies module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tutorial/orthoevolreadme.html#using-the-manager-module">Using the Manager module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tutorial/orthoevolreadme.html#using-the-orthologs-module">Using the Orthologs Module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tutorial/orthoevolreadme.html#using-the-pipeline-module">Using the Pipeline module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tutorial/orthoevolreadme.html#using-the-tools-module">Using the Tools module</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="cookies/cookiesreadme.html">Cookies Documentation</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="cookies/cookiesreadme.html#overview">Overview</a></li>
+<li class="toctree-l2"><a class="reference internal" href="cookies/cookiesreadme.html#available-templates">Available Templates</a></li>
+<li class="toctree-l2"><a class="reference internal" href="cookies/cookiesreadme.html#examples">Examples</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="manager/managerreadme.html">Manager Documentation</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="manager/managerreadme.html#why-a-manager">Why a manager?</a></li>
+<li class="toctree-l2"><a class="reference internal" href="manager/managerreadme.html#example">Example</a></li>
+<li class="toctree-l2"><a class="reference internal" href="manager/managerreadme.html#notes">Notes</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="orthologs/orthologsreadme.html">Orthologs Documentation</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="orthologs/orthologsreadme.html#usage-examples">Usage &amp; Examples</a></li>
+<li class="toctree-l2"><a class="reference internal" href="orthologs/orthologsreadme.html#software-dependencies">Software Dependencies</a></li>
+<li class="toctree-l2"><a class="reference internal" href="orthologs/orthologsreadme.html#using-install-sh-on-debian-ubuntu">Using install.sh on Debian/Ubuntu:</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="pipeline/pipelinereadme.html">Pipeline Documentation</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="pipeline/pipelinereadme.html#overview">Overview</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pipeline/pipelinereadme.html#examples">Examples</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pipeline/pipelinereadme.html#task-parameters">Task Parameters</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pipeline/pipelinereadme.html#software-dependencies">Software Dependencies</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pipeline/pipelinereadme.html#notes">Notes</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="tools/toolsreadme.html">Tools Documentation</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="tools/toolsreadme.html#examples">Examples</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tools/toolsreadme.html#additional-documentation">Additional Documentation</a></li>
+</ul>
+</li>
+</ul>
+</div>
+</section>
+<section id="indices-tables">
+<h1>Indices &amp; Tables<a class="headerlink" href="#indices-tables" title="Link to this heading">¶</a></h1>
+<ul class="simple">
+<li><p><a class="reference internal" href="genindex.html"><span class="std std-ref">Index</span></a></p></li>
+<li><p><a class="reference internal" href="py-modindex.html"><span class="std std-ref">Module Index</span></a></p></li>
+<li><p><a class="reference internal" href="search.html"><span class="std std-ref">Search Page</span></a></p></li>
+</ul>
+</section>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="Main">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="#">OrthoEvolution</a></h1>
+
+
+
+<p class="blurb">An easy to use and comprehensive python package which aids in the analysis and visualization of comparative evolutionary genetics</p>
+
+
+
+
+<p>
+<iframe src="https://ghbtns.com/github-btn.html?user=Datasnakes&repo=OrthoEvolution&type=watch&count=true&size=large&v=2"
+  allowtransparency="true" frameborder="0" scrolling="0" width="200px" height="35px"></iframe>
+</p>
+
+
+
+
+
+
+  <div>
+    <h3><a href="#">Table of Contents</a></h3>
+    <ul>
+<li><a class="reference internal" href="#">OrthoEvolution</a><ul>
+<li><a class="reference internal" href="#overview">Overview</a></li>
+<li><a class="reference internal" href="#installation">Installation</a><ul>
+<li><a class="reference internal" href="#pypi">PyPi</a></li>
+<li><a class="reference internal" href="#github">GitHub</a></li>
+<li><a class="reference internal" href="#development-code">Development Code</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#examples">Examples</a></li>
+<li><a class="reference internal" href="#tests">Tests</a></li>
+<li><a class="reference internal" href="#contributors">Contributors</a></li>
+<li><a class="reference internal" href="#citations">Citations</a></li>
+<li><a class="reference internal" href="#license">License</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#detailed-documentation">Detailed Documentation</a></li>
+<li><a class="reference internal" href="#indices-tables">Indices &amp; Tables</a></li>
+</ul>
+
+  </div><h3>Useful Links</h3>
+<p><a href="https://github.com/datasnakes/OrthoEvolution">🚀 View Source Code</a></p>
+<p><a href="https://github.com/datasnakes/OrthoEvolution/releases">💾 Download Releases</a></p>
+
+
+<h3>Stay Informed</h3>
+<p>Receive updates on new releases and upcoming projects.</p>
+
+<p><a href="https://twitter.com/datasnakes" class="twitter-follow-button" data-show-count="false">Follow @datasnakes</a> <script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0],p=/^http:/.test(d.location)?'http':'https';if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src=p+'://platform.twitter.com/widgets.js';fjs.parentNode.insertBefore(js,fjs);}}(document, 'script', 'twitter-wjs');</script></p>
+
+
+<h3>Other Projects</h3>
+
+<p>More <a href="https://datasnakes.github.io/">Datasnakes</a> projects:</p>
+<ul>
+    <li><a href="https://github.com/datasnakes/cookiecutter-pypackage-travisci">cookiecutter-pypackage-travisci</a></li>
+    <li><a href="https://github.com/datasnakes/htseq-analysis-scripts">htseq-analysis-scripts</a></li>
+</ul>
+<search id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</search>
+<script>document.getElementById('searchbox').style.display = "block"</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &#169;2017, Shaurita Hutchins & Robert Gilmore.
+      
+      |
+      Powered by <a href="https://www.sphinx-doc.org/">Sphinx 8.2.3</a>
+      &amp; <a href="https://alabaster.readthedocs.io">Alabaster 1.0.0</a>
+      
+      |
+      <a href="_sources/index.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+    <a href="https://github.com/Datasnakes/OrthoEvolution" class="github">
+        <img src="_static/github-banner.svg" alt="Fork me on GitHub" class="github"/>
+    </a>
+    
+
+    
+  </body>
+</html>

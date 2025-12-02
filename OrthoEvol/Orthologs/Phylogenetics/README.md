@@ -13,7 +13,7 @@ significant differences in genes across different mammalian species. From there,
 decide which genes we will further study in cell culture projects or assays.
 
 ## Dependencies
-It is critical to have these phylogenetic software installed and avalailable on
+It is critical to have these phylogenetic software installed and available on
 your path in order to use the Phylogenetics submodules or you can take a look
 at our [external apps repository](https://github.com/datasnakes/external-apps)
 to help you install these software on your machine.

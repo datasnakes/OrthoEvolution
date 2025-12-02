@@ -104,8 +104,152 @@ class PyBasher(BaseBash):
     def __init__(self):
         super().__init__()
 
-    def cp(self):
+    def cp(self, source, destination):
         """Copy file."""
 
-        cmd = ''
+        cmd = f"cp {source} {destination}"
+        self._bash(cmd)
+
+    def mv(self, source, destination):
+        """Move file."""
+
+        cmd = f"mv {source} {destination}"
+        self._bash(cmd)
+
+    def rm(self, path):
+        """Delete file."""
+
+        cmd = f"rm {path}"
+        self._bash(cmd)
+
+    def mkdir(self, path):
+        """Create directory."""
+
+        cmd = f"mkdir {path}"
+        self._bash(cmd)
+
+    def rmdir(self, path):
+        """Delete empty directory."""
+
+        cmd = f"rmdir {path}"
+        self._bash(cmd)
+
+    def touch(self, path):
+        """Create empty file."""
+
+        cmd = f"touch {path}"
+        self._bash(cmd)
+
+    def ls(self, path):
+        """List directory contents."""
+
+        cmd = f"ls {path}"
+        self._bash(cmd)
+
+    def cat(self, path):
+        """Display contents of file."""
+
+        cmd = f"cat {path}"
+        self._bash(cmd)
+
+    def pwd(self):
+        """Print current working directory."""
+
+        cmd = "pwd"
+        self._bash(cmd)
+
+    def cd(self, path):
+        """Change current working directory."""
+
+        cmd = f"cd {path}"
+        self._bash(cmd)
+
+    def grep(self, pattern, path):
+        """Search for pattern in file."""
+
+        cmd = f"grep {pattern} {path}"
+        self._bash(cmd)
+
+    def chmod(self, permissions, path):
+        """Change file permissions."""
+
+        cmd = f"chmod {permissions} {path}"
+        self._bash(cmd)
+
+    def chown(self, owner, path):
+        """Change file owner."""
+
+        cmd = f"chown {owner} {path}"
+        self._bash(cmd)
+
+    def find(self, path, pattern):
+        """Search for files matching pattern in path."""
+
+        cmd = f"find {path} -name {pattern}"
+        self._bash(cmd)
+
+    def tar(self, action, options, archive, files):
+        """Create or extract tar archive."""
+
+        cmd = f"tar {action} {options} {archive} {files}"
+        self._bash(cmd)
+
+    def unzip(self, archive, destination):
+        """Extract zip archive."""
+
+        cmd = f"unzip {archive} -d {destination}"
+        self._bash(cmd)
+
+    def zip(self, options, archive, files):
+        """Create zip archive."""
+
+        cmd = f"zip {options} {archive} {files}"
+        self._bash(cmd)
+        
+    def du(self, path):
+        """Display disk usage statistics."""
+
+        cmd = f"du {path}"
+        self._bash(cmd)
+
+    def df(self, path):
+        """Display free disk space."""
+
+        cmd = f"df {path}"
+        self._bash(cmd)
+
+    def top(self, options):
+        """Display top-running processes."""
+
+        cmd = f"top {options}"
+        self._bash(cmd)
+
+    def ps(self, options):
+        """Display running processes."""
+
+        cmd = f"ps {options}"
+        self._bash(cmd)
+
+    def kill(self, signal, process_id):
+        """Send signal to process."""
+
+        cmd = f"kill {signal} {process_id}"
+        self._bash(cmd)
+
+    def man(self, command):
+        """Display manual for command."""
+
+        cmd = f"man {command}"
+        self._bash(cmd)
+
+    def info(self, command):
+        """Display information for command."""
+
+        cmd = f"info {command}"
+        self._bash(cmd)
+
+    def history(self, options):
+        """Display command history."""
+
+        cmd = f"history {options}"
         self._bash(cmd)

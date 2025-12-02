@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+
+<html lang="python" data-content_root="../">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>LogIt Documentation &#8212; OrthoEvolution 1.0.0b2 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=fa44fd50" />
+    <link rel="stylesheet" type="text/css" href="../_static/basic.css?v=b08954a9" />
+    <link rel="stylesheet" type="text/css" href="../_static/alabaster.css?v=27fed22d" />
+    <script src="../_static/documentation_options.js?v=3e4b6f43"></script>
+    <script src="../_static/doctools.js?v=9bcbadda"></script>
+    <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+   
+  <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
+  
+
+  
+  
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <section id="logit-documentation">
+<h1>LogIt Documentation<a class="headerlink" href="#logit-documentation" title="Link to this heading">¶</a></h1>
+<p>Use the LogIt class to make logging very simple. This short and sweet
+class wraps around <a class="reference external" href="https://github.com/metachris/logzero">logzero</a>
+which allows color coded logging. We created our own default logger with
+a default dateformat, logformat, and logging level (default is debug).</p>
+<p>Note that LogIt automaticall capitalizes the logname.</p>
+<ol class="arabic simple">
+<li><p>Import the LogIt class and create a variable. ex: <code class="docutils literal notranslate"><span class="pre">logit</span> <span class="pre">=</span> <span class="pre">LogIt()</span></code></p></li>
+<li><p>Create your logger. ex:
+<code class="docutils literal notranslate"><span class="pre">blastn</span> <span class="pre">=</span> <span class="pre">logit.default('blastn',</span> <span class="pre">'blastn.log')</span></code></p></li>
+<li><p>Start logging. ex:
+<code class="docutils literal notranslate"><span class="pre">blastn.error('Your</span> <span class="pre">refseq</span> <span class="pre">accession</span> <span class="pre">was</span> <span class="pre">not</span> <span class="pre">found')</span></code></p></li>
+</ol>
+<p>Multiple loggers can exist for the same logfile and multiple loggers can
+be set up for one script which is shown in the example below.</p>
+<section id="example">
+<h2>Example<a class="headerlink" href="#example" title="Link to this heading">¶</a></h2>
+<section id="simple-logging">
+<h3>Simple logging<a class="headerlink" href="#simple-logging" title="Link to this heading">¶</a></h3>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">OrthoEvol.Tools.logit</span> <span class="kn">import</span> <span class="n">LogIt</span>
+<span class="n">genbank_log</span> <span class="o">=</span> <span class="n">LogIt</span><span class="p">()</span><span class="o">.</span><span class="n">default</span><span class="p">(</span><span class="n">logname</span><span class="o">=</span><span class="s2">&quot;genbank&quot;</span><span class="p">,</span> <span class="n">logfile</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span>
+</pre></div>
+</div>
+</section>
+<section id="use-logging-with-ete3paml">
+<h3>Use logging with ETE3PAML<a class="headerlink" href="#use-logging-with-ete3paml" title="Link to this heading">¶</a></h3>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">OrthoEvol.Tools.logit</span> <span class="kn">import</span> <span class="n">LogIt</span>
+<span class="kn">from</span> <span class="nn">OrthoEvol.Orthologs.Phylogenetics</span> <span class="kn">import</span> <span class="n">ETE3PAML</span>
+
+<span class="c1"># Set up your loggers</span>
+<span class="n">logit</span> <span class="o">=</span> <span class="n">LogIt</span><span class="p">()</span>
+
+<span class="c1"># Log to one file</span>
+<span class="n">logfile</span> <span class="o">=</span> <span class="s1">&#39;align2paml.log&#39;</span>
+
+<span class="n">align</span><span class="p">,</span> <span class="n">paml</span> <span class="o">=</span> <span class="n">logit</span><span class="o">.</span><span class="n">default</span><span class="p">(</span><span class="s1">&#39;alignlog&#39;</span><span class="p">,</span> <span class="n">logfile</span><span class="p">),</span> <span class="n">logit</span><span class="o">.</span><span class="n">default</span><span class="p">(</span><span class="s1">&#39;pamllog&#39;</span><span class="p">,</span> <span class="n">logfile</span><span class="p">)</span>
+
+<span class="c1"># Start logging</span>
+<span class="n">align</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;hi&#39;</span><span class="p">)</span>
+<span class="n">paml</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;muah&#39;</span><span class="p">)</span>
+
+<span class="c1"># Shutdown the loggers and delete the logfile</span>
+<span class="n">logit</span><span class="o">.</span><span class="n">deletelog</span><span class="p">(</span><span class="n">logfile</span><span class="o">=</span><span class="n">logfile</span><span class="p">)</span>
+
+<span class="c1"># Shutdown logging without deleting the logfile</span>
+<span class="n">logit</span><span class="o">.</span><span class="n">shutdown</span><span class="p">()</span>
+</pre></div>
+</div>
+</section>
+</section>
+</section>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="Main">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../index.html">OrthoEvolution</a></h1>
+
+
+
+<p class="blurb">An easy to use and comprehensive python package which aids in the analysis and visualization of comparative evolutionary genetics</p>
+
+
+
+
+<p>
+<iframe src="https://ghbtns.com/github-btn.html?user=Datasnakes&repo=OrthoEvolution&type=watch&count=true&size=large&v=2"
+  allowtransparency="true" frameborder="0" scrolling="0" width="200px" height="35px"></iframe>
+</p>
+
+
+
+
+
+
+  <div>
+    <h3><a href="../index.html">Table of Contents</a></h3>
+    <ul>
+<li><a class="reference internal" href="#">LogIt Documentation</a><ul>
+<li><a class="reference internal" href="#example">Example</a><ul>
+<li><a class="reference internal" href="#simple-logging">Simple logging</a></li>
+<li><a class="reference internal" href="#use-logging-with-ete3paml">Use logging with ETE3PAML</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+  </div>
+<search id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</search>
+<script>document.getElementById('searchbox').style.display = "block"</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &#169;2017, Shaurita Hutchins & Robert Gilmore.
+      
+      |
+      Powered by <a href="https://www.sphinx-doc.org/">Sphinx 8.2.3</a>
+      &amp; <a href="https://alabaster.readthedocs.io">Alabaster 1.0.0</a>
+      
+      |
+      <a href="../_sources/tools/logitreadme.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+    <a href="https://github.com/Datasnakes/OrthoEvolution" class="github">
+        <img src="../_static/github-banner.svg" alt="Fork me on GitHub" class="github"/>
+    </a>
+    
+
+    
+  </body>
+</html>

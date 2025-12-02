@@ -11,17 +11,33 @@ SGEPipelineTask.parallel_env = None
 
 
 class TestPipelineTask(SGEPipelineTask):
-    """Example pipeline task."""
+    """Example pipeline task for testing SGE pipeline functionality.
+
+    This is a simple example task that creates a test output file.
+    It demonstrates the basic structure of a pipeline task.
+
+    :param i: Task identifier number.
+    :type i: str
+    """
 
     i = luigi.Parameter()
 
-    def work(self):  # Use work instead of run to DEBUG
+    def work(self):
+        """Execute the test pipeline task.
+
+        Creates a test output file with a simple message.
+        Use work() instead of run() for SGE tasks.
+        """
         logger.info('Running test job...')
         with open(self.output().path, 'w') as f:
             f.write('This is a test job.')
-            f.close()
 
     def output(self):
+        """Define the output target for this task.
+
+        :return: Local target representing the test output file.
+        :rtype: luigi.LocalTarget
+        """
         return luigi.LocalTarget(path=os.path.join(os.getcwd(), 'testjob_' + str(self.i) + '.txt'))
 
 

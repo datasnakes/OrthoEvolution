@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+
+<html lang="python" data-content_root="../">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>FTP (File Transfer Protocol) Documentation &#8212; OrthoEvolution 1.0.0b2 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=fa44fd50" />
+    <link rel="stylesheet" type="text/css" href="../_static/basic.css?v=b08954a9" />
+    <link rel="stylesheet" type="text/css" href="../_static/alabaster.css?v=27fed22d" />
+    <script src="../_static/documentation_options.js?v=3e4b6f43"></script>
+    <script src="../_static/doctools.js?v=9bcbadda"></script>
+    <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+   
+  <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
+  
+
+  
+  
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <section id="ftp-file-transfer-protocol-documentation">
+<h1>FTP (File Transfer Protocol) Documentation<a class="headerlink" href="#ftp-file-transfer-protocol-documentation" title="Link to this heading">¶</a></h1>
+<p>The <code class="docutils literal notranslate"><span class="pre">ftp</span></code> module is geared towards making it easier to interface with
+<a class="reference external" href="ftp://ftp.ncbi.nlm.nih.gov">NCBI’s FTP repository</a>.</p>
+<p>More specifically, we provide a way to easily find and list directories
+and their respective contents as well as to download blast databases and
+other databases for use with the Orthologs package. We have implemented
+database downloading with threading which is the safest way to implement
+this cross-platform.</p>
+<p>We also provide a parallel module which can be used in conjunction with
+the <code class="docutils literal notranslate"><span class="pre">NcbiFTPClient</span></code> to download files or databases much quicker if
+your system can handle that.</p>
+<p>If you’re using Linux or a supercomputer and do not want to use
+threading to download ftp databases, you can look at <a class="reference external" href="https://github.com/datasnakes/OrthoEvolution/blob/master/Examples/standalone-scripts/ncbi-download.py">this cli
+script</a>.</p>
+<section id="examples">
+<h2>Examples<a class="headerlink" href="#examples" title="Link to this heading">¶</a></h2>
+<section id="blastdb-download-example">
+<h3>Blastdb Download Example<a class="headerlink" href="#blastdb-download-example" title="Link to this heading">¶</a></h3>
+<p>Download the <a class="reference external" href="ftp://ftp.ncbi.nlm.nih.gov/blast/db/v5/">latest</a> blast
+databases (version 5 which is formatted for taxonomy ids). If
+<code class="docutils literal notranslate"><span class="pre">v5=False</span></code>, then the previously used blast databases will be
+downloaded. The
+<a class="reference external" href="ftp://ftp.ncbi.nlm.nih.gov/blast/db/v5/taxdb.tar.gz">taxdb.tar.gz</a>
+database is also downloaded (by default) with the preformatted blast
+databases.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">OrthoEvol.Tools.ftp</span> <span class="kn">import</span> <span class="n">NcbiFTPClient</span>
+
+<span class="n">ncbiftp</span> <span class="o">=</span> <span class="n">NcbiFTPClient</span><span class="p">(</span><span class="n">email</span><span class="o">=</span><span class="s1">&#39;somebody@gmail.com&#39;</span><span class="p">)</span>
+<span class="n">ncbiftp</span><span class="o">.</span><span class="n">getblastdb</span><span class="p">(</span><span class="n">database_name</span><span class="o">=</span><span class="s1">&#39;refseq_rna&#39;</span><span class="p">,</span> <span class="n">v5</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+</pre></div>
+</div>
+</section>
+<section id="windowmasker-files-download-example">
+<h3>Windowmasker files Download Example<a class="headerlink" href="#windowmasker-files-download-example" title="Link to this heading">¶</a></h3>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">OrthoEvol.Tools.ftp</span> <span class="kn">import</span> <span class="n">NcbiFTPClient</span>
+<span class="kn">import</span> <span class="nn">os</span>
+
+<span class="n">ids</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;9544&#39;</span><span class="p">,</span> <span class="s1">&#39;9606&#39;</span><span class="p">]</span>
+
+<span class="n">ncbiftp</span> <span class="o">=</span> <span class="n">NcbiFTPClient</span><span class="p">(</span><span class="n">email</span><span class="o">=</span><span class="s1">&#39;somebody@gmail.com&#39;</span><span class="p">)</span>
+<span class="n">ncbiftp</span><span class="o">.</span><span class="n">getwindowmaskerfiles</span><span class="p">(</span><span class="n">taxonomy_ids</span><span class="o">=</span><span class="n">ids</span><span class="p">,</span> <span class="n">download_path</span><span class="o">=</span><span class="n">os</span><span class="o">.</span><span class="n">getcwd</span><span class="p">())</span>
+</pre></div>
+</div>
+</section>
+<section id="refseq-release-download-example">
+<h3>Refseq Release Download Example<a class="headerlink" href="#refseq-release-download-example" title="Link to this heading">¶</a></h3>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">OrthoEvol.Tools.ftp</span> <span class="kn">import</span> <span class="n">NcbiFTPClient</span>
+<span class="kn">import</span> <span class="nn">os</span>
+
+<span class="n">ncbiftp</span> <span class="o">=</span> <span class="n">NcbiFTPClient</span><span class="p">(</span><span class="n">email</span><span class="o">=</span><span class="s1">&#39;somebody@gmail.com&#39;</span><span class="p">)</span>
+<span class="n">ncbiftp</span><span class="o">.</span><span class="n">getrefseqrelease</span><span class="p">(</span><span class="n">taxon_group</span><span class="o">=</span><span class="s1">&#39;vertebrate_mammalian&#39;</span><span class="p">,</span> <span class="n">seqtype</span><span class="o">=</span><span class="s1">&#39;rna&#39;</span><span class="p">,</span>
+                         <span class="n">seqformat</span><span class="o">=</span><span class="s1">&#39;gbff&#39;</span><span class="p">,</span> <span class="n">download_path</span><span class="o">=</span><span class="n">os</span><span class="o">.</span><span class="n">getcwd</span><span class="p">())</span>
+</pre></div>
+</div>
+</section>
+<section id="list-all-directories-in-a-path">
+<h3>List all directories in a path<a class="headerlink" href="#list-all-directories-in-a-path" title="Link to this heading">¶</a></h3>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">ncbiftp</span><span class="o">.</span><span class="n">listdirectories</span><span class="p">(</span><span class="n">path</span><span class="o">=</span><span class="s1">&#39;/blast/db/&#39;</span><span class="p">)</span>
+<span class="n">Out</span><span class="p">[</span><span class="mi">54</span><span class="p">]:</span> <span class="p">[</span><span class="s1">&#39;FASTA&#39;</span><span class="p">,</span> <span class="s1">&#39;cloud&#39;</span><span class="p">]</span>
+</pre></div>
+</div>
+</section>
+<section id="list-all-files-in-a-path">
+<h3>List all files in a path<a class="headerlink" href="#list-all-files-in-a-path" title="Link to this heading">¶</a></h3>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">ncbiftp</span><span class="o">.</span><span class="n">listfiles</span><span class="p">(</span><span class="n">path</span><span class="o">=</span><span class="s1">&#39;/blast/db/&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+</section>
+<section id="list-all-files-in-the-current-working-directory">
+<h3>List all files in the current working directory<a class="headerlink" href="#list-all-files-in-the-current-working-directory" title="Link to this heading">¶</a></h3>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># The default path is ftp.pwd() or the current directory</span>
+<span class="n">ncbiftp</span><span class="o">.</span><span class="n">listfiles</span><span class="p">()</span>
+</pre></div>
+</div>
+</section>
+</section>
+<section id="notes">
+<h2>Notes<a class="headerlink" href="#notes" title="Link to this heading">¶</a></h2>
+<p>Check the <a class="reference external" href="NCBIREADME.md">NCBI README</a> for information about the
+preformatted blast databases that we use and suggest you use. We also
+provide an easy way to download them which is referenced in the above
+example.</p>
+</section>
+</section>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="Main">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../index.html">OrthoEvolution</a></h1>
+
+
+
+<p class="blurb">An easy to use and comprehensive python package which aids in the analysis and visualization of comparative evolutionary genetics</p>
+
+
+
+
+<p>
+<iframe src="https://ghbtns.com/github-btn.html?user=Datasnakes&repo=OrthoEvolution&type=watch&count=true&size=large&v=2"
+  allowtransparency="true" frameborder="0" scrolling="0" width="200px" height="35px"></iframe>
+</p>
+
+
+
+
+
+
+  <div>
+    <h3><a href="../index.html">Table of Contents</a></h3>
+    <ul>
+<li><a class="reference internal" href="#">FTP (File Transfer Protocol) Documentation</a><ul>
+<li><a class="reference internal" href="#examples">Examples</a><ul>
+<li><a class="reference internal" href="#blastdb-download-example">Blastdb Download Example</a></li>
+<li><a class="reference internal" href="#windowmasker-files-download-example">Windowmasker files Download Example</a></li>
+<li><a class="reference internal" href="#refseq-release-download-example">Refseq Release Download Example</a></li>
+<li><a class="reference internal" href="#list-all-directories-in-a-path">List all directories in a path</a></li>
+<li><a class="reference internal" href="#list-all-files-in-a-path">List all files in a path</a></li>
+<li><a class="reference internal" href="#list-all-files-in-the-current-working-directory">List all files in the current working directory</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#notes">Notes</a></li>
+</ul>
+</li>
+</ul>
+
+  </div>
+<search id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</search>
+<script>document.getElementById('searchbox').style.display = "block"</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &#169;2017, Shaurita Hutchins & Robert Gilmore.
+      
+      |
+      Powered by <a href="https://www.sphinx-doc.org/">Sphinx 8.2.3</a>
+      &amp; <a href="https://alabaster.readthedocs.io">Alabaster 1.0.0</a>
+      
+      |
+      <a href="../_sources/tools/ftpreadme.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+    <a href="https://github.com/Datasnakes/OrthoEvolution" class="github">
+        <img src="../_static/github-banner.svg" alt="Fork me on GitHub" class="github"/>
+    </a>
+    
+
+    
+  </body>
+</html>

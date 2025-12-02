@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+
+<html lang="python" data-content_root="../">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>Pipeline Documentation &#8212; OrthoEvolution 1.0.0b2 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=fa44fd50" />
+    <link rel="stylesheet" type="text/css" href="../_static/basic.css?v=b08954a9" />
+    <link rel="stylesheet" type="text/css" href="../_static/alabaster.css?v=27fed22d" />
+    <script src="../_static/documentation_options.js?v=3e4b6f43"></script>
+    <script src="../_static/doctools.js?v=9bcbadda"></script>
+    <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Tools Documentation" href="../tools/toolsreadme.html" />
+    <link rel="prev" title="Orthologs Documentation" href="../orthologs/orthologsreadme.html" />
+   
+  <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
+  
+
+  
+  
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <section id="pipeline-documentation">
+<h1>Pipeline Documentation<a class="headerlink" href="#pipeline-documentation" title="Link to this heading">¶</a></h1>
+<p>The Pipeline module is designed to provide the user with easily callable
+and command line usable pipelines that allow orthology inference to be
+completed in a parallel fashion.</p>
+<p>This module uses Luigi and SunGrid Engine (SGE) to distribute
+computational tasks across cluster nodes. Tasks are designed to run on
+clusters that use <strong>pbspro or SunGrid Engine</strong>.</p>
+<section id="overview">
+<h2>Overview<a class="headerlink" href="#overview" title="Link to this heading">¶</a></h2>
+<p>The Pipeline module provides pre-configured pipeline tasks that can be
+executed in parallel on cluster computing systems. Currently, the module
+includes:</p>
+<ul class="simple">
+<li><p><strong>BlastPipelineTask</strong>: Runs BLAST searches in parallel across multiple
+nodes</p></li>
+<li><p><strong>TestPipelineTask</strong>: Example task for testing pipeline functionality</p></li>
+</ul>
+</section>
+<section id="examples">
+<h2>Examples<a class="headerlink" href="#examples" title="Link to this heading">¶</a></h2>
+<section id="running-a-test-pipeline">
+<h3>Running a Test Pipeline<a class="headerlink" href="#running-a-test-pipeline" title="Link to this heading">¶</a></h3>
+<p>The <code class="docutils literal notranslate"><span class="pre">TestPipelineTask</span></code> is a simple example that demonstrates how to
+create and run a pipeline task:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">logging</span>
+<span class="kn">import</span> <span class="nn">luigi</span>
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">from</span> <span class="nn">OrthoEvol.Tools.sge</span> <span class="kn">import</span> <span class="n">SGEPipelineTask</span>
+<span class="kn">from</span> <span class="nn">OrthoEvol.Pipeline.testpipelinetask</span> <span class="kn">import</span> <span class="n">TestPipelineTask</span>
+
+<span class="c1"># Configure SGE settings</span>
+<span class="n">SGEPipelineTask</span><span class="o">.</span><span class="n">shared_tmp_dir</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">getcwd</span><span class="p">()</span>
+<span class="n">SGEPipelineTask</span><span class="o">.</span><span class="n">parallel_env</span> <span class="o">=</span> <span class="kc">None</span>
+
+<span class="c1"># Create and run test tasks</span>
+<span class="n">tasks</span> <span class="o">=</span> <span class="p">[</span><span class="n">TestPipelineTask</span><span class="p">(</span><span class="n">i</span><span class="o">=</span><span class="nb">str</span><span class="p">(</span><span class="n">i</span><span class="p">),</span> <span class="n">select</span><span class="o">=</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">3</span><span class="p">)]</span>
+<span class="n">luigi</span><span class="o">.</span><span class="n">build</span><span class="p">(</span><span class="n">tasks</span><span class="p">,</span> <span class="n">local_scheduler</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">workers</span><span class="o">=</span><span class="mi">3</span><span class="p">)</span>
+</pre></div>
+</div>
+</section>
+<section id="running-a-blast-pipeline">
+<h3>Running a BLAST Pipeline<a class="headerlink" href="#running-a-blast-pipeline" title="Link to this heading">¶</a></h3>
+<p>The <code class="docutils literal notranslate"><span class="pre">BlastPipelineTask</span></code> runs BLAST searches in parallel:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">logging</span>
+<span class="kn">import</span> <span class="nn">luigi</span>
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">from</span> <span class="nn">OrthoEvol.Tools.sge</span> <span class="kn">import</span> <span class="n">SGEPipelineTask</span>
+<span class="kn">from</span> <span class="nn">OrthoEvol.Pipeline.blastpipeline</span> <span class="kn">import</span> <span class="n">BlastPipelineTask</span>
+<span class="kn">from</span> <span class="nn">OrthoEvol.Orthologs.Blast</span> <span class="kn">import</span> <span class="n">OrthoBlastN</span>
+
+<span class="c1"># Configure BLAST settings</span>
+<span class="n">blast_config</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s2">&quot;taxon_file&quot;</span><span class="p">:</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="s2">&quot;go_list&quot;</span><span class="p">:</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="s2">&quot;post_blast&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+    <span class="s2">&quot;template&quot;</span><span class="p">:</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="s2">&quot;save_data&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+    <span class="s2">&quot;copy_from_package&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+    <span class="s2">&quot;MAF&quot;</span><span class="p">:</span> <span class="s1">&#39;test_blast.csv&#39;</span>
+<span class="p">}</span>
+
+<span class="c1"># Initialize BLAST instance</span>
+<span class="n">myblast</span> <span class="o">=</span> <span class="n">OrthoBlastN</span><span class="p">(</span>
+    <span class="n">proj_mana</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">project</span><span class="o">=</span><span class="s2">&quot;sdh-test&quot;</span><span class="p">,</span>
+    <span class="n">project_path</span><span class="o">=</span><span class="n">os</span><span class="o">.</span><span class="n">getcwd</span><span class="p">(),</span>
+    <span class="o">**</span><span class="n">blast_config</span>
+<span class="p">)</span>
+
+<span class="c1"># Configure SGE settings</span>
+<span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="s1">&#39;luigi-interface&#39;</span><span class="p">)</span>
+<span class="n">SGEPipelineTask</span><span class="o">.</span><span class="n">shared_tmp_dir</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">getcwd</span><span class="p">()</span>
+<span class="n">SGEPipelineTask</span><span class="o">.</span><span class="n">parallel_env</span> <span class="o">=</span> <span class="kc">None</span>
+
+<span class="c1"># Create and run BLAST tasks</span>
+<span class="n">path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">getcwd</span><span class="p">()</span>
+<span class="n">accessions</span> <span class="o">=</span> <span class="n">myblast</span><span class="o">.</span><span class="n">acc_list</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span>
+<span class="n">num_accs</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">accessions</span><span class="p">)</span>
+<span class="n">tasks</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="n">BlastPipelineTask</span><span class="p">(</span>
+        <span class="n">path</span><span class="o">=</span><span class="n">path</span><span class="p">,</span>
+        <span class="n">accessions</span><span class="o">=</span><span class="nb">str</span><span class="p">(</span><span class="n">accessions</span><span class="p">),</span>
+        <span class="n">select</span><span class="o">=</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span>
+    <span class="p">)</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">num_accs</span><span class="p">)</span>
+<span class="p">]</span>
+<span class="n">luigi</span><span class="o">.</span><span class="n">build</span><span class="p">(</span><span class="n">tasks</span><span class="p">,</span> <span class="n">local_scheduler</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">workers</span><span class="o">=</span><span class="n">num_accs</span><span class="p">)</span>
+</pre></div>
+</div>
+</section>
+</section>
+<section id="task-parameters">
+<h2>Task Parameters<a class="headerlink" href="#task-parameters" title="Link to this heading">¶</a></h2>
+<p>All pipeline tasks inherit from <code class="docutils literal notranslate"><span class="pre">SGEPipelineTask</span></code> and support the
+following parameters:</p>
+<ul class="simple">
+<li><p><strong>select</strong>: Number of CPUs (slots) to allocate for the task (default:
+3)</p></li>
+<li><p><strong>shared_tmp_dir</strong>: Shared drive accessible from all cluster nodes
+(default: ‘/home’)</p></li>
+<li><p><strong>parallel_env</strong>: SGE parallel environment name (default: ‘orte’)</p></li>
+<li><p><strong>job_name</strong>: Explicit job name for qsub</p></li>
+<li><p><strong>run_locally</strong>: Run locally instead of on the cluster (default:
+False)</p></li>
+</ul>
+</section>
+<section id="software-dependencies">
+<h2>Software Dependencies<a class="headerlink" href="#software-dependencies" title="Link to this heading">¶</a></h2>
+<ul class="simple">
+<li><p><strong>Luigi</strong>: Workflow management library</p></li>
+<li><p><strong>SunGrid Engine (SGE)</strong>: Job scheduler for cluster computing</p></li>
+<li><p><strong>pbspro</strong>: Alternative job scheduler (version 14.1.0 or higher)</p></li>
+</ul>
+</section>
+<section id="notes">
+<h2>Notes<a class="headerlink" href="#notes" title="Link to this heading">¶</a></h2>
+<ul class="simple">
+<li><p>Tasks should override the <code class="docutils literal notranslate"><span class="pre">work()</span></code> method instead of <code class="docutils literal notranslate"><span class="pre">run()</span></code> for
+SGE execution</p></li>
+<li><p>Use <code class="docutils literal notranslate"><span class="pre">local_scheduler=True</span></code> for local testing and debugging</p></li>
+<li><p>Set <code class="docutils literal notranslate"><span class="pre">workers</span></code> parameter to the number of parallel tasks you want to
+run</p></li>
+<li><p>Ensure Luigi is installed on all cluster nodes</p></li>
+</ul>
+</section>
+</section>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="Main">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../index.html">OrthoEvolution</a></h1>
+
+
+
+<p class="blurb">An easy to use and comprehensive python package which aids in the analysis and visualization of comparative evolutionary genetics</p>
+
+
+
+
+<p>
+<iframe src="https://ghbtns.com/github-btn.html?user=Datasnakes&repo=OrthoEvolution&type=watch&count=true&size=large&v=2"
+  allowtransparency="true" frameborder="0" scrolling="0" width="200px" height="35px"></iframe>
+</p>
+
+
+
+
+
+
+  <div>
+    <h3><a href="../index.html">Table of Contents</a></h3>
+    <ul>
+<li><a class="reference internal" href="#">Pipeline Documentation</a><ul>
+<li><a class="reference internal" href="#overview">Overview</a></li>
+<li><a class="reference internal" href="#examples">Examples</a><ul>
+<li><a class="reference internal" href="#running-a-test-pipeline">Running a Test Pipeline</a></li>
+<li><a class="reference internal" href="#running-a-blast-pipeline">Running a BLAST Pipeline</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#task-parameters">Task Parameters</a></li>
+<li><a class="reference internal" href="#software-dependencies">Software Dependencies</a></li>
+<li><a class="reference internal" href="#notes">Notes</a></li>
+</ul>
+</li>
+</ul>
+
+  </div>
+<search id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</search>
+<script>document.getElementById('searchbox').style.display = "block"</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &#169;2017, Shaurita Hutchins & Robert Gilmore.
+      
+      |
+      Powered by <a href="https://www.sphinx-doc.org/">Sphinx 8.2.3</a>
+      &amp; <a href="https://alabaster.readthedocs.io">Alabaster 1.0.0</a>
+      
+      |
+      <a href="../_sources/pipeline/pipelinereadme.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+    <a href="https://github.com/Datasnakes/OrthoEvolution" class="github">
+        <img src="../_static/github-banner.svg" alt="Fork me on GitHub" class="github"/>
+    </a>
+    
+
+    
+  </body>
+</html>

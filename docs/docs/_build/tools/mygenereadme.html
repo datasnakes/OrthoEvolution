@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+
+<html lang="python" data-content_root="../">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>MyGene Documentation &#8212; OrthoEvolution 1.0.0b2 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=fa44fd50" />
+    <link rel="stylesheet" type="text/css" href="../_static/basic.css?v=b08954a9" />
+    <link rel="stylesheet" type="text/css" href="../_static/alabaster.css?v=27fed22d" />
+    <script src="../_static/documentation_options.js?v=3e4b6f43"></script>
+    <script src="../_static/doctools.js?v=9bcbadda"></script>
+    <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+   
+  <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
+  
+
+  
+  
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <section id="mygene-documentation">
+<h1>MyGene Documentation<a class="headerlink" href="#mygene-documentation" title="Link to this heading">¶</a></h1>
+<p>Our <code class="docutils literal notranslate"><span class="pre">MyGene</span></code> class is a wrapper around BioThings’ MyGene.info.
+<a class="reference external" href="http://mygene.info">MyGene.info</a> provides simple-to-use REST web
+services to query/retrieve gene annotation data.</p>
+<p>Currently, our <code class="docutils literal notranslate"><span class="pre">MyGene</span></code> class does not allow any additional fields or
+species (than the default), but more features will be added in the near
+future.</p>
+<section id="examples">
+<h2>Examples<a class="headerlink" href="#examples" title="Link to this heading">¶</a></h2>
+<section id="use-blast-master-accession-file-output-with-mygene">
+<h3>Use Blast Master Accession File output with MyGene<a class="headerlink" href="#use-blast-master-accession-file-output-with-mygene" title="Link to this heading">¶</a></h3>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">OrthoEvol.Manager.config</span> <span class="kn">import</span> <span class="n">templates</span>
+
+<span class="n">infile</span> <span class="o">=</span> <span class="n">pkg_resources</span><span class="o">.</span><span class="n">resource_filename</span><span class="p">(</span><span class="n">templates</span><span class="o">.</span><span class="vm">__name__</span><span class="p">,</span> <span class="s1">&#39;test_blast.csv&#39;</span><span class="p">)</span>
+
+<span class="n">MyGene</span><span class="p">(</span><span class="n">infile</span><span class="o">=</span><span class="n">infile</span><span class="p">,</span> <span class="n">outfile</span><span class="o">=</span><span class="s1">&#39;mygene_output.csv&#39;</span><span class="p">)</span>
+
+<span class="c1"># Query mygene using your input file</span>
+<span class="n">MyGene</span><span class="o">.</span><span class="n">query_mygene</span><span class="p">()</span>
+</pre></div>
+</div>
+</section>
+</section>
+</section>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="Main">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../index.html">OrthoEvolution</a></h1>
+
+
+
+<p class="blurb">An easy to use and comprehensive python package which aids in the analysis and visualization of comparative evolutionary genetics</p>
+
+
+
+
+<p>
+<iframe src="https://ghbtns.com/github-btn.html?user=Datasnakes&repo=OrthoEvolution&type=watch&count=true&size=large&v=2"
+  allowtransparency="true" frameborder="0" scrolling="0" width="200px" height="35px"></iframe>
+</p>
+
+
+
+
+
+
+  <div>
+    <h3><a href="../index.html">Table of Contents</a></h3>
+    <ul>
+<li><a class="reference internal" href="#">MyGene Documentation</a><ul>
+<li><a class="reference internal" href="#examples">Examples</a><ul>
+<li><a class="reference internal" href="#use-blast-master-accession-file-output-with-mygene">Use Blast Master Accession File output with MyGene</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+  </div>
+<search id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</search>
+<script>document.getElementById('searchbox').style.display = "block"</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &#169;2017, Shaurita Hutchins & Robert Gilmore.
+      
+      |
+      Powered by <a href="https://www.sphinx-doc.org/">Sphinx 8.2.3</a>
+      &amp; <a href="https://alabaster.readthedocs.io">Alabaster 1.0.0</a>
+      
+      |
+      <a href="../_sources/tools/mygenereadme.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+    <a href="https://github.com/Datasnakes/OrthoEvolution" class="github">
+        <img src="../_static/github-banner.svg" alt="Fork me on GitHub" class="github"/>
+    </a>
+    
+
+    
+  </body>
+</html>

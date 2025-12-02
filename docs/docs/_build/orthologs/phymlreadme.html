@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+
+<html lang="python" data-content_root="../">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>PhyML Documentation &#8212; OrthoEvolution 1.0.0b2 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=fa44fd50" />
+    <link rel="stylesheet" type="text/css" href="../_static/basic.css?v=b08954a9" />
+    <link rel="stylesheet" type="text/css" href="../_static/alabaster.css?v=27fed22d" />
+    <script src="../_static/documentation_options.js?v=3e4b6f43"></script>
+    <script src="../_static/doctools.js?v=9bcbadda"></script>
+    <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+   
+  <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
+  
+
+  
+  
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <section id="phyml-documentation">
+<h1>PhyML Documentation<a class="headerlink" href="#phyml-documentation" title="Link to this heading">¶</a></h1>
+<p>PhyML is a phylogeny software based on the maximum-likelihood principle.
+Early PhyML versions used a fast algorithm performing Nearest Neighbor
+Interchanges (NNIs) to improve a reasonable starting tree topology.</p>
+<p>Learn more about PhyML <a class="reference external" href="http://www.atgc-montpellier.fr/">here</a>.</p>
+<section id="default-parameters">
+<h2>Default Parameters<a class="headerlink" href="#default-parameters" title="Link to this heading">¶</a></h2>
+<p>The default datatype is <code class="docutils literal notranslate"><span class="pre">'aa'</span> <span class="pre">(amino</span> <span class="pre">acid)</span></code>, but you may use ‘nt’ for
+nucleotide.</p>
+</section>
+<section id="examples">
+<h2>Examples<a class="headerlink" href="#examples" title="Link to this heading">¶</a></h2>
+<section id="running-phyml">
+<h3>Running Phyml<a class="headerlink" href="#running-phyml" title="Link to this heading">¶</a></h3>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">OrthoEvol.Orthologs.Phylogenetics.PhyML</span> <span class="kn">import</span> <span class="n">PhyML</span>
+
+<span class="n">htr1a</span> <span class="o">=</span> <span class="n">PhyML</span><span class="p">(</span><span class="n">infile</span><span class="o">=</span><span class="s1">&#39;HTR1A.phy&#39;</span><span class="p">,</span> <span class="n">datatype</span><span class="o">=</span><span class="s1">&#39;aa&#39;</span><span class="p">)</span>
+<span class="n">htr1a</span><span class="o">.</span><span class="n">run</span><span class="p">()</span>
+</pre></div>
+</div>
+</section>
+<section id="running-phyml-with-our-parallel-module">
+<h3>Running Phyml with our parallel module<a class="headerlink" href="#running-phyml-with-our-parallel-module" title="Link to this heading">¶</a></h3>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">OrthoEvol.Orthologs.Phylogenetics.PhyML</span> <span class="kn">import</span> <span class="n">PhyML</span>
+<span class="kn">from</span> <span class="nn">OrthoEvol.Tools.parallel</span> <span class="kn">import</span> <span class="n">Multiprocess</span>
+
+<span class="n">files</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;HTR1A.phy&#39;</span><span class="p">,</span> <span class="s1">&#39;HTR1E.phy&#39;</span><span class="p">,</span> <span class="s1">&#39;MAOA.phy&#39;</span><span class="p">]</span>
+
+<span class="k">def</span> <span class="nf">phyml</span><span class="p">(</span><span class="n">filename</span><span class="p">):</span>
+    <span class="n">phyml</span> <span class="o">=</span> <span class="n">PhyML</span><span class="p">(</span><span class="n">infile</span><span class="o">=</span><span class="n">filename</span><span class="p">,</span> <span class="n">datatype</span><span class="o">=</span><span class="s1">&#39;aa&#39;</span><span class="p">)</span>
+    <span class="n">phyml</span><span class="o">.</span><span class="n">run</span><span class="p">()</span>
+
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s1">&#39;__main__&#39;</span><span class="p">:</span>
+    <span class="n">mp</span> <span class="o">=</span> <span class="n">Multiprocess</span><span class="p">()</span>
+    <span class="n">mp</span><span class="o">.</span><span class="n">map2function</span><span class="p">(</span><span class="n">phyml</span><span class="p">,</span> <span class="n">files</span><span class="p">)</span>
+</pre></div>
+</div>
+</section>
+</section>
+<section id="notes">
+<h2>Notes<a class="headerlink" href="#notes" title="Link to this heading">¶</a></h2>
+<p>This class is designed for PhyML <a class="reference external" href="http://www.atgc-montpellier.fr/download/binaries/phyml/PhyML-3.1.zip">version
+3.1</a>.</p>
+</section>
+</section>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="Main">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../index.html">OrthoEvolution</a></h1>
+
+
+
+<p class="blurb">An easy to use and comprehensive python package which aids in the analysis and visualization of comparative evolutionary genetics</p>
+
+
+
+
+<p>
+<iframe src="https://ghbtns.com/github-btn.html?user=Datasnakes&repo=OrthoEvolution&type=watch&count=true&size=large&v=2"
+  allowtransparency="true" frameborder="0" scrolling="0" width="200px" height="35px"></iframe>
+</p>
+
+
+
+
+
+
+  <div>
+    <h3><a href="../index.html">Table of Contents</a></h3>
+    <ul>
+<li><a class="reference internal" href="#">PhyML Documentation</a><ul>
+<li><a class="reference internal" href="#default-parameters">Default Parameters</a></li>
+<li><a class="reference internal" href="#examples">Examples</a><ul>
+<li><a class="reference internal" href="#running-phyml">Running Phyml</a></li>
+<li><a class="reference internal" href="#running-phyml-with-our-parallel-module">Running Phyml with our parallel module</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#notes">Notes</a></li>
+</ul>
+</li>
+</ul>
+
+  </div>
+<search id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</search>
+<script>document.getElementById('searchbox').style.display = "block"</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &#169;2017, Shaurita Hutchins & Robert Gilmore.
+      
+      |
+      Powered by <a href="https://www.sphinx-doc.org/">Sphinx 8.2.3</a>
+      &amp; <a href="https://alabaster.readthedocs.io">Alabaster 1.0.0</a>
+      
+      |
+      <a href="../_sources/orthologs/phymlreadme.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+    <a href="https://github.com/Datasnakes/OrthoEvolution" class="github">
+        <img src="../_static/github-banner.svg" alt="Fork me on GitHub" class="github"/>
+    </a>
+    
+
+    
+  </body>
+</html>

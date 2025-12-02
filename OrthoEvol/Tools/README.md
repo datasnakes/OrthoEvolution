@@ -49,7 +49,7 @@ if __name__ == '__main__':
 from OrthoEvol.Tools.logit import LogIt
 
 # Set up your loggers
-logit = LogIt()default(logname='test1 log', logfile='log.txt')
+logit = LogIt().default(logname='test1 log', logfile='log.txt')
 
 # Shutdown logging without deleting the logfile
 logit.shutdown()

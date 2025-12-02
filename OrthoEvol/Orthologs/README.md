@@ -16,7 +16,7 @@ This is a simple example of using all of the `Orthologs` submodules together.
 ``` python
 from OrthoEvol.Orthologs.Blast import OrthoBlastN
 from OrthoEvol.Orthologs.Align import ClustalO
-from OrthoEvol.Orthologs.Phlogenetics import ETE3PAML
+from OrthoEvol.Orthologs.Phylogenetics import ETE3PAML
 
 ```
 

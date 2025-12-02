@@ -1,41 +1,120 @@
-# Docs
+# Documentation
 
-This folder hosts our tutorial documents used for our readthedocs page as well
-as functions to create our docs dynamically.
+This directory contains the Sphinx documentation for OrthoEvolution.
 
-Our readthedocs page is [here](http://orthoevolution.readthedocs.io/en/master/).
+## Quick Start
+
+To update and build the documentation:
+
+```bash
+# From the project root
+python docs/update_docs.py
+```
+
+This script will:
+1. Automatically read the version from `setup.py`
+2. Update Sphinx configuration
+3. Convert README.md files to RST format (if pypandoc installed)
+4. Regenerate API documentation from source code
+5. Build the HTML documentation
+
+### Options
+
+```bash
+# Skip README.md conversion (faster, if READMEs haven't changed)
+python docs/update_docs.py --skip-readmes
+
+# Only regenerate API docs, don't build
+python docs/update_docs.py --skip-build
+```
+
+## Manual Steps
+
+If you prefer to build manually:
+
+### 1. Regenerate API Documentation
+
+```bash
+cd docs
+rm -rf docs/source/modules/*.rst
+sphinx-apidoc OrthoEvol/ -o docs/source/modules --separate --force
+```
+
+### 2. Build Documentation
+
+```bash
+cd docs/docs/source
+make html
+```
+
+Or using sphinx-build directly:
+
+```bash
+sphinx-build -b html docs/source docs/_build
+```
+
+## Automation Features
+
+### Version Management
+
+The `conf.py` file automatically reads the version from `setup.py`, so you don't need to manually update version numbers when releasing.
+
+### API Documentation
+
+The `update_docs.py` script automatically:
+- Removes old module documentation files
+- Regenerates API docs using `sphinx-apidoc`
+- Builds the final documentation
+
+## Documentation Structure
+
+- `docs/source/` - Sphinx source files
+  - `conf.py` - Sphinx configuration (auto-reads version from setup.py)
+  - `index.rst` - Main documentation index
+  - `modules/` - Auto-generated API documentation
+  - `cookies/`, `manager/`, `orthologs/`, `pipeline/`, `tools/` - Module-specific docs
+  - `tutorial/` - Tutorial documentation
 
 ## Software Dependencies
 
-[Pandoc](http://johnmacfarlane.net/pandoc/) must be installed to use our `PandocConverter` class.
+- [Sphinx](http://www.sphinx-doc.org/) - Documentation generator
+- [Pandoc](http://johnmacfarlane.net/pandoc/) - Optional, for converting markdown to RST
 
-You can install it using the `pypandoc` package as well.
+Install dependencies:
 
-
-`pip install pypandoc`
-
-```python
-# expects an installed pypandoc: pip install pypandoc
-from pypandoc.pandoc_download import download_pandoc
-# see the documentation how to customize the installation path
-# but be aware that you then need to include it in the `PATH`
-download_pandoc()
-```
-
-## How-To: Create Our Docs
-1. Run createdocs.py using `python createdocs.py` to regenerate docs.
-2. Edit docs for specific add ins.
-For example, for main documentation in subfolders such as orthologs, reference
-the documentation files of submodules using `submodule <submodulereadme.rst>`__
-3. Test the docs by running `make html` in the `source` folder.
-4. Commit the changes and push to the branch.
-
-### Creating the modules directory for apidocs
-Perform the below command in the root directory of this package. First, remove
-all of the existing files.
 ```bash
-rm -rf Docs/docs/source/modules/*.rst
-
-sphinx-apidoc OrthoEvol/ -o Docs/docs/source/modules
+pip install sphinx
+# Optional: pip install pypandoc
 ```
 
+## ReadTheDocs Integration
+
+The documentation is automatically built and hosted on [ReadTheDocs](http://orthoevolution.readthedocs.io/).
+
+### Automated Build Process
+
+The `.readthedocs.yml` file in the project root configures the build process:
+
+1. **Pre-build step**: Automatically runs `python docs/update_docs.py --skip-build` to:
+   - Extract version from `setup.py`
+   - Convert README.md files to RST
+   - Regenerate API documentation with `sphinx-apidoc`
+
+2. **Build step**: Read the Docs then runs Sphinx to build the HTML documentation
+
+This means documentation updates automatically on every push to the repository, without manual intervention.
+
+### GitHub Actions
+
+A GitHub Actions workflow (`.github/workflows/docs.yml`) also builds documentation on:
+- Pushes to main branches
+- Pull requests affecting documentation
+- Manual workflow dispatch
+
+This provides local validation and artifact uploads for review.
+
+## Notes
+
+- The `_static/` directory contains generated HTML files that are updated when docs are built
+- README.md to RST conversion is integrated into `update_docs.py` (requires pypandoc)
+- Module documentation is auto-generated, so manual edits to `modules/*.rst` files will be overwritten

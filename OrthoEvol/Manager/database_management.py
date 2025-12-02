@@ -31,18 +31,20 @@ class BaseDatabaseManagement(object):
         uploading refseq release files to BioSQL databases.  This class currently REQUIRES an instance of
         ProjectManagement to be used with the proj_mana parameter.
 
-        :param project: The name of the project.
-        :type project: str.
         :param email: The email of the user for using during the FTP.
-        :type email: str.
+        :type email: str
         :param driver: The driver used for creating the BioSQL databases.
-        :type driver:  str.
+        :type driver: str
+        :param project: The name of the project.
+        :type project: str or None
         :param project_path: A path used for standalone/basic project configuration.
-        :type project_path: str.
+        :type project_path: str or Path or None
         :param proj_mana: A configuration variable for connecting projects.
-        :type proj_mana: ProjectManagement.
+        :type proj_mana: ProjectManagement or None
+        :param blast: Flag for BLAST-related database operations.
+        :type blast: bool
         :param ftp_flag: A flag used if FTP connection is available or not.
-        :type ftp_flag:  bool.
+        :type ftp_flag: bool
         """
 
         # Initialize Utilities

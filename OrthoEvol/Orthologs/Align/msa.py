@@ -24,14 +24,21 @@ class MultipleSequenceAlignment(object):
         """Initialize the MultipleSequenceAlignment class.
 
         :param project: The project name.
-        :param project_path:  The path to the project.
+        :type project: str or None
+        :param project_path: The path to the project.
+        :type project_path: str or Path
         :param genbank: The composer parameter which is used to configure the
                         GenBank class with the MSA class.
-        :param kwargs:  The kwargs are used with the dispatcher as a way to
-                        control the alignment pipeline.
+        :type genbank: class
+        :param kwargs: The kwargs are used with the dispatcher as a way to
+                        control the alignment pipeline. Can include:
+                        - Guidance_config: Configuration for GUIDANCE2
+                        - Pal2Nal_config: Configuration for PAL2NAL
+                        - ClustalO_config: Configuration for ClustalO
+        :type kwargs: dict
         :returns: If the kwargs are utilized with YAML or other
                   configurations, then this class returns an alignment
-        dictionary, which can be parsed to run specific alignment algorithms.
+                  dictionary, which can be parsed to run specific alignment algorithms.
         """
         self.dispatcher_options = {"Guidance_config": ["GUIDANCE2", self.guidance2],
                                    "Pal2Nal_config": ["PAL2NAL", self.pal2nal],
