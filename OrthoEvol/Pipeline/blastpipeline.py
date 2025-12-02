@@ -30,17 +30,34 @@ SGEPipelineTask.parallel_env = None
 
 
 class BlastPipelineTask(SGEPipelineTask):
-    """Task for running a Blast pipeline."""
+    """Task for running a BLAST pipeline on SunGrid Engine.
+
+    This task runs BLAST searches in parallel across multiple cluster nodes.
+    It inherits from SGEPipelineTask to enable distributed execution.
+
+    :param path: Working directory path for the pipeline.
+    :type path: str
+    :param accessions: List of accession numbers to process.
+    :type accessions: str
+    """
 
     path = luigi.Parameter()
     accessions = luigi.Parameter()
 
-    def run(self):  # Use work instead of run to DEBUG
+    def run(self):
+        """Execute the BLAST pipeline task.
+
+        Configures and runs BLAST for Homo sapiens using the configured
+        blast_human settings. Override work() instead of run() for debugging.
+        """
         myblast.blast_config(myblast.blast_human, 'Homo_sapiens', auto_start=True)
 
     def output(self):
-        """ """
+        """Define the output target for this task.
 
+        :return: Local target representing the project path output.
+        :rtype: luigi.LocalTarget
+        """
         return luigi.LocalTarget(path=os.path.join(self.path, myblast.project_path.as_posix()))
 
 
@@ -50,5 +67,5 @@ if __name__ == '__main__':
     num_accs = len(accessions)
     tasks = [BlastPipelineTask(path=path,
                                accessions=str(accessions),
-                               select=num_accs+1) for num_accs in range(num_accs)]
+                               select=i+1) for i in range(num_accs)]
     luigi.build(tasks, local_scheduler=True, workers=num_accs)
