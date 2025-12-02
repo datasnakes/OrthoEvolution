@@ -51,11 +51,16 @@ jobs:
 
     - name: Check for documentation errors
       run: |
-        if [ -d "docs/docs/_build/html" ]; then
+        if [ -d "docs/docs/_build" ] && [ -f "docs/docs/_build/index.html" ]; then
           echo "✓ Documentation built successfully"
-          find docs/docs/_build/html -name "*.html" | head -5
+          echo "Found HTML files:"
+          find docs/docs/_build -maxdepth 1 -name "*.html" | head -5
+          echo "Build directory structure:"
+          ls -la docs/docs/_build/ | head -10
         else
           echo "✗ Documentation build failed"
+          echo "Checking build directory:"
+          ls -la docs/docs/_build/ 2>&1 || echo "Build directory does not exist"
           exit 1
         fi
 
@@ -64,5 +69,5 @@ jobs:
       uses: actions/upload-artifact@v4
       with:
         name: documentation
-        path: docs/docs/_build/html
+        path: docs/docs/_build
         retention-days: 7
