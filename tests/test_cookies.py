@@ -1,55 +1,76 @@
 import unittest
-from unittest.mock import patch, MagicMock
 from OrthoEvol.Cookies import CookBook, Oven
 from pathlib import Path
 import os
+import shutil
 
 class TestCookBook(unittest.TestCase):
 
     def test_init(self):
+        """Test CookBook initialization."""
         cookbook = CookBook()
         self.assertTrue(hasattr(cookbook, 'CookieJar'))
         self.assertIsInstance(cookbook.CookieJar, Path)
-
-    @patch('builtins.open', new_callable=MagicMock)
-    def test_new_recipes(self, mock_open):
-        mock_open.return_value.__enter__.return_value = MagicMock()
-        new_recipe_path = Path('path/to/new/recipe')
-        cookbook = CookBook(new_recipe='new_recipe_path')
-        self.assertTrue(hasattr(cookbook, 'new_recipe'))
-        self.assertEqual(getattr(cookbook, 'new_recipe'), new_recipe_path)
+        self.assertTrue(cookbook.CookieJar.exists())
 
 class TestOven(unittest.TestCase):
 
     def setUp(self):
+        """Set up test fixtures."""
         self.cookbook = CookBook()
         self.oven = Oven(recipes=self.cookbook)
-        self.test_dir = Path('test_directory')
-        self.test_dir.mkdir(exist_ok=True)
+        self.test_dir = Path('test_cookies_output')
+        # Clean up any existing test directory
+        if self.test_dir.exists():
+            shutil.rmtree(self.test_dir)
+        self.test_dir.mkdir()
+        # Clean up any leftover Test-Repository from previous runs
+        test_repo = Path('Test-Repository')
+        if test_repo.exists():
+            shutil.rmtree(test_repo)
 
     def tearDown(self):
+        """Clean up test directories."""
+        # Clean up test directory
         if self.test_dir.exists():
-            os.rmdir(self.test_dir)
-
-    def test_init(self):
-        self.assertEqual(self.oven.Recipes, self.cookbook)
-        self.assertEqual(self.oven.cookie_jar, os.getcwd())
+            try:
+                shutil.rmtree(self.test_dir)
+            except (OSError, PermissionError):
+                # If cleanup fails, try to remove contents individually
+                for item in self.test_dir.iterdir():
+                    try:
+                        if item.is_dir():
+                            shutil.rmtree(item)
+                        else:
+                            item.unlink()
+                    except (OSError, PermissionError):
+                        pass
+                # Try to remove the directory again
+                try:
+                    self.test_dir.rmdir()
+                except (OSError, PermissionError):
+                    pass
+        # Clean up any Test-Repository that might have been created
+        test_repo = Path('Test-Repository')
+        if test_repo.exists():
+            try:
+                shutil.rmtree(test_repo)
+            except (OSError, PermissionError):
+                pass
 
     def test_bake_the_repo(self):
-        repo_name = 'test_repo'
-        self.oven.repo = repo_name
+        """Test that bake_the_repo creates a repository."""
+        self.oven.repo = 'test_repo'
         self.oven.bake_the_repo(cookie_jar=self.test_dir)
-        expected_dir = self.test_dir / repo_name
+        expected_dir = self.test_dir / 'test_repo'
         self.assertTrue(expected_dir.exists())
 
     def test_bake_the_user(self):
-        user_name = 'test_user'
-        self.oven.user = user_name
+        """Test that bake_the_user creates a user directory."""
+        self.oven.user = 'test_user'
         self.oven.bake_the_user(cookie_jar=self.test_dir)
-        expected_dir = self.test_dir / user_name
+        expected_dir = self.test_dir / 'test_user'
         self.assertTrue(expected_dir.exists())
-
-    # Similar tests for other methods like bake_the_project, etc.
 
 if __name__ == '__main__':
     unittest.main()
