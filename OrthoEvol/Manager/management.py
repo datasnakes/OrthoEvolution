@@ -19,10 +19,13 @@ class Management(object):
         important directory into a pathlike object.  The base class gives the option of creating a new repository with
         cookiecutter.
 
-        :param repo(string): The name of the new repository to be created.
-        :param home(path or path-like): The home of the file calling this name.  When creating a new
+        :param repo: The name of the new repository to be created.
+        :type repo: str or None
+        :param home: The home of the file calling this name. When creating a new
             repository, it is best to explicitly name the home path.
-        :param new_repo(bool): Triggers cookiecutter to create a new repository.
+        :type home: str or Path
+        :param new_repo: Triggers cookiecutter to create a new repository.
+        :type new_repo: bool
         """
 
         self.repo = repo
@@ -84,11 +87,16 @@ class RepoManagement(Management):
         This class maps the named repository, which includes top level access to front facing web servers, important
         documents, and the top level users directory.
 
-        :param repo (string):  The name of the repository.
-        :param user (string):  The name of the current user if any.
-        :param home (string or pathlike):  The home path of the repository.
-        :param new_user (bool):  Flag for creating a new user.
-        :param new_repo (bool): Flag for creating a new repository.
+        :param repo: The name of the repository.
+        :type repo: str
+        :param user: The name of the current user if any.
+        :type user: str or None
+        :param home: The home path of the repository.
+        :type home: str or Path
+        :param new_user: Flag for creating a new user.
+        :type new_user: bool
+        :param new_repo: Flag for creating a new repository.
+        :type new_repo: bool
         """
 
         # TODO-ROB change the home parameter to the output directory parameter
@@ -138,12 +146,24 @@ class UserManagement(RepoManagement):
         This class maps a users directory, which gives access to directories for db_config_file (NCBI and proprietary), index
         files for quickly retrieving project data, project log files, user affiliated journal articles, and projects.
 
-        :param repo (string):  The name of the repository.
-        :param user (string):  The name of the current user if any.
-        :param project(string):  The name of the current project if any.
-        :param home (string or pathlike):  The home path of the repository.
-        :param new_user (bool):  Flag for creating a new user.
-        :param new_project (bool):  Flag for creating a new project.
+        :param repo: The name of the repository.
+        :type repo: str
+        :param user: The name of the current user if any.
+        :type user: str
+        :param project: The name of the current project if any.
+        :type project: str or None
+        :param db_config_file: Configuration file for database setup.
+        :type db_config_file: str or Path or None
+        :param home: The home path of the repository.
+        :type home: str or Path
+        :param new_user: Flag for creating a new user.
+        :type new_user: bool
+        :param new_project: Flag for creating a new project.
+        :type new_project: bool
+        :param new_db: Flag for creating a new database.
+        :type new_db: bool
+        :param archive: Flag for archiving existing data.
+        :type archive: bool
         """
         self.user = user
         self.repo = repo
@@ -211,14 +231,21 @@ class WebsiteManagement(RepoManagement):
         official cookiecutter-flask template (https://github.com/sloria/cookiecutter-flask) has been edited for our own
         purposes.  This app class uses cookiecutter hooks to deploy the flask server.
 
-        :param repo (string):  The name of the repository.
-        :param website (string):  The name of the website.  Not a url, so
-        it doesn't containt http://www.*.com.
-        (e.g. for www.vallenger-genetics.ml this parameter would be 'vallender-genetics')
-        :param host (string):  The address to launch the flask app.  Defaults to 0.0.0.0
-        :param port (string):  The port to launch the flask app.  Defaults to 5252
-        :param home (string or pathlike):  The home path of the repository.
-        :param new_website (bool):  Flag for creating a new website
+        :param repo: The name of the repository.
+        :type repo: str
+        :param website: The name of the website. Not a URL, so it doesn't contain http://www.*.com.
+            (e.g. for www.vallenger-genetics.ml this parameter would be 'vallender-genetics')
+        :type website: str
+        :param host: The address to launch the flask app. Defaults to '0.0.0.0'.
+        :type host: str
+        :param port: The port to launch the flask app. Defaults to '5252'.
+        :type port: str
+        :param home: The home path of the repository.
+        :type home: str or Path
+        :param new_website: Flag for creating a new website.
+        :type new_website: bool
+        :param create_admin: Flag for creating an admin user.
+        :type create_admin: bool
         :param create_admin:  Flag for creating a new admin for the website via FLASK USER.
         (Note:  This parameter is not used currently in development.)
         """
@@ -262,16 +289,26 @@ class ProjectManagement(UserManagement):
         files, the raw data, the processed data, the project db_config_file,
         and the web files for serving data.
 
-        :param repo (string):  The name of the repository.
-        :param user (string):  The name of the current user if any.
-        :param project(string):  The name of the current project if any.
-        :param research (string):  The name of the current type of research if any
-        :param research_type (string):  The type of research (public or private)
-        :param app (string):  The name of the application that the research.
-        :param home (string or pathlike):  The home path of the repository.
-        :param new_project (bool):  Flag for creating a new project.
-        :param new_research (bool):  Flag for creating new research under a project.
-        :param new_app (bool):  Flag for creating a new web app under a research target.
+        :param repo: The name of the repository.
+        :type repo: str
+        :param user: The name of the current user if any.
+        :type user: str
+        :param project: The name of the current project if any.
+        :type project: str
+        :param research: The name of the current type of research if any.
+        :type research: str or None
+        :param research_type: The type of research (e.g., 'comparative_genetics', 'public', 'private').
+        :type research_type: str or None
+        :param app: The name of the application for the research.
+        :type app: str or None
+        :param home: The home path of the repository.
+        :type home: str or Path
+        :param new_project: Flag for creating a new project.
+        :type new_project: bool
+        :param new_research: Flag for creating new research under a project.
+        :type new_research: bool
+        :param new_app: Flag for creating a new web app under a research target.
+        :type new_app: bool
         """
         # Standalone for child/self or full class hierarchy use
         if project or (repo and user and project):

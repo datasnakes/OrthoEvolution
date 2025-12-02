@@ -73,14 +73,22 @@ class Oven(object):
 
         After the cookies cool, they are put in the cookie_jar (output directory).
 
-        :param repo (string):  An ingredient representing the repository name.
-        :param user (string):  An ingredient representing the user name
-        :param project (string):  An ingredient representing the project name.
-        :param basic_project (bool):  A secret ingredient ONLY for the basic project cookie.
-        :param db_config_file (list):  An ingredient representing a list of db_config_file.
-        :param website (string):  An ingredient representing the website name.
-        :param output_dir (path or pathlike):  The cookie jar for storing the cookies.
-        :param recipes (pathlike):  An index for the different recipe templates.
+        :param repo: An ingredient representing the repository name.
+        :type repo: str or None
+        :param user: An ingredient representing the user name.
+        :type user: str or None
+        :param project: An ingredient representing the project name.
+        :type project: str or None
+        :param basic_project: A secret ingredient ONLY for the basic project cookie.
+        :type basic_project: bool
+        :param website: An ingredient representing the website name.
+        :type website: str or None
+        :param db_repo: Name for the database repository. Defaults to "databases".
+        :type db_repo: str
+        :param output_dir: The cookie jar for storing the cookies.
+        :type output_dir: str or Path
+        :param recipes: An index for the different recipe templates.
+        :type recipes: CookBook
         """
         self.cookielog = LogIt().default(logname="Cookies", logfile=None)
         self.cookie_jar = output_dir
@@ -105,37 +113,43 @@ class Oven(object):
     def _check_ingredients(self, cookie, path, no_input, extra_context):
         """Check if a directory exists. If not, create it.
 
-        :param cookie: [description]
-        :type cookie: [type]
-        :param path: [description]
-        :type path: [type]
-        :param no_input: [description]
-        :type no_input: [type]
-        :param extra_context: [description]
-        :type extra_context: [type]
+        :param cookie: Path to the cookiecutter template directory.
+        :type cookie: str or Path
+        :param path: Path where the generated output should be created.
+        :type path: str or Path
+        :param no_input: Whether to run cookiecutter without user input.
+        :type no_input: bool
+        :param extra_context: Dictionary of context variables for cookiecutter.
+        :type extra_context: dict or None
         """
         if self.cookie_jar:
             if self.exists(str(path)):
                 os.chmod(str(path), mode=0o777)
                 self.cookielog.warning('%s already exists. ✔' % str(path))
-
-        else:
-            cookiecutter(str(cookie), no_input=no_input,
-                         extra_context=extra_context,
-                         output_dir=str(self.cookie_jar))
-            os.chmod(str(path), mode=0o777)
-            self.cookielog.info('%s was created. ✔' % str(path))
+            else:
+                # Convert cookie_jar to absolute path to ensure cookiecutter creates
+                # directories in the correct location
+                output_dir = Path(self.cookie_jar).resolve()
+                cookiecutter(str(cookie), no_input=no_input,
+                             extra_context=extra_context,
+                             output_dir=str(output_dir))
+                os.chmod(str(path), mode=0o777)
+                self.cookielog.info('%s was created. ✔' % str(path))
 
     def bake_the_repo(self, cookie_jar=None):
-        self.cookielog.warning('Creating directories from the Repository Cookie template.')
+        """Create a new repository using the repository cookiecutter template.
+
+        This function creates a new repository. If a repository name
+        is given to the class, then it is given a name. If not, cookiecutter
+        takes input from the user.
+
+        The base class will be the only class that allows cookiecutters parameter
+        no_input to be False.
+
+        :param cookie_jar: Output directory for the generated repository. Defaults to self.cookie_jar.
+        :type cookie_jar: str or Path or None
         """
-            This function creates a new repository.  If a repository name
-            is given to the class, then it is given a name.  If not, cookiecutter
-            takes input from the user.
-    
-            The base class will be the only class that allows cookiecutters parameter
-            no_input to be False.
-            """
+        self.cookielog.warning('Creating directories from the Repository Cookie template.')
         if cookie_jar:
             self.cookie_jar = cookie_jar
         if self.repo:
@@ -158,9 +172,10 @@ class Oven(object):
 
         This function uses the username given by our FLASK framework
         and creates a new directory system for the active user using
-        our  new_user cookiecutter template.
+        our new_user cookiecutter template.
 
-        :param cookie_jar:  (Default value = None)
+        :param cookie_jar: Output directory for the generated user directory. Defaults to self.cookie_jar.
+        :type cookie_jar: str or Path or None
         """
 
         self.cookielog.warning('Creating directories from the User Cookie template.')
@@ -177,8 +192,11 @@ class Oven(object):
     def bake_the_project(self, cookie_jar=None):
         """Create a project directory.
 
-        :param cookie_jar:
-        :return: A new project inside the user's project directory.
+        Creates a new project inside the user's project directory using
+        the project cookiecutter template.
+
+        :param cookie_jar: Output directory for the generated project. Defaults to self.cookie_jar.
+        :type cookie_jar: str or Path or None
         """
 
         self.cookielog.warning('Creating directories from the Project Cookie template.')
@@ -222,12 +240,19 @@ class Oven(object):
     def bake_the_db_repo(self, db_config_file, db_path, cookie_jar=None, archive_flag=False, delete=False):
         """Create a database directory.
 
-        :param db_config_file:
-        :param db_path:
-        :param cookie_jar:  (Default value = None)
-        :param archive_flag:  (Default value = False)
-        :param delete:  (Default value = False)
-        :return: A new database inside the users database directory
+        Creates a new database inside the users database directory using
+        the database cookiecutter template.
+
+        :param db_config_file: Configuration file for database setup.
+        :type db_config_file: str or Path
+        :param db_path: Path where the database should be created.
+        :type db_path: str or Path
+        :param cookie_jar: Output directory for the generated database. Defaults to self.cookie_jar.
+        :type cookie_jar: str or Path or None
+        :param archive_flag: Whether to archive existing database before creating new one. Defaults to False.
+        :type archive_flag: bool
+        :param delete: Whether to delete existing database. USE WITH CAUTION. Defaults to False.
+        :type delete: bool
         """
 
         # TODO-ROB:  Work work this in with the database management class.
@@ -239,12 +264,12 @@ class Oven(object):
         #     for arch in archive_list:
         #         self.cookielog.info("An archive has been created at %s." % arch)
         # else:
-        #     if self.db_repo:
-        #         no_input = True
-        #         e_c = {"db_name": self.db_repo}
-        #     else:
-        #         no_input = False
-        #         e_c = None
+        if self.db_repo:
+            no_input = True
+            e_c = {"db_name": self.db_repo}
+        else:
+            no_input = False
+            e_c = None
 
         self._check_ingredients(self.Recipes.db_cookie,
                                 self.cookie_jar / Path(self.db_repo),
@@ -265,10 +290,14 @@ class Oven(object):
         sets up the proper dependencies and environment variables for the
         website, and runs the website on the specified host and port.
 
-        :param host:
-        :param port:
-        :param website_path:
-        :param cookie_jar:  (Default value = None)
+        :param host: Host address for the website server.
+        :type host: str
+        :param port: Port number for the website server.
+        :type port: str or int
+        :param website_path: Path where the website should be created.
+        :type website_path: str or Path
+        :param cookie_jar: Output directory for the generated website. Defaults to self.cookie_jar.
+        :type cookie_jar: str or Path or None
         """
 
         self.cookielog.warning('Creating directories from the Website Cookie template.')
@@ -296,9 +325,14 @@ class Oven(object):
     def bake_the_research(self, research_type, research, cookie_jar=None):
         """Create a directory for a new research project.
 
-        :param research_type:
-        :param research:
-        :param cookie_jar:  (Default value = None)
+        Creates a new research directory using the research cookiecutter template.
+
+        :param research_type: Type of research (e.g., 'comparative_genetics').
+        :type research_type: str
+        :param research: Name of the research project.
+        :type research: str
+        :param cookie_jar: Output directory for the generated research directory. Defaults to self.cookie_jar.
+        :type cookie_jar: str or Path or None
         """
 
         self.cookielog.warning('Creating directories from the Research Cookie template.')
@@ -316,8 +350,12 @@ class Oven(object):
     def bake_the_app(self, app, cookie_jar=None):
         """Create an app.
 
-        :param app:  Name of the app.
-        :param cookie_jar:  (Default value = None)
+        Creates a new app directory using the app cookiecutter template.
+
+        :param app: Name of the app.
+        :type app: str
+        :param cookie_jar: Output directory for the generated app. Defaults to self.cookie_jar.
+        :type cookie_jar: str or Path or None
         """
 
         self.cookielog.warning('Creating directories from the App Cookie template.')

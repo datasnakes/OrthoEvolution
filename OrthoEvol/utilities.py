@@ -43,6 +43,11 @@ class BlastUtils(object):
 
     def map_func(self, hit):
         """Format/parse hit ids generated from blast xml results.
+
+        :param hit: A BLAST hit object from SearchIO.
+        :type hit: Bio.SearchIO.HSP or Bio.SearchIO.Hit
+        :return: The hit object with formatted id, id1 (accession), and id2 (gi).
+        :rtype: Bio.SearchIO.HSP or Bio.SearchIO.Hit
         """
         hit.id1 = hit.id.split('|')[3]  # accession number
         hit.id2 = hit.id.split('|')[1]  # gi number
@@ -54,8 +59,10 @@ class BlastUtils(object):
         which can only take names that are less than a certain length
         (36 characters?).
 
-        :param organisms:  A list of organisms
-        :type organisms:  list.
+        :param organisms: A list of organisms.
+        :type organisms: list
+        :return: A list of formatted organism names for PAML.
+        :rtype: list
         """
         # XXX PAML no longer needs a format different than `Homo_sapiens`
         org_list = []
@@ -398,11 +405,11 @@ class BlastUtils(object):
         :type path: str
         :param exists: A flag used to create a database if needed.
         :type exists: bool
-        :param acc_file:  The name of the accession file.  The file name is used to create a table in the
-        sqlite3 database.  Any periods will be replaced with underscores.
-        :type acc_file: str
-        :return:
-        :rtype:
+        :param acc_file: The name of the accession file. The file name is used to create a table in the
+                         sqlite3 database. Any periods will be replaced with underscores.
+        :type acc_file: str or None
+        :return: A pandas DataFrame containing the accession data.
+        :rtype: pd.DataFrame
         """
         db_path = Path(path) / Path(db_name)
         if not exists or not db_path.is_file():
@@ -551,7 +558,7 @@ class GenbankUtils(object):
         :return:  A multi-FASTA file with sorted sequences.
         :rtype:  str.
         """
-        # TODO-ROB:  Check for duplicates.
+        # TODO:  Check for duplicates.
         with TemporaryFile('r+', dir=str(Path(target_file).parent)) as tmp_file:
             aln = MultipleSeqAlignment([])
 
@@ -602,9 +609,10 @@ class OrthologUtils(BlastUtils, GenbankUtils):
         :param composer: A class that will yield attributes to the cls parameter.
         :type composer:  object.
         :param checker: A checker class used to check the type of the composer.
-                Dictionary composers will be treated differently.
-        :type checker:  object.
-        :type checker:  dict.
+                        Dictionary composers will be treated differently.
+        :type checker: class
+        :param checker2: An optional second checker class for additional type checking.
+        :type checker2: class or None
         :param project:  The name of the project.
         :type project:  str.
         :param project_path:  The relative path of the project.
@@ -658,11 +666,9 @@ class OrthologUtils(BlastUtils, GenbankUtils):
         :param project: The name of the project.
         :type project:  str.
         :param project_path: The relative path of a project.
-        :type project_path:  str.
-        :param new: The new project flag.
-        :type new:  bool.
+        :type project_path: str or Path
         :param custom: The custom flag which can be None or a dictionary.
-        :type custom:  dict.
+        :type custom: dict or None
         :return: Returns the instance (cls) with new attributes.
         :rtype:  object.
         """
@@ -712,8 +718,8 @@ class ManagerUtils(object):
 
         :param config_file:  A YAML config file for database management.
         :type config_file:   str.
-        :return:  The database config strategies, and the key word arguments for database management.
-        :rtype:  tuble.
+        :return: The database config strategies, and the key word arguments for database management.
+        :rtype: tuple
         """
         kw = {}
         db_config_strategy = {}
@@ -740,8 +746,10 @@ class ManagerUtils(object):
         :type id:  int.
         :param code:  Python code as a string.
         :type code:  str.
-        :param activate:  The path to the activate script for the virtual environment being used in the PBS job.
-        :type activate:  str.
+        :param activate: The path to the activate script for the virtual environment being used in the PBS job.
+        :type activate: str
+        :param config_dict: Configuration dictionary for the SGE job.
+        :type config_dict: dict
         """
         job = SGEJob(email_address=email_address, base_jobname=base_jobname % str(id), activate=activate,
                      config=config_dict)
@@ -872,19 +880,41 @@ class PackageVersion(object):
     """Get the version of an installed python package."""
 
     def __init__(self, packagename):
+        """Initialize PackageVersion class.
+
+        :param packagename: Name of the Python package to check.
+        :type packagename: str
+        """
         self.packagename = packagename
         self._getversion()
 
     def _getversion(self):
+        """Get and log the version of the installed package.
+
+        :return: The version string of the package.
+        :rtype: str
+        """
         import_module(self.packagename)
         version = pkg_resources.get_distribution(self.packagename).version
         utils_log.info('Version %s of %s is installed.' % (version, self.packagename))
+        return version
 
 
 class FunctionRepeater(object):
     """Repeats a function every interval. Ref: https://tinyurl.com/yckgv8m2"""
 
     def __init__(self, interval, function, *args, **kwargs):
+        """Initialize FunctionRepeater class.
+
+        :param interval: Time interval in seconds between function calls.
+        :type interval: float or int
+        :param function: The function to repeat.
+        :type function: callable
+        :param args: Positional arguments to pass to the function.
+        :type args: tuple
+        :param kwargs: Keyword arguments to pass to the function.
+        :type kwargs: dict
+        """
         self._timer = None
         self.function = function
         self.interval = interval
@@ -894,17 +924,20 @@ class FunctionRepeater(object):
         self.start()
 
     def _run(self):
+        """Internal method to run the function and restart the timer."""
         self.is_running = False
         self.start()
         self.function(*self.args, **self.kwargs)
 
     def start(self):
+        """Start the function repeater."""
         if not self.is_running:
             self._timer = Timer(self.interval, self._run)
             self._timer.start()
             self.is_running = True
 
     def stop(self):
+        """Stop the function repeater."""
         self._timer.cancel()
         self.is_running = False
 

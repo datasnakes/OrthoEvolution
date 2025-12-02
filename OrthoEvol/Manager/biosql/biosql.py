@@ -100,7 +100,7 @@ class BaseBioSQL(object):
         for file in os.listdir(biosql_scripts):
             if '.pl' in str(file):
                 script_path = os.path.join(biosql_scripts, file)
-                self.biosqllog,info("Making script executable: ", file)
+                self.biosqllog.info("Making script executable: ", file)
                 os.chmod(script_path, mode=0o755)
 
 

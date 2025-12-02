@@ -14,11 +14,23 @@ class FilteredTree(object):
     """Run IQTree to generate a "filtered" tree or best tree.
 
     :param alignment: Path to multiple sequence alignment file.
-    :param dataType:  Input datatype. (Default value = 'CODON')
-    :param home: Path of working directory.  (Default value = PWD)
-        """
+    :type alignment: str
+    :param dataType: Input datatype (e.g., 'CODON', 'DNA', 'AA').
+    :type dataType: str
+    :param home: Path of working directory.
+    :type home: str or Path
+    """
 
     def __init__(self, alignment, dataType='CODON', home=os.getcwd()):
+        """Initialize FilteredTree class.
+
+        :param alignment: Path to multiple sequence alignment file.
+        :type alignment: str
+        :param dataType: Input datatype (e.g., 'CODON', 'DNA', 'AA').
+        :type dataType: str
+        :param home: Path of working directory.
+        :type home: str or Path
+        """
         self.home = Path(home)
         self.iqtree_path = self.home / Path('IQTREE')
         self.tree_file = self.iqtree_path / Path(alignment + '.treefile')
@@ -28,13 +40,22 @@ class FilteredTree(object):
         outDir = self.home / Path('IQTREE')
         os.makedirs(str(outDir), exist_ok=True)
         copy(self.aln_File, str(outDir))
-        os.chdir(str(outDir))
-        self.iqtree_best_tree(alignment, dataType)
-        copy(self.tree_file, str(self.home / Path(self.gene + '_iqtree.nwk')))
+        # Save current directory and restore after execution
+        original_dir = os.getcwd()
+        try:
+            os.chdir(str(outDir))
+            self.iqtree_best_tree(alignment, dataType)
+            copy(self.tree_file, str(self.home / Path(self.gene + '_iqtree.nwk')))
+        finally:
+            os.chdir(original_dir)
 
     def iqtree_best_tree(self, alignment, dataType):
-        """Generate and save the best tree from IQTree by importing the filtered
-        alignment.
+        """Generate and save the best tree from IQTree by importing the filtered alignment.
+
+        :param alignment: Path to multiple sequence alignment file.
+        :type alignment: str
+        :param dataType: Input datatype for IQTree.
+        :type dataType: str
         """
         iqtree_cline = IQTreeCommandline(alignment=alignment,
                                          dataType=dataType)

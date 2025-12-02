@@ -25,7 +25,19 @@ from OrthoEvol.Orthologs.GenBank.genbank import GenBank
 class DataMana(object):
 
     def __init__(self, config_file=None, pipeline=None, new=False, start=False, **kwargs):
-        """Initialize the attributes that can be used as keys in the config_file."""
+        """Initialize the attributes that can be used as keys in the config_file.
+
+        :param config_file: Path to YAML configuration file.
+        :type config_file: str or Path or None
+        :param pipeline: Name of the pipeline to use (e.g., 'Ortho_CDS_1').
+        :type pipeline: str or None
+        :param new: Flag indicating if this is a new pipeline setup.
+        :type new: bool
+        :param start: Flag to start the pipeline immediately after initialization.
+        :type start: bool
+        :param kwargs: Additional keyword arguments for configuration.
+        :type kwargs: dict
+        """
         # Full configuration for the pipeline's YAML based variables
         self.Management_config = self.Database_config = self.CompGenAnalysis_config = self.BLASTn_config = \
             self.GenBank_config = self.Alignment_config = None
@@ -45,8 +57,11 @@ class DataMana(object):
     def configure(self, config_file):
         """Use YAML configuration in order to initialize different classes.
 
+        Reads a YAML configuration file and initializes various classes
+        (ProjectManagement, OrthoBlastN, GenBank, etc.) based on the configuration.
+
         :param config_file: A YAML file that is used to create a dictionary(kwargs) for each class.
-        :return:
+        :type config_file: str or Path
         """
         with open(config_file, 'r') as ymlfile:
             configuration = yaml.safe_load(ymlfile)
@@ -111,12 +126,15 @@ class DataMana(object):
             # TODO-ROB parse the config options
 
     def blast(self, proj_mana, blast_config):
-        """Run blast.
+        """Run BLAST analysis.
 
-        :param proj_mana: [description]
-        :type proj_mana: [type]
-        :param blast_config: [description]
-        :type blast_config: [type]
+        Executes BLAST analysis using the provided project management
+        and BLAST configuration.
+
+        :param proj_mana: Project management instance for organizing BLAST results.
+        :type proj_mana: ProjectManagement
+        :param blast_config: Configuration dictionary for BLAST parameters.
+        :type blast_config: dict
         """
         self.bl = OrthoBlastN(proj_mana=proj_mana, **self.Management_config, **blast_config)
         self.bl.blast_config(self.bl.blast_human, 'Homo_sapiens', auto_start=True)
