@@ -28,9 +28,14 @@ class FilteredTree(object):
         outDir = self.home / Path('IQTREE')
         os.makedirs(str(outDir), exist_ok=True)
         copy(self.aln_File, str(outDir))
-        os.chdir(str(outDir))
-        self.iqtree_best_tree(alignment, dataType)
-        copy(self.tree_file, str(self.home / Path(self.gene + '_iqtree.nwk')))
+        # Save current directory and restore after execution
+        original_dir = os.getcwd()
+        try:
+            os.chdir(str(outDir))
+            self.iqtree_best_tree(alignment, dataType)
+            copy(self.tree_file, str(self.home / Path(self.gene + '_iqtree.nwk')))
+        finally:
+            os.chdir(original_dir)
 
     def iqtree_best_tree(self, alignment, dataType):
         """Generate and save the best tree from IQTree by importing the filtered

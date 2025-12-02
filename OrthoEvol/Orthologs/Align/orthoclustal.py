@@ -3,7 +3,12 @@ guide trees and HMM profile-profile techniques to generate alignments between
 three or more sequences.
 """
 from Bio.Align.Applications import ClustalOmegaCommandline
-from Bio.Application import ApplicationError
+try:
+    from Bio.Application import ApplicationError
+except ImportError:
+    # Bio.Application is deprecated in newer biopython versions
+    # Use subprocess.CalledProcessError as fallback
+    from subprocess import CalledProcessError as ApplicationError
 
 from OrthoEvol.Tools.logit import LogIt
 
