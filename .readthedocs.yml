@@ -1,6 +1,25 @@
+# Read the Docs configuration for OrthoEvolution
+# https://docs.readthedocs.io/en/stable/config-file/v2.html
+
+version: 2
+
 build:
   image: latest
+  os: ubuntu-22.04
+  # Pre-build job: Run update_docs.py to regenerate API docs and convert READMEs
+  # This runs before Sphinx builds the documentation
+  commands:
+    - python docs/update_docs.py --skip-build
 
 python:
-  version: 3.6
-  setup_py_install: true
+  version: 3.9
+  install:
+    - method: pip
+      path: .
+    - method: pip
+      # Install documentation dependencies
+      pip_install:
+        - sphinx
+        - pypandoc
+
+# Sphinx will be auto-detected from docs/docs/source/conf.py

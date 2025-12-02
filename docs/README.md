@@ -91,7 +91,27 @@ pip install sphinx
 
 The documentation is automatically built and hosted on [ReadTheDocs](http://orthoevolution.readthedocs.io/).
 
-The `.readthedocs.yml` file in the project root configures the build process.
+### Automated Build Process
+
+The `.readthedocs.yml` file in the project root configures the build process:
+
+1. **Pre-build step**: Automatically runs `python docs/update_docs.py --skip-build` to:
+   - Extract version from `setup.py`
+   - Convert README.md files to RST
+   - Regenerate API documentation with `sphinx-apidoc`
+
+2. **Build step**: Read the Docs then runs Sphinx to build the HTML documentation
+
+This means documentation updates automatically on every push to the repository, without manual intervention.
+
+### GitHub Actions
+
+A GitHub Actions workflow (`.github/workflows/docs.yml`) also builds documentation on:
+- Pushes to main branches
+- Pull requests affecting documentation
+- Manual workflow dispatch
+
+This provides local validation and artifact uploads for review.
 
 ## Notes
 
