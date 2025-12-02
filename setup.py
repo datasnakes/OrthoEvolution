@@ -31,7 +31,7 @@ setup(
     author='Rob Gilmore & Shaurita Hutchins',
     author_email='datasnakes@gmail.com',
     description="This package aids in the analysis of orthologous genes.",
-    version='1.0.0b1',
+    version='1.0.0b2',
     long_description=readme(),
     url='https://github.com/datasnakes/OrthoEvolution',
     license='MIT',

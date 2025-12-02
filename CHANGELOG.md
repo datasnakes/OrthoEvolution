@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.0.0b2] - 2025-12-02
+
 ### Added
 - Comprehensive test suites for `utilities`, `Manager`, and `Tools` modules
   - Added 20+ test methods for `BlastUtils`, `GenbankUtils`, `OrthologUtils`, `ManagerUtils`, `PackageVersion`, and `FullUtilities` classes
@@ -63,5 +65,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Version History Notes
 
-- **1.0.0b1**: Current development version (beta)
+- **1.0.0b2**: Latest release (2025-12-02) - Test coverage improvements and bug fixes
+- **1.0.0b1**: Previous beta release - Test infrastructure and CI/CD improvements
 - **0.9.0a2**: Previous tagged release (alpha)
