@@ -47,16 +47,16 @@ setup(
         'Operating System :: Unix',
         'Natural Language :: English',
         'Programming Language :: Python :: 3 :: Only',
-        'Programming Language :: Python :: 3.7',
-        'Programming Language :: Python :: 3.8',
         'Programming Language :: Python :: 3.9',
+        'Programming Language :: Python :: 3.10',
+        'Programming Language :: Python :: 3.11',
         'Framework :: Flask',
         'Framework :: Cookiecutter'
     ],
     # Packages will be automatically found if not in this list.
     packages=find_packages(exclude=['docs', 'examples', 'tests']),
     include_package_data=True,
-    python_requires='~=3.5',
+    python_requires='>=3.9',
     entry_points={
         'console_scripts': [
                 'orthoevol=OrthoEvol.Orthologs.command_line:main'
