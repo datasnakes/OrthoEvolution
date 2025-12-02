@@ -1,3 +1,5 @@
+numpy
+scipy
 matplotlib
 tqdm==4.25.0
 ete3==3.0.0b35
@@ -5,7 +7,7 @@ pandas>=0.25.3
 openpyxl>=2.5.0
 pexpect==4.4.0
 slacker==0.9.42
-biopython==1.70
+biopython>=1.79,<1.84
 tablib>=0.11.5
 mygene>=3.0.0
 cookiecutter
