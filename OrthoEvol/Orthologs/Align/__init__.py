@@ -2,7 +2,7 @@
 
 from .orthoclustal import ClustalO
 from .guidance2 import Guidance2Commandline
-from .pal2nal import Pal2NalCommandline
+from .pal2nal import PAL2NALCommandline as Pal2NalCommandline
 from .msa import MultipleSequenceAlignment
 
 # Make this explicit, then they show up in the API docs

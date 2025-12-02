@@ -13,6 +13,8 @@ from OrthoEvol.Orthologs.Phylogenetics import RelaxPhylip
 from OrthoEvol.Orthologs.Phylogenetics.IQTree import IQTreeCommandline, FilteredTree
 from OrthoEvol.Orthologs.Phylogenetics.PAML import ETE3PAML
 from OrthoEvol.Orthologs.GenBank.genbank import GenBank
+from OrthoEvol.Orthologs.Align.orthoclustal import ClustalO
+from OrthoEvol.Orthologs.Align.msa import MultipleSequenceAlignment
 
 class TestOrthologs(unittest.TestCase):
     """Test the Orthologs module."""
@@ -458,6 +460,69 @@ class TestGenBank(unittest.TestCase):
         self.assertEqual(len(genbank.db_files_list), 2)
         self.assertIn('test.db', genbank.db_files_list)
         self.assertIn('other.db', genbank.db_files_list)
+
+
+class TestAlign(unittest.TestCase):
+    """Test the Align module."""
+
+    def setUp(self):
+        """Set up test fixtures."""
+        self.test_dir = tempfile.mkdtemp()
+        self.test_fasta = os.path.join(self.test_dir, 'test.fasta')
+        self.test_outfile = os.path.join(self.test_dir, 'test_aligned.fasta')
+        
+        # Create a simple test fasta file
+        with open(self.test_fasta, 'w') as f:
+            f.write('>seq1\nATGCATGC\n>seq2\nATGCATGC\n')
+
+    def tearDown(self):
+        """Clean up test fixtures."""
+        if os.path.exists(self.test_dir):
+            rmtree(self.test_dir, ignore_errors=True)
+
+    def test_clustalo_init(self):
+        """Test ClustalO initialization."""
+        clustalo = ClustalO(
+            infile=self.test_fasta,
+            outfile=self.test_outfile,
+            logpath=None,
+            outfmt="fasta"
+        )
+        
+        self.assertIsNotNone(clustalo)
+        self.assertEqual(clustalo.infile, self.test_fasta)
+        self.assertEqual(clustalo.outfile, self.test_outfile)
+        self.assertEqual(clustalo.outfmt, "fasta")
+        self.assertIsNone(clustalo.logpath)
+        self.assertTrue(hasattr(clustalo, 'clustalolog'))
+
+    @mock.patch('OrthoEvol.Orthologs.Align.msa.FullUtilities')
+    @mock.patch('OrthoEvol.Orthologs.Align.msa.LogIt')
+    def test_msa_init(self, mock_logit, mock_utils):
+        """Test MultipleSequenceAlignment initialization."""
+        mock_logit_instance = mock.Mock()
+        mock_logit.return_value.default.return_value = mock_logit_instance
+        
+        # Create a mock object with the required attributes
+        mock_config_obj = mock.Mock()
+        mock_config_obj.raw_data = Path(self.test_dir)
+        
+        # Set up the FullUtilities mock
+        mock_utils_instance = mock.Mock()
+        mock_utils_instance.attribute_config.return_value = mock_config_obj
+        mock_utils.return_value = mock_utils_instance
+        
+        msa = MultipleSequenceAlignment(
+            project="test-project",
+            project_path=self.test_dir
+        )
+        
+        self.assertIsNotNone(msa)
+        self.assertEqual(msa.project, "test-project")
+        self.assertTrue(hasattr(msa, 'guidancelog'))
+        self.assertTrue(hasattr(msa, 'pal2nallog'))
+        self.assertTrue(hasattr(msa, 'clustalolog'))
+        self.assertIsInstance(msa.dispatcher_options, dict)
 
 
 if __name__ == '__main__':
