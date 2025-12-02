@@ -17,7 +17,7 @@ warnings.simplefilter('ignore', OrthologsWarning)
 class RelaxPhylip(object):
     """Convert a multiple sequence alignment file to relaxed-phylip format."""
 
-    def __init__(inputfile, outputfile):
+    def __init__(self, inputfile, outputfile):
         """Fasta to Relaxed Phylip format."""
         AlignIO.convert(inputfile, "fasta",
                         outputfile, "phylip-relaxed")

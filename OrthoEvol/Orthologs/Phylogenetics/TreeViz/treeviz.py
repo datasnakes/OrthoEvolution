@@ -37,7 +37,7 @@ class TreeViz(object):
         :param tree_format: The format of the tree, defaults to "newick"
         :type tree_format: str
         """
-        tree = Phylo.read(file=self.path, format=self.tree_format)
+        tree = Phylo.read(file=path, format=tree_format)
         return tree
 
     def draw_tree(self, drawing_type="default", auto_show=False):

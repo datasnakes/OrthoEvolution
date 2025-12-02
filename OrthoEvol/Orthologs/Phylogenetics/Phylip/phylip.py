@@ -16,15 +16,17 @@ class Phylip(object):
 
         :param infile: A phylip formatted multiple sequence alignment.
         """
-        if self._validate_format(infile):
-            self.infile = infile
-        self._rename = os.rename
-        # Set up logging
+        # Set up logging first
         self.phylip_log = LogIt().default(logname="Phylip", logfile=None)
-        # Raise error is OS is not linux
+        # Raise error if OS is not linux
         if sys.platform != 'linux':
             err_msg = "This module is strictly for use on Linux at the moment."
             raise OSError(err_msg)
+        # Validate format and set infile
+        if not self._validate_format(infile):
+            raise ValueError(f"Invalid phylip format for file: {infile}")
+        self.infile = infile
+        self._rename = os.rename
 
     def _validate_format(self, infile):
         """Validate the format of the Phylip file
@@ -33,13 +35,12 @@ class Phylip(object):
         :type infile: str
         """
         try:
-            AlignIO.read(open(infile), "phylip")
-        except ValueError as e:
-            self.phylip_log.exception(e)
-        else:
+            with open(infile, 'r') as f:
+                AlignIO.read(f, "phylip")
             return True
-        # TODO: Return an exception?
-        return False
+        except (ValueError, IOError) as e:
+            self.phylip_log.exception(e)
+            return False
 
     def _temp_infile(self, infile):
         """Create a temporary infile named infile.

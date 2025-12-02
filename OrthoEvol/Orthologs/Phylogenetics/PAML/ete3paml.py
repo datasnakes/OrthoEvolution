@@ -81,15 +81,17 @@ class ETE3PAML(object):
                 else:
                     self.paml_log.warning('No sequence for %s.' % organism)
 
+            # Prune tree once after collecting all branches to keep
+            if branches_to_keep:
                 self._speciestree.prune(
                     branches_to_keep, preserve_branch_length=True)
+                # Write the tree to a file
+                temp_tree_path = os.path.join(self.workdir, 'temptree.nw')
+                self._speciestree.write(outfile=temp_tree_path)
+            else:
+                self.paml_log.warning('No organisms found in alignment. Tree not pruned.')
         except ValueError as e:
             self.paml_log.exception(e)
-
-        else:
-            # Write the tree to a file if not a ValueError
-            temp_tree_path = os.path.join(self.workdir, 'temptree.nw')
-            self._speciestree.write(outfile=temp_tree_path)
 
     def run(self, outfile, tree="temptree.nw", model="M1"):
         """Run PAML using ETE.

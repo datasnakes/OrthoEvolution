@@ -2,7 +2,12 @@ import sys
 import shutil
 
 from Bio.Phylo.Applications import PhymlCommandline
-from Bio.Application import ApplicationError
+try:
+    from Bio.Application import ApplicationError
+except ImportError:
+    # Bio.Application is deprecated in newer biopython versions
+    # Use subprocess.CalledProcessError as fallback
+    from subprocess import CalledProcessError as ApplicationError
 from Bio import AlignIO
 
 from OrthoEvol.Tools.logit import LogIt
@@ -29,22 +34,24 @@ class PhyML(object):
         # Check that the phyml executable is in the path
         self.phyml_exe = self._check_exe()
         self.datatype = datatype
-        if self._validate_format(infile):
-            self.infile = infile
+        # Validate format and set infile
+        if not self._validate_format(infile):
+            raise ValueError(f"Invalid phylip format for file: {infile}")
+        self.infile = infile
 
     def _validate_format(self, infile):
-        """"Validate the format of the input file.
+        """Validate the format of the input file.
 
         :param infile: An input file that is phylip formatted.
         :type infile: str
         """
         try:
-            AlignIO.read(open(infile), "phylip")
-        except ValueError as e:
-            self.phyml_log.exception(e)
-        else:
+            with open(infile, 'r') as f:
+                AlignIO.read(f, "phylip")
             return True
-        return False
+        except (ValueError, IOError) as e:
+            self.phyml_log.exception(e)
+            return False
 
     def _check_exe(self):
         """Check to see if the phyml exe is in the path."""
