@@ -195,7 +195,26 @@ class BaseDatabaseManagement(object):
         with open(str(dl_abs_path), 'wb') as taxdump:
             taxdump.write(data)
         with tarfile.open(str(dl_abs_path)) as tar:
-            tar.extractall(dl_path)
+            def is_within_directory(directory, target):
+                
+                abs_directory = os.path.abspath(directory)
+                abs_target = os.path.abspath(target)
+            
+                prefix = os.path.commonprefix([abs_directory, abs_target])
+                
+                return prefix == abs_directory
+            
+            def safe_extract(tar, path=".", members=None, *, numeric_owner=False):
+            
+                for member in tar.getmembers():
+                    member_path = os.path.join(path, member.name)
+                    if not is_within_directory(path, member_path):
+                        raise Exception("Attempted Path Traversal in Tar File")
+            
+                tar.extractall(path, members, numeric_owner=numeric_owner) 
+                
+            
+            safe_extract(tar, dl_path)
         os.remove(dl_abs_path)
 
     def download_refseq_release_files(self, collection_subset, seqtype, seqformat):
