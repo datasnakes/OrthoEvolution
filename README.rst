@@ -18,8 +18,10 @@
 
 OrthoEvolution
 ====================
-OrthoEvolution is an **easy to use** and comprehensive python package which aids in the **analysis and
+OrthoEvolution is an **easy to use** and comprehensive Python package which aids in the **analysis and
 visualization of comparative evolutionary genetics** related projects such as the **inference of orthologs**.
+
+**Current Version:** 1.0.0b2
 
 Overview
 --------------------------
@@ -32,7 +34,7 @@ the management and analysis of (what can be) large datasets.  The Cookies, Manag
 and Tools modules act as a framework for our workflow, while the Orthologs
 module provides access to specific functions for our various ortholog inference projects.
 
-View our `read the docs <http://orthoevolution.readthedocs.io/en/master/>`__ and feel free to also
+View our `read the docs <http://orthoevolution.readthedocs.io/en/latest/>`__ and feel free to also
 read `this related paper <https://www.frontiersin.org/articles/10.3389/fnhum.2014.00283/full>`__ to gain
 more insight into this project/python package.
 
@@ -41,29 +43,42 @@ Installation
 ----------------
 View the below methods for installing this package. Python 3.9 or higher is required.
 
-PyPi
+PyPI
 ~~~~~~~~~~~~~~~~
-``pip install OrthoEvol``
+.. code:: bash
+
+    pip install --upgrade pip
+    pip install OrthoEvol
 
 GitHub
 ~~~~~~~~~~~~~~~~
-1. Download the zip file and unzip it or ``git clone https://github.com/datasnakes/OrthoEvolution.git``
-2. ``cd OrthoEvolution``
-3. ``pip install .``
+.. code:: bash
+
+    git clone https://github.com/datasnakes/OrthoEvolution.git
+    cd OrthoEvolution
+    pip install --upgrade pip
+    pip install .
 
 Development Code
 ~~~~~~~~~~~~~~~~
-**WARNING** : This code is actively under development and may not be reliable.  Please create an `issue <https://github.com/datasnakes/OrthoEvolution/issues>`_ for questions about development.
+**WARNING** : This code is actively under development and may not be reliable. Please create an `issue <https://github.com/datasnakes/OrthoEvolution/issues>`_ for questions about development.
 
-1. Download the zip file and unzip it or ``git clone -b dev-master https://github.com/datasnakes/OrthoEvolution.git``
-2. ``cd OrthoEvolution``
-3. ``pip install .``
+.. code:: bash
+
+    git clone -b dev https://github.com/datasnakes/OrthoEvolution.git
+    cd OrthoEvolution
+    pip install --upgrade pip
+    pip install .
 
 Examples
 ----------------
-Check out this `tutorial <https://github.com/datasnakes/OrthoEvolution/wiki/Tutorial>`__ in our Wiki Docs.
+Please view the `examples directory <https://github.com/datasnakes/OrthoEvolution/tree/main/examples>`__ for working examples and scripts demonstrating how to utilize this package.
 
-Also, please view `examples <https://github.com/datasnakes/OrthoEvolution/examples>`__ of how to utilize this package to build tools.
+The examples include:
+- Standalone scripts for common workflows
+- Example data files
+- GUI implementations (Tkinter and PyWebView)
+- Pipeline demonstrations
 
 
 Running a pre-configured local blast
@@ -152,7 +167,7 @@ Creating projects and databases dynamically
         'script': job_name,
         'log_name': job_name,
         'pbsworkdir': os.getcwd(),
-        'cmd': f'python3.6 {os.path.join(os.getcwd(), job_name + ".py")}',
+        'cmd': f'python3 {os.path.join(os.getcwd(), job_name + ".py")}',
         'email': 'n/a'
     }
 
@@ -168,9 +183,17 @@ Creating projects and databases dynamically
 
 Tests
 ----------------
-To run tests, type ``pytest tests`` in the OrthoEvolution directory.
+To run tests, first install the test dependencies:
 
-First, install the ``pytest` package using pip.
+.. code:: bash
+
+    pip install pytest pytest-cov
+
+Then run the test suite:
+
+.. code:: bash
+
+    pytest tests
 
 Contributors
 ----------------
@@ -182,14 +205,23 @@ This package was created by the Datasnakes.
    `@sdhutchins <https://github.com/sdhutchins>`__ \|
    `✉ <mailto:sdhutchins@outlook.com>`__
 
-If you would like to contribute to this package, install the package in development mode,
-and check out our `contributing guidelines <https://github.com/datasnakes/OrthoEvolution/blob/main/CONTRIBUTING.rst>`__.
+If you would like to contribute to this package, install the package in development mode:
 
+.. code:: bash
+
+    pip install -e .
+
+Check out our `contributing guidelines <https://github.com/datasnakes/OrthoEvolution/blob/main/CONTRIBUTING.rst>`__ for more information.
+
+
+License
+----------------
+This project is licensed under the MIT License. See the `LICENSE <https://github.com/datasnakes/OrthoEvolution/blob/main/LICENSE>`__ file for details.
 
 Citations
 ----------------
-We're so thankful to have a resource such as
-`Biopython <http://biopython.org/wiki/Biopython>`__. They inspired this
+We're thankful to have a resource such as
+`Biopython <http://biopython.org/wiki/Biopython>`__, which inspired this
 package.
 
 *Cock, P.J.A. et al. Biopython: freely available Python tools for
