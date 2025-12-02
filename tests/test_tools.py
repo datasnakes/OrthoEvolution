@@ -1,7 +1,10 @@
 """This is the test suite for Tools."""
 
 import unittest
+from unittest import mock
 import os
+import logging
+import tempfile
 from pkg_resources import resource_filename
 
 from OrthoEvol.Tools.logit import LogIt
@@ -97,6 +100,79 @@ class TestTools(unittest.TestCase):
         # Clean up
         os.remove("test.txt")
         os.remove("copy.txt")
+
+    def test_logit_custom(self):
+        """Test LogIt custom method."""
+        logit = LogIt()
+        custom_log = logit.custom(
+            logname='customlog',
+            logfile=None,
+            level=logging.INFO,
+            fmt='default'
+        )
+        self.assertIsNotNone(custom_log)
+        self.assertEqual(custom_log.name, 'customlog')
+        logit.shutdown()
+
+    def test_pybasher_mkdir_touch(self):
+        """Test PyBasher mkdir and touch methods."""
+        test_dir = tempfile.mkdtemp()
+        try:
+            pybasher = PyBasher()
+            test_file = os.path.join(test_dir, 'test_file.txt')
+            test_subdir = os.path.join(test_dir, 'test_subdir')
+            
+            # Test mkdir
+            pybasher.mkdir(test_subdir)
+            self.assertTrue(os.path.isdir(test_subdir))
+            
+            # Test touch
+            pybasher.touch(test_file)
+            self.assertTrue(os.path.isfile(test_file))
+        finally:
+            import shutil
+            shutil.rmtree(test_dir, ignore_errors=True)
+
+    def test_pybasher_pwd(self):
+        """Test PyBasher pwd method."""
+        pybasher = PyBasher()
+        pybasher.pwd()
+        # pwd returns stdout, verify it's a string
+        result = str(pybasher)
+        self.assertIsInstance(result, str)
+        self.assertTrue(len(result) > 0)
+
+    def test_ncbiftp_pathformat(self):
+        """Test NcbiFTPClient _pathformat classmethod."""
+        # Test valid path format
+        valid_path = '/blast/db/'
+        try:
+            NcbiFTPClient._pathformat(valid_path)
+        except ValueError:
+            self.fail("_pathformat raised ValueError for valid path")
+        
+        # Test invalid path format
+        invalid_path = '/blast/db'  # Missing trailing slash
+        with self.assertRaises(ValueError):
+            NcbiFTPClient._pathformat(invalid_path)
+
+    @mock.patch('OrthoEvol.Tools.parallel.multiprocess.Pool')
+    def test_multiprocess_map_to_function(self, mock_pool):
+        """Test Multiprocess map_to_function method."""
+        mp = Multiprocess()
+        
+        def test_func(x):
+            return x * 2
+        
+        test_list = [1, 2, 3]
+        mock_pool_instance = mock.Mock()
+        mock_pool.return_value.__enter__.return_value = mock_pool_instance
+        
+        mp.map_to_function(test_func, test_list, procs=2)
+        
+        # Verify pool was created and map was called
+        mock_pool.assert_called_once_with(processes=2)
+        mock_pool_instance.map.assert_called_once_with(test_func, test_list)
 
 
 if __name__ == '__main__':
