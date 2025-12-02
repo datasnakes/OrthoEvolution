@@ -8,7 +8,7 @@ from OrthoEvol.Orthologs.Blast import OrthoBlastN
 
 
 # This is more pythonic with YAML loading
-Blast_config = {
+blast_config = {
   "taxon_file": None,
   "go_list": None,
   "post_blast": True,
@@ -19,7 +19,7 @@ Blast_config = {
 }
 
 
-myblast = OrthoBlastN(proj_mana=None, project="sdh-test", project_path=os.getcwd(), **Blast_config)
+myblast = OrthoBlastN(proj_mana=None, project="sdh-test", project_path=os.getcwd(), **blast_config)
 
 
 # TIP Works on linux
