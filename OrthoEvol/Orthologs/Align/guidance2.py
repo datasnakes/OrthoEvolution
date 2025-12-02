@@ -19,7 +19,7 @@ import os
 
 
 class Guidance2Commandline(AbstractCommandline):
-    """uCommand line wrapper for GUIDANCE2.
+    """Command line wrapper for GUIDANCE2.
     http://guidance.tau.ac.il/ver2/
     Example:
     --------
@@ -41,6 +41,15 @@ class Guidance2Commandline(AbstractCommandline):
 
 
     def __init__(self, cmd="guidance", align=True, **kwargs):
+        """Initialize GUIDANCE2 command line wrapper.
+
+        :param cmd: Command name for GUIDANCE2 executable.
+        :type cmd: str
+        :param align: Flag to determine if alignment mode is used.
+        :type align: bool
+        :param kwargs: Additional parameters for GUIDANCE2 configuration.
+        :type kwargs: dict
+        """
         # order parameters in the same order as invoking guidance on the cmd line (e.g. 'perl guidance.pl')
         if align is True:
             self.parameters = \
@@ -169,5 +178,3 @@ class Guidance2Commandline(AbstractCommandline):
                               checker_function=lambda x: x in ['aa', 'nuc'])
                 ]
             AbstractCommandline.__init__(self, cmd, **kwargs)
-
-

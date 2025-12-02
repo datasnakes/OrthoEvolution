@@ -40,6 +40,20 @@ class PAL2NALCommandline(AbstractCommandline):
     """
 
     def __init__(self, cmd='pal2nal', **kwargs):
+        """Initialize PAL2NAL command line wrapper.
+
+        :param cmd: Command name for PAL2NAL executable.
+        :type cmd: str
+        :param kwargs: Parameters for PAL2NAL configuration including:
+            - pepaln: Protein alignment file (required)
+            - nucfasta: DNA sequences file (required)
+            - output: Output format (clustal|paml|fasta|codon)
+            - output_file: Output file path (required)
+            - nogap: Remove gaps and stop codons (switch)
+            - nomismatch: Remove mismatched codons (switch)
+            - codontable: Genetic code table number (optional)
+        :type kwargs: dict
+        """
         self.parameters = \
             [
                 # Required Parameters

@@ -21,13 +21,27 @@ class ClustalO(object):
     This class is a further wrapper around Biopython's ClustalOmegaCommandline.
 
     :param infile: Path/Name of multiple fasta file.
+    :type infile: str
     :param outfile: Path/Name of multiple alignment file.
-    :param logpath: Path to logfile. (Default = None)
-    :param outfmt: Format of the output multiple alignment file.
+    :type outfile: str
+    :param logpath: Path to logfile.
+    :type logpath: str or None
+    :param outfmt: Format of the output multiple alignment file (e.g., 'fasta', 'clustal', 'phylip').
+    :type outfmt: str
     """
 
     def __init__(self, infile, outfile, logpath=None, outfmt="fasta"):
-        """Set up the logger and the parameters."""
+        """Set up the logger and the parameters.
+
+        :param infile: Path/Name of multiple fasta file.
+        :type infile: str
+        :param outfile: Path/Name of multiple alignment file.
+        :type outfile: str
+        :param logpath: Path to logfile.
+        :type logpath: str or None
+        :param outfmt: Format of the output multiple alignment file.
+        :type outfmt: str
+        """
         self.infile = infile
         self.outfile = outfile
         self.outfmt = outfmt
@@ -35,7 +49,11 @@ class ClustalO(object):
         self.clustalolog = LogIt().default('clustalo', logfile=self.logpath)
 
     def runclustalomega(self):
-        """Run clustalomega."""
+        """Run Clustal Omega alignment.
+
+        Executes the Clustal Omega command line tool to perform multiple
+        sequence alignment on the input file.
+        """
 
         try:
             # Run clustal omega using the multifasta file

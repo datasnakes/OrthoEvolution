@@ -9,12 +9,15 @@ from OrthoEvol.Tools.logit import LogIt
 
 
 class Phylip(object):
-    """A class that serves as a wrapper for the Phylip excecutable."""
+    """A class that serves as a wrapper for the Phylip executable."""
 
     def __init__(self, infile):
         """Initialize the Phylip class.
 
         :param infile: A phylip formatted multiple sequence alignment.
+        :type infile: str
+        :raises OSError: If the operating system is not Linux.
+        :raises ValueError: If the input file is not in valid phylip format.
         """
         # Set up logging first
         self.phylip_log = LogIt().default(logname="Phylip", logfile=None)
@@ -54,8 +57,10 @@ class Phylip(object):
     def dnapars(self, outfile, outtree):
         """Generate a maximum parsimony tree using dnapars.
 
-        :param outfile:  Standard output filename.
-        :param outtree:  Name of maximum parsimony tree.
+        :param outfile: Standard output filename.
+        :type outfile: str
+        :param outtree: Name of maximum parsimony tree.
+        :type outtree: str
         """
         infile = self._temp_infile(infile=self.infile)
         try:
@@ -73,10 +78,12 @@ class Phylip(object):
             os.remove(infile)
 
     def dnaml(self, outfile, outtree):
-        """Generate a maximum likelihoood tree using dnapaml.
+        """Generate a maximum likelihood tree using dnaml.
 
-        :param outfile:  Standard output filename.
-        :param outtree:  Name of maximum likelihoood tree.
+        :param outfile: Standard output filename.
+        :type outfile: str
+        :param outtree: Name of maximum likelihood tree.
+        :type outtree: str
         """
         infile = self._temp_infile(infile=self.infile)
         try:
@@ -96,7 +103,8 @@ class Phylip(object):
     def dnadist(self, outfile):
         """Generate a distance matrix using dnadist.
 
-        :param outfile:  distance matrix output filename.
+        :param outfile: Distance matrix output filename.
+        :type outfile: str
         """
         infile = self._temp_infile(infile=self.infile)
         try:
