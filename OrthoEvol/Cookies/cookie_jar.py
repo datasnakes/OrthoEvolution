@@ -118,13 +118,15 @@ class Oven(object):
             if self.exists(str(path)):
                 os.chmod(str(path), mode=0o777)
                 self.cookielog.warning('%s already exists. ✔' % str(path))
-
-        else:
-            cookiecutter(str(cookie), no_input=no_input,
-                         extra_context=extra_context,
-                         output_dir=str(self.cookie_jar))
-            os.chmod(str(path), mode=0o777)
-            self.cookielog.info('%s was created. ✔' % str(path))
+            else:
+                # Convert cookie_jar to absolute path to ensure cookiecutter creates
+                # directories in the correct location
+                output_dir = Path(self.cookie_jar).resolve()
+                cookiecutter(str(cookie), no_input=no_input,
+                             extra_context=extra_context,
+                             output_dir=str(output_dir))
+                os.chmod(str(path), mode=0o777)
+                self.cookielog.info('%s was created. ✔' % str(path))
 
     def bake_the_repo(self, cookie_jar=None):
         self.cookielog.warning('Creating directories from the Repository Cookie template.')
