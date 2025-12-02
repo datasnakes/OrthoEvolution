@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+
+<html lang="python" data-content_root="../">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>slackify &#8212; OrthoEvolution 1.0.0b2 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=fa44fd50" />
+    <link rel="stylesheet" type="text/css" href="../_static/basic.css?v=b08954a9" />
+    <link rel="stylesheet" type="text/css" href="../_static/alabaster.css?v=27fed22d" />
+    <script src="../_static/documentation_options.js?v=3e4b6f43"></script>
+    <script src="../_static/doctools.js?v=9bcbadda"></script>
+    <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+   
+  <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
+  
+
+  
+  
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <section id="slackify">
+<h1>slackify<a class="headerlink" href="#slackify" title="Link to this heading">¶</a></h1>
+<p>Send updates to Slack about your pipeline’s progression!</p>
+<p>You can upload a file, image, or send a message to a slack channel once
+you’ve gone through Slack to <a class="reference external" href="https://get.slack.help/hc/en-us/articles/215770388-Create-and-regenerate-API-tokens">generate an API
+KEY</a>.</p>
+<p>The bot you create (if you choose that route) must be invited to the
+channel you post from the bot in.</p>
+<p>After generating an apikey, it’s best to create a configuration file so
+that you can easily keep up with your apikey. Make sure to practice
+secure methods. Don’t upload your apikey to github as that is very
+insecure. Keep a local copy of your key.</p>
+<section id="examples">
+<h2>Examples<a class="headerlink" href="#examples" title="Link to this heading">¶</a></h2>
+<section id="import-the-class-and-set-up-the-slack-handler">
+<h3>Import the class and set up the slack handler<a class="headerlink" href="#import-the-class-and-set-up-the-slack-handler" title="Link to this heading">¶</a></h3>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">OrthoEvol.Tools.slackify</span> <span class="kn">import</span> <span class="n">Slackify</span>
+
+<span class="n">slack</span> <span class="o">=</span> <span class="n">Slackify</span><span class="p">(</span><span class="n">slackconfig</span><span class="o">=</span><span class="s1">&#39;path/to/slackconfig.cfg&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Your config file should look as such:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="p">[</span><span class="n">APIKEYS</span><span class="p">]</span>
+<span class="n">slack</span> <span class="o">=</span> <span class="n">apikeystring</span>
+</pre></div>
+</div>
+</section>
+<section id="message-a-channel-and-link-to-a-user-with-username-in-your-message">
+<h3>Message a channel and link to a user with <code class="docutils literal notranslate"><span class="pre">&lt;&#64;username&gt;</span></code> in your message<a class="headerlink" href="#message-a-channel-and-link-to-a-user-with-username-in-your-message" title="Link to this heading">¶</a></h3>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">message_to_channel</span> <span class="o">=</span> <span class="s1">&#39;Hey, &lt;@username&gt;. This is an update for the current script.&#39;</span>
+
+<span class="n">slack</span><span class="o">.</span><span class="n">send_msg</span><span class="p">(</span><span class="n">channel</span><span class="o">=</span><span class="s1">&#39;channelname&#39;</span><span class="p">,</span> <span class="n">message</span><span class="o">=</span><span class="n">message_to_channel</span><span class="p">)</span>
+</pre></div>
+</div>
+</section>
+<section id="get-all-users-and-channels">
+<h3>Get all users and channels<a class="headerlink" href="#get-all-users-and-channels" title="Link to this heading">¶</a></h3>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">slack</span><span class="o">.</span><span class="n">list_users</span><span class="p">()</span> <span class="c1"># Returns a list of all users.</span>
+<span class="n">slack</span><span class="o">.</span><span class="n">list_channels</span><span class="p">()</span> <span class="c1"># Returns a list of channels</span>
+</pre></div>
+</div>
+</section>
+<section id="upload-a-file">
+<h3>Upload a file<a class="headerlink" href="#upload-a-file" title="Link to this heading">¶</a></h3>
+<p>The file can be an image, pdf, doc, text, python file, etc</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">slack</span><span class="o">.</span><span class="n">upload_file</span><span class="p">()</span>
+</pre></div>
+</div>
+</section>
+</section>
+</section>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="Main">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../index.html">OrthoEvolution</a></h1>
+
+
+
+<p class="blurb">An easy to use and comprehensive python package which aids in the analysis and visualization of comparative evolutionary genetics</p>
+
+
+
+
+<p>
+<iframe src="https://ghbtns.com/github-btn.html?user=Datasnakes&repo=OrthoEvolution&type=watch&count=true&size=large&v=2"
+  allowtransparency="true" frameborder="0" scrolling="0" width="200px" height="35px"></iframe>
+</p>
+
+
+
+
+
+
+  <div>
+    <h3><a href="../index.html">Table of Contents</a></h3>
+    <ul>
+<li><a class="reference internal" href="#">slackify</a><ul>
+<li><a class="reference internal" href="#examples">Examples</a><ul>
+<li><a class="reference internal" href="#import-the-class-and-set-up-the-slack-handler">Import the class and set up the slack handler</a></li>
+<li><a class="reference internal" href="#message-a-channel-and-link-to-a-user-with-username-in-your-message">Message a channel and link to a user with <code class="docutils literal notranslate"><span class="pre">&lt;&#64;username&gt;</span></code> in your message</a></li>
+<li><a class="reference internal" href="#get-all-users-and-channels">Get all users and channels</a></li>
+<li><a class="reference internal" href="#upload-a-file">Upload a file</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+  </div>
+<search id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</search>
+<script>document.getElementById('searchbox').style.display = "block"</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &#169;2017, Shaurita Hutchins & Robert Gilmore.
+      
+      |
+      Powered by <a href="https://www.sphinx-doc.org/">Sphinx 8.2.3</a>
+      &amp; <a href="https://alabaster.readthedocs.io">Alabaster 1.0.0</a>
+      
+      |
+      <a href="../_sources/tools/slackifyreadme.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+    <a href="https://github.com/Datasnakes/OrthoEvolution" class="github">
+        <img src="../_static/github-banner.svg" alt="Fork me on GitHub" class="github"/>
+    </a>
+    
+
+    
+  </body>
+</html>

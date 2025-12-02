@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+
+<html lang="python" data-content_root="../">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>Tools Documentation &#8212; OrthoEvolution 1.0.0b2 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=fa44fd50" />
+    <link rel="stylesheet" type="text/css" href="../_static/basic.css?v=b08954a9" />
+    <link rel="stylesheet" type="text/css" href="../_static/alabaster.css?v=27fed22d" />
+    <script src="../_static/documentation_options.js?v=3e4b6f43"></script>
+    <script src="../_static/doctools.js?v=9bcbadda"></script>
+    <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="prev" title="Pipeline Documentation" href="../pipeline/pipelinereadme.html" />
+   
+  <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
+  
+
+  
+  
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <section id="tools-documentation">
+<h1>Tools Documentation<a class="headerlink" href="#tools-documentation" title="Link to this heading">¶</a></h1>
+<p>The Tools module is a collection of often used classes or functions that
+either enhance our other modules and create reusable functions to be
+used in various modules.</p>
+<p>We’ve incorporated tools for sge tools for use with pbs, a pandoc script
+and class for converting docx files to markdown formats, multiprocessing
+in multiprocess, and a ftp module that aids in downloading files from
+NCBI’s ftp repository.</p>
+<section id="examples">
+<h2>Examples<a class="headerlink" href="#examples" title="Link to this heading">¶</a></h2>
+<p>Take a look at the examples below to get an idea of how to incorporate
+these tools in your project and how we use these tools in our project.</p>
+<section id="download-ncbi-databases-with-our-ncbi-ftp-client">
+<h3>Download NCBI databases with our NCBI FTP Client<a class="headerlink" href="#download-ncbi-databases-with-our-ncbi-ftp-client" title="Link to this heading">¶</a></h3>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">OrthoEvol.Tools.ftp</span> <span class="kn">import</span> <span class="n">NcbiFTPClient</span>
+
+<span class="n">ncbiftp</span> <span class="o">=</span> <span class="n">NcbiFTPClient</span><span class="p">(</span><span class="n">email</span><span class="o">=</span><span class="s1">&#39;somebody@gmail.com&#39;</span><span class="p">)</span>
+<span class="n">ncbiftp</span><span class="o">.</span><span class="n">getblastdb</span><span class="p">(</span><span class="n">database_name</span><span class="o">=</span><span class="s1">&#39;refseq_rna&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+</section>
+<section id="list-all-subdirectories-in-a-ncbi-ftp-path">
+<h3>List all subdirectories in a NCBI FTP Path<a class="headerlink" href="#list-all-subdirectories-in-a-ncbi-ftp-path" title="Link to this heading">¶</a></h3>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">ncbiftp</span><span class="o">.</span><span class="n">listdirectories</span><span class="p">(</span><span class="n">path</span><span class="o">=</span><span class="s1">&#39;/blast/db/&#39;</span><span class="p">)</span>
+<span class="n">Out</span><span class="p">[</span><span class="mi">54</span><span class="p">]:</span> <span class="p">[</span><span class="s1">&#39;FASTA&#39;</span><span class="p">,</span> <span class="s1">&#39;cloud&#39;</span><span class="p">]</span>
+</pre></div>
+</div>
+</section>
+<section id="utilize-multiprocessing-to-speed-up-your-code">
+<h3>Utilize multiprocessing to speed up your code<a class="headerlink" href="#utilize-multiprocessing-to-speed-up-your-code" title="Link to this heading">¶</a></h3>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">OrthoEvol.Tools.parallel</span> <span class="kn">import</span> <span class="n">Multiprocess</span>
+
+
+<span class="k">def</span> <span class="nf">printwords</span><span class="p">(</span><span class="n">word</span><span class="p">):</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">word</span><span class="p">)</span>
+
+
+<span class="n">words</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;bae&#39;</span><span class="p">,</span> <span class="s1">&#39;luh&#39;</span><span class="p">,</span> <span class="s1">&#39;cuh&#39;</span><span class="p">]</span>
+
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s1">&#39;__main__&#39;</span><span class="p">:</span>
+    <span class="n">mp</span> <span class="o">=</span> <span class="n">Multiprocess</span><span class="p">()</span>
+    <span class="n">mp</span><span class="o">.</span><span class="n">map2function</span><span class="p">(</span><span class="n">printwords</span><span class="p">,</span> <span class="n">words</span><span class="p">)</span>
+</pre></div>
+</div>
+</section>
+<section id="integrate-logging-in-a-simple-and-quick-way">
+<h3>Integrate logging in a simple and quick way<a class="headerlink" href="#integrate-logging-in-a-simple-and-quick-way" title="Link to this heading">¶</a></h3>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">OrthoEvol.Tools.logit</span> <span class="kn">import</span> <span class="n">LogIt</span>
+
+<span class="c1"># Set up your loggers</span>
+<span class="n">logit</span> <span class="o">=</span> <span class="n">LogIt</span><span class="p">()</span><span class="o">.</span><span class="n">default</span><span class="p">(</span><span class="n">logname</span><span class="o">=</span><span class="s1">&#39;test1 log&#39;</span><span class="p">,</span> <span class="n">logfile</span><span class="o">=</span><span class="s1">&#39;log.txt&#39;</span><span class="p">)</span>
+
+<span class="c1"># Shutdown logging without deleting the logfile</span>
+<span class="n">logit</span><span class="o">.</span><span class="n">shutdown</span><span class="p">()</span>
+</pre></div>
+</div>
+</section>
+<section id="send-a-message-to-a-slack-channel">
+<h3>Send a message to a slack channel<a class="headerlink" href="#send-a-message-to-a-slack-channel" title="Link to this heading">¶</a></h3>
+<p>Your config file should look as such:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="p">[</span><span class="n">APIKEYS</span><span class="p">]</span>
+<span class="n">slack</span> <span class="o">=</span> <span class="n">apikeystring</span>
+</pre></div>
+</div>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">OrthoEvol.Tools.slackify</span> <span class="kn">import</span> <span class="n">Slackify</span>
+
+<span class="n">slack</span> <span class="o">=</span> <span class="n">Slackify</span><span class="p">(</span><span class="n">slackconfig</span><span class="o">=</span><span class="s1">&#39;path/to/slackconfig.cfg&#39;</span><span class="p">)</span>
+<span class="n">message_to_channel</span> <span class="o">=</span> <span class="s1">&#39;Hey, &lt;@username&gt;. This is an update for the current script.&#39;</span>
+
+<span class="n">slack</span><span class="o">.</span><span class="n">send_msg</span><span class="p">(</span><span class="n">channel</span><span class="o">=</span><span class="s1">&#39;channelname&#39;</span><span class="p">,</span> <span class="n">message</span><span class="o">=</span><span class="n">message_to_channel</span><span class="p">)</span>
+</pre></div>
+</div>
+</section>
+<section id="importing-all-tools-modules">
+<h3>Importing all tools modules<a class="headerlink" href="#importing-all-tools-modules" title="Link to this heading">¶</a></h3>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">OrthoEvol.Tools.ftp</span> <span class="kn">import</span> <span class="n">BaseFTPClient</span><span class="p">,</span> <span class="n">NcbiFTPClient</span>
+<span class="kn">from</span> <span class="nn">OrthoEvol.Tools.logit</span> <span class="kn">import</span> <span class="n">LogIt</span>
+<span class="kn">from</span> <span class="nn">OrthoEvol.Tools.mygene</span> <span class="kn">import</span> <span class="n">MyGene</span>
+<span class="kn">from</span> <span class="nn">OrthoEvol.Tools.parallel</span> <span class="kn">import</span> <span class="n">Multiprocess</span>
+<span class="c1"># from OrthoEvol.Tools.pandoc import PandocConverter</span>
+<span class="kn">from</span> <span class="nn">OrthoEvol.Tools.send2server</span> <span class="kn">import</span> <span class="n">S2S</span>
+<span class="kn">from</span> <span class="nn">OrthoEvol.Tools.sge</span> <span class="kn">import</span> <span class="p">(</span><span class="n">BaseSGEJob</span><span class="p">,</span> <span class="n">SGEJob</span><span class="p">,</span> <span class="n">Qstat</span><span class="p">,</span> <span class="n">SGEPipelineTask</span><span class="p">,</span>
+                                 <span class="n">randomid</span><span class="p">,</span> <span class="n">basejobids</span><span class="p">,</span> <span class="n">import_temp</span><span class="p">,</span>
+                                 <span class="n">writecodefile</span><span class="p">,</span>
+                                 <span class="n">file2str</span><span class="p">)</span>
+<span class="kn">from</span> <span class="nn">OrthoEvol.Tools.slackify</span> <span class="kn">import</span> <span class="n">Slackify</span>
+</pre></div>
+</div>
+</section>
+</section>
+<section id="additional-documentation">
+<h2>Additional Documentation<a class="headerlink" href="#additional-documentation" title="Link to this heading">¶</a></h2>
+<p>Check the specific modules for more detailed readmes and examples of
+using the tools with this package.</p>
+</section>
+</section>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="Main">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../index.html">OrthoEvolution</a></h1>
+
+
+
+<p class="blurb">An easy to use and comprehensive python package which aids in the analysis and visualization of comparative evolutionary genetics</p>
+
+
+
+
+<p>
+<iframe src="https://ghbtns.com/github-btn.html?user=Datasnakes&repo=OrthoEvolution&type=watch&count=true&size=large&v=2"
+  allowtransparency="true" frameborder="0" scrolling="0" width="200px" height="35px"></iframe>
+</p>
+
+
+
+
+
+
+  <div>
+    <h3><a href="../index.html">Table of Contents</a></h3>
+    <ul>
+<li><a class="reference internal" href="#">Tools Documentation</a><ul>
+<li><a class="reference internal" href="#examples">Examples</a><ul>
+<li><a class="reference internal" href="#download-ncbi-databases-with-our-ncbi-ftp-client">Download NCBI databases with our NCBI FTP Client</a></li>
+<li><a class="reference internal" href="#list-all-subdirectories-in-a-ncbi-ftp-path">List all subdirectories in a NCBI FTP Path</a></li>
+<li><a class="reference internal" href="#utilize-multiprocessing-to-speed-up-your-code">Utilize multiprocessing to speed up your code</a></li>
+<li><a class="reference internal" href="#integrate-logging-in-a-simple-and-quick-way">Integrate logging in a simple and quick way</a></li>
+<li><a class="reference internal" href="#send-a-message-to-a-slack-channel">Send a message to a slack channel</a></li>
+<li><a class="reference internal" href="#importing-all-tools-modules">Importing all tools modules</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#additional-documentation">Additional Documentation</a></li>
+</ul>
+</li>
+</ul>
+
+  </div>
+<search id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</search>
+<script>document.getElementById('searchbox').style.display = "block"</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &#169;2017, Shaurita Hutchins & Robert Gilmore.
+      
+      |
+      Powered by <a href="https://www.sphinx-doc.org/">Sphinx 8.2.3</a>
+      &amp; <a href="https://alabaster.readthedocs.io">Alabaster 1.0.0</a>
+      
+      |
+      <a href="../_sources/tools/toolsreadme.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+    <a href="https://github.com/Datasnakes/OrthoEvolution" class="github">
+        <img src="../_static/github-banner.svg" alt="Fork me on GitHub" class="github"/>
+    </a>
+    
+
+    
+  </body>
+</html>

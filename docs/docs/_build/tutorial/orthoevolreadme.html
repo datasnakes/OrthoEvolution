@@ -1,0 +1,459 @@
+<!DOCTYPE html>
+
+<html lang="python" data-content_root="../">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>Tutorial &#8212; OrthoEvolution 1.0.0b2 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=fa44fd50" />
+    <link rel="stylesheet" type="text/css" href="../_static/basic.css?v=b08954a9" />
+    <link rel="stylesheet" type="text/css" href="../_static/alabaster.css?v=27fed22d" />
+    <script src="../_static/documentation_options.js?v=3e4b6f43"></script>
+    <script src="../_static/doctools.js?v=9bcbadda"></script>
+    <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Cookies Documentation" href="../cookies/cookiesreadme.html" />
+    <link rel="prev" title="OrthoEvolution" href="../index.html" />
+   
+  <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
+  
+
+  
+  
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <section id="tutorial">
+<h1>Tutorial<a class="headerlink" href="#tutorial" title="Link to this heading">¶</a></h1>
+<p>OrthoEvolution has been built with Python 3.9 (and up) as a
+multi-faceted package and pipeline framework for comparative genetics in
+order to infer orthologous genes.</p>
+<p>Currently, this python package is comprised of 5 major modules:</p>
+<ol class="arabic simple">
+<li><p><a class="reference external" href="#using-the-cookies-module">Cookies Module</a> - Project structure
+creation using cookiecutter.</p></li>
+<li><p><a class="reference external" href="#using-the-manager-module">Manager Module</a> - Configuration
+management as well project deployment.</p></li>
+<li><p><a class="reference external" href="#using-the-orthologs-module">Orthologs Module</a> - Tools for
+comparative genetics analysis including alignment analysis and
+phylogenetics.</p></li>
+<li><p><a class="reference external" href="#using-the-pipeline-module">Pipeline Module</a> - Various
+preconfigured pipelines to be used in orthology inference.</p></li>
+<li><p><a class="reference external" href="#using-the-tools-module">Tools Module</a> - Utilities that aid in
+ftp downloading, server communication, and reusable everyday
+functions</p></li>
+</ol>
+<p>When used together, these 5 modules offer a cohesive environment for
+easily creating, managing, and deploying a bioinformatics pipeline for
+orthologous genes/species. In the future these tools will also be
+accessible from the command line and from a web application.</p>
+<p>READMEs are provided in each module’s directory, but we’ve compiled a
+mini tutorial here that can inform users on how to use these modules.</p>
+<section id="using-the-cookies-module">
+<h2>Using the Cookies module<a class="headerlink" href="#using-the-cookies-module" title="Link to this heading">¶</a></h2>
+<section id="overview">
+<h3>Overview<a class="headerlink" href="#overview" title="Link to this heading">¶</a></h3>
+<p>The Cookies module acts as a repository for custom
+<a class="reference external" href="https://github.com/audreyr/cookiecutter">cookiecutter</a> templates.</p>
+<p>Each “CookBook” allows us to quickly create and deploy different
+projects with various directory structures. They are meant to help
+organize projects and data in a standardized way. This module is used
+almost extensively by the Manager module.</p>
+<p>In the context of the Manager module the CookBook class is used to
+deploy an entire repository geared towards developing a web-page using
+Flask and R-Shiny. Cookies can also be used to create standalone
+projects that don’t require an entire repository.</p>
+<ul class="simple">
+<li><p>Templates used when creating a full repository:</p>
+<ul>
+<li><p><em>Cookies/new_repository</em></p></li>
+<li><p><em>Cookies/new_user</em></p></li>
+<li><p><em>Cookies/new_project</em></p></li>
+<li><p><em>Cookies/new_research</em></p></li>
+<li><p><em>Cookies/new_database</em> (for NCBI, proprietary, etc. databases)</p></li>
+<li><p><em>Cookies/new_app</em> (for
+<a class="reference external" href="https://github.com/grabear/awesome-rshiny">R-Shiny</a>
+applications)</p></li>
+<li><p><em>Cookies/new_website</em> (for <a class="reference external" href="http://flask.pocoo.org/">Flask</a>
+applications)</p></li>
+</ul>
+</li>
+<li><p>Template for standalone projects</p>
+<ul>
+<li><p><em>Cookies/new_basic_project</em></p></li>
+</ul>
+</li>
+</ul>
+</section>
+<section id="examples">
+<h3>Examples<a class="headerlink" href="#examples" title="Link to this heading">¶</a></h3>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">OrthoEvol.Cookies</span> <span class="kn">import</span> <span class="n">Oven</span>
+<span class="kn">from</span> <span class="nn">pathlib</span> <span class="kn">import</span> <span class="n">Path</span>
+<span class="kn">import</span> <span class="nn">os</span>
+
+<span class="c1"># Create the names used.</span>
+<span class="n">home</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">getcwd</span><span class="p">()</span>
+<span class="n">repo</span> <span class="o">=</span> <span class="s2">&quot;Development&quot;</span>
+<span class="n">user</span> <span class="o">=</span> <span class="s2">&quot;RAG&quot;</span>
+<span class="n">project</span> <span class="o">=</span> <span class="s2">&quot;Ortholog&quot;</span>
+<span class="n">research</span> <span class="o">=</span> <span class="s2">&quot;GPCR&quot;</span>
+<span class="n">research_type</span> <span class="o">=</span> <span class="s2">&quot;Comparative Genetics&quot;</span>
+<span class="c1"># Create the paths used</span>
+<span class="n">repo_path</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">home</span><span class="p">)</span> <span class="o">/</span> <span class="n">Path</span><span class="p">(</span><span class="n">repo</span><span class="p">)</span>
+<span class="n">user_path</span> <span class="o">=</span> <span class="n">repo_path</span> <span class="o">/</span> <span class="n">Path</span><span class="p">(</span><span class="s1">&#39;users&#39;</span><span class="p">)</span>
+<span class="n">project_path</span> <span class="o">=</span> <span class="n">user_path</span> <span class="o">/</span> <span class="n">Path</span><span class="p">(</span><span class="n">user</span><span class="p">)</span> <span class="o">/</span> <span class="n">Path</span><span class="p">(</span><span class="s1">&#39;projects&#39;</span><span class="p">)</span>
+<span class="n">research_path</span> <span class="o">=</span> <span class="n">project_path</span> <span class="o">/</span> <span class="n">Path</span><span class="p">(</span><span class="n">project</span><span class="p">)</span>
+
+<span class="c1"># Initialize the Oven object to create a full repository</span>
+<span class="n">Full_Kitchen</span> <span class="o">=</span> <span class="n">Oven</span><span class="p">(</span><span class="n">repo</span><span class="o">=</span><span class="n">repo</span><span class="p">,</span> <span class="n">user</span><span class="o">=</span><span class="n">user</span><span class="p">,</span> <span class="n">project</span><span class="o">=</span><span class="n">project</span><span class="p">,</span> <span class="n">basic_project</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">output_dir</span><span class="o">=</span><span class="n">home</span><span class="p">)</span>
+<span class="c1"># Create the new project</span>
+<span class="n">Full_Kitchen</span><span class="o">.</span><span class="n">bake_the_repo</span><span class="p">()</span>
+<span class="n">Full_Kitchen</span><span class="o">.</span><span class="n">bake_the_user</span><span class="p">(</span><span class="n">cookie_jar</span><span class="o">=</span><span class="n">user_path</span><span class="p">)</span>
+<span class="n">Full_Kitchen</span><span class="o">.</span><span class="n">bake_the_project</span><span class="p">(</span><span class="n">cookie_jar</span><span class="o">=</span><span class="n">project_path</span><span class="p">)</span>
+<span class="n">Full_Kitchen</span><span class="o">.</span><span class="n">bake_the_research</span><span class="p">(</span><span class="n">research</span><span class="o">=</span><span class="n">research</span><span class="p">,</span> <span class="n">research_type</span><span class="o">=</span><span class="n">research_type</span><span class="p">,</span> <span class="n">cookie_jar</span><span class="o">=</span><span class="n">research_path</span><span class="p">)</span>
+
+<span class="c1"># Initialize the Oven object to setup a basic project</span>
+<span class="n">Basic_Kitchen</span> <span class="o">=</span> <span class="n">Oven</span><span class="p">(</span><span class="n">project</span><span class="o">=</span><span class="n">project</span><span class="p">,</span> <span class="n">basic_project</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">output_dir</span><span class="o">=</span><span class="n">home</span><span class="p">)</span>
+<span class="c1"># Create the new project</span>
+<span class="n">Basic_Kitchen</span><span class="o">.</span><span class="n">bake_the_project</span><span class="p">()</span>
+</pre></div>
+</div>
+</section>
+</section>
+<section id="using-the-manager-module">
+<h2>Using the Manager module<a class="headerlink" href="#using-the-manager-module" title="Link to this heading">¶</a></h2>
+<section id="overview-1">
+<span id="id1"></span><h3>Overview<a class="headerlink" href="#overview-1" title="Link to this heading">¶</a></h3>
+<p>The Manager module uses the CookBook class in order to deploy a
+bioinformatics repository with an organized directory structure based on
+specific users and the projects that they create. Pipeline customization
+and configuration will also be possible through YAML files.</p>
+</section>
+<section id="future-direction">
+<h3>Future Direction<a class="headerlink" href="#future-direction" title="Link to this heading">¶</a></h3>
+<p>First, a database_management class for dealing with the various
+databases (NCBI, BioSQL, etc.) will be developed. Then the Management
+class will become responsible for functioning alongside Flask in order
+to create a web interface. The web interface will give each user access
+to the Tools and Orthologs modules as well as data generated by the
+pipeline functionality.</p>
+</section>
+<section id="examples-1">
+<span id="id2"></span><h3>Examples<a class="headerlink" href="#examples-1" title="Link to this heading">¶</a></h3>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Manager classes can be used explicitly, or...</span>
+<span class="kn">from</span> <span class="nn">OrthoEvol.Manager.management</span> <span class="kn">import</span> <span class="n">Management</span>
+<span class="kn">from</span> <span class="nn">OrthoEvol.Manager.management</span> <span class="kn">import</span> <span class="n">RepoManagement</span>
+<span class="kn">from</span> <span class="nn">OrthoEvol.Manager.management</span> <span class="kn">import</span> <span class="n">UserManagement</span>
+<span class="kn">from</span> <span class="nn">OrthoEvol.Manager.management</span> <span class="kn">import</span> <span class="n">WebsiteManagement</span>
+<span class="kn">from</span> <span class="nn">OrthoEvol.Manager.management</span> <span class="kn">import</span> <span class="n">ProjectManagement</span>
+
+<span class="c1"># ...they can be use implicitly through the main pipeline class.</span>
+<span class="kn">from</span> <span class="nn">OrthoEvol.Manager.data_management</span> <span class="kn">import</span> <span class="n">DataMana</span>
+</pre></div>
+</div>
+<section id="explicit-usage">
+<h4>Explicit Usage<a class="headerlink" href="#explicit-usage" title="Link to this heading">¶</a></h4>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">OrthoEvol.Manager.management</span> <span class="kn">import</span> <span class="n">ProjectManagement</span>
+<span class="c1"># Use the flags to create a new repository/user/project/research directory system</span>
+<span class="n">pm</span> <span class="o">=</span> <span class="n">ProjectManagement</span><span class="p">(</span><span class="n">repo</span><span class="o">=</span><span class="s2">&quot;repository1&quot;</span><span class="p">,</span> <span class="n">user</span><span class="o">=</span><span class="s1">&#39;user1&#39;</span><span class="p">,</span> <span class="n">project</span><span class="o">=</span><span class="s1">&#39;project1&#39;</span><span class="p">,</span> <span class="n">research</span><span class="o">=</span><span class="s1">&#39;research1&#39;</span><span class="p">,</span>
+    <span class="n">research_type</span><span class="o">=</span><span class="s1">&#39;comparative_genetics&#39;</span><span class="p">,</span> <span class="n">new_repo</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">new_user</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">new_project</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">new_research</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="c1"># Access the path variables</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">pm</span><span class="o">.</span><span class="n">research_path</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">pm</span><span class="o">.</span><span class="n">research</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">pm</span><span class="o">.</span><span class="n">Pantry</span><span class="o">.</span><span class="n">research_cookie</span><span class="p">)</span>
+</pre></div>
+</div>
+</section>
+<section id="implicit-usage">
+<h4>Implicit Usage<a class="headerlink" href="#implicit-usage" title="Link to this heading">¶</a></h4>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">OrthoEvol.Manager.data_management</span> <span class="kn">import</span> <span class="n">DataMana</span>
+<span class="c1"># Use a prebuilt configuration file in Manager/config/</span>
+<span class="c1"># *start* a *new* project automatically</span>
+<span class="c1"># This builds everything and then starts the pipeline</span>
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="n">pipeline</span> <span class="o">=</span> <span class="n">DataMana</span><span class="p">(</span><span class="n">pipeline</span><span class="o">=</span><span class="s1">&#39;Ortho_CDS_1&#39;</span><span class="p">,</span> <span class="n">project_path</span><span class="o">=</span><span class="n">os</span><span class="o">.</span><span class="n">getcwd</span><span class="p">(),</span> <span class="n">start</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">new</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+</pre></div>
+</div>
+</section>
+</section>
+</section>
+<section id="using-the-orthologs-module">
+<h2>Using the Orthologs Module<a class="headerlink" href="#using-the-orthologs-module" title="Link to this heading">¶</a></h2>
+<section id="overview-2">
+<span id="id3"></span><h3>Overview<a class="headerlink" href="#overview-2" title="Link to this heading">¶</a></h3>
+<p>The Orthologs module is the central data processing unit of our package.
+Any published data will be generated using these submodules.</p>
+<p>The sub modules are used for BLASTing NCBI’s refseq database to discover
+orthologous genes, parsing and analyzing BLASTn data, generating GenBank
+files for the orthologs, generating sequence data for the orthologs,
+aligning the orthologous sequences for each gene, generating
+phylogenetic trees for each gene, and doing phylogenetic analysis for
+each gene.</p>
+</section>
+<section id="examples-2">
+<span id="id4"></span><h3>Examples<a class="headerlink" href="#examples-2" title="Link to this heading">¶</a></h3>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">OrthoEvol.Manager.management</span> <span class="kn">import</span> <span class="n">ProjectManagement</span>
+<span class="kn">from</span> <span class="nn">OrthoEvol.Orthologs.Blast.blastn_comparative_genetics</span> <span class="kn">import</span> <span class="n">OrthoBlastN</span>
+<span class="kn">from</span> <span class="nn">OrthoEvol.Orthologs.GenBank.genbank</span> <span class="kn">import</span> <span class="n">GenBank</span>
+<span class="kn">from</span> <span class="nn">OrthoEvol.Orthologs.Align.msa</span> <span class="kn">import</span> <span class="n">MultipleSequenceAlignment</span> <span class="k">as</span> <span class="n">MSA</span>
+
+<span class="c1"># In a real situation a dictionary configuration from YAML files will be used</span>
+<span class="c1"># However a dictionary can be manually set up by the user within the script</span>
+<span class="c1"># See the config files in Manager/config or use data_management.py as an example</span>
+<span class="n">management_cfg</span> <span class="o">=</span> <span class="n">mlast_cfg</span> <span class="o">=</span> <span class="n">genbank_cfg</span> <span class="o">=</span> <span class="n">alignment_cfg</span> <span class="o">=</span> <span class="p">{}</span>
+
+<span class="c1"># Initialize the Project Manager</span>
+<span class="n">proj_mana</span> <span class="o">=</span> <span class="n">ProjectManagement</span><span class="p">(</span><span class="o">**</span><span class="n">management_cfg</span><span class="p">)</span>
+
+<span class="c1"># Initialize the BLAST tool</span>
+<span class="c1"># Compose this class with the Project Manager</span>
+<span class="n">myblast</span> <span class="o">=</span> <span class="n">OrthoBlastN</span><span class="p">(</span><span class="n">proj_mana</span><span class="o">=</span><span class="n">proj_mana</span><span class="p">,</span> <span class="o">**</span><span class="n">management_cfg</span><span class="p">,</span> <span class="o">**</span><span class="n">blast_cfg</span><span class="p">)</span>
+<span class="n">myblast</span><span class="o">.</span><span class="n">blast_config</span><span class="p">(</span><span class="n">myblast</span><span class="o">.</span><span class="n">blast_human</span><span class="p">,</span> <span class="s1">&#39;Homo_sapiens&#39;</span><span class="p">,</span> <span class="n">auto_start</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+<span class="c1"># Initialize the GenBank parser</span>
+<span class="c1"># Compose this class with the BLAST tool</span>
+<span class="c1"># Implicitly uses the Project Manager as well</span>
+<span class="n">genbank</span> <span class="o">=</span> <span class="n">GenBank</span><span class="p">(</span><span class="n">blast</span><span class="o">=</span><span class="n">blast</span><span class="p">,</span> <span class="o">**</span><span class="n">management_cfg</span><span class="p">,</span> <span class="o">**</span><span class="n">genbank_cfg</span><span class="p">)</span>
+<span class="c1"># Use the Blast tool data to get the desired GenBank files</span>
+<span class="n">genbank</span><span class="o">.</span><span class="n">blast2_gbk_files</span><span class="p">(</span><span class="n">myblast</span><span class="o">.</span><span class="n">org_list</span><span class="p">,</span> <span class="n">myblast</span><span class="o">.</span><span class="n">gene_dict</span><span class="p">)</span>
+
+<span class="c1"># Initialize the Aligner</span>
+<span class="c1"># Compose this class with the GenBank parser</span>
+<span class="c1"># Implicitly uses the Project Manager and the BLAST tool as well</span>
+<span class="n">al</span> <span class="o">=</span> <span class="n">MSA</span><span class="p">(</span><span class="n">genbank</span><span class="o">=</span><span class="n">genbank</span><span class="p">,</span> <span class="o">**</span><span class="n">management_cfg</span><span class="p">,</span> <span class="o">**</span><span class="n">alignment_cfg</span><span class="p">)</span>
+<span class="n">al</span><span class="o">.</span><span class="n">align</span><span class="p">(</span><span class="n">alignment_config</span><span class="p">[</span><span class="s1">&#39;kwargs&#39;</span><span class="p">])</span>  <span class="c1"># Underdeveloped</span>
+</pre></div>
+</div>
+</section>
+</section>
+<section id="using-the-pipeline-module">
+<h2>Using the Pipeline module<a class="headerlink" href="#using-the-pipeline-module" title="Link to this heading">¶</a></h2>
+<p>The pipeline module integrates the python package <a class="reference external" href="#">luigi</a> with our
+package to create a pipeline that is accessible via the command-line and
+can be utilized with a qsub/pbs job scheduling system.</p>
+<section id="examples-3">
+<span id="id5"></span><h3>Examples<a class="headerlink" href="#examples-3" title="Link to this heading">¶</a></h3>
+</section>
+</section>
+<section id="using-the-tools-module">
+<h2>Using the Tools module<a class="headerlink" href="#using-the-tools-module" title="Link to this heading">¶</a></h2>
+<p>The tools module is a grouping of utilities used by our package. While
+they could have been stored in each module’s util.py file, they were
+used and developed on a global scale, and hence required their own
+module.</p>
+<section id="overview-3">
+<span id="id6"></span><h3>Overview<a class="headerlink" href="#overview-3" title="Link to this heading">¶</a></h3>
+<p>Some of the tools/classes in the tools module are:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">NcbiFTPClient</span></code> - Provides functions to easily download NCBI
+databases/files and update them.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">LogIt</span></code> - A wrapper around logzero for easy logging to the screen or
+a file.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">Multiprocess</span></code> - A simple and effective class that allows the input
+of a function to map to a user’s list in order to take advantage of
+parallel computing.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">SGEJob</span></code> - A class to aid in submission of a job via <code class="docutils literal notranslate"><span class="pre">qsub</span></code> on a
+cluster.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">Qstat</span></code> - A class that parses the output of <code class="docutils literal notranslate"><span class="pre">qstat</span></code> to return job
+information. It also waits on job completion.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">Slackify</span></code> - A class for sending messages, files, and images to
+Slack channels for pipeline progress updates and notifications.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">MyGene</span></code> - A wrapper around BioThings’ MyGene.info REST API for
+querying and retrieving gene annotation data.</p></li>
+</ul>
+<p>Can I integrate these tools with each other and with other modules
+including my own? <strong>YES!</strong> We’ll provide some examples below!</p>
+</section>
+<section id="examples-4">
+<span id="id7"></span><h3>Examples<a class="headerlink" href="#examples-4" title="Link to this heading">¶</a></h3>
+<section id="download-ncbi-databases-with-our-ncbi-ftp-client">
+<h4>Download NCBI databases with our NCBI FTP Client<a class="headerlink" href="#download-ncbi-databases-with-our-ncbi-ftp-client" title="Link to this heading">¶</a></h4>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">OrthoEvol.Tools.ftp</span> <span class="kn">import</span> <span class="n">NcbiFTPClient</span>
+
+<span class="n">ncbiftp</span> <span class="o">=</span> <span class="n">NcbiFTPClient</span><span class="p">(</span><span class="n">email</span><span class="o">=</span><span class="s1">&#39;somebody@gmail.com&#39;</span><span class="p">)</span>
+<span class="n">ncbiftp</span><span class="o">.</span><span class="n">getblastdb</span><span class="p">(</span><span class="n">database_name</span><span class="o">=</span><span class="s1">&#39;refseq_rna&#39;</span><span class="p">,</span> <span class="n">v5</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+</pre></div>
+</div>
+</section>
+<section id="utilize-multiprocessing-to-speed-up-your-code">
+<h4>Utilize multiprocessing to speed up your code<a class="headerlink" href="#utilize-multiprocessing-to-speed-up-your-code" title="Link to this heading">¶</a></h4>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">OrthoEvol.Tools.parallel</span> <span class="kn">import</span> <span class="n">Multiprocess</span>
+
+<span class="k">def</span> <span class="nf">process_gene</span><span class="p">(</span><span class="n">gene</span><span class="p">):</span>
+    <span class="c1"># Your processing code here</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Processing </span><span class="si">{</span><span class="n">gene</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+<span class="n">genes</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;HTR1A&#39;</span><span class="p">,</span> <span class="s1">&#39;CCR5&#39;</span><span class="p">,</span> <span class="s1">&#39;DRD4&#39;</span><span class="p">]</span>
+
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s1">&#39;__main__&#39;</span><span class="p">:</span>
+    <span class="n">mp</span> <span class="o">=</span> <span class="n">Multiprocess</span><span class="p">()</span>
+    <span class="n">mp</span><span class="o">.</span><span class="n">map2function</span><span class="p">(</span><span class="n">process_gene</span><span class="p">,</span> <span class="n">genes</span><span class="p">)</span>
+</pre></div>
+</div>
+</section>
+<section id="integrate-logging-in-a-simple-and-quick-way">
+<h4>Integrate logging in a simple and quick way<a class="headerlink" href="#integrate-logging-in-a-simple-and-quick-way" title="Link to this heading">¶</a></h4>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">OrthoEvol.Tools.logit</span> <span class="kn">import</span> <span class="n">LogIt</span>
+
+<span class="c1"># Set up your loggers</span>
+<span class="n">logit</span> <span class="o">=</span> <span class="n">LogIt</span><span class="p">()</span><span class="o">.</span><span class="n">default</span><span class="p">(</span><span class="n">logname</span><span class="o">=</span><span class="s1">&#39;test1 log&#39;</span><span class="p">,</span> <span class="n">logfile</span><span class="o">=</span><span class="s1">&#39;log.txt&#39;</span><span class="p">)</span>
+
+<span class="c1"># Use the logger</span>
+<span class="n">logit</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;This is a log message&#39;</span><span class="p">)</span>
+
+<span class="c1"># Shutdown logging without deleting the logfile</span>
+<span class="n">logit</span><span class="o">.</span><span class="n">shutdown</span><span class="p">()</span>
+</pre></div>
+</div>
+</section>
+<section id="send-a-message-to-a-slack-channel">
+<h4>Send a message to a Slack channel<a class="headerlink" href="#send-a-message-to-a-slack-channel" title="Link to this heading">¶</a></h4>
+<p>Your config file should look as such:</p>
+<div class="highlight-ini notranslate"><div class="highlight"><pre><span></span><span class="k">[APIKEYS]</span>
+<span class="na">slack</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">apikeystring</span>
+</pre></div>
+</div>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">OrthoEvol.Tools.slackify</span> <span class="kn">import</span> <span class="n">Slackify</span>
+
+<span class="c1"># Slack takes a config file that&#39;s already set up</span>
+<span class="n">slack</span> <span class="o">=</span> <span class="n">Slackify</span><span class="p">(</span><span class="n">slackconfig</span><span class="o">=</span><span class="s1">&#39;path/to/slackconfig.cfg&#39;</span><span class="p">)</span>
+
+<span class="c1"># Message a channel and link to a user</span>
+<span class="n">message_to_channel</span> <span class="o">=</span> <span class="s1">&#39;Hey, &lt;@username&gt;. This is an update for the current script.&#39;</span>
+<span class="n">slack</span><span class="o">.</span><span class="n">send_msg</span><span class="p">(</span><span class="n">channel</span><span class="o">=</span><span class="s1">&#39;channelname&#39;</span><span class="p">,</span> <span class="n">message</span><span class="o">=</span><span class="n">message_to_channel</span><span class="p">)</span>
+</pre></div>
+</div>
+</section>
+<section id="use-mygene-to-query-gene-annotation-data">
+<h4>Use MyGene to query gene annotation data<a class="headerlink" href="#use-mygene-to-query-gene-annotation-data" title="Link to this heading">¶</a></h4>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">OrthoEvol.Tools.mygene</span> <span class="kn">import</span> <span class="n">MyGene</span>
+
+<span class="c1"># Use with a BLAST master accession file</span>
+<span class="n">mygene</span> <span class="o">=</span> <span class="n">MyGene</span><span class="p">(</span><span class="n">infile</span><span class="o">=</span><span class="s1">&#39;test_blast.csv&#39;</span><span class="p">,</span> <span class="n">outfile</span><span class="o">=</span><span class="s1">&#39;mygene_output.csv&#39;</span><span class="p">)</span>
+<span class="n">mygene</span><span class="o">.</span><span class="n">query_mygene</span><span class="p">()</span>
+</pre></div>
+</div>
+<p>For more information, view the <a class="reference external" href="https://github.com/datasnakes/OrthoEvolution/tree/master/OrthoEvol/Tools/README.md">Tools
+README</a>
+and individual tool READMEs.</p>
+</section>
+</section>
+</section>
+</section>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="Main">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../index.html">OrthoEvolution</a></h1>
+
+
+
+<p class="blurb">An easy to use and comprehensive python package which aids in the analysis and visualization of comparative evolutionary genetics</p>
+
+
+
+
+<p>
+<iframe src="https://ghbtns.com/github-btn.html?user=Datasnakes&repo=OrthoEvolution&type=watch&count=true&size=large&v=2"
+  allowtransparency="true" frameborder="0" scrolling="0" width="200px" height="35px"></iframe>
+</p>
+
+
+
+
+
+
+  <div>
+    <h3><a href="../index.html">Table of Contents</a></h3>
+    <ul>
+<li><a class="reference internal" href="#">Tutorial</a><ul>
+<li><a class="reference internal" href="#using-the-cookies-module">Using the Cookies module</a><ul>
+<li><a class="reference internal" href="#overview">Overview</a></li>
+<li><a class="reference internal" href="#examples">Examples</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#using-the-manager-module">Using the Manager module</a><ul>
+<li><a class="reference internal" href="#overview-1">Overview</a></li>
+<li><a class="reference internal" href="#future-direction">Future Direction</a></li>
+<li><a class="reference internal" href="#examples-1">Examples</a><ul>
+<li><a class="reference internal" href="#explicit-usage">Explicit Usage</a></li>
+<li><a class="reference internal" href="#implicit-usage">Implicit Usage</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a class="reference internal" href="#using-the-orthologs-module">Using the Orthologs Module</a><ul>
+<li><a class="reference internal" href="#overview-2">Overview</a></li>
+<li><a class="reference internal" href="#examples-2">Examples</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#using-the-pipeline-module">Using the Pipeline module</a><ul>
+<li><a class="reference internal" href="#examples-3">Examples</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#using-the-tools-module">Using the Tools module</a><ul>
+<li><a class="reference internal" href="#overview-3">Overview</a></li>
+<li><a class="reference internal" href="#examples-4">Examples</a><ul>
+<li><a class="reference internal" href="#download-ncbi-databases-with-our-ncbi-ftp-client">Download NCBI databases with our NCBI FTP Client</a></li>
+<li><a class="reference internal" href="#utilize-multiprocessing-to-speed-up-your-code">Utilize multiprocessing to speed up your code</a></li>
+<li><a class="reference internal" href="#integrate-logging-in-a-simple-and-quick-way">Integrate logging in a simple and quick way</a></li>
+<li><a class="reference internal" href="#send-a-message-to-a-slack-channel">Send a message to a Slack channel</a></li>
+<li><a class="reference internal" href="#use-mygene-to-query-gene-annotation-data">Use MyGene to query gene annotation data</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+  </div>
+<search id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</search>
+<script>document.getElementById('searchbox').style.display = "block"</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &#169;2017, Shaurita Hutchins & Robert Gilmore.
+      
+      |
+      Powered by <a href="https://www.sphinx-doc.org/">Sphinx 8.2.3</a>
+      &amp; <a href="https://alabaster.readthedocs.io">Alabaster 1.0.0</a>
+      
+      |
+      <a href="../_sources/tutorial/orthoevolreadme.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+    <a href="https://github.com/Datasnakes/OrthoEvolution" class="github">
+        <img src="../_static/github-banner.svg" alt="Fork me on GitHub" class="github"/>
+    </a>
+    
+
+    
+  </body>
+</html>

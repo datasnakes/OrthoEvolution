@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+
+<html lang="python" data-content_root="../">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>Orthologs Documentation &#8212; OrthoEvolution 1.0.0b2 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=fa44fd50" />
+    <link rel="stylesheet" type="text/css" href="../_static/basic.css?v=b08954a9" />
+    <link rel="stylesheet" type="text/css" href="../_static/alabaster.css?v=27fed22d" />
+    <script src="../_static/documentation_options.js?v=3e4b6f43"></script>
+    <script src="../_static/doctools.js?v=9bcbadda"></script>
+    <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Pipeline Documentation" href="../pipeline/pipelinereadme.html" />
+    <link rel="prev" title="Manager Documentation" href="../manager/managerreadme.html" />
+   
+  <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
+  
+
+  
+  
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <section id="orthologs-documentation">
+<h1>Orthologs Documentation<a class="headerlink" href="#orthologs-documentation" title="Link to this heading">¶</a></h1>
+<p>This top level module includes submodules such as
+<a class="reference external" href="https://github.com/datasnakes/OrthoEvolution/blob/master/OrthoEvol/Orthologs/Align/README.md">Align</a>
+(for aligning multi fasta files),
+<a class="reference external" href="https://github.com/datasnakes/OrthoEvolution/blob/master/OrthoEvol/Orthologs/Phylogenetics/README.md">Phylogenetics</a>
+(for analyzing multiple sequence alignments), <a href="#id1"><span class="problematic" id="id2">`BioSQL &lt;&gt;`__</span></a> (for
+database creation),
+<a class="reference external" href="https://github.com/datasnakes/OrthoEvolution/tree/master/OrthoEvol/Orthologs/Blast">Blast</a>
+(includes tools for using NCBI’s blastn command line), and
+<a class="reference external" href="https://github.com/datasnakes/OrthoEvolution/blob/master/OrthoEvol/Orthologs/Genbank/README.md">Genbank</a>.
+(for tools to extract features from genbank files).</p>
+<section id="usage-examples">
+<h2>Usage &amp; Examples<a class="headerlink" href="#usage-examples" title="Link to this heading">¶</a></h2>
+<p>These classes are optimized to be used together (very little work to do
+that), but can also be used as standalone classes/methods.</p>
+<p>This is a simple example of using all of the <code class="docutils literal notranslate"><span class="pre">Orthologs</span></code> submodules
+together.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">OrthoEvol.Orthologs.Blast</span> <span class="kn">import</span> <span class="n">OrthoBlastN</span>
+<span class="kn">from</span> <span class="nn">OrthoEvol.Orthologs.Align</span> <span class="kn">import</span> <span class="n">ClustalO</span>
+<span class="kn">from</span> <span class="nn">OrthoEvol.Orthologs.Phylogenetics</span> <span class="kn">import</span> <span class="n">ETE3PAML</span>
+</pre></div>
+</div>
+</section>
+<section id="software-dependencies">
+<h2>Software Dependencies<a class="headerlink" href="#software-dependencies" title="Link to this heading">¶</a></h2>
+<p>Ensure that the following software is installed and in your path:
+Clustal omega, NCBI Blast+ 2.6.0 or greater, PAML, PhyML, Phylip,
+IQTREE, Mafft, Prank, Clustalw, Guidance2 &amp; Pal2Nal</p>
+<p>If you are a sudo user, you may use the script we’ve provided,
+<a class="reference external" href="https://github.com/datasnakes/OrthoEvolution/blob/master/OrthoEvol/Orthologs/install.sh">install.sh</a>.</p>
+</section>
+<section id="using-install-sh-on-debian-ubuntu">
+<h2>Using install.sh on Debian/Ubuntu:<a class="headerlink" href="#using-install-sh-on-debian-ubuntu" title="Link to this heading">¶</a></h2>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># Change to the directory of the file.</span>
+<span class="nb">cd</span>
+chmod<span class="w"> </span>+x<span class="w"> </span>install.sh
+./sudo-install.sh
+</pre></div>
+</div>
+</section>
+</section>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="Main">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../index.html">OrthoEvolution</a></h1>
+
+
+
+<p class="blurb">An easy to use and comprehensive python package which aids in the analysis and visualization of comparative evolutionary genetics</p>
+
+
+
+
+<p>
+<iframe src="https://ghbtns.com/github-btn.html?user=Datasnakes&repo=OrthoEvolution&type=watch&count=true&size=large&v=2"
+  allowtransparency="true" frameborder="0" scrolling="0" width="200px" height="35px"></iframe>
+</p>
+
+
+
+
+
+
+  <div>
+    <h3><a href="../index.html">Table of Contents</a></h3>
+    <ul>
+<li><a class="reference internal" href="#">Orthologs Documentation</a><ul>
+<li><a class="reference internal" href="#usage-examples">Usage &amp; Examples</a></li>
+<li><a class="reference internal" href="#software-dependencies">Software Dependencies</a></li>
+<li><a class="reference internal" href="#using-install-sh-on-debian-ubuntu">Using install.sh on Debian/Ubuntu:</a></li>
+</ul>
+</li>
+</ul>
+
+  </div>
+<search id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</search>
+<script>document.getElementById('searchbox').style.display = "block"</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &#169;2017, Shaurita Hutchins & Robert Gilmore.
+      
+      |
+      Powered by <a href="https://www.sphinx-doc.org/">Sphinx 8.2.3</a>
+      &amp; <a href="https://alabaster.readthedocs.io">Alabaster 1.0.0</a>
+      
+      |
+      <a href="../_sources/orthologs/orthologsreadme.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+    <a href="https://github.com/Datasnakes/OrthoEvolution" class="github">
+        <img src="../_static/github-banner.svg" alt="Fork me on GitHub" class="github"/>
+    </a>
+    
+
+    
+  </body>
+</html>

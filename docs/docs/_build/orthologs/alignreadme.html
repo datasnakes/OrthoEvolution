@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+
+<html lang="python" data-content_root="../">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>Align Documentation &#8212; OrthoEvolution 1.0.0b2 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=fa44fd50" />
+    <link rel="stylesheet" type="text/css" href="../_static/basic.css?v=b08954a9" />
+    <link rel="stylesheet" type="text/css" href="../_static/alabaster.css?v=27fed22d" />
+    <script src="../_static/documentation_options.js?v=3e4b6f43"></script>
+    <script src="../_static/doctools.js?v=9bcbadda"></script>
+    <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+   
+  <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
+  
+
+  
+  
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <section id="align-documentation">
+<h1>Align Documentation<a class="headerlink" href="#align-documentation" title="Link to this heading">¶</a></h1>
+<p>This module aids in aligning multiple sequence fasta files, and in
+particular, it has been designed to optimize aligning orthologous
+mammalian sequences. We’ve found that <a class="reference external" href="http://www.ebi.ac.uk/Tools/msa/clustalo/help/faq.html">clustal
+omega</a> is best
+for the sample size we presently use which includes about 66 sequences
+per mutli fasta file.</p>
+<p>In the process of aligning our sequences, we also researched methods for
+better curating those sequences. We’ve added
+<a class="reference external" href="http://guidance.tau.ac.il/">Guidance2</a> and
+<a class="reference external" href="http://www.bork.embl.de/pal2nal/">Pal2Nal</a> command line wrappers to
+help us to remove poor sequences (guidance2) and to prep sequences
+better for PAML analysis (pal2nal).</p>
+<section id="examples">
+<h2>Examples<a class="headerlink" href="#examples" title="Link to this heading">¶</a></h2>
+<p>Clustal Omega is mainly used to align our the cds sequences. It’s best
+to use clustal omega with amino acid sequences.</p>
+<section id="using-the-multiplesequencealignment-class">
+<h3>Using the MultipleSequenceAlignment class<a class="headerlink" href="#using-the-multiplesequencealignment-class" title="Link to this heading">¶</a></h3>
+<p>The MultipleSequenceAlignment class was carefully designed to optimize
+the alignment strategies for orthology inference and speed.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">OrthoEvol.Orthologs.Align</span> <span class="kn">import</span> <span class="n">MultipleSequenceAlignment</span> <span class="k">as</span> <span class="n">MSA</span>
+
+<span class="c1"># User may specify a project and project path</span>
+<span class="n">msa</span> <span class="o">=</span> <span class="n">MSA</span><span class="p">(</span><span class="n">project</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">project_path</span><span class="o">=</span><span class="n">os</span><span class="o">.</span><span class="n">getcwd</span><span class="p">())</span>
+
+<span class="c1"># From there, the user can select an alignment strategy (clustalo, guidance2, or pal2nal)</span>
+
+<span class="n">fastafile</span> <span class="o">=</span> <span class="s1">&#39;HTR1A.ffn&#39;</span>
+
+<span class="n">msa</span><span class="o">.</span><span class="n">clustalo</span><span class="p">(</span><span class="n">infile</span><span class="o">=</span><span class="n">fastafile</span><span class="p">,</span> <span class="n">outfile</span><span class="o">=</span><span class="s1">&#39;HTR1A_aligned_clustal.ffn&#39;</span><span class="p">,</span> <span class="n">outfmt</span><span class="o">=</span><span class="s2">&quot;fasta&quot;</span><span class="p">)</span>
+
+<span class="n">msa</span><span class="o">.</span><span class="n">guidance2</span><span class="p">(</span><span class="n">seqFile</span><span class="o">=</span><span class="n">fastafile</span><span class="p">,</span> <span class="n">msaProgram</span><span class="o">=</span><span class="s1">&#39;MUSCLE&#39;</span><span class="p">,</span> <span class="n">seqType</span><span class="o">=</span><span class="s1">&#39;aa&#39;</span><span class="p">,</span> <span class="n">dataset</span><span class="o">=</span><span class="s1">&#39;MSA&#39;</span><span class="p">,</span>
+              <span class="n">seqFilter</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">columnFilter</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">maskFilter</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span>
+
+<span class="c1"># AFTER aligning, the user may use pal2nal</span>
+<span class="n">msa</span><span class="o">.</span><span class="n">pal2nal</span><span class="p">(</span><span class="n">aa_alignment</span><span class="o">=</span><span class="s1">&#39;HTR1A_aligned_clustal.ffn&#39;</span><span class="p">,</span> <span class="n">na_fasta</span><span class="o">=</span><span class="n">fastafile</span><span class="p">,</span>
+            <span class="n">output_type</span><span class="o">=</span><span class="s1">&#39;paml&#39;</span><span class="p">,</span> <span class="n">nogap</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">nomismatch</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">downstream</span><span class="o">=</span><span class="s1">&#39;paml&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+</section>
+<section id="running-clustal-omega">
+<h3>Running Clustal Omega<a class="headerlink" href="#running-clustal-omega" title="Link to this heading">¶</a></h3>
+<p>It’s important to note that the default parameters for <code class="docutils literal notranslate"><span class="pre">ClustalO</span></code> are
+as follows: <code class="docutils literal notranslate"><span class="pre">seqtype=&quot;PROTEIN&quot;</span></code>, <code class="docutils literal notranslate"><span class="pre">infmt=&quot;fasta&quot;</span></code>, <code class="docutils literal notranslate"><span class="pre">outfmt=&quot;fasta&quot;</span></code></p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">OrthoEvol.Orthologs.Align</span> <span class="kn">import</span> <span class="n">ClustalO</span>
+
+<span class="n">gene_list</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;HTR1A&#39;</span><span class="p">,</span> <span class="s1">&#39;CCR5&#39;</span><span class="p">,</span> <span class="s1">&#39;DRD4&#39;</span><span class="p">]</span>
+
+<span class="k">for</span> <span class="n">gene</span> <span class="ow">in</span> <span class="n">gene_list</span><span class="p">:</span>
+    <span class="n">ClustalO</span><span class="p">(</span><span class="n">infile</span><span class="o">=</span><span class="n">gene</span> <span class="o">+</span> <span class="s2">&quot;_multifasta.ffn&quot;</span><span class="p">,</span> <span class="n">outfile</span><span class="o">=</span><span class="n">gene</span> <span class="o">+</span> <span class="s2">&quot;_aligned.fasta&quot;</span><span class="p">,</span> <span class="n">logpath</span><span class="o">=</span><span class="n">gene</span> <span class="o">+</span> <span class="s2">&quot;.log&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</section>
+<section id="running-the-pal2nal-command-line-wrapper">
+<h3>Running the Pal2Nal command line wrapper<a class="headerlink" href="#running-the-pal2nal-command-line-wrapper" title="Link to this heading">¶</a></h3>
+<p>By default, the out format is in clustal or aln format.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">OrthoEvol.Orthologs.Align</span> <span class="kn">import</span> <span class="n">Pal2NalCommandline</span>
+
+<span class="n">Pal2NalCommandline</span><span class="p">(</span><span class="n">pepaln</span><span class="o">=</span><span class="s1">&#39;HTR1A_aligned.aln&#39;</span><span class="p">,</span> <span class="n">nucfasta</span><span class="o">=</span><span class="s1">&#39;HTR1A.ffn&#39;</span><span class="p">,</span> <span class="n">output_file</span><span class="o">=</span><span class="s1">&#39;HTR1A_aligned_pal2nal.aln&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+</section>
+<section id="running-the-guidance2-command-line-wrapper">
+<h3>Running the Guidance2 command line wrapper<a class="headerlink" href="#running-the-guidance2-command-line-wrapper" title="Link to this heading">¶</a></h3>
+<p>The user can choose a multiple sequence alignment program (Options
+include ‘MAFFT’, ‘PRANK’, ‘CLUSTALW’, ‘MUSCLE’) and a sequence type
+(seqType) which can be ‘aa’, ‘nt’, or ‘codon’.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">OrthoEvol.Orthologs.Align</span> <span class="kn">import</span> <span class="n">Guidance2Commandline</span>
+
+<span class="n">Guidance2Commandline</span><span class="p">(</span><span class="n">seqFile</span><span class="o">=</span><span class="s1">&#39;HTR1A.ffn&#39;</span><span class="p">,</span> <span class="n">msaProgram</span><span class="o">=</span><span class="s1">&#39;MUSCLE&#39;</span><span class="p">,</span> <span class="n">seqType</span><span class="o">=</span><span class="s1">&#39;aa&#39;</span><span class="p">,</span>
+                     <span class="n">outDir</span><span class="o">=</span><span class="s1">&#39;path/of/output/dir&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+</section>
+</section>
+</section>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="Main">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../index.html">OrthoEvolution</a></h1>
+
+
+
+<p class="blurb">An easy to use and comprehensive python package which aids in the analysis and visualization of comparative evolutionary genetics</p>
+
+
+
+
+<p>
+<iframe src="https://ghbtns.com/github-btn.html?user=Datasnakes&repo=OrthoEvolution&type=watch&count=true&size=large&v=2"
+  allowtransparency="true" frameborder="0" scrolling="0" width="200px" height="35px"></iframe>
+</p>
+
+
+
+
+
+
+  <div>
+    <h3><a href="../index.html">Table of Contents</a></h3>
+    <ul>
+<li><a class="reference internal" href="#">Align Documentation</a><ul>
+<li><a class="reference internal" href="#examples">Examples</a><ul>
+<li><a class="reference internal" href="#using-the-multiplesequencealignment-class">Using the MultipleSequenceAlignment class</a></li>
+<li><a class="reference internal" href="#running-clustal-omega">Running Clustal Omega</a></li>
+<li><a class="reference internal" href="#running-the-pal2nal-command-line-wrapper">Running the Pal2Nal command line wrapper</a></li>
+<li><a class="reference internal" href="#running-the-guidance2-command-line-wrapper">Running the Guidance2 command line wrapper</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+  </div>
+<search id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</search>
+<script>document.getElementById('searchbox').style.display = "block"</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &#169;2017, Shaurita Hutchins & Robert Gilmore.
+      
+      |
+      Powered by <a href="https://www.sphinx-doc.org/">Sphinx 8.2.3</a>
+      &amp; <a href="https://alabaster.readthedocs.io">Alabaster 1.0.0</a>
+      
+      |
+      <a href="../_sources/orthologs/alignreadme.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+    <a href="https://github.com/Datasnakes/OrthoEvolution" class="github">
+        <img src="../_static/github-banner.svg" alt="Fork me on GitHub" class="github"/>
+    </a>
+    
+
+    
+  </body>
+</html>

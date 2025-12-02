@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+
+<html lang="python" data-content_root="../">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>Cookies Documentation &#8212; OrthoEvolution 1.0.0b2 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=fa44fd50" />
+    <link rel="stylesheet" type="text/css" href="../_static/basic.css?v=b08954a9" />
+    <link rel="stylesheet" type="text/css" href="../_static/alabaster.css?v=27fed22d" />
+    <script src="../_static/documentation_options.js?v=3e4b6f43"></script>
+    <script src="../_static/doctools.js?v=9bcbadda"></script>
+    <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Manager Documentation" href="../manager/managerreadme.html" />
+    <link rel="prev" title="Tutorial" href="../tutorial/orthoevolreadme.html" />
+   
+  <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
+  
+
+  
+  
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <section id="cookies-documentation">
+<h1>Cookies Documentation<a class="headerlink" href="#cookies-documentation" title="Link to this heading">¶</a></h1>
+<p>For this package, we recommend using cookiecutter (along with Flask or
+Dash which is built with Flask) to set up your directory if you intend
+to create a web app/interface for your project.</p>
+<p><code class="docutils literal notranslate"><span class="pre">Cookies</span></code> makes it very easy to do this.</p>
+<p>Learn more about the
+<a class="reference external" href="https://github.com/audreyr/cookiecutter">cookiecutter</a> package.</p>
+<section id="overview">
+<h2>Overview<a class="headerlink" href="#overview" title="Link to this heading">¶</a></h2>
+<p>The Cookies module provides two main classes:</p>
+<ul class="simple">
+<li><p><strong>CookBook</strong>: Manages cookiecutter template paths and configurations</p></li>
+<li><p><strong>Oven</strong>: Deploys cookiecutter templates to create directory
+structures</p></li>
+</ul>
+<p>The <a class="reference external" href="https://github.com/datasnakes/OrthoEvolution/tree/master/OrthoEvol/Manager">Manager
+module</a>
+uses the <em>CookBook</em> and <em>Oven</em> classes as a primary means of
+functioning.</p>
+</section>
+<section id="available-templates">
+<h2>Available Templates<a class="headerlink" href="#available-templates" title="Link to this heading">¶</a></h2>
+<ul class="simple">
+<li><p>Templates used when creating a full repository:</p>
+<ul>
+<li><p><code class="docutils literal notranslate"><span class="pre">new_repository</span></code> - Creates a full repository structure</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">new_user</span></code> - Creates a user directory structure</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">new_project</span></code> - Creates a project directory structure</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">new_research</span></code> - Creates a research directory structure</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">new_database_repo</span></code> - Creates database repository structure</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">new_app</span></code> - Creates R-Shiny application structure</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">new_website</span></code> - Creates Flask website structure</p></li>
+</ul>
+</li>
+<li><p>Template for standalone projects:</p>
+<ul>
+<li><p><code class="docutils literal notranslate"><span class="pre">new_basic_project</span></code> - Creates a basic standalone project structure</p></li>
+</ul>
+</li>
+</ul>
+</section>
+<section id="examples">
+<h2>Examples<a class="headerlink" href="#examples" title="Link to this heading">¶</a></h2>
+<section id="simple-implementation">
+<h3>Simple Implementation<a class="headerlink" href="#simple-implementation" title="Link to this heading">¶</a></h3>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">OrthoEvol.Cookies</span> <span class="kn">import</span> <span class="n">Oven</span>
+
+<span class="c1"># Create an Oven instance</span>
+<span class="n">Kitchen</span> <span class="o">=</span> <span class="n">Oven</span><span class="p">(</span><span class="n">repo</span><span class="o">=</span><span class="s2">&quot;repo&quot;</span><span class="p">,</span> <span class="n">user</span><span class="o">=</span><span class="s2">&quot;username&quot;</span><span class="p">,</span> <span class="n">project</span><span class="o">=</span><span class="s2">&quot;project-name&quot;</span><span class="p">,</span>
+               <span class="n">output_dir</span><span class="o">=</span><span class="s2">&quot;path/to/project&quot;</span><span class="p">)</span>
+
+<span class="c1"># Access ingredients (parameters)</span>
+<span class="n">Pantry</span> <span class="o">=</span> <span class="n">Kitchen</span><span class="o">.</span><span class="n">Ingredients</span>
+
+<span class="c1"># Create different directory structures</span>
+<span class="n">Kitchen</span><span class="o">.</span><span class="n">bake_the_repo</span><span class="p">()</span>      <span class="c1"># Create repository</span>
+<span class="n">Kitchen</span><span class="o">.</span><span class="n">bake_the_user</span><span class="p">()</span>      <span class="c1"># Create user directory</span>
+<span class="n">Kitchen</span><span class="o">.</span><span class="n">bake_the_project</span><span class="p">()</span>   <span class="c1"># Create project directory</span>
+</pre></div>
+</div>
+</section>
+<section id="full-repository-setup">
+<h3>Full Repository Setup<a class="headerlink" href="#full-repository-setup" title="Link to this heading">¶</a></h3>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">OrthoEvol.Cookies</span> <span class="kn">import</span> <span class="n">Oven</span>
+<span class="kn">from</span> <span class="nn">pathlib</span> <span class="kn">import</span> <span class="n">Path</span>
+<span class="kn">import</span> <span class="nn">os</span>
+
+<span class="c1"># Set up paths and names</span>
+<span class="n">home</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">getcwd</span><span class="p">()</span>
+<span class="n">repo</span> <span class="o">=</span> <span class="s2">&quot;Development&quot;</span>
+<span class="n">user</span> <span class="o">=</span> <span class="s2">&quot;username&quot;</span>
+<span class="n">project</span> <span class="o">=</span> <span class="s2">&quot;MyProject&quot;</span>
+<span class="n">research</span> <span class="o">=</span> <span class="s2">&quot;GPCR&quot;</span>
+<span class="n">research_type</span> <span class="o">=</span> <span class="s2">&quot;comparative_genetics&quot;</span>
+
+<span class="c1"># Create paths</span>
+<span class="n">repo_path</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">home</span><span class="p">)</span> <span class="o">/</span> <span class="n">Path</span><span class="p">(</span><span class="n">repo</span><span class="p">)</span>
+<span class="n">user_path</span> <span class="o">=</span> <span class="n">repo_path</span> <span class="o">/</span> <span class="n">Path</span><span class="p">(</span><span class="s1">&#39;users&#39;</span><span class="p">)</span>
+<span class="n">project_path</span> <span class="o">=</span> <span class="n">user_path</span> <span class="o">/</span> <span class="n">Path</span><span class="p">(</span><span class="n">user</span><span class="p">)</span> <span class="o">/</span> <span class="n">Path</span><span class="p">(</span><span class="s1">&#39;projects&#39;</span><span class="p">)</span>
+<span class="n">research_path</span> <span class="o">=</span> <span class="n">project_path</span> <span class="o">/</span> <span class="n">Path</span><span class="p">(</span><span class="n">project</span><span class="p">)</span>
+
+<span class="c1"># Initialize Oven for full repository</span>
+<span class="n">Full_Kitchen</span> <span class="o">=</span> <span class="n">Oven</span><span class="p">(</span><span class="n">repo</span><span class="o">=</span><span class="n">repo</span><span class="p">,</span> <span class="n">user</span><span class="o">=</span><span class="n">user</span><span class="p">,</span> <span class="n">project</span><span class="o">=</span><span class="n">project</span><span class="p">,</span>
+                    <span class="n">basic_project</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">output_dir</span><span class="o">=</span><span class="n">home</span><span class="p">)</span>
+
+<span class="c1"># Create the full structure</span>
+<span class="n">Full_Kitchen</span><span class="o">.</span><span class="n">bake_the_repo</span><span class="p">()</span>
+<span class="n">Full_Kitchen</span><span class="o">.</span><span class="n">bake_the_user</span><span class="p">(</span><span class="n">cookie_jar</span><span class="o">=</span><span class="n">user_path</span><span class="p">)</span>
+<span class="n">Full_Kitchen</span><span class="o">.</span><span class="n">bake_the_project</span><span class="p">(</span><span class="n">cookie_jar</span><span class="o">=</span><span class="n">project_path</span><span class="p">)</span>
+<span class="n">Full_Kitchen</span><span class="o">.</span><span class="n">bake_the_research</span><span class="p">(</span><span class="n">research</span><span class="o">=</span><span class="n">research</span><span class="p">,</span>
+                               <span class="n">research_type</span><span class="o">=</span><span class="n">research_type</span><span class="p">,</span>
+                               <span class="n">cookie_jar</span><span class="o">=</span><span class="n">research_path</span><span class="p">)</span>
+</pre></div>
+</div>
+</section>
+<section id="basic-standalone-project">
+<h3>Basic Standalone Project<a class="headerlink" href="#basic-standalone-project" title="Link to this heading">¶</a></h3>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">OrthoEvol.Cookies</span> <span class="kn">import</span> <span class="n">Oven</span>
+
+<span class="c1"># Initialize Oven for basic project</span>
+<span class="n">Basic_Kitchen</span> <span class="o">=</span> <span class="n">Oven</span><span class="p">(</span><span class="n">project</span><span class="o">=</span><span class="s2">&quot;MyProject&quot;</span><span class="p">,</span> <span class="n">basic_project</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                     <span class="n">output_dir</span><span class="o">=</span><span class="n">os</span><span class="o">.</span><span class="n">getcwd</span><span class="p">())</span>
+
+<span class="c1"># Create the basic project</span>
+<span class="n">Basic_Kitchen</span><span class="o">.</span><span class="n">bake_the_project</span><span class="p">()</span>
+</pre></div>
+</div>
+</section>
+<section id="available-methods">
+<h3>Available Methods<a class="headerlink" href="#available-methods" title="Link to this heading">¶</a></h3>
+<p>The <code class="docutils literal notranslate"><span class="pre">Oven</span></code> class provides the following methods:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">bake_the_repo(cookie_jar=None)</span></code> - Create a repository structure</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">bake_the_user(cookie_jar=None)</span></code> - Create a user directory structure</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">bake_the_project(cookie_jar=None)</span></code> - Create a project directory
+structure</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">bake_the_research(research_type,</span> <span class="pre">research,</span> <span class="pre">cookie_jar=None)</span></code> -
+Create a research directory</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">bake_the_db_repo(db_config_file,</span> <span class="pre">db_path,</span> <span class="pre">cookie_jar=None,</span> <span class="pre">archive_flag=False,</span> <span class="pre">delete=False)</span></code>
+- Create database repository</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">bake_the_website(host,</span> <span class="pre">port,</span> <span class="pre">website_path,</span> <span class="pre">cookie_jar=None)</span></code> -
+Create a Flask website</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">bake_the_app(app,</span> <span class="pre">cookie_jar=None)</span></code> - Create an R-Shiny app
+structure</p></li>
+</ul>
+</section>
+</section>
+</section>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="Main">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../index.html">OrthoEvolution</a></h1>
+
+
+
+<p class="blurb">An easy to use and comprehensive python package which aids in the analysis and visualization of comparative evolutionary genetics</p>
+
+
+
+
+<p>
+<iframe src="https://ghbtns.com/github-btn.html?user=Datasnakes&repo=OrthoEvolution&type=watch&count=true&size=large&v=2"
+  allowtransparency="true" frameborder="0" scrolling="0" width="200px" height="35px"></iframe>
+</p>
+
+
+
+
+
+
+  <div>
+    <h3><a href="../index.html">Table of Contents</a></h3>
+    <ul>
+<li><a class="reference internal" href="#">Cookies Documentation</a><ul>
+<li><a class="reference internal" href="#overview">Overview</a></li>
+<li><a class="reference internal" href="#available-templates">Available Templates</a></li>
+<li><a class="reference internal" href="#examples">Examples</a><ul>
+<li><a class="reference internal" href="#simple-implementation">Simple Implementation</a></li>
+<li><a class="reference internal" href="#full-repository-setup">Full Repository Setup</a></li>
+<li><a class="reference internal" href="#basic-standalone-project">Basic Standalone Project</a></li>
+<li><a class="reference internal" href="#available-methods">Available Methods</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+  </div>
+<search id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</search>
+<script>document.getElementById('searchbox').style.display = "block"</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &#169;2017, Shaurita Hutchins & Robert Gilmore.
+      
+      |
+      Powered by <a href="https://www.sphinx-doc.org/">Sphinx 8.2.3</a>
+      &amp; <a href="https://alabaster.readthedocs.io">Alabaster 1.0.0</a>
+      
+      |
+      <a href="../_sources/cookies/cookiesreadme.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+    <a href="https://github.com/Datasnakes/OrthoEvolution" class="github">
+        <img src="../_static/github-banner.svg" alt="Fork me on GitHub" class="github"/>
+    </a>
+    
+
+    
+  </body>
+</html>

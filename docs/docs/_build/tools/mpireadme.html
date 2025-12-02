@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+
+<html lang="python" data-content_root="../">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>mpi module &#8212; OrthoEvolution 1.0.0b2 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=fa44fd50" />
+    <link rel="stylesheet" type="text/css" href="../_static/basic.css?v=b08954a9" />
+    <link rel="stylesheet" type="text/css" href="../_static/alabaster.css?v=27fed22d" />
+    <script src="../_static/documentation_options.js?v=3e4b6f43"></script>
+    <script src="../_static/doctools.js?v=9bcbadda"></script>
+    <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+   
+  <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
+  
+
+  
+  
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <section id="mpi-module">
+<h1>mpi module<a class="headerlink" href="#mpi-module" title="Link to this heading">¶</a></h1>
+<p>The mpi module will allow us to make use of the MCSR's PBS script
+functionality via the <code class="docutils literal notranslate"><span class="pre">mpi4py</span></code> package. ## Description</p>
+<p>Originally this was used for the FTP downloads. It is currently under
+development for project wide use. The following need to be added: - [ ]
+Start function - [ ] Function to split things into a nested list - [ ]
+Function to create JSON file for each process - [ ] Remove functions
+from the ftp2db script and put here - [ ] Add parameters for this module
+- [ ] MP script - [ ] Script type (language) - [ ] Add a script for
+calling these types (e.g. python3 script.py; R app.R) - [ ] Number of
+processes - [ ] Nested list to be split - [ ] Flag for keeping default
+PBS(.sh) script or generating a custom one - [ ] Look into the other
+multiprocessing thing I linked on SLACK</p>
+</section>
+<section id="usage">
+<h1>Usage<a class="headerlink" href="#usage" title="Link to this heading">¶</a></h1>
+<p>Usage will be more concisely described after this module is update.</p>
+<p>A PBS script is called like this:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>$<span class="w"> </span>qsub<span class="w"> </span>UPLOAD.sh
+</pre></div>
+</div>
+<p>Here is what the current PBS script looks like:</p>
+<div class="highlight-pbs notranslate"><div class="highlight"><pre><span></span>#PBS -S /bin/bash
+#PBS -m bea
+#PBS -M rgilmore@umc.edu
+#PBS -l select=8:ncpus=1:mem=16gb -l place=free
+#PBS -l cput=24:00:00
+#PBS -l walltime=32:00:00
+#PBS -N robupload
+#PBS -o /work5/r2294/DATA/PycharmProjects/GPCR_Orthologs/GPCR-Orthologs-Project/CODE/Lib/Log/robupload.o${PBS_JOBID}
+#PBS -e /work5/r2294/DATA/PycharmProjects/GPCR_Orthologs/GPCR-Orthologs-Project/CODE/Lib/Log/robupload.e${PBS_JOBID}
+#PBS -j oe
+cd ${PBS_O_WORKDIR}
+rm /work5/r2294/DATA/PycharmProjects/GPCR_Orthologs/GPCR-Orthologs-Project/CODE/1_Databases/NCBI_Data/refseq/release/vertebrate_mammalian/robupload.o*
+rm /work5/r2294/DATA/PycharmProjects/GPCR_Orthologs/GPCR-Orthologs-Project/CODE/1_Databases/NCBI_Data/refseq/release/vertebrate_mammalian/robupload.e*
+mpiexec python /work5/r2294/DATA/PycharmProjects/GPCR_Orthologs/GPCR-Orthologs-Project/CODE/1_Databases/NCBI_Data/refseq/release/vertebrate_mammalian/multi_dbupload.py
+echo &quot;end&quot;
+</pre></div>
+</div>
+<p>This module is strictly a python driven module. <code class="docutils literal notranslate"><span class="pre">mpi4py</span></code> is used like
+so:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">mpi4py</span> <span class="kn">import</span> <span class="n">MPI</span>
+
+<span class="c1"># Get child process information</span>
+<span class="n">comm</span> <span class="o">=</span> <span class="n">MPI</span><span class="o">.</span><span class="n">COMM_WORLD</span>
+
+<span class="c1"># The rank is unique to each process.</span>
+<span class="c1"># For 8 parallel processes there will be a rank 0-7</span>
+<span class="n">rank</span> <span class="o">=</span> <span class="n">comm</span><span class="o">.</span><span class="n">Get_rank</span><span class="p">()</span>
+<span class="c1"># Currently unused variable in my scripts</span>
+<span class="n">size</span> <span class="o">=</span> <span class="n">comm</span><span class="o">.</span><span class="n">Get_size</span><span class="p">()</span>
+<span class="n">machine</span> <span class="o">=</span> <span class="n">platform</span><span class="o">.</span><span class="n">node</span><span class="p">()</span>
+</pre></div>
+</div>
+<p>If another type of programming language is needed then ## Tests</p>
+<p>??</p>
+</section>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="Main">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../index.html">OrthoEvolution</a></h1>
+
+
+
+<p class="blurb">An easy to use and comprehensive python package which aids in the analysis and visualization of comparative evolutionary genetics</p>
+
+
+
+
+<p>
+<iframe src="https://ghbtns.com/github-btn.html?user=Datasnakes&repo=OrthoEvolution&type=watch&count=true&size=large&v=2"
+  allowtransparency="true" frameborder="0" scrolling="0" width="200px" height="35px"></iframe>
+</p>
+
+
+
+
+
+
+  <div>
+    <h3><a href="../index.html">Table of Contents</a></h3>
+    <ul>
+<li><a class="reference internal" href="#">mpi module</a></li>
+<li><a class="reference internal" href="#usage">Usage</a></li>
+</ul>
+
+  </div>
+<search id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</search>
+<script>document.getElementById('searchbox').style.display = "block"</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &#169;2017, Shaurita Hutchins & Robert Gilmore.
+      
+      |
+      Powered by <a href="https://www.sphinx-doc.org/">Sphinx 8.2.3</a>
+      &amp; <a href="https://alabaster.readthedocs.io">Alabaster 1.0.0</a>
+      
+      |
+      <a href="../_sources/tools/mpireadme.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+    <a href="https://github.com/Datasnakes/OrthoEvolution" class="github">
+        <img src="../_static/github-banner.svg" alt="Fork me on GitHub" class="github"/>
+    </a>
+    
+
+    
+  </body>
+</html>
