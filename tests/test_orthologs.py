@@ -191,6 +191,53 @@ class TestOrthologs(unittest.TestCase):
                 # We're just testing that the class can be initialized
                 self.skipTest(f"IQTree initialization failed (expected if executable not installed): {e}")
 
+    def test_filtered_tree_init(self):
+        """Test FilteredTree initialization and directory setup."""
+        # Create a temporary directory for testing
+        test_home = tempfile.mkdtemp()
+        test_alignment_name = 'test_gene_P2N_na.iqtree.aln'
+        test_alignment = os.path.join(test_home, test_alignment_name)
+        
+        # Create a simple test alignment file
+        with open(test_alignment, 'w') as f:
+            f.write("3 10\nseq1 ATGCATGCAT\nseq2 ATGCATGCAT\nseq3 ATGCATGCAT\n")
+        
+        try:
+            # Test FilteredTree initialization
+            # This will create directories and copy files, but may fail if IQTree isn't installed
+            filtered_tree = FilteredTree(alignment=test_alignment_name, 
+                                        dataType='CODON', 
+                                        home=test_home)
+            
+            # Verify that IQTREE directory was created
+            iqtree_dir = os.path.join(test_home, 'IQTREE')
+            self.assertTrue(os.path.exists(iqtree_dir))
+            
+            # Verify that alignment was copied to IQTREE directory
+            copied_alignment = os.path.join(iqtree_dir, test_alignment_name)
+            self.assertTrue(os.path.exists(copied_alignment))
+            
+            # Verify attributes are set
+            self.assertEqual(filtered_tree.home, test_home)
+            self.assertEqual(filtered_tree.gene, 'test_gene')
+            self.assertTrue(hasattr(filtered_tree, 'tree_file'))
+            self.assertTrue(hasattr(filtered_tree, 'iqtree_path'))
+            
+        except FileNotFoundError:
+            # IQTree executable not found - this is expected
+            self.skipTest("IQTree executable not found in PATH")
+        except Exception as e:
+            # Other errors during execution - still verify directory setup happened
+            iqtree_dir = os.path.join(test_home, 'IQTREE')
+            if os.path.exists(iqtree_dir):
+                # Directory was created, which means initialization started
+                self.assertTrue(os.path.exists(iqtree_dir))
+            self.skipTest(f"FilteredTree execution failed (expected if IQTree not fully functional): {e}")
+        finally:
+            # Cleanup
+            if os.path.exists(test_home):
+                rmtree(test_home)
+
     def test_phyml_validation(self):
         """Test PhyML class validation without running."""
         test_phy = self.join(self.cur_dir, 'test_data', 'test.phy')

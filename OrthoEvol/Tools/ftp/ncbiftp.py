@@ -270,17 +270,19 @@ class NcbiFTPClient(BaseFTPClient):
                          extract=True):
         """Download the refseq release database.
 
-        :param collection_subset: [description]
-        :type collection_subset: [type]
-        :param seqtype: [description]
-        :type seqtype: [type]
-        :param seqformat: [description]
-        :type seqformat: [type]
-        :param download_path: [description]
-        :type download_path: [type]
-        :param extract: [description], defaults to True
-        :type extract: bool, optional
-        :raises FileNotFoundError: [description]
+        Downloads RefSeq release database files from NCBI FTP server.
+
+        :param collection_subset: Subset of the collection to download (e.g., 'vertebrate_mammalian').
+        :type collection_subset: str
+        :param seqtype: Sequence type to download (e.g., 'genomic', 'rna').
+        :type seqtype: str
+        :param seqformat: Sequence format (e.g., 'fasta').
+        :type seqformat: str
+        :param download_path: Local path where files should be downloaded.
+        :type download_path: str or Path
+        :param extract: Whether to extract downloaded archive files. Defaults to True.
+        :type extract: bool
+        :raises FileNotFoundError: If the specified collection or sequence type is not found.
         """
         self.ftp = self._login()
         self.ftp.cwd(self.refseqrelease_path)
