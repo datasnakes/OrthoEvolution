@@ -4,7 +4,7 @@ from Bio import AlignIO
 from OrthoEvol.Orthologs import OrthologsWarning
 
 from OrthoEvol.Orthologs.Phylogenetics.PAML import ETE3PAML
-from OrthoEvol.Orthologs.Phylogenetics.PhyloTree import TreeViz
+from OrthoEvol.Orthologs.Phylogenetics.TreeViz import TreeViz
 from OrthoEvol.Orthologs.Phylogenetics import PhyML
 from OrthoEvol.Orthologs.Phylogenetics import Phylip
 from OrthoEvol.Orthologs.Phylogenetics.IQTree import IQTreeCommandline
@@ -17,7 +17,7 @@ warnings.simplefilter('ignore', OrthologsWarning)
 class RelaxPhylip(object):
     """Convert a multiple sequence alignment file to relaxed-phylip format."""
 
-    def __init__(inputfile, outputfile):
+    def __init__(self, inputfile, outputfile):
         """Fasta to Relaxed Phylip format."""
         AlignIO.convert(inputfile, "fasta",
                         outputfile, "phylip-relaxed")

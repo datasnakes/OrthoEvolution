@@ -551,7 +551,7 @@ class GenbankUtils(object):
         :return:  A multi-FASTA file with sorted sequences.
         :rtype:  str.
         """
-        # TODO-ROB:  Check for duplicates.
+        # TODO:  Check for duplicates.
         with TemporaryFile('r+', dir=str(Path(target_file).parent)) as tmp_file:
             aln = MultipleSeqAlignment([])
 

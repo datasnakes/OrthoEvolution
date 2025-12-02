@@ -1,0 +1,59 @@
+name: Python CI
+
+on:
+  push:
+    branches: [ master, main, dev-master, dev-refactored, refactor-phylo ]
+  pull_request:
+    branches: [ master, main, dev-master, dev-refactored, refactor-phylo ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    strategy:
+      matrix:
+        python-version: ["3.9", "3.10", "3.11"]
+
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: Set up Python ${{ matrix.python-version }}
+      uses: actions/setup-python@v4
+      with:
+        python-version: ${{ matrix.python-version }}
+
+    - name: Cache pip
+      uses: actions/cache@v3
+      with:
+        path: ~/.cache/pip
+        key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt') }}
+        restore-keys: |
+          ${{ runner.os }}-pip-
+
+    - name: Install dependencies
+      run: |
+        sudo apt-get install -qq phyml
+        python -m pip install --upgrade pip setuptools wheel
+        pip install --only-binary=numpy,scipy numpy scipy
+        pip install matplotlib ipython jupyter sympy pytest codecov pytest-cov
+        pip install -r requirements.txt
+        pip install -e .
+
+    - name: Run tests
+      run: pytest --cov=OrthoEvol --cov-report=xml --junitxml=junit.xml tests/
+
+    - name: Upload coverage to Codecov
+      uses: codecov/codecov-action@v5
+      with:
+        token: ${{ secrets.CODECOV_TOKEN }}
+        fail_ci_if_error: false
+
+    - name: Upload test results to Codecov
+      if: ${{ !cancelled() }}
+      uses: codecov/test-results-action@v1
+      with:
+        token: ${{ secrets.CODECOV_TOKEN }}
+
+    - name: Notify failure
+      if: failure()
+      run: echo "Build failed"
