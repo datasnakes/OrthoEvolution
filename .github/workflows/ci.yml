@@ -1,6 +1,10 @@
 name: Python CI
 
-on: [push, pull_request]
+on:
+  push:
+    branches: [ master, main, dev-master, dev-refactored, refactor-phylo ]
+  pull_request:
+    branches: [ master, main, dev-master, dev-refactored, refactor-phylo ]
 
 jobs:
   build:
@@ -8,18 +12,18 @@ jobs:
     timeout-minutes: 10
     strategy:
       matrix:
-        python-version: [3.7]
+        python-version: ["3.7", "3.8", "3.9"]
 
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v3
 
     - name: Set up Python ${{ matrix.python-version }}
-      uses: actions/setup-python@v2
+      uses: actions/setup-python@v4
       with:
         python-version: ${{ matrix.python-version }}
 
     - name: Cache pip
-      uses: actions/cache@v2
+      uses: actions/cache@v3
       with:
         path: ~/.cache/pip
         key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt') }}
@@ -29,17 +33,17 @@ jobs:
     - name: Install dependencies
       run: |
         sudo apt-get install -qq phyml
-        pip install --upgrade pip setuptools wheel
+        python -m pip install --upgrade pip setuptools wheel
         pip install --only-binary=numpy,scipy numpy scipy
         pip install matplotlib ipython jupyter sympy pytest codecov pytest-cov
         pip install -r requirements.txt
-        pip install .
+        pip install -e .
 
     - name: Run tests
       run: pytest --cov-report=xml --cov=OrthoEvol tests/
 
     - name: Upload coverage to Codecov
-      uses: codecov/codecov-action@v2
+      uses: codecov/codecov-action@v3
       with:
         token: ${{ secrets.CODECOV_TOKEN }}
         files: ./coverage.xml
