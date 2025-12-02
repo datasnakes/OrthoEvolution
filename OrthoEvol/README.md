@@ -1,6 +1,6 @@
 Tutorial
 =============
-OrthoEvolution has been built with Python 3.5 (and up) as a multi-faceted package and pipeline
+OrthoEvolution has been built with Python 3.9 (and up) as a multi-faceted package and pipeline
 framework for comparative genetics in order to infer orthologous genes.
 
 Currently, this python package is comprised of 5 major modules:
@@ -11,7 +11,7 @@ Currently, this python package is comprised of 5 major modules:
 4. [Pipeline Module](#using-the-pipeline-module) - Various preconfigured pipelines to be used in orthology inference.
 5. [Tools Module](#using-the-tools-module) - Utilities that aid in ftp downloading, server communication, and reusable everyday functions
 
-When used together, these 4 modules offer a cohesive environment for easily creating,
+When used together, these 5 modules offer a cohesive environment for easily creating,
 managing, and deploying a bioinformatics pipeline for orthologous genes/species.  In the future
 these tools will also be accessible from the command line and from a web application.
 
@@ -175,38 +175,91 @@ with a qsub/pbs job scheduling system.
 
 ## Using the Tools module
 The tools module is a grouping of utilities used by our package.  While they
-could have be stored in each modules util.py file, they were used and developed
+could have been stored in each module's util.py file, they were used and developed
 on a global scale, and hence required their own module.
-
 
 ### Overview
 Some of the tools/classes in the tools module are:
 
-- `NcbiFTPClient` - provides functions to easily download ncbi databases/files and update them.
+- `NcbiFTPClient` - Provides functions to easily download NCBI databases/files and update them.
 - `LogIt` - A wrapper around logzero for easy logging to the screen or a file.
 - `Multiprocess` - A simple and effective class that allows the input of a function
-to map to a user's list in order to take advantage of parallel computing.
+  to map to a user's list in order to take advantage of parallel computing.
 - `SGEJob` - A class to aid in submission of a job via `qsub` on a cluster.
 - `Qstat` - A class that parses the output of `qstat` to return job information.
-It also waits on job completion.
-- `Slackify` -
-- `MyGene` -
+  It also waits on job completion.
+- `Slackify` - A class for sending messages, files, and images to Slack channels
+  for pipeline progress updates and notifications.
+- `MyGene` - A wrapper around BioThings' MyGene.info REST API for querying and
+  retrieving gene annotation data.
 
-Can I integrate these tools with each other and with orther modules including my own?
+Can I integrate these tools with each other and with other modules including my own?
 **YES!** We'll provide some examples below!
 
 ### Examples
 
+#### Download NCBI databases with our NCBI FTP Client
 ```python
-# Import a tools module
-from OrthoEvol.Tools import Slackify
+from OrthoEvol.Tools.ftp import NcbiFTPClient
 
-# Slack takes a config file thats already set up
+ncbiftp = NcbiFTPClient(email='somebody@gmail.com')
+ncbiftp.getblastdb(database_name='refseq_rna', v5=True)
+```
+
+#### Utilize multiprocessing to speed up your code
+```python
+from OrthoEvol.Tools.parallel import Multiprocess
+
+def process_gene(gene):
+    # Your processing code here
+    print(f"Processing {gene}")
+
+genes = ['HTR1A', 'CCR5', 'DRD4']
+
+if __name__ == '__main__':
+    mp = Multiprocess()
+    mp.map2function(process_gene, genes)
+```
+
+#### Integrate logging in a simple and quick way
+```python
+from OrthoEvol.Tools.logit import LogIt
+
+# Set up your loggers
+logit = LogIt().default(logname='test1 log', logfile='log.txt')
+
+# Use the logger
+logit.info('This is a log message')
+
+# Shutdown logging without deleting the logfile
+logit.shutdown()
+```
+
+#### Send a message to a Slack channel
+Your config file should look as such:
+```ini
+[APIKEYS]
+slack = apikeystring
+```
+
+```python
+from OrthoEvol.Tools.slackify import Slackify
+
+# Slack takes a config file that's already set up
 slack = Slackify(slackconfig='path/to/slackconfig.cfg')
 
-# Message a channel and link to a user.
-
+# Message a channel and link to a user
 message_to_channel = 'Hey, <@username>. This is an update for the current script.'
 slack.send_msg(channel='channelname', message=message_to_channel)
 ```
-For more information, view the [slackify readme](https://github.com/OrthoEvolution/OrthoEvol-Scripts/tree/master/OrthoEvolution/Tools/slackify/README.md).
+
+#### Use MyGene to query gene annotation data
+```python
+from OrthoEvol.Tools.mygene import MyGene
+
+# Use with a BLAST master accession file
+mygene = MyGene(infile='test_blast.csv', outfile='mygene_output.csv')
+mygene.query_mygene()
+```
+
+For more information, view the [Tools README](https://github.com/datasnakes/OrthoEvolution/tree/master/OrthoEvol/Tools/README.md) and individual tool READMEs.
