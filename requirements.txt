@@ -1,7 +1,7 @@
 numpy
 scipy
 matplotlib
-tqdm==4.25.0
+tqdm==4.66.3
 ete3==3.0.0b35
 pandas>=0.25.3
 openpyxl>=2.5.0
