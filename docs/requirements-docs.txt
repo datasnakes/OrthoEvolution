@@ -1,3 +1,4 @@
 # Documentation build dependencies for Read the Docs
 sphinx
 pypandoc
+tomli; python_version < "3.11"

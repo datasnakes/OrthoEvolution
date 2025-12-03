@@ -24,23 +24,44 @@ from argparse import ArgumentParser
 from typing import List, Dict
 
 
-def get_version_from_setup():
-    """Extract version from setup.py.
+def get_version_from_pyproject():
+    """Extract version from pyproject.toml.
 
-    :return: Version string from setup.py
+    :return: Version string from pyproject.toml
     """
-    setup_path = Path(__file__).parent.parent / 'setup.py'
-    with open(setup_path, 'r') as f:
-        content = f.read()
-        match = re.search(r"version\s*=\s*['\"]([^'\"]+)['\"]", content)
-        if match:
-            return match.group(1)
-    raise ValueError("Could not find version in setup.py")
+    pyproject_path = Path(__file__).parent.parent / 'pyproject.toml'
+    
+    # Try using tomli (Python 3.11+) or tomllib (Python 3.11+)
+    try:
+        import tomllib
+        with open(pyproject_path, 'rb') as f:
+            data = tomllib.load(f)
+            version = data.get('project', {}).get('version')
+            if version:
+                return version
+    except ImportError:
+        # Fall back to tomli for older Python versions
+        try:
+            import tomli
+            with open(pyproject_path, 'rb') as f:
+                data = tomli.load(f)
+                version = data.get('project', {}).get('version')
+                if version:
+                    return version
+        except ImportError:
+            # Last resort: regex parsing
+            with open(pyproject_path, 'r') as f:
+                content = f.read()
+                match = re.search(r'version\s*=\s*["\']([^"\']+)["\']', content)
+                if match:
+                    return match.group(1)
+    
+    raise ValueError("Could not find version in pyproject.toml")
 
 
 def update_conf_py():
     """Update conf.py with current version (already automated in conf.py)."""
-    print("✓ conf.py automatically reads version from setup.py")
+    print("✓ conf.py automatically reads version from pyproject.toml")
 
 
 def convert_readmes():
@@ -251,7 +272,7 @@ def main():
 
     # Get current version
     try:
-        version = get_version_from_setup()
+        version = get_version_from_pyproject()
         print(f"\nCurrent version: {version}")
     except ValueError as e:
         print(f"✗ {e}")

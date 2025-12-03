@@ -2,7 +2,7 @@
 #exclude OrthoEvol/Manager/TODO.py
 
 # Include the README file
-include README.rst
+include README.md
 
 # Include the requirements file
 include requirements.txt
@@ -18,11 +18,10 @@ recursive-include OrthoEvol/Cookies *
 recursive-include OrthoEvol/Manager/config *
 
 # Include docs
-include Docs/docs/source/*.rst
-include Docs/docs/source/Makefile
-include Docs/docs/source/conf.py
-include Docs/createdocs.py
-include Docs/README.md
+include docs/docs/source/*.rst
+include docs/docs/source/Makefile
+include docs/docs/source/conf.py
+include docs/README.md
 
 # Include tests
-include Tests/*
+include tests/*
