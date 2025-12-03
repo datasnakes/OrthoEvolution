@@ -3,6 +3,8 @@ import unittest
 from shutil import rmtree
 import os
 import tempfile
+from unittest import mock
+from pathlib import Path
 
 from OrthoEvol.Orthologs.Blast import BaseBlastN, OrthoBlastN
 from OrthoEvol.Orthologs.Phylogenetics.PhyML import PhyML
@@ -10,6 +12,9 @@ from OrthoEvol.Orthologs.Phylogenetics.TreeViz import TreeViz
 from OrthoEvol.Orthologs.Phylogenetics import RelaxPhylip
 from OrthoEvol.Orthologs.Phylogenetics.IQTree import IQTreeCommandline, FilteredTree
 from OrthoEvol.Orthologs.Phylogenetics.PAML import ETE3PAML
+from OrthoEvol.Orthologs.GenBank.genbank import GenBank
+from OrthoEvol.Orthologs.Align.orthoclustal import ClustalO
+from OrthoEvol.Orthologs.Align.msa import MultipleSequenceAlignment
 
 class TestOrthologs(unittest.TestCase):
     """Test the Orthologs module."""
@@ -300,6 +305,224 @@ class TestOrthologs(unittest.TestCase):
     #                                    copy_from_package=True)
     #         self.assertEqual(ortho_blastn.ref_species, 'Homo_sapiens')
     #         self.assertTrue(ortho_blastn.copy_from_package)
+
+
+class TestGenBank(unittest.TestCase):
+    """Test the GenBank class."""
+
+    def setUp(self):
+        """Set up test fixtures."""
+        self.test_dir = tempfile.mkdtemp()
+        self.test_path = Path(self.test_dir)
+
+    def tearDown(self):
+        """Clean up test fixtures."""
+        if os.path.exists(self.test_dir):
+            rmtree(self.test_dir, ignore_errors=True)
+
+    def test_name_fasta_file_cds_single(self):
+        """Test name_fasta_file for CDS single mode."""
+        gene = "HTR1A"
+        org = "Homo_sapiens"
+        feat_type = "CDS"
+        feat_type_rank = "CDS"
+        extension = ".ffn"
+        mode = "w"
+
+        file_obj = GenBank.name_fasta_file(
+            self.test_path, gene, org, feat_type, feat_type_rank, extension, mode
+        )
+
+        self.assertIsNotNone(file_obj)
+        self.assertEqual(file_obj.mode, 'w')
+        expected_path = self.test_path / f"{gene}_{org}{feat_type_rank}{extension}"
+        self.assertEqual(Path(file_obj.name), expected_path)
+        file_obj.close()
+
+    def test_name_fasta_file_cds_multi(self):
+        """Test name_fasta_file for CDS multi mode."""
+        gene = "HTR1A"
+        org = "Homo_sapiens"
+        feat_type = "CDS"
+        feat_type_rank = "CDS"
+        extension = ".ffn"
+        mode = "a"
+
+        file_obj = GenBank.name_fasta_file(
+            self.test_path, gene, org, feat_type, feat_type_rank, extension, mode
+        )
+
+        self.assertIsNotNone(file_obj)
+        self.assertEqual(file_obj.mode, 'a')
+        expected_path = self.test_path / f"{gene}{feat_type_rank}{extension}"
+        self.assertEqual(Path(file_obj.name), expected_path)
+        file_obj.close()
+
+    def test_name_fasta_file_other_single(self):
+        """Test name_fasta_file for other feature type single mode."""
+        gene = "HTR1A"
+        org = "Homo_sapiens"
+        feat_type = "misc_feature"
+        feat_type_rank = "misc_feature"
+        extension = ".fna"
+        mode = "w"
+
+        file_obj = GenBank.name_fasta_file(
+            self.test_path, gene, org, feat_type, feat_type_rank, extension, mode
+        )
+
+        self.assertIsNotNone(file_obj)
+        self.assertEqual(file_obj.mode, 'w')
+        expected_path = self.test_path / f"{gene}_{org}_{feat_type_rank}{extension}"
+        self.assertEqual(Path(file_obj.name), expected_path)
+        file_obj.close()
+
+    def test_name_fasta_file_other_multi(self):
+        """Test name_fasta_file for other feature type multi mode."""
+        gene = "HTR1A"
+        org = "Homo_sapiens"
+        feat_type = "misc_feature"
+        feat_type_rank = "misc_feature"
+        extension = ".fna"
+        mode = "a"
+
+        file_obj = GenBank.name_fasta_file(
+            self.test_path, gene, org, feat_type, feat_type_rank, extension, mode
+        )
+
+        self.assertIsNotNone(file_obj)
+        self.assertEqual(file_obj.mode, 'a')
+        expected_path = self.test_path / f"{gene}_{feat_type_rank}{extension}"
+        self.assertEqual(Path(file_obj.name), expected_path)
+        file_obj.close()
+
+    def test_protein_gi_fetch_with_gi(self):
+        """Test protein_gi_fetch when GI is present."""
+        mock_feature = mock.Mock()
+        mock_feature.qualifiers = ['protein_id=NP_000000.1', 'GI:123456789', 'product=test protein']
+
+        result = GenBank.protein_gi_fetch(mock_feature)
+
+        self.assertEqual(result, '123456789')
+
+    def test_protein_gi_fetch_without_gi(self):
+        """Test protein_gi_fetch when GI is not present."""
+        mock_feature = mock.Mock()
+        mock_feature.qualifiers = ['protein_id=NP_000000.1', 'product=test protein']
+
+        result = GenBank.protein_gi_fetch(mock_feature)
+
+        self.assertIsNone(result)
+
+    def test_protein_gi_fetch_empty_qualifiers(self):
+        """Test protein_gi_fetch with empty qualifiers."""
+        mock_feature = mock.Mock()
+        mock_feature.qualifiers = []
+
+        result = GenBank.protein_gi_fetch(mock_feature)
+
+        self.assertIsNone(result)
+
+    @mock.patch('OrthoEvol.Orthologs.GenBank.genbank.FullUtilities')
+    @mock.patch('OrthoEvol.Orthologs.GenBank.genbank.LogIt')
+    @mock.patch('OrthoEvol.Orthologs.GenBank.genbank.Path.mkdir')
+    @mock.patch('os.listdir')
+    def test_genbank_init(self, mock_listdir, mock_mkdir, mock_logit, mock_utils):
+        """Test GenBank initialization."""
+        mock_listdir.return_value = ['test.db', 'other.db', 'not_a_db.txt']
+        mock_logit_instance = mock.Mock()
+        mock_logit.return_value.default.return_value = mock_logit_instance
+        
+        # Create a mock object with the required attributes
+        mock_config_obj = mock.Mock()
+        mock_config_obj.user_db = Path(self.test_dir)
+        mock_config_obj.ncbi_db_repo = Path(self.test_dir)
+        mock_config_obj.raw_data = Path(self.test_dir)
+        
+        # Set up the FullUtilities mock
+        mock_utils_instance = mock.Mock()
+        mock_utils_instance.attribute_config.return_value = mock_config_obj
+        mock_utils.return_value = mock_utils_instance
+
+        genbank = GenBank(
+            project="test-project",
+            project_path=self.test_dir,
+            solo=True,
+            multi=True
+        )
+
+        self.assertIsNotNone(genbank)
+        self.assertEqual(genbank.project, "test-project")
+        self.assertEqual(genbank.project_path, self.test_dir)
+        self.assertTrue(genbank.solo)
+        self.assertTrue(genbank.multi)
+        self.assertTrue(genbank.min_fasta)
+        self.assertEqual(len(genbank.db_files_list), 2)
+        self.assertIn('test.db', genbank.db_files_list)
+        self.assertIn('other.db', genbank.db_files_list)
+
+
+class TestAlign(unittest.TestCase):
+    """Test the Align module."""
+
+    def setUp(self):
+        """Set up test fixtures."""
+        self.test_dir = tempfile.mkdtemp()
+        self.test_fasta = os.path.join(self.test_dir, 'test.fasta')
+        self.test_outfile = os.path.join(self.test_dir, 'test_aligned.fasta')
+        
+        # Create a simple test fasta file
+        with open(self.test_fasta, 'w') as f:
+            f.write('>seq1\nATGCATGC\n>seq2\nATGCATGC\n')
+
+    def tearDown(self):
+        """Clean up test fixtures."""
+        if os.path.exists(self.test_dir):
+            rmtree(self.test_dir, ignore_errors=True)
+
+    def test_clustalo_init(self):
+        """Test ClustalO initialization."""
+        clustalo = ClustalO(
+            infile=self.test_fasta,
+            outfile=self.test_outfile,
+            logpath=None,
+            outfmt="fasta"
+        )
+        
+        self.assertIsNotNone(clustalo)
+        self.assertEqual(clustalo.infile, self.test_fasta)
+        self.assertEqual(clustalo.outfile, self.test_outfile)
+        self.assertEqual(clustalo.outfmt, "fasta")
+        self.assertIsNone(clustalo.logpath)
+        self.assertTrue(hasattr(clustalo, 'clustalolog'))
+
+    @mock.patch('OrthoEvol.Orthologs.Align.msa.FullUtilities')
+    @mock.patch('OrthoEvol.Orthologs.Align.msa.LogIt')
+    def test_msa_init(self, mock_logit, mock_utils):
+        """Test MultipleSequenceAlignment initialization."""
+        mock_logit_instance = mock.Mock()
+        mock_logit.return_value.default.return_value = mock_logit_instance
+        
+        # Create a mock object with the required attributes
+        mock_config_obj = mock.Mock()
+        mock_config_obj.raw_data = Path(self.test_dir)
+        
+        # Set up the FullUtilities mock
+        mock_utils_instance = mock.Mock()
+        mock_utils_instance.attribute_config.return_value = mock_config_obj
+        mock_utils.return_value = mock_utils_instance
+        
+        msa = MultipleSequenceAlignment(
+            project="test-project",
+            project_path=self.test_dir
+        )
+        
+        self.assertIsNotNone(msa)
+        self.assertEqual(msa.project, "test-project")
+        self.assertTrue(hasattr(msa, 'guidancelog'))
+        self.assertTrue(hasattr(msa, 'pal2nallog'))
+        self.assertTrue(hasattr(msa, 'clustalolog'))
+        self.assertIsInstance(msa.dispatcher_options, dict)
 
 
 if __name__ == '__main__':

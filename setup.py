@@ -22,8 +22,13 @@ name = 'OrthoEvol'
 
 def readme():
     """Get the long description from the README file."""
-    with open(path.join(home, 'README.rst'), encoding='utf-8') as f:
-        return f.read()
+    readme_md = path.join(home, 'README.md')
+    
+    if path.exists(readme_md):
+        with open(readme_md, encoding='utf-8') as f:
+            return f.read()
+    else:
+        return "OrthoEvolution - A Python package for orthologous gene analysis."
 
 # Setup the package by adding information to these parameters
 setup(
@@ -33,6 +38,7 @@ setup(
     description="This package aids in the analysis of orthologous genes.",
     version='1.0.0b2',
     long_description=readme(),
+    long_description_content_type="text/markdown",
     url='https://github.com/datasnakes/OrthoEvolution',
     license='MIT',
     keywords='bioinformatics science evolution orthology psychiatry genetics',

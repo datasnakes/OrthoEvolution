@@ -10,7 +10,7 @@ from Bio.Align.Applications import ClustalOmegaCommandline
 from OrthoEvol.Tools.logit import LogIt
 from OrthoEvol.utilities import FullUtilities
 from OrthoEvol.Orthologs.GenBank import GenBank
-from OrthoEvol.Orthologs.Align.pal2nal import Pal2NalCommandline
+from OrthoEvol.Orthologs.Align.pal2nal import PAL2NALCommandline as Pal2NalCommandline
 from OrthoEvol.Orthologs.Align.guidance2 import Guidance2Commandline
 from OrthoEvol.Orthologs.Align.orthoclustal import ClustalO
 
