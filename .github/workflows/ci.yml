@@ -33,7 +33,7 @@ jobs:
     - name: Install dependencies
       run: |
         sudo apt-get install -qq phyml
-        python -m pip install --upgrade pip setuptools wheel
+        python -m pip install --upgrade pip setuptools>=77.0.3 wheel
         pip install --only-binary=numpy,scipy numpy scipy
         pip install matplotlib ipython jupyter sympy pytest codecov pytest-cov
         pip install -r requirements.txt

@@ -24,15 +24,36 @@ import re
 # Add project root to path
 sys.path.insert(0, os.path.abspath('../../../'))
 
-# Read version from setup.py automatically
+# Read version from pyproject.toml automatically
 def get_version():
-    """Extract version from setup.py."""
-    setup_path = os.path.join(os.path.dirname(__file__), '../../../setup.py')
-    with open(setup_path, 'r') as f:
-        content = f.read()
-        match = re.search(r"version\s*=\s*['\"]([^'\"]+)['\"]", content)
-        if match:
-            return match.group(1)
+    """Extract version from pyproject.toml."""
+    pyproject_path = os.path.join(os.path.dirname(__file__), '../../../pyproject.toml')
+    
+    # Try using tomli (Python 3.11+) or tomllib (Python 3.11+)
+    try:
+        import tomllib
+        with open(pyproject_path, 'rb') as f:
+            data = tomllib.load(f)
+            version = data.get('project', {}).get('version')
+            if version:
+                return version
+    except ImportError:
+        # Fall back to tomli for older Python versions
+        try:
+            import tomli
+            with open(pyproject_path, 'rb') as f:
+                data = tomli.load(f)
+                version = data.get('project', {}).get('version')
+                if version:
+                    return version
+        except ImportError:
+            # Last resort: regex parsing
+            with open(pyproject_path, 'r') as f:
+                content = f.read()
+                match = re.search(r'version\s*=\s*["\']([^"\']+)["\']', content)
+                if match:
+                    return match.group(1)
+    
     return '1.0.0b2'  # fallback
 
 # -- General configuration ------------------------------------------------
@@ -70,7 +91,7 @@ author = 'Shaurita Hutchins & Robert Gilmore'
 # |version| and |release|, also used in various other places throughout the
 # built documents.
 #
-# Automatically read version from setup.py
+# Automatically read version from pyproject.toml
 _version = get_version()
 # The short X.Y version.
 version = _version
