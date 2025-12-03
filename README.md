@@ -1,40 +1,28 @@
-[![CI](https://github.com/datasnakes/OrthoEvolution/actions/workflows/ci.yml/badge.svg)](https://github.com/datasnakes/OrthoEvolution/actions/workflows/ci.yml)
-
-[![PyPI](https://badge.fury.io/py/OrthoEvol.svg)](https://badge.fury.io/py/OrthoEvol)
-
-[![Documentation](https://readthedocs.org/projects/orthoevolution/badge/?version=latest)](http://orthoevolution.readthedocs.io/en/latest/?badge=latest)
-
-[![Coverage](https://codecov.io/gh/datasnakes/OrthoEvolution/branch/main/graph/badge.svg)](https://codecov.io/gh/datasnakes/OrthoEvolution)
-
-[![Last Commit](https://badgen.net/github/last-commit/datasnakes/OrthoEvolution)](https://github.com/datasnakes/OrthoEvolution/commits/main)
+[![CI](https://github.com/datasnakes/OrthoEvolution/actions/workflows/ci.yml/badge.svg)](https://github.com/datasnakes/OrthoEvolution/actions/workflows/ci.yml) [![PyPI](https://badge.fury.io/py/OrthoEvol.svg)](https://badge.fury.io/py/OrthoEvol) [![Documentation](https://readthedocs.org/projects/orthoevolution/badge/?version=latest)](http://orthoevolution.readthedocs.io/en/latest/?badge=latest) [![Coverage](https://codecov.io/gh/datasnakes/OrthoEvolution/branch/main/graph/badge.svg)](https://codecov.io/gh/datasnakes/OrthoEvolution) [![Last Commit](https://badgen.net/github/last-commit/datasnakes/OrthoEvolution)](https://github.com/datasnakes/OrthoEvolution/commits/main)
 
 # OrthoEvolution
 
 OrthoEvolution is an **easy to use** and comprehensive Python package
-which aids in the **analysis and visualization of comparative
-evolutionary genetics** related projects such as the **inference of
-orthologs**.
+which aids in the **analysis and visualization of comparative evolutionary genetics** related 
+projects such as the **inference of orthologs**.
 
 **Current Version:** 1.0.0b2
 
 ## Overview
 
-This package focuses on **inferring orthologs** using NCBI\'s blast,
+This package focuses on **inferring orthologs** using NCBI's blast,
 various sequence alignment strategies, and phylogenetics analyses
 including PAML, PhyML, ete3, and more tools.
 
-Ultimately, the goal of this project is to create a **reusable
-pipeline** for the inference of orthologs in order to ensure
-reproducibility of data as well as improve the management and analysis
+Ultimately, the goal of this project is to create a **reusable pipeline** for the 
+inference of orthologs in order to ensure reproducibility of data as well as improve the management and analysis
 of (what can be) large datasets. The Cookies, Manager, Pipeline, and
 Tools modules act as a framework for our workflow, while the Orthologs
 module provides access to specific functions for our various ortholog
 inference projects.
 
-View our [read the
-docs](http://orthoevolution.readthedocs.io/en/latest/) and feel free to
-also read [this related
-paper](https://www.frontiersin.org/articles/10.3389/fnhum.2014.00283/full)
+View our [read the docs](http://orthoevolution.readthedocs.io/en/latest/) and feel free to
+also read [this related paper](https://www.frontiersin.org/articles/10.3389/fnhum.2014.00283/full)
 to gain more insight into this project/python package.
 
 ## Installation
@@ -79,9 +67,11 @@ directory](https://github.com/datasnakes/OrthoEvolution/tree/main/examples)
 for working examples and scripts demonstrating how to utilize this
 package.
 
-The examples include: - Standalone scripts for common workflows -
-Example data files - GUI implementations (Tkinter and PyWebView) -
-Pipeline demonstrations
+The examples include:
+- Standalone scripts for common workflows
+- Example data files
+- GUI implementations (Tkinter and PyWebView)
+- Pipeline demonstrations
 
 ### Running a pre-configured local blast
 
@@ -224,7 +214,7 @@ file for details.
 
 ## Citations
 
-We\'re thankful to have a resource such as
+We're thankful to have a resource such as
 [Biopython](http://biopython.org/wiki/Biopython), which inspired this
 package.
 
