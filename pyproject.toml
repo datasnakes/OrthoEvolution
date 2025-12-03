@@ -1,0 +1,95 @@
+[build-system]
+requires = ["setuptools >= 77.0.3", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "OrthoEvol"
+version = "1.0.0b2"
+description = "This package aids in the analysis of orthologous genes."
+readme = "README.md"
+requires-python = ">=3.9"
+license = "MIT"
+license-files = ["LICENSE"]
+keywords = [
+    "bioinformatics",
+    "science",
+    "evolution",
+    "orthology",
+    "psychiatry",
+    "genetics"
+]
+authors = [
+    {name = "Rob Gilmore", email = "robgilmore127@gmail.com"},
+    {name = "Shaurita D. Hutchins", email = "sdhutchins@outlook.com"}
+]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Science/Research",
+    "Topic :: Scientific/Engineering :: Bio-Informatics",
+    "Topic :: Scientific/Engineering :: Visualization",
+    "Topic :: Scientific/Engineering :: Medical Science Apps.",
+    "Programming Language :: Python :: 3",
+    "Operating System :: POSIX :: Linux",
+    "Operating System :: Unix",
+    "Natural Language :: English",
+    "Programming Language :: Python :: 3 :: Only",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Framework :: Flask",
+    "Framework :: Cookiecutter"
+]
+
+dependencies = [
+    "numpy",
+    "scipy",
+    "matplotlib",
+    "tqdm==4.66.3",
+    "ete3==3.0.0b35",
+    "pandas>=0.25.3",
+    "openpyxl>=2.5.0",
+    "pexpect==4.4.0",
+    "slacker==0.9.42",
+    "biopython>=1.79,<1.84",
+    "tablib>=0.11.5",
+    "mygene>=3.0.0",
+    "cookiecutter",
+    "Flask",
+    "Flask-Login",
+    "Flask-Mail",
+    "Flask-SQLAlchemy",
+    "Flask-WTF",
+    "treelib==1.3.5",
+    "psutil>=5.6.7",
+    "luigi",
+    "logzero>=1.5.0",
+    "xmltodict>=0.11.0",
+    "plotly>=3.10.0",
+    "pyyaml>=3.12",
+    "werkzeug>=3.1.4"
+]
+
+[project.optional-dependencies]
+test = [
+    "pytest",
+    "pytest-cov",
+    "pytest-runner"
+]
+
+[project.scripts]
+orthoevol = "OrthoEvol.Orthologs.command_line:main"
+
+[project.urls]
+Homepage = "https://github.com/datasnakes/OrthoEvolution"
+Documentation = "https://orthoevolution.readthedocs.io/"
+Repository = "https://github.com/datasnakes/OrthoEvolution"
+"Bug Reports" = "https://github.com/datasnakes/OrthoEvolution/issues"
+Releases = "https://github.com/datasnakes/OrthoEvolution/releases"
+
+[tool.setuptools]
+packages = {find = {exclude = ["docs", "examples", "tests"]}}
+include-package-data = true
+zip-safe = false
+
+[tool.setuptools.package-data]
+"*" = ["*.md", "*.txt", "*.yml", "*.yaml", "*.json", "*.cfg"]
