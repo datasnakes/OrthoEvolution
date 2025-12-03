@@ -189,11 +189,8 @@ pytest tests
 
 This package was created by the Datasnakes.
 
-- Rob Gilmore \| Github: [\@grabear](https://github.com/grabear) \|
-  [✉](mailto:robgilmore127@gmail.com)
-- Shaurita Hutchins \| Github:
-  [\@sdhutchins](https://github.com/sdhutchins) \|
-  [✉](mailto:sdhutchins@outlook.com)
+- Rob Gilmore | Github: [@grabear](https://github.com/grabear) | [✉](mailto:robgilmore127@gmail.com)
+- Shaurita D. Hutchins | Github: [@sdhutchins](https://github.com/sdhutchins) | [✉](mailto:sdhutchins@outlook.com)
 
 If you would like to contribute to this package, install the package in
 development mode:
@@ -202,20 +199,17 @@ development mode:
 pip install -e .
 ```
 
-Check out our [contributing
-guidelines](https://github.com/datasnakes/OrthoEvolution/blob/main/CONTRIBUTING.rst)
+Check out our [contributing guidelines](https://github.com/datasnakes/OrthoEvolution/blob/main/CONTRIBUTING.rst)
 for more information.
 
 ## License
 
-This project is licensed under the MIT License. See the
-[LICENSE](https://github.com/datasnakes/OrthoEvolution/blob/main/LICENSE)
+This project is licensed under the MIT License. See the [LICENSE](https://github.com/datasnakes/OrthoEvolution/blob/main/LICENSE)
 file for details.
 
 ## Citations
 
-We're thankful to have a resource such as
-[Biopython](http://biopython.org/wiki/Biopython), which inspired this
+We're thankful to have a resource such as [Biopython](http://biopython.org/wiki/Biopython), which inspired this
 package.
 
 *Cock, P.J.A. et al. Biopython: freely available Python tools for
