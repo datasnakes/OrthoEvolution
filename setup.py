@@ -43,69 +43,25 @@ home = path.abspath(path.dirname(__file__))
 name = 'OrthoEvol'
 
 
-def readme():
-    """Get the long description from the README file."""
-    readme_md = path.join(home, 'README.md')
-    
-    if path.exists(readme_md):
-        with open(readme_md, encoding='utf-8') as f:
-            return f.read()
-    else:
-        return "OrthoEvolution - A Python package for orthologous gene analysis."
+class PostInstallCommand(install):
+    """Post-installation command to set BioSQL Perl script permissions."""
 
-# Setup the package by adding information to these parameters
-setup(
-    name=name,
-    author='Rob Gilmore & Shaurita Hutchins',
-    author_email='datasnakes@gmail.com',
-    description="This package aids in the analysis of orthologous genes.",
-    version='1.0.0b2',
-    long_description=readme(),
-    long_description_content_type="text/markdown",
-    url='https://github.com/datasnakes/OrthoEvolution',
-    license='MIT',
-    keywords='bioinformatics science evolution orthology psychiatry genetics',
-    classifiers=[
-        'Development Status :: 3 - Alpha',
-        'Intended Audience :: Science/Research',
-        'Topic :: Scientific/Engineering :: Bio-Informatics',
-        'Topic :: Scientific/Engineering :: Visualization',
-        'Topic :: Scientific/Engineering :: Medical Science Apps.',
-        'Programming Language :: Python :: 3',
-        'Operating System :: POSIX :: Linux',
-        'Operating System :: Unix',
-        'Natural Language :: English',
-        'Programming Language :: Python :: 3 :: Only',
-        'Programming Language :: Python :: 3.9',
-        'Programming Language :: Python :: 3.10',
-        'Programming Language :: Python :: 3.11',
-        'Framework :: Flask',
-        'Framework :: Cookiecutter'
-    ],
-    # Packages will be automatically found if not in this list.
-    packages=find_packages(exclude=['docs', 'examples', 'tests']),
-    include_package_data=True,
-    python_requires='>=3.9',
-    entry_points={
-        'console_scripts': [
-                'orthoevol=OrthoEvol.Orthologs.command_line:main'
-        ]
-    },
-    project_urls={
-            'Docs': 'https://orthoevolution.readthedocs.io/',
-            'Releases': 'https://github.com/datasnakes/OrthoEvolution/releases',
-            'Bug Reports': 'https://github.com/datasnakes/OrthoEvolution/issues',
-            'Source': 'https://github.com/datasnakes/OrthoEvolution/',
-            },
-    zip_safe=False,
-    setup_requires=['pytest-runner'],
-    tests_require=['pytest']
-)
+    def run(self):
+        """Run the installation and then set script permissions."""
+        install.run(self)
+        # Set up the permissions for the BioSQL Perl scripts
+        try:
+            scripts = import_module("OrthoEvol.Manager.biosql.biosql_repo.scripts")
+            biosql_scripts = pkg_resources.resource_filename(scripts.__name__, "")
+            for file in os.listdir(biosql_scripts):
+                if '.pl' in file:
+                    script_path = os.path.join(biosql_scripts, file)
+                    os.chmod(script_path, mode=755)
+        except (ImportError, ModuleNotFoundError, FileNotFoundError):
+            # Skip if module not available or files don't exist
+            pass
 
-# Set up the permissions for the BioSQL Perl scripts
-scripts = import_module("OrthoEvol.Manager.biosql.biosql_repo.scripts")
-biosql_scripts = pkg_resources.resource_filename(scripts.__name__, "")
-for file in os.listdir(biosql_scripts):
-    if '.pl' in file:
-        script_path = os.path.join(biosql_scripts, file)
-        os.chmod(script_path, mode=755)
+
+# Most metadata is now in pyproject.toml
+# This setup() call is minimal - setuptools will read pyproject.toml
+setup(cmdclass={'install': PostInstallCommand})
