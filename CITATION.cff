@@ -1,0 +1,25 @@
+cff-version: 1.2.0
+message: "If you use this software, please cite it as below."
+authors:
+- family-names: "Gilmore"
+  given-names: "Rob"
+  orcid: "https://orcid.org/0000-0001-8096-0180"
+  email: "robgilmore127@gmail.com"
+- family-names: "Hutchins"
+  given-names: "Shaurita D."
+  orcid: "https://orcid.org/0000-0002-7687-0059"
+  email: "shaurita.d.hutchins@gmail.com"
+title: "OrthoEvolution"
+version: 1.0.0b2
+doi: 10.5281/zenodo.1234
+date-released: 2025-12-02
+url: "https://github.com/datasnakes/OrthoEvolution"
+repository-code: "https://github.com/datasnakes/OrthoEvolution"
+license: "MIT"
+keywords:
+  - "bioinformatics"
+  - "science"
+  - "evolution"
+  - "orthology"
+  - "psychiatry"
+  - "genetics"
