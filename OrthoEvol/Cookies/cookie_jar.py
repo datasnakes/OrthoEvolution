@@ -7,18 +7,17 @@ from pathlib import Path
 import yaml
 from cookiecutter.hooks import run_script
 from cookiecutter.main import cookiecutter
-from pkg_resources import resource_filename
-
 # OrthoEvol
 from OrthoEvol import Cookies
 from OrthoEvol.Manager.config import yml
+from OrthoEvol.resources import package_resource_path
 from OrthoEvol.Tools.logit import LogIt
 
 
 class CookBook(object):
     """Class of cookiecutter related functions."""
 
-    _config_file = resource_filename(yml.__name__, "cookie_recipes.yml")
+    _config_file = package_resource_path(yml, "cookie_recipes.yml")
 
     def __init__(self, config_file=_config_file, **new_recipes):
         """Access paths to the various cookiecutter templates.
@@ -28,7 +27,7 @@ class CookBook(object):
 
         New Recipes can also be added...
         """
-        self.CookieJar = Path(resource_filename(Cookies.__name__, ''))
+        self.CookieJar = package_resource_path(Cookies)
         self.repo_cookie = self.CookieJar / Path('new_repository')
         self.user_cookie = self.CookieJar / Path('new_user')
         self.project_cookie = self.CookieJar / Path('new_project')

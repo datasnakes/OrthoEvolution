@@ -111,24 +111,11 @@ class TestManagement(unittest.TestCase):
 class TestRepoManagement(unittest.TestCase):
     """Test the RepoManagement class."""
 
-    def setUp(self):
+    def setUp(self) -> None:
         """Set up test fixtures."""
         self.test_dir = Path(tempfile.mkdtemp())
+        self.addCleanup(rmtree, self.test_dir, ignore_errors=True)
         self.repo = 'test-repo'
-
-    def tearDown(self):
-        """Clean up test directories."""
-        repo_path = self.test_dir / self.repo
-        if repo_path.exists():
-            try:
-                rmtree(repo_path)
-            except (OSError, PermissionError):
-                pass
-        if self.test_dir.exists():
-            try:
-                rmtree(self.test_dir)
-            except (OSError, PermissionError):
-                pass
 
     def test_repo_management_init(self):
         """Test RepoManagement initialization."""
@@ -160,25 +147,12 @@ class TestRepoManagement(unittest.TestCase):
 class TestUserManagement(unittest.TestCase):
     """Test the UserManagement class."""
 
-    def setUp(self):
+    def setUp(self) -> None:
         """Set up test fixtures."""
         self.test_dir = Path(tempfile.mkdtemp())
+        self.addCleanup(rmtree, self.test_dir, ignore_errors=True)
         self.repo = 'test-repo'
         self.user = 'test-user'
-
-    def tearDown(self):
-        """Clean up test directories."""
-        repo_path = self.test_dir / self.repo
-        if repo_path.exists():
-            try:
-                rmtree(repo_path)
-            except (OSError, PermissionError):
-                pass
-        if self.test_dir.exists():
-            try:
-                rmtree(self.test_dir)
-            except (OSError, PermissionError):
-                pass
 
     def test_user_management_init(self):
         """Test UserManagement initialization."""
@@ -216,25 +190,12 @@ class TestUserManagement(unittest.TestCase):
 class TestWebsiteManagement(unittest.TestCase):
     """Test the WebsiteManagement class."""
 
-    def setUp(self):
+    def setUp(self) -> None:
         """Set up test fixtures."""
         self.test_dir = Path(tempfile.mkdtemp())
+        self.addCleanup(rmtree, self.test_dir, ignore_errors=True)
         self.repo = 'test-repo'
         self.website = 'test-website'
-
-    def tearDown(self):
-        """Clean up test directories."""
-        repo_path = self.test_dir / self.repo
-        if repo_path.exists():
-            try:
-                rmtree(repo_path)
-            except (OSError, PermissionError):
-                pass
-        if self.test_dir.exists():
-            try:
-                rmtree(self.test_dir)
-            except (OSError, PermissionError):
-                pass
 
     def test_website_management_init(self):
         """Test WebsiteManagement initialization."""

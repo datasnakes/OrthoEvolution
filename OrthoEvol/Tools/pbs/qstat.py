@@ -14,9 +14,9 @@ import plotly
 import plotly.graph_objs as go
 import yaml
 from dateutil import parser
-from pkg_resources import resource_filename
 
 from OrthoEvol.Manager.config import yml
+from OrthoEvol.resources import package_resource_path
 from OrthoEvol.Tools.logit import LogIt
 from OrthoEvol.utilities import FullUtilities
 
@@ -82,7 +82,7 @@ class BaseQstat(object):
 
         self.qstat_utils = FullUtilities()
         self.qstat_log = LogIt().default(logname="PBS - QSTAT", logfile=None)
-        self._yaml_config = resource_filename(yml.__name__, 'qstat.yml')
+        self._yaml_config = package_resource_path(yml, 'qstat.yml')
         self.pbs_job_id = job_id
         self.capture_json = capture_json
         if not cmd:

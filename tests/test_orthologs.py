@@ -5,6 +5,8 @@ import os
 import tempfile
 from unittest import mock
 from pathlib import Path
+from unittest import mock
+from pathlib import Path
 
 from OrthoEvol.Orthologs.Blast import BaseBlastN, OrthoBlastN
 from OrthoEvol.Orthologs.Phylogenetics.PhyML import PhyML
@@ -12,6 +14,9 @@ from OrthoEvol.Orthologs.Phylogenetics.TreeViz import TreeViz
 from OrthoEvol.Orthologs.Phylogenetics import RelaxPhylip
 from OrthoEvol.Orthologs.Phylogenetics.IQTree import IQTreeCommandline, FilteredTree
 from OrthoEvol.Orthologs.Phylogenetics.PAML import ETE3PAML
+from OrthoEvol.Orthologs.GenBank.genbank import GenBank
+from OrthoEvol.Orthologs.Align.orthoclustal import ClustalO
+from OrthoEvol.Orthologs.Align.msa import MultipleSequenceAlignment
 from OrthoEvol.Orthologs.GenBank.genbank import GenBank
 from OrthoEvol.Orthologs.Align.orthoclustal import ClustalO
 from OrthoEvol.Orthologs.Align.msa import MultipleSequenceAlignment
@@ -320,81 +325,62 @@ class TestGenBank(unittest.TestCase):
         if os.path.exists(self.test_dir):
             rmtree(self.test_dir, ignore_errors=True)
 
-    def test_name_fasta_file_cds_single(self):
-        """Test name_fasta_file for CDS single mode."""
+    def test_name_fasta_file(self) -> None:
+        """Test filename construction across feature types and write modes."""
         gene = "HTR1A"
         org = "Homo_sapiens"
-        feat_type = "CDS"
-        feat_type_rank = "CDS"
-        extension = ".ffn"
-        mode = "w"
-
-        file_obj = GenBank.name_fasta_file(
-            self.test_path, gene, org, feat_type, feat_type_rank, extension, mode
+        test_cases = (
+            {
+                "name": "CDS single",
+                "feature_type": "CDS",
+                "feature_rank": "CDS",
+                "extension": ".ffn",
+                "mode": "w",
+                "expected_filename": "HTR1A_Homo_sapiensCDS.ffn",
+            },
+            {
+                "name": "CDS multi",
+                "feature_type": "CDS",
+                "feature_rank": "CDS",
+                "extension": ".ffn",
+                "mode": "a",
+                "expected_filename": "HTR1ACDS.ffn",
+            },
+            {
+                "name": "other feature single",
+                "feature_type": "misc_feature",
+                "feature_rank": "misc_feature",
+                "extension": ".fna",
+                "mode": "w",
+                "expected_filename": "HTR1A_Homo_sapiens_misc_feature.fna",
+            },
+            {
+                "name": "other feature multi",
+                "feature_type": "misc_feature",
+                "feature_rank": "misc_feature",
+                "extension": ".fna",
+                "mode": "a",
+                "expected_filename": "HTR1A_misc_feature.fna",
+            },
         )
 
-        self.assertIsNotNone(file_obj)
-        self.assertEqual(file_obj.mode, 'w')
-        expected_path = self.test_path / f"{gene}_{org}{feat_type_rank}{extension}"
-        self.assertEqual(Path(file_obj.name), expected_path)
-        file_obj.close()
+        for test_case in test_cases:
+            with self.subTest(test_case["name"]):
+                file_obj = GenBank.name_fasta_file(
+                    self.test_path,
+                    gene,
+                    org,
+                    test_case["feature_type"],
+                    test_case["feature_rank"],
+                    test_case["extension"],
+                    test_case["mode"],
+                )
 
-    def test_name_fasta_file_cds_multi(self):
-        """Test name_fasta_file for CDS multi mode."""
-        gene = "HTR1A"
-        org = "Homo_sapiens"
-        feat_type = "CDS"
-        feat_type_rank = "CDS"
-        extension = ".ffn"
-        mode = "a"
-
-        file_obj = GenBank.name_fasta_file(
-            self.test_path, gene, org, feat_type, feat_type_rank, extension, mode
-        )
-
-        self.assertIsNotNone(file_obj)
-        self.assertEqual(file_obj.mode, 'a')
-        expected_path = self.test_path / f"{gene}{feat_type_rank}{extension}"
-        self.assertEqual(Path(file_obj.name), expected_path)
-        file_obj.close()
-
-    def test_name_fasta_file_other_single(self):
-        """Test name_fasta_file for other feature type single mode."""
-        gene = "HTR1A"
-        org = "Homo_sapiens"
-        feat_type = "misc_feature"
-        feat_type_rank = "misc_feature"
-        extension = ".fna"
-        mode = "w"
-
-        file_obj = GenBank.name_fasta_file(
-            self.test_path, gene, org, feat_type, feat_type_rank, extension, mode
-        )
-
-        self.assertIsNotNone(file_obj)
-        self.assertEqual(file_obj.mode, 'w')
-        expected_path = self.test_path / f"{gene}_{org}_{feat_type_rank}{extension}"
-        self.assertEqual(Path(file_obj.name), expected_path)
-        file_obj.close()
-
-    def test_name_fasta_file_other_multi(self):
-        """Test name_fasta_file for other feature type multi mode."""
-        gene = "HTR1A"
-        org = "Homo_sapiens"
-        feat_type = "misc_feature"
-        feat_type_rank = "misc_feature"
-        extension = ".fna"
-        mode = "a"
-
-        file_obj = GenBank.name_fasta_file(
-            self.test_path, gene, org, feat_type, feat_type_rank, extension, mode
-        )
-
-        self.assertIsNotNone(file_obj)
-        self.assertEqual(file_obj.mode, 'a')
-        expected_path = self.test_path / f"{gene}_{feat_type_rank}{extension}"
-        self.assertEqual(Path(file_obj.name), expected_path)
-        file_obj.close()
+                self.assertIsNotNone(file_obj)
+                self.assertEqual(file_obj.mode, test_case["mode"])
+                expected_path = self.test_path / test_case["expected_filename"]
+                self.assertEqual(Path(file_obj.name), expected_path)
+                file_obj.close()
 
     def test_protein_gi_fetch_with_gi(self):
         """Test protein_gi_fetch when GI is present."""
