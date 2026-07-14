@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "OrthoEvol"
-version = "1.0.0b2"
+version = "1.0.0b3"
 description = "This package aids in the analysis of orthologous genes."
 readme = "README.md"
 requires-python = ">=3.11,<3.13"
