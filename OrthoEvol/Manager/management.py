@@ -2,10 +2,10 @@
 # Standard Library
 import os
 from pathlib import Path
-import pkg_resources
 # OrthoEvol
 from OrthoEvol import Cookies, Orthologs, Manager, Tools
 from OrthoEvol.Cookies import Oven
+from OrthoEvol.resources import package_resource_path
 from OrthoEvol.Tools.logit import LogIt
 
 
@@ -37,19 +37,19 @@ class Management(object):
         self.Kitchen = Oven(repo=self.repo, output_dir=self.file_home)
         self.Pantry = self.Kitchen.Recipes
         # Manager Module:
-        self.Manager = Path(pkg_resources.resource_filename(Manager.__name__, ''))
+        self.Manager = package_resource_path(Manager)
         self.BioSQL = self.Manager / Path('BioSQL')
         self.SQLite3 = self.BioSQL / Path('sqlite')
         self.MySQL = self.BioSQL / Path('mysql')
         self.config = self.Manager / Path('config')
         # Orthologs Module:
-        self.Orthologs = Path(pkg_resources.resource_filename(Orthologs.__name__, ''))
+        self.Orthologs = package_resource_path(Orthologs)
         self.Align = self.Orthologs / Path('Align')
         self.Blast = self.Orthologs / Path('Blast')
         self.GenBank = self.Orthologs / Path('GenBank')
         self.Phylogenetics = self.Orthologs / Path('Phylogenetics')
         # Tools Module:
-        self.Tools = Path(pkg_resources.resource_filename(Tools.__name__, ''))
+        self.Tools = package_resource_path(Tools)
         self.ftp = self.Tools / Path('ftp')
         self.logit = self.Tools / Path('logit')
         self.mpi = self.Tools / Path('mpi')

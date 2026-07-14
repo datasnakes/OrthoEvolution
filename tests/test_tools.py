@@ -5,8 +5,8 @@ from unittest import mock
 import os
 import logging
 import tempfile
-from pkg_resources import resource_filename
 
+from OrthoEvol.resources import package_resource_path
 from OrthoEvol.Tools.logit import LogIt
 from OrthoEvol.Tools.parallel import Multiprocess
 from OrthoEvol.Tools.ftp import NcbiFTPClient
@@ -20,7 +20,7 @@ class TestTools(unittest.TestCase):
 
     def setUp(self, logfile='test.log'):
         self.logfile = logfile
-        self.infile = resource_filename(test.__name__, 'test_blast.csv')
+        self.infile = package_resource_path(test, 'test_blast.csv')
         self.outfile = 'out_mygene.csv'
 
     def test_logit(self):
