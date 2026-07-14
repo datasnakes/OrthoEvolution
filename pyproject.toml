@@ -7,7 +7,7 @@ name = "OrthoEvol"
 version = "1.0.0b2"
 description = "This package aids in the analysis of orthologous genes."
 readme = "README.md"
-requires-python = ">=3.9"
+requires-python = ">=3.11"
 license = "MIT"
 license-files = ["LICENSE"]
 keywords = [
@@ -33,9 +33,10 @@ classifiers = [
     "Operating System :: Unix",
     "Natural Language :: English",
     "Programming Language :: Python :: 3 :: Only",
-    "Programming Language :: Python :: 3.9",
-    "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Programming Language :: Python :: 3.14",
     "Framework :: Flask"
 ]
 
@@ -53,7 +54,7 @@ dependencies = [
     "tablib>=0.11.5",
     "mygene>=3.0.0",
     "cookiecutter",
-    "Flask",
+    "Flask>=3.1.3,<4",
     "Flask-Login",
     "Flask-Mail",
     "Flask-SQLAlchemy",
@@ -70,7 +71,7 @@ dependencies = [
 
 [project.optional-dependencies]
 test = [
-    "pytest",
+    "pytest>=9.1.1,<10",
     "pytest-cov",
     "pytest-runner"
 ]
