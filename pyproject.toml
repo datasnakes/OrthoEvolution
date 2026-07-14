@@ -7,7 +7,7 @@ name = "OrthoEvol"
 version = "1.0.0b2"
 description = "This package aids in the analysis of orthologous genes."
 readme = "README.md"
-requires-python = ">=3.11"
+requires-python = ">=3.11,<3.13"
 license = "MIT"
 license-files = ["LICENSE"]
 keywords = [
@@ -35,8 +35,6 @@ classifiers = [
     "Programming Language :: Python :: 3 :: Only",
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
-    "Programming Language :: Python :: 3.13",
-    "Programming Language :: Python :: 3.14",
     "Framework :: Flask"
 ]
 
