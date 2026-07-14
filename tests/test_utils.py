@@ -300,10 +300,10 @@ class TestManagerUtils(unittest.TestCase):
 
 class TestPackageVersion(unittest.TestCase):
 
-    def test_init(self):
+    def test_init(self) -> None:
         """Test PackageVersion initialization."""
-        pv = PackageVersion('setuptools')
-        self.assertEqual(pv.packagename, 'setuptools')
+        pv = PackageVersion('OrthoEvol')
+        self.assertEqual(pv.packagename, 'OrthoEvol')
         self.assertIsNotNone(pv)
 
 
