@@ -2,11 +2,11 @@
 import os
 from pathlib import Path
 from shutil import copy
-import pkg_resources
 # BioPython
 from Bio.Phylo.PAML import codeml
 # OrthoEvol
 from OrthoEvol.Manager.config import paml_control_files
+from OrthoEvol.resources import package_resource_path
 
 
 class CodemlRun(object):
@@ -39,8 +39,8 @@ class CodemlRun(object):
         # Set up genes control file name and get the OrthoEvol control file path
         self.gene = str(iqtree_newick).replace('_iqtree.nwk', '')
         self.control_file = self.paml_path / Path(self.gene + '.ctl')
-        self.control_template = pkg_resources.resource_filename(
-            paml_control_files.__name__, control_file)
+        self.control_template = package_resource_path(
+            paml_control_files, control_file)
         print(self.control_template)
 
         # Set up CODEML input files

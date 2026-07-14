@@ -8,7 +8,6 @@ import yaml
 from collections import OrderedDict
 from importlib import import_module
 from pathlib import Path
-from pkg_resources import resource_filename
 import subprocess as sp
 # OrthoEvol
 from OrthoEvol import OrthoEvolDeprecationWarning
@@ -19,6 +18,7 @@ from OrthoEvol.Manager.biosql import biosql
 from OrthoEvol.Manager.management import ProjectManagement
 from OrthoEvol.Orthologs.Blast.comparative_genetics import BaseComparativeGenetics
 from OrthoEvol.Manager.config import templates
+from OrthoEvol.resources import package_resource_path
 
 
 class BaseDatabaseManagement(object):
@@ -752,7 +752,7 @@ class DatabaseManagement(BaseDatabaseManagement):
             db_path = self.database_path / Path('NCBI') / Path('refseq') / Path('release') / Path(collection_subset)
 
             # Read the upload script
-            upload_script = resource_filename(templates.__name__, 'upload_rr_pbs.py')
+            upload_script = package_resource_path(templates, 'upload_rr_pbs.py')
             with open(upload_script, 'r') as upload_script:
                 temp_script = upload_script.read()
             rand_str = random.sample(string.ascii_letters + string.digits, 5)

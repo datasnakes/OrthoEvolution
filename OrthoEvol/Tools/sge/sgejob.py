@@ -1,13 +1,13 @@
 from subprocess import run, CalledProcessError, PIPE
 import os
 from time import sleep
-from pkg_resources import resource_filename
 
 from OrthoEvol.Tools.logit import LogIt
 from OrthoEvol.Tools.sge import (basejobids, writecodefile, import_temp,
                                  file2str)
 from OrthoEvol.Tools.sge.sgeconfig import __DEFAULT__
 from OrthoEvol.Manager.config import templates
+from OrthoEvol.resources import package_resource_path
 from OrthoEvol.Tools.sge import Qstat
 
 
@@ -24,8 +24,8 @@ class BaseSGEJob(object):
         self.sgejob_log = LogIt().default(logname="SGE JOB", logfile=None)
         self.pbsworkdir = os.getcwd()
 
-        # Import the temp.pbs file using pkg_resources
-        self.temp_pbs = resource_filename(templates.__name__, "temp.pbs")
+        # Resolve the bundled template once so jobs use a stable local path.
+        self.temp_pbs = package_resource_path(templates, "temp.pbs")
 
     @classmethod
     def _configure(cls, length, base_jobname):

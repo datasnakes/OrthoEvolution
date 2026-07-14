@@ -7,10 +7,10 @@ import shutil
 import sqlite3
 import subprocess as sp
 import sys
-import pkg_resources
 from threading import Timer
 from datetime import datetime
 from importlib import import_module
+from importlib.metadata import version
 from pathlib import Path
 from subprocess import TimeoutExpired
 from tempfile import TemporaryFile
@@ -895,9 +895,13 @@ class PackageVersion(object):
         :rtype: str
         """
         import_module(self.packagename)
-        version = pkg_resources.get_distribution(self.packagename).version
-        utils_log.info('Version %s of %s is installed.' % (version, self.packagename))
-        return version
+        package_version = version(self.packagename)
+        utils_log.info(
+            'Version %s of %s is installed.' % (
+                package_version, self.packagename
+            )
+        )
+        return package_version
 
 
 class FunctionRepeater(object):

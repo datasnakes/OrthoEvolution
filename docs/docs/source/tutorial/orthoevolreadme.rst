@@ -1,7 +1,7 @@
 Tutorial
 ========
 
-OrthoEvolution has been built with Python 3.9 (and up) as a
+OrthoEvolution has been built with Python 3.11 (and up) as a
 multi-faceted package and pipeline framework for comparative genetics in
 order to infer orthologous genes.
 
