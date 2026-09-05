@@ -664,7 +664,13 @@ class ComparativeGenetics(BaseComparativeGenetics):
         if self.save_data is True:
             temp.to_csv(str(self.building_file_path))
 
-    def add_blast_time(self, gene, organism, start, end):
+    def add_blast_time(
+        self,
+        gene: str,
+        organism: str,
+        start: float,
+        end: float,
+    ) -> None:
         """Build a file that stores the amount of time for each gene to blast.
 
         This method is similar to the add_accession() method.
@@ -674,11 +680,8 @@ class ComparativeGenetics(BaseComparativeGenetics):
         :param start:  Starting time.
         :param end:  Ending time.
         """
-        # TODO-ROB Add a method that adds the time to the post-blast analysis API.
-        # This will help us see if there is a correlation between gene, organism,
-        # or accession with the length of time.
-
         elapsed_time = end - start
+        self.time_dict.setdefault(gene, {})[organism] = elapsed_time
         # Edit the data frame
         self.building_time.at[gene, organism] = elapsed_time
         temp = self.building_time.reset_index()
