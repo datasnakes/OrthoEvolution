@@ -12,10 +12,9 @@
 
 It weights, filters or masks unreliably aligned positions in multiple sequence alignments."""
 
-from __future__ import print_function
 from pathlib import Path
+
 from Bio.Application import _Option, _Argument, AbstractCommandline
-import os
 
 
 class Guidance2Commandline(AbstractCommandline):
@@ -40,7 +39,12 @@ class Guidance2Commandline(AbstractCommandline):
         """
 
 
-    def __init__(self, cmd="guidance", align=True, **kwargs):
+    def __init__(
+        self,
+        cmd: str = "guidance",
+        align: bool = True,
+        **kwargs: object,
+    ) -> None:
         """Initialize GUIDANCE2 command line wrapper.
 
         :param cmd: Command name for GUIDANCE2 executable.
@@ -51,7 +55,7 @@ class Guidance2Commandline(AbstractCommandline):
         :type kwargs: dict
         """
         # order parameters in the same order as invoking guidance on the cmd line (e.g. 'perl guidance.pl')
-        if align is True:
+        if align:
             self.parameters = \
                 [
                     # Required Parameters
@@ -150,13 +154,7 @@ class Guidance2Commandline(AbstractCommandline):
                     # Other Guidance scripts
                 ]
 
-            ACmd = AbstractCommandline.__init__(self, cmd, **kwargs)
-            maskDir = ACmd.__getattribute__('outDir')
-
-        if 'maskCutoff' in kwargs.keys():
-            if 'maskDir' in kwargs.keys():
-                maskDir = kwargs['maskDir']
-            os.chdir(maskDir)
+        else:
             cmd = "maskLowScoreResidues"
             self.parameters = \
                 [
@@ -177,4 +175,4 @@ class Guidance2Commandline(AbstractCommandline):
                               is_required=True,
                               checker_function=lambda x: x in ['aa', 'nuc'])
                 ]
-            AbstractCommandline.__init__(self, cmd, **kwargs)
+        super().__init__(cmd, **kwargs)

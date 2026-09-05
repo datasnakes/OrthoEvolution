@@ -2,17 +2,35 @@
 import os
 import shutil
 import subprocess
+from dataclasses import dataclass
 from pathlib import Path
+from typing import Any
+
 # BioPython
 from Bio import SeqIO
 from Bio.Align.Applications import ClustalOmegaCommandline
+
+from OrthoEvol.Orthologs.Align.guidance2 import Guidance2Commandline
+from OrthoEvol.Orthologs.Align.orthoclustal import ClustalO
+from OrthoEvol.Orthologs.Align.pal2nal import \
+    PAL2NALCommandline as Pal2NalCommandline
+from OrthoEvol.Orthologs.GenBank import GenBank
 # OrthoEvol
 from OrthoEvol.Tools.logit import LogIt
 from OrthoEvol.utilities import FullUtilities
-from OrthoEvol.Orthologs.GenBank import GenBank
-from OrthoEvol.Orthologs.Align.pal2nal import PAL2NALCommandline as Pal2NalCommandline
-from OrthoEvol.Orthologs.Align.guidance2 import Guidance2Commandline
-from OrthoEvol.Orthologs.Align.orthoclustal import ClustalO
+
+
+@dataclass(frozen=True, slots=True)
+class _GuidancePaths:
+    """Keep related GUIDANCE2 outputs together across filtering branches."""
+
+    gene_directory: Path
+    filtered_sequence: Path
+    removed_sequences: Path
+    alignment: Path
+    sequence_column_filtered: Path
+    column_filtered: Path
+    masked: Path
 
 
 class MultipleSequenceAlignment(object):
@@ -76,7 +94,245 @@ class MultipleSequenceAlignment(object):
                 aligner_configuration = kwargs[config]
                 self.alignment_dict[program] = [aligner, aligner_configuration]
 
-    def guidance2(self, seqFile, msaProgram, seqType, dataset='MSA', seqFilter=None, columnFilter=None, maskFilter=None, **kwargs):
+    def _build_guidance_paths(
+        self,
+        sequence_file: str | Path,
+        sequence_type: str,
+    ) -> _GuidancePaths:
+        """Build every persistent output path before running GUIDANCE2."""
+        suffixes = {
+            "nuc": ("ffn", "na"),
+            "aa": ("faa", "aa"),
+        }
+        try:
+            sequence_extension, alignment_label = suffixes[sequence_type]
+        except KeyError as error:
+            supported_types = ", ".join(sorted(suffixes))
+            raise ValueError(
+                f"Unsupported GUIDANCE2 sequence type {sequence_type!r}; "
+                f"expected one of: {supported_types}."
+            ) from error
+
+        gene = Path(sequence_file).stem
+        gene_directory = Path(self.raw_data) / gene
+        return _GuidancePaths(
+            gene_directory=gene_directory,
+            filtered_sequence=gene_directory / f"{gene}_G2.{sequence_extension}",
+            removed_sequences=(
+                gene_directory / f"{gene}_G2_removed.{sequence_extension}"
+            ),
+            alignment=gene_directory / f"{gene}_G2_{alignment_label}.aln",
+            sequence_column_filtered=(
+                gene_directory / f"{gene}_G2sfcf_{alignment_label}.aln"
+            ),
+            column_filtered=(
+                gene_directory / f"{gene}_G2cf_{alignment_label}.aln"
+            ),
+            masked=gene_directory / f"{gene}_G2mf_{alignment_label}.aln",
+        )
+
+    def _run_guidance_command(self, **command_options: Any) -> None:
+        """Run one configured command through the existing wrapper boundary."""
+        command = Guidance2Commandline(**command_options)
+        self.guidancelog.info(command)
+        subprocess.check_call(
+            [str(command)],
+            stderr=subprocess.STDOUT,
+            shell=True,
+        )
+
+    @staticmethod
+    def _removed_sequence_file(iteration_directory: Path) -> Path:
+        """Use the named GUIDANCE2 output when the program creates it."""
+        named_file = (
+            iteration_directory / "Seqs.Orig.fas.FIXED.Removed_Seq.With_Names"
+        )
+        if named_file.is_file():
+            return named_file
+        return iteration_directory / "Seqs.Orig.fas.FIXED.Removed_Seq"
+
+    @staticmethod
+    def _sequence_filter_output_directory(
+        gene_directory: Path,
+        column_filter: float | None,
+        mask_filter: float | None,
+    ) -> Path:
+        """Select one stable directory for every filtering iteration."""
+        if column_filter is not None:
+            suffix = "sf_cf"
+        elif mask_filter is not None:
+            suffix = "sf_mf"
+        else:
+            suffix = "sf"
+        return gene_directory / f"GUIDANCE2_{suffix}"
+
+    @staticmethod
+    def _should_stop_guidance(
+        removed_sequence_count: int,
+        iteration: int,
+        maximum_iterations: int,
+    ) -> bool:
+        """Stop when GUIDANCE2 converges or reaches its configured limit."""
+        return removed_sequence_count == 0 or iteration >= maximum_iterations
+
+    def _run_guidance_sequence_filter(
+        self,
+        sequence_file: str | Path,
+        msa_program: str,
+        sequence_type: str,
+        dataset: str,
+        sequence_filter: str,
+        column_filter: float | None,
+        mask_filter: float | None,
+        paths: _GuidancePaths,
+        command_options: dict[str, Any],
+        maximum_iterations: int | None,
+        increment: float | None,
+    ) -> Path:
+        """Iteratively remove low-confidence sequences and return the last run."""
+        if sequence_filter not in {"inclusive", "exclusive"}:
+            raise ValueError(
+                "sequence_filter must be either 'inclusive' or 'exclusive'."
+            )
+
+        if not isinstance(maximum_iterations, int) or maximum_iterations < 1:
+            raise ValueError("iterations must be a positive integer.")
+        if maximum_iterations > 1 and increment is None:
+            raise ValueError("increment is required when iterations is greater than 1.")
+
+        output_directory = self._sequence_filter_output_directory(
+            paths.gene_directory,
+            column_filter,
+            mask_filter,
+        )
+        output_directory.mkdir(parents=True, exist_ok=True)
+
+        for iteration in range(1, maximum_iterations + 1):
+            iteration_directory = output_directory / f"iter_{iteration}"
+            iteration_directory.mkdir(parents=True, exist_ok=True)
+
+            if iteration > 1:
+                if sequence_filter == "inclusive":
+                    command_options["seqCutoff"] -= increment
+                else:
+                    command_options["seqCutoff"] += increment
+
+            iteration_input = (
+                Path(sequence_file) if iteration == 1 else paths.filtered_sequence
+            )
+            self._run_guidance_command(
+                seqFile=str(iteration_input),
+                msaProgram=msa_program,
+                seqType=sequence_type,
+                outDir=str(iteration_directory),
+                **command_options,
+            )
+
+            removed_file = self._removed_sequence_file(iteration_directory)
+            removed_sequence_count = sum(
+                1 for _ in SeqIO.parse(str(removed_file), "fasta")
+            )
+
+            if iteration == 1:
+                SeqIO.write(
+                    SeqIO.parse(str(removed_file), "fasta"),
+                    str(paths.removed_sequences),
+                    "fasta",
+                )
+            elif removed_sequence_count > 0:
+                self.msa_utils.multi_fasta_manipulator(
+                    str(paths.removed_sequences),
+                    str(removed_file),
+                    str(paths.removed_sequences),
+                    manipulation="add",
+                )
+
+            if removed_sequence_count > 0:
+                self.msa_utils.multi_fasta_manipulator(
+                    str(sequence_file),
+                    str(paths.removed_sequences),
+                    str(paths.filtered_sequence),
+                    manipulation="remove",
+                )
+
+            if self._should_stop_guidance(
+                removed_sequence_count,
+                iteration,
+                maximum_iterations,
+            ):
+                filtered_alignment = (
+                    iteration_directory
+                    / f"{dataset}.{msa_program}.aln.Sorted.With_Names"
+                )
+                renamed_alignment = shutil.copy(
+                    str(filtered_alignment),
+                    str(paths.alignment),
+                )
+                self.msa_utils.multi_fasta_manipulator(
+                    str(renamed_alignment),
+                    str(sequence_file),
+                    str(renamed_alignment),
+                    manipulation="sort",
+                )
+                return iteration_directory
+
+        raise RuntimeError("GUIDANCE2 sequence filtering ended without a result.")
+
+    def _apply_guidance_post_filter(
+        self,
+        sequence_file: str | Path,
+        msa_program: str,
+        sequence_type: str,
+        dataset: str,
+        column_filter: float | None,
+        mask_filter: float | None,
+        paths: _GuidancePaths,
+        iteration_directory: Path,
+    ) -> None:
+        """Apply the optional column or residue filter after sequence filtering."""
+        if column_filter is not None:
+            filtered_alignment = (
+                iteration_directory
+                / f"{dataset}.{msa_program}.Without_low_SP_Col.With_Names"
+            )
+            shutil.copy(
+                str(filtered_alignment),
+                str(paths.sequence_column_filtered),
+            )
+        elif mask_filter is not None:
+            alignment_to_mask = (
+                iteration_directory / f"{dataset}.{msa_program}.aln.With_Names"
+            )
+            residue_pair_scores = (
+                iteration_directory
+                / f"{dataset}.{msa_program}.Guidance2_res_pair_res.scr"
+            )
+            self._run_guidance_command(
+                align=False,
+                seqType=sequence_type,
+                maskCutoff=mask_filter,
+                maskFile=str(alignment_to_mask),
+                rprScores=str(residue_pair_scores),
+                output=str(paths.masked),
+            )
+            self.msa_utils.multi_fasta_manipulator(
+                str(paths.masked),
+                str(sequence_file),
+                str(paths.masked),
+                manipulation="sort",
+            )
+
+    def guidance2(
+        self,
+        seqFile: str | Path,
+        msaProgram: str,
+        seqType: str,
+        dataset: str = "MSA",
+        seqFilter: str | None = None,
+        columnFilter: float | None = None,
+        maskFilter: float | None = None,
+        **kwargs: Any,
+    ) -> None:
         """Run the GUIDANCE2 command line wrapper from BioPython.
 
         The Guidance2 algorithm is used to filter sequence alignments in
@@ -108,146 +364,81 @@ class MultipleSequenceAlignment(object):
         :return:  Returns Guidance2 files.
         """
 
+        if columnFilter is not None and maskFilter is not None:
+            raise ValueError("columnFilter and maskFilter are mutually exclusive.")
+
         self.guidancelog.info("Guidance2 will be used.")
-        # Name and Create the output directory
         self.program = "GUIDANCE2"
-        outDir = self.program
-        gene = Path(seqFile).stem
-        geneDir = self.raw_data / Path(gene)
-        self.guidancelog.info(geneDir)
-        if seqType == 'nuc':
-            g2_seqFile = str(geneDir / Path(gene + '_G2.ffn'))  # Need for all iterations
-            rem_file = str(geneDir / Path(gene + '_G2_removed.ffn'))   # Need for all iterations
-            g2_alnFile = str(geneDir / Path(gene + '_G2_na.aln'))
-            g2_seqcolFilter = str(geneDir / Path(gene + 'G2sfcf_na.aln'))
-            g2_colFilter = str(geneDir / Path(gene + '_G2cf_na.aln'))
-            g2_maskedFile = str(geneDir / Path(gene + '_G2mf_na.aln'))
-        elif seqType == 'aa':
-            g2_seqFile = str(geneDir / Path(gene + '_G2.faa'))  # Need for all iterations
-            rem_file = str(geneDir / Path(gene + '_G2_removed.faa'))   # Need for all iterations
-            g2_alnFile = str(geneDir / Path(gene + '_G2_aa.aln'))
-            g2_colFilter = str(geneDir / Path(gene + '_G2cf_aa.aln'))
-            g2_maskedFile = str(geneDir / Path(gene + '_G2mf_aa.aln'))
+        paths = self._build_guidance_paths(seqFile, seqType)
+        self.guidancelog.info(paths.gene_directory)
 
-        # Add the Guidance 2 cutoffs to the keyword arguments
-        if 'seqCutoff' not in kwargs.keys():
-            kwargs['seqCutoff'] = 0.6
-        if 'colCutoff' not in kwargs.keys():
-            kwargs['colCutoff'] = 0.93
+        command_options = dict(kwargs)
+        maximum_iterations = command_options.pop("iterations", None)
+        increment = command_options.pop("increment", None)
+        command_options.setdefault("seqCutoff", 0.6)
+        command_options.setdefault("colCutoff", 0.93)
 
-        # Filter Sequences, and then either remove columns, mask residues or do nothing
         if seqFilter is not None:
-
-            # Filter "bad" sequences and iterate over the good ones until the cutoff is reached.
-            iterFlag = True
-            iteration = 0
-            while iterFlag is True:
-                set_iter = kwargs['iterations']
-                iteration += 1
-                # Create paths for output files
-                if columnFilter is not None:
-                    outDir = self.raw_data / Path(gene) / Path(outDir + '_sf_cf')
-                elif maskFilter is not None:
-                    outDir = self.raw_data / Path(gene) / Path(outDir + '_sf_mf')
-                else:
-                    outDir = self.raw_data / Path(gene) / Path(outDir + '_sf')
-                Path.mkdir(outDir, parents=True, exist_ok=True)
-                iterDir = Path(outDir) / Path('iter_%s' % iteration)
-                g2_rem_file = str(iterDir / Path('Seqs.Orig.fas.FIXED.Removed_Seq.With_Names'))  # Need for all iterations
-                Path.mkdir(iterDir, parents=True, exist_ok=True)
-
-                # Create files for masking
-                if maskFilter is not None:
-                    g2_aln2mask = str(iterDir / Path('%s.%s.aln.With_Names' % (dataset, msaProgram)))
-                    g2_rprScores = str(iterDir / Path('%s.%s.Guidance2_res_pair_res.scr' % (dataset, msaProgram)))
-
-                if iteration == 1:
-
-                    # seqFile is the given input
-                    G2Cmd = Guidance2Commandline(seqFile=seqFile, msaProgram=msaProgram, seqType=seqType,
-                                                 outDir=str(iterDir), **kwargs)
-                    self.guidancelog.info(G2Cmd)
-                    subprocess.check_call([str(G2Cmd)], stderr=subprocess.STDOUT, shell=True)
-                    # Copy the Guidance removed seq file and paste it to the home directory
-                    # Creates the rem_file
-                    # Files without any removed don't have the file *.With_Names
-                    if os.path.isfile(g2_rem_file) is False:
-                        g2_rem_file = str(iterDir / Path('Seqs.Orig.fas.FIXED.Removed_Seq'))
-                    SeqIO.write(SeqIO.parse(g2_rem_file, 'fasta'), rem_file, 'fasta')  # Need for iter_1
-
-                    # Filter the input NA fasta file using Guidance output
-                    # Creates the g2_seqFile
-                    self.msa_utils.multi_fasta_manipulator(seqFile, g2_rem_file, g2_seqFile, manipulation='remove')  # Do after copying (iter_1) or adding (iter_n)
-                    iterFlag = True
-
-                elif set_iter >= iteration > 1:
-
-                    # Depending on the filter strategy increment the seqCutoff
-                    if seqFilter == "inclusive":
-                        kwargs['seqCutoff'] -= kwargs['increment']
-                    elif seqFilter == "exclusive":
-                        kwargs['seqCutoff'] += kwargs['increment']
-                    # seqFile changes to g2_seqFile and the cutoffs change
-                    G2Cmd = Guidance2Commandline(seqFile=g2_seqFile, msaProgram=msaProgram, seqType=seqType,
-                                                 outDir=str(iterDir), **kwargs)
-                    self.guidancelog.info(G2Cmd)
-                    subprocess.check_call([str(G2Cmd)], stderr=subprocess.STDOUT, shell=True)
-
-                    # Get the removed sequence count
-                    rem_count = 0
-                    # Files without any removed don't have the file *.With_Names
-                    if os.path.isfile(g2_rem_file) is False:
-                        g2_rem_file = str(Path(iterDir) / Path('Seqs.Orig.fas.FIXED.Removed_Seq'))
-
-                    for rec in SeqIO.parse(g2_rem_file, 'fasta'):  # Need for all iterations
-                        rem_count += 1
-
-                    # If sequences are removed, then iterate again on the "good" sequences
-                    if rem_count > 0:
-                        # Add new sequences to the rem_file
-                        self.msa_utils.multi_fasta_manipulator(rem_file, g2_rem_file, rem_file, manipulation='add')
-                        # Filter the input fasta file using the updated rem_file
-                        self.msa_utils.multi_fasta_manipulator(seqFile, rem_file, g2_seqFile, manipulation='remove')
-                        iterFlag = True
-                    # If sequences aren't removed, then stop iterating
-                    if rem_count < 0 or set_iter == iteration:
-                        filtered_alignment = Path(iterDir) / Path('%s.%s.aln.Sorted.With_Names' % (dataset, msaProgram))
-                        renamed_alignment = shutil.copy(str(filtered_alignment), g2_alnFile)
-                        self.msa_utils.multi_fasta_manipulator(str(renamed_alignment), str(seqFile), str(renamed_alignment), manipulation='sort')
-                        iterFlag = False
-
-            if columnFilter is not None:
-                col_filt_align = iterDir / Path('%s.%s.Without_low_SP_Col.With_Names' % (dataset, msaProgram))
-                shutil.copy(str(col_filt_align), g2_seqcolFilter)
-
-            elif maskFilter is not None:
-                G2Cmd = Guidance2Commandline(align=False, seqFile=seqFile, msaProgram=msaProgram, seqType=seqType,
-                                             outDir=str(iterDir), maskCutoff=maskFilter, maskFile=g2_aln2mask,
-                                             rprScores=g2_rprScores, output=g2_maskedFile, **kwargs)
-                self.alignmentlog.info(G2Cmd)
-                subprocess.check_call([str(G2Cmd)], stderr=subprocess.STDOUT, shell=True)
-                self.msa_utils.multi_fasta_manipulator(g2_maskedFile, str(seqFile), g2_maskedFile, manipulation='sort')
-
-        # Only COLUMN FILTER the bad columns
+            iteration_directory = self._run_guidance_sequence_filter(
+                seqFile,
+                msaProgram,
+                seqType,
+                dataset,
+                seqFilter,
+                columnFilter,
+                maskFilter,
+                paths,
+                command_options,
+                maximum_iterations,
+                increment,
+            )
+            self._apply_guidance_post_filter(
+                seqFile,
+                msaProgram,
+                seqType,
+                dataset,
+                columnFilter,
+                maskFilter,
+                paths,
+                iteration_directory,
+            )
         elif columnFilter is not None:
-            outDir = self.raw_data / Path(gene) / Path(outDir + '_cf')
-            Path.mkdir(outDir, parents=True, exist_ok=True)
-            G2Cmd = Guidance2Commandline(seqFile=seqFile, msaProgram=msaProgram, seqType=seqType,
-                                         outDir=str(outDir), **kwargs)
-            self.guidancelog.info(G2Cmd)
-            subprocess.check_call([str(G2Cmd)], stderr=subprocess.STDOUT, shell=True)
-            col_filt_align = outDir / Path('%s.%s.Without_low_SP_Col.With_Names' % (dataset, msaProgram))
-            shutil.copy(str(col_filt_align), g2_colFilter)
-
-        # Only MASK the bad residues
+            output_directory = paths.gene_directory / "GUIDANCE2_cf"
+            output_directory.mkdir(parents=True, exist_ok=True)
+            self._run_guidance_command(
+                seqFile=str(seqFile),
+                msaProgram=msaProgram,
+                seqType=seqType,
+                outDir=str(output_directory),
+                **command_options,
+            )
+            filtered_alignment = (
+                output_directory
+                / f"{dataset}.{msaProgram}.Without_low_SP_Col.With_Names"
+            )
+            shutil.copy(str(filtered_alignment), str(paths.column_filtered))
         elif maskFilter is not None:
-            outDir = self.raw_data / Path(gene) / Path(outDir + '_sf')
-            G2Cmd = Guidance2Commandline(seqFile=seqFile, msaProgram=msaProgram, seqType=seqType,
-                                         outDir=str(outDir), maskCutoff=maskFilter, maskFile=kwargs['aln2mask'],
-                                         rprScores=kwargs['rprScores'], output=kwargs['maskedFile'], **kwargs)
-            self.guidancelog.info(G2Cmd)
-            subprocess.check_call([str(G2Cmd)], stderr=subprocess.STDOUT, shell=True)
-            self.msa_utils.multi_fasta_manipulator(kwargs['maskedFile'], str(seqFile), kwargs['maskedFile'], manipulation='sort')
+            required_options = {"aln2mask", "rprScores", "maskedFile"}
+            missing_options = required_options.difference(command_options)
+            if missing_options:
+                missing = ", ".join(sorted(missing_options))
+                raise ValueError(f"Missing mask options: {missing}.")
+
+            masked_file = command_options.pop("maskedFile")
+            self._run_guidance_command(
+                align=False,
+                seqType=seqType,
+                maskCutoff=maskFilter,
+                maskFile=command_options.pop("aln2mask"),
+                rprScores=command_options.pop("rprScores"),
+                output=masked_file,
+            )
+            self.msa_utils.multi_fasta_manipulator(
+                masked_file,
+                str(seqFile),
+                masked_file,
+                manipulation="sort",
+            )
 
     def pal2nal(self, aa_alignment, na_fasta, output_type='paml', nogap=True, nomismatch=True, downstream='paml'):
         """This Pal2Nal method works with the Pal2Nal command line wrapper.
