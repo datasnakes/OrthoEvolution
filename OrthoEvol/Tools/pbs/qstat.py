@@ -5,6 +5,7 @@ import os
 import subprocess as sp
 import sys
 from collections import OrderedDict
+from collections.abc import Mapping, Sequence
 from datetime import datetime
 from pathlib import Path
 from time import sleep
@@ -19,6 +20,62 @@ from OrthoEvol.Manager.config import yml
 from OrthoEvol.resources import package_resource_path
 from OrthoEvol.Tools.logit import LogIt
 from OrthoEvol.utilities import FullUtilities
+
+QstatRawValue = str | list[str]
+QstatKeywordData = OrderedDict[str, QstatRawValue]
+QstatJobs = OrderedDict[str, QstatKeywordData]
+
+
+def _load_qstat_attribute_names(
+    config_path: Path,
+    extra_keywords: Sequence[str] | None,
+) -> frozenset[str]:
+    """Load accepted qstat attributes from the packaged configuration."""
+    with config_path.open(encoding="utf-8") as yaml_file:
+        qstat_config = yaml.safe_load(yaml_file)
+
+    if not isinstance(qstat_config, dict):
+        raise TypeError("The qstat configuration must contain a mapping.")
+
+    job_attributes = qstat_config.get("Job Id")
+    if not isinstance(job_attributes, dict):
+        raise KeyError("The qstat configuration must define 'Job Id'.")
+
+    resource_attributes = job_attributes.get("Resource_List")
+    if not isinstance(resource_attributes, dict):
+        raise KeyError("The qstat configuration must define 'Resource_List'.")
+
+    attribute_names = set(job_attributes)
+    attribute_names.remove("Resource_List")
+    attribute_names.update(resource_attributes)
+    if extra_keywords is not None:
+        attribute_names.update(extra_keywords)
+    return frozenset(attribute_names)
+
+
+def _qstat_attribute_name(line: str) -> str | None:
+    """Return an attribute name only for a top-level qstat field line."""
+    indentation = len(line) - len(line.lstrip(" "))
+    if indentation != 4:
+        return None
+
+    attribute_name, separator, _ = line[4:].partition(" = ")
+    if not separator or not attribute_name:
+        return None
+    return attribute_name
+
+
+def _append_qstat_continuation(
+    job_attributes: QstatKeywordData,
+    attribute_name: str,
+    line: str,
+) -> None:
+    """Preserve wrapped qstat values in the list shape used downstream."""
+    current_value = job_attributes[attribute_name]
+    if isinstance(current_value, str):
+        job_attributes[attribute_name] = [current_value, line]
+    else:
+        current_value.append(line)
 
 
 class TargetJobKeyError(KeyError):
@@ -251,7 +308,11 @@ class BaseQstat(object):
                     master_dict[job_id_key].append(item)
         return master_dict
 
-    def identify_qstat_keywords(self, job_data, extra_keywords=None):
+    def identify_qstat_keywords(
+        self,
+        job_data: Mapping[str, Sequence[str]],
+        extra_keywords: Sequence[str] | None = None,
+    ) -> QstatJobs:
         """
         Qstat Parsing - Stage 2
         Taking data from Stage 1, this function further parses the qstat data
@@ -267,43 +328,51 @@ class BaseQstat(object):
         to the appropriate data.
         :rtype:  OrderedDict.
         """
-        with open(self._yaml_config, 'r') as yf:
-            qstat_keywords = yaml.load(yf)
-        primary_keys = list(qstat_keywords["Job Id"].keys())
-        primary_keys.remove("Resource_List")
-        resource_list_keys = list(qstat_keywords["Job Id"]["Resource_List"].keys())
-        if extra_keywords is not None:
-            primary_keys = list(primary_keys + extra_keywords)
-        if isinstance(job_data, dict):
-            master_dict = OrderedDict()
-            for job, data_list in job_data.items():
-                master_dict[job] = OrderedDict()
-                line_key = None
-                for line in data_list:
-                    if "    " in line:
-                        if any(kw in line for kw in (primary_keys + resource_list_keys)):
-                            key_list = list(primary_keys + resource_list_keys)
-                            for kw in key_list:
-                                if ("    %s = " % kw) in line:
-                                    line_key = kw
-                                    break
-                            master_dict[job][line_key] = line
-                        elif " = " in line:
-                            raise KeyError(
-                                "It looks like you need to use the 'extra_keyword' parameter.  Add the keyword in the"
-                                "following string:  \n    `%s`.\nPlease file an issue at https://github.com/datasnakes/OrthoEvolution/issues"
-                                "and copy this Error message." % line)
-                    elif line == "\n":
-                        continue
-                    elif line_key is not None:
-                        if isinstance(master_dict[job][line_key], str):
-                            master_dict[job][line_key] = [master_dict[job][line_key]]
-                        master_dict[job][line_key].append(line)
-                    else:
-                        raise ValueError("line not parsed correctly")
-            return master_dict
-        else:
+        if not isinstance(job_data, Mapping):
             raise TypeError("input data is not a dictionary")
+
+        attribute_names = _load_qstat_attribute_names(
+            config_path=Path(self._yaml_config),
+            extra_keywords=extra_keywords,
+        )
+        parsed_jobs: QstatJobs = OrderedDict()
+
+        for job_id, lines in job_data.items():
+            parsed_attributes: QstatKeywordData = OrderedDict()
+            current_attribute: str | None = None
+
+            for line in lines:
+                if not line.strip():
+                    continue
+
+                attribute_name = _qstat_attribute_name(line)
+                if attribute_name is not None:
+                    if attribute_name not in attribute_names:
+                        raise KeyError(
+                            f"Unknown qstat attribute {attribute_name!r} for "
+                            f"{job_id!r}. Add it with extra_keywords or to "
+                            "qstat.yml."
+                        )
+                    current_attribute = attribute_name
+                    parsed_attributes[current_attribute] = line
+                    continue
+
+                indentation = len(line) - len(line.lstrip(" "))
+                if indentation > 4 and current_attribute is not None:
+                    _append_qstat_continuation(
+                        job_attributes=parsed_attributes,
+                        attribute_name=current_attribute,
+                        line=line,
+                    )
+                    continue
+
+                raise ValueError(
+                    f"Could not parse qstat line for {job_id!r}: {line!r}"
+                )
+
+            parsed_jobs[job_id] = parsed_attributes
+
+        return parsed_jobs
 
     def remove_whitespace(self, job_data):
         """
