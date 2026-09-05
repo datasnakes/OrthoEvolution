@@ -312,8 +312,33 @@ class BaseComparativeGenetics(object):
         self.building_filename = f"{self.project}_building.csv"
         self.building_time_filename = f"{self.project}_building_time.csv"
 
+    @staticmethod
+    def get_hgnc_gene_info(
+        gene_symbols: Sequence[str],
+        source: str | Path = HGNC_COMPLETE_SET_URL,
+    ) -> pd.DataFrame:
+        """Return HGNC records in the same order as the requested symbols."""
+        requested_symbols = pd.Index(
+            (symbol.strip().upper() for symbol in gene_symbols),
+            dtype="string",
+            name="query_symbol",
+        )
+        if requested_symbols.empty:
+            return pd.DataFrame(columns=("query_symbol", *HGNC_FIELDS))
 
-# //TODO-ROB Add HGNC python module
+        hgnc_records = pd.read_csv(
+            source,
+            sep="\t",
+            usecols=HGNC_FIELDS,
+            dtype="string",
+        ).set_index("symbol", drop=False)
+
+        matched_records = hgnc_records.reindex(requested_symbols).reset_index(
+            drop=True
+        )
+        matched_records.insert(0, "query_symbol", requested_symbols)
+        return matched_records
+
     @staticmethod
     def get_file_list(file):
         """Turn csv column to list.
@@ -349,6 +374,13 @@ class BaseComparativeGenetics(object):
         maf = df
         self.gene_list = maf.index.tolist()
         self.gene_count = len(self.gene_list)
+
+        if self.__hgnc_source is not None:
+            self.hgnc_df = self.get_hgnc_gene_info(
+                self.gene_list,
+                source=self.__hgnc_source,
+            )
+            self.hgnc_df.to_csv(self.hgnc_path, index=False)
 
         self.org_list = maf.axes[1].tolist()[1:]
         self.org_count = len(self.org_list)
