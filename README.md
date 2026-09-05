@@ -11,7 +11,7 @@ OrthoEvolution is a Python package for reproducible comparative evolutionary
 genetics, with a focus on ortholog inference, sequence analysis, and
 phylogenetic workflows.
 
-**Current version:** 1.0.0b3
+**Current version:** 1.0.0
 
 ## Table of Contents
 
@@ -180,7 +180,7 @@ documentation where appropriate, and review the
 
 If you use OrthoEvolution in research, please cite the software:
 
-> Gilmore, R., & Hutchins, S. D. (2026). *OrthoEvolution* (Version 1.0.0b3)
+> Gilmore, R., & Hutchins, S. D. (2026). *OrthoEvolution* (Version 1.0.0)
 > [Computer software]. Zenodo. https://doi.org/10.5281/zenodo.17796234
 
 OrthoEvolution builds on the work of the Biopython community. We thank its

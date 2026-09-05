@@ -54,7 +54,7 @@ def get_version():
                 if match:
                     return match.group(1)
     
-    return '1.0.0b2'  # fallback
+    return '1.0.0'  # fallback
 
 # -- General configuration ------------------------------------------------
 
