@@ -1,217 +1,203 @@
-[![CI](https://github.com/datasnakes/OrthoEvolution/actions/workflows/ci.yml/badge.svg)](https://github.com/datasnakes/OrthoEvolution/actions/workflows/ci.yml) [![PyPI](https://badge.fury.io/py/OrthoEvol.svg)](https://badge.fury.io/py/OrthoEvol) [![Documentation](https://readthedocs.org/projects/orthoevolution/badge/?version=latest)](http://orthoevolution.readthedocs.io/en/latest/?badge=latest) [![Coverage](https://codecov.io/gh/datasnakes/OrthoEvolution/branch/main/graph/badge.svg)](https://codecov.io/gh/datasnakes/OrthoEvolution) [![Last Commit](https://badgen.net/github/last-commit/datasnakes/OrthoEvolution)](https://github.com/datasnakes/OrthoEvolution/commits/main)
-
 # OrthoEvolution
 
-OrthoEvolution is an **easy to use** and comprehensive Python package
-which aids in the **analysis and visualization of comparative evolutionary genetics** related 
-projects such as the **inference of orthologs**.
+[![CI](https://github.com/datasnakes/OrthoEvolution/actions/workflows/ci.yml/badge.svg)](https://github.com/datasnakes/OrthoEvolution/actions/workflows/ci.yml)
+[![PyPI](https://badge.fury.io/py/OrthoEvol.svg)](https://pypi.org/project/OrthoEvol/)
+[![Documentation](https://readthedocs.org/projects/orthoevolution/badge/?version=latest)](https://orthoevolution.readthedocs.io/en/latest/)
+[![Coverage](https://codecov.io/gh/datasnakes/OrthoEvolution/branch/main/graph/badge.svg)](https://codecov.io/gh/datasnakes/OrthoEvolution)
+[![DOI](https://zenodo.org/badge/88282824.svg)](https://doi.org/10.5281/zenodo.17796234)
+[![Last Commit](https://badgen.net/github/last-commit/datasnakes/OrthoEvolution)](https://github.com/datasnakes/OrthoEvolution/commits/main)
 
-**Current Version:** 1.0.0b3
+OrthoEvolution is a Python package for reproducible comparative evolutionary
+genetics, with a focus on ortholog inference, sequence analysis, and
+phylogenetic workflows.
 
-## Overview
+**Current version:** 1.0.0b3
 
-This package focuses on **inferring orthologs** using NCBI's blast,
-various sequence alignment strategies, and phylogenetics analyses
-including PAML, PhyML, ete3, and more tools.
+## Table of Contents
 
-Ultimately, the goal of this project is to create a **reusable pipeline** for the 
-inference of orthologs in order to ensure reproducibility of data as well as improve the management and analysis
-of (what can be) large datasets. The Cookies, Manager, and Tools modules
-act as a framework for our workflow, while the Orthologs
-module provides access to specific functions for our various ortholog
-inference projects.
+- [Project Background](#project-background)
+- [Core Capabilities](#core-capabilities)
+- [Install & Setup](#install--setup)
+- [Usage](#usage)
+- [Documentation and Examples](#documentation-and-examples)
+- [Testing](#testing)
+- [Contributing](#contributing)
+- [Citation](#citation)
+- [License](#license)
+- [Authors](#authors)
 
-View our [read the docs](http://orthoevolution.readthedocs.io/en/latest/) and feel free to
-also read [this related paper](https://www.frontiersin.org/articles/10.3389/fnhum.2014.00283/full)
-to gain more insight into this project/python package.
+## Project Background
 
-## Installation
+OrthoEvolution supports the inference and analysis of orthologous genes using
+NCBI BLAST, multiple-sequence alignment strategies, and phylogenetic tools. It
+organizes these steps into reusable workflows so researchers can manage large
+comparative-genetics datasets and reproduce their analyses.
 
-View the below methods for installing this package. Python 3.11 or higher
-is required.
+The package is organized around four major areas:
 
-### PyPI
+- `Orthologs` provides ortholog inference, alignment, and phylogenetic tools.
+- `Manager` creates and coordinates repositories, projects, databases, and
+  research datasets.
+- `Tools` provides reusable utilities for data retrieval, parallel execution,
+  logging, and cluster workloads.
+- `Cookies` provides project and website templates.
 
-``` bash
-pip install --upgrade pip
-pip install OrthoEvol
+For additional scientific context, see this
+[related comparative-genetics paper](https://www.frontiersin.org/journals/neuroscience/articles/10.3389/fnins.2014.00283/full).
+
+## Core Capabilities
+
+- Infer candidate orthologs and generate post-BLAST reports.
+- Retrieve NCBI datasets and preformatted BLAST databases.
+- Prepare and filter nucleotide or protein sequence alignments.
+- Support phylogenetic workflows involving PAML, PhyML, IQ-TREE, Phylip, and
+  ETE.
+- Create consistent directory structures for comparative-genetics projects.
+- Configure local, parallel, PBS, and Slurm-oriented workloads.
+
+Some workflows call external scientific programs or remote services. Install
+the required BLAST, alignment, or phylogenetic software for the specific
+workflow you intend to run.
+
+## Install & Setup
+
+OrthoEvolution supports Python 3.11 and 3.12. A virtual environment keeps its
+dependencies separate from other Python projects.
+
+### Install from PyPI
+
+```bash
+python3.11 -m venv .venv
+source .venv/bin/activate
+python -m pip install --upgrade pip
+python -m pip install OrthoEvol
 ```
 
-### GitHub
+### Install from source
 
-``` bash
+```bash
 git clone https://github.com/datasnakes/OrthoEvolution.git
 cd OrthoEvolution
-pip install --upgrade pip
-pip install .
+python3.11 -m venv .venv
+source .venv/bin/activate
+python -m pip install --upgrade pip
+python -m pip install .
 ```
 
-### Development Code
+### Install for development
 
-**WARNING** : This code is actively under development and may not be
-reliable. Please create an
-[issue](https://github.com/datasnakes/OrthoEvolution/issues) for
-questions about development.
-
-``` bash
-git clone -b dev https://github.com/datasnakes/OrthoEvolution.git
+```bash
+git clone https://github.com/datasnakes/OrthoEvolution.git
 cd OrthoEvolution
-pip install --upgrade pip
-pip install .
+python3.11 -m venv .venv
+source .venv/bin/activate
+python -m pip install --upgrade pip
+python -m pip install -e ".[test]"
 ```
 
-## Examples
+## Usage
 
-Please view the [examples
-directory](https://github.com/datasnakes/OrthoEvolution/tree/main/examples)
-for working examples and scripts demonstrating how to utilize this
-package.
+### Run a preconfigured local BLAST workflow
 
-The examples include:
-- Standalone scripts for common workflows
-- Example data files
-- GUI implementations (Tkinter and PyWebView)
-
-### Running a pre-configured local blast
-
-``` python
+```python
 from OrthoEvol.Orthologs.Blast import OrthoBlastN
 
-# Use an existing list of gpcr genes
-gpcr_blastn = OrthoBlastN(project="orthology-gpcr", method=1,
-                         save_data=True, acc_file="gpcr.csv", 
-                         copy_from_package=True)
-
-# Run blast
+gpcr_blastn = OrthoBlastN(
+    project="orthology-gpcr",
+    method=1,
+    save_data=True,
+    acc_file="gpcr.csv",
+    copy_from_package=True,
+)
 gpcr_blastn.run()
 ```
 
-### Simple project creation
+This workflow requires a compatible local BLAST installation and database.
 
-``` python
+### Create a comparative-genetics project
+
+```python
 from OrthoEvol.Manager.management import ProjectManagement
 
-ProjectManagement(repo="test-repo", user=None,
-                  project="test-project",
-                  research=None,
-                  research_type='comparative_genetics',
-                  new_repo=False, new_user=False, new_project=True,
-                  new_research=False)
+project_manager = ProjectManagement(
+    repo="test-repo",
+    user=None,
+    project="test-project",
+    research=None,
+    research_type="comparative_genetics",
+    new_project=True,
+)
 ```
 
-### Simple blast database downloading
+### Download an NCBI BLAST database
 
-``` python
+```python
+from pathlib import Path
+
 from OrthoEvol.Tools.ftp import NcbiFTPClient
 
-ncbiftp = NcbiFTPClient(email='somebody@gmail.com')
-ncbiftp.getblastdb(database_name='refseq_rna', v5=True)
+ncbi_ftp = NcbiFTPClient(email="researcher@example.org")
+ncbi_ftp.getblastdb(
+    database_name="refseq_rna",
+    download_path=Path("databases"),
+    v5=True,
+)
 ```
 
-### Creating projects and databases dynamically
+NCBI database downloads require network access and can use substantial disk
+space. Choose the destination and database deliberately before starting a
+transfer.
 
-``` python
-from OrthoEvol.Manager.management import ProjectManagement
-from OrthoEvol.Manager.database_dispatcher import DatabaseDispatcher
-from OrthoEvol.Manager.config import yml
-from pkg_resources import resource_filename
-from pathlib import Path
-import yaml
-import getpass
-from datetime import datetime as d
-import os
+## Documentation and Examples
 
-# Define job name
-job_name = "jobname"
+- Read the
+  [OrthoEvolution documentation](https://orthoevolution.readthedocs.io/en/latest/)
+  for module and API details.
+- Browse the [examples](examples/) for scripts, example data, and interface
+  prototypes.
+- Report problems or request enhancements through
+  [GitHub Issues](https://github.com/datasnakes/OrthoEvolution/issues).
 
-# Function to load configuration from YAML file
-def load_config(file_name):
-    file_path = resource_filename(yml.__name__, file_name)
-    with open(file_path, 'r') as file:
-        return yaml.load(file, Loader=yaml.FullLoader)
+## Testing
 
-# Load project management configuration
-pm_config = load_config("initialize_new.yml")
-project_manager = ProjectManagement(**pm_config["Management_config"])
+Install the development dependencies and run the test suite through the active
+virtual environment:
 
-# Load and update database management configuration
-db_config = load_config("databases.yml")
-db_config.update(pm_config)
-
-# Configure NCBI RefSeq release settings
-ncbi_config = db_config['Database_config']['Full']['NCBI']['NCBI_refseq_release']
-ncbi_config['upload_number'] = 12
-ncbi_config['pbs_dict'] = {
-    'author': getpass.getuser(),
-    'description': 'This is a default pbs job.',
-    'date': d.now().strftime('%a %b %d %I:%M:%S %p %Y'),
-    'proj_name': 'OrthoEvol',
-    'select': '1',
-    'memgb': '6gb',
-    'cput': '72:00:00',
-    'wt': '2000:00:00',
-    'job_name': job_name,
-    'outfile': job_name + '.o',
-    'errfile': job_name + '.e',
-    'script': job_name,
-    'log_name': job_name,
-    'pbsworkdir': os.getcwd(),
-    'cmd': f'python3 {os.path.join(os.getcwd(), job_name + ".py")}',
-    'email': 'n/a'
-}
-
-# Save the updated configuration to a YAML file
-config_file_path = project_manager.user_log / Path("upload_config.yml")
-with open(str(config_file_path), 'w') as config_file:
-    yaml.dump(db_config, config_file, default_flow_style=False)
-
-# Initialize database dispatcher and execute dispatch functions
-db_dispatcher = DatabaseDispatcher(config_file_path, project_manager)
-db_dispatcher.dispatch(db_dispatcher.strategies, db_dispatcher.dispatcher, db_dispatcher.configuration)
+```bash
+python -m pip install -e ".[test]"
+python -m pytest tests/
 ```
 
-## Tests
+The continuous-integration workflow runs the suite on Python 3.11 and 3.12.
 
-To run tests, first install the test dependencies:
+## Contributing
 
-``` bash
-pip install pytest pytest-cov
-```
+Contributions are welcome. Create a focused branch, include tests and
+documentation where appropriate, and review the
+[contributing guidelines](CONTRIBUTING.rst) before opening a pull request.
 
-Then run the test suite:
+## Citation
 
-``` bash
-pytest tests
-```
+If you use OrthoEvolution in research, please cite the software:
 
-## Contributors
+> Gilmore, R., & Hutchins, S. D. (2026). *OrthoEvolution* (Version 1.0.0b3)
+> [Computer software]. Zenodo. https://doi.org/10.5281/zenodo.17796234
 
-This package was created by the Datasnakes.
+OrthoEvolution builds on the work of the Biopython community. We thank its
+developers and contributors and ask users to cite Biopython when it supports
+their analyses:
 
-- Rob Gilmore | Github: [@grabear](https://github.com/grabear) | [✉](mailto:robgilmore127@gmail.com)
-- Shaurita D. Hutchins | Github: [@sdhutchins](https://github.com/sdhutchins) | [✉](mailto:sdhutchins@outlook.com)
-
-If you would like to contribute to this package, install the package in
-development mode:
-
-``` bash
-pip install -e .
-```
-
-Check out our [contributing guidelines](https://github.com/datasnakes/OrthoEvolution/blob/main/CONTRIBUTING.rst)
-for more information.
+> Cock, P. J. A., et al. (2009). Biopython: Freely available Python tools for
+> computational molecular biology and bioinformatics. *Bioinformatics*,
+> 25(11), 1422–1423. https://doi.org/10.1093/bioinformatics/btp163
 
 ## License
 
-This project is licensed under the MIT License. See the [LICENSE](https://github.com/datasnakes/OrthoEvolution/blob/main/LICENSE)
-file for details.
+OrthoEvolution is distributed under the [MIT License](LICENSE).
 
-## Citations
+## Authors
 
-We're thankful to have a resource such as [Biopython](http://biopython.org/wiki/Biopython), which inspired this
-package.
+OrthoEvolution was created and is maintained by the Datasnakes:
 
-*Cock, P.J.A. et al. Biopython: freely available Python tools for
-computational molecular biology and bioinformatics. Bioinformatics 2009
-Jun 1; 25(11) 1422-3 http://dx.doi.org/10.1093/bioinformatics/btp163
-pmid:19304878*
+- [Rob Gilmore](https://github.com/grabear)
+- [Shaurita D. Hutchins](https://github.com/sdhutchins)
