@@ -1,87 +1,93 @@
-"""Base FTP module for connecting to FTP servers."""
-from ftplib import FTP, error_perm
-import os
-import contextlib
+"""Base FTP client for connecting to remote file repositories."""
+
+import logging
+from ftplib import FTP, all_errors
+from pathlib import Path, PurePosixPath
+from tempfile import TemporaryFile
 
 from OrthoEvol.utilities import FunctionRepeater
 
 
-class BaseFTPClient(object):
-    """The BaseFTP class provides basic functions for managing ftp clients.
+logger = logging.getLogger(__name__)
 
-    .. seealso:: :class:`NcbiFTPClient`
-    """
 
-    def __init__(self, ftpsite, user, password, keepalive=False, debug_lvl=0):
-        """Connect to a ftp site using a username and password.
+class BaseFTPClient:
+    """Provide shared connection management for FTP clients."""
 
-        :param ftpsite: The url or http address of the ftp site you want to connect to.
-        :param user: The name of the user that will log in.
-        :type user: str
-        :param password: The password needed to log in to the ftp site.
-        :type password: str
-        :param keepalive: Flag to determine whether to keepalive the connection, defaults to False
-        :type keepalive: bool, optional
-        :param debug_lvl: Verbosity level for debugging ftp connection, defaults to 0
-        :type debug_lvl: int, optional
+    def __init__(
+        self,
+        ftpsite: str,
+        user: str,
+        password: str,
+        keepalive: bool = False,
+        debug_lvl: int = 0,
+        timeout: float = 600.0,
+    ) -> None:
+        """Connect to an FTP server with the supplied credentials.
+
+        :param ftpsite: Host name of the FTP server.
+        :param user: User name used to log in.
+        :param password: Password used to log in.
+        :param keepalive: Whether to periodically keep the connection active.
+        :param debug_lvl: Verbosity level for the FTP connection.
+        :param timeout: Socket timeout in seconds.
         """
         self._ftpsite = ftpsite
         self._user = user
         self._password = password
         self._debug_lvl = debug_lvl
+        self._timeout = timeout
         self.ftp = self._login()
         self.__keepalive = keepalive
 
         if self.__keepalive:
             self._voidcmd_repeat, self._filetransfer_repeat = self._keepalive()
 
-    def _keepalive(self):
-        """Check to see if the FTP connection still exists using ftp.voidcmd
-
-        Also, creates a filetransfer to prevent file transfer timeout.
+    def _keepalive(self) -> tuple[FunctionRepeater, FunctionRepeater]:
+        """Create periodic commands that keep an idle FTP session active.
 
         .. warning:: :func:`_keepalive` is not well tested.
-        Avoid using it if possible.
+           Avoid using it if possible.
         """
-
-        voidcmd = FunctionRepeater(5, self.ftp.voidcmd, 'NOOP')
-        filetransfer = FunctionRepeater(5, self._filetransfer, 'README.ftp')
-
+        voidcmd = FunctionRepeater(5, self.ftp.voidcmd, "NOOP")
+        filetransfer = FunctionRepeater(5, self._filetransfer, "README.ftp")
         return voidcmd, filetransfer
 
-    def _login(self):
-        """Connect to the FTP server."""
-
-        with contextlib.suppress(error_perm):
-            ftp = FTP(self._ftpsite, timeout=600)
-            ftp.login(user=self._user, passwd=self._password)
-            ftp.voidcmd('NOOP')
-            ftp.set_debuglevel(self._debug_lvl)
-
+    def _login(self) -> FTP:
+        """Open and validate an FTP connection."""
+        ftp = FTP(self._ftpsite, timeout=self._timeout)
+        ftp.login(user=self._user, passwd=self._password)
+        ftp.voidcmd("NOOP")
+        ftp.set_debuglevel(self._debug_lvl)
         return ftp
 
-    def close_connection(self):
-        """Close the ftp connection."""
-
-        self.ftp.close()
-
+    def close_connection(self) -> None:
+        """Stop keepalive workers and close the FTP connection."""
         if self.__keepalive:
             self._voidcmd_repeat.stop()
             self._filetransfer_repeat.stop()
 
-    def _filetransfer(self, filename):
-        """Mimics a file transfer to prevent transfer time out.
+        try:
+            self.ftp.quit()
+        except all_errors:
+            # A timed-out server may reject QUIT but still hold a local socket.
+            self.ftp.close()
 
-        :param filename: Path of file to download.
+    def _filetransfer(self, filename: str | Path) -> None:
+        """Transfer and discard a small file to keep the session active.
+
+        :param filename: Remote path of the file used for the keepalive transfer.
         """
-
-        print("WAIT: Keeping connection open by transferring file.")
+        remote_path = PurePosixPath(str(filename))
         current_path = self.ftp.pwd()
-        self.ftp.cwd('/')
+        logger.info("Keeping the FTP connection active with %s.", remote_path)
 
-        with open(filename, 'wb') as local_file:
-            self.ftp.retrbinary('RETR %s' % filename, local_file.write)
-
-        os.remove(filename)
-        self.ftp.cwd(current_path)  # Return to starting path
-        print("You may now resume your work.")
+        try:
+            self.ftp.cwd("/")
+            with TemporaryFile() as temporary_file:
+                self.ftp.retrbinary(
+                    f"RETR {remote_path.as_posix()}",
+                    temporary_file.write,
+                )
+        finally:
+            self.ftp.cwd(current_path)
