@@ -447,7 +447,7 @@ class BaseQstat(object):
         :rtype:   OrderedDict.
         """
         with open(self._yaml_config, 'r') as yf:
-            qstat_keywords = yaml.load(yf)
+            qstat_keywords = yaml.safe_load(yf)
         primary_keys = list(qstat_keywords["Job Id"].keys())
         primary_keys.remove("Resource_List")
         master_dict = OrderedDict()
@@ -479,7 +479,7 @@ class BaseQstat(object):
         :rtype:   OrderedDict.
         """
         with open(self._yaml_config, 'r') as yf:
-            qstat_keywords = yaml.load(yf)
+            qstat_keywords = yaml.safe_load(yf)
         primary_keys = list(qstat_keywords["Job Id"].keys())
         primary_keys.remove("Resource_List")
         resource_list_keys = list(qstat_keywords["Job Id"]["Resource_List"].keys())

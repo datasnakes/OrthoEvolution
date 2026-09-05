@@ -82,6 +82,24 @@ class TestQstatKeywordParsing(unittest.TestCase):
         with self.assertRaisesRegex(TypeError, "dictionary"):
             self.qstat.identify_qstat_keywords([])  # type: ignore[arg-type]
 
+    def test_complete_parser_converts_nested_values(self) -> None:
+        """Exercise the parsing stages with one representative scheduler job."""
+        raw_data = [
+            "Job Id: 4.scheduler\n",
+            "    Job_Name = analysis\n",
+            "    Resource_List.ncpus = 4\n",
+            "    Variable_List = PBS_O_HOME=/home/user,\n",
+            "        PBS_O_QUEUE=workq\n",
+        ]
+
+        parsed = self.qstat.to_dict(raw_data, ordered=False)
+
+        self.assertEqual(parsed["4.scheduler"]["Job_Name"], "analysis")
+        self.assertEqual(parsed["4.scheduler"]["Resource_List"]["ncpus"], 4)
+        self.assertEqual(
+            parsed["4.scheduler"]["Variable_List"]["PBS_O_QUEUE"], "workq"
+        )
+
 
 if __name__ == "__main__":
     unittest.main()
