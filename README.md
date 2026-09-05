@@ -6,7 +6,7 @@ OrthoEvolution is an **easy to use** and comprehensive Python package
 which aids in the **analysis and visualization of comparative evolutionary genetics** related 
 projects such as the **inference of orthologs**.
 
-**Current Version:** 1.0.0b2
+**Current Version:** 1.0.0b3
 
 ## Overview
 
