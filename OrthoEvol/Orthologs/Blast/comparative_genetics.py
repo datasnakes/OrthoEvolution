@@ -42,6 +42,72 @@ HGNC_FIELDS = (
 )
 
 
+def _count_worksheet(
+    counts: Mapping[str, int | float],
+) -> pd.DataFrame | None:
+    """Create a consistently labeled count table when counts are available."""
+    if not counts:
+        return None
+    return pd.DataFrame.from_dict(counts, orient="index", columns=["Count"])
+
+
+def _mapping_worksheet(
+    values: Mapping[str, object],
+) -> pd.DataFrame | None:
+    """Create a worksheet only when the corresponding analysis has results."""
+    if not values:
+        return None
+    return pd.DataFrame.from_dict(values, orient="index")
+
+
+def _duplicate_group_worksheet(
+    groups: Mapping[str, Mapping[str, Sequence[str]]],
+) -> pd.DataFrame | None:
+    """Collect duplicate groups while retaining their outer entity labels."""
+    if not groups:
+        return None
+    grouped_values = {
+        entity: list(accession_groups.values())
+        for entity, accession_groups in groups.items()
+    }
+    return pd.DataFrame.from_dict(grouped_values, orient="index").T
+
+
+def _missing_worksheets(
+    missing_records: Mapping[str, Mapping[str, object]],
+    details_key: str,
+    count_sheet_name: str,
+    details_sheet_name: str,
+) -> dict[str, pd.DataFrame]:
+    """Separate missing-item details from their per-entity counts."""
+    if not missing_records:
+        return {}
+
+    required_keys = {"count", details_key}
+    for entity, record in missing_records.items():
+        missing_keys = required_keys.difference(record)
+        if missing_keys:
+            missing_key_list = ", ".join(sorted(missing_keys))
+            raise ValueError(
+                f"Missing-data record {entity!r} requires: {missing_key_list}."
+            )
+
+    counts = {
+        entity: record["count"] for entity, record in missing_records.items()
+    }
+    details = {
+        entity: record[details_key]
+        for entity, record in missing_records.items()
+    }
+    return {
+        count_sheet_name: pd.DataFrame.from_dict(
+            counts,
+            orient="index",
+            columns=["Count"],
+        ),
+        details_sheet_name: pd.DataFrame.from_dict(details, orient="index"),
+    }
+
 
 class BaseComparativeGenetics(object):
     """Base class in the Blast module."""
@@ -691,139 +757,72 @@ class ComparativeGenetics(BaseComparativeGenetics):
         if self.save_data is True:
             temp.to_csv(str(self.building_time_file_path))
 
-    def post_blast_analysis(self, removed_genes=None):
-        """Save the post blast data (duplicate/missing/removed) to an excel file.
+    def post_blast_analysis(
+        self,
+        removed_genes: Sequence[str] | None = None,
+    ) -> Path | None:
+        """Write duplicate, missing, and removed-gene results to Excel."""
+        worksheets: dict[str, pd.DataFrame] = {}
 
-        :param removed_genes:  Genes to exclude from the file.
-                               (Default value = None)
-        :return:
-        """
+        if removed_genes:
+            worksheets["Removed Genes"] = pd.DataFrame(
+                {"Removed Genes": list(removed_genes)}
+            )
 
-        # TODO-ROB  Fix the output format of the excel file.  View a sample
-        # output in /Orthologs/comp_gen
-        pba = '_postblastanalysis'
-        pba_file_path = str(self.data / Path(self.project + pba + '.xlsx'))
-        pb_file = pd.ExcelWriter(pba_file_path)
+        optional_worksheets = (
+            (
+                "Duplicate Count by Accession",
+                _count_worksheet(self.dup_acc_count),
+            ),
+            ("Duplicate Count by Gene", _count_worksheet(self.dup_gene_count)),
+            (
+                "Duplicate Org Groups by Gene",
+                _duplicate_group_worksheet(self.duplicated_genes),
+            ),
+            ("Duplicate Count by Org", _count_worksheet(self.dup_org_count)),
+            (
+                "Duplicate Gene Groups by Org",
+                _duplicate_group_worksheet(self.duplicated_organisms),
+            ),
+            ("Random Duplicates", _mapping_worksheet(self.duplicated_random)),
+            ("Other Duplicates", _mapping_worksheet(self.duplicated_other)),
+        )
+        worksheets.update(
+            {
+                sheet_name: worksheet
+                for sheet_name, worksheet in optional_worksheets
+                if worksheet is not None
+            }
+        )
+        worksheets.update(
+            _missing_worksheets(
+                self.missing_organsims,
+                details_key="missing genes",
+                count_sheet_name="Missing Genes Count",
+                details_sheet_name="Missing Genes by Org",
+            )
+        )
+        worksheets.update(
+            _missing_worksheets(
+                self.missing_genes,
+                details_key="missing organisms",
+                count_sheet_name="Missing Organisms Count",
+                details_sheet_name="Missing Organisms by Gene",
+            )
+        )
 
-        # Removed Genes
-        if removed_genes is not None:
-            removed_genes_dict = {'Removed Genes': removed_genes}
-            removed_worksheet = pd.DataFrame.from_dict(removed_genes_dict,
-                                                       orient='index')
-            removed_worksheet.to_excel(pb_file, sheet_name="Removed Genes")
-            msg = "Removed genes were added to your excel file."
-            self.postblastlog.info(msg)
+        if not worksheets:
+            self.postblastlog.warning(
+                "Post-BLAST analysis contained no reportable results."
+            )
+            return None
 
-        # Duplicated Accessions
-        try:
-            acc_ws = pd.DataFrame.from_dict(self.dup_acc_count, orient='index')
-            acc_ws.columns = ['Count']
-            acc_ws.to_excel(pb_file, sheet_name="Duplicate Count by Accession")
-            msg = "Dupilicate accessions were added to your excel file."
-            self.postblastlog.info(msg)
-        except (ValueError, AttributeError):
-            pass
+        output_path = self.data / f"{self.project}_postblastanalysis.xlsx"
+        with pd.ExcelWriter(output_path) as workbook:
+            for sheet_name, worksheet in worksheets.items():
+                worksheet.to_excel(workbook, sheet_name=sheet_name)
 
-        # Duplicate Genes
-        try:
-            dup_gene_ws = pd.DataFrame.from_dict(
-                self.dup_gene_count, orient='index')
-            dup_gene_ws.columns = ['Count']
-            dup_gene_ws.to_excel(pb_file, sheet_name="Duplicate Count by Gene")
-
-            gene_org_dup = {}
-            for gene, _ in self.duplicated_genes.items():
-                gene_org_dup[gene] = []
-                for _, genes in self.duplicated_genes[gene].items():
-                    gene_org_dup[gene].append(genes)
-            dup_org_ws2 = pd.DataFrame.from_dict(gene_org_dup, orient='index')
-            dup_org_ws2.T.to_excel(
-                pb_file, sheet_name="Duplicate Org Groups by Gene")
-            msg = 'Dupilicate genes were added to your excel file.'
-            self.postblastlog.info(msg)
-        except (ValueError, AttributeError):
-            pass
-
-        # Species Duplicates
-        try:
-            dup_org_ws1 = pd.DataFrame.from_dict(
-                self.dup_org_count, orient='index')
-            dup_org_ws1.columns = ['Count']
-            dup_org_ws1.to_excel(pb_file, sheet_name="Duplicate Count by Org")
-
-            org_gene_dup = {}
-            for gene, dup_dict in self.duplicated_organisms.items():
-                org_gene_dup[gene] = []
-                for acc, genes in self.duplicated_organisms[gene].items():
-                    org_gene_dup[gene].append(genes)
-            dup_org_ws2 = pd.DataFrame.from_dict(org_gene_dup, orient='index')
-            dup_org_ws2.T.to_excel(
-                pb_file, sheet_name="Duplicate Gene Groups by Org")
-            msg = 'Dupilicate species were added to your excel file.'
-            self.postblastlog.info(msg)
-        except (ValueError, AttributeError):
-            pass
-
-        # Random Duplicates
-        try:
-            rand_ws = pd.DataFrame.from_dict(
-                self.duplicated_random, orient='index')
-            rand_ws.to_excel(pb_file, sheet_name="Random Duplicates")
-            msg = 'Random duplicates were added to your excel file.'
-            self.postblastlog.info(msg)
-        except (ValueError, AttributeError):
-            pass
-
-        # Other Duplicates
-        try:
-            other_ws = pd.DataFrame.from_dict(
-                self.duplicated_other, orient='index')
-            other_ws.to_excel(pb_file, sheet_name="Other Duplicates")
-            msg = 'Other duplicates were added to your excel file.'
-            self.postblastlog.info(msg)
-        except (ValueError, AttributeError):
-            pass
-
-        # Missing genes sorted by Organism
-        org_gene_ms = {}
-        org_gene_ms_count = {}
-        try:
-            for org, ms_dict in self.missing_organsims.items():
-                for key, value in ms_dict.items():
-                    if key == 'missing genes':
-                        org_gene_ms[org] = value
-                    else:
-                        org_gene_ms_count[org] = value
-            org_ms_count = pd.DataFrame.from_dict(
-                org_gene_ms_count, orient='index')
-            org_ms_count.to_excel(pb_file, sheet_name="Missing Genes Count")
-            org_ms = pd.DataFrame.from_dict(org_gene_ms, orient='index')
-            org_ms.to_excel(pb_file, sheet_name="Missing Genes by Org")
-        except (ValueError, AttributeError):
-            pass
-
-        # Missing Organisms sorted by Gene
-        gene_org_ms = {}
-        gene_org_ms_count = {}
-        try:
-            for gene, ms_dict in self.missing_genes.items():
-                for key, value in ms_dict.items():
-                    if key == 'missing genes':
-                        gene_org_ms[gene] = value
-                    else:
-                        gene_org_ms_count[gene] = value
-            gene_ms_count = pd.DataFrame.from_dict(gene_org_ms_count,
-                                                   orient='index')
-            gene_ms_count.to_excel(pb_file,
-                                   sheet_name="Missing Organisms Count")
-            gene_ms = pd.DataFrame.from_dict(gene_org_ms, orient='index')
-            gene_ms.to_excel(pb_file, sheet_name="Missing Organisms by Gene")
-            msg = 'Missing Organisms by gene were added to your excel file.'
-            self.postblastlog.exception(msg)
-        except (ValueError, AttributeError):
-            pass
-        try:
-            pb_file.save()
-        except IndexError:
-            msg = "There are no duplicates or missing genes."
-            self.postblastlog.exception(msg)
+        self.postblastlog.info(
+            f"Post-BLAST analysis written to {output_path}."
+        )
+        return output_path
