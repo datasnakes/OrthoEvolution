@@ -2,6 +2,7 @@
 
 import io
 import tarfile
+from ftplib import error_perm
 from pathlib import Path
 from unittest import mock
 
@@ -23,6 +24,177 @@ def make_client() -> NcbiFTPClient:
     client.refseq_release_number_path = "/refseq/release/RELEASE_NUMBER"
     client.ncbiftp_log = mock.Mock()
     return client
+
+
+@mock.patch("OrthoEvol.Tools.ftp.baseftp.FTP")
+def test_login_uses_supplied_connection_settings(ftp_class: mock.Mock) -> None:
+    """Forward connection settings and validate the new FTP session."""
+    ftp = ftp_class.return_value
+
+    client = BaseFTPClient(
+        "ftp.example.org",
+        user="researcher",
+        password="secret",
+        debug_lvl=2,
+        timeout=45.0,
+    )
+
+    assert client.ftp is ftp
+    ftp_class.assert_called_once_with("ftp.example.org", timeout=45.0)
+    ftp.login.assert_called_once_with(user="researcher", passwd="secret")
+    ftp.voidcmd.assert_called_once_with("NOOP")
+    ftp.set_debuglevel.assert_called_once_with(2)
+
+
+@mock.patch("OrthoEvol.Tools.ftp.baseftp.FunctionRepeater")
+@mock.patch.object(BaseFTPClient, "_login")
+def test_keepalive_workers_start_and_stop(
+    login: mock.Mock,
+    repeater_class: mock.Mock,
+) -> None:
+    """Tie both keepalive workers to the connection lifecycle."""
+    ftp = login.return_value
+    void_worker = mock.Mock()
+    transfer_worker = mock.Mock()
+    repeater_class.side_effect = [void_worker, transfer_worker]
+
+    client = BaseFTPClient(
+        "ftp.example.org",
+        user="researcher",
+        password="secret",
+        keepalive=True,
+    )
+    client.close_connection()
+
+    assert repeater_class.call_args_list == [
+        mock.call(5, ftp.voidcmd, "NOOP"),
+        mock.call(5, client._filetransfer, "README.ftp"),
+    ]
+    void_worker.stop.assert_called_once_with()
+    transfer_worker.stop.assert_called_once_with()
+    ftp.quit.assert_called_once_with()
+
+
+def test_close_connection_falls_back_to_socket_close() -> None:
+    """Close the local socket when a remote server rejects FTP QUIT."""
+    client = object.__new__(BaseFTPClient)
+    client._BaseFTPClient__keepalive = False
+    client.ftp = mock.Mock()
+    client.ftp.quit.side_effect = OSError("connection lost")
+
+    client.close_connection()
+
+    client.ftp.close.assert_called_once_with()
+
+
+def test_keepalive_transfer_restores_remote_directory_after_failure() -> None:
+    """Restore the caller's FTP directory even when retrieval fails."""
+    client = object.__new__(BaseFTPClient)
+    client.ftp = mock.Mock()
+    client.ftp.pwd.return_value = "/remote/current"
+    client.ftp.retrbinary.side_effect = OSError("transfer failed")
+
+    with pytest.raises(OSError, match="transfer failed"):
+        client._filetransfer("README.ftp")
+
+    assert client.ftp.cwd.call_args_list == [
+        mock.call("/"),
+        mock.call("/remote/current"),
+    ]
+
+
+@pytest.mark.parametrize("path", ["relative/", "/missing-end", "relative"])
+def test_ftp_path_requires_absolute_directory_form(path: str) -> None:
+    """Reject paths that cannot unambiguously identify an FTP directory."""
+    with pytest.raises(ValueError, match="start and end with"):
+        NcbiFTPClient._pathformat(path)
+
+
+def test_walk_sorts_mlsd_entries() -> None:
+    """Separate and sort typed MLSD entries for deterministic callers."""
+    client = make_client()
+    client.ftp = mock.Mock()
+    client.ftp.mlsd.return_value = [
+        ("zeta.txt", {"type": "file"}),
+        ("beta", {"type": "dir"}),
+        ("alpha.txt", {"type": "file"}),
+        ("alpha", {"type": "dir"}),
+        ("ignored", {"type": "cdir"}),
+    ]
+
+    directories, files = client.walk("/blast/db/")
+
+    assert directories == ["alpha", "beta"]
+    assert files == ["alpha.txt", "zeta.txt"]
+    client.ftp.cwd.assert_called_once_with("/blast/db/")
+
+
+def test_walk_returns_empty_for_inaccessible_directory() -> None:
+    """Represent an inaccessible FTP directory without parsing stale output."""
+    client = make_client()
+    client.ftp = mock.Mock()
+    client.ftp.cwd.side_effect = error_perm("550 unavailable")
+    client.ftp.pwd.return_value = "/blast/"
+
+    assert client.walk("/missing/") == ([], [])
+    client.ncbiftp_log.info.assert_called_once()
+    client.ftp.mlsd.assert_not_called()
+
+
+def test_walk_falls_back_to_list_for_legacy_servers() -> None:
+    """Classify traditional LIST rows when MLSD is unavailable."""
+    client = make_client()
+    client.ftp = mock.Mock()
+    client.ftp.mlsd.side_effect = error_perm("500 MLSD unsupported")
+    list_rows = [
+        "-rw-r--r-- 1 ftp ftp 10 Jan 01 00:00 zeta.txt",
+        "drwxr-xr-x 2 ftp ftp 10 Jan 01 00:00 beta",
+        "-rw-r--r-- 1 ftp ftp 10 Jan 01 00:00 alpha.txt",
+    ]
+    client.ftp.retrlines.side_effect = (
+        lambda _command, callback: [callback(row) for row in list_rows]
+    )
+
+    directories, files = client.walk("/blast/db/")
+
+    assert directories == ["beta"]
+    assert files == ["alpha.txt", "zeta.txt"]
+    client.ftp.retrlines.assert_called_once()
+
+
+def test_checksum_markers_require_valid_matching_digest(tmp_path: Path) -> None:
+    """Accept case-insensitive NCBI digests and reject stale marker content."""
+    expected_md5 = "a" * 32
+    marker_path = tmp_path / "archive.tar.gz.md5"
+    marker_path.write_text(f"{'A' * 32}  archive.tar.gz\n", encoding="utf-8")
+
+    assert NcbiFTPClient._marker_matches(marker_path, expected_md5)
+
+    marker_path.write_text("invalid checksum\n", encoding="utf-8")
+    assert not NcbiFTPClient._marker_matches(marker_path, expected_md5)
+    assert not NcbiFTPClient._marker_matches(tmp_path / "missing.md5", expected_md5)
+
+
+def test_local_file_freshness_requires_matching_remote_size(
+    tmp_path: Path,
+) -> None:
+    """Skip transfers only when remote metadata confirms the local size."""
+    destination = tmp_path / "archive.tar.gz"
+    destination.write_bytes(b"data")
+
+    assert NcbiFTPClient._local_file_is_current(
+        destination,
+        {"content-length": "4"},
+    )
+    assert not NcbiFTPClient._local_file_is_current(
+        destination,
+        {"content-length": "5"},
+    )
+    assert not NcbiFTPClient._local_file_is_current(destination, {})
+    assert not NcbiFTPClient._local_file_is_current(
+        tmp_path / "missing.tar.gz",
+        {"content-length": "4"},
+    )
 
 
 def test_windowmasker_download_remains_explicitly_unsupported() -> None:
