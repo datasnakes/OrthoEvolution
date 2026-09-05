@@ -148,3 +148,84 @@ def test_rejects_malformed_scheduler_output(
 
     with pytest.raises(ValueError, match="Expected 7 Slurm fields"):
         SlurmClient().active_jobs(user="researcher")
+
+
+@patch("OrthoEvol.Tools.slurm.client.shutil.which", return_value="/usr/bin/squeue")
+@patch("OrthoEvol.Tools.slurm.client.subprocess.run")
+def test_empty_scheduler_output_returns_no_jobs(
+    mock_run: Mock,
+    _mock_which: Mock,
+) -> None:
+    """Treat blank scheduler output as a valid empty queue."""
+    mock_run.return_value = subprocess.CompletedProcess(
+        args=[],
+        returncode=0,
+        stdout="\n  \n",
+        stderr="",
+    )
+
+    assert SlurmClient().active_jobs(user="researcher") == []
+
+
+@patch("OrthoEvol.Tools.slurm.client.shutil.which", return_value="/usr/bin/squeue")
+@patch("OrthoEvol.Tools.slurm.client.subprocess.run")
+def test_blank_node_count_remains_unavailable(
+    mock_run: Mock,
+    _mock_which: Mock,
+) -> None:
+    """Keep missing allocation data distinct from a zero-node allocation."""
+    mock_run.return_value = subprocess.CompletedProcess(
+        args=[],
+        returncode=0,
+        stdout="12345|orthologs|PENDING|medium|0:00||Priority\n",
+        stderr="",
+    )
+
+    jobs = SlurmClient().active_jobs(user="researcher")
+
+    assert jobs[0].nodes is None
+
+
+@patch("OrthoEvol.Tools.slurm.client.shutil.which", return_value="/usr/bin/squeue")
+@patch("OrthoEvol.Tools.slurm.client.subprocess.run")
+def test_invalid_node_count_is_rejected(
+    mock_run: Mock,
+    _mock_which: Mock,
+) -> None:
+    """Reject scheduler rows whose node count violates the numeric contract."""
+    mock_run.return_value = subprocess.CompletedProcess(
+        args=[],
+        returncode=0,
+        stdout="12345|orthologs|RUNNING|medium|0:10|many|c0123\n",
+        stderr="",
+    )
+
+    with pytest.raises(ValueError, match="Invalid Slurm node count.*many"):
+        SlurmClient().active_jobs(user="researcher")
+
+
+@patch("OrthoEvol.Tools.slurm.client.shutil.which", return_value="/usr/bin/sbatch")
+@patch("OrthoEvol.Tools.slurm.client.subprocess.run")
+def test_submit_rejects_empty_job_id(
+    mock_run: Mock,
+    _mock_which: Mock,
+    tmp_path: Path,
+) -> None:
+    """Fail clearly when sbatch succeeds without returning an identifier."""
+    script = tmp_path / "analysis.sh"
+    script.write_text("#!/bin/bash\ntrue\n", encoding="utf-8")
+    mock_run.return_value = subprocess.CompletedProcess(
+        args=[],
+        returncode=0,
+        stdout="\n",
+        stderr="",
+    )
+
+    with pytest.raises(ValueError, match="empty job ID"):
+        SlurmClient().submit(script)
+
+
+def test_job_history_requires_job_id() -> None:
+    """Reject whitespace-only job IDs before invoking the scheduler."""
+    with pytest.raises(ValueError, match="job ID is required"):
+        SlurmClient().job_history("  ")
