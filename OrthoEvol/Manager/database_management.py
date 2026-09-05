@@ -403,41 +403,28 @@ class DatabaseManagement(BaseDatabaseManagement):
         """
         strategy_dispatcher = OrderedDict()
         strategy_config = OrderedDict()
+        strategy_methods = {
+            "Full": self.full,
+            "NCBI": self.NCBI,
+            "NCBI_blast": self.NCBI_blast,
+            "NCBI_blast_db": self.ncbi_blast_db,
+            "NCBI_blast_windowmaskerfiles": self.ncbi_blast_windowmasker_files,
+            "NCBI_pub_taxonomy": self.NCBI_pub_taxonomy,
+            "NCBI_refseq_release": self.NCBI_refseq_release,
+            "ITIS": self.itis,
+            "ITIS_taxonomy": self.itis_taxonomy,
+        }
         for strategy, strategy_kwargs in db_config_strategy.items():
+            strategy_method = strategy_methods.get(strategy)
+            if strategy_method is None:
+                continue
+
+            child_dispatcher, child_config = strategy_method(**strategy_kwargs)
             if strategy == "Full":
-                strategy_dispatcher, strategy_config = self.full(**strategy_kwargs)
-            elif strategy == "NCBI":
-                sd, sc = self.NCBI(**strategy_kwargs)
-                strategy_dispatcher.update(sd)
-                strategy_config.update(sc)
-            elif strategy == "NCBI_blast":
-                sd, sc = self.NCBI_blast(**strategy_kwargs)
-                strategy_dispatcher.update(sd)
-                strategy_config.update(sc)
-            elif strategy == "NCBI_blast_db":
-                sd, sc = self.ncbi_blast_db(**strategy_kwargs)
-                strategy_dispatcher.update(sd)
-                strategy_config.update(sc)
-            elif strategy == "NCBI_blast_windowmaskerfiles":
-                sd, sc = self.ncbi_blast_windowmasker_files(**strategy_kwargs)
-                strategy_dispatcher.update(sd)
-                strategy_config.update(sc)
-            elif strategy == "NCBI_pub_taxonomy":
-                sd, sc = self.NCBI_pub_taxonomy(**strategy_kwargs)
-                strategy_dispatcher.update(sd)
-                strategy_config.update(sc)
-            elif strategy == "NCBI_refseq_release":
-                sd, sc = self.NCBI_refseq_release(**strategy_kwargs)
-                strategy_dispatcher.update(sd)
-                strategy_config.update(sc)
-            elif strategy == "ITIS":
-                sd, sc = self.itis(**strategy_kwargs)
-                strategy_dispatcher.update(sd)
-                strategy_config.update(sc)
-            elif strategy == "ITIS_taxonomy":
-                sd, sc = self.itis_taxonomy(**strategy_kwargs)
-                strategy_dispatcher.update(sd)
-                strategy_config.update(sc)
+                strategy_dispatcher.clear()
+                strategy_config.clear()
+            strategy_dispatcher.update(child_dispatcher)
+            strategy_config.update(child_config)
 
         return strategy_dispatcher, strategy_config
 
@@ -501,8 +488,18 @@ class DatabaseManagement(BaseDatabaseManagement):
         # returns dict of config_dicts, dict of dispatcher_functions
         return full_dispatcher, full_config
 
-    def NCBI(self, NCBI_blast, NCBI_pub_taxonomy, NCBI_refseq_release, configure_flag=None, archive_flag=None,
-             delete_flag=None, database_path=None, archive_path=None, _path=None):
+    def NCBI(
+        self,
+        NCBI_blast: dict[str, Any],
+        NCBI_pub_taxonomy: dict[str, Any],
+        NCBI_refseq_release: dict[str, Any],
+        configure_flag: bool | None = None,
+        archive_flag: bool | None = None,
+        delete_flag: bool | None = None,
+        database_path: str | Path | None = None,
+        archive_path: str | Path | None = None,
+        _path: str | Path | None = None,
+    ) -> tuple[OrderedDict[str, Any], OrderedDict[str, Any]]:
         """
         A strategy that implements all of the databases relevant to NCBI.
 
@@ -531,54 +528,57 @@ class DatabaseManagement(BaseDatabaseManagement):
         """
         ncbi_dispatcher = OrderedDict({"NCBI": []})
         ncbi_config = OrderedDict({"NCBI": []})
-        if not archive_path:
-            archive_path = str(self.user_archive)
-        if not database_path:
-            database_path = str(self.user_db)
-        # If the flags are set in a top level part of the hierarchy, then everything below follows
-        if configure_flag:
-            NCBI_blast["configure_flag"] = configure_flag
-            NCBI_pub_taxonomy["configure_flag"] = configure_flag
-            NCBI_refseq_release["configure_flag"] = configure_flag
+        database_path, archive_path = self._resolve_database_paths(
+            database_path,
+            archive_path,
+        )
+        (
+            NCBI_blast,
+            NCBI_pub_taxonomy,
+            NCBI_refseq_release,
+        ) = self._prepare_child_strategies(
+            (NCBI_blast, NCBI_pub_taxonomy, NCBI_refseq_release),
+            configure_flag,
+            archive_flag,
+            delete_flag,
+        )
+
         if archive_flag:
-            NCBI_blast["delete_flag"] = None
-            NCBI_pub_taxonomy["delete_flag"] = None
-            NCBI_refseq_release["delete_flag"] = None
-            NCBI_blast["archive_flag"] = None
-            NCBI_pub_taxonomy["archive_flag"] = None
-            NCBI_refseq_release["archive_flag"] = None
-            ncbi_dispatcher["NCBI"].append(self.db_mana_utils.archive)
-            ncbi_config["NCBI"].append({
-                "database_path": database_path,
-                "archive_path": archive_path,
-                "option": "NCBI",
-                "delete_flag": delete_flag
-            })
-        else:
-            NCBI_blast["delete_flag"] = delete_flag
-            NCBI_pub_taxonomy["delete_flag"] = delete_flag
-            NCBI_refseq_release["delete_flag"] = delete_flag
+            self._append_archive_action(
+                ncbi_dispatcher,
+                ncbi_config,
+                "NCBI",
+                database_path,
+                archive_path,
+                delete_flag,
+            )
 
-        # Configure blast
         nb_dispatcher, nb_config = self.NCBI_blast(**NCBI_blast)
-        # Configure pub/taxonomy
         npt_dispatcher, npt_config = self.NCBI_pub_taxonomy(**NCBI_pub_taxonomy)
-        # Configure refseq/release
         nrr_dispatcher, nrr_config = self.NCBI_refseq_release(**NCBI_refseq_release)
-
-        # Create NCBI dispatcher
-        ncbi_dispatcher.update(nb_dispatcher)
-        ncbi_dispatcher.update(npt_dispatcher)
-        ncbi_dispatcher.update(nrr_dispatcher)
-        # Create NCBI config
-        ncbi_config.update(nb_config)
-        ncbi_config.update(npt_config)
-        ncbi_config.update(nrr_config)
+        self._merge_strategy_results(
+            ncbi_dispatcher,
+            ncbi_config,
+            (
+                (nb_dispatcher, nb_config),
+                (npt_dispatcher, npt_config),
+                (nrr_dispatcher, nrr_config),
+            ),
+        )
 
         return ncbi_dispatcher, ncbi_config
 
-    def NCBI_blast(self, NCBI_blast_db, NCBI_blast_windowmasker_files,
-                   configure_flag=None, archive_flag=None, delete_flag=None, database_path=None, archive_path=None, _path=None):
+    def NCBI_blast(
+        self,
+        NCBI_blast_db: dict[str, Any],
+        NCBI_blast_windowmasker_files: dict[str, Any],
+        configure_flag: bool | None = None,
+        archive_flag: bool | None = None,
+        delete_flag: bool | None = None,
+        database_path: str | Path | None = None,
+        archive_path: str | Path | None = None,
+        _path: str | Path | None = None,
+    ) -> tuple[OrderedDict[str, Any], OrderedDict[str, Any]]:
         """
         A strategy that implements all of the data relevant to NCBI's blast databases.
 
@@ -606,43 +606,54 @@ class DatabaseManagement(BaseDatabaseManagement):
         """
         ncbi_blast_dispatcher = OrderedDict()
         ncbi_blast_config = OrderedDict()
-        if not archive_path:
-            archive_path = str(self.user_archive)
-        if not database_path:
-            database_path = str(self.user_db)
-        if configure_flag:
-            NCBI_blast_db["configure_flag"] = configure_flag
-            NCBI_blast_windowmasker_files["configure_flag"] = configure_flag
+        database_path, archive_path = self._resolve_database_paths(
+            database_path,
+            archive_path,
+        )
+        (
+            NCBI_blast_db,
+            NCBI_blast_windowmasker_files,
+        ) = self._prepare_child_strategies(
+            (NCBI_blast_db, NCBI_blast_windowmasker_files),
+            configure_flag,
+            archive_flag,
+            delete_flag,
+        )
+
         if archive_flag:
-            NCBI_blast_db["delete_flag"] = None
-            NCBI_blast_windowmasker_files["delete_flag"] = None
-            NCBI_blast_db["archive_flag"] = None
-            NCBI_blast_windowmasker_files["archive_flag"] = None
-            ncbi_blast_dispatcher = {"NCBI_blast": []}
-            ncbi_blast_dispatcher["NCBI_blast"].append(self.db_mana_utils.archive)
-            ncbi_blast_config = {"NCBI_blast": []}
-            ncbi_blast_config["NCBI_blast"].append({
-                "database_path": database_path,
-                "archive_path": archive_path,
-                "option": "NCBI_blast",
-                "delete_flag": delete_flag
-            })
-        else:
-            NCBI_blast_db["delete_flag"] = delete_flag
-            NCBI_blast_windowmasker_files["delete_flag"] = delete_flag
+            self._append_archive_action(
+                ncbi_blast_dispatcher,
+                ncbi_blast_config,
+                "NCBI_blast",
+                database_path,
+                archive_path,
+                delete_flag,
+            )
 
         nbd_dispatcher, nbd_config = self.ncbi_blast_db(**NCBI_blast_db)
-        nbw_dispatcher, nbw_config = self.ncbi_blast_windowmasker_files(**NCBI_blast_windowmasker_files)
-
-        ncbi_blast_dispatcher.update(nbd_dispatcher)
-        ncbi_blast_dispatcher.update(nbw_dispatcher)
-
-        ncbi_blast_config.update(nbd_config)
-        ncbi_blast_config.update(nbw_config)
+        nbw_dispatcher, nbw_config = self.ncbi_blast_windowmasker_files(
+            **NCBI_blast_windowmasker_files
+        )
+        self._merge_strategy_results(
+            ncbi_blast_dispatcher,
+            ncbi_blast_config,
+            (
+                (nbd_dispatcher, nbd_config),
+                (nbw_dispatcher, nbw_config),
+            ),
+        )
 
         return ncbi_blast_dispatcher, ncbi_blast_config
 
-    def ncbi_blast_db(self, configure_flag=None, archive_flag=None, delete_flag=None, archive_path=None, database_path=None, _path=None):
+    def ncbi_blast_db(
+        self,
+        configure_flag: bool | None = None,
+        archive_flag: bool | None = None,
+        delete_flag: bool | None = None,
+        archive_path: str | Path | None = None,
+        database_path: str | Path | None = None,
+        _path: str | Path | None = None,
+    ) -> tuple[OrderedDict[str, Any], OrderedDict[str, Any]]:
         """
         A strategy that implements NCBI's blast database that's used with the blast+ command line utilities.
 
@@ -660,31 +671,29 @@ class DatabaseManagement(BaseDatabaseManagement):
         and a list of dictionaries containing kwargs for each function.
         :rtype:  tuple.
         """
-        # Set up default parameter values.
-        nbd_dispatcher = OrderedDict({"NCBI_blast_db": []})
-        nbd_config = OrderedDict({"NCBI_blast_db": []})
-        if not archive_path:
-            archive_path = str(self.user_archive)
-        # Archive.  If necessary, then delete.
-        if archive_flag:
-            nbd_dispatcher["NCBI_blast_db"].append(self.db_mana_utils.archive)
-            nbd_config["NCBI_blast_db"].append({
-                "database_path": database_path,
-                "archive_path": archive_path,
-                "option": "NCBI_blast",
-                "delete_flag": delete_flag
-            })
-        # Configure
-        if configure_flag:
-            # Download blast files
-            nbd_dispatcher["NCBI_blast_db"].append(self.download_blast_database)
-            nbd_config["NCBI_blast_db"].append({
-                "database_name": 'refseq_rna'
-            })
-        return nbd_dispatcher, nbd_config
+        return self._build_leaf_strategy(
+            strategy_name="NCBI_blast_db",
+            configure_flag=configure_flag,
+            archive_flag=archive_flag,
+            delete_flag=delete_flag,
+            database_path=database_path,
+            archive_path=archive_path,
+            configure_action=self.download_blast_database,
+            configure_kwargs_factory=lambda: {"database_name": "refseq_rna"},
+            archive_option="NCBI_blast",
+            use_default_database_path=False,
+        )
 
-    def ncbi_blast_windowmasker_files(self, taxonomy_ids, configure_flag=None, archive_flag=None, delete_flag=None,
-                                      archive_path=None, database_path=None, _path=None):
+    def ncbi_blast_windowmasker_files(
+        self,
+        taxonomy_ids: Sequence[int],
+        configure_flag: bool | None = None,
+        archive_flag: bool | None = None,
+        delete_flag: bool | None = None,
+        archive_path: str | Path | None = None,
+        database_path: str | Path | None = None,
+        _path: str | Path | None = None,
+    ) -> tuple[OrderedDict[str, Any], OrderedDict[str, Any]]:
         """
         A strategy that sets up windowmasker files used with the blast+ command line utilities.
 
@@ -702,28 +711,30 @@ class DatabaseManagement(BaseDatabaseManagement):
         and a list of dictionaries containing kwargs for each function.
         :rtype:  tuple.
         """
-        nbw_dispatcher = OrderedDict({"NCBI_blast_windowmasker_files": []})
-        nbw_config = OrderedDict({"NCBI_blast_windowmasker_files": []})
-        if not archive_path:
-            archive_path = str(self.user_archive)
-        if not database_path:
-            database_path = str(self.user_db)
-        if archive_flag:
-            nbw_dispatcher["NCBI_blast_windowmasker_files"].append(self.db_mana_utils.archive)
-            nbw_config["NCBI_blast_windowmasker_files"].append({
-                "database_path": database_path,
-                "archive_path": archive_path,
-                "option": "NCBI_blast_windowmasker_files",
-                "delete_flag": delete_flag
-            })
-        if configure_flag:
-            nbw_dispatcher["NCBI_blast_windowmasker_files"].append(self.download_windowmasker_files)
-            nbw_config["NCBI_blast_windowmasker_files"].append({
+        # Preserve the established behavior of using project gene data here.
+        _ = taxonomy_ids, _path
+        return self._build_leaf_strategy(
+            strategy_name="NCBI_blast_windowmasker_files",
+            configure_flag=configure_flag,
+            archive_flag=archive_flag,
+            delete_flag=delete_flag,
+            database_path=database_path,
+            archive_path=archive_path,
+            configure_action=self.download_windowmasker_files,
+            configure_kwargs_factory=lambda: {
                 "taxonomy_ids": self.gene_data.taxon_ids
-            })
-        return nbw_dispatcher, nbw_config
+            },
+        )
 
-    def NCBI_pub_taxonomy(self, configure_flag=None, archive_flag=None, delete_flag=None, archive_path=None, database_path=None, _path=None):
+    def NCBI_pub_taxonomy(
+        self,
+        configure_flag: bool | None = None,
+        archive_flag: bool | None = None,
+        delete_flag: bool | None = None,
+        archive_path: str | Path | None = None,
+        database_path: str | Path | None = None,
+        _path: str | Path | None = None,
+    ) -> tuple[OrderedDict[str, Any], OrderedDict[str, Any]]:
         """
         A strategy that sets up windowmasker files used with the blast+ command line utilities.
 
@@ -871,32 +882,45 @@ class DatabaseManagement(BaseDatabaseManagement):
 
         return nrr_dispatcher, nrr_config
 
-    def itis(self, ITIS_taxonomy, configure_flag=None, archive_flag=None, delete_flag=None, database_path=None, archive_path=None, _path=None):
+    def itis(
+        self,
+        ITIS_taxonomy: dict[str, Any],
+        configure_flag: bool | None = None,
+        archive_flag: bool | None = None,
+        delete_flag: bool | None = None,
+        database_path: str | Path | None = None,
+        archive_path: str | Path | None = None,
+        _path: str | Path | None = None,
+    ) -> tuple[OrderedDict[str, Any], OrderedDict[str, Any]]:
         itis_dispatcher = OrderedDict()
         itis_config = OrderedDict()
-        if not archive_path:
-            archive_path = str(self.user_archive)
-        if not database_path:
-            database_path = str(self.user_db)
-        if configure_flag:
-            ITIS_taxonomy["configure_flag"] = configure_flag
+        database_path, archive_path = self._resolve_database_paths(
+            database_path,
+            archive_path,
+        )
+        (ITIS_taxonomy,) = self._prepare_child_strategies(
+            (ITIS_taxonomy,),
+            configure_flag,
+            archive_flag,
+            delete_flag,
+        )
+
         if archive_flag:
-            ITIS_taxonomy["delete_flag"] = None
-            ITIS_taxonomy["archive_flag"] = None
-            itis_dispatcher = {"ITIS": []}
-            itis_dispatcher["ITIS"].append(self.db_mana_utils.archive)
-            itis_config = {"ITIS": []}
-            itis_config["ITIS"].append({
-                "database_path": database_path,
-                "archive_path": archive_path,
-                "option": "ITIS",
-                "delete_flag": delete_flag
-            })
-        else:
-            ITIS_taxonomy["delete_flag"] = delete_flag
+            self._append_archive_action(
+                itis_dispatcher,
+                itis_config,
+                "ITIS",
+                database_path,
+                archive_path,
+                delete_flag,
+            )
+
         it_dispatcher, it_config = self.itis_taxonomy(**ITIS_taxonomy)
-        itis_dispatcher.update(it_dispatcher)
-        itis_config.update(it_config)
+        self._merge_strategy_results(
+            itis_dispatcher,
+            itis_config,
+            ((it_dispatcher, it_config),),
+        )
 
         return itis_dispatcher, itis_config
 
