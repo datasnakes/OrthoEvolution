@@ -15,7 +15,7 @@ Subpackages
    OrthoEvol.Tools.pbs
    OrthoEvol.Tools.pybasher
    OrthoEvol.Tools.send2server
-   OrthoEvol.Tools.sge
+   OrthoEvol.Tools.slurm
    OrthoEvol.Tools.slackify
 
 Module contents

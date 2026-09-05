@@ -3,10 +3,10 @@ The Tools module is a collection of often used classes or functions that either
 enhance our other modules and create reusable functions to be used in various
 modules.
 
-We've incorporated tools for sge tools for use with pbs, a pandoc
-script and class for converting docx files to markdown formats, multiprocessing
-in multiprocess, and a ftp module that aids in downloading files from NCBI's
-ftp repository.
+We've incorporated a pandoc script and class for converting docx files to
+markdown formats, multiprocessing in multiprocess, an ftp module that aids in
+downloading files from NCBI's ftp repository, and a small Slurm client for
+submitting and inspecting jobs.
 
 
 ## Examples
@@ -54,6 +54,21 @@ logit = LogIt().default(logname='test1 log', logfile='log.txt')
 # Shutdown logging without deleting the logfile
 logit.shutdown()
 ```
+
+### Submit and inspect Slurm jobs
+
+```python
+from pathlib import Path
+
+from OrthoEvol.Tools.slurm import SlurmClient
+
+
+slurm = SlurmClient()
+job_id = slurm.submit(Path("ortholog-analysis.sh"))
+active_jobs = slurm.active_jobs()
+job_history = slurm.job_history(job_id)
+```
+
 ### Send a message to a slack channel
 Your config file should look as such:
 ```python
@@ -78,11 +93,8 @@ from OrthoEvol.Tools.mygene import MyGene
 from OrthoEvol.Tools.parallel import Multiprocess
 # from OrthoEvol.Tools.pandoc import PandocConverter
 from OrthoEvol.Tools.send2server import S2S
-from OrthoEvol.Tools.sge import (BaseSGEJob, SGEJob, Qstat, SGEPipelineTask,
-                                 randomid, basejobids, import_temp,
-                                 writecodefile,
-                                 file2str)
 from OrthoEvol.Tools.slackify import Slackify
+from OrthoEvol.Tools.slurm import SlurmClient
 ```
 
 

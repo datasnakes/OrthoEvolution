@@ -735,31 +735,6 @@ class ManagerUtils(object):
                     kw[key] = value
         return db_config_strategy, kw
 
-    def refseq_jobber(self, email_address, base_jobname, id, code, activate, config_dict):
-        """Submit python code as a string.
-
-        :param email_address:  The email address for PBS job notification.
-        :type email_address:  str.
-        :param base_jobname:  The base job name used for the PBS job.  Contains a %s for string formatting.
-        :type base_jobname:  str.
-        :param id:  An id used to format the base_jobname.
-        :type id:  int.
-        :param code:  Python code as a string.
-        :type code:  str.
-        :param activate: The path to the activate script for the virtual environment being used in the PBS job.
-        :type activate: str
-        :param config_dict: Configuration dictionary for the SGE job.
-        :type config_dict: dict
-        """
-        job = SGEJob(email_address=email_address, base_jobname=base_jobname % str(id), activate=activate,
-                     config=config_dict)
-        job.submit_pycode(code=code, wait=False, cleanup=False)
-
-    # def template_jobber(email_address, base_jobname, id, code):
-    #     job = SGEJob(email_address=email_address, base_jobname=base_jobname)
-    #     job.submit_pycode(code=code, wait=True, cleanup=True)
-
-
 class CookieUtils(object):
     def __init__(self):
         """Various utilities to help with cookie specific functionality."""

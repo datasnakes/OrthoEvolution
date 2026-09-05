@@ -7,9 +7,8 @@ soon be home to [MPI (Message Passing Interface)](http://mpi4py.readthedocs.io/e
 In order to take advantage of using our supercomputer's processing power, we
 looked into mpi and multiprocessing. Both were found to be useful.
 
-This is an optional class in our pipeline, but if you're using AWS or Google's
-supercomputing, then you may find it useful unless you're interested in or
-using clustering or SGE (Sun Grid Engine). We have a [sge module](https://github.com/datasnakes/OrthoEvolution/tree/master/OrthoEvol/Tools/sge) for that.
+This is an optional class in our workflow. It can be useful when running
+independent work on systems with multiple processors.
 
 ## Examples
 

@@ -1,24 +1,25 @@
 # Standard Library
 import os
-import random
-import string
-import urllib.request
+import subprocess as sp
 import tarfile
-import yaml
+import urllib.request
 from collections import OrderedDict
+from collections.abc import Callable, Sequence
 from importlib import import_module
 from pathlib import Path
-import subprocess as sp
+from typing import Any
+
+import yaml
+
 # OrthoEvol
 from OrthoEvol import OrthoEvolDeprecationWarning
-from OrthoEvol.Tools.logit import LogIt
-from OrthoEvol.Tools.ftp import NcbiFTPClient
-from OrthoEvol.utilities import FullUtilities
 from OrthoEvol.Manager.biosql import biosql
 from OrthoEvol.Manager.management import ProjectManagement
-from OrthoEvol.Orthologs.Blast.comparative_genetics import BaseComparativeGenetics
-from OrthoEvol.Manager.config import templates
-from OrthoEvol.resources import package_resource_path
+from OrthoEvol.Orthologs.Blast.comparative_genetics import \
+    BaseComparativeGenetics
+from OrthoEvol.Tools.ftp import NcbiFTPClient
+from OrthoEvol.Tools.logit import LogIt
+from OrthoEvol.utilities import FullUtilities
 
 
 class BaseDatabaseManagement(object):
@@ -27,8 +28,8 @@ class BaseDatabaseManagement(object):
         """
         This is the base class for managing various databases.  It provides functionality for downloading and creating
         various databases for your pipeline.  There are functions available for downloading files from NCBI (BLAST,
-        windowmasker, taxonomy, refseq release), downloading ITIS taxonomy tables, creating BioSQL databases, and
-        uploading refseq release files to BioSQL databases.  This class currently REQUIRES an instance of
+        windowmasker, taxonomy, refseq release), downloading ITIS taxonomy tables, and creating BioSQL databases.
+        This class currently REQUIRES an instance of
         ProjectManagement to be used with the proj_mana parameter.
 
         :param email: The email of the user for using during the FTP.
@@ -284,7 +285,111 @@ class DatabaseManagement(BaseDatabaseManagement):
         self.delete_flag = None
         self.config_file = config_file
 
-    def get_strategy_dispatcher(self, db_config_strategy):
+    @staticmethod
+    def _prepare_child_strategies(
+        child_strategies: tuple[dict[str, Any], ...],
+        configure_flag: bool | None,
+        archive_flag: bool | None,
+        delete_flag: bool | None,
+    ) -> tuple[dict[str, Any], ...]:
+        """Copy inherited flags into child strategies without mutating inputs."""
+        prepared_strategies = []
+        for child_strategy in child_strategies:
+            prepared_strategy = dict(child_strategy)
+            if configure_flag:
+                prepared_strategy["configure_flag"] = configure_flag
+            if archive_flag:
+                # The parent archive replaces child archive and delete actions.
+                prepared_strategy["archive_flag"] = None
+                prepared_strategy["delete_flag"] = None
+            else:
+                prepared_strategy["delete_flag"] = delete_flag
+            prepared_strategies.append(prepared_strategy)
+        return tuple(prepared_strategies)
+
+    def _resolve_database_paths(
+        self,
+        database_path: str | Path | None,
+        archive_path: str | Path | None,
+    ) -> tuple[str | Path, str | Path]:
+        """Resolve storage defaults while preserving explicit path objects."""
+        resolved_database_path = database_path or str(self.user_db)
+        resolved_archive_path = archive_path or str(self.user_archive)
+        return resolved_database_path, resolved_archive_path
+
+    def _append_archive_action(
+        self,
+        dispatcher: dict[str, Any],
+        configuration: dict[str, Any],
+        strategy_name: str,
+        database_path: str | Path | None,
+        archive_path: str | Path,
+        delete_flag: bool | None,
+        archive_option: str | None = None,
+    ) -> None:
+        """Append one archive action and its positionally matched configuration."""
+        dispatcher.setdefault(strategy_name, []).append(self.db_mana_utils.archive)
+        configuration.setdefault(strategy_name, []).append(
+            {
+                "database_path": database_path,
+                "archive_path": archive_path,
+                "option": archive_option or strategy_name,
+                "delete_flag": delete_flag,
+            }
+        )
+
+    def _build_leaf_strategy(
+        self,
+        *,
+        strategy_name: str,
+        configure_flag: bool | None,
+        archive_flag: bool | None,
+        delete_flag: bool | None,
+        database_path: str | Path | None,
+        archive_path: str | Path | None,
+        configure_action: Callable[..., Any],
+        configure_kwargs_factory: Callable[[], dict[str, Any]],
+        archive_option: str | None = None,
+        use_default_database_path: bool = True,
+    ) -> tuple[OrderedDict[str, Any], OrderedDict[str, Any]]:
+        """Build one ordered leaf strategy from archive and configure actions."""
+        dispatcher = OrderedDict({strategy_name: []})
+        configuration = OrderedDict({strategy_name: []})
+        resolved_database_path = database_path
+        resolved_archive_path = archive_path or str(self.user_archive)
+        if use_default_database_path and not resolved_database_path:
+            resolved_database_path = str(self.user_db)
+
+        if archive_flag:
+            self._append_archive_action(
+                dispatcher,
+                configuration,
+                strategy_name,
+                resolved_database_path,
+                resolved_archive_path,
+                delete_flag,
+                archive_option=archive_option,
+            )
+        if configure_flag:
+            dispatcher[strategy_name].append(configure_action)
+            configuration[strategy_name].append(configure_kwargs_factory())
+        return dispatcher, configuration
+
+    @staticmethod
+    def _merge_strategy_results(
+        dispatcher: dict[str, Any],
+        configuration: dict[str, Any],
+        child_results: tuple[tuple[dict[str, Any], dict[str, Any]], ...],
+    ) -> None:
+        """Merge paired child results in dispatch order."""
+        for child_dispatcher, child_configuration in child_results:
+            dispatcher.update(child_dispatcher)
+            configuration.update(child_configuration)
+
+    def get_strategy_dispatcher(
+        self,
+        db_config_strategy: dict[str, dict[str, Any]],
+    ) -> tuple[OrderedDict[str, Any], OrderedDict[str, Any]]:
         """
         Loop through a dictionary of strategies with nested configurations, and return a list of functions, and a
         list of matching key-word arguments (dictionaries).  The functions can then be dispatched using the kwargs.
@@ -636,87 +741,122 @@ class DatabaseManagement(BaseDatabaseManagement):
         and a list of dictionaries containing kwargs for each function.
         :rtype:  tuple.
         """
-        npt_dispatcher = OrderedDict({"NCBI_pub_taxonomy": []})
-        npt_config = OrderedDict({"NCBI_pub_taxonomy": []})
-        if not archive_path:
-            archive_path = str(self.user_archive)
-        if not database_path:
-            database_path = str(self.user_db)
-        if archive_flag:
-            npt_dispatcher["NCBI_pub_taxonomy"].append(self.db_mana_utils.archive)
-            npt_config["NCBI_pub_taxonomy"].append({
-                "database_path": database_path,
-                "archive_path": archive_path,
-                "option": "NCBI_pub_taxonomy",
-                "delete_flag": delete_flag
-            })
-        # Configure
-        if configure_flag:
-            # Download pub/taxonomy files
-            npt_dispatcher["NCBI_pub_taxonomy"].append(self.download_ncbi_taxonomy_dump_files)
-            npt_config["NCBI_pub_taxonomy"].append({})
-        return npt_dispatcher, npt_config
+        _ = _path
+        return self._build_leaf_strategy(
+            strategy_name="NCBI_pub_taxonomy",
+            configure_flag=configure_flag,
+            archive_flag=archive_flag,
+            delete_flag=delete_flag,
+            database_path=database_path,
+            archive_path=archive_path,
+            configure_action=self.download_ncbi_taxonomy_dump_files,
+            configure_kwargs_factory=dict,
+        )
 
-    def NCBI_refseq_release(self, configure_flag=None, archive_flag=None, delete_flag=None, upload_flag=None, archive_path=None,
-                            database_path=None, collection_subset=None, seqtype=None, seqformat=None, file_list=None,
-                            upload_number=8, _path=None, activate=None, template_flag=None, download_flag=None,
-                            pbs_dict=None):
-        """
-        This is the most complicated specific strategy.  It downloads the refseq release files of choice (gbff),
-        extracts the data, splits a list of files into {upload_number} lists, and uploads those file lists to
-        {upload_number} BioSQL databases.  The resulting databases can be used to access sequence data with accession
-        numbers.  Due to the long upload time (>24 hours) this class currently only uses PBS to break the uploading up
-        into {upload_number} processes.
+    def NCBI_refseq_release(
+        self,
+        configure_flag: bool | None = None,
+        archive_flag: bool | None = None,
+        delete_flag: bool | None = None,
+        upload_flag: bool | None = None,
+        archive_path: str | Path | None = None,
+        database_path: str | Path | None = None,
+        collection_subset: str | None = None,
+        seqtype: str | None = None,
+        seqformat: str | None = None,
+        file_list: list[str] | None = None,
+        upload_number: int = 8,
+        _path: str | Path | None = None,
+        activate: str | Path | None = None,
+        template_flag: bool | None = None,
+        download_flag: bool | None = None,
+        pbs_dict: dict[str, Any] | None = None,
+    ) -> tuple[OrderedDict[str, Any], OrderedDict[str, Any]]:
+        """Build RefSeq download, taxonomy, and archive actions.
 
-        :param configure_flag:  A flag that downloads refseq release files from NCBI.
+        The scheduler-backed BioSQL upload workflow has been retired. Its
+        legacy arguments remain temporarily so existing configurations receive
+        an explicit deprecation error instead of failing during argument
+        parsing.
+
+        :param configure_flag:  A flag that downloads refseq release files from
+            NCBI.
         :type configure_flag:  bool.
         :param archive_flag:  A flag that archives refseq release files from NCBI.
         :type archive_flag:  bool.
         :param delete_flag:  A flag that deletes refseq release files from NCBI.
         :type delete_flag:  bool.
-        :param upload_flag:  A flag that uploads refseq release files to BioSQL database(s).
+        :param upload_flag:  A retired flag that now raises a deprecation error.
         :type upload_flag:  bool.
-        :param database_path:  User supplied relative path to the databases.
+        :param database_path:  User-supplied relative path to the databases.
         :type database_path:   str.
-        :param archive_path:  User supplied relative path to the archived databases.
+        :param archive_path:  User-supplied relative path to the archived
+            databases.
         :type archive_path:   str.
         :param collection_subset: The collection subset of interest.
         :type collection_subset: str.
         :param seqtype: The type of sequence (rna, protein, genomic).
         :type seqtype: str.
-        :param seqformat: The format of the sequence file (usually 'gbff' for GenBank Flat File).
+        :param seqformat: The sequence format, usually ``gbff`` for GenBank Flat
+            File.
         :type seqformat: str.
-        :param file_list:  A list of files to upload.
+        :param file_list:  A deprecated upload argument retained for
+            compatibility.
         :type file_list:  list.
-        :param upload_number:  The number of databases to upload (defautls to 8)
+        :param upload_number:  A deprecated upload argument retained for
+            compatibility.
         :type upload_number:  int.
-        :param activate:  Absolute path to a virtual environments activate script.  This is used for PBS scripts.
+        :param activate:  A deprecated upload argument retained for compatibility.
         :type activate:  str.
-        :param template_flag:  A flag that loads a BioSQL database with NCBI taxonomy data.  This takes a very long time.
+        :param template_flag:  A flag that loads a BioSQL database with NCBI
+            taxonomy data.
         :type template_flag:  bool.
-        :param download_flag:  A flag that downloads the proper refseq release files from NCBI's ftp site.
+        :param download_flag:  A flag that downloads RefSeq release files from
+            NCBI's FTP site.
         :type download_flag:  bool.
-        :return:  A tuple containing 2 objects:  a list of functions for managing a BioSQL database with NCBI refseq
-        data, and a list of dictionaries containing kwargs for each function.
+        :param pbs_dict:  A deprecated upload argument retained for compatibility.
+        :type pbs_dict:  dict.
+        :return:  Paired action and configuration mappings for RefSeq data.
         :rtype:  tuple.
         """
-        nrr_dispatcher = OrderedDict({"NCBI_refseq_release": OrderedDict({"archive": [], "configure": [], "upload": []})})
-        nrr_config = OrderedDict({"NCBI_refseq_release": OrderedDict({"archive": [], "configure": [], "upload": []})})
-        _biosql = self.biosql.SQLiteBioSQL(proj_mana=self.proj_mana)
-        dl_path = Path(self.database_path) / Path("NCBI") / Path('pub') / Path('taxonomy')
+        # These arguments remain in the signature only to give legacy callers
+        # a precise error at the retired upload boundary.
+        _ = file_list, upload_number, _path, activate, pbs_dict
+
+        strategy_actions = OrderedDict(
+            {"archive": [], "configure": [], "upload": []}
+        )
+        strategy_config = OrderedDict(
+            {"archive": [], "configure": [], "upload": []}
+        )
+        nrr_dispatcher = OrderedDict(
+            {"NCBI_refseq_release": strategy_actions}
+        )
+        nrr_config = OrderedDict({"NCBI_refseq_release": strategy_config})
+        if upload_flag:
+            raise OrthoEvolDeprecationWarning(
+                "RefSeq BioSQL uploads depended on the retired SGE subsystem "
+                "and are no longer supported."
+            )
+
+        dl_path = Path(self.database_path) / "NCBI" / "pub" / "taxonomy"
         dmp_file = dl_path / "nodes.dmp"
         if not archive_path:
             archive_path = str(self.user_archive)
         if not database_path:
             database_path = str(self.user_db)
         if archive_flag:
-            nrr_dispatcher["NCBI_refseq_release"]["archive"].append(self.db_mana_utils.archive)
-            nrr_config["NCBI_refseq_release"]["archive"].append({
-                "database_path": database_path,
-                "archive_path": archive_path,
-                "option": "NCBI_refseq_release",
-                "delete_flag": delete_flag
-            })
+            nrr_dispatcher["NCBI_refseq_release"]["archive"].append(
+                self.db_mana_utils.archive
+            )
+            nrr_config["NCBI_refseq_release"]["archive"].append(
+                {
+                    "database_path": database_path,
+                    "archive_path": archive_path,
+                    "option": "NCBI_refseq_release",
+                    "delete_flag": delete_flag,
+                }
+            )
         if configure_flag:
             if download_flag and self.ftp_flag:
                 nrr_dispatcher["NCBI_refseq_release"]["configure"].append(self.download_refseq_release_files)
@@ -728,60 +868,6 @@ class DatabaseManagement(BaseDatabaseManagement):
             if template_flag and (self.ftp_flag or dmp_file.exists()):
                 nrr_dispatcher["NCBI_refseq_release"]["configure"].append(self.create_biosql_taxonomy_template)
                 nrr_config["NCBI_refseq_release"]["configure"].append({})
-
-        if upload_flag:
-            if not _biosql.template_abs_path.is_file() and (self.ftp_flag or dmp_file.exists()):
-                nrr_dispatcher["NCBI_refseq_release"]["configure"].append(self.create_biosql_taxonomy_template)
-                nrr_config["NCBI_refseq_release"]["configure"].append({})
-            elif _biosql.template_abs_path.is_file():
-                self.db_mana_log.info("The BioSQL template exists.")
-            elif not self.ftp_flag and dmp_file.exists():
-                self.db_mana_log.info("The system does not allow FTP for downloading the taxonomic dump files, but"
-                                      "they already exist.")
-            else:
-                self.db_mana_log.error("The BioSQL template doesn't exist and the system does not allow FTP for "
-                                       "downloading the taxonomic dump files.  The dump files are also not already"
-                                       "available.")
-
-            if upload_number < 8:
-                raise ValueError("The upload_number must be greater than 8.  The NCBI refseq release files are too bing"
-                                 "for anything less than 8 seperate BioSQL databases.")
-
-            # Get template script variables
-            py_shebang = Path(activate.parent).expanduser()
-            db_path = self.database_path / Path('NCBI') / Path('refseq') / Path('release') / Path(collection_subset)
-
-            # Read the upload script
-            upload_script = package_resource_path(templates, 'upload_rr_pbs.py')
-            with open(upload_script, 'r') as upload_script:
-                temp_script = upload_script.read()
-            rand_str = random.sample(string.ascii_letters + string.digits, 5)
-            script_dir = Path(self.user_log, ('upload_rr' + ''.join(rand_str)))
-            script_dir.mkdir()
-            script_string = temp_script % (py_shebang, file_list, pbs_dict, db_path, upload_number, self.email, str(script_dir / 'upload_config.yml'))
-
-            # Create the master upload script
-            with open(str(script_dir / 'master_upload_rr_pbs.py'), 'w') as mus:
-                mus.write(script_string)
-            os.chmod(str(script_dir / 'master_upload_rr_pbs.py'), mode=0o755)
-
-            # Load the configuration file
-            with open(str(self.config_file), 'r') as cfg:
-                conf_data = yaml.load(cfg, Loader=yaml.FullLoader)
-
-            # Write to the upload config file
-            with open(str(script_dir / 'upload_config.yml'), 'w') as upload_cfg:
-                conf_data['Database_config']['ftp_flag'] = False
-                conf_data['Database_config']['Full']['NCBI']['NCBI_refseq_release']['upload_flag'] = False
-                yaml.dump(conf_data, upload_cfg, default_flow_style=False)
-            os.chmod(str(script_dir / 'upload_config.yml'), mode=0o755)
-
-            def _run_upload_script():
-                self.db_mana_utils.system_cmd(cmd='%s/master_upload_rr_pbs.py' % str(script_dir), cwd=str(script_dir),
-                                              stdout=sp.PIPE, stderr=sp.STDOUT, shell=True)
-
-            nrr_dispatcher["NCBI_refseq_release"]['upload'].append(_run_upload_script)
-            nrr_config["NCBI_refseq_release"]['upload'].append({})
 
         return nrr_dispatcher, nrr_config
 

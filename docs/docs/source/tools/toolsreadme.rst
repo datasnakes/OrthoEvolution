@@ -5,8 +5,8 @@ The Tools module is a collection of often used classes or functions that
 either enhance our other modules and create reusable functions to be
 used in various modules.
 
-We’ve incorporated tools for sge tools for use with pbs, a pandoc script
-and class for converting docx files to markdown formats, multiprocessing
+We’ve incorporated a pandoc script and class for converting docx files
+to markdown formats, multiprocessing
 in multiprocess, and a ftp module that aids in downloading files from
 NCBI’s ftp repository.
 
@@ -96,10 +96,6 @@ Importing all tools modules
    from OrthoEvol.Tools.parallel import Multiprocess
    # from OrthoEvol.Tools.pandoc import PandocConverter
    from OrthoEvol.Tools.send2server import S2S
-   from OrthoEvol.Tools.sge import (BaseSGEJob, SGEJob, Qstat, SGEPipelineTask,
-                                    randomid, basejobids, import_temp,
-                                    writecodefile,
-                                    file2str)
    from OrthoEvol.Tools.slackify import Slackify
 
 Additional Documentation

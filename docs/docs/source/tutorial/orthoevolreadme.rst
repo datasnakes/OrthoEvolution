@@ -241,10 +241,6 @@ Some of the tools/classes in the tools module are:
 - ``Multiprocess`` - A simple and effective class that allows the input
   of a function to map to a user’s list in order to take advantage of
   parallel computing.
-- ``SGEJob`` - A class to aid in submission of a job via ``qsub`` on a
-  cluster.
-- ``Qstat`` - A class that parses the output of ``qstat`` to return job
-  information. It also waits on job completion.
 - ``Slackify`` - A class for sending messages, files, and images to
   Slack channels for pipeline progress updates and notifications.
 - ``MyGene`` - A wrapper around BioThings’ MyGene.info REST API for
