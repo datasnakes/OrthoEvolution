@@ -432,13 +432,20 @@ class BaseComparativeGenetics(object):
             del self.missing_organsims['count']
 
             # Duplicates
-            self.duplicated_dict = self.blast_utils.get_dup_acc(self.acc_dict, self.gene_list,
-                                                                self.org_list)
+            duplicate_analysis = self.blast_utils.analyze_duplicate_accessions(
+                self.acc_dict,
+                self.gene_list,
+                self.org_list,
+            )
+            self.duplicated_dict = duplicate_analysis.groups
             self.duplicated_accessions = self.duplicated_dict['accessions']
             self.duplicated_organisms = self.duplicated_dict['organisms']
             self.duplicated_genes = self.duplicated_dict['genes']
             self.duplicated_random = self.duplicated_dict['random']
             self.duplicated_other = self.duplicated_dict['other']
+            self.dup_acc_count = duplicate_analysis.accession_counts
+            self.dup_gene_count = duplicate_analysis.gene_counts
+            self.dup_org_count = duplicate_analysis.organism_counts
 
     def get_accession(self, gene, organism):
         """Access a single accession number.
