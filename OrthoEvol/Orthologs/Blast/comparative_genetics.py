@@ -1,25 +1,46 @@
 """Comparative Genetics"""
 # Standard Library
+import copy
 import os
+import random
 import shutil
 import time
-import copy
-import random
+from collections.abc import Mapping, Sequence
 from pathlib import Path
-# OrthoEvol
-from OrthoEvol.Manager.config import data
-from OrthoEvol.Manager.management import ProjectManagement
-from OrthoEvol.utilities import FullUtilities
-from OrthoEvol.Tools.logit import LogIt
-from OrthoEvol.resources import package_resource_path
+from typing import Any
+
 # Other
 import pandas as pd
 from ete3 import NCBITaxa
+
+# OrthoEvol
+from OrthoEvol.Manager.config import data
+from OrthoEvol.Manager.management import ProjectManagement
+from OrthoEvol.resources import package_resource_path
+from OrthoEvol.Tools.logit import LogIt
+from OrthoEvol.utilities import FullUtilities
+
 # from pandas import ExcelWriter
 # NCBITaxa().update_taxonomy_database()
 
 # TODO: Create function for archiving and multiple runs (this can go
 # into the Management class)
+
+HGNC_COMPLETE_SET_URL = (
+    "https://storage.googleapis.com/public-download-files/"
+    "hgnc/tsv/tsv/hgnc_complete_set.txt"
+)
+HGNC_FIELDS = (
+    "hgnc_id",
+    "symbol",
+    "name",
+    "status",
+    "locus_type",
+    "entrez_id",
+    "ensembl_gene_id",
+    "refseq_accession",
+)
+
 
 
 class BaseComparativeGenetics(object):
@@ -34,9 +55,20 @@ class BaseComparativeGenetics(object):
     blastn_log = LogIt().default(logname="blastn", logfile=None)
 
     # TODO:  CREATE PRE-BLAST and POST-BLAST functions
-    def __init__(self, project=None, project_path=os.getcwd(), acc_file=None,
-                 taxon_file=None, ref_species=None, pre_blast=False,
-                 post_blast=True, hgnc=False, proj_mana=None, **kwargs):
+    def __init__(
+        self,
+        project: str | None = None,
+        project_path: str | Path | None = os.getcwd(),
+        acc_file: str | None = None,
+        taxon_file: str | Path | None = None,
+        ref_species: str | None = None,
+        pre_blast: bool = False,
+        post_blast: bool = True,
+        hgnc: bool | str | Path = False,
+        proj_mana: ProjectManagement | dict[str, Any] | None = None,
+        copy_from_package: bool = False,
+        **kwargs: Any,
+    ) -> None:
         """This is the base class for the Blast module.
 
         It parses an accession file in order to provide easy handling for data.
@@ -66,171 +98,219 @@ class BaseComparativeGenetics(object):
         :param post_blast:  A flag that is used to handle a BLAST result file,
                             which returns information about misssing
                             data, duplicates, etc.
-        :param hgnc:  A flag used as a placeholder for future work with HGNC files.
+        :param hgnc:  Enable HGNC annotation with the current complete dataset,
+                      or provide a local HGNC TSV path or alternate URL.
         :param proj_mana:  This parameter is used to compose (vs inherit) the
                            ProjectManagement class with the ComparativeGenetics class.
                            This parameter allows the various blast classes to function with or
                            without the Manager module.
+        :param copy_from_package: Copy a packaged accession file into the project.
         :param kwargs:  The kwargs here are generally used for standalone blasting or for development.
         :returns:  A pandas data-frame, pivot-table, and associated lists and dictionaries.
         """
 
-        # Private Variables
         self.__pre_blast = pre_blast
         self.__post_blast = post_blast
+        self.__hgnc_source = self._resolve_hgnc_source(hgnc)
         self.acc_file = acc_file
-
-        # Initialize variables
         self.project_path = project_path
         self.project = project
         self.ref_species = ref_species
         self.taxon_file = taxon_file
         self.proj_mana = proj_mana
-
-        # Initialize Logging
         self.get_time = time.time
-        self.sep = 50*'*'
-
-        # Initialize Utilities
+        self.sep = 50 * "*"
         self.blast_utils = FullUtilities()
-        if self.project_path and self.project:
-            self.project_path = Path(project_path) / Path(project)
-        elif self.project and not self.project_path:
-            self.project_path = self.project
-        # If user does not want to use a project name, create one anyway.
-        elif not self.project and not self.project_path:
-            four_ints = random.sample(range(1, 9), 4)  # 4 random integers
-            four_ints_str = ''.join(str(e) for e in four_ints)
-            self.project = "orthoevol" + four_ints_str  # New project name
-            self.project_path = os.getcwd()
-        # TODO: Add ability to use an existing project or project path.
-        elif self.project_path and not self.project:
-            raise NotImplementedError
+
+        project, project_path = self._resolve_project_context(
+            project,
+            project_path,
+        )
 
         self.blastn_log.debug('Project name: %s' % self.project)
         self.blastn_log.debug('Project path: %s' % self.project_path)
 
-        # Configuration of class attributes.
-        add_self = self.blast_utils.attribute_config(cls=self,
-                                                     composer=proj_mana,
-                                                     checker=ProjectManagement,
-                                                     project=project,
-                                                     project_path=project_path)
-        for variable, attribute in add_self.__dict__.items():
+        self._apply_project_configuration(project, project_path, proj_mana)
+        self._initialize_taxon_path()
+        if self.acc_file is not None:
+            self._copy_accession_file(copy_from_package)
+        self.acc_filename = self.acc_file
+        self._initialize_accession_data(acc_file)
+
+    @staticmethod
+    def _resolve_hgnc_source(
+        hgnc: bool | str | Path,
+    ) -> str | Path | None:
+        """Resolve the opt-in flag without changing custom HGNC sources."""
+        if hgnc is True:
+            return HGNC_COMPLETE_SET_URL
+        if hgnc:
+            return hgnc
+        return None
+
+    def _resolve_project_context(
+        self,
+        project: str | None,
+        project_path: str | Path | None,
+    ) -> tuple[str | None, str | Path | None]:
+        """Resolve instance paths and the inputs used by project composition."""
+        if project_path and project:
+            self.project_path = Path(project_path) / project
+        elif project and not project_path:
+            self.project_path = project
+        elif not project and not project_path:
+            # Retain the legacy generated name for unnamed standalone projects.
+            four_ints = random.sample(range(1, 9), 4)
+            self.project = "orthoevol" + "".join(str(value) for value in four_ints)
+            self.project_path = os.getcwd()
+        elif project_path and not project:
+            existing_project_path = Path(project_path)
+            self.project = existing_project_path.name
+            project = self.project
+            project_path = existing_project_path.parent
+        return project, project_path
+
+    def _apply_project_configuration(
+        self,
+        project: str | None,
+        project_path: str | Path | None,
+        proj_mana: ProjectManagement | dict[str, Any] | None,
+    ) -> None:
+        """Copy composed project attributes onto this analysis instance."""
+        configured_self = self.blast_utils.attribute_config(
+            cls=self,
+            composer=proj_mana,
+            checker=ProjectManagement,
+            project=project,
+            project_path=project_path,
+        )
+        for variable, attribute in configured_self.__dict__.items():
             setattr(self, variable, attribute)
 
-        # Handle the taxon_id file and blast query
+    def _initialize_taxon_path(self) -> None:
+        """Create the optional taxonomy path after project composition."""
         if self.taxon_file is not None:
-            # File init
             self.taxon_path = self.project_index / Path(self.taxon_file)
-        # Handle the master accession file (could be before or after blast)
-        if kwargs["copy_from_package"]:
-            shutil.copy(package_resource_path(data, self.acc_file),
-                        str(self.project_index))
+
+    def _copy_accession_file(self, copy_from_package: bool) -> None:
+        """Copy the selected accession source into the project index."""
+        if copy_from_package:
+            accession_source = package_resource_path(data, self.acc_file)
         else:
-            shutil.copy(self.acc_file, str(self.project_index))
-        self.acc_filename = self.acc_file
-        if self.acc_file is not None:
-            # File init
-            self.acc_sqlite_filename = Path(acc_file).stem + '.sqlite'
-            self.acc_sqlite_tablename = Path(acc_file).stem.replace('.', '_')
-            self.acc_csv_path = self.project_index / Path(self.acc_file)
-            self.acc_sqlite_path = self.project_index / Path(self.acc_sqlite_filename)
+            accession_source = self.acc_file
+        shutil.copy(accession_source, str(self.project_index))
 
-            # Handles for organism lists
-            self.org_list = []
-            self.ncbi_orgs = []
-            self.org_count = 0
-            self.taxon_ids = []
-            self.taxon_orgs = []
-            self.taxon_dict = {}
+    def _initialize_accession_data(self, original_acc_file: str | None) -> None:
+        """Initialize accession-backed state after the source file is copied."""
+        if self.acc_file is None:
+            self._initialize_empty_output_filenames()
+            return
 
-            # Handles for gene lists
-            self.gene_list = []
-            self.gene_count = 0
+        self._initialize_accession_paths(original_acc_file)
+        self._initialize_accession_collections()
+        self._initialize_accession_frames()
+        if self.__post_blast:
+            self._initialize_post_blast_state()
+        self._initialize_accession_views()
 
-            # Handles for tier lists
-            self.tier_list = []
-            self.tier_dict = {}
-            self.tier_frame_dict = {}
+    def _initialize_accession_paths(
+        self,
+        original_acc_file: str | None,
+    ) -> None:
+        """Derive all accession-related input and output paths."""
+        self.acc_sqlite_filename = Path(original_acc_file).stem + ".sqlite"
+        self.acc_sqlite_tablename = Path(original_acc_file).stem.replace(".", "_")
+        self.acc_csv_path = self.project_index / Path(self.acc_file)
+        self.acc_sqlite_path = self.project_index / self.acc_sqlite_filename
+        self.building_filename = f"{self.acc_file[:-4]}building.csv"
+        self.building_file_path = self.data / self.building_filename
+        self.building_time_filename = self.building_filename.replace(
+            "building.csv",
+            "building_time.csv",
+        )
+        self.building_time_file_path = self.data / self.building_time_filename
+        self.mygene_filename = f"{self.project}_mygene.csv"
+        self.mygene_path = self.data / self.mygene_filename
+        self.hgnc_filename = f"{self.project}_hgnc.csv"
+        self.hgnc_path = self.data / self.hgnc_filename
 
-            # Handles for accession lists
-            self.acc_dict = {}
-            self.acc_list = []
+    def _initialize_accession_collections(self) -> None:
+        """Create the mutable collections populated during BLAST analysis."""
+        self.org_list = []
+        self.ncbi_orgs = []
+        self.org_count = 0
+        self.taxon_ids = []
+        self.taxon_orgs = []
+        self.taxon_dict = {}
+        self.gene_list = []
+        self.gene_count = 0
+        self.tier_list = []
+        self.tier_dict = {}
+        self.tier_frame_dict = {}
+        self.acc_dict = {}
+        self.acc_list = []
+        self.blast_human = []
+        self.blast_rhesus = []
 
-            # Handles for blast queries
-            self.blast_human = []
-            self.blast_rhesus = []
+    def _initialize_accession_frames(self) -> None:
+        """Load the accession table and create its mutable working frames."""
+        self.raw_acc_data = self.blast_utils.accession_sqlite2pandas(
+            self.acc_sqlite_tablename,
+            self.acc_sqlite_filename,
+            path=self.project_index,
+            acc_file=self.acc_file,
+        )
+        self.mygene_df = pd.DataFrame()
+        self.hgnc_df = pd.DataFrame()
+        self.header = self.raw_acc_data.axes[1].tolist()
 
-            # Handles for different dataframe initializations
-            self.raw_acc_data = self.blast_utils.accession_sqlite2pandas(self.acc_sqlite_tablename, self.acc_sqlite_filename,
-                                                                         path=self.project_index, acc_file=self.acc_file)
-            # Master accession file for the blast
-            self.building_filename = str(self.acc_file[:-4] + 'building.csv')
+        self.building = copy.deepcopy(self.raw_acc_data)
+        del self.building["Tier"]
+        del self.building[self.ref_species]
+        self.building = self.building.set_index("Gene")
 
-            # Pre-Blast objects
-            self.mygene_df = pd.DataFrame()  # MyGene
-            self.mygene_filename = "%s_mygene.csv" % self.project  # MyGene
-            self.mygene_path = self.data / Path(self.mygene_filename)  # MyGene
-            self.header = self.raw_acc_data.axes[1].tolist()
+        self.building_time = copy.deepcopy(self.raw_acc_data)
+        del self.building_time["Tier"]
+        del self.building_time[self.ref_species]
+        self.building_time = self.building_time.set_index("Gene")
 
-            # Blast accession numbers
-            self.building = copy.deepcopy(self.raw_acc_data)
-            del self.building['Tier']
-            del self.building[self.ref_species]
-            # Object for good user output
-            self.building = self.building.set_index('Gene')
-            self.building_file_path = self.data / Path(self.building_filename)
+    def _initialize_post_blast_state(self) -> None:
+        """Create result containers only when post-BLAST analysis is enabled."""
+        self.missing_dict = {}
+        self.missing_genes = {}
+        self.missing_organsims = {}
+        self.missing_gene_count = 0
+        self.missing_organsims_count = 0
+        self.duplicated_dict = {}
+        self.duplicated_accessions = {}
+        self.dup_acc_count = {}
+        self.duplicated_genes = {}
+        self.dup_gene_count = {}
+        self.duplicated_organisms = {}
+        self.dup_org_count = {}
+        self.duplicated_random = {}
+        self.duplicated_other = {}
+        self.time_dict = {}
 
-            # Blast time points
-            # Master time file for the blast
-            self.building_time_filename = self.building_filename.replace(
-                'building.csv', 'building_time.csv')  # Master time file for the blast
-            self.building_time = copy.deepcopy(self.raw_acc_data)
-            del self.building_time['Tier']
-            del self.building_time[self.ref_species]
-            self.building_time = self.building_time.set_index('Gene')
-            self.building_time_file_path = self.data / Path(self.building_time_filename)
+    def _initialize_accession_views(self) -> None:
+        """Create indexed views and populate the public lookup collections."""
+        self.__data = self.raw_acc_data.set_index("Gene")
+        self.df = self.__data
+        self.pt = pd.pivot_table(
+            copy.deepcopy(self.raw_acc_data),
+            index=["Tier", "Gene"],
+            aggfunc="first",
+        )
+        organism_columns = self.pt.axes[1].tolist()
+        self.pt.columns = pd.Index(organism_columns, name="Organism")
+        self.org_dict = self.df.loc[:, self.ref_species:].to_dict()
+        self.gene_dict = self.df.T.to_dict()
+        self.get_master_lists(self.__data)
 
-            # Handles for accession file analysis # #
-            if self.__post_blast:
-                # Missing
-                self.missing_dict = {}
-                self.missing_genes = {}
-                self.missing_organsims = {}
-                self.missing_gene_count = 0
-                self.missing_organsims_count = 0
-
-                # Duplicates
-                self.duplicated_dict = {}
-                self.duplicated_accessions = {}
-                self.dup_acc_count = {}
-                self.duplicated_genes = {}
-                self.dup_gene_count = {}
-                self.duplicated_organisms = {}
-                self.dup_org_count = {}
-                self.duplicated_random = {}
-                self.duplicated_other = {}
-                self.time_dict = {}
-
-            # Format the main data frame #### #
-            self.__data = self.raw_acc_data.set_index('Gene')
-            self.df = self.__data
-            # Format the main pivot table #### #
-            self.pt = pd.pivot_table(
-                copy.deepcopy(self.raw_acc_data),
-                index=['Tier', 'Gene'],
-                aggfunc='first')
-            array = self.pt.axes[1].tolist()  # Organism list
-            self.pt.columns = pd.Index(array, name='Organism')
-
-            # Handles for full dictionaries #### #
-            self.org_dict = self.df.loc[:, self.ref_species:].to_dict()
-            self.gene_dict = self.df.T.to_dict()
-            self.get_master_lists(self.__data)  # populates our lists
-        else:
-            self.building_filename = str(self.project + '_building.csv')
-            self.building_time_filename = str(self.project + '_building_time.csv')
+    def _initialize_empty_output_filenames(self) -> None:
+        """Retain output names when no accession dataset is configured."""
+        self.building_filename = f"{self.project}_building.csv"
+        self.building_time_filename = f"{self.project}_building_time.csv"
 
 
 # //TODO-ROB Add HGNC python module
