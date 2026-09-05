@@ -1,88 +1,109 @@
-FTP (File Transfer Protocol) Documentation
-=============================================
+# NCBI download tools
 
-The `ftp` module is geared towards making it easier to interface with [NCBI's
-FTP repository](ftp://ftp.ncbi.nlm.nih.gov).
+This package provides a generic FTP connection class and an NCBI-specific
+client. `NcbiFTPClient` uses FTP only to inspect directories. File transfers use
+HTTPS so concurrent downloads do not share a stateful FTP connection.
 
-More specifically, we provide a way to easily find and list directories and their
-respective contents as well as to download blast databases and other databases
-for use with the Orthologs package. We have implemented database downloading
-with threading which is the safest way to implement this cross-platform.
+The client supports:
 
-We also provide a parallel module which can be used in conjunction with the
-`NcbiFTPClient` to download files or databases much quicker if your system can
-handle that.
+- Current version 5 BLAST databases from `/blast/db/`
+- Legacy version 4 BLAST databases from `/blast/db/v4/`
+- NCBI's convenience BLAST FASTA files
+- Bulk RefSeq release selections
+- FTP file and directory listings
 
-If you're using Linux or a supercomputer and do not want to use threading to
-download ftp databases, you can look at [this cli script](https://github.com/datasnakes/OrthoEvolution/blob/master/Examples/standalone-scripts/ncbi-download.py).
+NCBI no longer publishes WindowMasker files. Calling
+`getwindowmaskerfiles()` raises `OrthoEvolDeprecationWarning`.
 
+## BLAST database download
 
-Examples
----------
+```python
+from pathlib import Path
 
-#### Blastdb Download Example
-
-Download the [latest](ftp://ftp.ncbi.nlm.nih.gov/blast/db/v5/) blast databases 
-(version 5 which is formatted for taxonomy ids). If `v5=False`, then the previously used 
-blast databases will be downloaded. The [taxdb.tar.gz](ftp://ftp.ncbi.nlm.nih.gov/blast/db/v5/taxdb.tar.gz) database is also
-downloaded (by default) with the preformatted blast databases.
-
-``` python
 from OrthoEvol.Tools.ftp import NcbiFTPClient
 
-ncbiftp = NcbiFTPClient(email='somebody@gmail.com')
-ncbiftp.getblastdb(database_name='refseq_rna', v5=True)
+
+download_path = Path("databases") / "NCBI" / "blast" / "db"
+client = NcbiFTPClient(email="researcher@example.org", max_workers=4)
+
+try:
+    client.getblastdb(
+        database_name="refseq_rna",
+        download_path=download_path,
+        v5=True,
+        extract=True,
+    )
+finally:
+    client.close_connection()
 ```
 
-#### Windowmasker files Download Example
+Version 5 selections use NCBI's
+[`blastdb-metadata-1-1.json`](https://ftp.ncbi.nlm.nih.gov/blast/db/blastdb-metadata-1-1.json)
+manifest. Exact database identities are matched, and every volume listed by
+NCBI is downloaded. Each archive is verified against its `.md5` sidecar before
+extraction. The sidecar remains as the local installation marker.
+
+Set `v5=False` only when a legacy version 4 database is specifically required.
+
+## RefSeq release download
 
 ```python
+from pathlib import Path
+
 from OrthoEvol.Tools.ftp import NcbiFTPClient
-import os
 
-ids = ['9544', '9606']
 
-ncbiftp = NcbiFTPClient(email='somebody@gmail.com')
-ncbiftp.getwindowmaskerfiles(taxonomy_ids=ids, download_path=os.getcwd())
+download_path = Path("databases") / "NCBI" / "refseq" / "release"
+client = NcbiFTPClient(email="researcher@example.org", max_workers=4)
+
+try:
+    client.getrefseqrelease(
+        collection_subset="vertebrate_mammalian",
+        seqtype="rna",
+        seqformat="gbff",
+        download_path=download_path,
+        extract=True,
+    )
+finally:
+    client.close_connection()
 ```
 
-#### Refseq Release Download Example
+RefSeq filenames are matched using NCBI's documented structure:
+`collection.increment[.subpart].molecule.format.gz`. The special
+`collection.wp_protein.increment.protein.format.gz` form is also included. A
+local selection marker records the completed NCBI release number. Repeating the
+same request skips a complete selection from the current release. Archives are
+verified against NCBI's release-catalog checksums before extraction.
+
+## BLAST FASTA download
 
 ```python
-from OrthoEvol.Tools.ftp import NcbiFTPClient
-import os
-
-ncbiftp = NcbiFTPClient(email='somebody@gmail.com')
-ncbiftp.getrefseqrelease(taxon_group='vertebrate_mammalian', seqtype='rna', 
-                         seqformat='gbff', download_path=os.getcwd())
+client.getblastfasta(
+    database_name="swissprot",
+    download_path=Path("databases") / "NCBI" / "blast" / "fasta",
+)
 ```
 
-#### List all directories in a path
+The FASTA directory is a convenience snapshot and can lag the preformatted
+BLAST databases. For sequences from the current preformatted database, NCBI
+recommends downloading the database and exporting sequences with `blastdbcmd`.
+
+## Directory listings
 
 ```python
-
-ncbiftp.listdirectories(path='/blast/db/')
-Out[54]: ['FASTA', 'cloud']
+directories = client.listdirectories("/blast/db/")
+files = client.listfiles("/blast/db/")
 ```
 
-#### List all files in a path
+Paths must begin and end with `/`.
 
-```python
+## Transfer behavior
 
-ncbiftp.listfiles(path='/blast/db/')
-```
+- Downloads use temporary `.part` files and replace destinations atomically.
+- Existing validated BLAST archives or installation markers are reused.
+- Existing RefSeq files are reused when their checksums or extracted outputs agree.
+- Archive paths are validated before extraction.
+- Network errors and checksum mismatches leave prior complete files intact.
 
-#### List all files in the current working directory
-
-```python
-
-# The default path is ftp.pwd() or the current directory
-ncbiftp.listfiles()
-```
-
-Notes
--------------------
-
-Check the [NCBI README](NCBIREADME.md) for information about the preformatted
-blast databases that we use and suggest you use. We also provide an easy way to
- download them which is referenced in the above example.
+See [NCBIREADME.md](NCBIREADME.md) for the NCBI source-of-truth links and
+format notes.

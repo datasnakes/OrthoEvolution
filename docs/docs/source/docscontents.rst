@@ -6,5 +6,4 @@
     cookies/cookiesreadme
     manager/managerreadme
     orthologs/orthologsreadme
-    pipeline/pipelinereadme
     tools/toolsreadme

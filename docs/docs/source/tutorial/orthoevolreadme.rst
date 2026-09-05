@@ -5,7 +5,7 @@ OrthoEvolution has been built with Python 3.11 (and up) as a
 multi-faceted package and pipeline framework for comparative genetics in
 order to infer orthologous genes.
 
-Currently, this python package is comprised of 5 major modules:
+Currently, this Python package is comprised of 4 major modules:
 
 1. `Cookies Module <#using-the-cookies-module>`__ - Project structure
    creation using cookiecutter.
@@ -14,9 +14,7 @@ Currently, this python package is comprised of 5 major modules:
 3. `Orthologs Module <#using-the-orthologs-module>`__ - Tools for
    comparative genetics analysis including alignment analysis and
    phylogenetics.
-4. `Pipeline Module <#using-the-pipeline-module>`__ - Various
-   preconfigured pipelines to be used in orthology inference.
-5. `Tools Module <#using-the-tools-module>`__ - Utilities that aid in
+4. `Tools Module <#using-the-tools-module>`__ - Utilities that aid in
    ftp downloading, server communication, and reusable everyday
    functions
 
@@ -221,18 +219,6 @@ Examples
    al = MSA(genbank=genbank, **management_cfg, **alignment_cfg)
    al.align(alignment_config['kwargs'])  # Underdeveloped
 
-Using the Pipeline module
--------------------------
-
-The pipeline module integrates the python package `luigi <#>`__ with our
-package to create a pipeline that is accessible via the command-line and
-can be utilized with a qsub/pbs job scheduling system.
-
-.. _examples-3:
-
-Examples
-~~~~~~~~
-
 Using the Tools module
 ----------------------
 
@@ -255,10 +241,6 @@ Some of the tools/classes in the tools module are:
 - ``Multiprocess`` - A simple and effective class that allows the input
   of a function to map to a user’s list in order to take advantage of
   parallel computing.
-- ``SGEJob`` - A class to aid in submission of a job via ``qsub`` on a
-  cluster.
-- ``Qstat`` - A class that parses the output of ``qstat`` to return job
-  information. It also waits on job completion.
 - ``Slackify`` - A class for sending messages, files, and images to
   Slack channels for pipeline progress updates and notifications.
 - ``MyGene`` - A wrapper around BioThings’ MyGene.info REST API for

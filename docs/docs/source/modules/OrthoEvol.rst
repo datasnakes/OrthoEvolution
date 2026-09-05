@@ -10,7 +10,6 @@ Subpackages
    OrthoEvol.Cookies
    OrthoEvol.Manager
    OrthoEvol.Orthologs
-   OrthoEvol.Pipeline
    OrthoEvol.Tools
 
 Submodules

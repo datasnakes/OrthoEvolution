@@ -27,7 +27,7 @@ and phylogenetics analyses including PAML, PhyML, ete3, and more tools.
 
 Ultimately, the goal of this project is to create a **reusable pipeline** for the
 inference of orthologs in order to ensure reproducibility of data as well as improve
-the management and analysis of (what can be) large datasets.  The Cookies, Manager, Pipeline,
+the management and analysis of (what can be) large datasets.  The Cookies, Manager,
 and Tools modules act as a framework for our workflow, while the Orthologs
 module provides access to specific functions for our various ortholog inference projects.
 
