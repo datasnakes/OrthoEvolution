@@ -298,6 +298,18 @@ class TestManagerUtils(unittest.TestCase):
         finally:
             shutil.rmtree(test_dir, ignore_errors=True)
 
+    def test_parse_db_config_file_requires_database_config(self) -> None:
+        """Reject configuration files without a database section."""
+        with tempfile.TemporaryDirectory() as test_dir:
+            config_file = Path(test_dir) / 'test_config.yml'
+            config_file.write_text('{}\n', encoding='utf-8')
+
+            with self.assertRaisesRegex(
+                ValueError,
+                'must contain Database_config',
+            ):
+                self.utils.parse_db_config_file(config_file)
+
 
 class TestPackageVersion(unittest.TestCase):
 
