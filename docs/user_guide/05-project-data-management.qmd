@@ -1,0 +1,121 @@
+---
+title: Project and Data Management
+description: Understand the managed repository hierarchy before creating files or databases.
+---
+
+A comparative-genetics project can produce many files across several analysis
+steps. The `Manager` package gives repository, user, project, database,
+raw-data, and web directories a consistent hierarchy. Its classes can create
+these directories from bundled Cookiecutter templates.
+
+## Create a project layout
+
+```python
+from OrthoEvol.Manager.management import ProjectManagement
+
+project_manager = ProjectManagement(
+    repo="comparative-genetics",
+    user="researcher",
+    project="receptor-family",
+    research=None,
+    research_type="comparative_genetics",
+    new_project=True,
+)
+```
+
+This code writes directories and files from a template. Before you set
+`new_project=True`, use an explicit destination and make sure that it is the
+intended location.
+
+## See the managed directory layout
+
+The management classes and templates use the repository hierarchy below. A
+constructor creates only the part selected by `new_repo`, `new_user`,
+`new_project`, `new_db`, `new_research`, or `new_app`. Some paths exist in the
+manager before a tool writes data to their directories.
+
+```text
+<repository>/
+├── docs/
+├── users/
+│   └── <user>/
+│       ├── archive/
+│       ├── databases/
+│       │   ├── <project>/
+│       │   ├── ITIS/
+│       │   └── NCBI/
+│       │       ├── blast/
+│       │       │   ├── db/
+│       │       │   ├── seqidlists/
+│       │       │   └── windowmasker_files/
+│       │       ├── pub/
+│       │       │   └── taxonomy/
+│       │       └── refseq/
+│       │           └── release/
+│       ├── index/
+│       ├── log/
+│       ├── manuscripts/
+│       ├── other/
+│       └── projects/
+│           └── <project>/
+│               ├── archive/
+│               └── <research-type>/
+│                   └── <research>/
+│                       ├── data/
+│                       ├── index/
+│                       ├── raw_data/
+│                       └── web/
+│                           └── <app>/
+└── web/
+    ├── flask/
+    ├── ftp/
+    ├── shiny/
+    └── wasabi/
+```
+
+The user's `databases/` directory contains project databases. They do not live
+inside `projects/<project>/`. The manager adds a research directory only when
+you supply both a research type and a research name.
+
+## Choose what to create
+
+| Option | Created area |
+|---|---|
+| `new_repo=True` | Repository-level directories and templates |
+| `new_user=True` | A user's archive, database, project, and support directories |
+| `new_db=True` | Database directories selected by the database configuration |
+| `new_project=True` | The named project beneath the user's project hierarchy |
+| `new_research=True` | The named research directory beneath its research type |
+| `new_app=True` | The selected web application beneath newly created research |
+
+These flags create content. They do not search an existing layout. Before you
+use a flag, supply the parent identifiers for that level. Make sure that the
+resolved paths are correct before you enable more than one creation flag.
+
+The current `ProjectManagement` implementation handles `new_app=True` inside
+the `new_research=True` branch. You must also supply `research`,
+`research_type`, and `app`.
+
+## Follow the project hierarchy
+
+- `Management` maps package resources and an optional repository root.
+- `RepoManagement` adds repository-wide user, documentation, and web paths.
+- `UserManagement` adds user-specific databases, archives, projects, and raw
+  data.
+- `ProjectManagement` specializes the hierarchy for a research project.
+- `DataMana` and the database-management classes dispatch configured data and
+  database operations.
+
+## Review the configuration
+
+A managed workflow can combine Python objects with YAML configuration. Before
+you dispatch the workflow, make sure that the YAML structure and referenced
+paths are correct. Valid YAML can still name an invalid database strategy, an
+unavailable path, or an unsupported operation.
+
+## Practice in a disposable project
+
+Start with a small disposable project while you learn the hierarchy. Make sure
+that each manager supplies the paths required by the next class. This practice
+reduces the risk of writing to the wrong directory or starting a large data
+operation with the wrong configuration.

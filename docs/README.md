@@ -1,120 +1,52 @@
-# Documentation
+# OrthoEvolution documentation
 
-This directory contains the Sphinx documentation for OrthoEvolution.
+The authored documentation lives in `docs/user_guide/`. Great Docs combines
+these guides with the project README, package metadata, changelog, citation,
+and an API reference generated from the Python docstrings.
 
-## Quick Start
+## Prerequisites
 
-To update and build the documentation:
+- Python 3.11 through 3.14
+- [Quarto](https://quarto.org/docs/get-started/)
+- [`uv`](https://docs.astral.sh/uv/getting-started/installation/)
+- A repository-local virtual environment
 
-```bash
-# From the project root
-python docs/update_docs.py
-```
+## Install the documentation tools
 
-This script will:
-1. Automatically read the version from `setup.py`
-2. Update Sphinx configuration
-3. Convert README.md files to RST format (if pypandoc installed)
-4. Regenerate API documentation from source code
-5. Build the HTML documentation
-
-### Options
+From the repository root:
 
 ```bash
-# Skip README.md conversion (faster, if READMEs haven't changed)
-python docs/update_docs.py --skip-readmes
-
-# Only regenerate API docs, don't build
-python docs/update_docs.py --skip-build
+uv venv --python 3.14 .venv
+uv pip install --python .venv/bin/python -e ".[docs]"
 ```
 
-## Manual Steps
-
-If you prefer to build manually:
-
-### 1. Regenerate API Documentation
+## Build the site
 
 ```bash
-cd docs
-rm -rf docs/source/modules/*.rst
-sphinx-apidoc OrthoEvol/ -o docs/source/modules --separate --force
+.venv/bin/great-docs build --no-refresh
 ```
 
-### 2. Build Documentation
+The generated site is written to `great-docs/_site/`. The entire
+`great-docs/` directory is ephemeral and is not committed.
+
+The `--no-refresh` option is intentional. OrthoEvolution contains bundled
+BioSQL sources and Cookiecutter templates that make unconstrained package-wide
+API discovery slow. The maintained API inventory in `great-docs.yml` keeps the
+published reference explicit and reviewable.
+
+## Preview the site
 
 ```bash
-cd docs/docs/source
-make html
+.venv/bin/great-docs preview
 ```
 
-Or using sphinx-build directly:
+## Quality checks
 
 ```bash
-sphinx-build -b html docs/source docs/_build
+.venv/bin/great-docs lint
+.venv/bin/great-docs check-links --docs-only
+.venv/bin/great-docs seo
 ```
 
-## Automation Features
-
-### Version Management
-
-The `conf.py` file automatically reads the version from `setup.py`, so you don't need to manually update version numbers when releasing.
-
-### API Documentation
-
-The `update_docs.py` script automatically:
-- Removes old module documentation files
-- Regenerates API docs using `sphinx-apidoc`
-- Builds the final documentation
-
-## Documentation Structure
-
-- `docs/source/` - Sphinx source files
-  - `conf.py` - Sphinx configuration (auto-reads version from setup.py)
-  - `index.rst` - Main documentation index
-  - `modules/` - Auto-generated API documentation
-  - `cookies/`, `manager/`, `orthologs/`, `pipeline/`, `tools/` - Module-specific docs
-  - `tutorial/` - Tutorial documentation
-
-## Software Dependencies
-
-- [Sphinx](http://www.sphinx-doc.org/) - Documentation generator
-- [Pandoc](http://johnmacfarlane.net/pandoc/) - Optional, for converting markdown to RST
-
-Install dependencies:
-
-```bash
-pip install sphinx
-# Optional: pip install pypandoc
-```
-
-## ReadTheDocs Integration
-
-The documentation is automatically built and hosted on [ReadTheDocs](http://orthoevolution.readthedocs.io/).
-
-### Automated Build Process
-
-The `.readthedocs.yml` file in the project root configures the build process:
-
-1. **Pre-build step**: Automatically runs `python docs/update_docs.py --skip-build` to:
-   - Extract version from `setup.py`
-   - Convert README.md files to RST
-   - Regenerate API documentation with `sphinx-apidoc`
-
-2. **Build step**: Read the Docs then runs Sphinx to build the HTML documentation
-
-This means documentation updates automatically on every push to the repository, without manual intervention.
-
-### GitHub Actions
-
-A GitHub Actions workflow (`.github/workflows/docs.yml`) also builds documentation on:
-- Pushes to main branches
-- Pull requests affecting documentation
-- Manual workflow dispatch
-
-This provides local validation and artifact uploads for review.
-
-## Notes
-
-- The `_static/` directory contains generated HTML files that are updated when docs are built
-- README.md to RST conversion is integrated into `update_docs.py` (requires pypandoc)
-- Module documentation is auto-generated, so manual edits to `modules/*.rst` files will be overwritten
+GitHub Actions builds every documentation change. Pushes to `main` publish the
+rendered site to GitHub Pages.

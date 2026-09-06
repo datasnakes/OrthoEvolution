@@ -58,7 +58,6 @@ class Management(object):
         self.parallel = self.Tools / Path('parallel')
         self.pybasher = self.Tools / Path('pybasher')
         self.send2server = self.Tools / Path('send2server')
-        self.sge = self.Tools / Path('sge')
         self.slackify = self.Tools / Path('slackify')
         self.utils = self.Tools / Path('utils')
 

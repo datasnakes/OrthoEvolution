@@ -1,0 +1,77 @@
+---
+title: Cluster Execution
+description: Submit and inspect PBS or Slurm work without hiding scheduler assumptions.
+---
+
+A cluster scheduler assigns computing resources to jobs. OrthoEvolution
+includes PBS helpers and a small synchronous Slurm client. These interfaces
+call scheduler commands on the execution host. They do not install a scheduler
+or translate the resource rules for your site.
+
+## Slurm example
+
+```python
+from pathlib import Path
+
+from OrthoEvol.Tools.slurm import SlurmClient
+
+slurm = SlurmClient()
+job_id = slurm.submit(Path("analysis.sbatch"))
+active_jobs = slurm.active_jobs()
+job_history = slurm.job_history(job_id)
+```
+
+`submit()` sends an existing batch script and returns its job identifier.
+`active_jobs()` requests the active jobs for one user. `job_history()` requests
+the allocation record for one job. The client returns `SlurmJob` objects and
+keeps the state and node information from Slurm.
+
+## PBS support
+
+The PBS package provides `Qsub` for job submission and `Qstat` for job status.
+PBS output formats differ between systems. Before you automate these
+interfaces, make sure that your local output matches the parser format.
+
+```python
+from OrthoEvol.Tools.pbs import BaseQstat, BaseQsub
+
+pbs_job = BaseQsub(
+    job_name="orthologs",
+    pbs_script="analysis.pbs",
+    pbs_working_dir="pbs-jobs",
+)
+pbs_job.copy_supplied_script(
+    supplied_script=pbs_job.supplied_pbs_script,
+    new_script=pbs_job.pbs_script,
+)
+pbs_job.submit_pbs_script()
+
+job_status = BaseQstat(
+    job_id=pbs_job.pbs_job_id,
+    home="pbs-status",
+)
+job_status.run_qstat(csv_flag=True)
+```
+
+`BaseQsub` creates a unique work directory. It copies the supplied script into
+that directory before submission. `BaseQstat` records one full status
+response. This example runs only on a host with compatible `qsub` and `qstat`
+commands.
+
+Before you create the status client, make sure that `pbs_job.pbs_job_id` has a
+value. A failed submission leaves it unset.
+
+## Adapt the job to your cluster
+
+Your cluster defines its partitions, queues, accounts, time limits, memory
+syntax, modules, and storage paths. Put these values in the batch script or
+site configuration. Do not assume that an example from another cluster will
+run without changes.
+
+## Diagnose scheduler errors
+
+If a scheduler command is missing, the request stops immediately. Other
+failures start after submission or status inspection. Common causes include an
+invalid account, unavailable resources, queue rules, missing accounting data,
+and malformed scheduler output. Save the exact error and job identifier for
+the cluster administrator.

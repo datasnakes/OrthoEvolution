@@ -7,23 +7,28 @@ import shutil
 import sqlite3
 import subprocess as sp
 import sys
-from threading import Timer
+from collections import Counter
+from collections.abc import Mapping, Sequence
+from dataclasses import dataclass
 from datetime import datetime
 from importlib import import_module
 from importlib.metadata import version
 from pathlib import Path
 from subprocess import TimeoutExpired
 from tempfile import TemporaryFile
-# BioPython
-from Bio import AlignIO
-from Bio import SeqIO
-from Bio.Align import MultipleSeqAlignment
-# OrthoEvol
-from OrthoEvol.Cookies.cookie_jar import Oven
-from OrthoEvol.Tools.logit import LogIt
+from threading import Timer
+from typing import TypedDict
+
 # Other
 import pandas as pd
 import yaml
+# BioPython
+from Bio import AlignIO, SeqIO
+from Bio.Align import MultipleSeqAlignment
+
+# OrthoEvol
+from OrthoEvol.Cookies.cookie_jar import Oven
+from OrthoEvol.Tools.logit import LogIt
 
 # Set up logging
 blastutils_log = LogIt().default(logname="blast-utils", logfile=None)
@@ -31,6 +36,98 @@ seqidlist_log = LogIt().default(logname="gi-lists", logfile=None)
 utils_log = LogIt().default(logname="utils", logfile=None)
 _datefmt = '%I:%M:%S %p on %m-%d-%Y'
 _date = str(datetime.now().strftime(_datefmt))
+
+
+class DuplicateGroups(TypedDict):
+    """Duplicate accessions grouped by their observed relationship."""
+
+    accessions: dict[str, list[Sequence[str]]]
+    genes: dict[str, dict[str, list[str]]]
+    organisms: dict[str, dict[str, list[str]]]
+    random: dict[str, list[Sequence[str]]]
+    other: dict[str, list[Sequence[str]]]
+
+
+@dataclass(frozen=True, slots=True)
+class DuplicateAnalysis:
+    """Duplicate groups and the counts consumed by post-BLAST reporting."""
+
+    groups: DuplicateGroups
+    accession_counts: dict[str, int]
+    gene_counts: dict[str, int]
+    organism_counts: dict[str, int]
+
+
+def _empty_duplicate_groups() -> DuplicateGroups:
+    """Create independent mappings for each duplicate category."""
+    return {
+        "accessions": {},
+        "genes": {},
+        "organisms": {},
+        "random": {},
+        "other": {},
+    }
+
+
+def _validated_gene_organism_pairs(
+    accession: str,
+    pairs: Sequence[Sequence[str]],
+) -> list[Sequence[str]]:
+    """Validate pair shape before interpreting duplicate relationships."""
+    invalid_pairs = [pair for pair in pairs if len(pair) != 2]
+    if invalid_pairs:
+        raise ValueError(
+            f"Duplicate accession {accession!r} requires gene-organism pairs."
+        )
+    return list(pairs)
+
+
+def _classify_duplicate_accession(
+    accession: str,
+    pairs: list[Sequence[str]],
+    duplicate_groups: DuplicateGroups,
+) -> None:
+    """Classify one duplicated accession using mutually exclusive categories."""
+    genes = [pair[0] for pair in pairs]
+    organisms = [pair[1] for pair in pairs]
+    gene_counts = Counter(genes)
+    organism_counts = Counter(organisms)
+
+    if len(organism_counts) == 1:
+        organism = organisms[0]
+        organism_groups = duplicate_groups["organisms"].setdefault(
+            organism,
+            {},
+        )
+        organism_groups[accession] = genes
+        blastutils_log.warning(
+            f"Duplicate accession {accession} occurs only in {organism}."
+        )
+        return
+
+    if len(gene_counts) == 1:
+        gene = genes[0]
+        gene_groups = duplicate_groups["genes"].setdefault(gene, {})
+        gene_groups[accession] = organisms
+        blastutils_log.warning(
+            f"Duplicate accession {accession} occurs only for {gene}."
+        )
+        return
+
+    if all(
+        count == 1
+        for count in (*gene_counts.values(), *organism_counts.values())
+    ):
+        duplicate_groups["random"][accession] = pairs
+        blastutils_log.warning(
+            f"Duplicate accession {accession} has no repeated gene or organism."
+        )
+        return
+
+    duplicate_groups["other"][accession] = pairs
+    blastutils_log.warning(
+        f"Duplicate accession {accession} has a mixed duplication pattern."
+    )
 
 
 class BlastUtils(object):
@@ -191,7 +288,51 @@ class BlastUtils(object):
 
         return query_data
 
-    def get_dup_acc(self, acc_dict, gene_list, org_list):
+    def analyze_duplicate_accessions(
+        self,
+        acc_dict: Mapping[str, Sequence[Sequence[str]]],
+        gene_list: Sequence[str],
+        org_list: Sequence[str],
+    ) -> DuplicateAnalysis:
+        """Classify duplicate accessions and calculate report counts once."""
+        duplicate_groups = _empty_duplicate_groups()
+
+        for accession, raw_pairs in acc_dict.items():
+            pairs = _validated_gene_organism_pairs(accession, raw_pairs)
+            if len(pairs) <= 1:
+                continue
+            duplicate_groups["accessions"][accession] = pairs
+            _classify_duplicate_accession(
+                accession,
+                pairs,
+                duplicate_groups,
+            )
+
+        accession_counts = {
+            accession: len(pairs)
+            for accession, pairs in duplicate_groups["accessions"].items()
+        }
+        gene_counts = {
+            gene: len(duplicate_groups["genes"].get(gene, {}))
+            for gene in gene_list
+        }
+        organism_counts = {
+            organism: len(duplicate_groups["organisms"].get(organism, {}))
+            for organism in org_list
+        }
+        return DuplicateAnalysis(
+            groups=duplicate_groups,
+            accession_counts=accession_counts,
+            gene_counts=gene_counts,
+            organism_counts=organism_counts,
+        )
+
+    def get_dup_acc(
+        self,
+        acc_dict: Mapping[str, Sequence[Sequence[str]]],
+        gene_list: Sequence[str],
+        org_list: Sequence[str],
+    ) -> DuplicateGroups:
         """Get duplicated accession numbers during post-blast analysis.
 
         :param acc_dict:  A dictionary with accession numbers as keys, and a
@@ -206,110 +347,11 @@ class BlastUtils(object):
         :rtype:  dict.
         """
 
-        duplicated_dict = dict()
-        duplicated_dict['accessions'] = {}
-        duplicated_dict['genes'] = {}
-        duplicated_dict['organisms'] = {}
-        duplicated_dict['random'] = {}
-        duplicated_dict['other'] = {}
-        acc_dict = acc_dict
-        dup_gene_count = {}
-        dup_org_count = {}
-        dup_acc_count = {}
-
-        for accession, go_list in acc_dict.items():
-            # Finding duplicates by using the length of the accession
-            # dictionary
-            if len(go_list) > 1:
-                # dict['accessions']['XM_000000'] = [[g, o], [g, o]]
-                duplicated_dict['accessions'][accession] = go_list
-                genes, orgs = zip(*go_list)
-                genes = list(genes)
-                orgs = list(orgs)
-                # Process the duplicates by categorizing and storing in a
-                # dictionary
-                for go in go_list:
-                    g = go[0]
-                    o = go[1]
-                    # Initialize the dictionaries if they haven't already been
-                    if g not in duplicated_dict['genes']:
-                        duplicated_dict['genes'][g] = {}
-                    if o not in duplicated_dict['organisms']:
-                        duplicated_dict['organisms'][o] = {}
-                        # Categorize the different types of duplication
-                    # Duplicates that persist across an organisms
-                    if orgs.count(o) == len(go_list):
-                        blastutils_log.warning(
-                            "A duplicate accession number(%s) persists ONLY across %s for %s." % (accession, o, genes))
-                        duplicated_dict['organisms'][o][accession] = genes
-                        del duplicated_dict['genes'][g]
-                        break
-                    # Duplication across an organisms, but also somewhere else
-                    elif orgs.count(o) != 1:
-                        alt_genes = list(
-                            gene for gene, org in go_list if org == o)
-                        blastutils_log.warning(
-                            "A duplicate accession number(%s) persists across %s for %s." % (accession, o, alt_genes))
-                        blastutils_log.warning(
-                            "%s is also duplicated elsewhere." % accession)
-                        duplicated_dict['organisms'][o][accession] = alt_genes
-
-                    # Duplicates that persist across a gene
-                    if genes.count(g) == len(go_list):
-                        blastutils_log.critical(
-                            "A duplicate accession number(%s) persists across %s for %s." % (accession, g, orgs))
-                        duplicated_dict['genes'][g][accession] = orgs
-                        del duplicated_dict['organisms'][o]
-                        break
-                    # Duplication across a gene, but also somewhere else
-                    elif genes.count(g) != 1:
-                        alt_orgs = list(
-                            org for gene, org in go_list if gene == g)
-                        blastutils_log.critical(
-                            "A duplicate accession number(%s) persists across %s for %s." % (accession, g, alt_orgs))
-                        blastutils_log.critical(
-                            "%s is also duplicated elsewhere." % accession)
-                        duplicated_dict['genes'][g][accession] = alt_orgs
-
-                        # This is the "somewhere else" if the duplication
-                        # is random or not categorized
-                        # The duplication is random
-                    if genes.count(g) == 1 and orgs.count(o) == 1:
-                        del duplicated_dict['organisms'][o]
-                        del duplicated_dict['genes'][g]
-                        if accession not in duplicated_dict['random']:
-                            duplicated_dict['random'][accession] = []
-                        blastutils_log.critical("%s is randomly duplicated." % accession)
-                        duplicated_dict['random'][accession].append(go)
-                        # There is another category of duplication that I'm missing
-                        # TODO-ROB:  If an other exists throw a warning in the
-                        # logs
-                    else:
-                        del duplicated_dict['organisms'][o]
-                        del duplicated_dict['genes'][g]
-                        if accession not in duplicated_dict['other']:
-                            duplicated_dict['other'][accession] = []
-                        blastutils_log.critical(
-                            "%s is duplicated, but cannot be categorized as random." % accession)
-                        duplicated_dict['other'][accession].append(go)
-            # Duplicate Organism count dictionary
-            dup_org = pd.DataFrame.from_dict(duplicated_dict['organisms'])
-            for org in org_list:
-                try:
-                    dup_org_count[org] = dup_org[org].count()
-                except KeyError:
-                    dup_org_count[org] = 0
-            # Duplicate Gene count dictionary
-            dup_gene = pd.DataFrame.from_dict(duplicated_dict['genes'])
-            for gene in gene_list:
-                try:
-                    dup_gene_count[gene] = dup_gene[gene].count()
-                except KeyError:
-                    dup_gene_count[gene] = 0
-            # Duplicate Accession count dictionary
-            for accn, go in duplicated_dict['accessions'].items():
-                dup_acc_count[accn] = go.__len__()
-        return duplicated_dict
+        return self.analyze_duplicate_accessions(
+            acc_dict,
+            gene_list,
+            org_list,
+        ).groups
 
     def get_miss_acc(self, acc_dataframe):
         """Get missing accession numbers during post-blast analysis.
@@ -734,31 +776,6 @@ class ManagerUtils(object):
                 else:
                     kw[key] = value
         return db_config_strategy, kw
-
-    def refseq_jobber(self, email_address, base_jobname, id, code, activate, config_dict):
-        """Submit python code as a string.
-
-        :param email_address:  The email address for PBS job notification.
-        :type email_address:  str.
-        :param base_jobname:  The base job name used for the PBS job.  Contains a %s for string formatting.
-        :type base_jobname:  str.
-        :param id:  An id used to format the base_jobname.
-        :type id:  int.
-        :param code:  Python code as a string.
-        :type code:  str.
-        :param activate: The path to the activate script for the virtual environment being used in the PBS job.
-        :type activate: str
-        :param config_dict: Configuration dictionary for the SGE job.
-        :type config_dict: dict
-        """
-        job = SGEJob(email_address=email_address, base_jobname=base_jobname % str(id), activate=activate,
-                     config=config_dict)
-        job.submit_pycode(code=code, wait=False, cleanup=False)
-
-    # def template_jobber(email_address, base_jobname, id, code):
-    #     job = SGEJob(email_address=email_address, base_jobname=base_jobname)
-    #     job.submit_pycode(code=code, wait=True, cleanup=True)
-
 
 class CookieUtils(object):
     def __init__(self):

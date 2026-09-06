@@ -12,6 +12,7 @@ from OrthoEvol.Manager.config import yml
 from OrthoEvol.Manager.biosql.biosql import BaseBioSQL
 from OrthoEvol.Manager.biosql.biosql_repo import scripts as sql_scripts
 from OrthoEvol.Manager.data_management import DataMana
+from OrthoEvol.Manager.management import ProjectManagement
 from OrthoEvol.Orthologs.Blast.comparative_genetics import (
     BaseComparativeGenetics,
 )
@@ -125,14 +126,14 @@ class TestResourceConsumers(unittest.TestCase):
         mock_resource_path: mock.Mock,
         mock_copy: mock.Mock,
     ) -> None:
-        """Resolve a packaged accession file before copying it into a project."""
+        """Skip packaged accession copying when no accession file is configured."""
         accession_path = self.test_dir / "accessions.csv"
         mock_resource_path.return_value = accession_path
         mock_utilities.return_value.attribute_config.return_value = SimpleNamespace(
             project_index=self.test_dir
         )
 
-        BaseComparativeGenetics(
+        analysis = BaseComparativeGenetics(
             project="test-project",
             project_path=self.test_dir,
             acc_file=None,
@@ -140,8 +141,53 @@ class TestResourceConsumers(unittest.TestCase):
             copy_from_package=True,
         )
 
-        mock_resource_path.assert_called_once()
-        mock_copy.assert_called_once_with(accession_path, str(self.test_dir))
+        mock_resource_path.assert_not_called()
+        mock_copy.assert_not_called()
+        self.assertEqual(analysis.project, "test-project")
+        self.assertEqual(analysis.project_path, self.test_dir / "test-project")
+
+    @mock.patch(
+        "OrthoEvol.Orthologs.Blast.comparative_genetics.shutil.copy"
+    )
+    @mock.patch(
+        "OrthoEvol.Orthologs.Blast.comparative_genetics.package_resource_path"
+    )
+    @mock.patch(
+        "OrthoEvol.Orthologs.Blast.comparative_genetics.FullUtilities"
+    )
+    def test_comparative_genetics_derives_project_from_existing_path(
+        self,
+        mock_utilities: mock.Mock,
+        mock_resource_path: mock.Mock,
+        mock_copy: mock.Mock,
+    ) -> None:
+        """Use the final path component as the project name."""
+        existing_project_path = self.test_dir / "existing-project"
+        accession_path = self.test_dir / "accessions.csv"
+        mock_resource_path.return_value = accession_path
+        mock_utilities.return_value.attribute_config.return_value = SimpleNamespace(
+            project_index=self.test_dir
+        )
+
+        analysis = BaseComparativeGenetics(
+            project=None,
+            project_path=existing_project_path,
+            acc_file=None,
+            proj_mana=None,
+            copy_from_package=True,
+        )
+
+        self.assertEqual(analysis.project, "existing-project")
+        self.assertEqual(analysis.project_path, existing_project_path)
+        mock_utilities.return_value.attribute_config.assert_called_once_with(
+            cls=analysis,
+            composer=None,
+            checker=ProjectManagement,
+            project="existing-project",
+            project_path=self.test_dir,
+        )
+        mock_resource_path.assert_not_called()
+        mock_copy.assert_not_called()
 
     @mock.patch(
         "OrthoEvol.Orthologs.Phylogenetics.PAML.codeml.package_resource_path"

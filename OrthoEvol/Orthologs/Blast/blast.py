@@ -1,12 +1,12 @@
 """Optimized for use with local/standalone NCBI BLAST 2.8.1"""
+import contextlib
+import logging
 import os
 import shutil
-import contextlib
-from subprocess import run, PIPE, CalledProcessError
-from datetime import datetime as d
 import time
+from datetime import datetime as d
 from pathlib import Path
-import logging
+from subprocess import PIPE, CalledProcessError, run
 
 try:
     from Bio.Application import ApplicationError
@@ -14,12 +14,14 @@ except ImportError:
     # Bio.Application is deprecated in newer biopython versions
     # Use subprocess.CalledProcessError as fallback
     from subprocess import CalledProcessError as ApplicationError
+
+# Other
+from xml.etree.ElementTree import ParseError
+
 from Bio import SearchIO  # Used for parsing and sorting XML files.
 
 from OrthoEvol.Orthologs.Blast.blastn_wrapper import NcbiblastnCommandline
 from OrthoEvol.Orthologs.Blast.comparative_genetics import ComparativeGenetics
-# Other
-from xml.etree.ElementTree import ParseError
 
 
 class BaseBlastN(ComparativeGenetics):
@@ -41,7 +43,7 @@ class BaseBlastN(ComparativeGenetics):
         :param ref_species: A reference species or organism for the blast query.
         :param template:  The accession file template.
         :param save_data:  A flag for saving the post_blast data to an excel file.
-        :param quiet:  A flag for determining the level of logging verbosity.
+        :param verbose: A flag for determining the level of logging verbosity.
         :param kwargs:"""
 
         super().__init__(project=project, method=method, acc_file=acc_file,
@@ -460,7 +462,7 @@ class BaseBlastN(ComparativeGenetics):
                     if gene == genes[-1] and organism == self.org_list[-1]:
                         self.create_maf()
                         if self.save_data:
-                            self.post_blast_analysis(self.project)
+                            self.post_blast_analysis(self.removed_genes)
                             self.blastn_log.info("Post-blast analysis is complete")
 
                         # TODO Archive function here

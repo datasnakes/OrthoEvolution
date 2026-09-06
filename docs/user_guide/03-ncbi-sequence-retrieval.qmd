@@ -1,0 +1,115 @@
+---
+title: NCBI and Sequence Retrieval
+description: Download NCBI datasets and prepare GenBank records for downstream workflows.
+---
+
+Sequence analysis starts with the correct source data. OrthoEvolution provides
+FTP and GenBank helpers that retrieve sequence data and prepare analysis
+inputs. Some downloads are large, and all remote downloads depend on NCBI
+services.
+
+## Download a BLAST database
+
+```python
+from pathlib import Path
+
+from OrthoEvol.Tools.ftp import NcbiFTPClient
+
+download_path = Path("databases") / "NCBI" / "blast" / "db"
+ncbi_ftp = NcbiFTPClient(
+    email="researcher@example.org",
+    max_workers=4,
+)
+
+try:
+    ncbi_ftp.getblastdb(
+        database_name="refseq_rna",
+        download_path=download_path,
+        v5=True,
+        extract=True,
+    )
+finally:
+    ncbi_ftp.close_connection()
+```
+
+Before you start the transfer, choose a destination with enough storage. If a
+transfer stops, make sure that the files are complete before you use them.
+
+Version 5 selections use NCBI metadata to match the exact database. The client
+downloads every volume in that selection. It compares each archive with its
+MD5 checksum before extraction. It then keeps the checksum sidecar as an
+installation marker. A repeated request can reuse an installation that passed
+these tests.
+
+## Download a RefSeq release selection
+
+```python
+from pathlib import Path
+
+from OrthoEvol.Tools.ftp import NcbiFTPClient
+
+download_path = Path("databases") / "NCBI" / "refseq" / "release"
+ncbi_ftp = NcbiFTPClient(
+    email="researcher@example.org",
+    max_workers=4,
+)
+
+try:
+    ncbi_ftp.getrefseqrelease(
+        collection_subset="vertebrate_mammalian",
+        seqtype="rna",
+        seqformat="gbff",
+        download_path=download_path,
+        extract=True,
+    )
+finally:
+    ncbi_ftp.close_connection()
+```
+
+This request downloads RNA GenBank flat files for the vertebrate-mammalian
+collection. A local marker records the NCBI release number and selected files.
+The client skips a later request only if the marker and output files match the
+current release.
+
+Common sequence formats include:
+
+| Extension | Typical content |
+|---|---|
+| `.fna` | Genomic or other nucleotide FASTA sequences |
+| `.ffn` | Nucleotide FASTA sequences for coding regions |
+| `.faa` | Protein FASTA sequences |
+| `.frn` | Non-coding RNA FASTA sequences |
+| `.gbff` | GenBank flat-file records with sequence annotations |
+
+Select `seqtype` and `seqformat` for the exact NCBI collection that you need.
+A valid file format does not show that the release, molecule type, or taxa fit
+your analysis.
+
+## GenBank processing
+
+The `GenBank` class connects a project to local GenBank archives and BioSQL
+resources. GenBank records contain sequences and their annotations. The class
+can:
+
+- Locate accessions in a local GenBank database
+- Write individual GenBank records
+- Extract nucleotide or protein FASTA files
+- Organize outputs by gene and organism
+
+Before you create the class, make sure that the project paths and required
+database resources exist. Several methods use NCBI database locations from a
+managed repository.
+
+## Record what you downloaded
+
+Record the NCBI database name and its release or retrieval date. Also record
+the available file checksums and the accession-table version. NCBI content can
+change without an OrthoEvolution release. The package version alone cannot
+reproduce a retrieval.
+
+## When retrieval does not complete
+
+First identify which part of the retrieval stopped. The cause can be a network
+interruption, a missing remote file, insufficient storage, a checksum
+mismatch, or an incomplete BioSQL setup. Do not use a partial archive. A file
+at the destination is not proof of a complete transfer.

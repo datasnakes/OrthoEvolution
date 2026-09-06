@@ -12,18 +12,18 @@ jobs:
     timeout-minutes: 10
     strategy:
       matrix:
-        python-version: ["3.11", "3.12"]
+        python-version: ["3.11", "3.12", "3.13", "3.14"]
 
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v6
 
     - name: Set up Python ${{ matrix.python-version }}
-      uses: actions/setup-python@v4
+      uses: actions/setup-python@v6
       with:
         python-version: ${{ matrix.python-version }}
 
     - name: Cache pip
-      uses: actions/cache@v3
+      uses: actions/cache@v4
       with:
         path: ~/.cache/pip
         key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt') }}
@@ -33,14 +33,14 @@ jobs:
     - name: Install dependencies
       run: |
         sudo apt-get install -qq phyml
-        python -m pip install --upgrade pip setuptools>=77.0.3 wheel
-        pip install --only-binary=numpy,scipy numpy scipy
-        pip install matplotlib ipython jupyter sympy pytest codecov pytest-cov
-        pip install -r requirements.txt
-        pip install -e .
+        python -m pip install --upgrade pip "setuptools>=77.0.3" wheel
+        python -m pip install --only-binary=numpy,scipy numpy scipy
+        python -m pip install matplotlib ipython jupyter sympy pytest codecov pytest-cov
+        python -m pip install -r requirements.txt
+        python -m pip install -e .
 
     - name: Run tests
-      run: pytest --cov=OrthoEvol --cov-report=xml --junitxml=junit.xml tests/
+      run: python -m pytest --cov=OrthoEvol --cov-report=xml --junitxml=junit.xml tests/
 
     - name: Upload coverage to Codecov
       uses: codecov/codecov-action@v5

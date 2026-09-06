@@ -1,0 +1,65 @@
+---
+title: Getting Started
+description: Install OrthoEvolution and make sure that the package works before an analysis.
+---
+
+A comparative-genetics analysis moves from candidate orthologs to sequences,
+alignments, and trees. OrthoEvolution coordinates these steps. External
+scientific programs run tasks such as BLAST searches and sequence alignment.
+
+## Requirements
+
+OrthoEvolution supports Python 3.11 through 3.14. Before you begin, identify
+the external programs that your workflow uses. The Python package does not
+install these programs:
+
+- NCBI BLAST+ for local similarity searches
+- Clustal Omega, GUIDANCE2, or PAL2NAL for supported alignment workflows
+- PAML, PhyML, IQ-TREE, Phylip, or ETE for supported phylogenetic workflows
+- PBS or Slurm commands when submitting work to a cluster
+
+If your workflow uses an external program, install it before you start the
+analysis. The import test checks Python only. It does not test external
+programs or reference databases.
+
+Before you create the environment, install
+[`uv`](https://docs.astral.sh/uv/getting-started/installation/).
+
+## Install from PyPI
+
+```bash
+uv venv --python 3.14 .venv
+uv pip install --python .venv/bin/python OrthoEvol
+```
+
+## Install from source
+
+```bash
+git clone https://github.com/datasnakes/OrthoEvolution.git
+cd OrthoEvolution
+uv venv --python 3.14 .venv
+uv pip install --python .venv/bin/python -e .
+```
+
+## Verify the installation
+
+```bash
+.venv/bin/python -c "import OrthoEvol; print(OrthoEvol.__name__)"
+```
+
+This command makes sure that Python can import the package. It does not test
+external programs, network access, database contents, or a scheduler
+configuration.
+
+## Choose a workflow
+
+- Start with [Ortholog Inference](02-ortholog-inference.qmd) if you have an
+  accession table and a local BLAST database.
+- Use [NCBI and Sequence Retrieval](03-ncbi-sequence-retrieval.qmd) if you
+  need an NCBI archive, BLAST database, or GenBank record.
+- Continue to [Alignment and Phylogenetics](04-alignment-phylogenetics.qmd)
+  after you collect the required nucleotide or protein sequences.
+- Read [Project and Data Management](05-project-data-management.qmd) before
+  you create a managed repository layout.
+- Browse [Work with the Example Data](08-example-data.qmd) to learn which
+  small inputs and recorded outputs come with the repository.

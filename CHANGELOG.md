@@ -7,6 +7,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.0.0] - 2026-09-04
+
+### Added
+- Expanded test coverage for core comparative-genomics workflows and utilities.
+
+### Changed
+- Declared OrthoEvolution stable and updated package metadata for the 1.0.0 release.
+- Updated vulnerable development dependencies in the bundled website template.
+
+### Fixed
+- Raised the Werkzeug security floor to 3.1.6.
+
 ## [1.0.0b2] - 2025-12-02
 
 ### Added
@@ -65,6 +77,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Version History Notes
 
-- **1.0.0b2**: Latest release (2025-12-02) - Test coverage improvements and bug fixes
+- **1.0.0**: Stable release (2026-09-04) - Workflow modernization, security updates, and expanded tests
+- **1.0.0b2**: Previous beta release (2025-12-02) - Test coverage improvements and bug fixes
 - **1.0.0b1**: Previous beta release - Test infrastructure and CI/CD improvements
 - **0.9.0a2**: Previous tagged release (alpha)
