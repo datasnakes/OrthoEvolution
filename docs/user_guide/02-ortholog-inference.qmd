@@ -46,12 +46,12 @@ for that gene.
 
 | Method | Search | Database and filter | Appropriate use |
 |---|---|---|---|
-| `1` | Local | `refseq_rna_v5` with taxonomy IDs | Multi-gene, multi-species ortholog searches |
+| `1` | Local | `refseq_rna` with taxonomy IDs | Multi-gene, multi-species ortholog searches |
 | `2` | Remote | NCBI `refseq_rna` with an Entrez query | Searches that must run through NCBI |
 | `None` | Local | `refseq_rna` without taxonomy IDs | A simple query, not the normal ortholog workflow |
 
 Method 1 is the recommended configuration for an ortholog search. It requires
-a local version 5 BLAST database. Method 2 uses an NCBI service and cannot
+a current local preformatted BLAST database. Method 2 uses an NCBI service and cannot
 filter with taxonomy IDs. The method controls how BLAST runs. It does not
 change the biological evidence required to identify an ortholog.
 

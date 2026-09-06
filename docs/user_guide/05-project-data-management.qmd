@@ -46,8 +46,7 @@ manager before a tool writes data to their directories.
 │       │   └── NCBI/
 │       │       ├── blast/
 │       │       │   ├── db/
-│       │       │   ├── seqidlists/
-│       │       │   └── windowmasker_files/
+│       │       │   └── seqidlists/
 │       │       ├── pub/
 │       │       │   └── taxonomy/
 │       │       └── refseq/

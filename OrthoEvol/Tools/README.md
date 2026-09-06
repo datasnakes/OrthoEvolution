@@ -18,7 +18,10 @@ tools in your project and how we use these tools in our project.
 from OrthoEvol.Tools.ftp import NcbiFTPClient
 
 ncbiftp = NcbiFTPClient(email='somebody@gmail.com')
-ncbiftp.getblastdb(database_name='refseq_rna')
+ncbiftp.getblastdb(
+    database_name='refseq_rna',
+    download_path='databases/NCBI/blast/db',
+)
 ```
 
 ### List all subdirectories in a NCBI FTP Path

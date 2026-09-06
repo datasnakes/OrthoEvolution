@@ -1,13 +1,15 @@
 # Standard Library
-import yaml
+from pathlib import Path
+
 # OrthoEvol
-from OrthoEvol.Manager.management import ProjectManagement
 from OrthoEvol.Manager.config import yml
 from OrthoEvol.Manager.database_management import BaseDatabaseManagement
+from OrthoEvol.Manager.management import ProjectManagement
 from OrthoEvol.Orthologs.Align import MultipleSequenceAlignment as MSA
 from OrthoEvol.Orthologs.Blast.blast import OrthoBlastN
 from OrthoEvol.Orthologs.Blast.comparative_genetics import BaseComparativeGenetics
 from OrthoEvol.Orthologs.GenBank.genbank import GenBank
+from OrthoEvol.config import load_pipeline_config
 from OrthoEvol.resources import package_resource_path
 
 
@@ -54,7 +56,7 @@ class DataMana(object):
             if start is True:
                 self.configure(config_file)
 
-    def configure(self, config_file):
+    def configure(self, config_file: str | Path) -> None:
         """Use YAML configuration in order to initialize different classes.
 
         Reads a YAML configuration file and initializes various classes
@@ -63,51 +65,49 @@ class DataMana(object):
         :param config_file: A YAML file that is used to create a dictionary(kwargs) for each class.
         :type config_file: str or Path
         """
-        with open(config_file, 'r') as ymlfile:
-            configuration = yaml.safe_load(ymlfile)
-            # TODO-ROB:  Set up configuratioin to parse this full list.  For each sub configuration do something.
-            # TODO-ROB:  Before doing the above set up Airflow.
-            setattr(self, "CONFIGURATION", configuration)
-            for key, value in configuration.items():
-                setattr(self, key, value)
-                print('key:' + str(key) + '\nvalue: ' + str(value))
+        validated_config = load_pipeline_config(config_file)
+        configuration = validated_config.as_legacy_dict()
+        self.CONFIGURATION = configuration
+        for section_name in validated_config.section_names:
+            setattr(self, section_name, configuration.get(section_name))
 
-                # Project Management
-            if self.Management_config is not None:
-                self.pm = ProjectManagement(**self.Management_config)
-                print('mana_config')
-                print(self.pm)
-            else:
-                self.pm = self.Management_config
+        # Project Management
+        if self.Management_config is not None:
+            self.pm = ProjectManagement(**self.Management_config)
+        else:
+            self.pm = self.Management_config
 
-            if self.Database_config is not None:
-                self.database(self.pm, self.Database_config)
-            else:
-                self.db = self.Database_config
+        if self.Database_config is not None:
+            self.database(self.pm, self.Database_config)
+        else:
+            self.db = self.Database_config
 
-                # CompGenAnalysis and BLASTn Configuration
-            if self.BLASTn_config is not None and self.CompGenAnalysis_config is not None:
-                self.BLASTn_config.update(self.CompGenAnalysis_config)
-            if self.BLASTn_config is not None:
-                # Blast has not taken place so it will happen here
-                self.blast(self.pm, self.BLASTn_config)
-            elif self.CompGenAnalysis_config is not None:
-                self.blast(self.pm, self.CompGenAnalysis_config)
-            else:
-                # Blast has taken place so
-                self.bl = self.BLASTn_config
+        # CompGenAnalysis and BLASTn Configuration
+        if (
+            self.BLASTn_config is not None
+            and self.CompGenAnalysis_config is not None
+        ):
+            self.BLASTn_config.update(self.CompGenAnalysis_config)
+        if self.BLASTn_config is not None:
+            # Blast has not taken place so it will happen here
+            self.blast(self.pm, self.BLASTn_config)
+        elif self.CompGenAnalysis_config is not None:
+            self.blast(self.pm, self.CompGenAnalysis_config)
+        else:
+            # Blast has taken place so
+            self.bl = self.BLASTn_config
 
-                # GenBank
-            if self.GenBank_config is not None:
-                self.genbank(self.pm, self.bl)
-            else:
-                self.gb = self.GenBank_config
+        # GenBank
+        if self.GenBank_config is not None:
+            self.genbank(self.pm, self.bl)
+        else:
+            self.gb = self.GenBank_config
 
-                # Alignment
-            if self.Alignment_config is not None:
-                self.align(self.gb)
-            else:
-                self.al = self.Alignment_config
+        # Alignment
+        if self.Alignment_config is not None:
+            self.align(self.gb)
+        else:
+            self.al = self.Alignment_config
 
     def database(self, proj_mana, database_config):
         self.db = BaseDatabaseManagement(proj_mana=proj_mana, **database_config)

@@ -137,7 +137,6 @@ ncbi_ftp = NcbiFTPClient(email="researcher@example.org")
 ncbi_ftp.getblastdb(
     database_name="refseq_rna",
     download_path=Path("databases"),
-    v5=True,
 )
 ```
 

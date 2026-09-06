@@ -192,7 +192,7 @@ Can I integrate these tools with each other and with other modules including my 
 from OrthoEvol.Tools.ftp import NcbiFTPClient
 
 ncbiftp = NcbiFTPClient(email='somebody@gmail.com')
-ncbiftp.getblastdb(database_name='refseq_rna', v5=True)
+ncbiftp.getblastdb(database_name='refseq_rna', download_path='databases')
 ```
 
 #### Utilize multiprocessing to speed up your code

@@ -20,3 +20,10 @@ The current standalone scripts available here are:
 
 
 ### Using ncbi-download
+
+```bash
+python ncbi-download.py \
+  --email researcher@example.org \
+  --database-name refseq_rna \
+  --download-path databases/NCBI/blast/db
+```

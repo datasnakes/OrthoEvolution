@@ -6,12 +6,11 @@ metadata instead of maintaining a bundled database-name catalog.
 
 ## Preformatted BLAST databases
 
-NCBI has served version 5 BLAST databases from
-[`/blast/db/`](https://ftp.ncbi.nlm.nih.gov/blast/db/) since February 2020.
-Legacy version 4 files remain under
-[`/blast/db/v4/`](https://ftp.ncbi.nlm.nih.gov/blast/db/v4/).
+NCBI serves its current BLAST databases from
+[`/blast/db/`](https://ftp.ncbi.nlm.nih.gov/blast/db/). OrthoEvolution follows
+that current location and does not expose a database-format version switch.
 
-The authoritative version 5 manifest is
+The authoritative manifest is
 [`blastdb-metadata-1-1.json`](https://ftp.ncbi.nlm.nih.gov/blast/db/blastdb-metadata-1-1.json).
 Each entry supplies:
 

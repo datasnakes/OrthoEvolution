@@ -21,7 +21,6 @@ from typing import TypedDict
 
 # Other
 import pandas as pd
-import yaml
 # BioPython
 from Bio import AlignIO, SeqIO
 from Bio.Align import MultipleSeqAlignment
@@ -29,6 +28,7 @@ from Bio.Align import MultipleSeqAlignment
 # OrthoEvol
 from OrthoEvol.Cookies.cookie_jar import Oven
 from OrthoEvol.Tools.logit import LogIt
+from OrthoEvol.config import load_pipeline_config
 
 # Set up logging
 blastutils_log = LogIt().default(logname="blast-utils", logfile=None)
@@ -755,7 +755,10 @@ class ManagerUtils(object):
         """Various utilities to help with management specific functionality."""
         pass
 
-    def parse_db_config_file(self, config_file):
+    def parse_db_config_file(
+        self,
+        config_file: str | Path,
+    ) -> tuple[dict[str, dict[str, object]], dict[str, object]]:
         """Parse a YAML config file and return the config strategies and keyword arguments.
 
         :param config_file:  A YAML config file for database management.
@@ -763,18 +766,21 @@ class ManagerUtils(object):
         :return: The database config strategies, and the key word arguments for database management.
         :rtype: tuple
         """
-        kw = {}
-        db_config_strategy = {}
-        with open(config_file, 'r') as cf:
-            db_config = yaml.load(cf, Loader=yaml.FullLoader)
-            # Get the configuration for the desired strategy
-            for key, value in db_config["Database_config"].items():
-                if isinstance(value, dict):
-                    db_config_strategy[key] = value
-                    continue
-                # Get the parameters for the Base class
-                else:
-                    kw[key] = value
+        validated_config = load_pipeline_config(config_file)
+        configuration = validated_config.as_legacy_dict()
+        database_config = configuration.get("Database_config")
+        if database_config is None:
+            raise ValueError(
+                f"Configuration file {config_file} must contain Database_config."
+            )
+
+        kw: dict[str, object] = {}
+        db_config_strategy: dict[str, dict[str, object]] = {}
+        for key, value in database_config.items():
+            if isinstance(value, dict):
+                db_config_strategy[key] = value
+            else:
+                kw[key] = value
         return db_config_strategy, kw
 
 class CookieUtils(object):
@@ -786,7 +792,6 @@ class CookieUtils(object):
             "ITIS": Path('ITIS'),
             "NCBI_blast": Path('NCBI/blast'),
             "NCBI_blast_db": Path('NCBI/blast/db'),
-            "NCBI_blast_windowmasker_files": Path('NCBI/blast/windowmasker_files'),
             "NCBI_pub_taxonomy": Path('NCBI/pub/taxonomy'),
             "NCBI_refseq_release": Path('NCBI/refseq/release'),
             "ITIS_taxonomy": Path('ITIS/taxonomy'),

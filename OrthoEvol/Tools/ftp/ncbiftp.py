@@ -13,13 +13,12 @@ from email.utils import parsedate_to_datetime
 from ftplib import error_perm
 from pathlib import Path, PurePosixPath
 from time import perf_counter
-from typing import Any, NoReturn, Sequence
+from typing import Any, Sequence
 from urllib.parse import urlparse
 from urllib.request import Request, urlopen
 
 from tqdm import tqdm
 
-from OrthoEvol import OrthoEvolDeprecationWarning
 from OrthoEvol.Tools.ftp.baseftp import BaseFTPClient
 from OrthoEvol.Tools.logit import LogIt
 
@@ -59,13 +58,9 @@ class NcbiFTPClient(BaseFTPClient):
         self._date = datetime.now().strftime(self._datefmt)
         self.blastpath = "/blast/"
         self.blastdb_path = "/blast/db/"
-        self.blastdbv4_path = "/blast/db/v4/"
-        # NCBI serves version 5 databases from the main BLAST DB directory.
-        self.blastdbv5_path = self.blastdb_path
         self.blastfasta_path = "/blast/db/FASTA/"
         self.refseqrelease_path = "/refseq/release/"
         self.refseq_release_number_path = "/refseq/release/RELEASE_NUMBER"
-        self.windowmasker_path = "/blast/windowmasker_files/"
 
         # Retain these public attributes for callers that inspect selections.
         self._taxdb = ["taxdb.tar.gz", "taxdb.tar.gz.md5"]
@@ -506,7 +501,7 @@ class NcbiFTPClient(BaseFTPClient):
         database_name: str,
         include_taxonomy: bool = True,
     ) -> list[str]:
-        """Resolve every archive required for a version 5 BLAST database."""
+        """Resolve every archive required for a current BLAST database."""
         metadata = self._load_blast_metadata()
         database_names = [database_name]
         if include_taxonomy and database_name != "taxdb":
@@ -523,31 +518,6 @@ class NcbiFTPClient(BaseFTPClient):
                     f"NCBI metadata for {selected_name!r} has no valid files list."
                 )
             remote_paths.extend(urlparse(file_url).path for file_url in files)
-        return remote_paths
-
-    def _legacy_blast_archive_paths(
-        self,
-        database_name: str,
-        include_taxonomy: bool = True,
-    ) -> list[str]:
-        """Resolve exact version 4 archive names from its legacy directory."""
-        files = self.listfiles(self.blastdbv4_path)
-        pattern = re.compile(
-            rf"^{re.escape(database_name)}(?:\.\d+)?\.tar\.gz$"
-        )
-        matching_files = [
-            file_name for file_name in files if pattern.fullmatch(file_name)
-        ]
-        if not matching_files:
-            raise FileNotFoundError(
-                f"{database_name!r} is not present in NCBI's BLAST v4 directory."
-            )
-
-        remote_paths = [
-            f"{self.blastdbv4_path}{file_name}" for file_name in matching_files
-        ]
-        if include_taxonomy and database_name != "taxdb":
-            remote_paths.append(f"{self.blastdb_path}taxdb.tar.gz")
         return remote_paths
 
     def _remote_checksums(
@@ -573,44 +543,27 @@ class NcbiFTPClient(BaseFTPClient):
         }
         return expected_checksums, checksum_texts
 
-    def getwindowmaskerfiles(
-        self,
-        taxonomy_ids: Sequence[int | str],
-        download_path: str | Path,
-    ) -> NoReturn:
-        """Reject downloads from NCBI's retired WindowMasker file service."""
-        raise OrthoEvolDeprecationWarning(
-            "WindowMasker downloads are no longer supported."
-        )
-
     def getblastdb(
         self,
         database_name: str,
         download_path: str | Path,
-        v5: bool = True,
         extract: bool = True,
         include_taxonomy: bool = True,
-    ) -> None:
-        """Download a complete preformatted NCBI BLAST database.
+    ) -> Path:
+        """Download a complete current preformatted NCBI BLAST database.
 
-        Version 5 selections come from NCBI's metadata manifest, which avoids
-        partial or substring-based database matches.
+        Selections come from NCBI's metadata manifest, which avoids partial or
+        substring-based database matches.
         """
         if database_name.startswith("est"):
             raise NotImplementedError("EST databases are not supported.")
 
         destination = Path(download_path)
         destination.mkdir(parents=True, exist_ok=True)
-        if v5:
-            remote_paths = self._blast_archive_paths(
-                database_name,
-                include_taxonomy=include_taxonomy,
-            )
-        else:
-            remote_paths = self._legacy_blast_archive_paths(
-                database_name,
-                include_taxonomy=include_taxonomy,
-            )
+        remote_paths = self._blast_archive_paths(
+            database_name,
+            include_taxonomy=include_taxonomy,
+        )
 
         expected_checksums, checksum_texts = self._remote_checksums(remote_paths)
         self.files2download = [
@@ -654,6 +607,7 @@ class NcbiFTPClient(BaseFTPClient):
                 self.extract_file(archive_path, download_path=destination)
                 marker_path = destination / f"{archive_path.name}.md5"
                 self._write_text_atomic(marker_path, checksum_texts[remote_path])
+
         else:
             for remote_path, archive_path in zip(
                 paths_to_download,
@@ -662,6 +616,8 @@ class NcbiFTPClient(BaseFTPClient):
             ):
                 marker_path = destination / f"{archive_path.name}.md5"
                 self._write_text_atomic(marker_path, checksum_texts[remote_path])
+
+        return destination
 
     def getblastfasta(
         self,

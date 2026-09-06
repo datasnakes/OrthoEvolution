@@ -1,26 +1,11 @@
 Database_config:
-  email:  "datasnakes@gmail.com"
+  email: "researcher@example.org"
   driver: "sqlite3"
   Full:
-    configure_flag: False
-    archive_flag: False
-    delete_flag: False
-    project_flag: False
-    _path: !!python/object/apply:pathlib.Path ['']
-    Projects:
-      Project_Name_1:
-        _path: !!python/object/apply:pathlib.Path ['Project_Name_1']
     NCBI:
-      _path: !!python/object/apply:pathlib.Path ['NCBI']
       NCBI_blast:
-        _path: !!python/object/apply:pathlib.Path ['NCBI', 'blast']
-        NCBI_blast_db:
-          _path: !!python/object/apply:pathlib.Path ['NCBI', 'blast', 'db']
-        NCBI_blast_windowmasker_files:
-          _path: !!python/object/apply:pathlib.Path ['NCBI', 'blast', 'windowmasker_files']
-          taxonomy_ids: ""
-      NCBI_pub_taxonomy:
-        _path: !!python/object/apply:pathlib.Path ['NCBI', 'pub', taxonomy']
+        NCBI_blast_db: {}
+      NCBI_pub_taxonomy: {}
       NCBI_refseq_release:
         seqtype: "rna"
         seqformat: "gbff"
@@ -28,10 +13,5 @@ Database_config:
         configure_flag: True
         download_flag: True
         template_flag: True
-        archive_flag: False
-        delete_flag: False
-        _path: !!python/object/apply:pathlib.Path ['NCBI', 'refseq', 'release']
     ITIS:
-      _path: !!python/object/apply:pathlib.Path ['ITIS']
-      ITIS_taxonomy:
-        _path: !!python/object/apply:pathlib.Path ['ITIS', 'taxonomy']
+      ITIS_taxonomy: {}

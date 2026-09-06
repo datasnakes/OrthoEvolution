@@ -16,6 +16,7 @@ def test_configure_routes_each_enabled_stage(tmp_path: Path) -> None:
   user: null
   project: example
 Database_config:
+  email: test@example.com
   driver: sqlite
 CompGenAnalysis_config:
   taxon_file: taxa.csv
@@ -43,11 +44,11 @@ Alignment_config:
 
     manager.database.assert_called_once_with(
         project_manager,
-        {"driver": "sqlite"},
+        {"email": "test@example.com", "driver": "sqlite"},
     )
     manager.blast.assert_called_once_with(
         project_manager,
-        {"method": 1, "taxon_file": "taxa.csv"},
+        {"method": 1, "taxon_file": Path("taxa.csv")},
     )
     manager.genbank.assert_called_once_with(project_manager, manager.bl)
     manager.align.assert_called_once_with(manager.gb)
@@ -65,6 +66,36 @@ def test_configure_preserves_disabled_stages(tmp_path: Path) -> None:
     assert manager.bl is None
     assert manager.gb is None
     assert manager.al is None
+
+
+def test_configure_routes_comparative_config_without_blast_config(
+    tmp_path: Path,
+) -> None:
+    config_file = tmp_path / "pipeline.yml"
+    config_file.write_text(
+        """Management_config:
+  repo: null
+  user: null
+  project: example
+CompGenAnalysis_config:
+  taxon_file: taxa.csv
+""",
+        encoding="utf-8",
+    )
+    manager = DataMana()
+    manager.blast = mock.Mock()
+    project_manager = mock.Mock()
+
+    with mock.patch(
+        "OrthoEvol.Manager.data_management.ProjectManagement",
+        return_value=project_manager,
+    ):
+        manager.configure(config_file)
+
+    manager.blast.assert_called_once_with(
+        project_manager,
+        {"taxon_file": Path("taxa.csv")},
+    )
 
 
 def test_database_dispatches_nested_and_flat_strategies() -> None:

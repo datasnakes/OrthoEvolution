@@ -23,18 +23,30 @@ def build_blast(tmp_path: Path, method: int | None = 1) -> BaseBlastN:
     return blast
 
 
-@pytest.mark.parametrize("method", [1, 2, None, ""])
-def test_select_method_returns_query_configuration(method: int | str | None) -> None:
+@pytest.mark.parametrize("method", [1, 2, None])
+def test_select_method_returns_query_configuration(method: int | None) -> None:
     parameters, query = BaseBlastN.select_method(method)
 
     assert parameters["query"] == ""
     assert query["temp fasta"] == ""
-    assert parameters.get("remote") == ("True" if method == 2 else None)
+    assert parameters["db"] == "refseq_rna"
+    assert parameters.get("remote") is (True if method == 2 else None)
 
 
-def test_select_method_rejects_unknown_method() -> None:
+@pytest.mark.parametrize("method", [3, ""])
+def test_select_method_rejects_unknown_method(method: int | str) -> None:
     with pytest.raises(ValueError, match="not a blast method"):
-        BaseBlastN.select_method(3)
+        BaseBlastN.select_method(method)  # type: ignore[arg-type]
+
+
+@pytest.mark.parametrize("method", [1, None])
+def test_local_blast_requires_database_environment(method: int | None) -> None:
+    with pytest.raises(EnvironmentError, match="BLASTDB is required"):
+        BaseBlastN._validate_database_environment(method, {})
+
+
+def test_remote_blast_does_not_require_database_environment() -> None:
+    BaseBlastN._validate_database_environment(2, {})
 
 
 def test_make_blast_dir_creates_parents(tmp_path: Path) -> None:

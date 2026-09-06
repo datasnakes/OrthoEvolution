@@ -1,6 +1,5 @@
 # Standard Library
 import os
-import subprocess as sp
 import tarfile
 import urllib.request
 from collections import OrderedDict
@@ -28,7 +27,8 @@ class BaseDatabaseManagement(object):
         """
         This is the base class for managing various databases.  It provides functionality for downloading and creating
         various databases for your pipeline.  There are functions available for downloading files from NCBI (BLAST,
-        windowmasker, taxonomy, refseq release), downloading ITIS taxonomy tables, and creating BioSQL databases.
+        taxonomy and RefSeq data, downloading ITIS taxonomy tables, and creating
+        BioSQL databases.
         This class currently REQUIRES an instance of
         ProjectManagement to be used with the proj_mana parameter.
 
@@ -78,71 +78,22 @@ class BaseDatabaseManagement(object):
         else:
             self.database_path = Path(project_path) / Path(project) / Path("databases")
 
-    def download_windowmasker_files(self, taxonomy_ids):
-        """Download the WindowMasker files used in the BLAST database.
-
-        :param taxonomy_ids:  Taxonomy ids for the organisms of interest.
-        :type taxonomy_ids:  list.
-        """
-        OrthoEvolDeprecationWarning("Windowmasker files are no longer used by the most current blastx command line "
-                                    "utilities.  You can now use taxon ids directly.")
-        # <path>/<user or basic_project>/databases/NCBI/blast/db/<database_name>
-        dl_path = Path(self.database_path) / Path("NCBI") / Path('blast') / Path('windowmasker_files')
-        self.ncbiftp.getwindowmaskerfiles(taxonomy_ids=taxonomy_ids, download_path=str(dl_path))
-
-    def download_blast_database(self, database_name="refseq_rna", v5=True, set_blastdb=True):
-        """Download the blast database files for using NCBI's BLAST+ command line.
+    def download_blast_database(
+        self,
+        database_name: str = "refseq_rna",
+    ) -> Path:
+        """Download current NCBI BLAST database files and return their path.
 
         For other types of blast data, please see the NCBIREADME.md file.
 
-        :param database_name:  A string that represents a pattern in the files of interest, defaults to "refseq_rna"
-        :type database_name:  str, optional
-        :param v5: A flag that determines which version of blastdb to use, defaults to True
-        :type v5: bool, optional
-        :param set_blastdb:  A flag that determines whether the BLASTDB environment
-                            variable is automatically set.
-        :type set_blastdb:  bool, optional
+        :param database_name: Exact name from NCBI's BLAST database manifest.
+        :return: Directory containing the extracted database files.
         """
-        # <path>/<user or basic_project>/databases/NCBI/blast/db/<database_name>
-        dl_path = Path(self.database_path) / Path("NCBI") / Path("blast") / Path("db")
-        
-        if v5:
-            dl_path = Path(dl_path) / Path("v5")
-
-        # Download the preformatted blast database.
-        self.ncbiftp.getblastdb(database_name=database_name, v5=v5,
-                                download_path=str(dl_path))
-
-        env_vars = dict(os.environ).keys()
-        if set_blastdb or ("BLASTDB" not in env_vars):
-            # See if .bash_profile or .profile exists
-            bash_prof = Path("~/.bash_profile").expanduser().absolute()
-            sh_prof = Path("~/.profile").expanduser().absolute()
-            if not bash_prof.exists():
-                if not sh_prof.exists():
-                    bash_prof.touch(mode=0o700)
-                    set_prof = bash_prof
-                else:
-                    set_prof = sh_prof
-            else:
-                set_prof = bash_prof
-            self.db_mana_log.warning("Setting the PATH in %s" % str(set_prof))
-            # Use the set .*profile to append to PATH
-            with open(str(set_prof), 'r') as prof:
-                _ = prof.read()
-                bas_prof_export = "export PATH=\"%s:$PATH\"" % str(dl_path)
-                if bas_prof_export not in _:
-                    with open(str(set_prof), "a+") as b_prof:
-                        b_prof.write("export PATH=\"%s:$PATH\"" % str(dl_path))
-                    cmd = ["source %s" % str(set_prof)]
-                    stdout = self.db_mana_utils.system_cmd(cmd=cmd,
-                                                           stdout=sp.PIPE,
-                                                           stderr=sp.STDOUT,
-                                                           shell=True)
-        else:
-            self.db_mana_log.critical("Please set the BLAST environment variables in your .bash_profile!!")
-            self.db_mana_log.info("The appropriate environment variable is \'BLASTDB=%s\'." % str(dl_path))
-            self.db_mana_log.critical("Please set the BLAST environment variables in your .bash_profile!!")
+        download_path = Path(self.database_path) / "NCBI" / "blast" / "db"
+        return self.ncbiftp.getblastdb(
+            database_name=database_name,
+            download_path=download_path,
+        )
 
     def download_ete3_taxonomy_database(self):
         """Update ETE3's taxonomy database with ETE3's API."""
@@ -315,14 +266,17 @@ class DatabaseManagement(BaseDatabaseManagement):
         prepared_strategies = []
         for child_strategy in child_strategies:
             prepared_strategy = dict(child_strategy)
-            if configure_flag:
+            if configure_flag is not None:
                 prepared_strategy["configure_flag"] = configure_flag
             if archive_flag:
                 # The parent archive replaces child archive and delete actions.
                 prepared_strategy["archive_flag"] = None
                 prepared_strategy["delete_flag"] = None
             else:
-                prepared_strategy["delete_flag"] = delete_flag
+                if archive_flag is False:
+                    prepared_strategy["archive_flag"] = False
+                if delete_flag is not None:
+                    prepared_strategy["delete_flag"] = delete_flag
             prepared_strategies.append(prepared_strategy)
         return tuple(prepared_strategies)
 
@@ -427,7 +381,6 @@ class DatabaseManagement(BaseDatabaseManagement):
             "NCBI": self.NCBI,
             "NCBI_blast": self.NCBI_blast,
             "NCBI_blast_db": self.ncbi_blast_db,
-            "NCBI_blast_windowmaskerfiles": self.ncbi_blast_windowmasker_files,
             "NCBI_pub_taxonomy": self.NCBI_pub_taxonomy,
             "NCBI_refseq_release": self.NCBI_refseq_release,
             "ITIS": self.itis,
@@ -436,7 +389,11 @@ class DatabaseManagement(BaseDatabaseManagement):
         for strategy, strategy_kwargs in db_config_strategy.items():
             strategy_method = strategy_methods.get(strategy)
             if strategy_method is None:
-                continue
+                supported = ", ".join(sorted(strategy_methods))
+                raise ValueError(
+                    f"Unknown database strategy {strategy!r}; expected one of: "
+                    f"{supported}."
+                )
 
             child_dispatcher, child_config = strategy_method(**strategy_kwargs)
             if strategy == "Full":
@@ -447,11 +404,14 @@ class DatabaseManagement(BaseDatabaseManagement):
 
         return strategy_dispatcher, strategy_config
 
-    def PROJECTS(self, **kwargs):
-        print(self)
-        return {}, {}
-
-    def full(self, NCBI, ITIS, Projects=None, configure_flag=None, archive_flag=None, delete_flag=None, project_flag=None, _path=None):
+    def full(
+        self,
+        NCBI: dict[str, Any],
+        ITIS: dict[str, Any],
+        configure_flag: bool | None = None,
+        archive_flag: bool | None = None,
+        delete_flag: bool | None = None,
+    ) -> tuple[OrderedDict[str, Any], OrderedDict[str, Any]]:
         """
         The most generalized strategy available.  This configures everything.  The 3 primary flags (configure, archive,
         and delete) will be passed down to the more specific strategies, which will inherit these values unless
@@ -470,19 +430,17 @@ class DatabaseManagement(BaseDatabaseManagement):
         :param delete_flag:  A generalized flag that is passed to all of the strategies in order to implement their
         deletion process.
         :type delete_flag:  bool.
-        :param _path:
-        :type _path:
         :return:  A tuple containing 2 objects:  a list of function (NCBI and ITIS), and a list of dictionaries
-        containing kwargs for each function.  In the future Projects will also be  returned.
+        containing kwargs for each function.
         :rtype:  tuple.
         """
-        if configure_flag:
+        if configure_flag is not None:
             NCBI["configure_flag"] = configure_flag
             ITIS["configure_flag"] = configure_flag
-        if archive_flag:
+        if archive_flag is not None:
             NCBI["archive_flag"] = archive_flag
             ITIS["archive_flag"] = archive_flag
-        if delete_flag:
+        if delete_flag is not None:
             NCBI["delete_flag"] = delete_flag
             ITIS["delete_flag"] = delete_flag
 
@@ -492,7 +450,6 @@ class DatabaseManagement(BaseDatabaseManagement):
         ncbi_dispatcher, ncbi_config = self.NCBI(**NCBI)
         # Configure ITIS
         itis_dispatcher, itis_config = self.itis(**ITIS)
-        # Configure projects
 
         # Create Full dispatcher
         full_dispatcher.update(ncbi_dispatcher)
@@ -500,10 +457,6 @@ class DatabaseManagement(BaseDatabaseManagement):
         # Create Full config
         full_config.update(ncbi_config)
         full_config.update(itis_config)
-        if Projects:
-            projects_dispatcher, projects_config = self.PROJECTS(**Projects)
-            full_dispatcher.update(projects_dispatcher)
-            full_config.update(projects_config)
         # returns dict of config_dicts, dict of dispatcher_functions
         return full_dispatcher, full_config
 
@@ -517,7 +470,6 @@ class DatabaseManagement(BaseDatabaseManagement):
         delete_flag: bool | None = None,
         database_path: str | Path | None = None,
         archive_path: str | Path | None = None,
-        _path: str | Path | None = None,
     ) -> tuple[OrderedDict[str, Any], OrderedDict[str, Any]]:
         """
         A strategy that implements all of the databases relevant to NCBI.
@@ -590,22 +542,17 @@ class DatabaseManagement(BaseDatabaseManagement):
     def NCBI_blast(
         self,
         NCBI_blast_db: dict[str, Any],
-        NCBI_blast_windowmasker_files: dict[str, Any],
         configure_flag: bool | None = None,
         archive_flag: bool | None = None,
         delete_flag: bool | None = None,
         database_path: str | Path | None = None,
         archive_path: str | Path | None = None,
-        _path: str | Path | None = None,
     ) -> tuple[OrderedDict[str, Any], OrderedDict[str, Any]]:
         """
         A strategy that implements all of the data relevant to NCBI's blast databases.
 
         :param NCBI_blast_db:  Keyword arguments for the generalized NCBI_blast_db strategy.
         :type NCBI_blast_db:   dict.
-        :param NCBI_blast_windowmasker_files:  Keyword arguments for the generalized NCBI_blast_windowmasker_files
-         strategy.
-        :type NCBI_blast_windowmasker_files:  dict.
         :param configure_flag:  A flag that is passed to the NCBI strategies in order to implement their
         configuration process.
         :type configure_flag:  bool.
@@ -619,8 +566,7 @@ class DatabaseManagement(BaseDatabaseManagement):
         :type database_path:   str.
         :param archive_path:  User supplied relative path to the archived databases.
         :type archive_path:   str.
-        :return:  A tuple containing 2 objects:  a list of function (NCBI_blast_db, and NCBI_blast_windowmasker_files),
-        and a list of dictionaries containing kwargs for each function.
+        :return: Paired BLAST database actions and configuration values.
         :rtype:  tuple.
         """
         ncbi_blast_dispatcher = OrderedDict()
@@ -629,11 +575,8 @@ class DatabaseManagement(BaseDatabaseManagement):
             database_path,
             archive_path,
         )
-        (
-            NCBI_blast_db,
-            NCBI_blast_windowmasker_files,
-        ) = self._prepare_child_strategies(
-            (NCBI_blast_db, NCBI_blast_windowmasker_files),
+        (NCBI_blast_db,) = self._prepare_child_strategies(
+            (NCBI_blast_db,),
             configure_flag,
             archive_flag,
             delete_flag,
@@ -650,15 +593,11 @@ class DatabaseManagement(BaseDatabaseManagement):
             )
 
         nbd_dispatcher, nbd_config = self.ncbi_blast_db(**NCBI_blast_db)
-        nbw_dispatcher, nbw_config = self.ncbi_blast_windowmasker_files(
-            **NCBI_blast_windowmasker_files
-        )
         self._merge_strategy_results(
             ncbi_blast_dispatcher,
             ncbi_blast_config,
             (
                 (nbd_dispatcher, nbd_config),
-                (nbw_dispatcher, nbw_config),
             ),
         )
 
@@ -671,7 +610,6 @@ class DatabaseManagement(BaseDatabaseManagement):
         delete_flag: bool | None = None,
         archive_path: str | Path | None = None,
         database_path: str | Path | None = None,
-        _path: str | Path | None = None,
     ) -> tuple[OrderedDict[str, Any], OrderedDict[str, Any]]:
         """
         A strategy that implements NCBI's blast database that's used with the blast+ command line utilities.
@@ -703,48 +641,6 @@ class DatabaseManagement(BaseDatabaseManagement):
             use_default_database_path=False,
         )
 
-    def ncbi_blast_windowmasker_files(
-        self,
-        taxonomy_ids: Sequence[int],
-        configure_flag: bool | None = None,
-        archive_flag: bool | None = None,
-        delete_flag: bool | None = None,
-        archive_path: str | Path | None = None,
-        database_path: str | Path | None = None,
-        _path: str | Path | None = None,
-    ) -> tuple[OrderedDict[str, Any], OrderedDict[str, Any]]:
-        """
-        A strategy that sets up windowmasker files used with the blast+ command line utilities.
-
-        :param configure_flag:  A flag for configuring the windowmasker files for blast+.
-        :type configure_flag:  bool.
-        :param archive_flag:  A flag for archiving the windowmasker files for blast+.
-        :type archive_flag:  bool.
-        :param delete_flag:  A flag for deleting the windowmasker files for blast+.
-        :type delete_flag:  bool.
-        :param database_path:  User supplied relative path to the databases.
-        :type database_path:   str.
-        :param archive_path:  User supplied relative path to the archived databases.
-        :type archive_path:   str.
-        :return:  A tuple containing 2 objects:  a list of functions for dealing with windowmasker files,
-        and a list of dictionaries containing kwargs for each function.
-        :rtype:  tuple.
-        """
-        # Preserve the established behavior of using project gene data here.
-        _ = taxonomy_ids, _path
-        return self._build_leaf_strategy(
-            strategy_name="NCBI_blast_windowmasker_files",
-            configure_flag=configure_flag,
-            archive_flag=archive_flag,
-            delete_flag=delete_flag,
-            database_path=database_path,
-            archive_path=archive_path,
-            configure_action=self.download_windowmasker_files,
-            configure_kwargs_factory=lambda: {
-                "taxonomy_ids": self.gene_data.taxon_ids
-            },
-        )
-
     def NCBI_pub_taxonomy(
         self,
         configure_flag: bool | None = None,
@@ -752,10 +648,9 @@ class DatabaseManagement(BaseDatabaseManagement):
         delete_flag: bool | None = None,
         archive_path: str | Path | None = None,
         database_path: str | Path | None = None,
-        _path: str | Path | None = None,
     ) -> tuple[OrderedDict[str, Any], OrderedDict[str, Any]]:
         """
-        A strategy that sets up windowmasker files used with the blast+ command line utilities.
+        A strategy that downloads NCBI taxonomy dump files.
 
         :param configure_flag:  A flag that updates NCBI's taxonomy dump files.
         :type configure_flag:  bool.
@@ -771,7 +666,6 @@ class DatabaseManagement(BaseDatabaseManagement):
         and a list of dictionaries containing kwargs for each function.
         :rtype:  tuple.
         """
-        _ = _path
         return self._build_leaf_strategy(
             strategy_name="NCBI_pub_taxonomy",
             configure_flag=configure_flag,
@@ -796,7 +690,6 @@ class DatabaseManagement(BaseDatabaseManagement):
         seqformat: str | None = None,
         file_list: list[str] | None = None,
         upload_number: int = 8,
-        _path: str | Path | None = None,
         activate: str | Path | None = None,
         template_flag: bool | None = None,
         download_flag: bool | None = None,
@@ -851,7 +744,7 @@ class DatabaseManagement(BaseDatabaseManagement):
         """
         # These arguments remain in the signature only to give legacy callers
         # a precise error at the retired upload boundary.
-        _ = file_list, upload_number, _path, activate, pbs_dict
+        _ = file_list, upload_number, activate, pbs_dict
 
         strategy_actions = OrderedDict(
             {"archive": [], "configure": [], "upload": []}
@@ -909,7 +802,6 @@ class DatabaseManagement(BaseDatabaseManagement):
         delete_flag: bool | None = None,
         database_path: str | Path | None = None,
         archive_path: str | Path | None = None,
-        _path: str | Path | None = None,
     ) -> tuple[OrderedDict[str, Any], OrderedDict[str, Any]]:
         itis_dispatcher = OrderedDict()
         itis_config = OrderedDict()
