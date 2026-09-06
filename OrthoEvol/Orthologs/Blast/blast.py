@@ -1,12 +1,14 @@
-"""Optimized for use with local/standalone NCBI BLAST 2.8.1"""
+"""Nucleotide BLAST workflows for ortholog inference."""
 import contextlib
 import logging
 import os
 import shutil
 import time
+from collections.abc import Mapping
 from datetime import datetime as d
 from pathlib import Path
 from subprocess import PIPE, CalledProcessError, run
+from typing import Literal
 
 try:
     from Bio.Application import ApplicationError
@@ -66,11 +68,9 @@ class BaseBlastN(ComparativeGenetics):
         self._fmt = '%a %b %d at %I:%M:%S %p %Y'
         self.date_format = str(d.now().strftime(self._fmt))
 
-        # Ensure paths are set
+        # Remote BLAST does not depend on a locally installed database.
         self.environment_vars = dict(os.environ)
-        if 'BLASTDB' not in self.environment_vars.keys():
-            msg = "BLASTDB is not set in your path."
-            raise EnvironmentError(msg)
+        self._validate_database_environment(self.method, self.environment_vars)
 
         # Manage Directories
         self.home = Path(os.getcwd())
@@ -129,7 +129,18 @@ class BaseBlastN(ComparativeGenetics):
                     self.current_gene_list.remove(gene)
 
     @staticmethod
-    def select_method(method=1):
+    def _validate_database_environment(
+        method: Literal[1, 2] | None,
+        environment: Mapping[str, str],
+    ) -> None:
+        """Require ``BLASTDB`` only for a local search."""
+        if method != 2 and "BLASTDB" not in environment:
+            raise EnvironmentError("BLASTDB is required for a local BLAST search.")
+
+    @staticmethod
+    def select_method(
+        method: Literal[1, 2] | None = 1,
+    ) -> tuple[dict[str, object], dict[str, str]]:
         """Select a method for running blastn.
 
         :param method: The blast method to use. Either 1, 2, or None.
@@ -138,12 +149,12 @@ class BaseBlastN(ComparativeGenetics):
         # TIP: This is the fastest version and recommended for blasting with
         # multiple species and multiple genes.
         if method == 1:
-            blastn_parameters = {'query': '', 'db': 'refseq_rna_v5',
+            blastn_parameters = {'query': '', 'db': 'refseq_rna',
                                  'taxids': '', 'strand': 'plus',
                                  'evalue': 0.01, 'outfmt': 5,
                                  'max_target_seqs': 10, 'task': 'blastn'}
             query_config = {'query': '',
-                            'db': 'refseq_rna_v5',
+                            'db': 'refseq_rna',
                             'temp fasta': ''}
         # Remote blast with entrez_query
         # XXX: This cannot be used with taxids.
@@ -152,14 +163,14 @@ class BaseBlastN(ComparativeGenetics):
                                  'db': 'refseq_rna',
                                  'strand': 'plus', 'evalue': 0.01,
                                  'outfmt': 5, 'max_target_seqs': 10,
-                                 'task': 'blastn', 'remote': 'True'}
+                                 'task': 'blastn', 'remote': True}
             query_config = {'query': '',
                             'db': 'refseq_rna',
                             'temp fasta': ''}
         # Default local blast
         # XXX Unless you are have a very simple blast....
         # i.e. only a query fasta
-        elif method is None or method == "":
+        elif method is None:
             blastn_parameters = {'query': '', 'db': 'refseq_rna',
                                  'strand': 'plus', 'evalue': 0.01,
                                  'outfmt': 5, 'max_target_seqs': 500,

@@ -17,7 +17,6 @@ class Webster(object):
         "ITIS": Path('ITIS'),
         "NCBI_blast": Path('NCBI/blast'),
         "NCBI_blast_db": Path('NCBI/blast/db'),
-        "NCBI_blast_windowmasker_files": Path('NCBI/blast/windowmasker_files'),
         "NCBI_pub_taxonomy": Path('NCBI/pub/taxonomy'),
         "NCBI_refseq_release": Path('NCBI/refseq/release'),
         "ITIS_taxonomy": Path('ITIS/taxonomy'),

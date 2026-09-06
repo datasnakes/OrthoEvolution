@@ -8,7 +8,6 @@ from unittest import mock
 
 import pytest
 
-from OrthoEvol import OrthoEvolDeprecationWarning
 from OrthoEvol.Tools.ftp.baseftp import BaseFTPClient
 from OrthoEvol.Tools.ftp.ncbiftp import NcbiFTPClient
 
@@ -197,17 +196,6 @@ def test_local_file_freshness_requires_matching_remote_size(
     )
 
 
-def test_windowmasker_download_remains_explicitly_unsupported() -> None:
-    """Preserve the deprecated API boundary without opening an FTP connection."""
-    client = make_client()
-
-    with pytest.raises(
-        OrthoEvolDeprecationWarning,
-        match="WindowMasker downloads are no longer supported",
-    ):
-        client.getwindowmaskerfiles([9606], "/tmp")
-
-
 def test_keepalive_transfer_preserves_same_named_local_file(
     tmp_path: Path,
     monkeypatch: pytest.MonkeyPatch,
@@ -272,6 +260,47 @@ def test_blast_manifest_rejects_unknown_database() -> None:
     with mock.patch.object(client, "_load_blast_metadata", return_value=[]):
         with pytest.raises(FileNotFoundError, match="missing"):
             client._blast_archive_paths("missing")
+
+
+def test_getblastdb_uses_current_manifest_and_returns_destination(
+    tmp_path: Path,
+) -> None:
+    """Resolve the current manifest and expose the installed database path."""
+    client = make_client()
+    remote_path = "/blast/db/refseq_rna.tar.gz"
+
+    with (
+        mock.patch.object(
+            client,
+            "_blast_archive_paths",
+            return_value=[remote_path],
+        ) as archive_paths,
+        mock.patch.object(
+            client,
+            "_remote_checksums",
+            return_value=(
+                {remote_path: "a" * 32},
+                {remote_path: f"{'a' * 32}  refseq_rna.tar.gz\n"},
+            ),
+        ),
+        mock.patch.object(
+            client,
+            "_download_pool",
+            return_value=[tmp_path / "refseq_rna.tar.gz"],
+        ),
+        mock.patch.object(client, "_write_text_atomic"),
+    ):
+        result = client.getblastdb(
+            database_name="refseq_rna",
+            download_path=tmp_path,
+            extract=False,
+        )
+
+    assert result == tmp_path
+    archive_paths.assert_called_once_with(
+        "refseq_rna",
+        include_taxonomy=True,
+    )
 
 
 def test_download_does_not_replace_file_after_interruption(

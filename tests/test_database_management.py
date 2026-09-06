@@ -9,6 +9,7 @@ import pytest
 
 from OrthoEvol import OrthoEvolDeprecationWarning
 from OrthoEvol.Manager.database_management import DatabaseManagement
+from OrthoEvol.config import load_pipeline_config
 
 
 def build_database_manager(tmp_path: Path) -> DatabaseManagement:
@@ -16,13 +17,13 @@ def build_database_manager(tmp_path: Path) -> DatabaseManagement:
     manager = object.__new__(DatabaseManagement)
     manager.user_db = tmp_path / "databases"
     manager.user_archive = tmp_path / "archive"
+    manager.database_path = manager.user_db
+    manager.ftp_flag = False
     manager.db_mana_utils = SimpleNamespace(archive=Mock(name="archive"))
     manager.download_blast_database = Mock(name="download_blast_database")
-    manager.download_windowmasker_files = Mock(name="download_windowmasker_files")
     manager.download_ncbi_taxonomy_dump_files = Mock(
         name="download_ncbi_taxonomy_dump_files"
     )
-    manager.gene_data = SimpleNamespace(taxon_ids=[9606, 9544])
     return manager
 
 
@@ -43,6 +44,39 @@ def test_prepare_child_strategies_does_not_mutate_callers() -> None:
         "archive_flag": None,
         "delete_flag": None,
     }
+
+
+def test_prepare_child_strategies_preserves_explicit_false() -> None:
+    (prepared_strategy,) = DatabaseManagement._prepare_child_strategies(
+        ({},),
+        configure_flag=False,
+        archive_flag=False,
+        delete_flag=False,
+    )
+
+    assert prepared_strategy == {
+        "configure_flag": False,
+        "archive_flag": False,
+        "delete_flag": False,
+    }
+
+
+def test_download_blast_database_returns_unversioned_path(
+    tmp_path: Path,
+) -> None:
+    manager = build_database_manager(tmp_path)
+    manager.database_path = tmp_path
+    manager.ncbiftp = Mock()
+    expected_path = tmp_path / "NCBI" / "blast" / "db"
+    manager.ncbiftp.getblastdb.return_value = expected_path
+
+    result = DatabaseManagement.download_blast_database(manager)
+
+    assert result == expected_path
+    manager.ncbiftp.getblastdb.assert_called_once_with(
+        database_name="refseq_rna",
+        download_path=expected_path,
+    )
 
 
 def test_refseq_upload_reports_retired_scheduler(tmp_path: Path) -> None:
@@ -125,7 +159,6 @@ def test_strategy_dispatcher_maps_every_strategy_and_preserves_full_reset(
         "NCBI_blast": "NCBI_blast",
         "Full": "full",
         "NCBI_blast_db": "ncbi_blast_db",
-        "NCBI_blast_windowmaskerfiles": "ncbi_blast_windowmasker_files",
         "NCBI_pub_taxonomy": "NCBI_pub_taxonomy",
         "NCBI_refseq_release": "NCBI_refseq_release",
         "ITIS": "itis",
@@ -140,7 +173,7 @@ def test_strategy_dispatcher_maps_every_strategy_and_preserves_full_reset(
 
     configuration = OrderedDict(
         (strategy_name, {"value": strategy_name})
-        for strategy_name in (*strategy_methods, "unknown")
+        for strategy_name in strategy_methods
     )
     dispatcher, strategy_config = manager.get_strategy_dispatcher(configuration)
 
@@ -149,6 +182,53 @@ def test_strategy_dispatcher_maps_every_strategy_and_preserves_full_reset(
     assert list(strategy_config) == expected_strategies
     for strategy_name, method_name in strategy_methods.items():
         getattr(manager, method_name).assert_called_once_with(value=strategy_name)
+
+
+def test_strategy_dispatcher_rejects_unknown_strategy(tmp_path: Path) -> None:
+    manager = build_database_manager(tmp_path)
+
+    with pytest.raises(ValueError, match="Unknown database strategy 'unknown'"):
+        manager.get_strategy_dispatcher(OrderedDict({"unknown": {}}))
+
+
+def test_validated_nested_configuration_reaches_dispatcher(
+    tmp_path: Path,
+) -> None:
+    config_file = tmp_path / "databases.yml"
+    config_file.write_text(
+        """Database_config:
+  email: test@example.com
+  driver: sqlite3
+  Full:
+    NCBI:
+      NCBI_blast:
+        NCBI_blast_db: {}
+      NCBI_pub_taxonomy: {}
+      NCBI_refseq_release: {}
+    ITIS:
+      ITIS_taxonomy: {}
+""",
+        encoding="utf-8",
+    )
+    database_config = load_pipeline_config(config_file).as_legacy_dict()[
+        "Database_config"
+    ]
+    strategy_config = {
+        key: value
+        for key, value in database_config.items()
+        if isinstance(value, dict)
+    }
+    manager = build_database_manager(tmp_path)
+
+    dispatcher, configuration = manager.get_strategy_dispatcher(strategy_config)
+
+    assert list(dispatcher) == [
+        "NCBI",
+        "NCBI_blast_db",
+        "NCBI_pub_taxonomy",
+        "NCBI_refseq_release",
+    ]
+    assert list(configuration) == list(dispatcher)
 
 
 @pytest.mark.parametrize(
@@ -170,15 +250,6 @@ def test_strategy_dispatcher_maps_every_strategy_and_preserves_full_reset(
             {"database_name": "refseq_rna"},
             "NCBI_blast",
             None,
-        ),
-        (
-            "ncbi_blast_windowmasker_files",
-            "NCBI_blast_windowmasker_files",
-            {"taxonomy_ids": [1]},
-            "download_windowmasker_files",
-            {"taxonomy_ids": [9606, 9544]},
-            "NCBI_blast_windowmasker_files",
-            "default",
         ),
         (
             "NCBI_pub_taxonomy",
