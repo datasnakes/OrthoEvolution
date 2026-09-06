@@ -1,14 +1,14 @@
 # Standard Library
-import pkg_resources
 import yaml
 # OrthoEvol
 from OrthoEvol.Manager.management import ProjectManagement
-from OrthoEvol.Manager import config
+from OrthoEvol.Manager.config import yml
 from OrthoEvol.Manager.database_management import BaseDatabaseManagement
 from OrthoEvol.Orthologs.Align import MultipleSequenceAlignment as MSA
 from OrthoEvol.Orthologs.Blast.blast import OrthoBlastN
 from OrthoEvol.Orthologs.Blast.comparative_genetics import BaseComparativeGenetics
 from OrthoEvol.Orthologs.GenBank.genbank import GenBank
+from OrthoEvol.resources import package_resource_path
 
 
 #import configparser
@@ -46,10 +46,10 @@ class DataMana(object):
         self.pm = self.bl = self.gb = self.al = self.db = None
         if pipeline == 'Ortho_CDS_1':
             if new is True:
-                config_file = pkg_resources.resource_filename(config.yaml.__name__, 'pipeline.yml')
+                config_file = package_resource_path(yml, 'pipeline.yml')
             else:
-                config_file = pkg_resources.resource_filename(
-                    config.yaml.__name__, 'config_template_existing.yml')
+                config_file = package_resource_path(
+                    yml, 'initialize_old.yml')
         if config_file is not None:
             if start is True:
                 self.configure(config_file)

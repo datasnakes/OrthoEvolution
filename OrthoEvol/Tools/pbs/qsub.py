@@ -9,9 +9,8 @@ from datetime import datetime as d
 from pathlib import Path
 from time import sleep
 
-from pkg_resources import resource_filename
-
 from OrthoEvol.Manager.config import templates
+from OrthoEvol.resources import package_resource_path
 from OrthoEvol.Tools.logit import LogIt
 from OrthoEvol.utilities import FullUtilities
 
@@ -184,7 +183,7 @@ class Qsub(BaseQsub):
         else:
             self.supplied_python_script = self.python_script
 
-        self.pbs_template = resource_filename(templates.__name__, "temp.pbs")
+        self.pbs_template = package_resource_path(templates, "temp.pbs")
 
         # PBS - header info
         if not author:

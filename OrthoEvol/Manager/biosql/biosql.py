@@ -1,7 +1,6 @@
 # Standard Library
 import os
 import subprocess as sp
-import pkg_resources
 from pathlib import Path
 # BioPython
 from BioSQL import BioSeqDatabase
@@ -12,6 +11,7 @@ from OrthoEvol.Tools.logit import LogIt
 from OrthoEvol.Manager.management import ProjectManagement
 from OrthoEvol.Manager.biosql.biosql_repo import sql
 from OrthoEvol.Manager.biosql.biosql_repo import scripts as sql_scripts
+from OrthoEvol.resources import package_resource_path
 
 
 class BaseBioSQL(object):
@@ -46,9 +46,13 @@ class BaseBioSQL(object):
         self.biosql_proc = self.biosql_utils.system_cmd
 
         # Load relative and absolute paths to scripts in the BioSQL module
-        self.scripts = pkg_resources.resource_filename(sql_scripts.__name__, "")
-        self.ncbi_taxon_script = pkg_resources.resource_filename(sql_scripts.__name__, "load_ncbi_taxonomy.pl")
-        self.itis_taxon_script = pkg_resources.resource_filename(sql_scripts.__name__, "load_itis_taxonomy.pl")
+        self.scripts = package_resource_path(sql_scripts)
+        self.ncbi_taxon_script = package_resource_path(
+            sql_scripts, "load_ncbi_taxonomy.pl"
+        )
+        self.itis_taxon_script = package_resource_path(
+            sql_scripts, "load_itis_taxonomy.pl"
+        )
         if database_name:
             self.database_name = Path(database_name)
 
@@ -132,7 +136,7 @@ class SQLiteBioSQL(BaseBioSQL):
         """
         # Build the command
         if not self.template_abs_path.is_file():
-            schema_file = pkg_resources.resource_filename(sql.__name__, self.schema_file)
+            schema_file = package_resource_path(sql, self.schema_file)
             schema_cmd = self.schema_cmd % str(self.template_abs_path)
             # Run the bash command
             self.configure_new_database(schema_cmd, schema_file)

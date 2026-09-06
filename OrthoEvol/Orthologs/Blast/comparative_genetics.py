@@ -5,13 +5,13 @@ import shutil
 import time
 import copy
 import random
-import pkg_resources
 from pathlib import Path
 # OrthoEvol
 from OrthoEvol.Manager.config import data
 from OrthoEvol.Manager.management import ProjectManagement
 from OrthoEvol.utilities import FullUtilities
 from OrthoEvol.Tools.logit import LogIt
+from OrthoEvol.resources import package_resource_path
 # Other
 import pandas as pd
 from ete3 import NCBITaxa
@@ -125,7 +125,7 @@ class BaseComparativeGenetics(object):
             self.taxon_path = self.project_index / Path(self.taxon_file)
         # Handle the master accession file (could be before or after blast)
         if kwargs["copy_from_package"]:
-            shutil.copy(pkg_resources.resource_filename(data.__name__, self.acc_file),
+            shutil.copy(package_resource_path(data, self.acc_file),
                         str(self.project_index))
         else:
             shutil.copy(self.acc_file, str(self.project_index))

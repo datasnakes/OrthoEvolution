@@ -2,9 +2,9 @@
 import re
 import textwrap as twrap
 from pathlib import Path
-from pkg_resources import resource_filename
 # OrthoEvol
 from OrthoEvol.Manager.config import references
+from OrthoEvol.resources import package_resource_path
 
 
 
@@ -39,16 +39,16 @@ class Webster(object):
                 Unreliable Alignment Regions Accounting for the Uncertainty of Multiple Parameters.  Nucleic Acids
                 Research, 2015 Jul 1; 43 (Web Server issue): W7-W14.; doi: 10.1093/nar/gkq443""",
                 "link": "https://www.ncbi.nlm.nih.gov/pubmed/18229673",
-                "path": resource_filename(
-                    references.__name__, "GUIDANCE2_Accurate_Detection_of_Unreliable_Alignment_Regions_Accounting_for_"
+                "path": package_resource_path(
+                    references, "GUIDANCE2_Accurate_Detection_of_Unreliable_Alignment_Regions_Accounting_for_"
                                          "the_Uncertainty_of_Multiple_Parameters.pdf")
             },
             "reference_2": {
                 "citation": u"""Landan, G., and D. Graur. (2008).  Local Reliability Measures from Sets of Co-optimal
                 Multiple Sequence Alignments.  Pac Symp Biocomput 13:15-24""",
                 "link": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC4489236/",
-                "path": resource_filename(
-                    references.__name__, "Local_Reliability_Measures_from_Sets_of_Co-optimal_Multiple_Sequence_"
+                "path": package_resource_path(
+                    references, "Local_Reliability_Measures_from_Sets_of_Co-optimal_Multiple_Sequence_"
                                          "Alignments.pdf")
             }
         },

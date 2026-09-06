@@ -58,7 +58,6 @@ def _dispatch_config(config_file):
          "from OrthoEvol.Manager.management import ProjectManagement\n" \
          "from OrthoEvol.Manager.database_dispatcher import DatabaseDispatcher\n" \
          "from OrthoEvol.Manager.config import yml\n" \
-         "from pkg_resources import resource_filename\n" \
          "import yaml\n" \
          "pm_config_file = \"%%s\"\n" \
          "with open(pm_config_file, \'r\') as f:\n" \

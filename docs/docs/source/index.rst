@@ -38,7 +38,7 @@ more insight into this project/python package.
 
 Installation
 ----------------
-View the below methods for installing this package. **Python 3.9 or higher is required.**
+View the below methods for installing this package. **Python 3.11 or higher is required.**
 
 PyPi
 ~~~~~~~~~~~~~~~~
