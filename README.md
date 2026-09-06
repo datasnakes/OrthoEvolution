@@ -2,7 +2,7 @@
 
 [![CI](https://github.com/datasnakes/OrthoEvolution/actions/workflows/ci.yml/badge.svg)](https://github.com/datasnakes/OrthoEvolution/actions/workflows/ci.yml)
 [![PyPI](https://badge.fury.io/py/OrthoEvol.svg)](https://pypi.org/project/OrthoEvol/)
-[![Documentation](https://readthedocs.org/projects/orthoevolution/badge/?version=latest)](https://orthoevolution.readthedocs.io/en/latest/)
+[![Documentation](https://img.shields.io/badge/docs-Great_Docs-2F6B45.svg)](https://datasnakes.github.io/OrthoEvolution/)
 [![Coverage](https://codecov.io/gh/datasnakes/OrthoEvolution/branch/main/graph/badge.svg)](https://codecov.io/gh/datasnakes/OrthoEvolution)
 [![DOI](https://zenodo.org/badge/88282824.svg)](https://doi.org/10.5281/zenodo.17796234)
 [![Last Commit](https://badgen.net/github/last-commit/datasnakes/OrthoEvolution)](https://github.com/datasnakes/OrthoEvolution/commits/main)
@@ -45,7 +45,7 @@ The package is organized around four major areas:
 For additional scientific context, see this
 [related comparative-genetics paper](https://www.frontiersin.org/journals/neuroscience/articles/10.3389/fnins.2014.00283/full).
 
-## Core Capabilities
+## Features
 
 - Infer candidate orthologs and generate post-BLAST reports.
 - Retrieve NCBI datasets and preformatted BLAST databases.
@@ -61,16 +61,17 @@ workflow you intend to run.
 
 ## Install & Setup
 
-OrthoEvolution supports Python 3.11 and 3.12. A virtual environment keeps its
+OrthoEvolution supports Python 3.11 through 3.14. A virtual environment keeps its
 dependencies separate from other Python projects.
+
+Install [`uv`](https://docs.astral.sh/uv/getting-started/installation/) before
+creating the environment.
 
 ### Install from PyPI
 
 ```bash
-python3.11 -m venv .venv
-source .venv/bin/activate
-python -m pip install --upgrade pip
-python -m pip install OrthoEvol
+uv venv --python 3.14 .venv
+uv pip install --python .venv/bin/python OrthoEvol
 ```
 
 ### Install from source
@@ -78,10 +79,8 @@ python -m pip install OrthoEvol
 ```bash
 git clone https://github.com/datasnakes/OrthoEvolution.git
 cd OrthoEvolution
-python3.11 -m venv .venv
-source .venv/bin/activate
-python -m pip install --upgrade pip
-python -m pip install .
+uv venv --python 3.14 .venv
+uv pip install --python .venv/bin/python .
 ```
 
 ### Install for development
@@ -89,10 +88,8 @@ python -m pip install .
 ```bash
 git clone https://github.com/datasnakes/OrthoEvolution.git
 cd OrthoEvolution
-python3.11 -m venv .venv
-source .venv/bin/activate
-python -m pip install --upgrade pip
-python -m pip install -e ".[test]"
+uv venv --python 3.14 .venv
+uv pip install --python .venv/bin/python -e ".[test]"
 ```
 
 ## Usage
@@ -151,7 +148,7 @@ transfer.
 ## Documentation and Examples
 
 - Read the
-  [OrthoEvolution documentation](https://orthoevolution.readthedocs.io/en/latest/)
+  [OrthoEvolution documentation](https://datasnakes.github.io/OrthoEvolution/)
   for module and API details.
 - Browse the [examples](examples/) for scripts, example data, and interface
   prototypes.
@@ -164,11 +161,12 @@ Install the development dependencies and run the test suite through the active
 virtual environment:
 
 ```bash
-python -m pip install -e ".[test]"
-python -m pytest tests/
+uv pip install --python .venv/bin/python -e ".[test]"
+.venv/bin/python -m pytest tests/
 ```
 
-The continuous-integration workflow runs the suite on Python 3.11 and 3.12.
+The continuous-integration workflow runs the suite on Python 3.11, 3.12, 3.13,
+and 3.14.
 
 ## Contributing
 

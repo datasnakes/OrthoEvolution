@@ -1,0 +1,36 @@
+---
+title: Troubleshooting
+description: Separate Python, external-program, data, network, and scheduler failures.
+---
+
+OrthoEvolution connects Python, external programs, data files, network
+services, and cluster schedulers. First identify which system stopped. A
+Python traceback can report a failure that started outside Python.
+
+## Confirm the environment
+
+```bash
+.venv/bin/python --version
+.venv/bin/python -c "import OrthoEvol; print(OrthoEvol.__name__)"
+.venv/bin/python -m pip check
+```
+
+Use Python 3.11 through 3.14. Run each command with the same local environment
+that contains OrthoEvolution.
+
+## Classify the failure
+
+| Boundary | First checks |
+|---|---|
+| Python import | Interpreter path, installed package, dependency conflicts |
+| BLAST | Executable on `PATH`, `BLASTDB`, database files, accession input |
+| Alignment | Executable path, sequence type, file format, writable output |
+| Phylogenetics | Program installation, model settings, alignment validity |
+| NCBI retrieval | Network access, remote path, storage, archive validation |
+| PBS or Slurm | Scheduler command, account, queue or partition, job identifier |
+
+## Preserve useful evidence
+
+Save the exact command, traceback, log, configuration file, and smallest input
+that fails. Also record the package, Python, and external-program versions.
+Before you share the report, remove credentials and private paths.

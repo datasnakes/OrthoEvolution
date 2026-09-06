@@ -43,7 +43,7 @@ class BaseBlastN(ComparativeGenetics):
         :param ref_species: A reference species or organism for the blast query.
         :param template:  The accession file template.
         :param save_data:  A flag for saving the post_blast data to an excel file.
-        :param quiet:  A flag for determining the level of logging verbosity.
+        :param verbose: A flag for determining the level of logging verbosity.
         :param kwargs:"""
 
         super().__init__(project=project, method=method, acc_file=acc_file,

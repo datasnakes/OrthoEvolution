@@ -1,0 +1,107 @@
+---
+title: Alignment and Phylogenetics
+description: Prepare sequence alignments and connect them to supported phylogenetic tools.
+---
+
+An alignment places comparable sequence positions in the same columns. A
+phylogenetic analysis then uses that alignment to estimate evolutionary
+relationships. OrthoEvolution coordinates both stages, but external scientific
+programs perform the computations.
+
+## Alignment workflow
+
+`MultipleSequenceAlignment` can coordinate Clustal Omega, GUIDANCE2, and
+PAL2NAL. Select the sequence type before you align the records:
+
+- Use nucleotide inputs where a nucleotide alignment is required
+- Use amino-acid inputs for protein alignment and filtering
+- Retain the coding-sequence relationship when PAL2NAL projects a protein
+  alignment back to codons
+
+GUIDANCE2 writes separate files for retained sequences, removed sequences,
+alignments, filtered columns, and masked alignments. Record which filtering
+path produced the input for the next step.
+
+## Run a Clustal Omega alignment
+
+```python
+from pathlib import Path
+
+from OrthoEvol.Orthologs.Align import ClustalO
+
+input_fasta = Path("examples/example-data/Alignment_Filter/HTR1A.faa")
+output_fasta = Path("HTR1A_aligned.fasta")
+
+alignment = ClustalO(
+    infile=input_fasta,
+    outfile=output_fasta,
+    outfmt="fasta",
+)
+alignment.runclustalomega()
+```
+
+`ClustalO` builds and runs the external `clustalo` command. Before you run it,
+make sure that `clustalo` is on `PATH`. The input file must contain one
+biological sequence type. Use proteins if the alignment will guide a later
+PAL2NAL codon alignment.
+
+## Configure GUIDANCE2
+
+```python
+from OrthoEvol.Orthologs.Align import Guidance2Commandline
+
+guidance = Guidance2Commandline(
+    seqFile="examples/example-data/Alignment_Filter/HTR1A.faa",
+    msaProgram="MAFFT",
+    seqType="aa",
+    outDir="HTR1A_guidance2",
+)
+```
+
+This object records the input, alignment program, sequence type, and output
+directory. To run the command, you still need GUIDANCE2 and the selected
+alignment program. Review the retained and removed sequences. Filtering does
+not always improve the biological analysis.
+
+## Convert an alignment for PhyML
+
+```python
+from OrthoEvol.Orthologs.Phylogenetics import PhyML, RelaxPhylip
+
+RelaxPhylip("HTR1A_aligned.fasta", "HTR1A_aligned.phy")
+
+phyml = PhyML("HTR1A_aligned.phy", datatype="aa")
+phyml.run(model="WAG", alpha="e", bootstrap=100)
+```
+
+`RelaxPhylip` converts the alignment to the relaxed PHYLIP format that the
+wrapper reads. PhyML is optional external software. OrthoEvolution does not
+install it. If the `phyml` executable is absent, `PhyML` raises
+`FileNotFoundError` when you create the object.
+
+## Phylogenetic tools
+
+The package provides interfaces for PAML, PhyML, IQ-TREE, Phylip, ETE, and tree
+visualization. Each interface has requirements for its executable, input
+format, and operating system. Before you automate one, read its constructor
+and method details in the API reference.
+
+The bundled Phylip wrapper runs only on Linux. The repository keeps the
+ETE3/PAML and filtered-tree interfaces for existing workflows. It does not
+include a complete portable tutorial for their external programs. Their
+reference pages describe the API, but they do not test your local installation.
+
+## Interpret the tree
+
+The sampled taxa, selected sequences, alignment, filters, substitution model,
+and program configuration all affect an inferred tree. A clear plot does not
+show that these choices fit the biological question. Keep the unaligned
+sequences, final alignment, program configuration, logs, and tree files
+together.
+
+## Before trusting a result
+
+If a command stops immediately, make sure that its executable and input format
+are correct. A completed command can still give a misleading result. This can
+happen when identifiers differ, aligned regions are not homologous, or filters
+remove the variation required for inference.

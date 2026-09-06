@@ -1,0 +1,174 @@
+# Great Docs configuration for the OrthoEvolution documentation site.
+module: OrthoEvol
+display_name: OrthoEvolution
+project_type: python
+parser: sphinx
+dynamic: false
+
+repo: https://github.com/datasnakes/OrthoEvolution
+site_url: https://datasnakes.github.io/OrthoEvolution/
+github_style: widget
+pypi: https://pypi.org/project/OrthoEvol/
+
+source:
+  enabled: true
+  branch: main
+  placement: usage
+
+site:
+  theme: flatly
+  toc: true
+  toc-depth: 3
+  html-math-method: katex
+
+user_guide: docs/user_guide
+
+reference:
+  - title: Ortholog discovery
+    desc: Infer orthologs and summarize comparative-genetics results.
+    contents:
+      - Orthologs.Blast.BaseComparativeGenetics
+      - Orthologs.Blast.ComparativeGenetics
+      - Orthologs.Blast.BaseBlastN
+      - Orthologs.Blast.OrthoBlastN
+
+  - title: Sequence retrieval
+    desc: Retrieve and organize GenBank records and NCBI datasets.
+    contents:
+      - Orthologs.GenBank.GenBank
+      - Tools.ftp.BaseFTPClient
+      - Tools.ftp.NcbiFTPClient
+      - Tools.mygene.MyGene
+
+  - title: Alignment and phylogenetics
+    desc: Prepare alignments and run supported phylogenetic programs.
+    contents:
+      - Orthologs.Align.ClustalO
+      - Orthologs.Align.Guidance2Commandline
+      - Orthologs.Align.Pal2NalCommandline
+      - Orthologs.Align.MultipleSequenceAlignment
+      - Orthologs.Phylogenetics.RelaxPhylip
+      - Orthologs.Phylogenetics.ETE3PAML
+      - Orthologs.Phylogenetics.PhyML
+      - Orthologs.Phylogenetics.Phylip
+      - Orthologs.Phylogenetics.IQTreeCommandline
+      - Orthologs.Phylogenetics.FilteredTree
+      - Orthologs.Phylogenetics.TreeViz
+      - Orthologs.Phylogenetics.PAML.CodemlRun
+
+  - title: Project and data management
+    desc: Create project layouts and coordinate data and database workflows.
+    contents:
+      - Manager.management.Management
+      - Manager.management.RepoManagement
+      - Manager.management.UserManagement
+      - Manager.management.WebsiteManagement
+      - Manager.management.ProjectManagement
+      - Manager.data_management.DataMana
+      - Manager.database_management.BaseDatabaseManagement
+      - Manager.database_management.DatabaseManagement
+      - Manager.database_dispatcher.DatabaseDispatcher
+      - Manager.biosql.biosql.BaseBioSQL
+      - Manager.biosql.biosql.SQLiteBioSQL
+      - Manager.biosql.biosql.MySQLBioSQL
+
+  - title: Execution and supporting tools
+    desc: Run local, PBS, Slurm, logging, and transfer helpers.
+    contents:
+      - Tools.pbs.BaseQsub
+      - Tools.pbs.Qsub
+      - Tools.pbs.BaseQstat
+      - Tools.pbs.Qstat
+      - Tools.pbs.MultiQstat
+      - Tools.pbs.TargetJobKeyError
+      - Tools.slurm.SlurmClient
+      - Tools.slurm.SlurmJob
+      - Tools.slurm.SlurmCommandNotFoundError
+      - Tools.parallel.Multiprocess
+      - Tools.logit.LogIt
+      - Tools.pybasher.PyBasher
+      - Tools.send2server.S2S
+      - Tools.slackify.Slackify
+
+  - title: Templates and utilities
+    desc: Create project templates and use shared package utilities.
+    contents:
+      - Cookies.Oven
+      - Cookies.CookBook
+      - resources.package_resource_path
+      - utilities.DuplicateAnalysis
+      - utilities.BlastUtils
+      - utilities.GenbankUtils
+      - utilities.OrthologUtils
+      - utilities.ManagerUtils
+      - utilities.CookieUtils
+      - utilities.PackageVersion
+      - utilities.FunctionRepeater
+      - utilities.FullUtilities
+      - OrthoEvolWarning
+      - OrthoEvolDevelopmentWarning
+      - OrthoEvolDeprecationWarning
+
+inline_methods: 5
+
+hero:
+  enabled: true
+  name: OrthoEvolution
+  tagline: Reproducible comparative evolutionary genetics in Python.
+  badges: auto
+  starfield: false
+
+accent_color:
+  light: "#2F6B45"
+  dark: "#8BC49C"
+
+navbar_color:
+  light: "#174D35"
+  dark: "#0D2818"
+
+navbar_order:
+  - User Guide
+  - Reference
+  - Changelog
+
+nav_icons:
+  navbar:
+    User Guide: book-open
+    Reference: code-2
+    Changelog: history
+  sidebar:
+    Getting Started: rocket
+    Ortholog Inference: search
+    NCBI and Sequence Retrieval: database
+    Alignment and Phylogenetics: git-branch
+    Project and Data Management: folders
+    Cluster Execution: server
+    Troubleshooting: wrench
+    Work with the Example Data: folder
+
+dark_mode_toggle: true
+keyboard_nav: true
+back_to_top: true
+sidebar_filter:
+  enabled: true
+  min_items: 8
+
+markdown_pages:
+  enabled: true
+  widget: true
+
+changelog:
+  enabled: true
+  max_releases: 50
+
+mcp:
+  enabled: false
+
+seo:
+  enabled: true
+  canonical:
+    enabled: true
+    base_url: https://datasnakes.github.io/OrthoEvolution/
+  structured_data:
+    enabled: true
+    type: SoftwareSourceCode

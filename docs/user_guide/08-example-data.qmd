@@ -1,0 +1,83 @@
+---
+title: Work with the Example Data
+description: Identify the small inputs and recorded outputs bundled with OrthoEvolution.
+---
+
+The repository includes small files for ortholog searches, sequences,
+alignments, and trees. Use them to learn each file format or practice one
+operation at a time. You do not need to start with a large dataset.
+
+These files are historical test fixtures and recorded outputs. They do not
+form a complete analysis or a current biological reference dataset.
+
+## Find the files
+
+```text
+examples/example-data/
+├── BLASTest_MAF.csv
+├── BLASTest_TIME.csv
+├── BLASTest_mygene.csv
+├── HTR1A_aligned.phy
+├── HTR1A_aligned_cds_nucl.fasta
+├── MASTER_HTR1A_CDS1.ffn
+├── example_pba.xlsx
+├── organisms.csv
+├── species_tree.nw
+└── Alignment_Filter/
+    ├── HTR1A.faa
+    ├── HTR1A.ffn
+    ├── HTR1A_G2.faa
+    ├── HTR1A_G2.ffn
+    ├── HTR1A_G2_aa.aln
+    ├── HTR1A_G2_removed.ffn
+    ├── HTR1A_P2N_na.aln
+    ├── AA_Guidance2/
+    └── NA_Guidance2/
+```
+
+The GUIDANCE2 directories contain intermediate scores, alignments, and filter
+files. Keep them with the input and final alignment. Together, these files show
+which sequences or columns the filter removed.
+
+## Choose an example by task
+
+| Task | Start with | What it demonstrates |
+|---|---|---|
+| Inspect accession tables | `BLASTest_mygene.csv` | Gene-by-organism accession layout |
+| Review BLAST summaries | `BLASTest_MAF.csv`, `BLASTest_TIME.csv` | Recorded accession and timing outputs |
+| Practice protein alignment | `Alignment_Filter/HTR1A.faa` | Multi-sequence protein FASTA input |
+| Inspect coding sequences | `Alignment_Filter/HTR1A.ffn` | Matching coding-region nucleotide FASTA |
+| Inspect a filtered alignment | `Alignment_Filter/HTR1A_G2_aa.aln` | Recorded GUIDANCE2-derived alignment |
+| Inspect PAL2NAL output | `Alignment_Filter/HTR1A_P2N_na.aln` | Protein-guided nucleotide alignment |
+| Read PHYLIP input | `HTR1A_aligned.phy` | Alignment in PHYLIP format |
+| Read a tree | `species_tree.nw` | Newick-formatted tree |
+| Inspect the organism set | `organisms.csv` | One organism name per row |
+
+You can find these files in the repository's
+[`examples/example-data`](https://github.com/datasnakes/OrthoEvolution/tree/main/examples/example-data)
+directory.
+
+## Inspect a sequence file
+
+```python
+from pathlib import Path
+
+from Bio import SeqIO
+
+sequence_file = Path("examples/example-data/Alignment_Filter/HTR1A.faa")
+records = list(SeqIO.parse(sequence_file, "fasta"))
+
+assert records
+assert all(record.seq for record in records)
+```
+
+This test makes sure that Biopython can read at least one non-empty FASTA
+record. It does not test orthology, sequence quality, taxonomic coverage, or
+the relationship between the protein and nucleotide files.
+
+## Use the examples as snapshots
+
+Before a tool changes an example, copy the file to a disposable work directory.
+Record the example name and the program version for each new result. The
+bundled accession values, alignment filters, and trees are snapshots. Do not
+treat them as current data.
