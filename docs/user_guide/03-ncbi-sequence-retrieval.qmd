@@ -25,7 +25,6 @@ try:
     ncbi_ftp.getblastdb(
         database_name="refseq_rna",
         download_path=download_path,
-        v5=True,
         extract=True,
     )
 finally:
@@ -35,7 +34,7 @@ finally:
 Before you start the transfer, choose a destination with enough storage. If a
 transfer stops, make sure that the files are complete before you use them.
 
-Version 5 selections use NCBI metadata to match the exact database. The client
+Database selections use NCBI metadata to match the exact database. The client
 downloads every volume in that selection. It compares each archive with its
 MD5 checksum before extraction. It then keeps the checksum sidecar as an
 installation marker. A repeated request can reuse an installation that passed

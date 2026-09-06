@@ -34,14 +34,13 @@ Download the latest standalone blast executables from
 
 NCBI's `blastn` can be configured (using its parameters) in a number of different ways 
 (i.e. local or remote use and with seqidlists or taxids). For typical orthology analyses, 
-it's important to take advantage of the speed and efficiency of NCBI's newest 
-preformatted blast databases ([blastdbv5](https://ftp.ncbi.nlm.nih.gov/blast/db/v5/)). 
+it's important to use NCBI's current preformatted BLAST databases.
 In order to do that, we've implemented a method (`1`) that uses taxids (taxonomic groups — species level and higher level taxa). 
 View more about our methods below.
 
 Method    |  Description  
 ----------|--------------------------------------------------------------------
-1         |  Local blast using taxids. Utilizes local databases (`refseq_rna_v5`).
+1         |  Local blast using taxids. Utilizes local databases (`refseq_rna`).
 2         |  Remote blast using an entrez query. Uses entrez species name and query 
 None      |  A single query method not useful for orthology inference
 

@@ -6,14 +6,10 @@ HTTPS so concurrent downloads do not share a stateful FTP connection.
 
 The client supports:
 
-- Current version 5 BLAST databases from `/blast/db/`
-- Legacy version 4 BLAST databases from `/blast/db/v4/`
+- Current BLAST databases from `/blast/db/`
 - NCBI's convenience BLAST FASTA files
 - Bulk RefSeq release selections
 - FTP file and directory listings
-
-NCBI no longer publishes WindowMasker files. Calling
-`getwindowmaskerfiles()` raises `OrthoEvolDeprecationWarning`.
 
 ## BLAST database download
 
@@ -30,20 +26,17 @@ try:
     client.getblastdb(
         database_name="refseq_rna",
         download_path=download_path,
-        v5=True,
         extract=True,
     )
 finally:
     client.close_connection()
 ```
 
-Version 5 selections use NCBI's
+Database selections use NCBI's
 [`blastdb-metadata-1-1.json`](https://ftp.ncbi.nlm.nih.gov/blast/db/blastdb-metadata-1-1.json)
 manifest. Exact database identities are matched, and every volume listed by
 NCBI is downloaded. Each archive is verified against its `.md5` sidecar before
 extraction. The sidecar remains as the local installation marker.
-
-Set `v5=False` only when a legacy version 4 database is specifically required.
 
 ## RefSeq release download
 
