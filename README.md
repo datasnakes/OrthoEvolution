@@ -61,16 +61,17 @@ workflow you intend to run.
 
 ## Install & Setup
 
-OrthoEvolution supports Python 3.11 and 3.12. A virtual environment keeps its
+OrthoEvolution supports Python 3.11 through 3.14. A virtual environment keeps its
 dependencies separate from other Python projects.
+
+Install [`uv`](https://docs.astral.sh/uv/getting-started/installation/) before
+creating the environment.
 
 ### Install from PyPI
 
 ```bash
-python3.11 -m venv .venv
-source .venv/bin/activate
-python -m pip install --upgrade pip
-python -m pip install OrthoEvol
+uv venv --python 3.14 .venv
+uv pip install --python .venv/bin/python OrthoEvol
 ```
 
 ### Install from source
@@ -78,10 +79,8 @@ python -m pip install OrthoEvol
 ```bash
 git clone https://github.com/datasnakes/OrthoEvolution.git
 cd OrthoEvolution
-python3.11 -m venv .venv
-source .venv/bin/activate
-python -m pip install --upgrade pip
-python -m pip install .
+uv venv --python 3.14 .venv
+uv pip install --python .venv/bin/python .
 ```
 
 ### Install for development
@@ -89,10 +88,8 @@ python -m pip install .
 ```bash
 git clone https://github.com/datasnakes/OrthoEvolution.git
 cd OrthoEvolution
-python3.11 -m venv .venv
-source .venv/bin/activate
-python -m pip install --upgrade pip
-python -m pip install -e ".[test]"
+uv venv --python 3.14 .venv
+uv pip install --python .venv/bin/python -e ".[test]"
 ```
 
 ## Usage
@@ -164,11 +161,12 @@ Install the development dependencies and run the test suite through the active
 virtual environment:
 
 ```bash
-python -m pip install -e ".[test]"
-python -m pytest tests/
+uv pip install --python .venv/bin/python -e ".[test]"
+.venv/bin/python -m pytest tests/
 ```
 
-The continuous-integration workflow runs the suite on Python 3.11 and 3.12.
+The continuous-integration workflow runs the suite on Python 3.11, 3.12, 3.13,
+and 3.14.
 
 ## Contributing
 
