@@ -2,7 +2,7 @@
 
 [![CI](https://github.com/datasnakes/OrthoEvolution/actions/workflows/ci.yml/badge.svg)](https://github.com/datasnakes/OrthoEvolution/actions/workflows/ci.yml)
 [![PyPI](https://badge.fury.io/py/OrthoEvol.svg)](https://pypi.org/project/OrthoEvol/)
-[![Documentation](https://readthedocs.org/projects/orthoevolution/badge/?version=latest)](https://orthoevolution.readthedocs.io/en/latest/)
+[![Documentation](https://img.shields.io/badge/docs-Great_Docs-2F6B45.svg)](https://datasnakes.github.io/OrthoEvolution/)
 [![Coverage](https://codecov.io/gh/datasnakes/OrthoEvolution/branch/main/graph/badge.svg)](https://codecov.io/gh/datasnakes/OrthoEvolution)
 [![DOI](https://zenodo.org/badge/88282824.svg)](https://doi.org/10.5281/zenodo.17796234)
 [![Last Commit](https://badgen.net/github/last-commit/datasnakes/OrthoEvolution)](https://github.com/datasnakes/OrthoEvolution/commits/main)
@@ -45,7 +45,7 @@ The package is organized around four major areas:
 For additional scientific context, see this
 [related comparative-genetics paper](https://www.frontiersin.org/journals/neuroscience/articles/10.3389/fnins.2014.00283/full).
 
-## Core Capabilities
+## Features
 
 - Infer candidate orthologs and generate post-BLAST reports.
 - Retrieve NCBI datasets and preformatted BLAST databases.
@@ -148,7 +148,7 @@ transfer.
 ## Documentation and Examples
 
 - Read the
-  [OrthoEvolution documentation](https://orthoevolution.readthedocs.io/en/latest/)
+  [OrthoEvolution documentation](https://datasnakes.github.io/OrthoEvolution/)
   for module and API details.
 - Browse the [examples](examples/) for scripts, example data, and interface
   prototypes.

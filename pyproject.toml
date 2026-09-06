@@ -75,13 +75,16 @@ test = [
     "pytest-cov",
     "pytest-runner"
 ]
+docs = [
+    "great-docs==0.17.0"
+]
 
 [project.scripts]
 orthoevol = "OrthoEvol.Orthologs.command_line:main"
 
 [project.urls]
 Homepage = "https://github.com/datasnakes/OrthoEvolution"
-Documentation = "https://orthoevolution.readthedocs.io/"
+Documentation = "https://datasnakes.github.io/OrthoEvolution/"
 Repository = "https://github.com/datasnakes/OrthoEvolution"
 "Bug Reports" = "https://github.com/datasnakes/OrthoEvolution/issues"
 Releases = "https://github.com/datasnakes/OrthoEvolution/releases"
