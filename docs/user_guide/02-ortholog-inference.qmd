@@ -1,0 +1,100 @@
+---
+title: Ortholog Inference
+description: Configure local BLAST searches and interpret OrthoEvolution outputs cautiously.
+---
+
+An ortholog search asks which genes in different species share an evolutionary
+origin. OrthoEvolution uses NCBI BLAST results to find candidates across the
+organisms in an accession table. It ranks sequence-similarity hits and records
+the selected accessions for the next analysis step.
+
+## Before you run the search
+
+Before you run a local BLAST search, make sure that these inputs are ready:
+
+- An accession table that defines the genes and organisms
+- A reference species, which is normally human in the preconfigured workflow
+- A compatible local BLAST database
+- The `BLASTDB` environment variable if BLAST cannot find the database
+- A project directory that the workflow can write to
+
+Read the accession table before you start. Its gene labels, organism labels,
+and taxonomy identifiers determine how the workflow organizes each
+comparison.
+
+## Prepare the accession table
+
+The accession file is a CSV table with one gene in each row. It requires the
+`Tier`, `Gene`, and organism columns. Use `Tier` for a group or priority that
+you define.
+
+| Tier | Gene | Homo_sapiens | Macaca_mulatta | Mus_musculus | Rattus_norvegicus |
+|---|---|---|---|---|---|
+| 1 | ADRA1A | NM_000680.3 |  |  |  |
+| 2 | ADRA1B | NM_000679.3 |  |  |  |
+
+Put the query organism in the first organism column. Add one query accession
+for each gene. Organism names use underscores, such as `Homo_sapiens`. Empty
+cells in the other organism columns identify accessions that the workflow will
+search for.
+
+Choose a query species with good annotation. Before you start, make sure that
+each query accession is correct. An incorrect query affects every comparison
+for that gene.
+
+## Choose a BLAST method
+
+| Method | Search | Database and filter | Appropriate use |
+|---|---|---|---|
+| `1` | Local | `refseq_rna_v5` with taxonomy IDs | Multi-gene, multi-species ortholog searches |
+| `2` | Remote | NCBI `refseq_rna` with an Entrez query | Searches that must run through NCBI |
+| `None` | Local | `refseq_rna` without taxonomy IDs | A simple query, not the normal ortholog workflow |
+
+Method 1 is the recommended configuration for an ortholog search. It requires
+a local version 5 BLAST database. Method 2 uses an NCBI service and cannot
+filter with taxonomy IDs. The method controls how BLAST runs. It does not
+change the biological evidence required to identify an ortholog.
+
+## Preconfigured workflow
+
+```python
+from OrthoEvol.Orthologs.Blast import OrthoBlastN
+
+ortholog_search = OrthoBlastN(
+    project="orthology-gpcr",
+    method=1,
+    save_data=True,
+    acc_file="gpcr.csv",
+    copy_from_package=True,
+)
+ortholog_search.run()
+```
+
+This code sets up and starts the workflow. It does not install BLAST or
+download a database. Before you run a large analysis, make sure that BLAST can
+find the selected database.
+
+If `acc_file` points to your own accession table, set
+`copy_from_package=False`. Use the packaged-copy option only for tables that
+come with OrthoEvolution.
+
+## Review the search results
+
+After the search finishes, review these output files:
+
+- Per-gene BLAST XML results
+- A master accession file
+- A table of BLAST execution times
+- Post-BLAST summaries when `save_data=True`
+
+The selected accessions are candidate orthologs that the computation ranks.
+Sequence similarity alone does not show conserved function, regulatory
+equivalence, or an experimentally tested evolutionary relationship. Before
+you interpret the biology, review all ambiguous, duplicate, and missing hits.
+
+## When BLAST does not finish
+
+If `BLASTDB` is absent, the workflow stops early. It can stop later if BLAST is
+missing, a database is unavailable, or the accession table is malformed. An
+accession that BLAST cannot extract can also stop part of the search. Keep the
+log and master accession files so that you can trace a partial run.
