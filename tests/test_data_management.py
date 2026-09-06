@@ -16,6 +16,7 @@ def test_configure_routes_each_enabled_stage(tmp_path: Path) -> None:
   user: null
   project: example
 Database_config:
+  email: test@example.com
   driver: sqlite
 CompGenAnalysis_config:
   taxon_file: taxa.csv
@@ -43,11 +44,11 @@ Alignment_config:
 
     manager.database.assert_called_once_with(
         project_manager,
-        {"driver": "sqlite"},
+        {"email": "test@example.com", "driver": "sqlite"},
     )
     manager.blast.assert_called_once_with(
         project_manager,
-        {"method": 1, "taxon_file": "taxa.csv"},
+        {"method": 1, "taxon_file": Path("taxa.csv")},
     )
     manager.genbank.assert_called_once_with(project_manager, manager.bl)
     manager.align.assert_called_once_with(manager.gb)

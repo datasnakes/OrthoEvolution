@@ -282,18 +282,19 @@ class TestManagerUtils(unittest.TestCase):
             config_file = test_dir / 'test_config.yml'
             config_data = {
                 'Database_config': {
-                    'strategy1': {'key1': 'value1'},
-                    'strategy2': {'key2': 'value2'},
-                    'base_param': 'base_value'
+                    'email': 'test@example.com',
+                    'driver': 'sqlite',
+                    'NCBI_blast_db': {'configure_flag': True},
+                    'ftp_flag': False,
                 }
             }
             with open(config_file, 'w') as f:
                 yaml.dump(config_data, f)
             strategies, kw = self.utils.parse_db_config_file(str(config_file))
             self.assertIsInstance(strategies, dict)
-            self.assertIn('strategy1', strategies)
+            self.assertIn('NCBI_blast_db', strategies)
             self.assertIsInstance(kw, dict)
-            self.assertIn('base_param', kw)
+            self.assertFalse(kw['ftp_flag'])
         finally:
             shutil.rmtree(test_dir, ignore_errors=True)
 
