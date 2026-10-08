@@ -431,6 +431,7 @@ class BaseBlastN(ComparativeGenetics):
                             self.blastn_log.error(parse_error_msg)
                             os.remove(xml_path)
                             self.blastn_log.error('%s was deleted' % xml)
+                            raise
 
                     else:
                         # Set up blast parameters

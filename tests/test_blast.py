@@ -254,6 +254,25 @@ def test_external_accession_path_keeps_derived_files_in_project(tmp_path: Path) 
     assert analysis.building_file_path == analysis.data / "external.v1building.csv"
 
 
+def test_runblast_does_not_complete_after_invalid_cached_xml(tmp_path: Path) -> None:
+    blast = build_blast(tmp_path)
+    blast.date_format = "test date"
+    blast.org_list = ["Homo_sapiens", "Mus_musculus"]
+    blast.taxon_dict = {"Mus_musculus": 10090}
+    blast.create_maf = mock.Mock()
+    xml_path = tmp_path / "GeneA" / "BLAST" / "GeneA_Mus_musculus.xml"
+    xml_path.parent.mkdir(parents=True)
+    xml_path.write_text("<broken>")
+
+    with pytest.raises(ParseError):
+        blast.runblast(
+            genes=["GeneA"], query_organism="Homo_sapiens", pre_configured=True
+        )
+
+    assert not xml_path.exists()
+    blast.create_maf.assert_not_called()
+
+
 def test_parse_xml_skips_predicted_hit_and_lowercases_nonmatching_hit(
     tmp_path: Path,
 ) -> None:
