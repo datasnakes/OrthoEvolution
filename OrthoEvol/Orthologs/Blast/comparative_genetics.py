@@ -133,6 +133,7 @@ class BaseComparativeGenetics(object):
         hgnc: bool | str | Path = False,
         proj_mana: ProjectManagement | dict[str, Any] | None = None,
         copy_from_package: bool = False,
+        taxonomy_db: str | Path | None = None,
         **kwargs: Any,
     ) -> None:
         """This is the base class for the Blast module.
@@ -157,6 +158,8 @@ class BaseComparativeGenetics(object):
                             defined by the ProjectManagement configuration.
         :param acc_file:  The name of the accession file.
         :param taxon_file:  A file that contains an ordered list of taxonomy ids.
+        :param taxonomy_db: Existing ETE taxonomy SQLite database. None uses
+                            ETE's default database location and update behavior.
         :param ref_species: A reference species or organism for the blast query.
         :param pre_blast:  A flag that gives the user access to an API that
                         contains extra information about their genes using the
@@ -183,6 +186,10 @@ class BaseComparativeGenetics(object):
         self.project = project
         self.ref_species = ref_species
         self.taxon_file = taxon_file
+        self.taxonomy_db = (
+            str(Path(taxonomy_db).expanduser().resolve())
+            if taxonomy_db is not None else None
+        )
         self.proj_mana = proj_mana
         self.get_time = time.time
         self.sep = 50 * "*"
@@ -462,7 +469,7 @@ class BaseComparativeGenetics(object):
             self.taxon_ids = self.get_file_list(self.taxon_path)
         else:
             # Load taxon ids from a local NCBI taxon database via ete3
-            ncbi = NCBITaxa()
+            ncbi = NCBITaxa(dbfile=self.taxonomy_db)
             taxon_dict = ncbi.get_name_translator(self.ncbi_orgs)
             self.taxon_ids = list(tid[0] for tid in taxon_dict.values())
             self.taxon_orgs = list(torg for torg in taxon_dict.keys())
@@ -592,7 +599,7 @@ class BaseComparativeGenetics(object):
         ["class", "family", "genus", "kingdowm", "order", "phylum", "species",
         "superkingdom"].
         """
-        ncbi = NCBITaxa()
+        ncbi = NCBITaxa(dbfile=self.taxonomy_db)
         taxa_dict = {}
         for organism in self.org_list:
             try:

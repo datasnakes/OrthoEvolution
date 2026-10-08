@@ -7,6 +7,7 @@ import time
 from datetime import datetime as d
 from pathlib import Path
 from subprocess import PIPE, CalledProcessError, run
+from typing import Any
 
 try:
     from Bio.Application import ApplicationError
@@ -473,9 +474,19 @@ class OrthoBlastN(BaseBlastN):
     """OrthoBlastN provides a preconfigured and orthology optimized version
     of the BaseBlastN class."""
 
-    def __init__(self, project="orthology-gpcr", project_path=os.getcwd(),
-                 method=1, template=None, save_data=True, acc_file="gpcr.csv",
-                 copy_from_package=True, auto_start=False, **kwargs):
+    def __init__(
+        self,
+        project: str = "orthology-gpcr",
+        project_path: str | Path = os.getcwd(),
+        method: int | None = 1,
+        template: str | None = None,
+        save_data: bool = True,
+        acc_file: str | Path = "gpcr.csv",
+        copy_from_package: bool = True,
+        auto_start: bool = False,
+        taxonomy_db: str | Path | None = None,
+        **kwargs: Any,
+    ) -> None:
         """This class inherits from the BaseBlastN class.
 
         This class utilizes it's parent classes to search a standalone
@@ -491,6 +502,7 @@ class OrthoBlastN(BaseBlastN):
         :param save_data:  A flag for saving the post_blast data to an excel file.
         :param acc_file: The accession file to use. (Default: 'gpcr.csv')
         :param copy_from_package: Copy the acc_file from the package. (Default: True)
+        :param taxonomy_db: Existing ETE taxonomy database, or None for ETE defaults.
         :param kwargs:
         """
         # Set values for methods to prevent using a config.
@@ -513,6 +525,7 @@ class OrthoBlastN(BaseBlastN):
                          project_path=self.project_path,
                          proj_mana=self.proj_mana,
                          auto_start=self.auto_start,
+                         taxonomy_db=taxonomy_db,
                          **kwargs)
 
     def run(self):
