@@ -102,7 +102,9 @@ class BaseBlastN(ComparativeGenetics):
         except FileExistsError:
             self.blastn_log.debug("Directory exists for %s" % gene)
 
-    def _create_temp_fasta(self, query, gene, query_config):
+    def _create_temp_fasta(
+        self, query: str, gene: str, query_config: dict[str, str]
+    ) -> None:
         """Create a temporary fasta file using blastdbcmd.
 
         :param query: The blast query or reference accession.
@@ -110,10 +112,13 @@ class BaseBlastN(ComparativeGenetics):
         :param query_config: A configuration dict for the blastdbcmd string.
         """
         try:
-            blastdbcmd_query = "blastdbcmd -entry {query} -db {db} -outfmt %f -out {temp fasta}".format(
-                **query_config)
-            blastdbcmd_status = run(blastdbcmd_query, stdout=PIPE,
-                                    stderr=PIPE, shell=True, check=True)
+            # Arguments preserve paths containing spaces without shell interpolation.
+            blastdbcmd_query = [
+                "blastdbcmd", "-entry", query_config["query"],
+                "-db", query_config["db"], "-outfmt", "%f",
+                "-out", query_config["temp fasta"],
+            ]
+            blastdbcmd_status = run(blastdbcmd_query, stdout=PIPE, stderr=PIPE, check=True)
             self.blastn_log.info(
                 "Extracted query refseq sequence to a temp.fasta file from BLAST database.")
         except CalledProcessError as err:
