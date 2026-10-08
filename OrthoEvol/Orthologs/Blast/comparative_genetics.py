@@ -125,7 +125,7 @@ class BaseComparativeGenetics(object):
         self,
         project: str | None = None,
         project_path: str | Path | None = os.getcwd(),
-        acc_file: str | None = None,
+        acc_file: str | Path | None = None,
         taxon_file: str | Path | None = None,
         ref_species: str | None = None,
         pre_blast: bool = False,
@@ -264,9 +264,14 @@ class BaseComparativeGenetics(object):
             accession_source = package_resource_path(data, self.acc_file)
         else:
             accession_source = self.acc_file
-        shutil.copy(accession_source, str(self.project_index))
+        accession_source = Path(accession_source)
+        destination = self.project_index / accession_source.name
+        if accession_source.resolve() != destination.resolve():
+            shutil.copy(accession_source, destination)
+        # Derived outputs must stay inside the project, regardless of input location.
+        self.acc_file = accession_source.name
 
-    def _initialize_accession_data(self, original_acc_file: str | None) -> None:
+    def _initialize_accession_data(self, original_acc_file: str | Path | None) -> None:
         """Initialize accession-backed state after the source file is copied."""
         if self.acc_file is None:
             self._initialize_empty_output_filenames()
@@ -281,7 +286,7 @@ class BaseComparativeGenetics(object):
 
     def _initialize_accession_paths(
         self,
-        original_acc_file: str | None,
+        original_acc_file: str | Path | None,
     ) -> None:
         """Derive all accession-related input and output paths."""
         self.acc_sqlite_filename = Path(original_acc_file).stem + ".sqlite"

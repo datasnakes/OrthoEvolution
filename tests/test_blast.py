@@ -8,6 +8,7 @@ from xml.etree.ElementTree import ParseError
 import pytest
 
 from OrthoEvol.Orthologs.Blast.blast import BaseBlastN, BlastFailure
+from OrthoEvol.Orthologs.Blast.comparative_genetics import BaseComparativeGenetics
 
 
 def build_blast(tmp_path: Path, method: int | None = 1) -> BaseBlastN:
@@ -236,6 +237,24 @@ def test_blastn_wrapper_removes_unparseable_output(tmp_path: Path) -> None:
         )
 
     assert not xml_path.exists()
+
+
+def test_external_accession_path_keeps_derived_files_in_project(tmp_path: Path) -> None:
+    source = tmp_path / "external.v1.csv"
+    source.write_text("Tier,Gene,Homo_sapiens\n1,ADRA1A,NM_000680.3\n")
+    analysis = object.__new__(BaseComparativeGenetics)
+    analysis.acc_file = source
+    analysis.project = "analysis"
+    analysis.project_index = tmp_path / "index"
+    analysis.project_index.mkdir()
+    analysis.data = tmp_path / "data"
+
+    analysis._copy_accession_file(copy_from_package=False)
+    analysis._initialize_accession_paths(source)
+
+    assert analysis.acc_csv_path.read_text() == source.read_text()
+    assert analysis.acc_csv_path.parent == analysis.project_index
+    assert analysis.building_file_path == analysis.data / "external.v1building.csv"
 
 
 def test_parse_xml_skips_predicted_hit_and_lowercases_nonmatching_hit(

@@ -58,7 +58,7 @@ class BaseBlastN(ComparativeGenetics):
 
         # Method variable
         self.method = method
-        self.acc_file = acc_file
+        self.acc_file = Path(acc_file).name
         self.ref_species = ref_species
         self.copy_from_package = copy_from_package
 
