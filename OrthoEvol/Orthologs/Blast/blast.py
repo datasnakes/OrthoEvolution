@@ -1,5 +1,4 @@
 """Optimized for use with local/standalone NCBI BLAST 2.8.1"""
-import contextlib
 import logging
 import os
 import shutil
@@ -118,21 +117,12 @@ class BaseBlastN(ComparativeGenetics):
                 "-db", query_config["db"], "-outfmt", "%f",
                 "-out", query_config["temp fasta"],
             ]
-            blastdbcmd_status = run(blastdbcmd_query, stdout=PIPE, stderr=PIPE, check=True)
+            run(blastdbcmd_query, stdout=PIPE, stderr=PIPE, check=True)
             self.blastn_log.info(
                 "Extracted query refseq sequence to a temp.fasta file from BLAST database.")
-        except CalledProcessError as err:
-            self.blastn_log.error(err.stderr.decode('utf-8'))
-        else:
-            if blastdbcmd_status.returncode != 0:  # Command was not successful.
-                self.blastn_log.error(
-                    "FASTA sequence for %s not found in the BLAST extraction" % query)
-                self.blastn_log.error("Removing %s from the BLAST list." % gene)
-                self.gene_list.remove(gene)
-                self.removed_genes.append(gene)
-
-                with contextlib.suppress(ValueError):
-                    self.current_gene_list.remove(gene)
+        except CalledProcessError:
+            self.blastn_log.exception("Query extraction failed for %s (%s).", gene, query)
+            raise
 
     @staticmethod
     def select_method(method=1):
@@ -233,6 +223,7 @@ class BaseBlastN(ComparativeGenetics):
             self.blastn_log.error(errmsg)
             os.remove(xml_path)
             self.blastn_log.info('%s was deleted.' % xml_path)
+            raise
 
         # Catch either KeyboardInterrupt or SystemExit
         except (KeyboardInterrupt, SystemExit):

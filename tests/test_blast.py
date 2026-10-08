@@ -1,13 +1,14 @@
 """Focused tests for BLAST workflow control."""
 
 from pathlib import Path
+from subprocess import CalledProcessError
 from types import SimpleNamespace
 from unittest import mock
 from xml.etree.ElementTree import ParseError
 
 import pytest
 
-from OrthoEvol.Orthologs.Blast.blast import BaseBlastN, BlastFailure
+from OrthoEvol.Orthologs.Blast.blast import ApplicationError, BaseBlastN, BlastFailure
 from OrthoEvol.Orthologs.Blast.comparative_genetics import BaseComparativeGenetics
 
 
@@ -163,32 +164,22 @@ def test_blastn_wrapper_writes_and_parses_output(
     assert sleep.called is (method == 2)
 
 
-@pytest.mark.parametrize("return_code", [0, 1])
-def test_create_temp_fasta_handles_command_status(
-    return_code: int, tmp_path: Path
-) -> None:
+def test_create_temp_fasta_propagates_failure_with_spaced_path(tmp_path: Path) -> None:
     blast = build_blast(tmp_path)
-    blast.gene_list = ["GeneA"]
-    blast.current_gene_list = ["GeneA"]
     query_config = {
         "query": "NM_001",
         "db": "refseq",
-        "temp fasta": str(tmp_path / "temp.fasta"),
+        "temp fasta": str(tmp_path / "query with spaces.fasta"),
     }
 
     with mock.patch(
         "OrthoEvol.Orthologs.Blast.blast.run",
-        return_value=SimpleNamespace(returncode=return_code),
-    ):
+        side_effect=CalledProcessError(1, "blastdbcmd", stderr=b"missing query"),
+    ) as command, pytest.raises(CalledProcessError):
         blast._create_temp_fasta("NM_001", "GeneA", query_config)
 
-    if return_code == 0:
-        assert blast.gene_list == ["GeneA"]
-        assert blast.removed_genes == []
-    else:
-        assert blast.gene_list == []
-        assert blast.current_gene_list == []
-        assert blast.removed_genes == ["GeneA"]
+    assert command.call_args.args[0][-1] == query_config["temp fasta"]
+    assert command.call_args.kwargs["check"] is True
 
 
 def test_runblast_dispatches_one_local_search(tmp_path: Path) -> None:
@@ -222,16 +213,22 @@ def test_runblast_dispatches_one_local_search(tmp_path: Path) -> None:
     blast.create_maf.assert_called_once_with()
 
 
-def test_blastn_wrapper_removes_unparseable_output(tmp_path: Path) -> None:
+@pytest.mark.parametrize(
+    "error",
+    [ParseError("invalid XML"), ApplicationError(1, "blastn", stderr="bad database")],
+)
+def test_blastn_wrapper_removes_failed_output_and_raises(
+    tmp_path: Path, error: Exception
+) -> None:
     blast = build_blast(tmp_path)
     blast.get_time = mock.Mock(return_value=1.0)
-    command = mock.Mock(side_effect=ParseError("invalid XML"))
+    command = mock.Mock(side_effect=error)
     xml_path = tmp_path / "result.xml"
 
     with mock.patch(
         "OrthoEvol.Orthologs.Blast.blast.NcbiblastnCommandline",
         return_value=command,
-    ):
+    ), pytest.raises(type(error)):
         blast.blastn_wrapper(
             "GeneA", "Mus_musculus", {}, str(xml_path), tmp_path
         )
