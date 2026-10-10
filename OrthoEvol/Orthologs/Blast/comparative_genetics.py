@@ -361,10 +361,12 @@ class BaseComparativeGenetics(object):
         del self.building[self.ref_species]
         self.building = self.building.set_index("Gene")
 
-        self.building_time = copy.deepcopy(self.raw_acc_data)
-        del self.building_time["Tier"]
-        del self.building_time[self.ref_species]
-        self.building_time = self.building_time.set_index("Gene")
+        self.building_time = pd.DataFrame(
+            float("nan"), index=self.building.index, columns=self.building.columns
+        )
+        if self.building_time_file_path.is_file():
+            previous_times = pd.read_csv(self.building_time_file_path, index_col="Gene")
+            self.building_time.update(previous_times)
 
     def _initialize_post_blast_state(self) -> None:
         """Create result containers only when post-BLAST analysis is enabled."""

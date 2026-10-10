@@ -110,6 +110,9 @@ After the search finishes, review these output files:
 - A table of BLAST execution times
 - Post-BLAST summaries when `save_data=True`
 
+Unknown durations remain empty rather than
+being reported as zero.
+
 The selected accessions are candidate orthologs that the computation ranks.
 Sequence similarity alone does not show conserved function, regulatory
 equivalence, or an experimentally tested evolutionary relationship. Before
