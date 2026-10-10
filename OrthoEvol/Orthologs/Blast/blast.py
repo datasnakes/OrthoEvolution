@@ -27,8 +27,12 @@ from OrthoEvol.Orthologs.Blast.comparative_genetics import ComparativeGenetics
 class BaseBlastN(ComparativeGenetics):
     """Base BlastN class."""
 
-    def __init__(self, project, method, acc_file, copy_from_package,
-                 ref_species, template=None, save_data=True, verbose=False, **kwargs):
+    def __init__(
+        self, project: str, method: int | None, acc_file: str | Path,
+        copy_from_package: bool, ref_species: str, template: str | None = None,
+        save_data: bool = True, verbose: bool = False,
+        database: str | Path = "refseq_rna", **kwargs: Any,
+    ) -> None:
         """This class inherits from the ComparativeGenetics class.
         This class utilizes it's parent classes to search a standalone
         Blast database for specific orthologs of a gene using a query organism
@@ -66,11 +70,11 @@ class BaseBlastN(ComparativeGenetics):
         self._fmt = '%a %b %d at %I:%M:%S %p %Y'
         self.date_format = str(d.now().strftime(self._fmt))
 
-        # Ensure paths are set
-        self.environment_vars = dict(os.environ)
-        if 'BLASTDB' not in self.environment_vars.keys():
-            msg = "BLASTDB is not set in your path."
-            raise EnvironmentError(msg)
+        self.database = str(database)
+        if not self.database.strip():
+            raise ValueError("BLAST database name or prefix must not be empty")
+        if isinstance(database, Path) or "/" in self.database or "\\" in self.database:
+            self.database = str(Path(database).expanduser().resolve())
 
         # Manage Directories
         self.home = Path(os.getcwd())
@@ -87,7 +91,9 @@ class BaseBlastN(ComparativeGenetics):
         self.complete_time_file = self.project + '_TIME.csv'
         self.complete_time_file_path = self.data / Path(self.complete_time_file)
 
-        self.blastn_parameters, self.query_config = BaseBlastN.select_method(method=self.method)
+        self.blastn_parameters, self.query_config = BaseBlastN.select_method(
+            method=self.method, database=self.database
+        )
 
     def _make_blast_dir(self, gene, path):
         """Create a blast directory for a gene.
@@ -125,7 +131,9 @@ class BaseBlastN(ComparativeGenetics):
             raise
 
     @staticmethod
-    def select_method(method=1):
+    def select_method(
+        method: int | str | None = 1, database: str = "refseq_rna"
+    ) -> tuple[dict[str, Any], dict[str, str]]:
         """Select a method for running blastn.
 
         :param method: The blast method to use. Either 1, 2, or None.
@@ -134,34 +142,34 @@ class BaseBlastN(ComparativeGenetics):
         # TIP: This is the fastest version and recommended for blasting with
         # multiple species and multiple genes.
         if method == 1:
-            blastn_parameters = {'query': '', 'db': 'refseq_rna_v5',
+            blastn_parameters = {'query': '', 'db': database,
                                  'taxids': '', 'strand': 'plus',
                                  'evalue': 0.01, 'outfmt': 5,
                                  'max_target_seqs': 10, 'task': 'blastn'}
             query_config = {'query': '',
-                            'db': 'refseq_rna_v5',
+                            'db': database,
                             'temp fasta': ''}
         # Remote blast with entrez_query
         # XXX: This cannot be used with taxids.
         elif method == 2:
             blastn_parameters = {'query': '', 'entrez_query': '',
-                                 'db': 'refseq_rna',
+                                 'db': database,
                                  'strand': 'plus', 'evalue': 0.01,
                                  'outfmt': 5, 'max_target_seqs': 10,
                                  'task': 'blastn', 'remote': 'True'}
             query_config = {'query': '',
-                            'db': 'refseq_rna',
+                            'db': database,
                             'temp fasta': ''}
         # Default local blast
         # XXX Unless you are have a very simple blast....
         # i.e. only a query fasta
         elif method is None or method == "":
-            blastn_parameters = {'query': '', 'db': 'refseq_rna',
+            blastn_parameters = {'query': '', 'db': database,
                                  'strand': 'plus', 'evalue': 0.01,
                                  'outfmt': 5, 'max_target_seqs': 500,
                                  'task': 'blastn'}
             query_config = {'query': '',
-                            'db': 'refseq_rna',
+                            'db': database,
                             'temp fasta': ''}
         else:
             raise ValueError('%s is not a blast method.' % method)
@@ -482,6 +490,7 @@ class OrthoBlastN(BaseBlastN):
         copy_from_package: bool = True,
         auto_start: bool = False,
         taxonomy_db: str | Path | None = None,
+        database: str | Path = "refseq_rna",
         **kwargs: Any,
     ) -> None:
         """This class inherits from the BaseBlastN class.
@@ -500,6 +509,8 @@ class OrthoBlastN(BaseBlastN):
         :param acc_file: The accession file to use. (Default: 'gpcr.csv')
         :param copy_from_package: Copy the acc_file from the package. (Default: True)
         :param taxonomy_db: Existing ETE taxonomy database. Preparation is explicit.
+        :param database: BLAST database name or filesystem prefix, shared by searches
+                         and query extraction. Defaults to refseq_rna.
         :param kwargs:
         """
         # Set values for methods to prevent using a config.
@@ -523,6 +534,7 @@ class OrthoBlastN(BaseBlastN):
                          proj_mana=self.proj_mana,
                          auto_start=self.auto_start,
                          taxonomy_db=taxonomy_db,
+                         database=database,
                          **kwargs)
 
     def run(self):

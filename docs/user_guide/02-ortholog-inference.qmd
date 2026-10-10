@@ -48,7 +48,7 @@ for that gene.
 
 | Method | Search | Database and filter | Appropriate use |
 |---|---|---|---|
-| `1` | Local | `refseq_rna_v5` with taxonomy IDs | Multi-gene, multi-species ortholog searches |
+| `1` | Local | `refseq_rna` with taxonomy IDs | Multi-gene, multi-species ortholog searches |
 | `2` | Remote | NCBI `refseq_rna` with an Entrez query | Searches that must run through NCBI |
 | `None` | Local | `refseq_rna` without taxonomy IDs | A simple query, not the normal ortholog workflow |
 
@@ -75,6 +75,7 @@ ortholog_search = OrthoBlastN(
     acc_file="gpcr.csv",
     copy_from_package=True,
     taxonomy_db=taxonomy,
+    database=Path("resources/blast/refseq_rna/refseq_rna"),
 )
 ortholog_search.run()
 ```
@@ -88,7 +89,10 @@ is explicitly requested.
 
 `OrthoBlastN` performs offline taxonomy lookups and requires every species name
 to resolve unambiguously. Its constructor does not download taxonomy. The code
-does not install BLAST or download a BLAST sequence database.
+does not install BLAST or download the BLAST sequence database. The `database`
+argument is the database **prefix**, not its directory; both `blastdbcmd` query
+extraction and `blastn` use it. A bare name such as `refseq_rna` also works with
+BLAST's normal search path, including `BLASTDB`. BLAST binaries must be on `PATH`.
 
 If `acc_file` points to your own accession table, set
 `copy_from_package=False`. Use the packaged-copy option only for tables that
@@ -110,7 +114,7 @@ you interpret the biology, review all ambiguous, duplicate, and missing hits.
 
 ## When BLAST does not finish
 
-If `BLASTDB` is absent, the workflow stops early. It can stop later if BLAST is
-missing, a database is unavailable, or the accession table is malformed. An
-accession that BLAST cannot extract can also stop part of the search. Keep the
-log and master accession files so that you can trace a partial run.
+The workflow raises an error if taxonomy is missing or invalid, a species is
+unknown or ambiguous, or reference accessions are missing. BLAST executable,
+query extraction, and XML parsing failures propagate to the caller. Keep the
+logs and partial files for diagnosis; a failed command is not a no-hit result.

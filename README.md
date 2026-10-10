@@ -109,6 +109,7 @@ gpcr_blastn = OrthoBlastN(
     acc_file="gpcr.csv",
     copy_from_package=True,
     taxonomy_db=taxonomy,
+    database="resources/blast/refseq_rna/refseq_rna",
 )
 gpcr_blastn.run()
 ```
