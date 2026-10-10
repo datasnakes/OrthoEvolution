@@ -36,7 +36,7 @@ you define.
 
 Keep `Tier` and `Gene` as the first two columns.
 Put the query organism in the first organism column. Add one query accession
-for each gene. Organism names use underscores, such as `Homo_sapiens`. Empty
+for each uniquely named gene. Organism names use underscores, such as `Homo_sapiens`. Empty
 cells in the other organism columns identify accessions that the workflow will
 search for.
 

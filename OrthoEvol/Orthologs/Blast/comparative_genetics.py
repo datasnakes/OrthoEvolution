@@ -346,6 +346,8 @@ class BaseComparativeGenetics(object):
             raise ValueError("Accession table must begin with Tier,Gene columns")
         if self.raw_acc_data.empty or self.raw_acc_data["Gene"].isna().any():
             raise ValueError("Accession table must contain named genes")
+        if self.raw_acc_data["Gene"].duplicated().any():
+            raise ValueError("Accession table contains duplicate genes")
         self.mygene_df = pd.DataFrame()
         self.hgnc_df = pd.DataFrame()
         self.header = self.raw_acc_data.axes[1].tolist()

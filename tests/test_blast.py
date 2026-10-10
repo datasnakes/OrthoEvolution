@@ -11,7 +11,7 @@ from xml.etree.ElementTree import ParseError
 
 import pytest
 
-from OrthoEvol.Orthologs.Blast.blast import ApplicationError, BaseBlastN, BlastFailure
+from OrthoEvol.Orthologs.Blast.blast import ApplicationError, BaseBlastN, BlastFailure, OrthoBlastN
 from OrthoEvol.Orthologs.Blast.comparative_genetics import BaseComparativeGenetics
 from OrthoEvol.Tools.taxonomy import (
     prepare_taxonomy_database,
@@ -381,3 +381,19 @@ def test_invalid_taxonomy_never_triggers_download(tmp_path: Path, state: str) ->
             with taxonomy_database(path):
                 pass
         update.assert_not_called()
+
+
+@pytest.mark.parametrize("row", ["1,ADRA1A,,NM_001\n1,ADRA1A,,NM_002"])
+def test_invalid_reference_table_fails_before_taxonomy(
+    tmp_path: Path, row: str
+) -> None:
+    source = tmp_path / "accessions.csv"
+    source.write_text(f"Tier,Gene,Mus_musculus,Homo_sapiens\n{row}\n")
+    with pytest.raises(ValueError, match="Missing query accessions|duplicate genes"):
+        OrthoBlastN(
+            project="test",
+            project_path=tmp_path,
+            acc_file=source,
+            copy_from_package=False,
+            taxonomy_db=tmp_path / "missing.sqlite",
+        )
