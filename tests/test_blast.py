@@ -12,7 +12,12 @@ from xml.etree.ElementTree import ParseError
 import pandas as pd
 import pytest
 
-from OrthoEvol.Orthologs.Blast.blast import ApplicationError, BaseBlastN, BlastFailure, OrthoBlastN
+from OrthoEvol.Orthologs.Blast.blast import (
+    ApplicationError,
+    BaseBlastN,
+    BlastFailure,
+    OrthoBlastN,
+)
 from OrthoEvol.Orthologs.Blast.comparative_genetics import BaseComparativeGenetics
 from OrthoEvol.Tools.taxonomy import (
     prepare_taxonomy_database,
@@ -124,9 +129,7 @@ def test_parse_xml_selects_highest_matching_hit(tmp_path: Path) -> None:
 
 
 @pytest.mark.parametrize("method", [1, 2])
-def test_blastn_wrapper_writes_and_parses_output(
-    method: int, tmp_path: Path
-) -> None:
+def test_blastn_wrapper_writes_and_parses_output(method: int, tmp_path: Path) -> None:
     blast = build_blast(tmp_path, method=method)
     blast.get_time = mock.Mock(side_effect=[1.0, 3.0])
     blast.add_blast_time = mock.Mock()
@@ -150,12 +153,8 @@ def test_blastn_wrapper_writes_and_parses_output(
         )
 
     assert xml_path.read_text(encoding="utf-8") == "<xml />"
-    blast.add_blast_time.assert_called_once_with(
-        "GeneA", "Mus_musculus", 1.0, 3.0
-    )
-    blast.parse_xml.assert_called_once_with(
-        str(xml_path), "GeneA", "Mus_musculus"
-    )
+    blast.add_blast_time.assert_called_once_with("GeneA", "Mus_musculus", 1.0, 3.0)
+    blast.parse_xml.assert_called_once_with(str(xml_path), "GeneA", "Mus_musculus")
     assert sleep.called is (method == 2)
 
 
@@ -167,10 +166,13 @@ def test_create_temp_fasta_propagates_failure_with_spaced_path(tmp_path: Path) -
         "temp fasta": str(tmp_path / "query with spaces.fasta"),
     }
 
-    with mock.patch(
-        "OrthoEvol.Orthologs.Blast.blast.run",
-        side_effect=CalledProcessError(1, "blastdbcmd", stderr=b"missing query"),
-    ) as command, pytest.raises(CalledProcessError):
+    with (
+        mock.patch(
+            "OrthoEvol.Orthologs.Blast.blast.run",
+            side_effect=CalledProcessError(1, "blastdbcmd", stderr=b"missing query"),
+        ) as command,
+        pytest.raises(CalledProcessError),
+    ):
         blast._create_temp_fasta("NM_001", "GeneA", query_config)
 
     assert command.call_args.args[0][-1] == query_config["temp fasta"]
@@ -226,13 +228,14 @@ def test_blastn_wrapper_removes_failed_output_and_raises(
     command = mock.Mock(side_effect=error)
     xml_path = tmp_path / "result.xml"
 
-    with mock.patch(
-        "OrthoEvol.Orthologs.Blast.blast.NcbiblastnCommandline",
-        return_value=command,
-    ), pytest.raises(type(error)):
-        blast.blastn_wrapper(
-            "GeneA", "Mus_musculus", {}, str(xml_path), tmp_path
-        )
+    with (
+        mock.patch(
+            "OrthoEvol.Orthologs.Blast.blast.NcbiblastnCommandline",
+            return_value=command,
+        ),
+        pytest.raises(type(error)),
+    ):
+        blast.blastn_wrapper("GeneA", "Mus_musculus", {}, str(xml_path), tmp_path)
 
     assert not xml_path.exists()
 
@@ -306,9 +309,7 @@ def test_parse_xml_skips_predicted_hit_and_lowercases_nonmatching_hit(
     ):
         blast.parse_xml(str(xml_path), "GeneA", "Mus_musculus")
 
-    blast.add_accession.assert_called_once_with(
-        "GeneA", "Mus_musculus", "nm_002"
-    )
+    blast.add_accession.assert_called_once_with("GeneA", "Mus_musculus", "nm_002")
 
 
 @pytest.fixture
