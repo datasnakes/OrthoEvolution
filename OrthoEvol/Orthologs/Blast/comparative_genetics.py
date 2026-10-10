@@ -338,6 +338,14 @@ class BaseComparativeGenetics(object):
             path=self.project_index,
             acc_file=self.acc_file,
         )
+        required = {"Tier", "Gene", self.ref_species}
+        missing = required.difference(self.raw_acc_data.columns)
+        if missing:
+            raise ValueError(f"Accession table is missing required columns: {missing}")
+        if list(self.raw_acc_data.columns[:2]) != ["Tier", "Gene"]:
+            raise ValueError("Accession table must begin with Tier,Gene columns")
+        if self.raw_acc_data.empty or self.raw_acc_data["Gene"].isna().any():
+            raise ValueError("Accession table must contain named genes")
         self.mygene_df = pd.DataFrame()
         self.hgnc_df = pd.DataFrame()
         self.header = self.raw_acc_data.axes[1].tolist()
