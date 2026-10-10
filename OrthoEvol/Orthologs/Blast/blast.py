@@ -563,6 +563,6 @@ class OrthoBlastN(BaseBlastN):
         return outputs
 
 
-class BlastFailure(BaseException):
+class BlastFailure(RuntimeError):
     """Simple Blast Exception Class."""
     pass
