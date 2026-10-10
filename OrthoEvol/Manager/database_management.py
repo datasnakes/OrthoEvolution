@@ -5,7 +5,6 @@ import tarfile
 import urllib.request
 from collections import OrderedDict
 from collections.abc import Callable, Sequence
-from importlib import import_module
 from pathlib import Path
 from typing import Any
 
@@ -19,6 +18,7 @@ from OrthoEvol.Orthologs.Blast.comparative_genetics import \
     BaseComparativeGenetics
 from OrthoEvol.Tools.ftp import NcbiFTPClient
 from OrthoEvol.Tools.logit import LogIt
+from OrthoEvol.Tools.taxonomy import prepare_taxonomy_database
 from OrthoEvol.utilities import FullUtilities
 
 
@@ -144,13 +144,10 @@ class BaseDatabaseManagement(object):
             self.db_mana_log.info("The appropriate environment variable is \'BLASTDB=%s\'." % str(dl_path))
             self.db_mana_log.critical("Please set the BLAST environment variables in your .bash_profile!!")
 
-    def download_ete3_taxonomy_database(self):
-        """Update ETE3's taxonomy database with ETE3's API."""
-        # DEFAULT_TAXADB = os.path.join(os.environ.get('HOME', '/'), '.etetoolkit', 'taxa.sqlite')
-        ete3 = import_module("ete3")
-        ncbi_taxon_dump_path = self.database_path / Path("NCBI") / Path('pub') / Path('taxonomy')
-        ncbi = ete3.NCBITaxa(dbfile=str(ncbi_taxon_dump_path / 'ete3_taxa.sqlite'))
-        ncbi.update_taxonomy_database()
+    def download_ete3_taxonomy_database(self) -> Path:
+        """Build taxonomy once, validating the replacement before publishing it."""
+        destination = self.database_path / "NCBI/pub/taxonomy/ete3_taxa.sqlite"
+        return prepare_taxonomy_database(destination, overwrite=True)
 
     def copy_biosql_taxonomy_template(self, destination, database_name):
         """
