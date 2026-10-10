@@ -1,5 +1,6 @@
 """Focused tests for BLAST workflow control."""
 
+import sqlite3
 from pathlib import Path
 from subprocess import CalledProcessError
 from types import SimpleNamespace
@@ -10,6 +11,7 @@ import pytest
 
 from OrthoEvol.Orthologs.Blast.blast import ApplicationError, BaseBlastN, BlastFailure
 from OrthoEvol.Orthologs.Blast.comparative_genetics import BaseComparativeGenetics
+from OrthoEvol.Tools.taxonomy import taxonomy_database
 
 
 def build_blast(tmp_path: Path, method: int | None = 1) -> BaseBlastN:
@@ -308,3 +310,20 @@ def test_parse_xml_skips_predicted_hit_and_lowercases_nonmatching_hit(
     blast.add_accession.assert_called_once_with(
         "GeneA", "Mus_musculus", "nm_002"
     )
+
+
+@pytest.mark.parametrize("state", ["missing", "empty", "partial"])
+def test_invalid_taxonomy_never_triggers_download(tmp_path: Path, state: str) -> None:
+    path = tmp_path / "invalid.sqlite"
+    if state != "missing":
+        with sqlite3.connect(path) as db:
+            db.executescript(
+                "CREATE TABLE stats(version); INSERT INTO stats VALUES(2); CREATE TABLE species(taxid, track);"
+            )
+            if state == "partial":
+                db.execute("INSERT INTO species VALUES(1, NULL)")
+    with mock.patch("ete3.NCBITaxa.update_taxonomy_database") as update:
+        with pytest.raises((FileNotFoundError, ValueError)):
+            with taxonomy_database(path):
+                pass
+        update.assert_not_called()
