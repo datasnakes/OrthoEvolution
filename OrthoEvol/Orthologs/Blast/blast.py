@@ -499,7 +499,7 @@ class OrthoBlastN(BaseBlastN):
         :param save_data:  A flag for saving the post_blast data to an excel file.
         :param acc_file: The accession file to use. (Default: 'gpcr.csv')
         :param copy_from_package: Copy the acc_file from the package. (Default: True)
-        :param taxonomy_db: Existing ETE taxonomy database, or None for ETE defaults.
+        :param taxonomy_db: Existing ETE taxonomy database. Preparation is explicit.
         :param kwargs:
         """
         # Set values for methods to prevent using a config.

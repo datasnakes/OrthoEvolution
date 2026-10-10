@@ -1,7 +1,7 @@
 """Explicit preparation and offline access to ETE taxonomy databases."""
 
 import sqlite3
-from collections.abc import Iterator
+from collections.abc import Iterator, Sequence
 from contextlib import closing, contextmanager
 from pathlib import Path
 
@@ -42,3 +42,15 @@ def taxonomy_database(dbfile: str | Path | None = None) -> Iterator[NCBITaxa]:
         yield taxonomy
     finally:
         taxonomy.db.close()
+
+
+def resolve_species(taxonomy: NCBITaxa, species: Sequence[str]) -> dict[str, int]:
+    """Resolve every input species; missing or ambiguous names are errors."""
+    names = [name.replace("_", " ") for name in species]
+    matches = taxonomy.get_name_translator(names)
+    unresolved = [name for name in names if len(matches.get(name, [])) != 1]
+    if unresolved:
+        raise ValueError(
+            f"Missing or ambiguous taxonomy names: {', '.join(unresolved)}"
+        )
+    return {original: matches[name][0] for original, name in zip(species, names)}

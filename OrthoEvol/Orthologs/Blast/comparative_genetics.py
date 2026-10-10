@@ -11,13 +11,13 @@ from typing import Any
 
 # Other
 import pandas as pd
-from ete3 import NCBITaxa
 
 # OrthoEvol
 from OrthoEvol.Manager.config import data
 from OrthoEvol.Manager.management import ProjectManagement
 from OrthoEvol.resources import package_resource_path
 from OrthoEvol.Tools.logit import LogIt
+from OrthoEvol.Tools.taxonomy import resolve_species, taxonomy_database
 from OrthoEvol.utilities import FullUtilities
 
 # from pandas import ExcelWriter
@@ -159,7 +159,7 @@ class BaseComparativeGenetics(object):
         :param acc_file:  The name of the accession file.
         :param taxon_file:  A file that contains an ordered list of taxonomy ids.
         :param taxonomy_db: Existing ETE taxonomy SQLite database. None uses
-                            ETE's default database location and update behavior.
+                            ETE's default location; preparation is always explicit.
         :param ref_species: A reference species or organism for the blast query.
         :param pre_blast:  A flag that gives the user access to an API that
                         contains extra information about their genes using the
@@ -464,19 +464,11 @@ class BaseComparativeGenetics(object):
         self.org_count = len(self.org_list)
         self.ncbi_orgs = list(org.replace('_', ' ') for org in self.org_list)
 
-        if self.taxon_file is not None:
-            # Load taxon ids from a file
-            self.taxon_ids = self.get_file_list(self.taxon_path)
-        else:
-            # Load taxon ids from a local NCBI taxon database via ete3
-            ncbi = NCBITaxa(dbfile=self.taxonomy_db)
-            taxon_dict = ncbi.get_name_translator(self.ncbi_orgs)
-            self.taxon_ids = list(tid[0] for tid in taxon_dict.values())
-            self.taxon_orgs = list(torg for torg in taxon_dict.keys())
-            self.taxon_orgs = list(org.replace(' ', '_')
-                                   for org in self.taxon_orgs)
-            self.taxon_dict = dict(zip(self.taxon_orgs, self.taxon_ids))
-            self.taxon_lineage = self.get_taxon_dict()
+        with taxonomy_database(self.taxonomy_db) as taxonomy:
+            self.taxon_dict = resolve_species(taxonomy, self.org_list)
+        self.taxon_orgs = self.org_list.copy()
+        self.taxon_ids = list(self.taxon_dict.values())
+        self.taxon_lineage = self.get_taxon_dict()
 
         self.tier_list = maf['Tier'].tolist()
         self.tier_dict = maf['Tier'].to_dict()
@@ -599,10 +591,9 @@ class BaseComparativeGenetics(object):
         ["class", "family", "genus", "kingdowm", "order", "phylum", "species",
         "superkingdom"].
         """
-        ncbi = NCBITaxa(dbfile=self.taxonomy_db)
-        taxa_dict = {}
-        for organism in self.org_list:
-            try:
+        with taxonomy_database(self.taxonomy_db) as ncbi:
+            taxa_dict = {}
+            for organism in self.org_list:
                 taxa_dict[organism] = {}
                 taxid = self.taxon_dict[organism]
                 lineage = ncbi.get_lineage(taxid)
@@ -615,8 +606,6 @@ class BaseComparativeGenetics(object):
                                         'class', 'order', 'family', 'genus', 'species']:
                         continue
                     taxa_dict[organism][ranks[id]] = names[id]
-            except KeyError as ke:
-                self.blastn_log.exception(ke)
         return taxa_dict
 
     def get_acc_dict(self):
