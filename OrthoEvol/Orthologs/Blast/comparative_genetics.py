@@ -388,6 +388,11 @@ class BaseComparativeGenetics(object):
 
     def _initialize_accession_views(self) -> None:
         """Create indexed views and populate the public lookup collections."""
+        self._refresh_accession_views()
+        self.get_master_lists(self.df)
+
+    def _refresh_accession_views(self) -> None:
+        """Keep public tables and lookups consistent with the current results."""
         self.__data = self.raw_acc_data.set_index("Gene")
         self.df = self.__data
         self.pt = pd.pivot_table(
@@ -399,7 +404,6 @@ class BaseComparativeGenetics(object):
         self.pt.columns = pd.Index(organism_columns, name="Organism")
         self.org_dict = self.df.drop(columns="Tier").to_dict()
         self.gene_dict = self.df.T.to_dict()
-        self.get_master_lists(self.__data)
 
     def _initialize_empty_output_filenames(self) -> None:
         """Retain output names when no accession dataset is configured."""
@@ -509,34 +513,36 @@ class BaseComparativeGenetics(object):
                 acc_dataframe=copy.deepcopy(self.raw_acc_data))
             self.mygene_df.to_csv(self.mygene_path, index=False)
 
-        # Post-Blast accession analysis
         if self.__post_blast:
+            self._summarize_accessions()
 
-            # Missing
-            self.missing_dict = self.blast_utils.get_miss_acc(
-                acc_dataframe=copy.deepcopy(self.raw_acc_data))
-            self.missing_genes = self.missing_dict['genes']
-            self.missing_gene_count = self.missing_genes['count']
-            del self.missing_genes['count']
-            self.missing_organsims = self.missing_dict['organisms']
-            self.missing_organsims_count = self.missing_organsims['count']
-            del self.missing_organsims['count']
+    def _summarize_accessions(self) -> None:
+        """Recalculate report statistics from the current accession table."""
+        # Missing
+        self.missing_dict = self.blast_utils.get_miss_acc(
+            acc_dataframe=copy.deepcopy(self.raw_acc_data))
+        self.missing_genes = self.missing_dict['genes']
+        self.missing_gene_count = self.missing_genes['count']
+        del self.missing_genes['count']
+        self.missing_organsims = self.missing_dict['organisms']
+        self.missing_organsims_count = self.missing_organsims['count']
+        del self.missing_organsims['count']
 
-            # Duplicates
-            duplicate_analysis = self.blast_utils.analyze_duplicate_accessions(
-                self.acc_dict,
-                self.gene_list,
-                self.org_list,
-            )
-            self.duplicated_dict = duplicate_analysis.groups
-            self.duplicated_accessions = self.duplicated_dict['accessions']
-            self.duplicated_organisms = self.duplicated_dict['organisms']
-            self.duplicated_genes = self.duplicated_dict['genes']
-            self.duplicated_random = self.duplicated_dict['random']
-            self.duplicated_other = self.duplicated_dict['other']
-            self.dup_acc_count = duplicate_analysis.accession_counts
-            self.dup_gene_count = duplicate_analysis.gene_counts
-            self.dup_org_count = duplicate_analysis.organism_counts
+        # Duplicates
+        duplicate_analysis = self.blast_utils.analyze_duplicate_accessions(
+            self.acc_dict,
+            self.gene_list,
+            self.org_list,
+        )
+        self.duplicated_dict = duplicate_analysis.groups
+        self.duplicated_accessions = self.duplicated_dict['accessions']
+        self.duplicated_organisms = self.duplicated_dict['organisms']
+        self.duplicated_genes = self.duplicated_dict['genes']
+        self.duplicated_random = self.duplicated_dict['random']
+        self.duplicated_other = self.duplicated_dict['other']
+        self.dup_acc_count = duplicate_analysis.accession_counts
+        self.dup_gene_count = duplicate_analysis.gene_counts
+        self.dup_org_count = duplicate_analysis.organism_counts
 
     def get_accession(self, gene, organism):
         """Access a single accession number.

@@ -9,6 +9,7 @@ from types import SimpleNamespace
 from unittest import mock
 from xml.etree.ElementTree import ParseError
 
+import pandas as pd
 import pytest
 
 from OrthoEvol.Orthologs.Blast.blast import ApplicationError, BaseBlastN, BlastFailure, OrthoBlastN
@@ -183,6 +184,12 @@ def test_runblast_dispatches_one_local_search(tmp_path: Path) -> None:
     blast.taxon_dict = {"Mus_musculus": 10090}
     blast.tier_dict = {"GeneA": 1}
     blast.save_data = False
+    blast.building = pd.DataFrame({"Mus_musculus": [None]}, index=["GeneA"])
+    blast.result_frame = mock.Mock(return_value=pd.DataFrame({"Gene": ["GeneA"]}))
+    blast._refresh_accession_views = mock.Mock()
+    blast.get_tier_frame = mock.Mock(return_value={})
+    blast.get_acc_dict = mock.Mock(return_value={})
+    blast._summarize_accessions = mock.Mock()
     blast.blastn_wrapper = mock.Mock()
     blast.create_maf = mock.Mock()
     gene_path = tmp_path / "GeneA" / "BLAST"

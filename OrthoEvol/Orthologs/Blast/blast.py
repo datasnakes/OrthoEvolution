@@ -450,15 +450,17 @@ class BaseBlastN(ComparativeGenetics):
                                             parameters=update_dict, gene=gene,
                                             organism=organism)
 
-                    # If the BLAST has gone through all orthologs then create a
-                    # master accession file.
-                    if gene == genes[-1] and organism == self.org_list[-1]:
-                        self.create_maf()
-                        if self.save_data:
-                            self.post_blast_analysis(self.removed_genes)
-                            self.blastn_log.info("Post-blast analysis is complete")
+            self.raw_acc_data = self.result_frame(self.building)
+            self._refresh_accession_views()
+            self.acc_dict = self.get_acc_dict()
+            self.acc_list = list(self.acc_dict)
+            self.tier_frame_dict = self.get_tier_frame()
+            self._summarize_accessions()
+            self.create_maf()
+            if self.save_data:
+                self.post_blast_analysis(self.removed_genes)
+                self.blastn_log.info("Post-blast analysis is complete")
 
-                        # TODO Archive function here
             self.blastn_log.info("Blast has completed. Check your output.")
 
 
