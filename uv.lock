@@ -706,9 +706,9 @@ wheels = [
 
 [[package]]
 name = "ete3"
-version = "3.0.0b35"
+version = "3.1.3"
 source = { registry = "https://pypi.org/simple" }
-sdist = { url = "https://files.pythonhosted.org/packages/f0/c5/e1bb20c02f0e7cd924eab783901b4e2acf8fda79c0f7c7303b740bf7b98e/ete3-3.0.0b35.tar.gz", hash = "sha256:f9f055f5865d00afb8882e0ea128dea2df6fba2e31e3486392a282a2aa90dc18", size = 10561639, upload-time = "2016-03-18T09:28:29.432Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/cf/59/f26e8bfab088a3989bf1f61b836637039758a22df2d9fc6be491c5a6ccef/ete3-3.1.3.tar.gz", hash = "sha256:06a3b7fa8ed90187b076a8dbbe5b1b62acee94201d3c6e822f55f449601ef6f2", size = 4768608, upload-time = "2023-05-02T09:47:21.01Z" }
 
 [[package]]
 name = "executing"
@@ -2072,7 +2072,7 @@ test = [
 requires-dist = [
     { name = "biopython", specifier = ">=1.85,<1.86" },
     { name = "cookiecutter" },
-    { name = "ete3", specifier = "==3.0.0b35" },
+    { name = "ete3", specifier = "==3.1.3" },
     { name = "flask", specifier = ">=3.1.3,<4" },
     { name = "flask-login" },
     { name = "flask-mail" },

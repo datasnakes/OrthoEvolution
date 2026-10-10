@@ -265,42 +265,16 @@ class TestOrthologs(unittest.TestCase):
                 # Invalid format - this is a real error
                 self.fail(f"PhyML validation failed: {e}")
 
-    def test_ete3paml_init(self):
-        """Test ETE3PAML initialization."""
-        # This test requires test files and may require PAML executable
-        # ETE3PAML expects a fasta file, so we'll create a simple one for testing
-        test_tree = self.join(self.cur_dir, 'test_data', 'test_tree.txt')
-        test_fasta = self.join(self.cur_dir, 'test_data', 'test_ete3paml.fasta')
-        workdir = tempfile.mkdtemp()
-        
-        # Create a simple test fasta file
-        if os.path.exists(test_tree):
-            try:
-                with open(test_fasta, 'w') as f:
-                    f.write(">Human\nATGCATGC\n>Chimp\nATGCATGC\n")
-                
-                # Test initialization (won't run without PAML executable)
-                paml = ETE3PAML(infile=test_fasta, 
-                               species_tree=test_tree, 
-                               workdir=workdir,
-                               pamlsrc=None)
-                self.assertIsNotNone(paml)
-                self.assertEqual(paml.infile, test_fasta)
-                self.assertEqual(paml.species_tree, test_tree)
-                
-                # Cleanup
-                if os.path.exists(test_fasta):
-                    os.remove(test_fasta)
-                if os.path.exists(workdir):
-                    rmtree(workdir)
-            except Exception as e:
-                # If initialization fails due to missing dependencies, skip
-                if os.path.exists(test_fasta):
-                    os.remove(test_fasta)
-                if os.path.exists(workdir):
-                    rmtree(workdir)
-                self.skipTest(f"ETE3PAML initialization failed: {e}")
-        
+    def test_ete3paml_init(self) -> None:
+        """ETE must read tree files on supported Python versions without rU mode."""
+        tree = self.join(self.cur_dir, "test_data", "test_tree.txt")
+        with tempfile.TemporaryDirectory() as workdir:
+            fasta = Path(workdir) / "alignment.fasta"
+            fasta.write_text(">Human\nATGATGATG\n>Chimp\nATGATGATA\n")
+            paml = ETE3PAML(str(fasta), tree, workdir, pamlsrc=None)
+            self.assertEqual(paml.infile, str(fasta))
+            self.assertEqual(paml.species_tree, tree)
+
     # def test_orthoblastn(self):
     #     """Test the OrthoBlastN class."""
     #     with self.assertRaises(EnvironmentError):
