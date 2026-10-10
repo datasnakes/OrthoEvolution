@@ -608,7 +608,7 @@ class BaseComparativeGenetics(object):
             tier_frame_dict[str(tier)] = maf.groupby('Tier').get_group(tier)
         return tier_frame_dict
 
-    def get_taxon_dict(self):
+    def get_taxon_dict(self) -> dict[str, dict[str, str]]:
         """Get the taxonomy information about each organism using ETE3.
 
         :return:  Returns several dictionaries.  One is a basic organism (key)
@@ -709,7 +709,7 @@ class ComparativeGenetics(BaseComparativeGenetics):
             self.building_time_filename = self.building_filename.replace(
                 'building.csv', 'building_time.csv')
 
-    def add_accession(self, gene, organism, accession):
+    def add_accession(self, gene: str, organism: str, accession: str | None) -> None:
         """Build an accession file after a Blastn run.
 
         It finds whether or not the Blast has been interrupted or not, so that

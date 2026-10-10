@@ -242,7 +242,9 @@ class BaseBlastN(ComparativeGenetics):
             self.blastn_log.error('%s was deleted.' % xml_path)
             raise
 
-    def configure(self, query_accessions, query_organism, auto_start=False):
+    def configure(
+        self, query_accessions: list[str], query_organism: str, auto_start: bool = False
+    ) -> None:
         """Configure the BLAST workflow.
 
         Extract queries for all input genes. runblast() reuses completed XML
@@ -376,7 +378,10 @@ class BaseBlastN(ComparativeGenetics):
             self.blastn_log.info("Description: %s" % description)
             self.add_accession(gene, organism, accession)
 
-    def runblast(self, genes=None, query_organism=None, pre_configured=False):
+    def runblast(
+        self, genes: list[str] | None = None, query_organism: str | None = None,
+        pre_configured: bool = False,
+    ) -> None:
         """Run NCBI's blastn.
         This method actually performs NCBI's blastn.
         It requires configuring before it can be utilized.
