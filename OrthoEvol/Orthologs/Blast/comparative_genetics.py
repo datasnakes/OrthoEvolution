@@ -742,13 +742,15 @@ class ComparativeGenetics(BaseComparativeGenetics):
                 self.blastn_log.warning("The existing accession will be overwritten.")
 
         self.building.at[gene, organism] = accession
-        temp = self.building.reset_index()
-        temp.insert(0, 'Tier', pd.Series(self.df['Tier'].tolist()))
-        # TODO: make the query organism insert implicit
-        temp.insert(2, self.ref_species, self.df[self.ref_species])
-        temp.set_index('Tier')
-        if self.save_data is True:
-            temp.to_csv(str(self.building_file_path))
+        if self.save_data:
+            self.result_frame(self.building).to_csv(self.building_file_path, index=False)
+
+    def result_frame(self, values: pd.DataFrame) -> pd.DataFrame:
+        """Restore metadata by gene before exporting, preserving input column order."""
+        frame = values.reindex(self.df.index).copy()
+        frame["Tier"] = self.df["Tier"]
+        frame[self.ref_species] = self.df[self.ref_species]
+        return frame.reset_index().loc[:, self.raw_acc_data.columns]
 
     def add_blast_time(
         self,
@@ -770,12 +772,10 @@ class ComparativeGenetics(BaseComparativeGenetics):
         self.time_dict.setdefault(gene, {})[organism] = elapsed_time
         # Edit the data frame
         self.building_time.at[gene, organism] = elapsed_time
-        temp = self.building_time.reset_index()
-        temp.insert(0, 'Tier', pd.Series(self.df['Tier'].tolist()))
-        temp.insert(2, self.ref_species, self.df[self.ref_species])
-        temp.set_index('Tier')
-        if self.save_data is True:
-            temp.to_csv(str(self.building_time_file_path))
+        if self.save_data:
+            self.result_frame(self.building_time).to_csv(
+                self.building_time_file_path, index=False
+            )
 
     def post_blast_analysis(
         self,
