@@ -391,8 +391,8 @@ class BaseBlastN(ComparativeGenetics):
             # Gene list created by blast_config.
             genes = self.current_gene_list
 
-        if len(genes) < 1:
-            self.blastn_log.fatal('There are no genes to run with blastn.')
+        if not genes:
+            raise ValueError('There are no genes to run with blastn.')
 
         else:
             self.blastn_log.debug('The blast began on {}'.format(self.date_format))
