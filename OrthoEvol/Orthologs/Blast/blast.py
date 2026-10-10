@@ -533,10 +533,31 @@ class OrthoBlastN(BaseBlastN):
                          database=database,
                          **kwargs)
 
-    def run(self):
-        """Run the blast using a default configuration."""
-        self.configure(self.blast_human, self.ref_species,
-                       auto_start=self.auto_start)
+    def prepare(self) -> None:
+        """Extract reference sequences without running any BLAST searches."""
+        self.configure(self.df[self.ref_species].tolist(), self.ref_species)
+
+    def run(self) -> dict[str, Path]:
+        """Run the analysis and return generated file paths.
+
+        ``auto_start`` remains supported by legacy configure() calls; run()
+        always executes. Use prepare() for the former configuration-only mode.
+        The report entry is present only when an Excel report was produced.
+        With save_data=False, results remain in building and building_time.
+        """
+        self.prepare()
+        self.runblast(self.current_gene_list, self.ref_species, pre_configured=True)
+        outputs = {
+            "input_accessions": self.acc_csv_path,
+            "accession_database": self.acc_sqlite_path,
+        }
+        if self.save_data:
+            outputs.update(
+                accessions=self.complete_file_path, timings=self.complete_time_file_path
+            )
+            if self.report_path is not None:
+                outputs["report"] = self.report_path
+        return outputs
 
 
 class BlastFailure(BaseException):

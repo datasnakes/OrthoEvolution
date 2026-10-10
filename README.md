@@ -111,7 +111,7 @@ gpcr_blastn = OrthoBlastN(
     taxonomy_db=taxonomy,
     database="resources/blast/refseq_rna/refseq_rna",
 )
-gpcr_blastn.run()
+outputs = gpcr_blastn.run()
 ```
 
 This workflow requires a compatible local BLAST installation and database.

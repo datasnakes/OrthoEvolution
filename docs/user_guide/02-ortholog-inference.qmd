@@ -77,7 +77,7 @@ ortholog_search = OrthoBlastN(
     taxonomy_db=taxonomy,
     database=Path("resources/blast/refseq_rna/refseq_rna"),
 )
-ortholog_search.run()
+outputs = ortholog_search.run()
 ```
 
 Taxonomy preparation downloads NCBI's taxonomy dump over HTTPS. To use a known
@@ -94,7 +94,10 @@ argument is the database **prefix**, not its directory; both `blastdbcmd` query
 extraction and `blastn` use it. A bare name such as `refseq_rna` also works with
 BLAST's normal search path, including `BLASTDB`. BLAST binaries must be on `PATH`.
 
-Choose another reference with
+`run()` always executes the analysis. To extract reference queries without
+searching, call `prepare()`. This replaces the former configuration-only
+behavior of `run()` with `auto_start=False`. The legacy `configure(...,
+auto_start=True)` entry point remains available. Choose another reference with
 `ref_species="Mus_musculus"`; a rhesus column is not required.
 
 If `acc_file` points to your own accession table, set
@@ -110,7 +113,10 @@ After the search finishes, review these output files:
 - A table of BLAST execution times
 - Post-BLAST summaries when there is reportable content and `save_data=True`
 
-Summary statistics
+`run()` returns a dictionary of paths: `input_accessions` and
+`accession_database` identify the copied input and its SQLite representation.
+With `save_data=True`, `accessions` and `timings` identify the completed CSVs.
+`report` is included only when an Excel report was produced. Summary statistics
 are calculated from completed search results. With `save_data=False`, result
 frames remain available as `building` and `building_time`.
 

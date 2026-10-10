@@ -376,6 +376,74 @@ def test_invalid_taxonomy_never_triggers_download(tmp_path: Path, state: str) ->
         update.assert_not_called()
 
 
+@pytest.mark.parametrize("no_hit", [False, True])
+@pytest.mark.parametrize("reference", ["Homo_sapiens", "Mus_musculus"])
+def test_run_with_reference_last_preserves_outputs_and_cached_results(
+    tmp_path: Path,
+    taxonomy_path: Path,
+    no_hit: bool,
+    reference: str,
+) -> None:
+    source = tmp_path / "accessions.csv"
+    target = "Mus_musculus" if reference == "Homo_sapiens" else "Homo_sapiens"
+    source.write_text(f"Tier,Gene,{target},{reference}\n1,ADRA1A,,NM_000680.3\n")
+    analysis = OrthoBlastN(
+        project="test",
+        project_path=tmp_path,
+        acc_file=source,
+        copy_from_package=False,
+        taxonomy_db=taxonomy_path,
+        ref_species=reference,
+        database=tmp_path / "db with spaces" / "refseq_rna",
+    )
+    assert analysis.blast_rhesus == []
+    assert target in analysis.org_dict
+    assert (
+        analysis.query_config["db"]
+        == analysis.blastn_parameters["db"]
+        == str(tmp_path / "db with spaces" / "refseq_rna")
+    )
+    hits = (
+        []
+        if no_hit
+        else [
+            SimpleNamespace(
+                id="NM_001",
+                id1="NM_001",
+                id2="1",
+                description="ADRA1A",
+                hsps=[SimpleNamespace(bitscore_raw=20)],
+            )
+        ]
+    )
+    result = mock.Mock()
+    result.hit_map.return_value = hits
+    with (
+        mock.patch.object(analysis, "_create_temp_fasta"),
+        mock.patch(
+            "OrthoEvol.Orthologs.Blast.blast.NcbiblastnCommandline",
+            return_value=mock.Mock(return_value=("<xml />", "")),
+        ) as command,
+        mock.patch(
+            "OrthoEvol.Orthologs.Blast.blast.SearchIO.read", return_value=result
+        ),
+    ):
+        outputs = analysis.run()
+        analysis.run()  # Cache reuse must preserve no-hit results without another search.
+        assert command.call_count == 1
+    assert all(path.is_file() for path in outputs.values())
+    table = pd.read_csv(outputs["accessions"])
+    assert list(table.columns) == ["Tier", "Gene", target, reference]
+    assert table.at[0, reference] == "NM_000680.3"
+    assert pd.isna(table.at[0, target]) if no_hit else table.at[0, target] == "NM_001"
+    assert analysis.missing_organsims_count == int(no_hit)
+    if not no_hit:
+        assert "NM_001" in analysis.get_orthologous_gene_sets()
+        assert analysis.org_dict[target]["ADRA1A"] == "NM_001"
+    if no_hit:
+        assert "report" in outputs
+
+
 @pytest.mark.parametrize("row", ["1,ADRA1A,,", "1,ADRA1A,,NM_001\n1,ADRA1A,,NM_002"])
 def test_invalid_reference_table_fails_before_taxonomy(
     tmp_path: Path, row: str
