@@ -337,6 +337,7 @@ class BaseComparativeGenetics(object):
             self.acc_sqlite_filename,
             path=self.project_index,
             acc_file=self.acc_file,
+            exists=False,  # The supplied CSV is authoritative, not a stale SQLite copy.
         )
         required = {"Tier", "Gene", self.ref_species}
         missing = required.difference(self.raw_acc_data.columns)
