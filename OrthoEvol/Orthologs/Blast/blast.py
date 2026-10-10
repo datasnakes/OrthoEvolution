@@ -75,6 +75,7 @@ class BaseBlastN(ComparativeGenetics):
             raise ValueError("BLAST database name or prefix must not be empty")
         if isinstance(database, Path) or "/" in self.database or "\\" in self.database:
             self.database = str(Path(database).expanduser().resolve())
+        self.report_path: Path | None = None
 
         # Manage Directories
         self.home = Path(os.getcwd())
@@ -456,11 +457,15 @@ class BaseBlastN(ComparativeGenetics):
             self.acc_list = list(self.acc_dict)
             self.tier_frame_dict = self.get_tier_frame()
             self._summarize_accessions()
-            self.create_maf()
             if self.save_data:
-                self.post_blast_analysis(self.removed_genes)
-                self.blastn_log.info("Post-blast analysis is complete")
-
+                # Cached XML has no recoverable elapsed time unless a timing file
+                # survived. Preserve missing timings instead of inventing zeros.
+                self.raw_acc_data.to_csv(self.building_file_path, index=False)
+                self.result_frame(self.building_time).to_csv(
+                    self.building_time_file_path, index=False
+                )
+                self.create_maf()
+                self.report_path = self.post_blast_analysis(self.removed_genes)
             self.blastn_log.info("Blast has completed. Check your output.")
 
 

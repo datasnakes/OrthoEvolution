@@ -211,7 +211,7 @@ def test_runblast_dispatches_one_local_search(tmp_path: Path) -> None:
         gene="GeneA",
         organism="Mus_musculus",
     )
-    blast.create_maf.assert_called_once_with()
+    blast.create_maf.assert_not_called()
 
 
 @pytest.mark.parametrize(

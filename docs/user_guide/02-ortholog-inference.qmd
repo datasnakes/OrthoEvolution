@@ -108,7 +108,11 @@ After the search finishes, review these output files:
 - Per-gene BLAST XML results
 - A master accession file
 - A table of BLAST execution times
-- Post-BLAST summaries when `save_data=True`
+- Post-BLAST summaries when there is reportable content and `save_data=True`
+
+Summary statistics
+are calculated from completed search results. With `save_data=False`, result
+frames remain available as `building` and `building_time`.
 
 On an interrupted run, valid cached XML is parsed again;
 only missing searches are executed. Unknown durations remain empty rather than
