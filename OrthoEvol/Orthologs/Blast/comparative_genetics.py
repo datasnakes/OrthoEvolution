@@ -468,6 +468,10 @@ class BaseComparativeGenetics(object):
             self.taxon_dict = resolve_species(taxonomy, self.org_list)
         self.taxon_orgs = self.org_list.copy()
         self.taxon_ids = list(self.taxon_dict.values())
+        if self.taxon_file is not None:
+            supplied_ids = [int(value) for value in self.get_file_list(self.taxon_path)]
+            if supplied_ids != self.taxon_ids:
+                raise ValueError("Taxonomy file must match accession species order")
         self.taxon_lineage = self.get_taxon_dict()
 
         self.tier_list = maf['Tier'].tolist()
