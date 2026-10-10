@@ -383,7 +383,7 @@ def test_invalid_taxonomy_never_triggers_download(tmp_path: Path, state: str) ->
         update.assert_not_called()
 
 
-@pytest.mark.parametrize("row", ["1,ADRA1A,,NM_001\n1,ADRA1A,,NM_002"])
+@pytest.mark.parametrize("row", ["1,ADRA1A,,", "1,ADRA1A,,NM_001\n1,ADRA1A,,NM_002"])
 def test_invalid_reference_table_fails_before_taxonomy(
     tmp_path: Path, row: str
 ) -> None:

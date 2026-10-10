@@ -348,6 +348,9 @@ class BaseComparativeGenetics(object):
             raise ValueError("Accession table must contain named genes")
         if self.raw_acc_data["Gene"].duplicated().any():
             raise ValueError("Accession table contains duplicate genes")
+        references = self.raw_acc_data[self.ref_species]
+        if references.isna().any() or references.str.strip().eq("").any():
+            raise ValueError(f"Missing query accessions for {self.ref_species}")
         self.mygene_df = pd.DataFrame()
         self.hgnc_df = pd.DataFrame()
         self.header = self.raw_acc_data.axes[1].tolist()

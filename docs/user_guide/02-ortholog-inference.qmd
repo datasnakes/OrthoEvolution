@@ -35,7 +35,7 @@ you define.
 | 2 | ADRA1B | NM_000679.3 |  |  |  |
 
 Keep `Tier` and `Gene` as the first two columns.
-Put the query organism in the first organism column. Add one query accession
+Put the query organism in the first organism column. Add one nonempty query accession
 for each uniquely named gene. Organism names use underscores, such as `Homo_sapiens`. Empty
 cells in the other organism columns identify accessions that the workflow will
 search for.
