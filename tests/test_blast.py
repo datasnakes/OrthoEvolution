@@ -56,6 +56,19 @@ def test_make_blast_dir_creates_parents(tmp_path: Path) -> None:
     assert output.is_dir()
 
 
+def test_configure_keeps_duplicate_query_accessions_paired_with_genes(
+    tmp_path: Path,
+) -> None:
+    blast = build_blast(tmp_path)
+    blast.ref_species = "Mus_musculus"
+    blast.gene_list = ["GeneA", "GeneB"]
+    blast._create_temp_fasta = mock.Mock()
+    blast.configure(["NM_SAME", "NM_SAME"], blast.ref_species)
+    assert [
+        call.kwargs["gene"] for call in blast._create_temp_fasta.call_args_list
+    ] == blast.gene_list
+
+
 def test_create_maf_copies_completed_files(tmp_path: Path) -> None:
     blast = build_blast(tmp_path)
     blast.building_file_path = tmp_path / "building.csv"

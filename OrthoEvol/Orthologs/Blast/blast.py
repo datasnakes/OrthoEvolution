@@ -265,9 +265,9 @@ class BaseBlastN(ComparativeGenetics):
         # Reparse cached XML for every gene; CSV blanks can also mean valid no-hit
         # results and cannot reliably identify which searches completed.
         self.current_gene_list = self.gene_list.copy()
-        # Iterate through the query accessions numbers
-        for query in query_accessions:
-            gene = self.acc_dict[query][0][0]
+        if len(query_accessions) != len(self.current_gene_list):
+            raise ValueError("Each gene must have exactly one query accession")
+        for gene, query in zip(self.current_gene_list, query_accessions):
             gene_path = self.raw_data / Path(gene) / Path('BLAST')
 
             # Create the directories for each gene
