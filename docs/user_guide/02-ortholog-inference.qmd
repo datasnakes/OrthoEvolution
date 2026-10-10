@@ -34,9 +34,9 @@ you define.
 | 1 | ADRA1A | NM_000680.3 |  |  |  |
 | 2 | ADRA1B | NM_000679.3 |  |  |  |
 
-Keep `Tier` and `Gene` as the first two columns.
-Put the query organism in the first organism column. Add one nonempty query accession
-for each uniquely named gene. Organism names use underscores, such as `Homo_sapiens`. Empty
+Keep `Tier` and `Gene` as the first two columns. The reference species may
+appear in any organism column. Add one nonempty query accession for each
+uniquely named gene. Organism names use underscores, such as `Homo_sapiens`. Empty
 cells in the other organism columns identify accessions that the workflow will
 search for.
 
@@ -93,6 +93,9 @@ does not install BLAST or download the BLAST sequence database. The `database`
 argument is the database **prefix**, not its directory; both `blastdbcmd` query
 extraction and `blastn` use it. A bare name such as `refseq_rna` also works with
 BLAST's normal search path, including `BLASTDB`. BLAST binaries must be on `PATH`.
+
+Choose another reference with
+`ref_species="Mus_musculus"`; a rhesus column is not required.
 
 If `acc_file` points to your own accession table, set
 `copy_from_package=False`. Use the packaged-copy option only for tables that

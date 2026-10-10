@@ -491,6 +491,7 @@ class OrthoBlastN(BaseBlastN):
         auto_start: bool = False,
         taxonomy_db: str | Path | None = None,
         database: str | Path = "refseq_rna",
+        ref_species: str = "Homo_sapiens",
         **kwargs: Any,
     ) -> None:
         """This class inherits from the BaseBlastN class.
@@ -511,13 +512,14 @@ class OrthoBlastN(BaseBlastN):
         :param taxonomy_db: Existing ETE taxonomy database. Preparation is explicit.
         :param database: BLAST database name or filesystem prefix, shared by searches
                          and query extraction. Defaults to refseq_rna.
+        :param ref_species: Reference species column in the accession CSV.
         :param kwargs:
         """
         # Set values for methods to prevent using a config.
         self.taxon_file = None
         self.__post_blast = True
         self.project_path = project_path
-        self.ref_species = 'Homo_sapiens'
+        self.ref_species = ref_species
         self.proj_mana = None
         self.acc_file = acc_file
         self.copy_from_package = copy_from_package

@@ -395,7 +395,7 @@ class BaseComparativeGenetics(object):
         )
         organism_columns = self.pt.axes[1].tolist()
         self.pt.columns = pd.Index(organism_columns, name="Organism")
-        self.org_dict = self.df.loc[:, self.ref_species:].to_dict()
+        self.org_dict = self.df.drop(columns="Tier").to_dict()
         self.gene_dict = self.df.T.to_dict()
         self.get_master_lists(self.__data)
 
@@ -474,7 +474,7 @@ class BaseComparativeGenetics(object):
             )
             self.hgnc_df.to_csv(self.hgnc_path, index=False)
 
-        self.org_list = maf.axes[1].tolist()[1:]
+        self.org_list = [column for column in maf.columns if column != 'Tier']
         self.org_count = len(self.org_list)
         self.ncbi_orgs = list(org.replace('_', ' ') for org in self.org_list)
 
@@ -498,6 +498,7 @@ class BaseComparativeGenetics(object):
         # Get blast query list
         if self.ref_species == 'Homo_sapiens':
             self.blast_human = self.df.Homo_sapiens.tolist()
+        if 'Macaca_mulatta' in self.df.columns:
             self.blast_rhesus = self.df.Macaca_mulatta.tolist()
 
         # Pre-Blast gene analysis
