@@ -56,33 +56,6 @@ def test_make_blast_dir_creates_parents(tmp_path: Path) -> None:
     assert output.is_dir()
 
 
-def test_configure_resumes_remaining_queries(tmp_path: Path) -> None:
-    blast = build_blast(tmp_path)
-    blast.ref_species = None
-    blast.building_file_path = tmp_path / "building.csv"
-    blast.data = tmp_path
-    blast.gene_list = ["GeneA", "GeneB"]
-    blast.blast_human = ["NM_A", "NM_B"]
-    blast.taxon_dict = {}
-    blast.acc_dict = {"NM_A": [["GeneA"]], "NM_B": [["GeneB"]]}
-    blast.blast_utils.gene_list_config.return_value = ["GeneB"]
-    blast._make_blast_dir = mock.Mock()
-    blast._create_temp_fasta = mock.Mock()
-
-    blast.configure(blast.blast_human, "Homo_sapiens")
-
-    assert blast.current_gene_list == ["GeneB"]
-    blast._create_temp_fasta.assert_called_once_with(
-        query="NM_B",
-        gene="GeneB",
-        query_config={
-            "query": "NM_B",
-            "db": "refseq",
-            "temp fasta": str(tmp_path / "GeneB" / "BLAST" / "temp.fasta"),
-        },
-    )
-
-
 def test_create_maf_copies_completed_files(tmp_path: Path) -> None:
     blast = build_blast(tmp_path)
     blast.building_file_path = tmp_path / "building.csv"

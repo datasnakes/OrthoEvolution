@@ -244,8 +244,8 @@ class BaseBlastN(ComparativeGenetics):
     def configure(self, query_accessions, query_organism, auto_start=False):
         """Configure the BLAST workflow.
 
-        It configures the accession file, which works with interrupted Blasts.
-        It configures a gene_list for blasting the right genes.
+        Extract queries for all input genes. runblast() reuses completed XML
+        searches when resuming an interrupted analysis.
 
         :param query_accessions:  A list of query accession numbers.  Each gene
                                   needs one from the same organism.
@@ -262,23 +262,9 @@ class BaseBlastN(ComparativeGenetics):
         if self.ref_species:
             query_organism = self.ref_species
 
-        # CONFIGURE and UPDATE the gene_list based on the existence of an
-        # incomplete blast file
-        gene_list = self.blast_utils.gene_list_config(self.building_file_path, self.data,
-                                                      self.gene_list, self.taxon_dict,
-                                                      self.blastn_log)
-        if gene_list is not None:
-            # What gene to start blasting
-            start = len(self.blast_human) - len(gene_list)
-
-            # Reconfigured query
-            query_accessions = self.blast_human[start:]
-
-            # Reconfigure the gene_list to reflect the existing accession info
-            self.current_gene_list = gene_list
-        else:
-            self.current_gene_list = self.gene_list
-
+        # Reparse cached XML for every gene; CSV blanks can also mean valid no-hit
+        # results and cannot reliably identify which searches completed.
+        self.current_gene_list = self.gene_list.copy()
         # Iterate through the query accessions numbers
         for query in query_accessions:
             gene = self.acc_dict[query][0][0]
