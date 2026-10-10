@@ -382,11 +382,12 @@ class BaseBlastN(ComparativeGenetics):
         :param pre_configured:  Determines if the blast needs configuring. (Default value = False)
         :return:
         """
+        query_organism = query_organism or self.ref_species
         if not pre_configured:
             query = self.df[query_organism].tolist()
             self.configure(query_accessions=query,
                            query_organism=query_organism,
-                           auto_start=True)
+                           auto_start=False)
             # Gene list created by blast_config.
             genes = self.current_gene_list
 
