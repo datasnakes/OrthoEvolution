@@ -356,7 +356,10 @@ class BaseBlastN(ComparativeGenetics):
                                 description = hit.description
             blast_xml.close()
             self.blastn_log.info("Finished parsing the Blast XML file.")
-            self.blastn_log.info("The best accession has been selected.")
+            self.blastn_log.info(
+                "The best accession has been selected." if accession is not None
+                else "No eligible BLAST hit was found."
+            )
 
             # Add xml parsed xml data to record dictionary
             record_dict['gene'] = gene

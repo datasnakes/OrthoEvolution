@@ -120,7 +120,8 @@ With `save_data=True`, `accessions` and `timings` identify the completed CSVs.
 are calculated from completed search results. With `save_data=False`, result
 frames remain available as `building` and `building_time`.
 
-On an interrupted run, valid cached XML is parsed again;
+A search with no eligible hit is a completed result with an empty accession,
+not a failed command. On an interrupted run, valid cached XML is parsed again;
 only missing searches are executed. Unknown durations remain empty rather than
 being reported as zero. Reuse a project only for unchanged inputs, database,
 and search settings. Choose a new project when those change because cached XML
