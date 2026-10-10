@@ -1,6 +1,8 @@
 """Focused tests for BLAST workflow control."""
 
+import io
 import sqlite3
+import tarfile
 from pathlib import Path
 from subprocess import CalledProcessError
 from types import SimpleNamespace
@@ -11,7 +13,11 @@ import pytest
 
 from OrthoEvol.Orthologs.Blast.blast import ApplicationError, BaseBlastN, BlastFailure
 from OrthoEvol.Orthologs.Blast.comparative_genetics import BaseComparativeGenetics
-from OrthoEvol.Tools.taxonomy import taxonomy_database
+from OrthoEvol.Tools.taxonomy import (
+    prepare_taxonomy_database,
+    resolve_species,
+    taxonomy_database,
+)
 
 
 def build_blast(tmp_path: Path, method: int | None = 1) -> BaseBlastN:
@@ -310,6 +316,54 @@ def test_parse_xml_skips_predicted_hit_and_lowercases_nonmatching_hit(
     blast.add_accession.assert_called_once_with(
         "GeneA", "Mus_musculus", "nm_002"
     )
+
+
+@pytest.fixture
+def taxonomy_path(tmp_path: Path) -> Path:
+    """Build a real tiny NCBI dump including the duplicate synonym that broke ETE."""
+    species = [(1, 1, "root"), (9606, 1, "Homo sapiens"), (10090, 1, "Mus musculus")]
+    names = "".join(
+        f"{taxid}\t|\t{name}\t|\t\t|\tscientific name\t|\n"
+        for taxid, _, name in species
+    )
+    names += "9606\t|\tHuman\t|\t\t|\tsynonym\t|\n9606\t|\thuman\t|\t\t|\tsynonym\t|\n"
+    nodes = "".join(
+        f"{taxid}\t|\t{parent}\t|\t{'no rank' if taxid == 1 else 'species'}\t|\n"
+        for taxid, parent, _ in species
+    )
+    archive = tmp_path / "taxdump.tar.gz"
+    with tarfile.open(archive, "w:gz") as bundle:
+        for name, content in [
+            ("names.dmp", names),
+            ("nodes.dmp", nodes),
+            ("merged.dmp", "99999\t|\t9606\t|\n"),
+        ]:
+            member = tarfile.TarInfo(name)
+            member.size = len(content.encode())
+            bundle.addfile(member, io.BytesIO(content.encode()))
+    return prepare_taxonomy_database(
+        tmp_path / "taxa.sqlite",
+        taxdump_file=archive,
+        required_species=["Homo_sapiens", "Mus_musculus"],
+    )
+
+
+def test_taxonomy_failed_replacement_preserves_existing_database(
+    taxonomy_path: Path,
+) -> None:
+    before = taxonomy_path.read_bytes()
+    cache = Path(f"{taxonomy_path}.traverse.pkl").read_bytes()
+    with pytest.raises(ValueError, match="Missing or ambiguous"):
+        prepare_taxonomy_database(
+            taxonomy_path,
+            taxdump_file=taxonomy_path.parent / "taxdump.tar.gz",
+            required_species=["Unknown_species"],
+            overwrite=True,
+        )
+    assert taxonomy_path.read_bytes() == before
+    assert Path(f"{taxonomy_path}.traverse.pkl").read_bytes() == cache
+    with taxonomy_database(taxonomy_path) as taxonomy:
+        assert resolve_species(taxonomy, ["human"]) == {"human": 9606}
 
 
 @pytest.mark.parametrize("state", ["missing", "empty", "partial"])

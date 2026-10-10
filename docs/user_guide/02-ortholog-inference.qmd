@@ -15,6 +15,7 @@ Before you run a local BLAST search, make sure that these inputs are ready:
 - An accession table that defines the genes and organisms
 - A reference species, which is normally human in the preconfigured workflow
 - A compatible local BLAST database
+- A prepared ETE taxonomy SQLite database
 - The `BLASTDB` environment variable if BLAST cannot find the database
 - A project directory that the workflow can write to
 
@@ -58,7 +59,13 @@ change the biological evidence required to identify an ortholog.
 ## Preconfigured workflow
 
 ```python
+from pathlib import Path
+
 from OrthoEvol.Orthologs.Blast import OrthoBlastN
+from OrthoEvol.Tools.taxonomy import prepare_taxonomy_database
+
+# Prepare once before analysis. An existing valid database is reused.
+taxonomy = prepare_taxonomy_database(Path("resources/taxonomy/taxa.sqlite"))
 
 ortholog_search = OrthoBlastN(
     project="orthology-gpcr",
@@ -66,13 +73,21 @@ ortholog_search = OrthoBlastN(
     save_data=True,
     acc_file="gpcr.csv",
     copy_from_package=True,
+    taxonomy_db=taxonomy,
 )
 ortholog_search.run()
 ```
 
-This code sets up and starts the workflow. It does not install BLAST or
-download a database. Before you run a large analysis, make sure that BLAST can
-find the selected database.
+Taxonomy preparation downloads NCBI's taxonomy dump over HTTPS. To use a known
+snapshot, pass `taxdump_file=Path("taxdump.tar.gz")`. To replace a damaged or
+outdated database, pass `overwrite=True`. The replacement is built and checked
+before publication. Prepare taxonomy before analyses, without concurrent
+readers or writers. An invalid existing database is rejected unless replacement
+is explicitly requested.
+
+`OrthoBlastN` performs offline taxonomy lookups and requires every species name
+to resolve unambiguously. Its constructor does not download taxonomy. The code
+does not install BLAST or download a BLAST sequence database.
 
 If `acc_file` points to your own accession table, set
 `copy_from_package=False`. Use the packaged-copy option only for tables that

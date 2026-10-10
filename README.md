@@ -98,6 +98,9 @@ uv pip install --python .venv/bin/python -e ".[test]"
 
 ```python
 from OrthoEvol.Orthologs.Blast import OrthoBlastN
+from OrthoEvol.Tools.taxonomy import prepare_taxonomy_database
+
+taxonomy = prepare_taxonomy_database("resources/taxonomy/taxa.sqlite")
 
 gpcr_blastn = OrthoBlastN(
     project="orthology-gpcr",
@@ -105,6 +108,7 @@ gpcr_blastn = OrthoBlastN(
     save_data=True,
     acc_file="gpcr.csv",
     copy_from_package=True,
+    taxonomy_db=taxonomy,
 )
 gpcr_blastn.run()
 ```
